@@ -40,7 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Object.cs" />
+    <Compile Include="Affliation.cs" />
+    <Compile Include="TerrainBuilder.cs" />
+    <Compile Include="UnitHero.cs" />
+    <Compile Include="MapObject.cs" />
+    <Compile Include="AffliationOrcsOfKor.cs" />
+    <Compile Include="Terrain.cs" />
+    <Compile Include="Unit.cs" />
     <Compile Include="World.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,21 +9,48 @@ namespace wism
 {
     public class World
     {
-        private enum mapObject : int
+        private static World current;
+
+        static World()
         {
-            None = 0,
-            Mountain = 1,
-            Meadow = 2,
-            Castle = 3
+            current = new World();
+            current.map = TerrainBuilder.GenerateMap(TerrainBuilder.DefaultMapRepresentation);
+        } 
+
+        public IList<MapObject> Objects { get => objects; set => objects = value; }
+        public static World Current { get => current; }
+        public Terrain[,] Map { get => map; }
+
+        private IList<MapObject> objects = new List<MapObject>();
+
+        private Terrain[,] map;        
+}
+
+    public sealed class Coordinate
+    {
+        private int x;
+        private int y;
+
+        public int X { get => x; set => x = value; }
+        public int Y { get => y; set => y = value; }
+
+        public Coordinate(int x, int y)
+        {
+            this.X = x;
+            this.Y = y;
         }
 
-        private static int[,] map =
+        public override string ToString()
         {
-            { 1, 1, 1, 1, 1 },
-            { 1, 2, 2, 2, 1 },
-            { 1, 2, 3, 2, 1 },
-            { 1, 2, 2, 2, 1 },
-            { 1, 1, 1, 1, 1 }
-        };
+            return string.Format("({0},{1})", this.x, this.y);
+        }
+    }
+
+    public enum Direction : int
+    {
+        North = 0,
+        East = 1,
+        South = 2,
+        West = 3
     }
 }

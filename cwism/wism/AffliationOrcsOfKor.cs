@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace cwism
+namespace wism
 {
-    class Program
+    public class AffliationOrcsOfKor : Affliation
     {
-        static void Main(string[] args)
+        public AffliationOrcsOfKor()
         {
+            this.DisplayName = "Orcs of Kor";
         }
     }
 }
