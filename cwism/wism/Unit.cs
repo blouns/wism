@@ -6,16 +6,28 @@ using System.Threading.Tasks;
 
 namespace wism
 {
-    public abstract class Unit : MapObject
+    public class Unit : MapObject
     {
+        private UnitInfo info;
+
         private int moves = 1;
 
         public int Moves { get => moves; }
 
-        //public bool TryMove(Direction direction)
-        //{
-        //    if (War.)
-        //}
+        public override string GetDisplayName()
+        {
+            return info.DisplayName;
+        }
+
+        public static Unit Create(UnitInfo info)
+        {
+            return new Unit(info);
+        }
+
+        public Unit(UnitInfo info)
+        {
+            this.info = info;
+        }
     }
 }
 

@@ -9,10 +9,10 @@ namespace wism
     public abstract class Terrain : MapObject
     {
         private Coordinate position = new Coordinate(-1, -1);
-        private Affliation affliation;
+        private Affiliation affliation;
 
         public Coordinate Position { get => position; }
-        public Affliation Affliation { get => affliation; set => affliation = value; }
+        public Affiliation Affliation { get => affliation; set => affliation = value; }
     }
 
     public sealed class TerrainVoid : Terrain
