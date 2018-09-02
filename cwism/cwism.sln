@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cwism", "cwism\cwism.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wism", "wism\wism.csproj", "{6150D953-BF84-439D-8AFA-C885613A6BB9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wismtest", "wismtest\wismtest.csproj", "{9FBDB7CD-3960-4250-B871-CB2C01E045ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{6150D953-BF84-439D-8AFA-C885613A6BB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6150D953-BF84-439D-8AFA-C885613A6BB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6150D953-BF84-439D-8AFA-C885613A6BB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FBDB7CD-3960-4250-B871-CB2C01E045ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FBDB7CD-3960-4250-B871-CB2C01E045ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FBDB7CD-3960-4250-B871-CB2C01E045ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FBDB7CD-3960-4250-B871-CB2C01E045ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

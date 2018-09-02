@@ -41,9 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AffiliationFactory.cs" />
     <Compile Include="AffiliationInfo.cs" />
     <Compile Include="Affiliation.cs" />
+    <Compile Include="GameLogger.cs" />
     <Compile Include="ICustomizable.cs" />
+    <Compile Include="ModFactory.cs" />
     <Compile Include="TerrainBuilder.cs" />
     <Compile Include="MapObject.cs" />
     <Compile Include="Terrain.cs" />
@@ -52,6 +55,26 @@
     <Compile Include="UnitInfo.cs" />
     <Compile Include="World.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="mod\Affiliation_Elvallie.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="mod\Affiliation_OrcsOfKor.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="mod\Affiliation_Template.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="mod\Terrain_Template.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="mod\Unit_Hero.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="mod\Unit_Template.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

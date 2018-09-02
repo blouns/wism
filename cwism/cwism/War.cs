@@ -16,16 +16,14 @@ namespace cwism
         static void Main(string[] args)
         {
             const string modPath = "mod";
-            Customizer customizer = new Customizer();
-            customizer.WriteTemplates(modPath);
 
-            IList<Affiliation> affiliations = LoadAffiliations(modPath);
+            IList<Affiliation> affiliations = ModFactory.LoadAffiliations(modPath);
             foreach (Affiliation affiliation in affiliations)
             {
                 Console.WriteLine("Affiliation: {0}", affiliation);
             }
 
-            IList<Unit> units = LoadUnits(modPath);
+            IList<Unit> units = ModFactory.LoadUnits(modPath);
             foreach (Unit unit in units)
             {
                 Console.WriteLine("Unit: {0}", unit);
@@ -41,59 +39,7 @@ namespace cwism
 
             Console.ReadKey();
         }
-
-        private static IList<Unit> LoadUnits(string path)
-        {
-            IList infos = LoadModFiles(path, UnitInfo.FilePattern, typeof(UnitInfo));
-
-            IList<Unit> units = new List<Unit>();
-            foreach (UnitInfo info in infos)
-            {
-                units.Add(Unit.Create(info));
-            }
-
-            return units;
-        }
-
-        private static IList<Affiliation> LoadAffiliations(string path)
-        {
-            IList infos = LoadModFiles(path, AffiliationInfo.FilePattern, typeof(AffiliationInfo));
-
-            IList<Affiliation> affiliations = new List<Affiliation>();
-            foreach (AffiliationInfo ai in infos)
-            {
-                affiliations.Add(Affiliation.Create(ai));
-            }
-
-            return affiliations;
-        }
-
-        private static IList LoadModFiles(string path, string pattern, Type type)
-        {
-            IList objects = new ArrayList();
-            object info;
-            DirectoryInfo dirInfo = new DirectoryInfo(path);
-            foreach (FileInfo file in dirInfo.EnumerateFiles(pattern))
-            {
-
-                using (FileStream ms = file.OpenRead())
-                {
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(type);
-                    info = serializer.ReadObject(ms);
-                }
-
-                if (info == null)
-                {
-                    Console.WriteLine("Skipping unexpected type while loading '{0}' from '{1}'", info.GetType(), file.FullName);
-                }
-                else
-                {
-                    objects.Add(info);
-                }
-            }
-
-            return objects;
-        }
+                
 
 
         private static void MoveObjects(World world)
