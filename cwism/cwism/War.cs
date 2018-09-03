@@ -15,53 +15,10 @@ namespace cwism
     {
         static void Main(string[] args)
         {
-            const string modPath = "mod";
-
-            // Game loop
             Draw();
 
             Console.ReadKey();
-        }
-                
-
-
-        private static void MoveObjects(World world)
-        {
-            foreach (Unit unit in world.Objects)
-            {
-                if (unit == null)
-                    continue;
-
-                //if (unit.Affliation.Control == Affliation.ControlKind.Human)
-                //{
-                //    Move(unit);
-                //}
-                //else
-                //{
-                //    // Do nothing
-                //}
-            }
-        }
-
-        private static void Move(Unit unit, Direction direction)
-        {
-            ConsoleKeyInfo keyInfo = Console.ReadKey();
-            switch (keyInfo.Key)
-            {
-                case ConsoleKey.UpArrow:
-                    //unit.Position. 
-                    break;
-                case ConsoleKey.DownArrow:
-                    break;
-                case ConsoleKey.LeftArrow:
-                    break;
-                case ConsoleKey.RightArrow:
-                    break;
-                default:
-                    Console.WriteLine("WTF: {0}", keyInfo);
-                    break;
-            }
-        }
+        }                     
 
         private static void Draw()
         {
@@ -69,19 +26,11 @@ namespace cwism
             {
                 for (int j = 0; j < World.Current.Map.GetLength(1); j++)
                 {
-                    Console.WriteLine("Name: {0}", World.Current.Map[i, j].DisplayName);
+                    Console.WriteLine("[{0},{1}]", 
+                        World.Current.Map[i, j].Terrain,
+                        World.Current.Map[i, j].Unit);
                 }
             }
-
-
-            /*foreach (MapObject obj in world.Objects)
-            {
-                Console.WriteLine("Position: {0}", obj.Position);
-                Console.WriteLine("Name: {0}", obj.DisplayName);
-                Console.WriteLine("Affiliation: {0}", obj.Affliation);
-                Console.WriteLine("Control: {0}", obj.Affliation.Control.ToString());
-            }
-            */
         }
     }
 }

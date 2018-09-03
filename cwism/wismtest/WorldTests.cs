@@ -9,13 +9,12 @@ using System.Threading.Tasks;
 namespace wism.Tests
 {
     [TestClass()]
-    public class TerrainBuilderTests
+    public class WorldTests
     {
         [TestMethod()]
-        public void GenerateMapTest()
+        public void SerializeTest()
         {
-            Terrain[,] map = MapBuilder.GenerateMap(MapBuilder.DefaultMapRepresentation);
-            Assert.IsNotNull(map);
+            World.Current.Serialize();
         }
     }
 }
