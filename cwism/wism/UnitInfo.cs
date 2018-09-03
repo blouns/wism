@@ -18,7 +18,10 @@ namespace wism
         public string Type = "Unit";
 
         [DataMember]
-        public string DisplayName { get; set; } = "Display Name";
+        public string DisplayName { get; set; } = "Unit Name";
+
+        [DataMember]
+        public char Symbol { get; set; } = 'x';
 
         [DataMember]
         private string ImageFileName = "image.jpg";

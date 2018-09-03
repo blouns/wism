@@ -17,25 +17,8 @@ namespace cwism
         {
             const string modPath = "mod";
 
-            IList<Affiliation> affiliations = ModFactory.LoadAffiliations(modPath);
-            foreach (Affiliation affiliation in affiliations)
-            {
-                Console.WriteLine("Affiliation: {0}", affiliation);
-            }
-
-            IList<Unit> units = ModFactory.LoadUnits(modPath);
-            foreach (Unit unit in units)
-            {
-                Console.WriteLine("Unit: {0}", unit);
-            }
-
-
             // Game loop
-            //while (true)
-            //{
-            //    Draw();
-            //    break;
-            //}
+            Draw();
 
             Console.ReadKey();
         }

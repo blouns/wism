@@ -21,6 +21,9 @@ namespace wism
         public string DisplayName { get; set; } = "Affiliation Name";
 
         [DataMember]
+        private char Symbol { get; set; } = 'x';
+
+        [DataMember]
         private string imageFileName = "affiliation_image.jpg";
 
         [DataMember]

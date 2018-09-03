@@ -12,6 +12,8 @@ namespace wism
 
         public override string DisplayName { get => info.DisplayName; }
 
+        public override char Symbol { get => info.Symbol; }
+
         public static Terrain Create(TerrainInfo info)
         {
             return new Terrain(info);

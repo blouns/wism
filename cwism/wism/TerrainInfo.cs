@@ -24,6 +24,9 @@ namespace wism
         private string imageFileName = "image.jpg";
 
         [DataMember]
+        public char Symbol { get; set; } = 'x';
+
+        [DataMember]
         private bool AllowFlight { get; set; } = false;
 
         [DataMember]

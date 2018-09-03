@@ -14,7 +14,7 @@ namespace wism
         static World()
         {
             current = new World();
-            current.map = TerrainBuilder.GenerateMap(TerrainBuilder.DefaultMapRepresentation);
+            current.map = MapBuilder.GenerateMap(MapBuilder.DefaultMapRepresentation);
         } 
 
         public IList<MapObject> Objects { get => objects; set => objects = value; }

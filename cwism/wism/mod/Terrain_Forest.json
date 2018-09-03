@@ -1,1 +1,9 @@
-{"AllowFlight":true,"AllowFloat":false,"AllowWalk":true,"DisplayName":"Forest","Type":"Terrain","imageFileName":"image.jpg"}
+{
+    "AllowFlight": true,
+    "AllowFloat": false,
+    "AllowWalk": true,
+    "DisplayName": "Forest",
+    "Type": "Terrain",
+    "imageFileName": "image.jpg",
+    "Symbol": "F"
+}

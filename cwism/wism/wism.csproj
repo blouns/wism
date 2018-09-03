@@ -46,7 +46,7 @@
     <Compile Include="Log.cs" />
     <Compile Include="ICustomizable.cs" />
     <Compile Include="ModFactory.cs" />
-    <Compile Include="TerrainBuilder.cs" />
+    <Compile Include="MapBuilder.cs" />
     <Compile Include="MapObject.cs" />
     <Compile Include="Terrain.cs" />
     <Compile Include="TerrainInfo.cs" />
@@ -62,9 +62,6 @@
     <None Include="mod\Affiliation_OrcsOfKor.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="mod\Affiliation_Template.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="mod\Terrain_Mountain.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -77,13 +74,7 @@
     <None Include="mod\Terrain_Meadow.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="mod\Terrain_Template.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="mod\Unit_Hero.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mod\Unit_Template.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

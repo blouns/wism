@@ -1,1 +1,6 @@
-{"DisplayName":"Hero","ImageFileName":"image.jpg","Type":"Unit"}
+{
+    "DisplayName": "Hero",
+    "ImageFileName": "image.jpg",
+    "Type": "Unit",
+    "Symbol": "H"
+}

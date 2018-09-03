@@ -15,7 +15,9 @@ namespace wism
         public int Moves { get => moves; }
 
         public override string DisplayName { get => info.DisplayName; }
-        
+
+        public override char Symbol { get => info.Symbol; }
+
         public static Unit Create(UnitInfo info)
         {
             return new Unit(info);

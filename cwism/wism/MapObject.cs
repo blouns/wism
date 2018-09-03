@@ -10,6 +10,8 @@ namespace wism
     {
         public abstract string DisplayName { get; }
 
+        public abstract char Symbol { get; }
+
         public override string ToString()
         {
             return this.DisplayName;
