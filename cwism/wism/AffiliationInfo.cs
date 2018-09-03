@@ -10,7 +10,7 @@ namespace wism
     [DataContract]
     public class AffiliationInfo : ICustomizable
     {
-        public const string FilePattern = "Affiliation_*.json";
+        public static readonly string FilePattern = "Affiliation_*.json";
 
         public string FileName { get => "Affiliation_Template.json"; }
 
@@ -18,10 +18,10 @@ namespace wism
         public string Type = "Affiliation";
 
         [DataMember]
-        public string DisplayName { get;  set; } = "Display Name"; 
+        public string DisplayName { get; set; } = "Affiliation Name";
 
         [DataMember]
-        private string imageFileName = "image.jpg";
+        private string imageFileName = "affiliation_image.jpg";
 
         [DataMember]
         public string Color = "(255, 0, 0)";

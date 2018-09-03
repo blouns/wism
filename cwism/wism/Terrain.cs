@@ -6,44 +6,22 @@ using System.Threading.Tasks;
 
 namespace wism
 {
-    public abstract class Terrain : MapObject
+    public class Terrain : MapObject
     {
-        private Coordinate position = new Coordinate(-1, -1);
-        private Affiliation affliation;
+        private TerrainInfo info;
 
-        public Coordinate Position { get => position; }
-        public Affiliation Affliation { get => affliation; set => affliation = value; }
-    }
+        public override string DisplayName { get => info.DisplayName; }
 
-    public sealed class TerrainVoid : Terrain
-    {
-        public override string GetDisplayName()
+        public static Terrain Create(TerrainInfo info)
         {
-            return "The void";
+            return new Terrain(info);
+        }
+
+        private Terrain(TerrainInfo info)
+        {
+            this.info = info;
         }
     }
 
-    public sealed class TerrainMountain : Terrain
-    {
-        public override string GetDisplayName()
-        {
-            return "Mountain";
-        }
-    }
-
-    public sealed class TerrainMeadow : Terrain
-    {
-        public override string GetDisplayName()
-        {
-            return "Meadow";
-        }
-    }
-
-    public sealed class TerrainCastle : Terrain
-    {
-        public override string GetDisplayName()
-        {
-            return "Castle";
-        }
-    }
+    
 }

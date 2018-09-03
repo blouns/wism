@@ -11,6 +11,8 @@ namespace wism
 {
     public static class ModFactory
     {
+        internal static readonly string DefaultPath = "mod";
+
         internal static IList LoadModFiles(string path, string pattern, Type type)
         {
             IList objects = new ArrayList();
@@ -59,6 +61,19 @@ namespace wism
             foreach (UnitInfo info in infos)
             {
                 units.Add(Unit.Create(info));
+            }
+
+            return units;
+        }
+
+        public static IList<Terrain> LoadTerrains(string path)
+        {
+            IList infos = LoadModFiles(path, TerrainInfo.FilePattern, typeof(TerrainInfo));
+
+            IList<Terrain> units = new List<Terrain>();
+            foreach (TerrainInfo info in infos)
+            {
+                units.Add(Terrain.Create(info));
             }
 
             return units;

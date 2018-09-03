@@ -8,11 +8,11 @@ namespace wism
 {
     public abstract class MapObject
     {
-        public abstract string GetDisplayName();
+        public abstract string DisplayName { get; }
 
         public override string ToString()
         {
-            return this.GetDisplayName();
+            return this.DisplayName;
         }
     }
 }

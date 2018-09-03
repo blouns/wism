@@ -17,10 +17,8 @@ namespace wism
 
         private static void LoadTerrain()
         {
-            terrainKinds.Add(new TerrainVoid());     // 0
-            terrainKinds.Add(new TerrainMountain()); // 1
-            terrainKinds.Add(new TerrainMeadow());   // 2           
-            terrainKinds.Add(new TerrainCastle());   // 3
+            IList<Terrain> terrains = ModFactory.LoadTerrains(ModFactory.DefaultPath);
+            terrainKinds.AddRange(terrains);            
         }
 
         private static readonly int[,] defaultMapRepresentation =

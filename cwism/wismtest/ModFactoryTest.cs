@@ -66,11 +66,26 @@ namespace wismtest
             foreach (Unit unit in units)
             {
                 Logger.LogMessage("Unit: {0}", unit);
-                if (unit.GetDisplayName() == "Hero")
+                if (unit.DisplayName == "Hero")
                     foundHero = true;
             }
 
             Assert.IsTrue(foundHero);
+        }
+
+        [TestMethod]
+        public void LoadTerrainTest()
+        {
+            bool foundMeadow = false;
+            IList<Terrain> terrains = ModFactory.LoadTerrains(modPath);
+            foreach (Terrain terrain in terrains)
+            {
+                Logger.LogMessage("Terrain: {0}", terrain);
+                if (terrain.DisplayName == "Meadow")
+                    foundMeadow = true;
+            }
+
+            Assert.IsTrue(foundMeadow);
         }
 
         [TestCleanup]

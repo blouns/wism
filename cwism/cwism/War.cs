@@ -86,7 +86,7 @@ namespace cwism
             {
                 for (int j = 0; j < World.Current.Map.GetLength(1); j++)
                 {
-                    Console.WriteLine("Name: {0}", World.Current.Map[i, j].GetDisplayName());
+                    Console.WriteLine("Name: {0}", World.Current.Map[i, j].DisplayName);
                 }
             }
 

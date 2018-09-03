@@ -12,6 +12,8 @@ namespace wism
     {
         public string FileName { get => "Unit_Template.json"; }
 
+        public static readonly string FilePattern = "Unit_*.json";
+
         [DataMember]
         public string Type = "Unit";
 
@@ -20,7 +22,6 @@ namespace wism
 
         [DataMember]
         private string ImageFileName = "image.jpg";
-
-        public static string FilePattern = "Unit_*.json";
+        
     }
 }

@@ -12,6 +12,8 @@ namespace wism
     {
         public string FileName { get => "Terrain_Template.json"; }
 
+        public static readonly string FilePattern = "Terrain_*.json";
+
         [DataMember]
         public string Type = "Terrain";
 
