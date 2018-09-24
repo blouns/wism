@@ -25,6 +25,15 @@ namespace wism
 
         [DataMember]
         private string ImageFileName = "image.jpg";
-        
+
+        [DataMember]
+        internal bool CanWalk;
+
+        [DataMember]
+        internal bool CanFloat;
+
+        [DataMember]
+        internal bool CanFly;
+
     }
 }

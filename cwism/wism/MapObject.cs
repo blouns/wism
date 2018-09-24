@@ -16,6 +16,18 @@ namespace wism
         {
             return this.DisplayName;
         }
+
+        private Tile tile;
+
+        public Tile Tile { get => tile; set => tile = value; }
+
+        public Coordinate GetCoordinates()
+        {
+            if (tile == null)
+                throw new InvalidOperationException("Tile is null; cannot get coordinates.");
+
+            return tile.Coordinate;
+        }
     }
 }
 

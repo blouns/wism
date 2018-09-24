@@ -19,7 +19,6 @@ namespace wism
         {
             LoadTerrainKinds(ModFactory.DefaultPath);
             LoadUnitKinds(ModFactory.DefaultPath);
-            //LoadMap(DefaultMapPath);
         }
 
         private static void LoadUnitKinds(string path)
@@ -51,41 +50,35 @@ namespace wism
         public static Tile[,] LoadMap(string path)
         {
             string mapJson = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<Tile[,]>(mapJson);
-        }
-        
-        private static readonly string[,] defaultMap =
-        {
-            { "M", "M", "M", "M", "M" },
-            { "M", "m", "m", "m", "M" },
-            { "M", "m", "F", "m", "M" },
-            { "M", "m", "mH", "m", "M" },
-            { "M", "M", "M", "M", "M" }
-        };
-
-        public static string[,] DefaultMap => defaultMap;
-
-        public static Dictionary<char, Terrain> TerrainKinds { get => terrainKinds;  }
-        public static Dictionary<char, Unit> UnitKinds { get => unitKinds; }
-
-        public static Tile[,] GenerateMap(string[,] mapRepresentation)
-        {
-            if (mapRepresentation == null)
-                throw new ArgumentNullException("mapRepresentation", "The map representation must not be null.");
-
-            int height = mapRepresentation.GetLength(0);
-            int width = mapRepresentation.GetLength(1);
-
-            Tile[,] map = new Tile[height, width];            
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    map[i, j] = Tile.Create(mapRepresentation[i, j], j, i);
-                }
-            }
+            Tile[,] map = JsonConvert.DeserializeObject<Tile[,]>(mapJson);
+            AffixMapObjects(map);
 
             return map;
         }
+
+        /// <summary>
+        /// Affix all map objects with there initial locations.
+        /// </summary>
+        /// <param name="map"></param>
+        private static void AffixMapObjects(Tile[,] map)
+        {
+            for (int y = 0; y < map.GetLength(0); y++)
+            {
+                for (int x = 0; x < map.GetLength(1); x++)
+                {
+
+                    // Affix map objects and coordinates with tile
+                    Tile tile = map[x, y];
+                    tile.Coordinate = new Coordinate(x, y);
+                    if (tile.Unit != null)
+                        tile.Unit.Tile = tile;
+                    if (tile.Terrain != null)
+                        tile.Terrain.Tile = tile;
+                }
+            }
+        }
+
+        public static Dictionary<char, Terrain> TerrainKinds { get => terrainKinds;  }
+        public static Dictionary<char, Unit> UnitKinds { get => unitKinds; }
     }    
 }

@@ -27,12 +27,12 @@ namespace wism
         public char Symbol { get; set; } = 'x';
 
         [DataMember]
-        private bool AllowFlight { get; set; } = false;
+        public bool AllowFlight { get; set; } = false;
 
         [DataMember]
-        private bool AllowFloat { get; set; } = false;
+        public bool AllowFloat { get; set; } = false;
 
         [DataMember]
-        private bool AllowWalk { get; set; } = false;
+        public bool AllowWalk { get; set; } = false;
     }
 }

@@ -40,5 +40,12 @@ namespace wism
         public Terrain()
         {
         }
+
+        internal bool CanTraverse(bool canWalk, bool canFloat, bool canFly)
+        {
+            return ((canWalk && Info.AllowWalk) ||
+                    (canFloat && Info.AllowFloat) ||
+                    (canFloat && Info.AllowFlight));
+        }
     }
 }

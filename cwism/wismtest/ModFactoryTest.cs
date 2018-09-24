@@ -7,14 +7,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using wism;
 
-namespace wismtest
+namespace wism.Tests
 {
     [TestClass]
     public class ModFactoryTest
     {
         #region Test constants
 
-        private const string modPath = @"..\..\..\wism\bin\Debug\mod";
+        public const string TestModPath = @"..\..\..\wism\bin\Debug\mod";
         
         private const string affiliationFileName = "Affiliation_Template.json";
         private const string unitFileName = "Unit_Template.json";
@@ -47,7 +47,7 @@ namespace wismtest
         public void LoadAffiliationsTest()
         {
             bool foundOrcs = false;
-            IList<Affiliation> affiliations = ModFactory.LoadAffiliations(modPath);
+            IList<Affiliation> affiliations = ModFactory.LoadAffiliations(TestModPath);
             foreach (Affiliation affiliation in affiliations)
             {
                 Logger.LogMessage("Affiliation: {0}", affiliation);
@@ -62,7 +62,7 @@ namespace wismtest
         public void LoadUnitsTest()
         {
             bool foundHero = false;
-            IList<Unit> units = ModFactory.LoadUnits(modPath);
+            IList<Unit> units = ModFactory.LoadUnits(TestModPath);
             foreach (Unit unit in units)
             {
                 Logger.LogMessage("Unit: {0}", unit);
@@ -77,7 +77,7 @@ namespace wismtest
         public void LoadTerrainTest()
         {
             bool foundMeadow = false;
-            IList<Terrain> terrains = ModFactory.LoadTerrains(modPath);
+            IList<Terrain> terrains = ModFactory.LoadTerrains(TestModPath);
             foreach (Terrain terrain in terrains)
             {
                 Logger.LogMessage("Terrain: {0}", terrain);

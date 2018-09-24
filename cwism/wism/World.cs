@@ -18,7 +18,6 @@ namespace wism
         static World()
         {
             current = new World();
-            //current.map = MapBuilder.GenerateMap(MapBuilder.DefaultMap);
             current.map = MapBuilder.LoadMap(path);
         }
 
@@ -30,8 +29,10 @@ namespace wism
 
         public void Serialize()
         {
-            
-            string mapJson = JsonConvert.SerializeObject(this.Map);
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects;
+            settings.Formatting = Formatting.Indented;
+            string mapJson = JsonConvert.SerializeObject(this.Map, settings);
             File.WriteAllText(World.path, mapJson);
         }
      }   

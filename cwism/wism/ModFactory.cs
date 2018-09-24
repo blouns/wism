@@ -11,7 +11,7 @@ namespace wism
 {
     public static class ModFactory
     {
-        internal static readonly string DefaultPath = "mod";
+        public static readonly string DefaultPath = "mod";
 
         internal static IList LoadModFiles(string path, string pattern, Type type)
         {
@@ -20,7 +20,6 @@ namespace wism
             DirectoryInfo dirInfo = new DirectoryInfo(path);
             foreach (FileInfo file in dirInfo.EnumerateFiles(pattern))
             {
-
                 using (FileStream ms = file.OpenRead())
                 {
                     DataContractJsonSerializer serializer = new DataContractJsonSerializer(type);

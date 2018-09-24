@@ -12,40 +12,41 @@ namespace wism.Tests
     public class MapBuilderTests
     {
         [TestMethod()]
-        public void GenerateMapTest()
-        {
-            Tile[,] map = MapBuilder.GenerateMap(MapBuilder.DefaultMap);
-            Assert.IsNotNull(map);
-        }
-
-        [TestMethod()]
         public void LoadMapTest()
         {
-            Tile[,] map = MapBuilder.LoadMap(@"world.json");
-            Assert.IsNotNull(map, "Map is null");
-            Assert.IsTrue(map.GetLength(0) == 5, "Map dimensions are incorrect");
-            Assert.IsTrue(map.GetLength(1) == 5, "Map dimensions are incorrect");
+            const int defaultMapHeight = 5;
+            const int defaultMapWidth = 5;
 
-            Tile tile = map[3, 2]; // (y, x)
-            Assert.IsNotNull(tile, "Tile is null");
+            Tile[,] map = MapBuilder.LoadMap(MapBuilder.DefaultMapPath);
 
-            Assert.IsNotNull(tile.Terrain, "Terrain is null");
-            Assert.AreEqual(tile.Terrain.DisplayName, "Meadow", "Not a meadow");
+            Assert.IsNotNull(map, "MapBuilder returned null map");
 
-            Assert.IsNotNull(tile.Unit, "Hero is null");
-            Assert.AreEqual(tile.Unit.DisplayName, "Hero", "Not the hero");
-            Assert.AreEqual(tile.Unit.Moves, 1, "Hero's moves incorrect");
+            Assert.AreEqual(map.GetLength(0), defaultMapHeight);
+            Assert.AreEqual(map.GetLength(0), defaultMapWidth);
 
-            tile = map[3, 1]; // (y, x)
-            Assert.IsNotNull(tile, "Tile is null");
+            Tile tile = map[0, 0];
+            Assert.IsNotNull(tile, "MapBuilder added a null tile.");
+            Assert.IsNotNull(tile.Coordinate);
+            Assert.IsNotNull(tile.Terrain);
+            Assert.IsNull(tile.Unit);
+        }
 
-            Assert.IsNotNull(tile.Terrain, "Terrain is null");
-            Assert.AreEqual(tile.Terrain.DisplayName, "Meadow", "Not a meadow");
+        [TestMethod]
+        public void LoadUnitKindsTest()
+        {
+            Dictionary<char, Unit> unitKinds = MapBuilder.UnitKinds;
+            Assert.IsTrue(unitKinds.Count > 0);
+            Unit hero = unitKinds['H'];
+            Assert.IsNotNull(hero, "Unit 'hero' was not found.");
+        }
 
-            Assert.IsNotNull(tile.Unit, "Light infantry is null");
-            Assert.AreEqual(tile.Unit.DisplayName, "Light Infantry", "Not light infantry");
-            Assert.AreEqual(tile.Unit.Moves, 1, "Light infantry moves incorrect");
-
+        [TestMethod]
+        public void LoadTerrainKindsTest()
+        {
+            Dictionary<char, Terrain> terrainKinds = MapBuilder.TerrainKinds;
+            Assert.IsTrue(terrainKinds.Count > 0);
+            Terrain meadow = terrainKinds['m'];
+            Assert.IsNotNull(meadow, "Terrain 'meadow' was not found.");
         }
     }
 }
