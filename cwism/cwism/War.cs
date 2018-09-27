@@ -34,27 +34,30 @@ namespace cwism
             switch (key.Key)
             {
                 case ConsoleKey.UpArrow:                    
-                    Console.WriteLine("Hero trying to move North.");
+                    //Console.WriteLine("Hero trying to move North.");
                     success = hero.TryMove(Direction.North);
                     break;
                 case ConsoleKey.DownArrow:
-                    Console.WriteLine("Hero trying to move South.");
+                    //Console.WriteLine("Hero trying to move South.");
                     success = hero.TryMove(Direction.South);
                     break;
                 case ConsoleKey.LeftArrow:
-                    Console.WriteLine("Hero trying to move West.");
+                    //Console.WriteLine("Hero trying to move West.");
                     success = hero.TryMove(Direction.West);
                     break;
                 case ConsoleKey.RightArrow:
-                    Console.WriteLine("Hero trying to move East.");
+                    //Console.WriteLine("Hero trying to move East.");
                     success = hero.TryMove(Direction.East);
                     break;
                 case ConsoleKey.Q:
+                    Console.WriteLine();
                     Console.WriteLine("Exiting to DOS...");
                     break;
             }
 
-            Console.WriteLine(success ? "Success!" : "Failed!");
+            if (!success)
+                Console.Beep();
+            //Console.WriteLine(success ? "Success!" : "Failed!");
         }
 
         private static ConsoleKeyInfo GetInput()
@@ -67,6 +70,7 @@ namespace cwism
 
         private static void Draw()
         {
+            Console.Clear();
             for (int y = 0; y < World.Current.Map.GetLength(1); y++)
             {
                 for (int x = 0; x < World.Current.Map.GetLength(0); x++)
