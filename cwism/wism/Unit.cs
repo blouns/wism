@@ -56,16 +56,16 @@ namespace wism
             switch (direction)
             {
                 case Direction.North:
-                    targetTile = map[coord.X, coord.Y + 1];
+                    targetTile = map[coord.X, coord.Y - 1];
                     break;
                 case Direction.East:
                     targetTile = map[coord.X + 1, coord.Y];
                     break;
                 case Direction.South:
-                    targetTile = map[coord.X, coord.Y - 1];
+                    targetTile = map[coord.X, coord.Y + 1];
                     break;
                 case Direction.West:
-                    targetTile = map[coord.X, coord.Y - 1];
+                    targetTile = map[coord.X - 1, coord.Y];
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("direction", "Unexpected direction given to unit.");

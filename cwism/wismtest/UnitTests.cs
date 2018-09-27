@@ -5,12 +5,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 
 namespace wism.Tests
 {
     [TestClass()]
     public class UnitTests
     {
+        private TestContext testContextInstance;
+
+        /// <summary>
+        ///  Gets or sets the test context which provides
+        ///  information about and functionality for the current test run.
+        ///</summary>
+        public TestContext TestContext
+        {
+            get { return testContextInstance; }
+            set { testContextInstance = value; }
+        }
+
         [TestMethod()]
         public void CreateTest()
         {
@@ -38,52 +51,160 @@ namespace wism.Tests
 
         [TestMethod()]
         public void MoveHeroToMeadowTest()
-        {            
+        {
+            World.Current.Reset();
             Unit hero = FindHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
-            Tile originalTile = hero.Tile;
+            MoveUnitPass(hero, Direction.North);
             if (!hero.TryMove(Direction.North))
-            {
-                Assert.Fail("Hero was unable to walk into an empty meadow.");                                
-            }
 
-            Tile newTile = hero.Tile;
-            Assert.AreNotEqual<Tile>(originalTile, newTile, "Hero did not actually move anywhere.");
-            Assert.IsNotNull(hero.Tile.Terrain.Tile.Unit);
-            Assert.IsNull(originalTile.Unit);
             Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
         }
 
         [TestMethod()]
         public void MoveHeroToMountainTest()
         {
+            World.Current.Reset();
             Unit hero = FindHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
-            Tile originalTile = hero.Tile;
-            
+            // Walk into meadow
+            MoveUnitPass(hero, Direction.East);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); 
+
             // Try to walk onto an impassable mountain; should fail
-            if (!hero.TryMove(Direction.East))
-            {
-                Assert.AreEqual<Tile>(originalTile, hero.Tile, "Hero moved unexpectedly.");
-                Assert.IsNotNull(hero.Tile.Terrain.Tile);
-                Assert.IsNotNull(originalTile.Unit);
-                Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow
-            }
-            else
-            {
-                Assert.Fail("Hero was able to walk onto an impassable mountain!");
-            }
+            MoveUnitFail(hero, Direction.East);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow
         }
 
         [TestMethod()]
         public void MoveHeroToCoastTest()
         {
-            Assert.Fail("Not implemented.");
+            World.Current.Reset();
+            Unit hero = FindHero();
+            Assert.IsNotNull(hero, "Could not find the hero.");
+
+            // Move north to meadow
+            MoveUnitPass(hero, Direction.North);            
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            // Try to walk onto an impassable coast
+            MoveUnitFail(hero, Direction.North);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow            
+        }
+
+        [TestMethod()]
+        public void MoveNorthThenSouth()
+        {
+            World.Current.Reset();
+            Unit hero = FindHero();
+            Assert.IsNotNull(hero, "Could not find the hero.");
+
+            Tile originalTile = hero.Tile;
+
+            MoveUnitPass(hero, Direction.North);            
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            MoveUnitPass(hero, Direction.South);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
+        }
+
+        [TestMethod()]
+        public void MoveSouthThenNorth()
+        {
+            World.Current.Reset();
+            Unit hero = FindHero();
+            Assert.IsNotNull(hero, "Could not find the hero.");
+
+            Tile originalTile = hero.Tile;
+
+            MoveUnitPass(hero, Direction.South);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            MoveUnitPass(hero, Direction.North);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
+        }
+
+        [TestMethod()]
+        public void MoveWestThenEast()
+        {
+            World.Current.Reset();
+            Unit hero = FindHero();
+            Assert.IsNotNull(hero, "Could not find the hero.");
+
+            Tile originalTile = hero.Tile;
+
+            MoveUnitPass(hero, Direction.West);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            MoveUnitPass(hero, Direction.East);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
+        }
+
+        [TestMethod()]
+        public void MoveEastThenWest()
+        {
+            World.Current.Reset();
+            Unit hero = FindHero();
+            Assert.IsNotNull(hero, "Could not find the hero.");
+
+            Tile originalTile = hero.Tile;
+
+            MoveUnitPass(hero, Direction.West);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            MoveUnitPass(hero, Direction.East);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
 
         #region Helper utility methods
+
+        private void MoveUnitPass(Unit unit, Direction direction)
+        {
+            string directionName = Enum.GetName(typeof(Direction), direction);
+            Tile originalTile = unit.Tile;
+
+            TestContext.WriteLine("Trying to move {0} {1}; should succeed...", unit.ToString(), directionName);
+            if (!unit.TryMove(direction))
+            {
+                Assert.Fail(
+                    String.Format("Unable to move {0} {1}.", unit.ToString(), direction));
+            }
+
+            Tile newTile = unit.Tile;
+            Assert.AreNotEqual<Tile>(originalTile, newTile,
+                String.Format("{0} could not move to tile.", unit.ToString()));
+            Assert.IsNotNull(unit.Tile.Unit);       // Unit should be set on new tile
+            Assert.IsNotNull(unit.Tile.Unit.Tile);  // Unit's tile should be set on new tile
+            Assert.IsNull(originalTile.Unit);       // Unit should be null on old tile
+        }
+
+        private void MoveUnitFail(Unit unit, Direction direction)
+        {
+            string directionName = Enum.GetName(typeof(Direction), direction);
+            Tile originalTile = unit.Tile;
+
+            TestContext.WriteLine("Trying to move {0} {1}; should fail...", unit.ToString(), directionName);
+            if (unit.TryMove(direction))
+            {
+                Assert.Fail(
+                    String.Format("{0} moved {1} onto {2}.", unit, direction, unit.Tile.Terrain));
+            }
+
+            // Should fail
+            Assert.AreEqual<Tile>(originalTile, unit.Tile, "{0} moved unexpectedly {1}.", unit, directionName);
+            Assert.IsNotNull(unit.Tile.Unit.Tile);  // Unit's tile should be set on new tile
+            Assert.IsNotNull(originalTile.Unit);    // Unit should be set on old tile
+        }
 
         private static Unit FindHero()
         {

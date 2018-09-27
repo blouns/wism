@@ -2,8 +2,8 @@
     [
         {
             "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
+                "DisplayName": "Coast",
+                "Symbol": "c"
             },
             "Unit": null,
             "Coordinate": {
@@ -13,8 +13,8 @@
         },
         {
             "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
+                "DisplayName": "Coast",
+                "Symbol": "c"
             },
             "Unit": null,
             "Coordinate": {
@@ -24,8 +24,8 @@
         },
         {
             "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
+                "DisplayName": "Coast",
+                "Symbol": "c"
             },
             "Unit": null,
             "Coordinate": {
@@ -35,8 +35,8 @@
         },
         {
             "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
+                "DisplayName": "Coast",
+                "Symbol": "c"
             },
             "Unit": null,
             "Coordinate": {
@@ -46,8 +46,8 @@
         },
         {
             "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
+                "DisplayName": "Coast",
+                "Symbol": "c"
             },
             "Unit": null,
             "Coordinate": {
@@ -66,120 +66,6 @@
             "Coordinate": {
                 "X": 0,
                 "Y": 1
-            }
-        },
-        {
-            "Terrain": {
-                "DisplayName": "Meadow",
-                "Symbol": "m"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 1,
-                "Y": 1
-            }
-        },
-        {
-            "Terrain": {
-                "DisplayName": "Meadow",
-                "Symbol": "m"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 2,
-                "Y": 1
-            }
-        },
-        {
-            "Terrain": {
-                "DisplayName": "Meadow",
-                "Symbol": "m"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 3,
-                "Y": 1
-            }
-        },
-        {
-            "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 4,
-                "Y": 1
-            }
-        }
-    ],
-    [
-        {
-            "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 0,
-                "Y": 2
-            }
-        },
-        {
-            "Terrain": {
-                "DisplayName": "Meadow",
-                "Symbol": "m"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 1,
-                "Y": 2
-            }
-        },
-        {
-            "Terrain": {
-                "DisplayName": "Forest",
-                "Symbol": "F"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 2,
-                "Y": 2
-            }
-        },
-        {
-            "Terrain": {
-                "DisplayName": "Meadow",
-                "Symbol": "m"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 3,
-                "Y": 2
-            }
-        },
-        {
-            "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 4,
-                "Y": 2
-            }
-        }
-    ],
-    [
-        {
-            "Terrain": {
-                "DisplayName": "Mountain",
-                "Symbol": "M"
-            },
-            "Unit": null,
-            "Coordinate": {
-                "X": 0,
-                "Y": 3
             }
         },
         {
@@ -194,7 +80,64 @@
             },
             "Coordinate": {
                 "X": 1,
-                "Y": 3
+                "Y": 1
+            }
+        },
+        {
+            "Terrain": {
+                "DisplayName": "Meadow",
+                "Symbol": "m"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 2,
+                "Y": 1
+            }
+        },
+        {
+            "Terrain": {
+                "DisplayName": "Meadow",
+                "Symbol": "m"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 3,
+                "Y": 1
+            }
+        },
+        {
+            "Terrain": {
+                "DisplayName": "Mountain",
+                "Symbol": "M"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 4,
+                "Y": 1
+            }
+        }
+    ],
+    [
+        {
+            "Terrain": {
+                "DisplayName": "Mountain",
+                "Symbol": "M"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 0,
+                "Y": 2
+            }
+        },
+        {
+            "Terrain": {
+                "DisplayName": "Meadow",
+                "Symbol": "m"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 1,
+                "Y": 2
             }
         },
         {
@@ -207,6 +150,63 @@
                 "DisplayName": "Hero",
                 "Symbol": "H"
             },
+            "Coordinate": {
+                "X": 2,
+                "Y": 2
+            }
+        },
+        {
+            "Terrain": {
+                "DisplayName": "Meadow",
+                "Symbol": "m"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 3,
+                "Y": 2
+            }
+        },
+        {
+            "Terrain": {
+                "DisplayName": "Mountain",
+                "Symbol": "M"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 4,
+                "Y": 2
+            }
+        }
+    ],
+    [
+        {
+            "Terrain": {
+                "DisplayName": "Mountain",
+                "Symbol": "M"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 0,
+                "Y": 3
+            }
+        },
+        {
+            "Terrain": {
+                "DisplayName": "Meadow",
+                "Symbol": "m"
+            },
+            "Unit": null,
+            "Coordinate": {
+                "X": 1,
+                "Y": 3
+            }
+        },
+        {
+            "Terrain": {
+                "DisplayName": "Meadow",
+                "Symbol": "m"
+            },
+            "Unit": null,
             "Coordinate": {
                 "X": 2,
                 "Y": 3

@@ -35,5 +35,10 @@ namespace wism
             string mapJson = JsonConvert.SerializeObject(this.Map, settings);
             File.WriteAllText(World.path, mapJson);
         }
-     }   
+
+        public void Reset()
+        {
+            current.map = MapBuilder.LoadMap(path);
+        }
+    }   
 }
