@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,44 +7,45 @@ using System.Threading.Tasks;
 
 namespace wism
 {
-    public abstract class Terrain : MapObject
+    public class Terrain : MapObject
     {
-        private Coordinate position = new Coordinate(-1, -1);
-        private Affliation affliation;
+        private char symbol;
 
-        public Coordinate Position { get => position; }
-        public Affliation Affliation { get => affliation; set => affliation = value; }
-    }
+        private TerrainInfo info;
 
-    public sealed class TerrainVoid : Terrain
-    {
-        public override string GetDisplayName()
+        public override string DisplayName { get => Info.DisplayName; }
+
+        public override char Symbol { get => Info.Symbol; set => this.symbol = value; }
+        
+        internal TerrainInfo Info
         {
-            return "The void";
+            get
+            {
+                if (this.info == null)
+                    this.info = MapBuilder.FindTerrainInfo(symbol);
+                return info;
+            }
         }
-    }
 
-    public sealed class TerrainMountain : Terrain
-    {
-        public override string GetDisplayName()
+        public static Terrain Create(TerrainInfo info)
         {
-            return "Mountain";
+            return new Terrain(info);
         }
-    }
 
-    public sealed class TerrainMeadow : Terrain
-    {
-        public override string GetDisplayName()
+        private Terrain(TerrainInfo info)
         {
-            return "Meadow";
+            this.info = info;
         }
-    }
 
-    public sealed class TerrainCastle : Terrain
-    {
-        public override string GetDisplayName()
+        public Terrain()
         {
-            return "Castle";
+        }
+
+        internal bool CanTraverse(bool canWalk, bool canFloat, bool canFly)
+        {
+            return ((canWalk && Info.AllowWalk) ||
+                    (canFloat && Info.AllowFloat) ||
+                    (canFloat && Info.AllowFlight));
         }
     }
 }

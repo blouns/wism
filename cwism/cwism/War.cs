@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
 using wism;
+using System.Runtime.Serialization.Json;
+using System.IO;
+using System.Collections;
 
 namespace cwism
 {
@@ -11,71 +15,101 @@ namespace cwism
     {
         static void Main(string[] args)
         {
-            // Game loop
-            while (true)
+            ConsoleKeyInfo key;
+            do
             {
                 Draw();
-                break;
-            }
+
+                key = GetInput();
+                DoActions(key);
+
+            } while (key.Key != ConsoleKey.Q);
         }
 
-        private static void MoveObjects(World world)
+        private static void DoActions(ConsoleKeyInfo key)
         {
-            foreach (Unit unit in world.Objects)
-            {
-                if (unit == null)
-                    continue;
+            Unit hero = FindHero();
+            bool success = false;
 
-                //if (unit.Affliation.Control == Affliation.ControlKind.Human)
-                //{
-                //    Move(unit);
-                //}
-                //else
-                //{
-                //    // Do nothing
-                //}
-            }
-        }
-
-        private static void Move(Unit unit, Direction direction)
-        {
-            ConsoleKeyInfo keyInfo = Console.ReadKey();
-            switch (keyInfo.Key)
+            switch (key.Key)
             {
-                case ConsoleKey.UpArrow:
-                    //unit.Position. 
+                case ConsoleKey.UpArrow:                    
+                    //Console.WriteLine("Hero trying to move North.");
+                    success = hero.TryMove(Direction.North);
                     break;
                 case ConsoleKey.DownArrow:
+                    //Console.WriteLine("Hero trying to move South.");
+                    success = hero.TryMove(Direction.South);
                     break;
                 case ConsoleKey.LeftArrow:
+                    //Console.WriteLine("Hero trying to move West.");
+                    success = hero.TryMove(Direction.West);
                     break;
                 case ConsoleKey.RightArrow:
+                    //Console.WriteLine("Hero trying to move East.");
+                    success = hero.TryMove(Direction.East);
                     break;
-                default:
-                    Console.WriteLine("WTF: {0}", keyInfo);
+                case ConsoleKey.Q:
+                    Console.WriteLine();
+                    Console.WriteLine("Exiting to DOS...");
                     break;
             }
+
+            if (!success)
+                Console.Beep();
+            //Console.WriteLine(success ? "Success!" : "Failed!");
+        }
+
+        private static ConsoleKeyInfo GetInput()
+        {
+            ConsoleKeyInfo key;
+            Console.Write("> ");
+            key = Console.ReadKey();
+            return key;
         }
 
         private static void Draw()
         {
-            for (int i = 0; i < World.Current.Map.GetLength(0); i++)
+            Console.Clear();
+            for (int y = 0; y < World.Current.Map.GetLength(1); y++)
             {
-                for (int j = 0; j < World.Current.Map.GetLength(1); j++)
+                for (int x = 0; x < World.Current.Map.GetLength(0); x++)
                 {
-                    Console.WriteLine("Name: {0}", World.Current.Map[i, j].GetDisplayName());
+                    Tile tile = World.Current.Map[x, y];
+                    char terrain = tile.Terrain.Symbol;
+                    char unit = ' ';
+                    if (tile.Unit != null)
+                        unit = tile.Unit.Symbol;
+
+                    Console.Write("{0}:[{1},{2}]\t", tile.Coordinate.ToString(), terrain, unit);
+                }
+                Console.WriteLine();
+            }
+        }
+
+        private static Unit FindHero()
+        {
+            Tile[,] map = World.Current.Map;
+            Unit hero = null;
+
+            for (int y = 0; y < map.GetLength(0); y++)
+            {
+                for (int x = 0; x < map.GetLength(1); x++)
+                {
+                    Unit unit = map[x, y].Unit;
+                    if (unit != null &&
+                        unit.Symbol == 'H')
+                    {
+                        hero = unit;
+                        break;
+                    }
                 }
             }
 
+            if (hero == null)
+                throw new InvalidOperationException("Cannot find the hero in the world.");
 
-            /*foreach (MapObject obj in world.Objects)
-            {
-                Console.WriteLine("Position: {0}", obj.Position);
-                Console.WriteLine("Name: {0}", obj.DisplayName);
-                Console.WriteLine("Affiliation: {0}", obj.Affliation);
-                Console.WriteLine("Control: {0}", obj.Affliation.Control.ToString());
-            }
-            */
+            return hero;
         }
     }
 }

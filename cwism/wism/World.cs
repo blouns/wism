@@ -1,56 +1,44 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace wism
-{
+{    
     public class World
     {
+        private const string path = @"world.json";
+
         private static World current;
 
         static World()
         {
             current = new World();
-            current.map = TerrainBuilder.GenerateMap(TerrainBuilder.DefaultMapRepresentation);
-        } 
+            current.map = MapBuilder.LoadMap(path);
+        }
 
-        public IList<MapObject> Objects { get => objects; set => objects = value; }
         public static World Current { get => current; }
-        public Terrain[,] Map { get => map; }
 
-        private IList<MapObject> objects = new List<MapObject>();
+        public Tile[,] Map { get => map; }
 
-        private Terrain[,] map;        
-}
+        private Tile[,] map;
 
-    public sealed class Coordinate
-    {
-        private int x;
-        private int y;
-
-        public int X { get => x; set => x = value; }
-        public int Y { get => y; set => y = value; }
-
-        public Coordinate(int x, int y)
+        public void Serialize()
         {
-            this.X = x;
-            this.Y = y;
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects;
+            settings.Formatting = Formatting.Indented;
+            string mapJson = JsonConvert.SerializeObject(this.Map, settings);
+            File.WriteAllText(World.path, mapJson);
         }
 
-        public override string ToString()
+        public void Reset()
         {
-            return string.Format("({0},{1})", this.x, this.y);
+            current.map = MapBuilder.LoadMap(path);
         }
-    }
-
-    public enum Direction : int
-    {
-        North = 0,
-        East = 1,
-        South = 2,
-        West = 3
-    }
+    }   
 }

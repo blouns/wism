@@ -1,0 +1,9 @@
+{
+    "DisplayName": "Light Infantry",
+    "ImageFileName": "image.jpg",
+    "Type": "Unit",
+    "Symbol": "i",
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false
+}

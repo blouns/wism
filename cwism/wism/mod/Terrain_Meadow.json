@@ -1,0 +1,9 @@
+{
+    "AllowFlight": true,
+    "AllowFloat": false,
+    "AllowWalk": true,
+    "DisplayName": "Meadow",
+    "Type": "Terrain",
+    "imageFileName": "image.jpg",
+    "Symbol": "m"
+}
