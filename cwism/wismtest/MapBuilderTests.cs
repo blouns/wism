@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using wism;
 using System;
 using System.Collections.Generic;
@@ -8,10 +8,16 @@ using System.Threading.Tasks;
 
 namespace wism.Tests
 {
-    [TestClass()]
+    [TestFixture]
     public class MapBuilderTests
     {
-        [TestMethod()]
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+        }
+
+        [Test]
         public void LoadMapTest()
         {
             const int defaultMapHeight = 5;
@@ -31,7 +37,7 @@ namespace wism.Tests
             Assert.IsNull(tile.Unit);
         }
 
-        [TestMethod]
+        [Test]
         public void LoadUnitKindsTest()
         {
             Dictionary<char, Unit> unitKinds = MapBuilder.UnitKinds;
@@ -40,7 +46,7 @@ namespace wism.Tests
             Assert.IsNotNull(hero, "Unit 'hero' was not found.");
         }
 
-        [TestMethod]
+        [Test]
         public void LoadTerrainKindsTest()
         {
             Dictionary<char, Terrain> terrainKinds = MapBuilder.TerrainKinds;

@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using wism;
 using System;
 using System.Collections.Generic;
@@ -9,28 +9,22 @@ using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 
 namespace wism.Tests
 {
-    [TestClass()]
+    [TestFixture]
     public class UnitTests
     {
-        private TestContext testContextInstance;
-
-        /// <summary>
-        ///  Gets or sets the test context which provides
-        ///  information about and functionality for the current test run.
-        ///</summary>
-        public TestContext TestContext
+        [OneTimeSetUp]
+        public void OneTimeSetup()
         {
-            get { return testContextInstance; }
-            set { testContextInstance = value; }
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
         }
 
-        [TestMethod()]
+        [Test]
         public void CreateTest()
         {
             Unit unit = Unit.Create(new UnitInfo());
         }
 
-        [TestMethod()]
+        [Test]
         public void HeroCanXTest()
         {
             bool foundHero = false;
@@ -49,7 +43,7 @@ namespace wism.Tests
             Assert.IsTrue(foundHero, "Could not find the hero.");
         }
 
-        [TestMethod()]
+        [Test]
         public void MoveHeroToMeadowTest()
         {
             World.Current.Reset();
@@ -62,7 +56,7 @@ namespace wism.Tests
             Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
         }
 
-        [TestMethod()]
+        [Test]
         public void MoveHeroToMountainTest()
         {
             World.Current.Reset();
@@ -78,7 +72,7 @@ namespace wism.Tests
             Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow
         }
 
-        [TestMethod()]
+        [Test]
         public void MoveHeroToCoastTest()
         {
             World.Current.Reset();
@@ -94,7 +88,7 @@ namespace wism.Tests
             Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow            
         }
 
-        [TestMethod()]
+        [Test]
         public void MoveNorthThenSouth()
         {
             World.Current.Reset();
@@ -112,7 +106,7 @@ namespace wism.Tests
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
 
-        [TestMethod()]
+        [Test]
         public void MoveSouthThenNorth()
         {
             World.Current.Reset();
@@ -130,7 +124,7 @@ namespace wism.Tests
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
 
-        [TestMethod()]
+        [Test]
         public void MoveWestThenEast()
         {
             World.Current.Reset();
@@ -148,7 +142,7 @@ namespace wism.Tests
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
 
-        [TestMethod()]
+        [Test]
         public void MoveEastThenWest()
         {
             World.Current.Reset();
@@ -181,7 +175,7 @@ namespace wism.Tests
             }
 
             Tile newTile = unit.Tile;
-            Assert.AreNotEqual<Tile>(originalTile, newTile,
+            Assert.AreNotEqual(originalTile, newTile,
                 String.Format("{0} could not move to tile.", unit.ToString()));
             Assert.IsNotNull(unit.Tile.Unit);       // Unit should be set on new tile
             Assert.IsNotNull(unit.Tile.Unit.Tile);  // Unit's tile should be set on new tile
@@ -201,7 +195,7 @@ namespace wism.Tests
             }
 
             // Should fail
-            Assert.AreEqual<Tile>(originalTile, unit.Tile, "{0} moved unexpectedly {1}.", unit, directionName);
+            Assert.AreEqual(originalTile, unit.Tile, "{0} moved unexpectedly {1}.", unit, directionName);
             Assert.IsNotNull(unit.Tile.Unit.Tile);  // Unit's tile should be set on new tile
             Assert.IsNotNull(originalTile.Unit);    // Unit should be set on old tile
         }

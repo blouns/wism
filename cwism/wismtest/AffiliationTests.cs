@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using wism;
 using System;
 using System.Collections.Generic;
@@ -8,16 +8,22 @@ using System.Threading.Tasks;
 
 namespace wism.Tests
 {
-    [TestClass()]
+    [TestFixture]
     public class AffiliationTests
     {
-        [TestMethod()]
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+        }
+
+        [Test]
         public void CreateTest()
         {
             Affiliation affiliation = Affiliation.Create(new AffiliationInfo());            
         }
 
-        [TestMethod()]
+        [Test]
         public void ToStringTest()
         {
             Affiliation affiliation = Affiliation.Create(new AffiliationInfo());
