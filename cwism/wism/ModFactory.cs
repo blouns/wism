@@ -7,11 +7,14 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     public static class ModFactory
     {
         public static readonly string DefaultPath = "mod";
+
+        // Units are not singletons; so cache the infos for conscription
+        private static IList<UnitInfo> unitInfos;
 
         internal static IList LoadModFiles(string path, string pattern, Type type)
         {
@@ -54,7 +57,7 @@ namespace wism
 
         public static IList<Unit> LoadUnits(string path)
         {
-            IList infos = LoadModFiles(path, UnitInfo.FilePattern, typeof(UnitInfo));
+            IList<UnitInfo> infos = LoadUnitInfos(path);
 
             IList<Unit> units = new List<Unit>();
             foreach (UnitInfo info in infos)
@@ -63,6 +66,27 @@ namespace wism
             }
 
             return units;
+        }
+
+        public static IList<UnitInfo> LoadUnitInfos(string path)
+        {
+            IList infos = LoadModFiles(path, UnitInfo.FilePattern, typeof(UnitInfo));
+
+            IList<UnitInfo> unitInfos = new List<UnitInfo>();
+            foreach (UnitInfo info in infos)
+            {
+                unitInfos.Add(info);
+            }
+
+            return unitInfos;
+        }
+
+        public static IList<UnitInfo> GetUnitInfos()
+        {
+            if (unitInfos == null)
+                throw new InvalidOperationException("Cannot get null unit infos.");
+
+            return unitInfos;
         }
 
         public static IList<Terrain> LoadTerrains(string path)

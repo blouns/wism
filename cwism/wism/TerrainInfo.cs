@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     [DataContract]
     public class TerrainInfo : ICustomizable

@@ -1,15 +1,16 @@
-﻿using NUnit.Framework;
-using BranallyGames.Wism;
+﻿using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework;
+using System.IO;
 
 namespace wism.Tests
 {
     [TestFixture]
-    public class TerrainTests
+    public class TemplateTests
     {
         [OneTimeSetUp]
         public void OneTimeSetup()
@@ -18,9 +19,10 @@ namespace wism.Tests
         }
 
         [Test]
-        public void CreateTest()
+        public void TemplateTest()
         {
-            Terrain terrain = Terrain.Create(new TerrainInfo());
+            Assert.Pass();
         }
+
     }
 }

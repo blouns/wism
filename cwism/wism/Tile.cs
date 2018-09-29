@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     public class Tile
     {

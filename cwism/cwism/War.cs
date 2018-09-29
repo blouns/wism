@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
-using wism;
+using BranallyGames.Wism;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Collections;
 
-namespace cwism
+namespace BranallyGames.cwism
 {
     class War
     {

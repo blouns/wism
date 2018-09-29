@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using wism;
+using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using System.Linq;

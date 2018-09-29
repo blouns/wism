@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Json;
+using BranallyGames.Wism;
 using NUnit.Framework;
-using wism;
 
 namespace wism.Tests
 {

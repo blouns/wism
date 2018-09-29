@@ -1,5 +1,4 @@
-﻿//using NUnit.Framework;
-using wism;
+﻿using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +9,6 @@ using System.IO;
 
 namespace wism.Tests
 {
-    //[TestFixture]
     [TestFixture]
     public class WorldTests
     {
@@ -35,7 +33,6 @@ namespace wism.Tests
                 File.Delete(TestMapPath);
         }
 
-        //[Test]
         [Test]
         public void SerializeTest()
         {            
