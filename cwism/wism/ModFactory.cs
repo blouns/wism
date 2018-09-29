@@ -13,29 +13,30 @@ namespace BranallyGames.Wism
     {
         public static readonly string DefaultPath = "mod";
 
-        // Units are not singletons; so cache the infos for conscription
-        private static IList<UnitInfo> unitInfos;
+        private static IList<UnitInfo> unitInfos = null;
+        private static IList<TerrainInfo> terrainInfos = null;
+        private static IList<AffiliationInfo> affiliationInfos = null;
 
-        internal static IList LoadModFiles(string path, string pattern, Type type)
+        public static IList<T> LoadModFiles<T>(string path, string pattern)
         {
-            IList objects = new ArrayList();
+            IList<T> objects = new List<T>();
             object info;
             DirectoryInfo dirInfo = new DirectoryInfo(path);
             foreach (FileInfo file in dirInfo.EnumerateFiles(pattern))
             {
                 using (FileStream ms = file.OpenRead())
                 {
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(type);
+                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
                     info = serializer.ReadObject(ms);
                 }
 
-                if (info == null)
+                if (info == null || info.GetType() != typeof(T))
                 {
                     Log.WriteLine(Log.TraceLevel.Warning, "Skipping unexpected type while loading '{0}' from '{1}'", info.GetType(), file.FullName);
                 }
                 else
                 {
-                    objects.Add(info);
+                    objects.Add((T)info);
                 }
             }
 
@@ -44,10 +45,10 @@ namespace BranallyGames.Wism
 
         public static IList<Affiliation> LoadAffiliations(string path)
         {
-            IList infos = LoadModFiles(path, AffiliationInfo.FilePattern, typeof(AffiliationInfo));
+            affiliationInfos = LoadModFiles<AffiliationInfo>(path, AffiliationInfo.FilePattern);
 
             IList<Affiliation> affiliations = new List<Affiliation>();
-            foreach (AffiliationInfo ai in infos)
+            foreach (AffiliationInfo ai in affiliationInfos)
             {
                 affiliations.Add(Affiliation.Create(ai));
             }
@@ -55,11 +56,23 @@ namespace BranallyGames.Wism
             return affiliations;
         }
 
+        internal static UnitInfo FindUnitInfo(char symbol)
+        {
+            IList<UnitInfo> infos = GetUnitInfos();
+            foreach (UnitInfo info in infos)
+            {
+                if (info.Symbol == symbol)
+                    return info;
+            }
+
+            return null; // Symbol not found
+        }
+
         public static IList<Unit> LoadUnits(string path)
         {
-            IList<UnitInfo> infos = LoadUnitInfos(path);
-
             IList<Unit> units = new List<Unit>();
+
+            IList<UnitInfo> infos = GetUnitInfos();            
             foreach (UnitInfo info in infos)
             {
                 units.Add(Unit.Create(info));
@@ -68,30 +81,39 @@ namespace BranallyGames.Wism
             return units;
         }
 
-        public static IList<UnitInfo> LoadUnitInfos(string path)
+        public static IList<UnitInfo> GetUnitInfos()
         {
-            IList infos = LoadModFiles(path, UnitInfo.FilePattern, typeof(UnitInfo));
-
-            IList<UnitInfo> unitInfos = new List<UnitInfo>();
-            foreach (UnitInfo info in infos)
+            if (unitInfos == null)
             {
-                unitInfos.Add(info);
+                unitInfos = LoadModFiles<UnitInfo>(DefaultPath, UnitInfo.FilePattern);
             }
 
             return unitInfos;
         }
 
-        public static IList<UnitInfo> GetUnitInfos()
+        public static IList<AffiliationInfo> GetAffiliationInfos()
         {
-            if (unitInfos == null)
-                throw new InvalidOperationException("Cannot get null unit infos.");
+            if (affiliationInfos == null)
+            {
+                affiliationInfos = LoadModFiles<AffiliationInfo>(DefaultPath, AffiliationInfo.FilePattern);
+            }
 
-            return unitInfos;
+            return affiliationInfos;
+        }
+
+        public static IList<TerrainInfo> GetTerrainInfos()
+        {
+            if (terrainInfos == null)
+            {
+                terrainInfos = LoadModFiles<TerrainInfo>(DefaultPath, TerrainInfo.FilePattern);
+            }
+
+            return terrainInfos;
         }
 
         public static IList<Terrain> LoadTerrains(string path)
         {
-            IList infos = LoadModFiles(path, TerrainInfo.FilePattern, typeof(TerrainInfo));
+            IList<TerrainInfo> infos = LoadModFiles<TerrainInfo>(path, TerrainInfo.FilePattern);
 
             IList<Terrain> units = new List<Terrain>();
             foreach (TerrainInfo info in infos)

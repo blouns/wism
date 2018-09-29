@@ -30,7 +30,7 @@ namespace wism.Tests
         {
             Player player = CreateOrcsOfKorPlayer();
 
-            IList<UnitInfo> unitKinds = ModFactory.LoadUnitInfos(ModFactory.DefaultPath);
+            IList<UnitInfo> unitKinds = GetUnitKinds();
             for (int i = 0; i < unitKinds.Count; i++)
             {
                 UnitInfo info = unitKinds[i];
@@ -41,7 +41,7 @@ namespace wism.Tests
 
             IList<Unit> units = player.GetUnits();
             Assert.IsNotNull(units, "Player had null units.");
-            Assert.IsTrue(units.Count > 0, "Count of units was not > 0.");            
+            Assert.IsTrue(units.Count > 0, "Count of units was not > 0.");
         }        
 
         [Test]
@@ -51,7 +51,7 @@ namespace wism.Tests
             {
                 Player player = CreateOrcsOfKorPlayer();
 
-                IList<UnitInfo> unitKinds = ModFactory.LoadUnitInfos(ModFactory.DefaultPath);
+                IList<UnitInfo> unitKinds = GetUnitKinds();
                 UnitInfo info = unitKinds[0];
 
                 // Add player to Void; should fail
@@ -100,6 +100,11 @@ namespace wism.Tests
             Assert.AreEqual(player.Affiliation.DisplayName, "Orcs of Kor");
 
             return player;
+        }
+
+        private static IList<UnitInfo> GetUnitKinds()
+        {
+            return ModFactory.LoadModFiles<UnitInfo>(ModFactory.DefaultPath, UnitInfo.FilePattern);
         }
 
         #endregion

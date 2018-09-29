@@ -89,27 +89,23 @@ namespace BranallyGames.cwism
 
         private static Unit FindHero()
         {
-            Tile[,] map = World.Current.Map;
             Unit hero = null;
 
-            for (int y = 0; y < map.GetLength(0); y++)
+            Player player1 = World.Current.Players[0];
+            IList<Unit> units = player1.GetUnits();
+            foreach(Unit unit in units)
             {
-                for (int x = 0; x < map.GetLength(1); x++)
+                if (unit.Symbol == 'H')
                 {
-                    Unit unit = map[x, y].Unit;
-                    if (unit != null &&
-                        unit.Symbol == 'H')
-                    {
-                        hero = unit;
-                        break;
-                    }
+                    hero = unit;
+                    break;
                 }
             }
 
             if (hero == null)
                 throw new InvalidOperationException("Cannot find the hero in the world.");
 
-            return hero;
+            return hero;            
         }
     }
 }

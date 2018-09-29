@@ -14,6 +14,30 @@ namespace BranallyGames.Wism
 
         private IList<Unit> units = new List<Unit>();
 
+        public Player()
+        {
+        }
+
+        public static Player Create(Affiliation affiliation)
+        {
+            if (affiliation == null)
+            {
+                throw new ArgumentNullException(nameof(affiliation));
+            }
+
+            Player player = new Player();
+            player.Affiliation = affiliation;
+            player.ConscriptUnit(UnitInfo.GetHeroInfo(), GetTileForHero());
+
+            return player;
+        }
+
+        private static Tile GetTileForHero()
+        {
+            // TODO: Need a home tile for the Hero; for now hardcode
+            return World.Current.Map[2, 2];
+        }
+
         public IList<Unit> GetUnits()
         {
             return units;

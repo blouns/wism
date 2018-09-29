@@ -9,8 +9,7 @@ namespace BranallyGames.Wism
 {
     public class Unit : MapObject
     {
-        private UnitInfo info;
-
+        private UnitInfo info;        
         private int moves = 1;
         private char symbol;
 
@@ -45,7 +44,6 @@ namespace BranallyGames.Wism
 
         public Unit()
         {
-
         }
 
         public bool TryMove(Direction direction)

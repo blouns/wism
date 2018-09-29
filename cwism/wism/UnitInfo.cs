@@ -9,7 +9,9 @@ namespace BranallyGames.Wism
 {
     [DataContract]
     public class UnitInfo : ICustomizable
-    {
+    {        
+        public const char HeroSymbol = 'H';
+
         public string FileName { get => "Unit_Template.json"; }
 
         public static readonly string FilePattern = "Unit_*.json";
@@ -35,5 +37,13 @@ namespace BranallyGames.Wism
         [DataMember]
         internal bool CanFly;
 
+        public static UnitInfo GetHeroInfo()
+        {
+            UnitInfo heroInfo = ModFactory.FindUnitInfo(HeroSymbol);
+            if (heroInfo == null)
+                throw new InvalidOperationException("No hero type found.");
+
+            return heroInfo;
+        }
     }
 }
