@@ -29,6 +29,15 @@ namespace BranallyGames.cwism
         private static void DoActions(ConsoleKeyInfo key)
         {
             Unit hero = FindHero();
+            if (hero == null)
+            {
+                // You have lost!
+                Console.WriteLine("Your hero has died and you have lost!");
+                Console.WriteLine("Press any key to quit...");
+                Console.ReadKey();
+                return;
+            }
+
             bool success = false;
 
             switch (key.Key)
@@ -100,10 +109,7 @@ namespace BranallyGames.cwism
                     hero = unit;
                     break;
                 }
-            }
-
-            if (hero == null)
-                throw new InvalidOperationException("Cannot find the hero in the world.");
+            }            
 
             return hero;            
         }

@@ -46,6 +46,9 @@
   <ItemGroup>
     <Compile Include="AffiliationInfo.cs" />
     <Compile Include="Affiliation.cs" />
+    <Compile Include="AttackingForceCombatModifier.cs" />
+    <Compile Include="DefendingForceCombatModifer.cs" />
+    <Compile Include="Hero.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="ICustomizable.cs" />
     <Compile Include="ModFactory.cs" />
@@ -54,6 +57,7 @@
     <Compile Include="Player.cs" />
     <Compile Include="Terrain.cs" />
     <Compile Include="TerrainInfo.cs" />
+    <Compile Include="TerrainModifierInfo.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="UnitInfo.cs" />
@@ -92,9 +96,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="World.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Content Include="World.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

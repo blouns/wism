@@ -18,10 +18,7 @@ namespace BranallyGames.Wism
         public string Type = "Terrain";
 
         [DataMember]
-        public string DisplayName { get; set; } = "Display Name";
-
-        [DataMember]
-        private string imageFileName = "image.jpg";
+        public string DisplayName { get; set; } = "Display Name";        
 
         [DataMember]
         public char Symbol { get; set; } = 'x';

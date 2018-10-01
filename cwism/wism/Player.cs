@@ -26,21 +26,37 @@ namespace BranallyGames.Wism
             }
 
             Player player = new Player();
-            player.Affiliation = affiliation;
-            player.ConscriptUnit(UnitInfo.GetHeroInfo(), GetTileForHero());
+            player.Affiliation = affiliation;            
+            player.HireHero();
 
             return player;
         }
 
-        private static Tile GetTileForHero()
+        private Tile FindTileForNewHero()
         {
             // TODO: Need a home tile for the Hero; for now hardcode
-            return World.Current.Map[2, 2];
+            Tile tile = World.Current.Map[2, 2];
+            UnitInfo unitInfo = UnitInfo.GetHeroInfo();
+
+            if (!CanDeploy(unitInfo, tile))
+                throw new ArgumentException(
+                    String.Format("Hero cannot be deployed to '{1}'.", unitInfo.DisplayName, tile.Terrain.DisplayName));
+
+            return tile;
         }
 
         public IList<Unit> GetUnits()
         {
             return units;
+        }
+
+        public void HireHero()
+        {
+            Tile tile = FindTileForNewHero();
+
+            // TODO: Money talks 
+            Hero hero = Hero.Create();
+            this.Deploy(tile, hero);
         }
 
         public void ConscriptUnit(UnitInfo unitInfo, Tile tile)
@@ -55,20 +71,27 @@ namespace BranallyGames.Wism
                 throw new ArgumentNullException(nameof(tile));
             }
 
-            Terrain terrain = tile.Terrain;
-            if (!terrain.CanTraverse(unitInfo.CanWalk, unitInfo.CanFloat, unitInfo.CanFly))
-            {
+            if (!CanDeploy(unitInfo, tile))
                 throw new ArgumentException(
-                    String.Format("Unit type '{0}' cannot be deployed to '{1}'.",
-                    unitInfo.DisplayName,
-                    terrain.DisplayName));
-            }
+                    String.Format("Unit type '{0}' cannot be deployed to '{1}'.", unitInfo.DisplayName, tile.Terrain.DisplayName));
 
             Unit newUnit = Unit.Create(unitInfo);
+            Deploy(tile, newUnit);
+        }
+
+        private void Deploy(Tile tile, Unit newUnit)
+        {
             newUnit.Affiliation = this.Affiliation;
             newUnit.Tile = tile;
             tile.Unit = newUnit;
             this.units.Add(newUnit);
+        }
+
+        private bool CanDeploy(UnitInfo unitInfo, Tile tile)
+        {
+            Terrain terrain = tile.Terrain;
+            return ((terrain.CanTraverse(unitInfo.CanWalk, unitInfo.CanFloat, unitInfo.CanFly)) &&
+                    (tile.Unit == null));            
         }
 
         public void KillUnit(Unit targetUnit)

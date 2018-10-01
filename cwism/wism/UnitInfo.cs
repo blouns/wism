@@ -25,8 +25,10 @@ namespace BranallyGames.Wism
         [DataMember]
         public char Symbol { get; set; } = 'x';
 
+        private bool isSpecial = false;
+
         [DataMember]
-        private string ImageFileName = "image.jpg";
+        public bool IsSpecial { get; internal set; }
 
         [DataMember]
         internal bool CanWalk;

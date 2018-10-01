@@ -20,7 +20,7 @@ namespace wism.Tests
         [Test]
         public void CreateTest()
         {
-            Affiliation affiliation = Affiliation.Create(new AffiliationInfo());            
+            Affiliation affiliation = Affiliation.Create(new AffiliationInfo());
         }
 
         [Test]

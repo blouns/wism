@@ -21,12 +21,6 @@ namespace BranallyGames.Wism
         public string DisplayName { get; set; } = "Affiliation Name";
 
         [DataMember]
-        private char Symbol { get; set; } = 'x';
-
-        [DataMember]
-        private string imageFileName = "affiliation_image.jpg";
-
-        [DataMember]
         public string Color = "(255, 0, 0)";
     }
 }

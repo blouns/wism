@@ -47,7 +47,7 @@ namespace wism.Tests
         public void MoveHeroToMeadowTest()
         {
             World.Current.Reset();
-            Unit hero = FindHero();
+            Hero hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             MoveUnitPass(hero, Direction.North);
@@ -60,12 +60,16 @@ namespace wism.Tests
         public void MoveHeroToMountainTest()
         {
             World.Current.Reset();
-            Unit hero = FindHero();
+            Hero hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             // Walk into meadow
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); 
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+
+            // Walk into meadow
+            MoveUnitPass(hero, Direction.East);
+            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
 
             // Try to walk onto an impassable mountain; should fail
             MoveUnitFail(hero, Direction.East);
@@ -76,7 +80,7 @@ namespace wism.Tests
         public void MoveHeroToCoastTest()
         {
             World.Current.Reset();
-            Unit hero = FindHero();
+            Hero hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             // Move north to meadow
@@ -92,7 +96,7 @@ namespace wism.Tests
         public void MoveNorthThenSouth()
         {
             World.Current.Reset();
-            Unit hero = FindHero();
+            Hero hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             Tile originalTile = hero.Tile;
@@ -110,7 +114,7 @@ namespace wism.Tests
         public void MoveSouthThenNorth()
         {
             World.Current.Reset();
-            Unit hero = FindHero();
+            Hero hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             Tile originalTile = hero.Tile;
@@ -128,7 +132,7 @@ namespace wism.Tests
         public void MoveWestThenEast()
         {
             World.Current.Reset();
-            Unit hero = FindHero();
+            Hero hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             Tile originalTile = hero.Tile;
@@ -146,8 +150,7 @@ namespace wism.Tests
         public void MoveEastThenWest()
         {
             World.Current.Reset();
-            Unit hero = FindHero();
-            Assert.IsNotNull(hero, "Could not find the hero.");
+            Unit hero = GetFirstHero();
 
             Tile originalTile = hero.Tile;
 
@@ -200,29 +203,22 @@ namespace wism.Tests
             Assert.IsNotNull(originalTile.Unit);    // Unit should be set on old tile
         }
 
-        private static Unit FindHero()
+        private static Hero GetFirstHero()
         {
-            Tile[,] map = World.Current.Map;
-            Unit hero = null;
+            Hero hero = null;
 
-            for (int y = 0; y < map.GetLength(0); y++)
+            Player player1 = World.Current.Players[0];
+            IList<Unit> units = player1.GetUnits();
+            foreach (Unit unit in units)
             {
-                for (int x = 0; x < map.GetLength(1); x++)
+                hero = unit as Hero;
+                if (hero != null)
                 {
-                    Unit unit = map[x, y].Unit;
-                    if (unit != null && 
-                        unit.Symbol == 'H')
-                    {
-                        hero = unit;
-                        break;
-                    }
+                    return hero;
                 }
             }
 
-            if (hero == null)
-                throw new InvalidOperationException("Cannot find the hero in the world.");
-            
-            return hero;
+            throw new InvalidOperationException("Cannot find the hero in the world.");           
         }
 
         #endregion

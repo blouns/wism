@@ -1,6 +1,5 @@
 {
     "Color": "(100, 100, 100)",
     "DisplayName": "Neutral",
-    "Type": "Affiliation",
-    "imageFileName": "neutral_crest.jpg"
+    "Type": "Affiliation"
 }

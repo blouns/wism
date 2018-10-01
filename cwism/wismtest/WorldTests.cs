@@ -24,11 +24,6 @@ namespace wism.Tests
         [SetUp]
         public void TestSetup()
         {
-            Cleanup();
-        }
-
-        private void Cleanup()
-        {
             if (File.Exists(TestMapPath))
                 File.Delete(TestMapPath);
         }
@@ -37,9 +32,8 @@ namespace wism.Tests
         public void SerializeTest()
         {            
             World.Current.Serialize(TestMapPath);
-            Assert.IsTrue(File.Exists(TestMapPath), "File did not serialize.");    if (File.Exists(TestMapPath))
-                File.Delete(TestMapPath);
-        }
+            Assert.IsTrue(File.Exists(TestMapPath), "File did not serialize.");
+         }
 
     }
 }

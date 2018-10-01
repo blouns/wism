@@ -20,8 +20,8 @@ namespace wism.Tests
         [Test]
         public void LoadMapTest()
         {
-            const int defaultMapHeight = 5;
-            const int defaultMapWidth = 5;
+            const int defaultMapHeight = 6;
+            const int defaultMapWidth = 6;
 
             Tile[,] map = MapBuilder.LoadMap(MapBuilder.DefaultMapPath);
 

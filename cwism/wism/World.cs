@@ -29,14 +29,14 @@ namespace BranallyGames.Wism
 
         static World()
         {
-            CreateDefaultWorld();
+            current = new World();
+            CreateDefaultWorld(current);
         }
 
-        private static void CreateDefaultWorld()
-        {
-            current = new World();
-            current.map = MapBuilder.LoadMap(DefaultMapPath);
-            current.players = ReadyPlayers();
+        private static void CreateDefaultWorld(World world)
+        {            
+            world.map = MapBuilder.LoadMap(DefaultMapPath);
+            world.players = ReadyPlayers();
         }
 
         private static IList<Player> ReadyPlayers()
@@ -67,18 +67,18 @@ namespace BranallyGames.Wism
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects;
             settings.Formatting = Formatting.Indented;
-            string mapJson = JsonConvert.SerializeObject(this.Map, settings);
-            File.WriteAllText(path, mapJson);
+            string json = JsonConvert.SerializeObject(this, settings);
+            File.WriteAllText(path, json);
         }
 
         public void Serialize()
         {
-            Serialize(World.DefaultMapPath);
+            Serialize(World.DefaultMapPath);            
         }
 
         public void Reset()
         {
-            current.map = MapBuilder.LoadMap(mapPath);
+            CreateDefaultWorld(World.Current);
         }
     }   
 }
