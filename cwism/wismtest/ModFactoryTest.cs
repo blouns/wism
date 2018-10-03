@@ -67,11 +67,12 @@ namespace wism.Tests
         public void LoadUnitsTest()
         {
             bool foundHero = false;
-            IList<Unit> units = ModFactory.LoadUnits(TestModPath);
+            IList<Unit> units = ModFactory.LoadUnits(TestModPath);            
+
             foreach (Unit unit in units)
             {
                 TestContext.WriteLine("Unit: {0}", unit);
-                if (unit.DisplayName == "Hero")
+                if (unit.Symbol== 'H')
                     foundHero = true;
             }
 

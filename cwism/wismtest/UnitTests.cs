@@ -26,21 +26,13 @@ namespace wism.Tests
 
         [Test]
         public void HeroCanXTest()
-        {
-            bool foundHero = false;
-            IList<Unit> units = ModFactory.LoadUnits(ModFactoryTest.TestModPath);
-            foreach (Unit unit in units)
-            {
-                if (unit.DisplayName == "Hero")
-                {
-                    foundHero = true;
-                    Assert.IsTrue(unit.CanWalk, "Hero cannot walk. Broken leg?");
-                    Assert.IsFalse(unit.CanFloat, "Hero learned how to swim!");
-                    Assert.IsFalse(unit.CanFly, "Heros can fly!? Crazy talk.");
-                }
-            }
+        {         
+            Hero unit = GetFirstHero();
+            
+            Assert.IsTrue(unit.CanWalk, "Hero cannot walk. Broken leg?");
+            Assert.IsFalse(unit.CanFloat, "Hero learned how to swim!");
+            Assert.IsFalse(unit.CanFly, "Heros can fly!? Crazy talk.");
 
-            Assert.IsTrue(foundHero, "Could not find the hero.");
         }
 
         [Test]
@@ -203,7 +195,7 @@ namespace wism.Tests
             Assert.IsNotNull(originalTile.Unit);    // Unit should be set on old tile
         }
 
-        private static Hero GetFirstHero()
+        public static Hero GetFirstHero()
         {
             Hero hero = null;
 
