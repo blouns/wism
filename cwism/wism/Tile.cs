@@ -14,6 +14,15 @@ namespace BranallyGames.Wism
 
         public Terrain Terrain { get => terrain; set => terrain = value; }
 
+        /// <summary>
+        /// Expands units from composite tile (if present)
+        /// </summary>
+        /// <returns></returns>
+        internal IList<Unit> GetDefenders()
+        {
+            return new List<Unit>(Unit.Expand());
+        }
+
         private Unit unit;
 
         public Unit Unit { get => unit; set => unit = value; }
@@ -22,17 +31,9 @@ namespace BranallyGames.Wism
 
         public Coordinate Coordinate { get => coordinate; set => coordinate = value; }
 
-        internal static Tile Create(string str, int x, int y)
+        internal IList<Unit> Muster()
         {
-            Tile tile = new Tile();
-            tile.Coordinate = new Coordinate(x, y);
-            tile.Terrain = MapBuilder.TerrainKinds[str[0]];
-            if (str.Length > 1)
-            {
-                tile.Unit = MapBuilder.UnitKinds[str[1]];
-            }
-
-            return tile;
+            throw new NotImplementedException();
         }
     }
 

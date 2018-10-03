@@ -47,6 +47,8 @@
     <Compile Include="AffiliationInfo.cs" />
     <Compile Include="Affiliation.cs" />
     <Compile Include="AttackingForceCombatModifier.cs" />
+    <Compile Include="UnitComposite.cs" />
+    <Compile Include="WarStrategy.cs" />
     <Compile Include="DefendingForceCombatModifer.cs" />
     <Compile Include="Hero.cs" />
     <Compile Include="Log.cs" />

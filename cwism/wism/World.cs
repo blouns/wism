@@ -12,8 +12,9 @@ namespace BranallyGames.Wism
     public class World
     {
         private const string DefaultMapPath = @"world.json";
-
         private string mapPath = DefaultMapPath;
+
+        private Random random;
 
         private IList<Player> players;
 
@@ -23,9 +24,14 @@ namespace BranallyGames.Wism
         
         public static World Current { get => current; }
 
+        private Tile[,] map;
+
         public Tile[,] Map { get => map; }        
 
-        private Tile[,] map;
+        private IWarStrategy warStrategy;
+
+        public IWarStrategy WarStrategy { get => warStrategy; set => warStrategy = value; }
+        public Random Random { get => random; set => random = value; }
 
         static World()
         {
@@ -37,6 +43,8 @@ namespace BranallyGames.Wism
         {            
             world.map = MapBuilder.LoadMap(DefaultMapPath);
             world.players = ReadyPlayers();
+            world.warStrategy = new DefaultWarStrategy();
+            world.Random = new Random();
         }
 
         private static IList<Player> ReadyPlayers()
