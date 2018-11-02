@@ -12,7 +12,7 @@ namespace BranallyGames.Wism
 
         public Affiliation Affiliation { get => affiliation; set => affiliation = value; }
 
-        private IList<Unit> units = new List<Unit>();
+        private IList<Army> armies = new List<Army>();
 
         public Player()
         {
@@ -26,7 +26,7 @@ namespace BranallyGames.Wism
             }
 
             Player player = new Player();
-            player.Affiliation = affiliation;            
+            player.Affiliation = affiliation;
             player.HireHero();
 
             return player;
@@ -45,18 +45,23 @@ namespace BranallyGames.Wism
             return tile;
         }
 
-        public IList<Unit> GetUnits()
+        public IList<Army> GetArmies()
         {
-            return units;
+            return armies;
         }
 
         public void HireHero()
         {
             Tile tile = FindTileForNewHero();
 
+            HireHero(tile);
+        }
+
+        public void HireHero(Tile tile)
+        {
             // TODO: Money talks 
             Hero hero = Hero.Create();
-            this.Deploy(tile, hero);
+            this.DeployArmy(tile, hero);
         }
 
         public void ConscriptUnit(UnitInfo unitInfo, Tile tile)
@@ -75,55 +80,55 @@ namespace BranallyGames.Wism
                 throw new ArgumentException(
                     String.Format("Unit type '{0}' cannot be deployed to '{1}'.", unitInfo.DisplayName, tile.Terrain.DisplayName));
 
-            Unit newUnit = Unit.Create(unitInfo);
-            Deploy(tile, newUnit);
+            Army newUnit = Army.Create(unitInfo);
+            DeployArmy(tile, newUnit);
         }
 
-        private void Deploy(Tile tile, Unit newUnit)
+        private void DeployArmy(Tile tile, Army newArmy)
         {
-            newUnit.Affiliation = this.Affiliation;
-            newUnit.Tile = tile;
-            tile.Unit = newUnit;
-            this.units.Add(newUnit);
+            newArmy.Affiliation = this.Affiliation;
+            newArmy.Tile = tile;
+            tile.AddArmy(newArmy);
+            this.armies.Add(newArmy);
         }
 
         private bool CanDeploy(UnitInfo unitInfo, Tile tile)
         {
             Terrain terrain = tile.Terrain;
             return ((terrain.CanTraverse(unitInfo.CanWalk, unitInfo.CanFloat, unitInfo.CanFly)) &&
-                    (tile.Unit == null));            
+                    (tile.HasArmy()));
         }
 
-        public void KillUnit(Unit targetUnit)
+        public void KillArmy(Army targetArmy)
         {
-            if (targetUnit == null)
+            if (targetArmy == null)
             {
-                throw new ArgumentNullException(nameof(targetUnit));
+                throw new ArgumentNullException(nameof(targetArmy));
             }
 
-            if (!IsMine(targetUnit))
-                throw new ArgumentException("Cannot remove unit that is not mine!");
+            if (!IsMine(targetArmy))
+                throw new ArgumentException("Cannot remove army that is not mine!");
 
-            this.units.Remove(targetUnit);
+            this.armies.Remove(targetArmy);
         }
 
-        public bool IsMine(Unit unit)
+        public bool IsMine(Army army)
         {
-            if (unit == null)
+            if (army == null)
             {
-                throw new ArgumentNullException(nameof(unit));
+                throw new ArgumentNullException(nameof(army));
             }
 
             // Verify affiliation and in collection
-            return (FindUnit(unit) != null) && (unit.Affiliation == this.Affiliation);
+            return (FindArmy(army) != null) && (army.Affiliation == this.Affiliation);
         }
 
-        private Unit FindUnit(Unit targetUnit)
+        private Army FindArmy(Army targetArmy)
         {
-            foreach (Unit unit in this.units)
+            foreach (Army army in this.armies)
             {
-                if (unit == targetUnit)
-                    return unit;
+                if (army == targetArmy)
+                    return army;
             }
 
             return null;

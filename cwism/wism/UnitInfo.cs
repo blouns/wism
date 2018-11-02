@@ -41,11 +41,16 @@ namespace BranallyGames.Wism
 
         public static UnitInfo GetHeroInfo()
         {
-            UnitInfo heroInfo = ModFactory.FindUnitInfo(HeroSymbol);
-            if (heroInfo == null)
-                throw new InvalidOperationException("No hero type found.");
+            return GetUnitInfo(HeroSymbol);
+        }
 
-            return heroInfo;
+        public static UnitInfo GetUnitInfo(char symbol)
+        {
+            UnitInfo info = ModFactory.FindUnitInfo(symbol);
+            if (info == null)
+                throw new InvalidOperationException("No such type found.");
+
+            return info;
         }
     }
 }

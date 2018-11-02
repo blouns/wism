@@ -35,9 +35,9 @@ namespace BranallyGames.Wism
             }
         }
 
-        public bool CanWalk { get => info.CanWalk; }
-        public bool CanFloat { get => info.CanFloat; }
-        public bool CanFly { get => info.CanFly; }
+        public virtual bool CanWalk { get => info.CanWalk; }
+        public virtual bool CanFloat { get => info.CanFloat; }
+        public virtual bool CanFly { get => info.CanFly; }
         public int Strength { get => strength; set => strength = value; }
         public int ModifiedStrength { get => modifiedStrength; set => modifiedStrength = value; }
         public int HitPoints { get => hitPoints; set => hitPoints = value; }
@@ -59,79 +59,7 @@ namespace BranallyGames.Wism
         public virtual bool IsSpecial()
         {
             return this.info.IsSpecial;
-        }
-
-        public virtual IList<Unit> Expand()
-        {
-            return new List<Unit>() { this };
-        }
-
-        public bool TryMove(Direction direction)
-        {
-            Coordinate coord = this.GetCoordinates();
-            Tile targetTile;
-            Tile[,] map = World.Current.Map;
-
-            // Where are we going?
-            switch (direction)
-            {
-                case Direction.North:
-                    targetTile = map[coord.X, coord.Y - 1];
-                    break;
-                case Direction.East:
-                    targetTile = map[coord.X + 1, coord.Y];
-                    break;
-                case Direction.South:
-                    targetTile = map[coord.X, coord.Y + 1];
-                    break;
-                case Direction.West:
-                    targetTile = map[coord.X - 1, coord.Y];
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("direction", "Unexpected direction given to unit.");
-            }
-
-            // Can we traverse in that terrain?
-            if (!CanMove(targetTile))
-                return false;
-
-            // Does the tile has room for the unit of the same team?
-            if ((targetTile.Unit != null) &&
-                (targetTile.Unit.Affiliation == this.Affiliation))
-            {
-                return false;
-            }
-
-            // Is it an enemy tile?
-            if ((targetTile.Unit != null) &&
-                (targetTile.Unit.Affiliation != this.Affiliation))
-            {
-                IWarStrategy war = World.Current.WarStrategy;
-                
-                // WAR! ...in a senseless mind.
-                if (!war.Attack(this, targetTile))
-                {
-                    // We have lost!
-                    return false;
-                }
-            }
-
-            // We are clear to advance!
-            MoveInternal(targetTile);           
-
-            return true;
-        }
-
-        public void Kill()
-        {
-            foreach (Player player in World.Current.Players)
-            {
-                if (player.IsMine(this))
-                {
-                    player.KillUnit(this);
-                }
-            }
-        }
+        }        
 
         public void Reset()
         {
@@ -153,19 +81,7 @@ namespace BranallyGames.Wism
             int defenderModifier = defenseModifier.Calculate(this);
 
             return defenderModifier;
-        }    
-
-        public bool CanMove(Tile targetTile)
-        {
-            return targetTile.Terrain.CanTraverse(this.Info.CanWalk, this.Info.CanFloat, this.Info.CanFly);            
-        }
-
-        public void MoveInternal(Tile targetTile)
-        {
-            this.Tile.Unit = null;
-            this.Tile = targetTile;
-            this.Tile.Unit = this;
-        }
+        }            
     }
 
     public class UnitConverter : JsonConverter<Unit>
@@ -190,14 +106,6 @@ namespace BranallyGames.Wism
         {
             serializer.Serialize(writer, value);
         }
-    }
-
-    public enum Direction
-    {
-        North,
-        South,
-        East,
-        West
     }
 }
 

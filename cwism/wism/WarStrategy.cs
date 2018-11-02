@@ -14,7 +14,7 @@ namespace BranallyGames.Wism
         /// <param name="attacker">Unit attacking</param>
         /// <param name="tile">Tile being defended</param>
         /// <returns>True if attaker wins; false otherwise</returns>
-        bool Attack(Unit attacker, Tile tile);
+        bool Attack(Army attacker, Tile tile);
     }
 
     /// <summary>
@@ -40,15 +40,13 @@ namespace BranallyGames.Wism
         /// </summary>
         /// <param name="tile">Tile that is being attacked.</param>
         /// <returns>True if attacker wins; false otherwise.</returns>
-        public bool Attack(Unit attacker, Tile tile)
+        public bool Attack(Army attacker, Tile tile)
         {
-            Unit defender = tile.Unit;
-
             // Muster all units from composite tile (i.e. city) to defend
-            IList<Unit> defenders = tile.GetDefenders();
-
-            // Expand composite unit (i.e. stack)
-            IList<Unit> attackers = attacker.Expand();
+            Army defender = tile.MusterArmy();
+                        
+            IList<Unit> defenders = defender.Units;
+            IList<Unit> attackers = attacker.Units;
 
             // Calculate composite modifieres
             int compositeAFCM = attacker.GetAttackModifier();
@@ -63,15 +61,15 @@ namespace BranallyGames.Wism
             defenders.OrderBy(v => v.ModifiedStrength);
 
             // Attack units one-at-a-time to the death!
-            return AttackAllDefenders(defenders, attackers, compositeAFCM, compositeDFCM);
+            return AttackInternal(defender, attacker, compositeAFCM, compositeDFCM);
         }
 
-        private bool AttackAllDefenders(IList<Unit> defenders, IList<Unit> attackers, int compositeAFCM, int compositeDFCM)
+        private bool AttackInternal(Army defender, Army attacker, int compositeAFCM, int compositeDFCM)
         {
-            while (attackers.Count > 0 && defenders.Count > 0)
+            while (attacker.Count > 0 && defender.Count > 0)
             {
-                Unit currentAttacker = attackers.First();
-                Unit currentDefender = defenders.First();
+                Unit currentAttacker = attacker.Units.First();
+                Unit currentDefender = defender.Units.First();
 
                 // Max strength of 9 due to die of 10
                 int attackStrength = Math.Min(compositeAFCM + currentAttacker.ModifiedStrength, 9);
@@ -82,31 +80,31 @@ namespace BranallyGames.Wism
                 {
                     // Current attacker won
                     Log.WriteLine(Log.TraceLevel.Information, "Current attacker won.");
-                    defenders.RemoveAt(0);
+                    defender.Kill(currentDefender);
                 }
                 else
                 {
                     // Current attacker lost
                     Log.WriteLine(Log.TraceLevel.Information, "Current attacker lost.");
-                    attackers.RemoveAt(0);
+                    attacker.Kill(currentAttacker);
                 }
             }
 
             // Reset hit points for victor
-            foreach (Unit unit in attackers)
+            foreach (Unit unit in attacker.Units)
                 unit.Reset();
-            foreach (Unit unit in defenders)
+            foreach (Unit unit in defender.Units)
                 unit.Reset();
 
             // Determine winner
-            bool attackerWon = (attackers.Count > 0);
+            bool attackerWon = (attacker.Count > 0);
 
-            if ((attackers.Count > 0 && defenders.Count > 0) ||
-                (attackers.Count == 0 && defenders.Count == 0))
+            if ((attacker.Count > 0 && defender.Count > 0) ||
+                (attacker.Count == 0 && defender.Count == 0))
             {
                 throw new Exception(
                     String.Format("Attacker and defender count incorrect after battle: Attackers: {0}, Defenders: {1}",
-                    attackers.Count, defenders.Count));
+                    attacker.Count, defender.Count));
             }
 
             return attackerWon;
@@ -128,14 +126,12 @@ namespace BranallyGames.Wism
             // Have we won?
             if (defender.HitPoints == 0)
             {
-                defender.Kill();
                 return true;
             }
 
             // Have we lost?
             if (attacker.HitPoints == 0)
             {
-                attacker.Kill();
                 return false;
             }
 

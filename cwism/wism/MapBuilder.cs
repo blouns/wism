@@ -70,8 +70,8 @@ namespace BranallyGames.Wism
                     // Affix map objects and coordinates with tile
                     Tile tile = map[x, y];
                     tile.Coordinate = new Coordinate(x, y);
-                    if (tile.Unit != null)
-                        tile.Unit.Tile = tile;
+                    if (tile.Army != null)
+                        tile.Army.Tile = tile;
                     if (tile.Terrain != null)
                         tile.Terrain.Tile = tile;
                 }

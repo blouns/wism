@@ -28,7 +28,7 @@ namespace BranallyGames.cwism
 
         private static void DoActions(ConsoleKeyInfo key)
         {
-            Unit hero = FindHero();
+            Army hero = FindHero();
             if (hero == null)
             {
                 // You have lost!
@@ -87,8 +87,8 @@ namespace BranallyGames.cwism
                     Tile tile = World.Current.Map[x, y];
                     char terrain = tile.Terrain.Symbol;
                     char unit = ' ';
-                    if (tile.Unit != null)
-                        unit = tile.Unit.Symbol;
+                    if (tile.Army != null)
+                        unit = tile.Army.Symbol;
 
                     Console.Write("{0}:[{1},{2}]\t", tile.Coordinate.ToString(), terrain, unit);
                 }
@@ -96,18 +96,21 @@ namespace BranallyGames.cwism
             }
         }
 
-        private static Unit FindHero()
+        private static Hero FindHero()
         {
-            Unit hero = null;
+            Hero hero = null;
 
             Player player1 = World.Current.Players[0];
-            IList<Unit> units = player1.GetUnits();
-            foreach(Unit unit in units)
+            IList<Army> armies = player1.GetArmies();
+            foreach(Army army in armies)
             {
-                if (unit.Symbol == 'H')
+                foreach (Unit unit in army.Units)
                 {
-                    hero = unit;
-                    break;
+                    if (unit.Symbol == 'H')
+                    {
+                        hero = unit as Hero;
+                        break;
+                    }
                 }
             }            
 
