@@ -96,10 +96,8 @@ namespace BranallyGames.cwism
             }
         }
 
-        private static Hero FindHero()
+        private static Army FindHero()
         {
-            Hero hero = null;
-
             Player player1 = World.Current.Players[0];
             IList<Army> armies = player1.GetArmies();
             foreach(Army army in armies)
@@ -108,13 +106,12 @@ namespace BranallyGames.cwism
                 {
                     if (unit.Symbol == 'H')
                     {
-                        hero = unit as Hero;
-                        break;
+                        return army;
                     }
                 }
-            }            
+            }
 
-            return hero;            
+            return null;
         }
     }
 }

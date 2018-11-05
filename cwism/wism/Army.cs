@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BranallyGames.Wism
 {
-    public class Army : Unit
+    public class Army : MapObject
     {
         public const int MaxUnits = 8;
 
@@ -25,7 +25,7 @@ namespace BranallyGames.Wism
             return Create(new List<Unit>() { unit });
         }
 
-        public static new Army Create(UnitInfo info)
+        public static Army Create(UnitInfo info)
         {
             return Create(Unit.Create(info));
         }
@@ -34,7 +34,7 @@ namespace BranallyGames.Wism
         {
         }
         
-        public override bool IsSpecial()
+        public bool IsSpecial()
         {
             return Units.Any<Unit>(v => v.IsSpecial());
         }
@@ -42,14 +42,24 @@ namespace BranallyGames.Wism
         public override string DisplayName => "Army";
 
         // TODO: Show the first unit's info instead
-        public override char Symbol { get => 'A'; set => base.Symbol = value; }
+        public override char Symbol
+        {
+            get
+            {
+                return Units[0].Symbol;
+            }
+            set
+            {
+                // N/A
+            }
+        }
 
-        public override int GetAttackModifier()
+        public int GetCompositeAttackModifier()
         {
             return Units.Sum<Unit>(v => v.GetAttackModifier());
         }
 
-        public override int GetDefenseModifier()
+        public int GetCompositeDefenseModifier()
         {
             return Units.Sum<Unit>(v => v.GetDefenseModifier());
         }
@@ -92,49 +102,40 @@ namespace BranallyGames.Wism
             if ((this.Units.Count + army.Units.Count) == Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
 
-            this.Units.Concat(army.Units);
+            this.Units = new List<Unit>(this.Units.Concat(army.Units));
         }
 
-        public override bool CanWalk
+        public bool CanWalk()
         {
-            get
+           bool canWalk = true;
+            foreach (Unit unit in this.units)
             {
-                bool canWalk = true;
-                foreach (Unit unit in this.units)
-                {
-                    canWalk &= unit.CanWalk;
-                }
-
-                return canWalk;
-            }   
-        }
-
-        public override bool CanFloat
-        {
-            get
-            {
-                bool canFloat = true;
-                foreach (Unit unit in this.units)
-                {
-                    canFloat &= unit.CanFloat;
-                }
-
-                return canFloat;
+                canWalk &= unit.CanWalk;
             }
+
+            return canWalk;       
         }
 
-        public override bool CanFly
+        public bool CanFloat()
         {
-            get
+            bool canFloat = true;
+            foreach (Unit unit in this.units)
             {
-                bool canFly = true;
-                foreach (Unit unit in this.units)
-                {
-                    canFly &= unit.CanFly;
-                }
-
-                return canFly;
+                canFloat &= unit.CanFloat;
             }
+
+            return canFloat;
+        }
+
+        public bool CanFly()
+        {
+            bool canFly = true;
+            foreach (Unit unit in this.units)
+            {
+                canFly &= unit.CanFly;
+            }
+
+            return canFly;
         }
 
         public bool TryMove(Direction direction)
@@ -163,27 +164,30 @@ namespace BranallyGames.Wism
             }
 
             // Can we traverse in that terrain?
-            if (!targetTile.CanMoveHere(this))
+            if (!targetTile.CanTraverseHere(this))
                 return false;
 
-            // Does the tile has room for the unit of the same team?
-            if ((targetTile.Army.Affiliation == this.Affiliation) &&
-                (!targetTile.HasRoom(this)))
+            if (targetTile.HasArmy())
             {
-                return false;
-            }
-
-            // Is it an enemy tile?
-            if ((targetTile.Army != null) &&
-                (targetTile.Army.Affiliation != this.Affiliation))
-            {
-                IWarStrategy war = World.Current.WarStrategy;
-
-                // WAR! ...in a senseless mind.
-                if (!war.Attack(this, targetTile))
+                // Does the tile has room for the unit of the same team?
+                if ((targetTile.Army.Affiliation == this.Affiliation) &&
+                    (!targetTile.HasRoom(this)))
                 {
-                    // We have lost!
                     return false;
+                }
+
+                // Is it an enemy tile?
+                if ((targetTile.Army != null) &&
+                    (targetTile.Army.Affiliation != this.Affiliation))
+                {
+                    IWarStrategy war = World.Current.WarStrategy;
+
+                    // WAR! ...in a senseless mind.
+                    if (!war.Attack(this, targetTile))
+                    {
+                        // We have lost!
+                        return false;
+                    }
                 }
             }
 

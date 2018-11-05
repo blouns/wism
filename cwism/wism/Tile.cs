@@ -41,17 +41,18 @@ namespace BranallyGames.Wism
         {
             if (!HasArmy())
             {
-                this.army = newArmy;
+                this.Army = newArmy;
+                this.Army.Tile = this;
             }
             else
             {
                 this.Army.Concat(newArmy);
-            }
+            }            
         }
 
-        public bool CanMoveHere(Army army)
+        public bool CanTraverseHere(Army army)
         {
-            return this.Terrain.CanTraverse(army.Info.CanWalk, army.Info.CanFloat, army.Info.CanFly);
+            return this.Terrain.CanTraverse(army.CanWalk(), army.CanFloat(), army.CanFly());
         }
 
         public void MoveArmy(Army army, Tile toTile)
@@ -80,8 +81,8 @@ namespace BranallyGames.Wism
 
         public Coordinate(int x, int y)
         {
-            this.X = x;
-            this.Y = y;
+            this.x = x;
+            this.y = y;
         }
 
         public override string ToString()

@@ -59,9 +59,8 @@ namespace BranallyGames.Wism
 
         public void HireHero(Tile tile)
         {
-            // TODO: Money talks 
             Hero hero = Hero.Create();
-            this.DeployArmy(tile, hero);
+            this.DeployArmy(tile, Army.Create(hero));
         }
 
         public void ConscriptUnit(UnitInfo unitInfo, Tile tile)
@@ -96,7 +95,7 @@ namespace BranallyGames.Wism
         {
             Terrain terrain = tile.Terrain;
             return ((terrain.CanTraverse(unitInfo.CanWalk, unitInfo.CanFloat, unitInfo.CanFly)) &&
-                    (tile.HasArmy()));
+                    (!tile.HasArmy() || (tile.Army.Count < Army.MaxUnits)));
         }
 
         public void KillArmy(Army targetArmy)

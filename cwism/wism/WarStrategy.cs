@@ -49,8 +49,8 @@ namespace BranallyGames.Wism
             IList<Unit> attackers = attacker.Units;
 
             // Calculate composite modifieres
-            int compositeAFCM = attacker.GetAttackModifier();
-            int compositeDFCM = defender.GetDefenseModifier();
+            int compositeAFCM = attacker.GetCompositeAttackModifier();
+            int compositeDFCM = defender.GetCompositeDefenseModifier();
 
             // Apply unit-specific terrain modifiers (e.g. elves like forests)
             ApplyUnitTerrainModifiers(attackers);

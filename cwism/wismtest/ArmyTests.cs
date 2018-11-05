@@ -21,7 +21,7 @@ namespace wism.Tests
         [Test]
         public void CreateTest()
         {
-            Unit unit = Army.Create(new UnitInfo());
+            Army unit = Army.Create(new UnitInfo());
             unit = Army.Create(Unit.Create(new UnitInfo()));
             unit = Army.Create(new List<Unit>() { Unit.Create(new UnitInfo()) });
         }
@@ -31,9 +31,9 @@ namespace wism.Tests
         {
             Army unit = GetFirstHero();
 
-            Assert.IsTrue(unit.CanWalk, "Hero cannot walk. Broken leg?");
-            Assert.IsFalse(unit.CanFloat, "Hero learned how to swim!");
-            Assert.IsFalse(unit.CanFly, "Heros can fly!? Crazy talk.");
+            Assert.IsTrue(unit.CanWalk(), "Hero cannot walk. Broken leg?");
+            Assert.IsFalse(unit.CanFloat(), "Hero learned how to swim!");
+            Assert.IsFalse(unit.CanFly(), "Heros can fly!? Crazy talk.");
 
         }
 
@@ -211,7 +211,7 @@ namespace wism.Tests
                     hero = unit as Hero;
                     if (hero != null)
                     {
-                        return Army.Create(hero);
+                        return army;
                     }
                 }
             }

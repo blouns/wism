@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BranallyGames.Wism;
 
-namespace wismtest
+namespace wism.Tests
 {
     [TestFixture]
     public class WarStrategyTests
@@ -18,7 +18,7 @@ namespace wismtest
         }
 
         [SetUp]
-        private void SetupWorldWithTwoPlayers()
+        public void SetupWorldWithTwoPlayers()
         {
             Player orcs = CreatePlayer("Orcs of Kor");
             Player elves = CreatePlayer("Elvallie");
@@ -30,10 +30,10 @@ namespace wismtest
             World.Current.Players.Add(elves);
 
             orcs.HireHero(World.Current.Map[1, 1]);
-            orcs.ConscriptUnit(UnitInfo.GetUnitInfo('L'), World.Current.Map[1, 2]);
+            orcs.ConscriptUnit(UnitInfo.GetUnitInfo('i'), World.Current.Map[1, 2]);
 
             elves.HireHero(World.Current.Map[3, 1]);
-            elves.ConscriptUnit(UnitInfo.GetUnitInfo('L'), World.Current.Map[3, 2]);
+            elves.ConscriptUnit(UnitInfo.GetUnitInfo('i'), World.Current.Map[3, 2]);
         }
 
         [Test]

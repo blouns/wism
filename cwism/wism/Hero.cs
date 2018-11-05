@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BranallyGames.Wism
 {
-    public class Hero : Army
+    public class Hero : Unit
     {
         public static Hero Create()
         {
