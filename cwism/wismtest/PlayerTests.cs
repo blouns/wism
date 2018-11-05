@@ -18,9 +18,16 @@ namespace wism.Tests
             Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            World.Current.Reset();
+        }
+
         [Test]
         public void CreateTest()
         {
+            World.Current.Players.Clear();
             Player player = CreateOrcsOfKorPlayer();
             Assert.IsNotNull(player);
         }
@@ -39,9 +46,9 @@ namespace wism.Tests
                 player.ConscriptUnit(info, tile);
             }
 
-            IList<Unit> units = player.GetUnits();
-            Assert.IsNotNull(units, "Player had null units.");
-            Assert.IsTrue(units.Count > 0, "Count of units was not > 0.");
+            IList<Army> armies = player.GetArmies();
+            Assert.IsNotNull(armies, "Player had null units.");
+            Assert.IsTrue(armies.Count > 0, "Count of units was not > 0.");
         }        
 
         [Test]
@@ -62,7 +69,18 @@ namespace wism.Tests
             Assert.Throws<ArgumentException>(
                 ConscriptUnit, "Failed to conscript with unexpected exception or deployed incorrectly.");
         }
-       
+
+        [Test]
+        public void HireHeroTest()
+        {
+            Player player = CreateOrcsOfKorPlayer();
+            player.HireHero();
+
+            IList<Army> armies = player.GetArmies();
+            Assert.IsNotNull(armies, "Player had null armies.");
+            Assert.IsTrue(armies.Count > 0, "Count of armies was not > 0.");
+        }
+
         #region Helper utility methods
 
         private Tile CreateTile(char symbol, int x, int y)

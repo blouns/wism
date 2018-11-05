@@ -45,7 +45,7 @@ namespace BranallyGames.Wism
         {
             return ((canWalk && Info.AllowWalk) ||
                     (canFloat && Info.AllowFloat) ||
-                    (canFloat && Info.AllowFlight));
+                    (canFly && Info.AllowFlight));
         }
     }
 }

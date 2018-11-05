@@ -18,22 +18,55 @@ namespace BranallyGames.Wism
         /// Expands units from composite tile (if present)
         /// </summary>
         /// <returns></returns>
-        internal IList<Unit> GetDefenders()
+        internal Army MusterArmy()
         {
-            return new List<Unit>(Unit.Expand());
+            // TODO: If castle, muster the troops
+            return this.army;
         }
 
-        private Unit unit;
-
-        public Unit Unit { get => unit; set => unit = value; }
-
+        private Army army;
+ 
         private Coordinate coordinate;
 
         public Coordinate Coordinate { get => coordinate; set => coordinate = value; }
 
-        internal IList<Unit> Muster()
+        public Army Army { get => army; set => army = value; }
+
+        public bool HasArmy()
         {
-            throw new NotImplementedException();
+            return this.army != null;
+        }
+
+        public void AddArmy(Army newArmy)
+        {
+            if (!HasArmy())
+            {
+                this.Army = newArmy;
+                this.Army.Tile = this;
+            }
+            else
+            {
+                this.Army.Concat(newArmy);
+            }            
+        }
+
+        public bool CanTraverseHere(Army army)
+        {
+            return this.Terrain.CanTraverse(army.CanWalk(), army.CanFloat(), army.CanFly());
+        }
+
+        public void MoveArmy(Army army, Tile toTile)
+        {
+            Tile fromTile = this;
+
+            fromTile.Army = null;   // Remove army from originating tile            
+            toTile.Army = army;     // Move army to destination tile
+            army.Tile = toTile;     // Set army parent tile to destination tile
+        }
+
+        internal bool HasRoom(Army army)
+        {
+            return ((this.army == null) || (this.army.Count + army.Count <= Army.MaxUnits)) ;
         }
     }
 
@@ -48,8 +81,8 @@ namespace BranallyGames.Wism
 
         public Coordinate(int x, int y)
         {
-            this.X = x;
-            this.Y = y;
+            this.x = x;
+            this.y = y;
         }
 
         public override string ToString()

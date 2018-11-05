@@ -34,7 +34,7 @@ namespace wism.Tests
             Assert.IsNotNull(tile, "MapBuilder added a null tile.");
             Assert.IsNotNull(tile.Coordinate);
             Assert.IsNotNull(tile.Terrain);
-            Assert.IsNull(tile.Unit);
+            Assert.IsNull(tile.Army);
         }
 
         [Test]
