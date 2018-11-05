@@ -5,16 +5,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     public class Unit : MapObject
-    {
-        private UnitInfo info;
+    {        
+        private const int DefaultHitPoints = 2;        
+        internal UnitInfo info;
 
         private int moves = 1;
         private char symbol;
+        private int strength;
 
-        public int Moves { get => moves; }
+        // Ephemeral fields only used during battle
+        private int modifiedStrength;
+        private int hitPoints = DefaultHitPoints;
+
+        public int Moves { get => moves; set => moves = value; }
 
         public override string DisplayName { get => Info.DisplayName; }
 
@@ -29,9 +35,12 @@ namespace wism
             }
         }
 
-        public bool CanWalk { get => info.CanWalk; }
-        public bool CanFloat { get => info.CanFloat; }
-        public bool CanFly { get => info.CanFly; }
+        public virtual bool CanWalk { get => info.CanWalk; }
+        public virtual bool CanFloat { get => info.CanFloat; }
+        public virtual bool CanFly { get => info.CanFly; }
+        public int Strength { get => strength; set => strength = value; }
+        public int ModifiedStrength { get => modifiedStrength; set => modifiedStrength = value; }
+        public int HitPoints { get => hitPoints; set => hitPoints = value; }
 
         public static Unit Create(UnitInfo info)
         {
@@ -45,59 +54,34 @@ namespace wism
 
         public Unit()
         {
-
         }
 
-        public bool TryMove(Direction direction)
+        public virtual bool IsSpecial()
         {
-            Coordinate coord = this.GetCoordinates();
-            Tile targetTile;
-            Tile[,] map = World.Current.Map;
-            switch (direction)
-            {
-                case Direction.North:
-                    targetTile = map[coord.X, coord.Y - 1];
-                    break;
-                case Direction.East:
-                    targetTile = map[coord.X + 1, coord.Y];
-                    break;
-                case Direction.South:
-                    targetTile = map[coord.X, coord.Y + 1];
-                    break;
-                case Direction.West:
-                    targetTile = map[coord.X - 1, coord.Y];
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("direction", "Unexpected direction given to unit.");
-            }
+            return this.info.IsSpecial;
+        }        
 
-            if (!CanMove(targetTile))
-                return false;
-
-            // Tile has room for the unit
-            if (targetTile.Unit != null)
-            {
-                return false;
-            }
-
-            // TODO: War! ...in a senseless mind.
-
-            Move(targetTile);           
-
-            return true;
-        }
-
-        private bool CanMove(Tile targetTile)
+        public void Reset()
         {
-            return targetTile.Terrain.CanTraverse(this.Info.CanWalk, this.Info.CanFloat, this.Info.CanFly);            
+            this.hitPoints = DefaultHitPoints;
+            this.ModifiedStrength = this.Strength;
         }
 
-        private void Move(Tile targetTile)
+        public virtual int GetAttackModifier()
         {
-            this.Tile.Unit = null;
-            this.Tile = targetTile;
-            this.Tile.Unit = this;
+            ICombatModifier attackModifier = new AttackingForceCombatModifier();            
+            int attackerModifier = attackModifier.Calculate(this);
+
+            return attackerModifier;
         }
+
+        public virtual int GetDefenseModifier()
+        {
+            ICombatModifier defenseModifier = new DefendingForceCombatModifer();
+            int defenderModifier = defenseModifier.Calculate(this);
+
+            return defenderModifier;
+        }            
     }
 
     public class UnitConverter : JsonConverter<Unit>
@@ -122,14 +106,6 @@ namespace wism
         {
             serializer.Serialize(writer, value);
         }
-    }
-
-    public enum Direction
-    {
-        North,
-        South,
-        East,
-        West
     }
 }
 

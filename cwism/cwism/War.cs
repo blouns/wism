@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
-using wism;
+using BranallyGames.Wism;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Collections;
 
-namespace cwism
+namespace BranallyGames.cwism
 {
     class War
     {
@@ -28,7 +28,16 @@ namespace cwism
 
         private static void DoActions(ConsoleKeyInfo key)
         {
-            Unit hero = FindHero();
+            Army hero = FindHero();
+            if (hero == null)
+            {
+                // You have lost!
+                Console.WriteLine("Your hero has died and you have lost!");
+                Console.WriteLine("Press any key to quit...");
+                Console.ReadKey();
+                return;
+            }
+
             bool success = false;
 
             switch (key.Key)
@@ -78,8 +87,8 @@ namespace cwism
                     Tile tile = World.Current.Map[x, y];
                     char terrain = tile.Terrain.Symbol;
                     char unit = ' ';
-                    if (tile.Unit != null)
-                        unit = tile.Unit.Symbol;
+                    if (tile.Army != null)
+                        unit = tile.Army.Symbol;
 
                     Console.Write("{0}:[{1},{2}]\t", tile.Coordinate.ToString(), terrain, unit);
                 }
@@ -87,29 +96,22 @@ namespace cwism
             }
         }
 
-        private static Unit FindHero()
+        private static Army FindHero()
         {
-            Tile[,] map = World.Current.Map;
-            Unit hero = null;
-
-            for (int y = 0; y < map.GetLength(0); y++)
+            Player player1 = World.Current.Players[0];
+            IList<Army> armies = player1.GetArmies();
+            foreach(Army army in armies)
             {
-                for (int x = 0; x < map.GetLength(1); x++)
+                foreach (Unit unit in army.Units)
                 {
-                    Unit unit = map[x, y].Unit;
-                    if (unit != null &&
-                        unit.Symbol == 'H')
+                    if (unit.Symbol == 'H')
                     {
-                        hero = unit;
-                        break;
+                        return army;
                     }
                 }
             }
 
-            if (hero == null)
-                throw new InvalidOperationException("Cannot find the hero in the world.");
-
-            return hero;
+            return null;
         }
     }
 }

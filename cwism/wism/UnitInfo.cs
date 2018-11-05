@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     [DataContract]
     public class UnitInfo : ICustomizable
-    {
+    {        
+        public const char HeroSymbol = 'H';
+
         public string FileName { get => "Unit_Template.json"; }
 
         public static readonly string FilePattern = "Unit_*.json";
@@ -23,8 +25,10 @@ namespace wism
         [DataMember]
         public char Symbol { get; set; } = 'x';
 
+        private bool isSpecial = false;
+
         [DataMember]
-        private string ImageFileName = "image.jpg";
+        public bool IsSpecial { get; internal set; }
 
         [DataMember]
         internal bool CanWalk;
@@ -35,5 +39,18 @@ namespace wism
         [DataMember]
         internal bool CanFly;
 
+        public static UnitInfo GetHeroInfo()
+        {
+            return GetUnitInfo(HeroSymbol);
+        }
+
+        public static UnitInfo GetUnitInfo(char symbol)
+        {
+            UnitInfo info = ModFactory.FindUnitInfo(symbol);
+            if (info == null)
+                throw new InvalidOperationException("No such type found.");
+
+            return info;
+        }
     }
 }

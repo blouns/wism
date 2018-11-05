@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     public static class Log
     {

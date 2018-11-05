@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     public static class MapBuilder
     {
@@ -50,7 +50,30 @@ namespace wism
         public static Tile[,] LoadMap(string path)
         {
             string mapJson = File.ReadAllText(path);
-            Tile[,] map = JsonConvert.DeserializeObject<Tile[,]>(mapJson);
+            //Tile[,] map = JsonConvert.DeserializeObject<Tile[,]>(mapJson);
+            Tile[,] map = new Tile[6, 6];
+            for (int y = 0; y < map.GetLength(0); y++)
+            {
+                for (int x = 0; x < map.GetLength(1); x++)
+                {
+                    Tile tile = new Tile();
+                    tile.Terrain = MapBuilder.TerrainKinds['m'];
+
+                    if (x == 1 && y == 1)
+                    {
+                        tile.AddArmy(Army.Create(UnitKinds['i']));
+                    }
+
+                    if ((x == 0) || (y == 0))
+                        tile.Terrain = MapBuilder.TerrainKinds['M'];
+
+                    if ((x == 5) || (y == 5))
+                        tile.Terrain = MapBuilder.TerrainKinds['M'];
+
+                    map[x, y] = tile;
+                }
+            }
+
             AffixMapObjects(map);
 
             return map;
@@ -70,8 +93,8 @@ namespace wism
                     // Affix map objects and coordinates with tile
                     Tile tile = map[x, y];
                     tile.Coordinate = new Coordinate(x, y);
-                    if (tile.Unit != null)
-                        tile.Unit.Tile = tile;
+                    if (tile.Army != null)
+                        tile.Army.Tile = tile;
                     if (tile.Terrain != null)
                         tile.Terrain.Tile = tile;
                 }

@@ -7,7 +7,7 @@
     <ProjectGuid>{6150D953-BF84-439D-8AFA-C885613A6BB9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>wism</RootNamespace>
+    <RootNamespace>BranallyGames.Wism</RootNamespace>
     <AssemblyName>wism</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -46,13 +46,20 @@
   <ItemGroup>
     <Compile Include="AffiliationInfo.cs" />
     <Compile Include="Affiliation.cs" />
+    <Compile Include="AttackingForceCombatModifier.cs" />
+    <Compile Include="Army.cs" />
+    <Compile Include="WarStrategy.cs" />
+    <Compile Include="DefendingForceCombatModifer.cs" />
+    <Compile Include="Hero.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="ICustomizable.cs" />
     <Compile Include="ModFactory.cs" />
     <Compile Include="MapBuilder.cs" />
     <Compile Include="MapObject.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="Terrain.cs" />
     <Compile Include="TerrainInfo.cs" />
+    <Compile Include="TerrainModifierInfo.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="UnitInfo.cs" />
@@ -60,6 +67,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="mod\Affiliation_Neutral.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="mod\Affiliation_Elvallie.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -88,9 +98,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="World.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Content Include="World.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

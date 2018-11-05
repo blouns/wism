@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     [DataContract]
     public class AffiliationInfo : ICustomizable
@@ -19,12 +19,6 @@ namespace wism
 
         [DataMember]
         public string DisplayName { get; set; } = "Affiliation Name";
-
-        [DataMember]
-        private char Symbol { get; set; } = 'x';
-
-        [DataMember]
-        private string imageFileName = "affiliation_image.jpg";
 
         [DataMember]
         public string Color = "(255, 0, 0)";

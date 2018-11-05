@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     public class Terrain : MapObject
     {
@@ -41,11 +41,11 @@ namespace wism
         {
         }
 
-        internal bool CanTraverse(bool canWalk, bool canFloat, bool canFly)
+        public bool CanTraverse(bool canWalk, bool canFloat, bool canFly)
         {
             return ((canWalk && Info.AllowWalk) ||
                     (canFloat && Info.AllowFloat) ||
-                    (canFloat && Info.AllowFlight));
+                    (canFly && Info.AllowFlight));
         }
     }
 }

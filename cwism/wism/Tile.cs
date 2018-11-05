@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     public class Tile
     {
@@ -14,25 +14,59 @@ namespace wism
 
         public Terrain Terrain { get => terrain; set => terrain = value; }
 
-        private Unit unit;
+        /// <summary>
+        /// Expands units from composite tile (if present)
+        /// </summary>
+        /// <returns></returns>
+        internal Army MusterArmy()
+        {
+            // TODO: If castle, muster the troops
+            return this.army;
+        }
 
-        public Unit Unit { get => unit; set => unit = value; }
-
+        private Army army;
+ 
         private Coordinate coordinate;
 
         public Coordinate Coordinate { get => coordinate; set => coordinate = value; }
 
-        internal static Tile Create(string str, int x, int y)
-        {
-            Tile tile = new Tile();
-            tile.Coordinate = new Coordinate(x, y);
-            tile.Terrain = MapBuilder.TerrainKinds[str[0]];
-            if (str.Length > 1)
-            {
-                tile.Unit = MapBuilder.UnitKinds[str[1]];
-            }
+        public Army Army { get => army; set => army = value; }
 
-            return tile;
+        public bool HasArmy()
+        {
+            return this.army != null;
+        }
+
+        public void AddArmy(Army newArmy)
+        {
+            if (!HasArmy())
+            {
+                this.Army = newArmy;
+                this.Army.Tile = this;
+            }
+            else
+            {
+                this.Army.Concat(newArmy);
+            }            
+        }
+
+        public bool CanTraverseHere(Army army)
+        {
+            return this.Terrain.CanTraverse(army.CanWalk(), army.CanFloat(), army.CanFly());
+        }
+
+        public void MoveArmy(Army army, Tile toTile)
+        {
+            Tile fromTile = this;
+
+            fromTile.Army = null;   // Remove army from originating tile            
+            toTile.Army = army;     // Move army to destination tile
+            army.Tile = toTile;     // Set army parent tile to destination tile
+        }
+
+        internal bool HasRoom(Army army)
+        {
+            return ((this.army == null) || (this.army.Count + army.Count <= Army.MaxUnits)) ;
         }
     }
 
@@ -47,8 +81,8 @@ namespace wism
 
         public Coordinate(int x, int y)
         {
-            this.X = x;
-            this.Y = y;
+            this.x = x;
+            this.y = y;
         }
 
         public override string ToString()

@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using wism;
+﻿using NUnit.Framework;
+using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +8,22 @@ using System.Threading.Tasks;
 
 namespace wism.Tests
 {
-    [TestClass()]
+    [TestFixture]
     public class AffiliationTests
     {
-        [TestMethod()]
-        public void CreateTest()
+        [OneTimeSetUp]
+        public void OneTimeSetup()
         {
-            Affiliation affiliation = Affiliation.Create(new AffiliationInfo());            
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
         }
 
-        [TestMethod()]
+        [Test]
+        public void CreateTest()
+        {
+            Affiliation affiliation = Affiliation.Create(new AffiliationInfo());
+        }
+
+        [Test]
         public void ToStringTest()
         {
             Affiliation affiliation = Affiliation.Create(new AffiliationInfo());

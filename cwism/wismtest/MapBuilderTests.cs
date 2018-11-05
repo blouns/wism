@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using wism;
+﻿using NUnit.Framework;
+using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +8,20 @@ using System.Threading.Tasks;
 
 namespace wism.Tests
 {
-    [TestClass()]
+    [TestFixture]
     public class MapBuilderTests
     {
-        [TestMethod()]
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+        }
+
+        [Test]
         public void LoadMapTest()
         {
-            const int defaultMapHeight = 5;
-            const int defaultMapWidth = 5;
+            const int defaultMapHeight = 6;
+            const int defaultMapWidth = 6;
 
             Tile[,] map = MapBuilder.LoadMap(MapBuilder.DefaultMapPath);
 
@@ -28,10 +34,10 @@ namespace wism.Tests
             Assert.IsNotNull(tile, "MapBuilder added a null tile.");
             Assert.IsNotNull(tile.Coordinate);
             Assert.IsNotNull(tile.Terrain);
-            Assert.IsNull(tile.Unit);
+            Assert.IsNull(tile.Army);
         }
 
-        [TestMethod]
+        [Test]
         public void LoadUnitKindsTest()
         {
             Dictionary<char, Unit> unitKinds = MapBuilder.UnitKinds;
@@ -40,7 +46,7 @@ namespace wism.Tests
             Assert.IsNotNull(hero, "Unit 'hero' was not found.");
         }
 
-        [TestMethod]
+        [Test]
         public void LoadTerrainKindsTest()
         {
             Dictionary<char, Terrain> terrainKinds = MapBuilder.TerrainKinds;

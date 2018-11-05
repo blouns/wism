@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using wism;
+﻿using NUnit.Framework;
+using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +8,16 @@ using System.Threading.Tasks;
 
 namespace wism.Tests
 {
-    [TestClass()]
+    [TestFixture]
     public class TerrainTests
     {
-        [TestMethod()]
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+        }
+
+        [Test]
         public void CreateTest()
         {
             Terrain terrain = Terrain.Create(new TerrainInfo());

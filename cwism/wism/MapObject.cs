@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     public abstract class MapObject
     {
@@ -12,14 +12,13 @@ namespace wism
 
         public abstract char Symbol { get; set; }
 
-        public override string ToString()
-        {
-            return this.DisplayName;
-        }
+        private Affiliation affiliation;
 
+        public Affiliation Affiliation { get => affiliation; set => affiliation = value; }
+        
         private Tile tile;
 
-        public Tile Tile { get => tile; set => tile = value; }
+        public Tile Tile { get => tile; set => tile = value; }        
 
         public Coordinate GetCoordinates()
         {
@@ -27,6 +26,10 @@ namespace wism
                 throw new InvalidOperationException("Tile is null; cannot get coordinates.");
 
             return tile.Coordinate;
+        }
+        public override string ToString()
+        {
+            return this.DisplayName;
         }
     }
 }

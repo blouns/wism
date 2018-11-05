@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Json;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
-using wism;
+using BranallyGames.Wism;
+using NUnit.Framework;
 
 namespace wism.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class ModFactoryTest
     {
         #region Test constants
@@ -22,7 +21,13 @@ namespace wism.Tests
 
         #endregion
 
-        [TestMethod]
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+        }
+
+        [Test]
         public void WriteTemplatesTest()
         {
             CleanupTestFiles();
@@ -43,14 +48,14 @@ namespace wism.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void LoadAffiliationsTest()
         {
             bool foundOrcs = false;
             IList<Affiliation> affiliations = ModFactory.LoadAffiliations(TestModPath);
             foreach (Affiliation affiliation in affiliations)
             {
-                Logger.LogMessage("Affiliation: {0}", affiliation);
+                TestContext.WriteLine("Affiliation: {0}", affiliation);
                 if (affiliation.DisplayName == "Orcs of Kor")
                     foundOrcs = true;
             }
@@ -58,29 +63,30 @@ namespace wism.Tests
             Assert.IsTrue(foundOrcs);
         }
 
-        [TestMethod]
+        [Test]
         public void LoadUnitsTest()
         {
             bool foundHero = false;
-            IList<Unit> units = ModFactory.LoadUnits(TestModPath);
+            IList<Unit> units = ModFactory.LoadUnits(TestModPath);            
+
             foreach (Unit unit in units)
             {
-                Logger.LogMessage("Unit: {0}", unit);
-                if (unit.DisplayName == "Hero")
+                TestContext.WriteLine("Unit: {0}", unit);
+                if (unit.Symbol== 'H')
                     foundHero = true;
             }
 
             Assert.IsTrue(foundHero);
         }
 
-        [TestMethod]
+        [Test]
         public void LoadTerrainTest()
         {
             bool foundMeadow = false;
             IList<Terrain> terrains = ModFactory.LoadTerrains(TestModPath);
             foreach (Terrain terrain in terrains)
             {
-                Logger.LogMessage("Terrain: {0}", terrain);
+                TestContext.WriteLine("Terrain: {0}", terrain);
                 if (terrain.DisplayName == "Meadow")
                     foundMeadow = true;
             }
@@ -88,7 +94,7 @@ namespace wism.Tests
             Assert.IsTrue(foundMeadow);
         }
 
-        [TestCleanup]
+        [OneTimeTearDown]
         public void Cleanup()
         {
             CleanupTestFiles();        
@@ -112,7 +118,7 @@ namespace wism.Tests
             serializer.WriteObject(stream, obj);
 
             string fileName = String.Format("{0}\\{1}", path, obj.FileName);
-            Logger.LogMessage("Writing: {0}", fileName);
+            TestContext.WriteLine("Writing: {0}", fileName);
 
             stream.Position = 0;
             StreamReader sr = new StreamReader(stream);

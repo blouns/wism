@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
-namespace wism
+namespace BranallyGames.Wism
 {
     [DataContract]
     public class TerrainInfo : ICustomizable
@@ -18,10 +18,7 @@ namespace wism
         public string Type = "Terrain";
 
         [DataMember]
-        public string DisplayName { get; set; } = "Display Name";
-
-        [DataMember]
-        private string imageFileName = "image.jpg";
+        public string DisplayName { get; set; } = "Display Name";        
 
         [DataMember]
         public char Symbol { get; set; } = 'x';

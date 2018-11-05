@@ -1,9 +1,9 @@
 {
-    "DisplayName": "Hero",
-    "ImageFileName": "image.jpg",
+    "DisplayName": "Branally",
     "Type": "Unit",
     "Symbol": "H",
+    "Strength": 5,
     "CanWalk": true,
     "CanFloat": false,
-    "CanFly":  false
+    "CanFly": false
 }

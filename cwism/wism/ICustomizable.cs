@@ -1,4 +1,4 @@
-﻿namespace wism
+﻿namespace BranallyGames.Wism
 {
     public interface ICustomizable
     {
