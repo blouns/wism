@@ -15,6 +15,9 @@ namespace BranallyGames.Wism
         public string FileName { get => "Affiliation_Template.json"; }
 
         [DataMember]
+        public string ID = "xx";
+
+        [DataMember]
         public string Type = "Affiliation";
 
         [DataMember]
@@ -22,5 +25,14 @@ namespace BranallyGames.Wism
 
         [DataMember]
         public string Color = "(255, 0, 0)";
+
+        public static AffiliationInfo GetAffiliationInfo(string id)
+        {
+            AffiliationInfo info = ModFactory.FindAffiliation(id);
+            if (info == null)
+                throw new InvalidOperationException("No such type found.");
+
+            return info;
+        }
     }
 }

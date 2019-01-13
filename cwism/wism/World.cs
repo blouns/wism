@@ -51,23 +51,28 @@ namespace BranallyGames.Wism
         {
             List<Player> players = new List<Player>();
 
-            // TODO: For now just one player
-            AffiliationInfo affiliationInfo = GetFirstAffiliationInfo();
+            // Default two players for now
+            AffiliationInfo affiliationInfo = AffiliationInfo.GetAffiliationInfo("Or"); // Orcs of Kor
             Affiliation affiliation = Affiliation.Create(affiliationInfo);
             Player player1 = Player.Create(affiliation);
             players.Add(player1);
 
+            affiliationInfo = AffiliationInfo.GetAffiliationInfo("El"); // Elvallie
+            affiliation = Affiliation.Create(AffiliationInfo.GetAffiliationInfo("El"));
+            Player player2 = Player.Create(affiliation);
+            players.Add(player2);
+
             return players;
         }
 
-        private static AffiliationInfo GetFirstAffiliationInfo()
+        private static AffiliationInfo GetAffiliationInfo(int index)
         {
             IList<AffiliationInfo> infos = ModFactory.GetAffiliationInfos();
 
-            if (infos.Count == 0)
-                throw new InvalidOperationException("Affiliation infos were empty.");
+            if (infos.Count < index)
+                throw new ArgumentOutOfRangeException("index", "Affiliation infos were empty.");
 
-            return infos[0];
+            return infos[index];
         }
 
         public void Serialize(string path)

@@ -43,6 +43,18 @@ namespace BranallyGames.Wism
             return objects;
         }
 
+        internal static AffiliationInfo FindAffiliation(string id)
+        {
+            IList<AffiliationInfo> infos = GetAffiliationInfos();
+            foreach (AffiliationInfo info in infos)
+            {
+                if (info.ID == id)
+                    return info;
+            }
+
+            return null; // ID not found
+        }
+
         public static IList<Affiliation> LoadAffiliations(string path)
         {
             affiliationInfos = LoadModFiles<AffiliationInfo>(path, AffiliationInfo.FilePattern);

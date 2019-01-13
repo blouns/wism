@@ -27,9 +27,15 @@ namespace BranallyGames.Wism
 
             Player player = new Player();
             player.Affiliation = affiliation;
+            //player.FoundCapitol();
             player.HireHero();
 
             return player;
+        }
+
+        private void FoundCapitol()
+        {
+            throw new NotImplementedException();
         }
 
         private Tile FindTileForNewHero()
