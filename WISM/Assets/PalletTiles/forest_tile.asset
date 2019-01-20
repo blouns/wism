@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac1f3f68dfa59f34495a47cd8be10c6f, type: 3}
+  m_Name: forest_tile
+  m_EditorClassIdentifier: 
+  m_Sprite: {fileID: 21300000, guid: 24f0b800f9ca3c447b5c5f851f8c01af, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Transform:
+    e00: 1
+    e01: 0
+    e02: 0
+    e03: 0
+    e10: 0
+    e11: 1
+    e12: 0
+    e13: 0
+    e20: 0
+    e21: 0
+    e22: 1
+    e23: 0
+    e30: 0
+    e31: 0
+    e32: 0
+    e33: 1
+  m_InstancedGameObject: {fileID: 0}
+  m_Flags: 1
+  m_ColliderType: 1
+  forestSprites:
+  - {fileID: 21300000, guid: c45929fd6cedf4849ac7251f1024c87a, type: 3}
+  - {fileID: 21300000, guid: a111ca8d3e770ac4382f622ec594d574, type: 3}
+  - {fileID: 21300000, guid: e3c2ca5e4f58f604c8b1db3a5e3ae111, type: 3}
+  - {fileID: 21300000, guid: 3cafda8a85f0d8d4bb47ce9aa4961d65, type: 3}
+  - {fileID: 21300000, guid: a7425c22f2bd53b4fbac53738a056005, type: 3}
+  - {fileID: 21300000, guid: 4ca15cfe5934a9941a342f06c3c219e3, type: 3}
+  - {fileID: 21300000, guid: 19499d481b6985b40af0cf51b22513e3, type: 3}
+  - {fileID: 21300000, guid: a5da8d604a9ff5c4b8e543612be3c4db, type: 3}
+  - {fileID: 21300000, guid: 33bef0279d6acbc4e90295ae52a3a5c9, type: 3}
+  - {fileID: 21300000, guid: 845a9b0c9e5233c40928eb13eba2ed55, type: 3}
+  - {fileID: 21300000, guid: 4f05bd681246f5845b9bfeede17b5fef, type: 3}
+  - {fileID: 21300000, guid: db9a63969b073a1428c5a62c5e4d158f, type: 3}
+  - {fileID: 21300000, guid: 306f283ecdb48784d8374a4790895ad2, type: 3}
+  - {fileID: 21300000, guid: 24f0b800f9ca3c447b5c5f851f8c01af, type: 3}
+  preview: {fileID: 21300000, guid: 24f0b800f9ca3c447b5c5f851f8c01af, type: 3}

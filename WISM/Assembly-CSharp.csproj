@@ -60,9 +60,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\BridgeTile.cs" />
-    <Compile Include="Assets\Scripts\RoadTile.cs" />
-    <Compile Include="Assets\Scripts\WaterTile.cs" />
+    <Compile Include="Assets\Scripts\Tiles\BridgeTile.cs" />
+    <Compile Include="Assets\Scripts\Tiles\ForestTile.cs" />
+    <Compile Include="Assets\Scripts\Tiles\HillTile.cs" />
+    <Compile Include="Assets\Scripts\Tiles\MountainTile.cs" />
+    <Compile Include="Assets\Scripts\Tiles\RoadTile.cs" />
+    <Compile Include="Assets\Scripts\Tiles\TileUtility.cs" />
+    <Compile Include="Assets\Scripts\Tiles\WaterTile.cs" />
+    <Compile Include="Assets\Scripts\Tools\AlphaFy.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/Blouns/GitHub/wism/WISM/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
