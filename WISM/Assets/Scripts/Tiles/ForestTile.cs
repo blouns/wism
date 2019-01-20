@@ -14,36 +14,23 @@ public class ForestTile : Tile
     [SerializeField]
     private Sprite preview;
 
-    private const int DefaultTileIndex = 13;
+    private const int DefaultTileIndex = 13;    
+    public HasTile hasTile = HasTile;
 
-    private static List<AdjacencyMap> kinds = null;
-
+    public static bool HasTile(ITilemap tilemap, Vector3Int position)
+    {
+        return tilemap.GetTile(position) is ForestTile;
+    }
     public override void RefreshTile(Vector3Int position, ITilemap tilemap)
     {
-        TileUtility.RefreshTile<ForestTile>(position, tilemap);
+        TileUtility.RefreshTile(position, tilemap, hasTile);
     }
 
     public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
     {
-        AdjacencyMap overlappingTiles = TileUtility.FindOverlappingTiles<ForestTile>(position, tilemap);
-        List<AdjacencyMap> kinds = GetOverlappingKinds();
-        int index = TileUtility.FindOverlappingTileIndex(kinds, overlappingTiles);
-        tileData.sprite = (index < 0) ? forestSprites[DefaultTileIndex] : forestSprites[index];
+        int index = TileUtility.FindOverlapping14SpriteIndex(position, tilemap, hasTile, DefaultTileIndex);
+        tileData.sprite = forestSprites[index];
     }
-   
-    private List<AdjacencyMap> GetOverlappingKinds()
-    {
-        // Singleton
-        if (kinds == null)
-        {
-            kinds = TileUtility.BuildOverlappingKinds();
-
-            // Special cases
-            kinds.Add(new AdjacencyMap(false, false, false, false));    // 13 Single tile        
-        }
-
-        return kinds;
-    }    
 
 #if UNITY_EDITOR
     // Add tile type into Unity Editor

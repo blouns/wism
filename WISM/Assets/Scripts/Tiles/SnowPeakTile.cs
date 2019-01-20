@@ -1,18 +1,30 @@
-﻿using System.Collections;
+﻿using Assets.Scripts;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
-public class SnowPeakTile : MonoBehaviour
+public class SnowPeakTile : Tile
 {
-    // Start is called before the first frame update
-    void Start()
+    public override void RefreshTile(Vector3Int position, ITilemap tilemap)
     {
-        
+        HasTile hasTile = MountainTile.HasTile;
+        TileUtility.RefreshTile(position, tilemap, hasTile);
+    }
+    
+#if UNITY_EDITOR
+    // Add tile type into Unity Editor
+
+    [MenuItem("Assets/Create/Tiles/SnowPeakTile")]
+    public static void CreateSnowPeakTile()
+    {
+        string path = EditorUtility.SaveFilePanelInProject("Save Snow Peak Tile", "New Snow Peak Tile", "asset", "Assets");
+        if (string.IsNullOrEmpty(path))
+            return;
+
+        AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<SnowPeakTile>(), path);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+#endif
 }

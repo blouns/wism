@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.Scripts;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -13,23 +14,11 @@ public class HillTile : Tile
     private Sprite preview;
 
     private const int HillTileDefault = 4;
+    private HasTile hasTile = HasHill;
 
     public override void RefreshTile(Vector3Int position, ITilemap tilemap)
     {
-        for (int x = -1; x <= 1; x++)
-        {
-            for (int y = -1; y <= 1; y++)
-            {
-                Vector3Int adjacentPosition = new Vector3Int(position.x + x, position.y + y, position.z);
-
-                if (HasHill(tilemap, adjacentPosition))
-                {
-                    tilemap.RefreshTile(adjacentPosition);
-                }
-            }
-        }
-
-        base.RefreshTile(position, tilemap);
+        TileUtility.RefreshTile(position, tilemap, hasTile);
     }
 
     public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
@@ -83,9 +72,10 @@ public class HillTile : Tile
         //Debug.Log("Composition: " + composition);
     }
 
-    private bool HasHill(ITilemap tilemap, Vector3Int position)
+    private static bool HasHill(ITilemap tilemap, Vector3Int position)
     {
-        return (tilemap.GetTile(position) == this);
+        return ((tilemap.GetTile(position) is HillTile) ||
+                (tilemap.GetTile(position) is MountainTile));
     }    
 
 #if UNITY_EDITOR

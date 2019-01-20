@@ -8,37 +8,29 @@ using Assets.Scripts;
 
 public class MountainTile : Tile
 {
-    [SerializeField]
-    private Sprite[] mountainSprites;
+    public Sprite[] mountainSprites;
 
-    [SerializeField]
-    private Sprite preview;
+    public Sprite preview;
 
     private const int DefaultTileIndex = 0;
+    public HasTile hasTile = HasTile;
 
-    private static List<AdjacencyMap> TileKinds = null;
+    public static bool HasTile(ITilemap tilemap, Vector3Int position)
+    {
+        return (
+            (tilemap.GetTile(position) is MountainTile) ||
+            (tilemap.GetTile(position) is SnowPeakTile) ||
+            (tilemap.GetTile(position) is VolcanoTile));
+    }
 
     public override void RefreshTile(Vector3Int position, ITilemap tilemap)
     {
-        TileUtility.RefreshTile<MountainTile>(position, tilemap);
+        TileUtility.RefreshTile(position, tilemap, hasTile);
     }
     public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
     {
-        AdjacencyMap overlappingTiles = TileUtility.FindOverlappingTiles<MountainTile>(position, tilemap);
-        List<AdjacencyMap> kinds = GetOverlappingKinds();
-        int index = TileUtility.FindOverlappingTileIndex(kinds, overlappingTiles);
-        tileData.sprite = (index < 0) ? mountainSprites[DefaultTileIndex] : mountainSprites[index];        
-    }
-
-    private List<AdjacencyMap> GetOverlappingKinds()
-    {
-        // Singleton
-        if (TileKinds == null)
-        {
-            TileKinds = TileUtility.BuildOverlappingKinds();
-        }
-
-        return TileKinds;
+        int index = TileUtility.FindOverlapping14SpriteIndex(position, tilemap, hasTile, DefaultTileIndex);
+        tileData.sprite = mountainSprites[index];
     }
 
 #if UNITY_EDITOR

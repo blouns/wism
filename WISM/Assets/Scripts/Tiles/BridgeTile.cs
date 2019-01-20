@@ -82,8 +82,6 @@ public class BridgeTile : Tile
         {
             tileData.sprite = bridgeSprites[3];
         }
-
-        //Debug.Log("Composition: " + composition);
     }
 
     private bool HasBridge(ITilemap tilemap, Vector3Int position)

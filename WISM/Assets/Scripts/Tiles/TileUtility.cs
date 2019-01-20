@@ -8,8 +8,62 @@ using UnityEngine.Tilemaps;
 
 namespace Assets.Scripts
 {
+    public delegate bool HasTile(ITilemap tilemap, Vector3Int position);
+
     public static class TileUtility
     {
+        private static List<AdjacencyMap> overlappingKinds = TileUtility.BuildOverlapping14Kinds();
+
+        public static void RefreshTile(Vector3Int position, ITilemap tilemap, HasTile hasTile)
+        {
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    Vector3Int adjacentPosition = new Vector3Int(position.x + x, position.y + y, position.z);
+
+                    if (hasTile(tilemap, adjacentPosition))
+                    {
+                        tilemap.RefreshTile(adjacentPosition);
+                    }
+                }
+            }
+
+            tilemap.RefreshTile(position);
+        }
+
+        /// <summary>
+        /// Finds the index of a tile matching the overlapping "14" adjacent tile pattern.
+        /// 
+        /// Note: Tile pattern must contain 14 adjacency overlapping sprites. Ad defined
+        /// by <c>BuildOverlapping14Kinds()</c>.
+        /// </summary>
+        /// <param name="position">Position for new tile</param>
+        /// <param name="tilemap">Tilemap collection</param>
+        /// <param name="hasTile">Delegate to check for adjacent tile matches</param>
+        /// <param name="defaultIndex">Optional index to use if no match is found</param>
+        /// <returns>Matching tile index or default if not found</returns>
+        public static int FindOverlapping14SpriteIndex(Vector3Int position, ITilemap tilemap, HasTile hasTile, int defaultIndex = 0)
+        {
+            int index = defaultIndex;
+
+            try
+            {
+                AdjacencyMap adjacencyMap = FindOverlapping14Tiles(position, tilemap, hasTile);
+                index = overlappingKinds.FindIndex(x => x.Equals(adjacencyMap));
+                if (index < 0)
+                {
+                    index = defaultIndex;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+
+            return index;
+        }
+
         /// <summary>
         /// Return neighbors grid in positions:
         /// [2,5,8]
@@ -18,7 +72,7 @@ namespace Assets.Scripts
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        public static Vector3Int[] GetNeighbors(Vector3Int position)
+        private static Vector3Int[] GetNeighbors(Vector3Int position)
         {
             Vector3Int[] grid = new Vector3Int[9];
             grid[0] = new Vector3Int(position.x - 1, position.y - 1, position.z);
@@ -33,48 +87,32 @@ namespace Assets.Scripts
             return grid;
         }
 
-        /// <summary>
-        /// Lookup the kind that matches the pattern of adjacent, overlapping tiles
-        /// </summary>
-        /// <param name="kinds">List of all overlapping adjacency map kinds</param>
-        /// <param name="overlappingTiles">Tile adjacency map to find</param>
-        /// <returns></returns>
-        public static int FindOverlappingTileIndex(List<AdjacencyMap> kinds, AdjacencyMap overlappingTiles)
-        {            
-            int index = kinds.FindIndex(x => x.Equals(overlappingTiles));
-
-            //Debug.Log(String.Format("Id: {0}, Overlap: ({1}, {2}, {3}, {4})",
-            //    index, overlappingBlendedTiles<T>.TopLeft, overlappingBlendeds.TopRight, overlappingBlendeds.BottomLeft, overlappingBlendeds.BottomRight));
-
-            return index;
-        }
-
-        public static AdjacencyMap FindOverlappingTiles<T>(Vector3Int position, ITilemap tilemap)
+        private static AdjacencyMap FindOverlapping14Tiles(Vector3Int position, ITilemap tilemap, HasTile hasTile)
         {
             Vector3Int[] grid = TileUtility.GetNeighbors(position);
 
-            AdjacencyMap adjacentBlendedTiles = new AdjacencyMap();
-            adjacentBlendedTiles.TopLeft =
-                HasTile<T>(tilemap, grid[1]) &&
-                HasTile<T>(tilemap, grid[2]) &&
-                HasTile<T>(tilemap, grid[5]);
+            AdjacencyMap adjacentTiles = new AdjacencyMap();
+            adjacentTiles.TopLeft =
+                hasTile(tilemap, grid[1]) &&
+                hasTile(tilemap, grid[2]) &&
+                hasTile(tilemap, grid[5]);
 
-            adjacentBlendedTiles.TopRight =
-                HasTile<T>(tilemap, grid[5]) &&
-                HasTile<T>(tilemap, grid[7]) &&
-                HasTile<T>(tilemap, grid[8]);
+            adjacentTiles.TopRight =
+                hasTile(tilemap, grid[5]) &&
+                hasTile(tilemap, grid[7]) &&
+                hasTile(tilemap, grid[8]);
 
-            adjacentBlendedTiles.BottomLeft =
-                HasTile<T>(tilemap, grid[0]) &&
-                HasTile<T>(tilemap, grid[1]) &&
-                HasTile<T>(tilemap, grid[3]);
+            adjacentTiles.BottomLeft =
+                hasTile(tilemap, grid[0]) &&
+                hasTile(tilemap, grid[1]) &&
+                hasTile(tilemap, grid[3]);
 
-            adjacentBlendedTiles.BottomRight =
-                HasTile<T>(tilemap, grid[3]) &&
-                HasTile<T>(tilemap, grid[6]) &&
-                HasTile<T>(tilemap, grid[7]);
+            adjacentTiles.BottomRight =
+                hasTile(tilemap, grid[3]) &&
+                hasTile(tilemap, grid[6]) &&
+                hasTile(tilemap, grid[7]);
 
-            return adjacentBlendedTiles;
+            return adjacentTiles;
         }
 
         /// <summary>
@@ -82,48 +120,33 @@ namespace Assets.Scripts
         /// to the sprite number.
         /// </summary>
         /// <returns></returns>
-        public static List<AdjacencyMap> BuildOverlappingKinds()
+        private static List<AdjacencyMap> BuildOverlapping14Kinds()
         {
-            List<AdjacencyMap> kinds = new List<AdjacencyMap>();
-            kinds.Add(new AdjacencyMap(false, true, false, false)); // 0 Bottom-left
-            kinds.Add(new AdjacencyMap(true, true, false, true));   // 1 Bottom-left inside corner
-            kinds.Add(new AdjacencyMap(true, true, false, false));  // 2 Bottom-middle
-            kinds.Add(new AdjacencyMap(true, false, false, false)); // 3 Bottom-right
-            kinds.Add(new AdjacencyMap(true, true, true, false));   // 4 Bottom-right inside corner
-            kinds.Add(new AdjacencyMap(true, true, true, true));    // 5 Middle-middle
-            kinds.Add(new AdjacencyMap(true, false, true, false));  // 6 Right-middle
-            kinds.Add(new AdjacencyMap(false, false, false, true)); // 7 Top-left
-            kinds.Add(new AdjacencyMap(false, true, true, true));   // 8 Top-left inside corner
-            kinds.Add(new AdjacencyMap(false, false, true, true));  // 9 Top-middle
-            kinds.Add(new AdjacencyMap(false, false, true, false)); // 10 Top-right
-            kinds.Add(new AdjacencyMap(true, false, true, true));   // 11 Top-right inside corner
-            kinds.Add(new AdjacencyMap(false, true, false, true));  // 12 Left-middle
-
-            return kinds;
-        }
-
-        public static bool HasTile<T>(ITilemap tilemap, Vector3Int position)
-        {
-            return (tilemap.GetTile(position) is T);
-        }
-
-        public static void RefreshTile<T>(Vector3Int position, ITilemap tilemap)
-        {
-            for (int x = -1; x <= 1; x++)
+            // Singleton
+            List<AdjacencyMap> kinds = overlappingKinds;
+            if (overlappingKinds == null)
             {
-                for (int y = -1; y <= 1; y++)
+                kinds = new List<AdjacencyMap>
                 {
-                    Vector3Int adjacentPosition = new Vector3Int(position.x + x, position.y + y, position.z);
-
-                    if (HasTile<T>(tilemap, adjacentPosition))
-                    {
-                        tilemap.RefreshTile(adjacentPosition);
-                    }
-                }
+                    new AdjacencyMap(false, true, false, false), // 0 Bottom-left
+                    new AdjacencyMap(true, true, false, true),   // 1 Bottom-left inside corner
+                    new AdjacencyMap(true, true, false, false),  // 2 Bottom-middle
+                    new AdjacencyMap(true, false, false, false), // 3 Bottom-right
+                    new AdjacencyMap(true, true, true, false),   // 4 Bottom-right inside corner
+                    new AdjacencyMap(true, true, true, true),    // 5 Middle-middle
+                    new AdjacencyMap(true, false, true, false),  // 6 Right-middle
+                    new AdjacencyMap(false, false, false, true), // 7 Top-left
+                    new AdjacencyMap(false, true, true, true),   // 8 Top-left inside corner
+                    new AdjacencyMap(false, false, true, true),  // 9 Top-middle
+                    new AdjacencyMap(false, false, true, false), // 10 Top-right
+                    new AdjacencyMap(true, false, true, true),   // 11 Top-right inside corner
+                    new AdjacencyMap(false, true, false, true),  // 12 Left-middle
+                    new AdjacencyMap(false, false, false, false) // 13 Single
+                };
             }
 
-            tilemap.RefreshTile(position);
-        }
+            return kinds;
+        }        
     }
 
     public class AdjacencyMap
