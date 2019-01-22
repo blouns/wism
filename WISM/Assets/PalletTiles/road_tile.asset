@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50061f0f8ae648345a96dc3ab48d672a, type: 3}
+  m_Name: road_tile
+  m_EditorClassIdentifier: 
+  m_Sprite: {fileID: 21300000, guid: 063c0ff8c4a6b7e4fa050235516f82fe, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Transform:
+    e00: 1
+    e01: 0
+    e02: 0
+    e03: 0
+    e10: 0
+    e11: 1
+    e12: 0
+    e13: 0
+    e20: 0
+    e21: 0
+    e22: 1
+    e23: 0
+    e30: 0
+    e31: 0
+    e32: 0
+    e33: 1
+  m_InstancedGameObject: {fileID: 0}
+  m_Flags: 1
+  m_ColliderType: 1
+  roadSprites:
+  - {fileID: 21300000, guid: f1d515ac4b03c674eb40a290efc9a501, type: 3}
+  - {fileID: 21300000, guid: 063c0ff8c4a6b7e4fa050235516f82fe, type: 3}
+  - {fileID: 21300000, guid: 1797207c9cfb44449b546919f5de46fc, type: 3}
+  - {fileID: 21300000, guid: ad8fb91789088fa4a942dcfeae67bc11, type: 3}
+  - {fileID: 21300000, guid: a6aeaab71331cbb4bb1696e2b126bc24, type: 3}
+  - {fileID: 21300000, guid: dd73a660dba11e448af3dc5bfe8e68e8, type: 3}
+  - {fileID: 21300000, guid: a75aa97644e4aae4593363b777766b15, type: 3}
+  - {fileID: 21300000, guid: d391e74a937b50249b89d52d266ca89e, type: 3}
+  - {fileID: 21300000, guid: cd55dcd1840b30648b1bef90c1baad77, type: 3}
+  - {fileID: 21300000, guid: 6dacfeec43cba564d89747adc0b973ce, type: 3}
+  - {fileID: 21300000, guid: ef318e1f1c327a141bf7b826acb115d7, type: 3}
+  - {fileID: 21300000, guid: 6f226887f9cddfe49b1fc3cccbb7c9af, type: 3}
+  - {fileID: 21300000, guid: d12a256b1fa27f44997784fa0236afc0, type: 3}
+  - {fileID: 21300000, guid: 7cd7a2326f37c7f4ab2714774a06fbbd, type: 3}
+  - {fileID: 21300000, guid: f7e1e9e212d101c43bc9e9a286d836ba, type: 3}
+  - {fileID: 21300000, guid: 8a20f829c6ad8a94f9bbf25de8fedc80, type: 3}
+  - {fileID: 21300000, guid: fe5eed7112df9234cb22f44045fce473, type: 3}
+  - {fileID: 21300000, guid: 78c610377a12f474f8353321a67500cd, type: 3}
+  - {fileID: 21300000, guid: 4231490505c2e724898d7901de1e1eba, type: 3}
+  preview: {fileID: 21300000, guid: 063c0ff8c4a6b7e4fa050235516f82fe, type: 3}

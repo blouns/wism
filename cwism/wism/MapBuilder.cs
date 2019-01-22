@@ -37,19 +37,19 @@ namespace BranallyGames.Wism
 
         internal static UnitInfo FindUnitInfo(char key)
         {
-            //TODO: Should not expose "info"; instead have Unit lookup the kind
             return MapBuilder.UnitKinds[key].Info;
         }
 
         internal static TerrainInfo FindTerrainInfo(char key)
         {
-            //TODO: Should not expose "info"; instead have Terrain lookup the kind
             return MapBuilder.TerrainKinds[key].Info;
         }
 
         public static Tile[,] LoadMap(string path)
         {
             string mapJson = File.ReadAllText(path);
+
+            // TODO: Fix serialization; until then create a simple map
             //Tile[,] map = JsonConvert.DeserializeObject<Tile[,]>(mapJson);
             Tile[,] map = new Tile[6, 6];
             for (int y = 0; y < map.GetLength(0); y++)
@@ -58,11 +58,6 @@ namespace BranallyGames.Wism
                 {
                     Tile tile = new Tile();
                     tile.Terrain = MapBuilder.TerrainKinds['m'];
-
-                    if (x == 1 && y == 1)
-                    {
-                        tile.AddArmy(Army.Create(UnitKinds['i']));
-                    }
 
                     if ((x == 0) || (y == 0))
                         tile.Terrain = MapBuilder.TerrainKinds['M'];
