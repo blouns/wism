@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\Tiles\MountainTile.cs" />
     <Compile Include="Assets\Scripts\Tiles\RoadTile.cs" />
     <Compile Include="Assets\Scripts\Tiles\SnowPeakTile.cs" />
+    <Compile Include="Assets\Scripts\Tiles\TilemapManager.cs" />
     <Compile Include="Assets\Scripts\Tiles\TileUtility.cs" />
     <Compile Include="Assets\Scripts\Tiles\VolcanoTile.cs" />
     <Compile Include="Assets\Scripts\Tiles\WaterTile.cs" />
