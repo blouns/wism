@@ -18,6 +18,12 @@ namespace wism.Tests
             Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            World.CreateDefaultWorld();
+        }
+
         [Test]
         public void CreateTest()
         {
@@ -200,7 +206,7 @@ namespace wism.Tests
         public static Army GetFirstHero()
         {
             Hero hero = null;
-
+            
             Player player1 = World.Current.Players[0];
             IList<Army> armies = player1.GetArmies();
 

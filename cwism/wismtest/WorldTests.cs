@@ -30,10 +30,17 @@ namespace wism.Tests
 
         [Test]
         public void SerializeTest()
-        {            
+        {
+            World.CreateDefaultWorld();
             World.Current.Serialize(TestMapPath);
             Assert.IsTrue(File.Exists(TestMapPath), "File did not serialize.");
          }
+
+        [Test]
+        public void CreateWorldTest()
+        {
+            World.CreateDefaultWorld();
+        }
 
     }
 }

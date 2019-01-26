@@ -22,7 +22,18 @@ namespace BranallyGames.Wism
 
         private static World current;
         
-        public static World Current { get => current; }
+        public static World Current
+        {
+            get
+            {
+                if (World.current == null)
+                {
+                    throw new InvalidOperationException("No current world exists.");
+                }
+
+                return World.current;
+            }
+        }
 
         private Tile[,] map;
 
@@ -33,21 +44,28 @@ namespace BranallyGames.Wism
         public IWarStrategy WarStrategy { get => warStrategy; set => warStrategy = value; }
         public Random Random { get => random; set => random = value; }
 
-        static World()
+        private World()
         {
-            current = new World();
-            CreateDefaultWorld(current);
+            // Create from Factory method
         }
 
-        private static void CreateDefaultWorld(World world)
-        {            
-            world.map = MapBuilder.LoadMap(DefaultMapPath);
-            world.players = ReadyPlayers();
-            world.warStrategy = new DefaultWarStrategy();
-            world.Random = new Random();
+        public static void CreateDefaultWorld()
+        {
+            World oldWorld = World.current;
+            try
+            {
+                World.current = new World();
+                World.current.Reset();
+            }
+            catch
+            {
+                Log.WriteLine(Log.TraceLevel.Critical, "Unable to create the default world.");
+                World.current = oldWorld;
+                throw;
+            }
         }
 
-        private static IList<Player> ReadyPlayers()
+        private IList<Player> ReadyPlayers()
         {
             List<Player> players = new List<Player>();
 
@@ -91,7 +109,10 @@ namespace BranallyGames.Wism
 
         public void Reset()
         {
-            CreateDefaultWorld(World.Current);
+            this.map = MapBuilder.LoadMap(DefaultMapPath);
+            this.players = this.ReadyPlayers();
+            this.warStrategy = new DefaultWarStrategy();
+            this.Random = new Random();
         }
     }   
 }

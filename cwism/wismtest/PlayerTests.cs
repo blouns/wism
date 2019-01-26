@@ -21,7 +21,7 @@ namespace wism.Tests
         [SetUp]
         public void Setup()
         {
-            World.Current.Reset();
+            World.CreateDefaultWorld();
         }
 
         [Test]
