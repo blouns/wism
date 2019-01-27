@@ -1,9 +1,0 @@
-{
-    "DisplayName": "Light Infantry",
-    "Type": "Unit",
-    "Symbol": "i",
-    "Strength": 9,
-    "CanWalk": true,
-    "CanFloat": false,
-    "CanFly": false
-}

@@ -40,18 +40,18 @@ namespace wism.Tests
         [Test]
         public void LoadUnitKindsTest()
         {
-            Dictionary<char, Unit> unitKinds = MapBuilder.UnitKinds;
+            Dictionary<string, Unit> unitKinds = MapBuilder.UnitKinds;
             Assert.IsTrue(unitKinds.Count > 0);
-            Unit hero = unitKinds['H'];
+            Unit hero = unitKinds["H"];
             Assert.IsNotNull(hero, "Unit 'hero' was not found.");
         }
 
         [Test]
         public void LoadTerrainKindsTest()
         {
-            Dictionary<char, Terrain> terrainKinds = MapBuilder.TerrainKinds;
+            Dictionary<string, Terrain> terrainKinds = MapBuilder.TerrainKinds;
             Assert.IsTrue(terrainKinds.Count > 0);
-            Terrain meadow = terrainKinds['m'];
+            Terrain meadow = terrainKinds["G"];
             Assert.IsNotNull(meadow, "Terrain 'meadow' was not found.");
         }
     }

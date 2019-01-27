@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,20 +8,20 @@ namespace BranallyGames.Wism
 {
     public class Terrain : MapObject
     {
-        private char symbol;
+        private string id;
 
         private TerrainInfo info;
 
         public override string DisplayName { get => Info.DisplayName; }
 
-        public override char Symbol { get => Info.Symbol; set => this.symbol = value; }
+        public override string ID { get => Info.ID; set => this.id = value; }
         
         internal TerrainInfo Info
         {
             get
             {
                 if (this.info == null)
-                    this.info = MapBuilder.FindTerrainInfo(symbol);
+                    this.info = MapBuilder.FindTerrainInfo(id);
                 return info;
             }
         }

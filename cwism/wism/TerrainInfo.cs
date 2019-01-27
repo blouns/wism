@@ -8,20 +8,15 @@ using System.Runtime.Serialization;
 namespace BranallyGames.Wism
 {
     [DataContract]
-    public class TerrainInfo : ICustomizable
+    public class TerrainInfo
     {
-        public string FileName { get => "Terrain_Template.json"; }
-
-        public static readonly string FilePattern = "Terrain_*.json";
+        public static readonly string FileName = "Terrain.json";
 
         [DataMember]
-        public string Type = "Terrain";
+        public string DisplayName { get; set; } = "Void";      
 
         [DataMember]
-        public string DisplayName { get; set; } = "Display Name";        
-
-        [DataMember]
-        public char Symbol { get; set; } = 'x';
+        public string ID { get; set; } = "V";
 
         [DataMember]
         public bool AllowFlight { get; set; } = false;

@@ -41,7 +41,7 @@ namespace wism.Tests
             for (int i = 0; i < unitKinds.Count; i++)
             {
                 UnitInfo info = unitKinds[i];
-                Tile tile = CreateTile('m', i, i + 1);
+                Tile tile = CreateTile("G", i, i + 1);
 
                 player.ConscriptUnit(info, tile);
             }
@@ -62,7 +62,7 @@ namespace wism.Tests
                 UnitInfo info = unitKinds[0];
 
                 // Add player to Void; should fail
-                Tile tile = CreateTile('V', 0, 0);
+                Tile tile = CreateTile("V", 0, 0);
                 player.ConscriptUnit(info, tile);
             }
 
@@ -83,26 +83,26 @@ namespace wism.Tests
 
         #region Helper utility methods
 
-        private Tile CreateTile(char symbol, int x, int y)
+        private Tile CreateTile(string id, int x, int y)
         {
             Tile tile = new Tile();
             tile.Coordinate = new Coordinate(x, y);
-            tile.Terrain = GetTerrain(symbol);
+            tile.Terrain = GetTerrain(id);
 
             return tile;
         }
 
-        private Terrain GetTerrain(char symbol)
+        private Terrain GetTerrain(string id)
         {
             IList<Terrain> terrains = ModFactory.LoadTerrains(ModFactory.DefaultPath);
             foreach (Terrain terrain in terrains)
             {
-                if (terrain.Symbol == symbol)
+                if (terrain.ID == id)
                     return terrain;
             }
 
             throw new InvalidOperationException(
-                String.Format("Could not find a '{0}' terrain.", symbol));
+                String.Format("Could not find a '{0}' terrain.", id));
         }
 
         private static Player CreateOrcsOfKorPlayer()
@@ -122,7 +122,8 @@ namespace wism.Tests
 
         private static IList<UnitInfo> GetUnitKinds()
         {
-            return ModFactory.LoadModFiles<UnitInfo>(ModFactory.DefaultPath, UnitInfo.FilePattern);
+            string filePath = String.Format(@"{0}\{1}", ModFactory.DefaultPath, UnitInfo.FileName);
+            return ModFactory.LoadModFiles<UnitInfo>(filePath);
         }
 
         #endregion

@@ -8,22 +8,17 @@ using System.Runtime.Serialization;
 namespace BranallyGames.Wism
 {
     [DataContract]
-    public class UnitInfo : ICustomizable
+    public class UnitInfo
     {        
-        public const char HeroSymbol = 'H';
+        public const string HeroId = "H";
 
-        public string FileName { get => "Unit_Template.json"; }
-
-        public static readonly string FilePattern = "Unit_*.json";
-
-        [DataMember]
-        public string Type = "Unit";
+        public static readonly string FileName = "Unit.json";
 
         [DataMember]
         public string DisplayName { get; set; } = "Unit Name";
 
         [DataMember]
-        public char Symbol { get; set; } = 'x';
+        public string ID { get; set; } = "x";
 
         private bool isSpecial = false;
 
@@ -41,12 +36,12 @@ namespace BranallyGames.Wism
 
         public static UnitInfo GetHeroInfo()
         {
-            return GetUnitInfo(HeroSymbol);
+            return GetUnitInfo(HeroId);
         }
 
-        public static UnitInfo GetUnitInfo(char symbol)
+        public static UnitInfo GetUnitInfo(string id)
         {
-            UnitInfo info = ModFactory.FindUnitInfo(symbol);
+            UnitInfo info = ModFactory.FindUnitInfo(id);
             if (info == null)
                 throw new InvalidOperationException("No such type found.");
 

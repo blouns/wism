@@ -42,11 +42,11 @@ namespace BranallyGames.Wism
         public override string DisplayName => "Army";
 
         // TODO: Show the first unit's info instead
-        public override char Symbol
+        public override string ID
         {
             get
             {
-                return Units[0].Symbol;
+                return Units[0].ID;
             }
             set
             {

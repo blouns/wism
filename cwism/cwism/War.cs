@@ -16,8 +16,11 @@ namespace BranallyGames.cwism
         static void Main(string[] args)
         {
             ConsoleKeyInfo key;
+
+            World.CreateDefaultWorld();
+
             do
-            {
+            {                
                 Draw();
 
                 key = GetInput();
@@ -85,10 +88,10 @@ namespace BranallyGames.cwism
                 for (int x = 0; x < World.Current.Map.GetLength(0); x++)
                 {
                     Tile tile = World.Current.Map[x, y];
-                    char terrain = tile.Terrain.Symbol;
-                    char unit = ' ';
+                    string terrain = tile.Terrain.ID;
+                    string unit = String.Empty;
                     if (tile.Army != null)
-                        unit = tile.Army.Symbol;
+                        unit = tile.Army.ID;
 
                     Console.Write("{0}:[{1},{2}]\t", tile.Coordinate.ToString(), terrain, unit);
                 }
@@ -104,7 +107,7 @@ namespace BranallyGames.cwism
             {
                 foreach (Unit unit in army.Units)
                 {
-                    if (unit.Symbol == 'H')
+                    if (unit.ID == "H")
                     {
                         return army;
                     }

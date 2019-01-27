@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace BranallyGames.Wism
 {    
@@ -54,7 +53,8 @@ namespace BranallyGames.Wism
             World oldWorld = World.current;
             try
             {
-                World.current = new World();
+                MapBuilder.Initialize();
+                World.current = new World();                
                 World.current.Reset();
             }
             catch
@@ -85,7 +85,7 @@ namespace BranallyGames.Wism
 
         private static AffiliationInfo GetAffiliationInfo(int index)
         {
-            IList<AffiliationInfo> infos = ModFactory.GetAffiliationInfos();
+            IList<AffiliationInfo> infos = ModFactory.GetAffiliationInfos(ModFactory.DefaultPath);
 
             if (infos.Count < index)
                 throw new ArgumentOutOfRangeException("index", "Affiliation infos were empty.");
@@ -93,22 +93,8 @@ namespace BranallyGames.Wism
             return infos[index];
         }
 
-        public void Serialize(string path)
-        {
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects;
-            settings.Formatting = Formatting.Indented;
-            string json = JsonConvert.SerializeObject(this, settings);
-            File.WriteAllText(path, json);
-        }
-
-        public void Serialize()
-        {
-            Serialize(World.DefaultMapPath);            
-        }
-
         public void Reset()
-        {
+        {            
             this.map = MapBuilder.LoadMap(DefaultMapPath);
             this.players = this.ReadyPlayers();
             this.warStrategy = new DefaultWarStrategy();

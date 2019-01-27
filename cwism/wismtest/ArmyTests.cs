@@ -53,7 +53,7 @@ namespace wism.Tests
             MoveUnitPass(hero, Direction.North);
             if (!hero.TryMove(Direction.North))
 
-                Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+                Assert.AreEqual(hero.Tile.Terrain.ID, "G");
         }
 
         [Test]
@@ -65,15 +65,15 @@ namespace wism.Tests
 
             // Walk into meadow
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             // Walk into meadow
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             // Try to walk onto an impassable mountain; should fail
             MoveUnitFail(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G"); // Still on meadow
         }
 
         [Test]
@@ -85,11 +85,11 @@ namespace wism.Tests
 
             // Move north to meadow
             MoveUnitPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             // Try to walk onto an impassable coast
             MoveUnitFail(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow            
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G"); // Still on meadow            
         }
 
         [Test]
@@ -102,10 +102,10 @@ namespace wism.Tests
             Tile originalTile = hero.Tile;
 
             MoveUnitPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             MoveUnitPass(hero, Direction.South);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
@@ -120,10 +120,10 @@ namespace wism.Tests
             Tile originalTile = hero.Tile;
 
             MoveUnitPass(hero, Direction.South);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             MoveUnitPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
@@ -138,10 +138,10 @@ namespace wism.Tests
             Tile originalTile = hero.Tile;
 
             MoveUnitPass(hero, Direction.West);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
@@ -155,10 +155,10 @@ namespace wism.Tests
             Tile originalTile = hero.Tile;
 
             MoveUnitPass(hero, Direction.West);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "G");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }

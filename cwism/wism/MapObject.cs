@@ -10,7 +10,7 @@ namespace BranallyGames.Wism
     {
         public abstract string DisplayName { get; }
 
-        public abstract char Symbol { get; set; }
+        public abstract string ID { get; set; }
 
         private Affiliation affiliation;
 

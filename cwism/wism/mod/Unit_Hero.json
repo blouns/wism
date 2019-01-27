@@ -1,9 +1,0 @@
-{
-    "DisplayName": "Branally",
-    "Type": "Unit",
-    "Symbol": "H",
-    "Strength": 5,
-    "CanWalk": true,
-    "CanFloat": false,
-    "CanFly": false
-}

@@ -8,13 +8,9 @@ using System.Runtime.Serialization;
 namespace BranallyGames.Wism
 {
     [DataContract]
-    public class TerrainModifierInfo : ICustomizable
+    public class TerrainModifierInfo
     {
-        private const string fileName = "TerrainModifierInfo_Template.json";
-
-        public string FileName { get => fileName; }
-
-        public static readonly string FilePattern = fileName;
+        public static readonly string FileName = "TerrainModifier.json";
 
         // TODO: Implement
     }

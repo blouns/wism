@@ -1,0 +1,17 @@
+[
+    {
+        "ID": "El",
+        "Color": "(0, 255, 0)",
+        "DisplayName": "Elvallie"
+    },
+    {
+        "ID": "Nu",
+        "Color": "(100, 100, 100)",
+        "DisplayName": "Neutral"
+    },
+    {
+        "ID": "Or",
+        "Color": "(255, 0, 0)",
+        "DisplayName": "Orcs of Kor"
+    }
+]

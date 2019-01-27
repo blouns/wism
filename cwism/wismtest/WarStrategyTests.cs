@@ -30,10 +30,10 @@ namespace wism.Tests
             World.Current.Players.Add(elves);
 
             orcs.HireHero(World.Current.Map[1, 1]);
-            orcs.ConscriptUnit(UnitInfo.GetUnitInfo('i'), World.Current.Map[1, 2]);
+            orcs.ConscriptUnit(UnitInfo.GetUnitInfo("i"), World.Current.Map[1, 2]);
 
             elves.HireHero(World.Current.Map[3, 1]);
-            elves.ConscriptUnit(UnitInfo.GetUnitInfo('i'), World.Current.Map[3, 2]);
+            elves.ConscriptUnit(UnitInfo.GetUnitInfo("i"), World.Current.Map[3, 2]);
         }
 
         [Test]
