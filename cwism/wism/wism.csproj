@@ -24,7 +24,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\WISM\Assets\Scripts\Core\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -78,4 +78,26 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo POSTBUILDSTEP for $(ProjectName)
+
+echo Copying files from "$(TargetDir)*" to "$(SolutionDir)..\WISM\Assets\Scripts\Core"
+
+if not exist "$(SolutionDir)..\WISM\Assets\Scripts\Core" mkdir "$(SolutionDir)..\WISM\Assets\Scripts\Core"
+ 
+xcopy "$(TargetDir)*" "$(SolutionDir)..\WISM\Assets\Scripts\Core" /i /d /y /s
+if errorlevel 1 goto BuildEventFailed
+
+if errorlevel 1 goto BuildEventFailed 
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+:BuildEventFailed
+echo POSTBUILDSTEP for $(ProjectName) FAILED
+exit 1
+:BuildEventOK
+echo POSTBUILDSTEP for $(ProjectName) COMPLETED OK</PostBuildEvent>
+  </PropertyGroup>
 </Project>

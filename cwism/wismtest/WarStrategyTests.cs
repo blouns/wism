@@ -59,7 +59,7 @@ namespace wism.Tests
         {
             Player player = new Player();
 
-            IList<Affiliation> affiliationKinds = ModFactory.LoadAffiliations(ModFactory.DefaultPath);
+            IList<Affiliation> affiliationKinds = ModFactory.LoadAffiliations(ModFactory.ModPath);
             foreach (Affiliation affiliation in affiliationKinds)
             {
                 if (affiliation.DisplayName == name)

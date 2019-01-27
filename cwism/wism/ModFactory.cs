@@ -11,7 +11,7 @@ namespace BranallyGames.Wism
 {
     public static class ModFactory
     {
-        public static readonly string DefaultPath = "mod";
+        public static string ModPath = "mod";
 
         private static IList<UnitInfo> unitInfos = null;
         private static IList<TerrainInfo> terrainInfos = null;
@@ -41,7 +41,7 @@ namespace BranallyGames.Wism
 
         internal static AffiliationInfo FindAffiliation(string id)
         {
-            IList<AffiliationInfo> infos = GetAffiliationInfos(DefaultPath);
+            IList<AffiliationInfo> infos = GetAffiliationInfos(ModPath);
             foreach (AffiliationInfo info in infos)
             {
                 if (info.ID == id)
@@ -67,7 +67,7 @@ namespace BranallyGames.Wism
 
         internal static UnitInfo FindUnitInfo(string id)
         {
-            IList<UnitInfo> infos = GetUnitInfos(DefaultPath);
+            IList<UnitInfo> infos = GetUnitInfos(ModPath);
             foreach (UnitInfo info in infos)
             {
                 if (info.ID == id)

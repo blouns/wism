@@ -16,11 +16,12 @@ namespace BranallyGames.Wism
 
         public static void Initialize()
         {
-            Initialize(DefaultMapPath);
+            Initialize(ModFactory.ModPath);
         }
 
         public static void Initialize(string modPath)
         {
+            ModFactory.ModPath = modPath;
             LoadTerrainKinds(modPath);
             LoadUnitKinds(modPath);
         }
@@ -86,6 +87,7 @@ namespace BranallyGames.Wism
         /// <param name="map"></param>
         public static void AffixMapObjects(Tile[,] map)
         {
+            // BUGBUG: bounds are transposed; need to flip
             for (int y = 0; y < map.GetLength(0); y++)
             {
                 for (int x = 0; x < map.GetLength(1); x++)

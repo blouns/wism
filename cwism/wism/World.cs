@@ -101,7 +101,7 @@ namespace BranallyGames.Wism
 
         private static AffiliationInfo GetAffiliationInfo(int index)
         {
-            IList<AffiliationInfo> infos = ModFactory.GetAffiliationInfos(ModFactory.DefaultPath);
+            IList<AffiliationInfo> infos = ModFactory.GetAffiliationInfos(ModFactory.ModPath);
 
             if (infos.Count < index)
                 throw new ArgumentOutOfRangeException("index", "Affiliation infos were empty.");

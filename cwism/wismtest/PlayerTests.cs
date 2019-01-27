@@ -94,7 +94,7 @@ namespace wism.Tests
 
         private Terrain GetTerrain(string id)
         {
-            IList<Terrain> terrains = ModFactory.LoadTerrains(ModFactory.DefaultPath);
+            IList<Terrain> terrains = ModFactory.LoadTerrains(ModFactory.ModPath);
             foreach (Terrain terrain in terrains)
             {
                 if (terrain.ID == id)
@@ -109,7 +109,7 @@ namespace wism.Tests
         {
             Player player = new Player();
 
-            IList<Affiliation> affiliationKinds = ModFactory.LoadAffiliations(ModFactory.DefaultPath);
+            IList<Affiliation> affiliationKinds = ModFactory.LoadAffiliations(ModFactory.ModPath);
             foreach (Affiliation affiliation in affiliationKinds)
             {
                 if (affiliation.DisplayName == "Orcs of Kor")
@@ -122,7 +122,7 @@ namespace wism.Tests
 
         private static IList<UnitInfo> GetUnitKinds()
         {
-            string filePath = String.Format(@"{0}\{1}", ModFactory.DefaultPath, UnitInfo.FileName);
+            string filePath = String.Format(@"{0}\{1}", ModFactory.ModPath, UnitInfo.FileName);
             return ModFactory.LoadModFiles<UnitInfo>(filePath);
         }
 

@@ -15,13 +15,15 @@ public class TerrainTilemap : MonoBehaviour
     }
 
     private void CreateWorld()
-    {        
+    {      
         int boundsX, boundsY;
         TileBase[] allTiles = GetTiles(out boundsX, out boundsY);
+
+        MapBuilder.Initialize(@"Assets\Scripts\Core\mod");
         BranallyGames.Wism.Tile[,] gameMap = new BranallyGames.Wism.Tile[boundsX, boundsY];
-        for (int x = 0; x < boundsX; x++)
+        for (int y = 0; y < boundsY; y++)
         {
-            for (int y = 0; y < boundsY; y++)
+            for (int x = 0; x < boundsX; x++)
             {
                 TileBase unityTile = allTiles[x + y * boundsX];
                 BranallyGames.Wism.Tile gameTile = new BranallyGames.Wism.Tile();
@@ -29,7 +31,6 @@ public class TerrainTilemap : MonoBehaviour
 
                 if (unityTile != null)
                 {
-                    Debug.Log("x:" + x + " y:" + y + " tile:" + unityTile.name);
                     // TODO: Refactor
                     if (unityTile.name.Contains("grass"))
                     {
@@ -66,23 +67,36 @@ public class TerrainTilemap : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("x:" + x + " y:" + y + " tile: (null)");
-
                     // Null or empty tiles are "Void"
                     gameTile.Terrain = MapBuilder.TerrainKinds["V"];
                 }
             }
         }
 
-        MapBuilder.AffixMapObjects(gameMap);
+        //MapBuilder.AffixMapObjects(gameMap);
+        for (int y = 0; y < gameMap.GetLength(1); y++)
+        {
+            for (int x = 0; x < gameMap.GetLength(0); x++)
+            {
+                // Affix gameMap objects and coordinates with tile
+                BranallyGames.Wism.Tile tile = gameMap[x, y];
+                tile.Coordinate = new Coordinate(x, y);
+                if (tile.Army != null)
+                    tile.Army.Tile = tile;
+                if (tile.Terrain != null)
+                    tile.Terrain.Tile = tile;
+            }
+        }
         World.CreateWorld(gameMap);
         this.world = World.Current;
+
+        // TODO: Draw the units on the map
     }
 
     private TileBase[] GetTiles(out int xSize, out int ySize)
     {
         // Constrain bounds
-        int maxSize = 10000;
+        int maxSize = 1000;
         Tilemap tilemap = GetComponent<Tilemap>();
 
         tilemap.CompressBounds();
