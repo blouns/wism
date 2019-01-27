@@ -16,8 +16,13 @@ namespace BranallyGames.Wism
 
         public static void Initialize()
         {
-            LoadTerrainKinds(ModFactory.DefaultPath);
-            LoadUnitKinds(ModFactory.DefaultPath);
+            Initialize(DefaultMapPath);
+        }
+
+        public static void Initialize(string modPath)
+        {
+            LoadTerrainKinds(modPath);
+            LoadUnitKinds(modPath);
         }
 
         private static void LoadUnitKinds(string path)
@@ -45,8 +50,8 @@ namespace BranallyGames.Wism
         {
             return MapBuilder.TerrainKinds[key].Info;
         }
-
-        public static Tile[,] LoadMap(string path)
+        
+        public static Tile[,] LoadMapFromFile(string path)
         {
             string mapJson = File.ReadAllText(path);
 
@@ -79,7 +84,7 @@ namespace BranallyGames.Wism
         /// Affix all map objects with there initial locations.
         /// </summary>
         /// <param name="map"></param>
-        private static void AffixMapObjects(Tile[,] map)
+        public static void AffixMapObjects(Tile[,] map)
         {
             for (int y = 0; y < map.GetLength(0); y++)
             {

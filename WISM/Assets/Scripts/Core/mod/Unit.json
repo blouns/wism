@@ -1,0 +1,19 @@
+[
+    
+    {
+        "DisplayName": "Branally",
+        "ID": "H",
+        "Strength": 5,
+        "CanWalk": true,
+        "CanFloat": false,
+        "CanFly": false
+    },
+    {
+        "DisplayName": "Light Infantry",
+        "ID": "i",
+        "Strength": 9,
+        "CanWalk": true,
+        "CanFloat": false,
+        "CanFly": false
+    }
+]

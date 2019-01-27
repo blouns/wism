@@ -23,7 +23,7 @@ namespace wism.Tests
             const int defaultMapHeight = 6;
             const int defaultMapWidth = 6;
 
-            Tile[,] map = MapBuilder.LoadMap(MapBuilder.DefaultMapPath);
+            Tile[,] map = MapBuilder.LoadMapFromFile(MapBuilder.DefaultMapPath);
 
             Assert.IsNotNull(map, "MapBuilder returned null map");
 

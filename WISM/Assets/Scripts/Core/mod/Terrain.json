@@ -1,0 +1,65 @@
+[
+    {
+        "ID": "F",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Forest"
+    },
+    {
+        "ID": "M",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": false,
+        "DisplayName": "Mountain"
+    },
+    {
+        "ID": "G",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Grass"
+    },
+    {
+        "ID": "W",
+        "AllowFlight": true,
+        "AllowFloat": true,
+        "AllowWalk": false,
+        "DisplayName": "Water"
+    },
+    {
+        "ID": "h",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Hill"
+    },
+    {
+        "ID": "m",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Marsh"
+    },
+    {
+        "ID": "R",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Road"
+    },
+    {
+        "ID": "B",
+        "AllowFlight": true,
+        "AllowFloat": true,
+        "AllowWalk": true,
+        "DisplayName": "Bridge"
+    },
+    {
+        "ID": "V",
+        "AllowFlight": false,
+        "AllowFloat": false,
+        "AllowWalk": false,
+        "DisplayName": "Void"
+    }
+]

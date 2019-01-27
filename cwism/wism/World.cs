@@ -54,8 +54,24 @@ namespace BranallyGames.Wism
             try
             {
                 MapBuilder.Initialize();
-                World.current = new World();                
+                World.current = new World();
                 World.current.Reset();
+            }
+            catch
+            {
+                Log.WriteLine(Log.TraceLevel.Critical, "Unable to create the default world.");
+                World.current = oldWorld;
+                throw;
+            }
+        }
+
+        public static void CreateWorld(Tile[,] map)
+        {
+            World oldWorld = World.current;
+            try
+            {                
+                World.current = new World();
+                World.current.Reset(map);
             }
             catch
             {
@@ -95,7 +111,14 @@ namespace BranallyGames.Wism
 
         public void Reset()
         {            
-            this.map = MapBuilder.LoadMap(DefaultMapPath);
+            Tile[,] map = MapBuilder.LoadMapFromFile(DefaultMapPath);
+            Reset(map);
+        }
+
+        public void Reset(Tile[,] map)
+        {
+            // TODO: Validate map since it can come from external assembly (Unity)
+            this.map = map;
             this.players = this.ReadyPlayers();
             this.warStrategy = new DefaultWarStrategy();
             this.Random = new Random();
