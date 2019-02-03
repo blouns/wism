@@ -117,44 +117,11 @@ namespace BranallyGames.Wism
 
         public void Reset(Tile[,] map)
         {
-            //if (!IsValid(map))
-            //    throw new ArgumentException("Map is null or contains invalid elements.");
-
+            // TODO: Validate map since it can come from external assembly (Unity)
             this.map = map;
             this.players = this.ReadyPlayers();
             this.warStrategy = new DefaultWarStrategy();
             this.Random = new Random();
-        }
-
-        private bool IsValid(Tile[,] map)
-        {
-            bool isValid = true;
-            for (int x = 0; x < map.GetLength(1); x++)
-            {
-                for (int y = 0; y < map.GetLength(0); y++)
-                {
-                    if (!(map[x, y] is Tile))
-                    {
-                        isValid = false;
-                    }
-
-                    // Valid terrain
-                    if ((map[x, y].Terrain == null) ||
-                        (!MapBuilder.TerrainKinds.ContainsKey(map[x, y].Terrain.ID)))
-                    {
-                        isValid = false;
-                    }
-
-                    // Valid units; units are optional
-                    if ((map[x, y].Army != null) &&
-                        (MapBuilder.UnitKinds.ContainsKey(map[x, y].Army.ID)))
-                    {
-                        isValid = false;
-                    }
-                }
-            }
-
-            return isValid;
         }
     }   
 }

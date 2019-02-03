@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e8452017e5950645842d07fcf16fac1, type: 3}
+  m_Script: {fileID: 11500000, guid: bf4bf1b8e587cb9489db7c3cbda0d32b, type: 3}
   m_Name: mountain_snow_tile
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: 9d7d2effdb3524f48b2a98478f00c233, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0ed4e68a3cb638b45a447a07a4b33639, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1

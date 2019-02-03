@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 492f86fd030081b4c87b1de4a926620b, type: 3}
+  m_Script: {fileID: 11500000, guid: 5b005c82e9fa04446927166480a9bc66, type: 3}
   m_Name: hill_tile
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: ef9023373dc821b43a1cb8a2c6a53ad2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 902c282de4833324385914218a2d8199, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -35,9 +35,9 @@ MonoBehaviour:
   m_Flags: 1
   m_ColliderType: 1
   hillSprites:
-  - {fileID: 21300000, guid: ef9023373dc821b43a1cb8a2c6a53ad2, type: 3}
-  - {fileID: 21300000, guid: 39f377ed4e158ba47b4483a534574665, type: 3}
-  - {fileID: 21300000, guid: 8c265248a33db374e9b3d55402320073, type: 3}
-  - {fileID: 21300000, guid: cf4b06a54d88a744185ec2133a381f83, type: 3}
-  - {fileID: 21300000, guid: 631ab34a1777e7847a65f44dc51d9020, type: 3}
-  preview: {fileID: 21300000, guid: ef9023373dc821b43a1cb8a2c6a53ad2, type: 3}
+  - {fileID: 21300000, guid: f5d32ae4355656341b840a65098274c3, type: 3}
+  - {fileID: 21300000, guid: c1a35febcc780c2459be1c9dc316375a, type: 3}
+  - {fileID: 21300000, guid: 87bfe870244b3cc45afb24b227ee85ee, type: 3}
+  - {fileID: 21300000, guid: 5dc54060ed9083e41ba571eb1af5e423, type: 3}
+  - {fileID: 21300000, guid: 902c282de4833324385914218a2d8199, type: 3}
+  preview: {fileID: 21300000, guid: 902c282de4833324385914218a2d8199, type: 3}

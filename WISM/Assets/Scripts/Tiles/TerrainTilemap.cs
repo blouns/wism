@@ -8,7 +8,6 @@ using System;
 public class TerrainTilemap : MonoBehaviour
 {
     public World world;
-    public GameObject hero;
 
     void Start()
     {
@@ -16,7 +15,7 @@ public class TerrainTilemap : MonoBehaviour
     }
 
     private void CreateWorld()
-    {
+    {      
         int boundsX, boundsY;
         TileBase[] allTiles = GetTiles(out boundsX, out boundsY);
 
@@ -92,32 +91,6 @@ public class TerrainTilemap : MonoBehaviour
         this.world = World.Current;
 
         // TODO: Draw the units on the map
-        DrawArmies();
-    }
-
-    private void DrawArmies()
-    {
-        Tilemap tilemap = GetComponent<Tilemap>();
-        int x = -15, y = -13, z = 1;
-        Vector3 worldVector = tilemap.CellToWorld(new Vector3Int(x, y, z));
-        Debug.Log(String.Format("Cell ({0}, {1}, {2}); World ({3}, {4}, {5})",
-            x, y, z, worldVector.x, worldVector.y, worldVector.z));
-
-        Instantiate(hero, worldVector, Quaternion.identity);
-
-        foreach (Player player in World.Current.Players)
-        {
-            Debug.Log("Player: " + player.Affiliation.DisplayName);
-            foreach (Army army in player.GetArmies())
-            {                
-                Coordinate coord = army.GetCoordinates();
-                worldVector = tilemap.CellToWorld(new Vector3Int(coord.X, coord.Y, 1));
-                Debug.Log("Army: " + army.DisplayName + ", @(" + coord.X + ", " + coord.Y + ")");
-                worldVector.x = worldVector.x + x;
-                worldVector.y = worldVector.y + y;
-                Instantiate(hero, worldVector, Quaternion.identity);
-            }
-        }
     }
 
     private TileBase[] GetTiles(out int xSize, out int ySize)
