@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 423a5d639f5fa2a4aab279c3b9b27097, type: 3}
+  m_Script: {fileID: 11500000, guid: 63d4c452babbb6345b3c95e3d940c346, type: 3}
   m_Name: mountain_volcano_tile
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: fa6f830ef03d813499ea3157f7ed63dc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 83541cc8f2c94d6469fe9535a913b5cf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1

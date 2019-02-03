@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: sirians_castle_top_left
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: 8cbd0d8840d99a94a8abdad6eef83351, type: 3}
+  m_Sprite: {fileID: 21300000, guid: cbb87205366f6f4419f3ad43f23d47c4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
