@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,10 +38,19 @@ namespace BranallyGames.Wism
         {
             return Units.Any<Unit>(v => v.IsSpecial());
         }
+        
+        public override string DisplayName
+        {
+            get
+            {
+                return Units[0].DisplayName;
+            }
+            set
+            {
+                // N/A
+            }
+        }
 
-        public override string DisplayName => "Army";
-
-        // TODO: Show the first unit's info instead
         public override string ID
         {
             get

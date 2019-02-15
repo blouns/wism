@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,10 +9,13 @@ namespace BranallyGames.Wism
 {
     public static class MapBuilder
     {
-        public const string DefaultMapPath = @"World.json";
-
         private static Dictionary<string, Terrain> terrainKinds = new Dictionary<string, Terrain>();
         private static Dictionary<string, Unit> unitKinds = new Dictionary<string, Unit>();
+        private static Dictionary<string, Affiliation> affiliationKinds = new Dictionary<string, Affiliation>();
+
+        public static Dictionary<string, Terrain> TerrainKinds { get => terrainKinds; }
+        public static Dictionary<string, Unit> UnitKinds { get => unitKinds; }
+        public static Dictionary<string, Affiliation> AffiliationKinds { get => affiliationKinds; }
 
         public static void Initialize()
         {
@@ -24,6 +27,7 @@ namespace BranallyGames.Wism
             ModFactory.ModPath = modPath;
             LoadTerrainKinds(modPath);
             LoadUnitKinds(modPath);
+            LoadAffiliationKinds(modPath);
         }
 
         private static void LoadUnitKinds(string path)
@@ -42,6 +46,14 @@ namespace BranallyGames.Wism
                 TerrainKinds.Add(t.ID, t);
         }
 
+        private static void LoadAffiliationKinds(string path)
+        {
+            AffiliationKinds.Clear();
+            IList<Affiliation> terrains = ModFactory.LoadAffiliations(path);
+            foreach (Affiliation t in terrains)
+                AffiliationKinds.Add(t.ID, t);
+        }
+
         internal static UnitInfo FindUnitInfo(string key)
         {
             return MapBuilder.UnitKinds[key].Info;
@@ -51,26 +63,27 @@ namespace BranallyGames.Wism
         {
             return MapBuilder.TerrainKinds[key].Info;
         }
-        
-        public static Tile[,] LoadMapFromFile(string path)
-        {
-            string mapJson = File.ReadAllText(path);
 
-            // TODO: Fix serialization; until then create a simple map
-            //Tile[,] map = JsonConvert.DeserializeObject<Tile[,]>(mapJson);
+        internal static AffiliationInfo FindAffiliationInfo(string key)
+        {
+            return MapBuilder.AffiliationKinds[key].Info;
+        }
+        
+        public static Tile[,] CreateDefaultMap()
+        {            
             Tile[,] map = new Tile[6, 6];
-            for (int y = 0; y < map.GetLength(0); y++)
+            for (int x = 0; x < map.GetLength(0); x++)
             {
-                for (int x = 0; x < map.GetLength(1); x++)
+                for (int y = 0; y < map.GetLength(1); y++)
                 {
                     Tile tile = new Tile();
-                    tile.Terrain = MapBuilder.TerrainKinds["G"];
+                    tile.Terrain = MapBuilder.TerrainKinds["Grass"];
 
                     if ((x == 0) || (y == 0))
-                        tile.Terrain = MapBuilder.TerrainKinds["M"];
+                        tile.Terrain = MapBuilder.TerrainKinds["Mountain"];
 
                     if ((x == 5) || (y == 5))
-                        tile.Terrain = MapBuilder.TerrainKinds["M"];
+                        tile.Terrain = MapBuilder.TerrainKinds["Mountain"];
 
                     map[x, y] = tile;
                 }
@@ -87,10 +100,9 @@ namespace BranallyGames.Wism
         /// <param name="map"></param>
         public static void AffixMapObjects(Tile[,] map)
         {
-            // BUGBUG: bounds are transposed; need to flip
-            for (int y = 0; y < map.GetLength(0); y++)
+            for (int x = 0; x < map.GetLength(0); x++)
             {
-                for (int x = 0; x < map.GetLength(1); x++)
+                for (int y = 0; y < map.GetLength(1); y++)
                 {
 
                     // Affix map objects and coordinates with tile
@@ -103,8 +115,5 @@ namespace BranallyGames.Wism
                 }
             }
         }
-
-        public static Dictionary<string, Terrain> TerrainKinds { get => terrainKinds;  }
-        public static Dictionary<string, Unit> UnitKinds { get => unitKinds; }
     }    
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,11 +12,11 @@ namespace BranallyGames.Wism
 
         private TerrainInfo info;
 
-        public override string DisplayName { get => Info.DisplayName; }
+        public override string DisplayName { get => Info.DisplayName; set => Info.DisplayName = value; }
 
         public override string ID { get => Info.ID; set => this.id = value; }
         
-        internal TerrainInfo Info
+        public TerrainInfo Info
         {
             get
             {

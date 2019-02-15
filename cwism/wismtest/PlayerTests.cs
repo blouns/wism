@@ -1,4 +1,4 @@
-﻿using BranallyGames.Wism;
+using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace wism.Tests
             for (int i = 0; i < unitKinds.Count; i++)
             {
                 UnitInfo info = unitKinds[i];
-                Tile tile = CreateTile("G", i, i + 1);
+                Tile tile = CreateTile("Grass", i, i + 1);
 
                 player.ConscriptUnit(info, tile);
             }
@@ -62,7 +62,7 @@ namespace wism.Tests
                 UnitInfo info = unitKinds[0];
 
                 // Add player to Void; should fail
-                Tile tile = CreateTile("V", 0, 0);
+                Tile tile = CreateTile("Void", 0, 0);
                 player.ConscriptUnit(info, tile);
             }
 
@@ -112,8 +112,11 @@ namespace wism.Tests
             IList<Affiliation> affiliationKinds = ModFactory.LoadAffiliations(ModFactory.ModPath);
             foreach (Affiliation affiliation in affiliationKinds)
             {
-                if (affiliation.DisplayName == "Orcs of Kor")
+                if (affiliation.ID == "OrcsOfKor")
+                {
                     player.Affiliation = affiliation;
+                    break;
+                }
             }
             Assert.AreEqual(player.Affiliation.DisplayName, "Orcs of Kor");
 

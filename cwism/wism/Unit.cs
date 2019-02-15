@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,6 @@ namespace BranallyGames.Wism
         internal UnitInfo info;
 
         private int moves = 1;
-        private string id;
         private int strength;
 
         // Ephemeral fields only used during battle
@@ -21,15 +20,16 @@ namespace BranallyGames.Wism
 
         public int Moves { get => moves; set => moves = value; }
 
-        public override string DisplayName { get => Info.DisplayName; }
+        public override string DisplayName { get => Info.DisplayName; set => Info.DisplayName = value;  }
 
-        public override string ID { get => Info.ID; set => id = value; }
-        internal UnitInfo Info
+        public override string ID { get => Info.ID; set => Info.ID = value; }
+
+        public UnitInfo Info
         {
             get
             {
                 if (this.info == null)
-                    this.info = MapBuilder.FindUnitInfo(this.id);
+                    this.info = MapBuilder.FindUnitInfo(this.ID);
                 return info;
             }
         }

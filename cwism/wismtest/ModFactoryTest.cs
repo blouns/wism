@@ -72,7 +72,7 @@ namespace wism.Tests
             foreach (Unit unit in units)
             {
                 TestContext.WriteLine("Unit: {0}", unit);
-                if (unit.ID == "H")
+                if (unit.ID == "Hero")
                     foundHero = true;
             }
 

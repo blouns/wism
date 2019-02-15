@@ -71,7 +71,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -88,7 +88,7 @@
                 "Moves": 12,
                 "Strength":  3,
                 "DisplayName": "Light Infantry",
-                "Symbol": "i"
+                "Symbol": "LightInfantry"
             },
             "Coordinate": {
                 "X": 1,
@@ -131,7 +131,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -144,7 +144,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -199,7 +199,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -212,7 +212,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -267,7 +267,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -280,7 +280,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -335,7 +335,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -348,7 +348,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -359,7 +359,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -370,7 +370,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -381,7 +381,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -392,7 +392,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {
@@ -403,7 +403,7 @@
         {
             "Terrain": {
                 "DisplayName": "Mountain",
-                "Symbol": "M"
+                "Symbol": "Mountain"
             },
             "Unit": null,
             "Coordinate": {

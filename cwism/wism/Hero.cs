@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +20,7 @@ namespace BranallyGames.Wism
             this.info = info;
 
             // TODO: This should come from the mod
-            this.ID = "H";
+            this.ID = "Hero";
             this.Strength = 5;
             this.Moves = 14;    // TODO: random
         }

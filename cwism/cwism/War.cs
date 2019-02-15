@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,25 +13,55 @@ namespace BranallyGames.cwism
 {
     class War
     {
+        IDictionary<string, char> unitMap = new Dictionary<string, char>
+        {
+            { "Hero", 'H' },
+            { "LightInfantry", 'i' },
+            { "HeavyInfantry", 'I' },
+            { "Cavalry", 'c' },
+            { "Pegasus", 'P' }
+        };
+
+        IDictionary<string, char> terrainMap = new Dictionary<string, char>
+        {
+            { "Forest", 'F' },
+            { "Mountain", 'M' },
+            { "Grass", 'G' },
+            { "Water", 'W' },
+            { "Hill", 'h' },
+            { "Marsh", 'm' },
+            { "Road", 'R' },
+            { "Bridge", 'B' },
+            { "Castle", 'C' },
+            { "Ruins", 'r' },
+            { "Temple", 'T' },
+            { "Tomb", 't' },
+            { "Tower", 'K' },
+            { "Void", 'v' }
+        };
+
         static void Main(string[] args)
         {
             ConsoleKeyInfo key;
+            War war = new War();
 
             World.CreateDefaultWorld();
+            World.Current.Players[0].HireHero(World.Current.Map[2, 2]);
+            World.Current.Players[1].ConscriptUnit(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 1]);
 
             do
             {                
-                Draw();
+                war.Draw();
 
-                key = GetInput();
-                DoActions(key);
+                key = war.GetInput();
+                war.DoActions(key);
 
             } while (key.Key != ConsoleKey.Q);
         }
 
-        private static void DoActions(ConsoleKeyInfo key)
+        private void DoActions(ConsoleKeyInfo key)
         {
-            Army hero = FindHero();
+            Army hero = FindFirstHero();
             if (hero == null)
             {
                 // You have lost!
@@ -69,10 +99,9 @@ namespace BranallyGames.cwism
 
             if (!success)
                 Console.Beep();
-            //Console.WriteLine(success ? "Success!" : "Failed!");
         }
 
-        private static ConsoleKeyInfo GetInput()
+        private ConsoleKeyInfo GetInput()
         {
             ConsoleKeyInfo key;
             Console.Write("> ");
@@ -80,7 +109,7 @@ namespace BranallyGames.cwism
             return key;
         }
 
-        private static void Draw()
+        private void Draw()
         {
             Console.Clear();
             for (int y = 0; y < World.Current.Map.GetLength(1); y++)
@@ -93,13 +122,26 @@ namespace BranallyGames.cwism
                     if (tile.Army != null)
                         unit = tile.Army.ID;
 
-                    Console.Write("{0}:[{1},{2}]\t", tile.Coordinate.ToString(), terrain, unit);
+                    Console.Write("{0}:[{1},{2}]\t", 
+                        tile.Coordinate.ToString(), 
+                        GetTerrainSymbol(terrain), 
+                        GetUnitSymbol(unit));
                 }
                 Console.WriteLine();
             }
         }
 
-        private static Army FindHero()
+        private char GetTerrainSymbol(string terrain)
+        {
+            return (terrainMap.Keys.Contains(terrain)) ? terrainMap[terrain] : '?';
+        }
+
+        private char GetUnitSymbol(string unit)
+        {
+            return (terrainMap.Keys.Contains(unit)) ? unitMap[unit] : '?';
+        }
+
+        private Army FindFirstHero()
         {
             Player player1 = World.Current.Players[0];
             IList<Army> armies = player1.GetArmies();
@@ -107,7 +149,7 @@ namespace BranallyGames.cwism
             {
                 foreach (Unit unit in army.Units)
                 {
-                    if (unit.ID == "H")
+                    if (unit.ID == "Hero")
                     {
                         return army;
                     }

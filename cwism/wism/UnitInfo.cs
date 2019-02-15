@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,8 +10,7 @@ namespace BranallyGames.Wism
     [DataContract]
     public class UnitInfo
     {        
-        public const string HeroId = "H";
-
+        private static readonly string HeroId = "Hero";
         public static readonly string FileName = "Unit.json";
 
         [DataMember]

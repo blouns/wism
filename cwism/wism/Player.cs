@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,26 +27,34 @@ namespace BranallyGames.Wism
 
             Player player = new Player();
             player.Affiliation = affiliation;
-            //player.FoundCapitol();
-            player.HireHero();
 
             return player;
         }
 
-        private void FoundCapitol()
-        {
-            throw new NotImplementedException();
-        }
-
         private Tile FindTileForNewHero()
         {
-            // TODO: Need a home tile for the Hero; for now hardcode
-            Tile tile = World.Current.Map[2, 2];
+            // TODO: Temp code; need a home tile for the Hero; for now random location
+            Tile tile = null;
+            int retries = 0;
+            int maxRetries = 100;
             UnitInfo unitInfo = UnitInfo.GetHeroInfo();
 
-            if (!CanDeploy(unitInfo, tile))
-                throw new ArgumentException(
-                    String.Format("Hero cannot be deployed to '{1}'.", unitInfo.DisplayName, tile.Terrain.DisplayName));
+            bool deployedHero = false;
+            while (!deployedHero)
+            {
+                if (retries++ > maxRetries)
+                {
+                    throw new ArgumentException(
+                        String.Format("Hero cannot be deployed to '{0}'.", tile.Terrain.DisplayName));
+                }
+
+                int x = World.Current.Random.Next(0, World.Current.Map.GetLength(0));
+                int y = World.Current.Random.Next(0, World.Current.Map.GetLength(1));
+
+                tile = World.Current.Map[x, y];
+                
+                deployedHero = CanDeploy(unitInfo, tile);
+            }
 
             return tile;
         }
@@ -99,6 +107,16 @@ namespace BranallyGames.Wism
 
         private bool CanDeploy(UnitInfo unitInfo, Tile tile)
         {
+            if (unitInfo == null)
+            {
+                throw new ArgumentNullException(nameof(unitInfo));
+            }
+
+            if (tile == null)
+            {
+                throw new ArgumentNullException(nameof(tile));
+            }
+
             Terrain terrain = tile.Terrain;
             return ((terrain.CanTraverse(unitInfo.CanWalk, unitInfo.CanFloat, unitInfo.CanFly)) &&
                     (!tile.HasArmy() || (tile.Army.Count < Army.MaxUnits)));
