@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,13 @@ namespace wism.Tests
         public void OneTimeSetup()
         {
             Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            World.CreateDefaultWorld();
+            World.Current.Players[0].HireHero(World.Current.Map[2, 2]);
         }
 
         [Test]
@@ -40,66 +47,62 @@ namespace wism.Tests
         [Test]
         public void MoveHeroToMeadowTest()
         {
-            World.Current.Reset();
             Army hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             MoveUnitPass(hero, Direction.North);
             if (!hero.TryMove(Direction.North))
 
-                Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+                Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
         }
 
         [Test]
         public void MoveHeroToMountainTest()
         {
-            World.Current.Reset();
             Army hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             // Walk into meadow
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             // Walk into meadow
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             // Try to walk onto an impassable mountain; should fail
             MoveUnitFail(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass"); // Still on meadow
         }
 
         [Test]
         public void MoveHeroToCoastTest()
         {
-            World.Current.Reset();
             Army hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             // Move north to meadow
             MoveUnitPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             // Try to walk onto an impassable coast
             MoveUnitFail(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm'); // Still on meadow            
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass"); // Still on meadow            
         }
 
         [Test]
         public void MoveNorthThenSouth()
         {
-            World.Current.Reset();
             Army hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             Tile originalTile = hero.Tile;
 
             MoveUnitPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             MoveUnitPass(hero, Direction.South);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
@@ -107,17 +110,16 @@ namespace wism.Tests
         [Test]
         public void MoveSouthThenNorth()
         {
-            World.Current.Reset();
             Army hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             Tile originalTile = hero.Tile;
 
             MoveUnitPass(hero, Direction.South);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             MoveUnitPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
@@ -125,17 +127,16 @@ namespace wism.Tests
         [Test]
         public void MoveWestThenEast()
         {
-            World.Current.Reset();
             Army hero = GetFirstHero();
             Assert.IsNotNull(hero, "Could not find the hero.");
 
             Tile originalTile = hero.Tile;
 
             MoveUnitPass(hero, Direction.West);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
@@ -143,16 +144,15 @@ namespace wism.Tests
         [Test]
         public void MoveEastThenWest()
         {
-            World.Current.Reset();
             Army hero = GetFirstHero();
 
             Tile originalTile = hero.Tile;
 
             MoveUnitPass(hero, Direction.West);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             MoveUnitPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.Symbol, 'm');
+            Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
         }
@@ -200,7 +200,7 @@ namespace wism.Tests
         public static Army GetFirstHero()
         {
             Hero hero = null;
-
+            
             Player player1 = World.Current.Players[0];
             IList<Army> armies = player1.GetArmies();
 

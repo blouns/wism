@@ -1,4 +1,3 @@
-﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +12,6 @@ namespace BranallyGames.Wism
         internal UnitInfo info;
 
         private int moves = 1;
-        private char symbol;
         private int strength;
 
         // Ephemeral fields only used during battle
@@ -22,15 +20,16 @@ namespace BranallyGames.Wism
 
         public int Moves { get => moves; set => moves = value; }
 
-        public override string DisplayName { get => Info.DisplayName; }
+        public override string DisplayName { get => Info.DisplayName; set => Info.DisplayName = value;  }
 
-        public override char Symbol { get => Info.Symbol; set => symbol = value; }
-        internal UnitInfo Info
+        public override string ID { get => Info.ID; set => Info.ID = value; }
+
+        public UnitInfo Info
         {
             get
             {
                 if (this.info == null)
-                    this.info = MapBuilder.FindUnitInfo(this.symbol);
+                    this.info = MapBuilder.FindUnitInfo(this.ID);
                 return info;
             }
         }
@@ -82,30 +81,6 @@ namespace BranallyGames.Wism
 
             return defenderModifier;
         }            
-    }
-
-    public class UnitConverter : JsonConverter<Unit>
-    {
-        public override Unit ReadJson(JsonReader reader, Type objectType, Unit existingValue, bool hasExistingValue, JsonSerializer serializer)
-        {
-            do
-            {
-                string value = reader.Value as string;
-                if (value == "Symbol")
-                {
-                    string symbol = (string)reader.ReadAsString();
-                    UnitInfo ui = MapBuilder.FindUnitInfo(symbol[0]);
-                    return Unit.Create(ui);
-                }
-            } while (reader.Read());
-
-            throw new JsonReaderException("Expected a Unit symbol.");
-        }
-
-        public override void WriteJson(JsonWriter writer, Unit value, JsonSerializer serializer)
-        {
-            serializer.Serialize(writer, value);
-        }
     }
 }
 

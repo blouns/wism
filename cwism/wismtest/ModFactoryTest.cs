@@ -32,13 +32,13 @@ namespace wism.Tests
         {
             CleanupTestFiles();
 
-            IList<ICustomizable> objects = new List<ICustomizable>();
-            objects.Add(new AffiliationInfo());
-            objects.Add(new UnitInfo());
-            objects.Add(new TerrainInfo());
+            AffiliationInfo affiliationInfo = new AffiliationInfo();
+            UnitInfo unitInfo = new UnitInfo();
+            TerrainInfo terrainInfo = new TerrainInfo();
 
-            foreach (ICustomizable obj in objects)
-                SerializeType(@".\", obj);
+            SerializeType(affiliationFileName, affiliationInfo);
+            SerializeType(unitFileName, unitInfo);
+            SerializeType(terrainFileName, terrainInfo);
 
             if (!File.Exists(affiliationFileName) ||
                 !File.Exists(unitFileName) ||
@@ -72,7 +72,7 @@ namespace wism.Tests
             foreach (Unit unit in units)
             {
                 TestContext.WriteLine("Unit: {0}", unit);
-                if (unit.Symbol== 'H')
+                if (unit.ID == "Hero")
                     foundHero = true;
             }
 
@@ -87,7 +87,7 @@ namespace wism.Tests
             foreach (Terrain terrain in terrains)
             {
                 TestContext.WriteLine("Terrain: {0}", terrain);
-                if (terrain.DisplayName == "Meadow")
+                if (terrain.DisplayName == "Grass")
                     foundMeadow = true;
             }
 
@@ -111,13 +111,12 @@ namespace wism.Tests
                 File.Delete(terrainFileName);
         }
 
-        private static void SerializeType(string path, ICustomizable obj)
+        private static void SerializeType(string fileName, object obj)
         {
             MemoryStream stream = new MemoryStream();
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
             serializer.WriteObject(stream, obj);
 
-            string fileName = String.Format("{0}\\{1}", path, obj.FileName);
             TestContext.WriteLine("Writing: {0}", fileName);
 
             stream.Position = 0;

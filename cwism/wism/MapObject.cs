@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,17 +6,21 @@ using System.Threading.Tasks;
 
 namespace BranallyGames.Wism
 {
-    public abstract class MapObject
+    public abstract class MapObject : ICustomizable
     {
-        public abstract string DisplayName { get; }
+        public abstract string DisplayName { get; set;  }
 
-        public abstract char Symbol { get; set; }
+        public abstract string ID { get; set; }
 
         private Affiliation affiliation;
 
         public Affiliation Affiliation { get => affiliation; set => affiliation = value; }
         
         private Tile tile;
+
+        public MapObject()
+        {
+        }
 
         public Tile Tile { get => tile; set => tile = value; }        
 

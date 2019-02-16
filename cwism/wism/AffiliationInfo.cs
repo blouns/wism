@@ -8,17 +8,12 @@ using System.Runtime.Serialization;
 namespace BranallyGames.Wism
 {
     [DataContract]
-    public class AffiliationInfo : ICustomizable
+    public class AffiliationInfo
     {
-        public static readonly string FilePattern = "Affiliation_*.json";
-
-        public string FileName { get => "Affiliation_Template.json"; }
+        public static readonly string FileName = "Affiliation.json";
 
         [DataMember]
         public string ID = "xx";
-
-        [DataMember]
-        public string Type = "Affiliation";
 
         [DataMember]
         public string DisplayName { get; set; } = "Affiliation Name";

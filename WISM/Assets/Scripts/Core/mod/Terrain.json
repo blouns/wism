@@ -1,0 +1,100 @@
+[
+    {
+        "ID": "Forest",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Forest"
+    },
+    {
+        "ID": "Mountain",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": false,
+        "DisplayName": "Mountain"
+    },
+    {
+        "ID": "Grass",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Grass"
+    },
+    {
+        "ID": "Water",
+        "AllowFlight": true,
+        "AllowFloat": true,
+        "AllowWalk": false,
+        "DisplayName": "Water"
+    },
+    {
+        "ID": "Hill",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Hill"
+    },
+    {
+        "ID": "Marsh",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Marsh"
+    },
+    {
+        "ID": "Road",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Road"
+    },
+    {
+        "ID": "Bridge",
+        "AllowFlight": true,
+        "AllowFloat": true,
+        "AllowWalk": true,
+        "DisplayName": "Bridge"
+    },
+    {
+        "ID": "Castle",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Castle"
+    },
+    {
+        "ID": "Ruins",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Ruins"
+    },
+    {
+        "ID": "Temple",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Temple"
+    },
+    {
+        "ID": "Tomb",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Tomb"
+    },
+    {
+        "ID": "Tower",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "DisplayName": "Tower"
+    },
+    {
+        "ID": "Void",
+        "AllowFlight": false,
+        "AllowFloat": false,
+        "AllowWalk": false,
+        "DisplayName": "Void"
+    }
+]

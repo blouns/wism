@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BranallyGames.Wism
 {
 
-    public class Affiliation
+    public class Affiliation : ICustomizable
     {
         private AffiliationInfo info;
 
@@ -17,6 +17,8 @@ namespace BranallyGames.Wism
 
         public bool IsHuman { get => isHuman; set => isHuman = value; }
 
+        public string ID { get => info.ID; set => info.ID = value; }
+
         public static Affiliation Create(AffiliationInfo info)
         {
             return new Affiliation(info);
@@ -25,6 +27,16 @@ namespace BranallyGames.Wism
         private Affiliation(AffiliationInfo info)
         {
             this.info = info;
+        }
+
+        public AffiliationInfo Info
+        {
+            get
+            {
+                if (this.info == null)
+                    this.info = MapBuilder.FindAffiliationInfo(this.ID);
+                return info;
+            }
         }
 
         public override string ToString()

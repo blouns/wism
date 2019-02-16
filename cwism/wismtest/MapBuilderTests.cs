@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ namespace wism.Tests
             const int defaultMapHeight = 6;
             const int defaultMapWidth = 6;
 
-            Tile[,] map = MapBuilder.LoadMap(MapBuilder.DefaultMapPath);
+            Tile[,] map = MapBuilder.CreateDefaultMap();
 
             Assert.IsNotNull(map, "MapBuilder returned null map");
 
@@ -40,18 +40,18 @@ namespace wism.Tests
         [Test]
         public void LoadUnitKindsTest()
         {
-            Dictionary<char, Unit> unitKinds = MapBuilder.UnitKinds;
+            Dictionary<string, Unit> unitKinds = MapBuilder.UnitKinds;
             Assert.IsTrue(unitKinds.Count > 0);
-            Unit hero = unitKinds['H'];
+            Unit hero = unitKinds["Hero"];
             Assert.IsNotNull(hero, "Unit 'hero' was not found.");
         }
 
         [Test]
         public void LoadTerrainKindsTest()
         {
-            Dictionary<char, Terrain> terrainKinds = MapBuilder.TerrainKinds;
+            Dictionary<string, Terrain> terrainKinds = MapBuilder.TerrainKinds;
             Assert.IsTrue(terrainKinds.Count > 0);
-            Terrain meadow = terrainKinds['m'];
+            Terrain meadow = terrainKinds["Grass"];
             Assert.IsNotNull(meadow, "Terrain 'meadow' was not found.");
         }
     }

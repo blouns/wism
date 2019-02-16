@@ -1,4 +1,4 @@
-﻿using BranallyGames.Wism;
+using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace wism.Tests
         [SetUp]
         public void Setup()
         {
-            World.Current.Reset();
+            World.CreateDefaultWorld();
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace wism.Tests
             for (int i = 0; i < unitKinds.Count; i++)
             {
                 UnitInfo info = unitKinds[i];
-                Tile tile = CreateTile('m', i, i + 1);
+                Tile tile = CreateTile("Grass", i, i + 1);
 
                 player.ConscriptUnit(info, tile);
             }
@@ -62,7 +62,7 @@ namespace wism.Tests
                 UnitInfo info = unitKinds[0];
 
                 // Add player to Void; should fail
-                Tile tile = CreateTile('V', 0, 0);
+                Tile tile = CreateTile("Void", 0, 0);
                 player.ConscriptUnit(info, tile);
             }
 
@@ -83,37 +83,40 @@ namespace wism.Tests
 
         #region Helper utility methods
 
-        private Tile CreateTile(char symbol, int x, int y)
+        private Tile CreateTile(string id, int x, int y)
         {
             Tile tile = new Tile();
             tile.Coordinate = new Coordinate(x, y);
-            tile.Terrain = GetTerrain(symbol);
+            tile.Terrain = GetTerrain(id);
 
             return tile;
         }
 
-        private Terrain GetTerrain(char symbol)
+        private Terrain GetTerrain(string id)
         {
-            IList<Terrain> terrains = ModFactory.LoadTerrains(ModFactory.DefaultPath);
+            IList<Terrain> terrains = ModFactory.LoadTerrains(ModFactory.ModPath);
             foreach (Terrain terrain in terrains)
             {
-                if (terrain.Symbol == symbol)
+                if (terrain.ID == id)
                     return terrain;
             }
 
             throw new InvalidOperationException(
-                String.Format("Could not find a '{0}' terrain.", symbol));
+                String.Format("Could not find a '{0}' terrain.", id));
         }
 
         private static Player CreateOrcsOfKorPlayer()
         {
             Player player = new Player();
 
-            IList<Affiliation> affiliationKinds = ModFactory.LoadAffiliations(ModFactory.DefaultPath);
+            IList<Affiliation> affiliationKinds = ModFactory.LoadAffiliations(ModFactory.ModPath);
             foreach (Affiliation affiliation in affiliationKinds)
             {
-                if (affiliation.DisplayName == "Orcs of Kor")
+                if (affiliation.ID == "OrcsOfKor")
+                {
                     player.Affiliation = affiliation;
+                    break;
+                }
             }
             Assert.AreEqual(player.Affiliation.DisplayName, "Orcs of Kor");
 
@@ -122,7 +125,8 @@ namespace wism.Tests
 
         private static IList<UnitInfo> GetUnitKinds()
         {
-            return ModFactory.LoadModFiles<UnitInfo>(ModFactory.DefaultPath, UnitInfo.FilePattern);
+            string filePath = String.Format(@"{0}\{1}", ModFactory.ModPath, UnitInfo.FileName);
+            return ModFactory.LoadModFiles<UnitInfo>(filePath);
         }
 
         #endregion

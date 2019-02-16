@@ -30,9 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -52,7 +49,6 @@
     <Compile Include="DefendingForceCombatModifer.cs" />
     <Compile Include="Hero.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="ICustomizable.cs" />
     <Compile Include="ModFactory.cs" />
     <Compile Include="MapBuilder.cs" />
     <Compile Include="MapObject.cs" />
@@ -67,35 +63,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="mod\Affiliation_Neutral.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Include="mod\Affiliation.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="mod\Affiliation_Elvallie.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Include="mod\Terrain.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="mod\Affiliation_OrcsOfKor.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mod\Terrain_Coast.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mod\Terrain_Mountain.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mod\Terrain_Forest.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mod\Terrain_Void.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mod\Terrain_Meadow.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mod\Unit_LightInfantry.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="mod\Unit_Hero.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Include="mod\Unit.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
     <Content Include="World.json">
@@ -103,4 +78,26 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo POSTBUILDSTEP for $(ProjectName)
+
+echo Copying files from "$(TargetDir)*" to "$(SolutionDir)..\WISM\Assets\Scripts\Core"
+
+if not exist "$(SolutionDir)..\WISM\Assets\Scripts\Core" mkdir "$(SolutionDir)..\WISM\Assets\Scripts\Core"
+ 
+xcopy "$(TargetDir)*" "$(SolutionDir)..\WISM\Assets\Scripts\Core" /i /d /y /s
+if errorlevel 1 goto BuildEventFailed
+
+if errorlevel 1 goto BuildEventFailed 
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+:BuildEventFailed
+echo POSTBUILDSTEP for $(ProjectName) FAILED
+exit 1
+:BuildEventOK
+echo POSTBUILDSTEP for $(ProjectName) COMPLETED OK</PostBuildEvent>
+  </PropertyGroup>
 </Project>

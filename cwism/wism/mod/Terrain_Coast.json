@@ -1,9 +1,0 @@
-{
-    "AllowFlight": true,
-    "AllowFloat": true,
-    "AllowWalk": false,
-    "DisplayName": "Coast",
-    "Type": "Terrain",
-    "imageFileName": "coast_image.jpg",
-    "Symbol": "c"
-}
