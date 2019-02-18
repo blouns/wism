@@ -7,14 +7,14 @@ using System;
 using Assets.Scripts.Units;
 using System.IO;
 
-public class TerrainTilemap : MonoBehaviour
+public class WorldTimemap : MonoBehaviour
 {
     private Camera followCamera;
     private World world;
     private Tilemap tileMap;
     private IList<Player> players;
     public GameObject[] armyKinds;
-    private IList<ArmyGameObject> instantiatedArmies = new List<ArmyGameObject>();
+    private readonly Dictionary<Guid, ArmyGameObject> armyDictionary = new Dictionary<Guid, ArmyGameObject>();
 
     private ClickableObject.SelectedState selectedState;
     private ArmyGameObject selectedArmy;
@@ -28,27 +28,15 @@ public class TerrainTilemap : MonoBehaviour
         tileMap = transform.GetComponent<Tilemap>();
         world = CreateWorldFromScene();
         players = ReadyPlayerOne();
-
-        DrawArmies(players);
-    }
-
-    private void SetupCameras()
-    {
-        foreach (Camera camera in Camera.allCameras)
-        {
-            if (camera.name == "FollowCamera")
-            {
-                followCamera = camera;
-            }            
-        }
-
-        if (followCamera == null)
-        {
-            throw new InvalidOperationException("Could not find the FollowCamera.");
-        }
+        DrawArmies();
     }
 
     private void Update()
+    {
+        HandleInput();
+    }
+
+    private void HandleInput()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -58,7 +46,7 @@ public class TerrainTilemap : MonoBehaviour
             switch (this.SelectedState)
             {
                 case ClickableObject.SelectedState.Selected:
-                    MoveSelectedUnit(clickedTile);
+                    MoveSelectedArmyTo(clickedTile);
                     this.SelectedState = ClickableObject.SelectedState.Unselected;
                     break;
                 case ClickableObject.SelectedState.Moving:
@@ -78,47 +66,57 @@ public class TerrainTilemap : MonoBehaviour
         }
     }
 
-    private void SelectObject(BranallyGames.Wism.Tile clickedTile)
-    {
-        if (clickedTile.Army != null)
-        {
-            Army army = clickedTile.Army;
-            Debug.Log("Selected army: " + army.DisplayName);
-
-            this.SelectedArmy = null;
-            this.SelectedState = ClickableObject.SelectedState.Unselected;
-            foreach (ArmyGameObject ago in this.instantiatedArmies)
-            {
-                if (ago.Army == army)
-                {
-                    this.SelectedArmy = ago;
-                    this.SelectedState = ClickableObject.SelectedState.Selected;
-                }
-            }
-
-            if (this.SelectedArmy == null)
-                throw new InvalidOperationException("Could not find selected army in instantiated game objects.");
-        }
-    }
-
     private void FixedUpdate()
     {
         if (this.players == null)
             return;
 
-        // Cleanup existing objects for render
-        // TODO: Remove and redesign this to find and move existing objects; for now...
-        for (int i = 0; i < this.instantiatedArmies.Count; i++)
-        {
-            ArmyGameObject ago = instantiatedArmies[i];
-            Destroy(ago.GameObject);
-            instantiatedArmies.RemoveAt(i);
-        }
-
-        DrawArmies(this.players);
+        CleanupArmies();
+        DrawArmies();
     }
 
-    private void MoveSelectedUnit(BranallyGames.Wism.Tile clickedTile)
+    private void CleanupArmies()
+    {
+        // Find and cleanup stale game objects
+        List<Guid> toDelete = new List<Guid>(armyDictionary.Keys);
+        foreach (Player player in world.Players)
+        {
+            IList<Army> armies = player.GetArmies();
+            foreach (Army army in armies)
+            {
+                if (armyDictionary.ContainsKey(army.Guid))
+                {
+                    toDelete.Remove(army.Guid);
+                }
+            }
+        }
+
+        toDelete.ForEach(guid =>
+        {
+            Destroy(armyDictionary[guid].GameObject);
+            armyDictionary.Remove(guid);
+        });
+    }
+
+    private void SelectObject(BranallyGames.Wism.Tile clickedTile)
+    {
+        // If tile contains an army, select it     
+        if (clickedTile.Army != null)
+        {
+            Army army = clickedTile.Army;
+            Debug.Log("Selected army: " + army.DisplayName);
+
+            if (!armyDictionary.ContainsKey(army.Guid))
+            {
+                throw new InvalidOperationException("Could not find selected army in instantiated game objects.");
+            }
+
+            this.SelectedArmy = armyDictionary[army.Guid];
+            this.SelectedState = ClickableObject.SelectedState.Selected;
+        }
+    }
+       
+    private void MoveSelectedArmyTo(BranallyGames.Wism.Tile clickedTile)
     {        
         // Move the selected unit to the clicked tile location
         if (this.SelectedArmy == null)
@@ -127,23 +125,27 @@ public class TerrainTilemap : MonoBehaviour
         if (!clickedTile.CanTraverseHere(SelectedArmy.Army))
         {
             Debug.Log(String.Format("Cannot move '{0}' to {1}'", SelectedArmy.Army.DisplayName, clickedTile.Terrain));
-            Console.Beep(220, 800);
         }
         else
         {
             // TODO: Implement path traversal and movement in steps
-            MoveArmyTo(clickedTile);
+            MoveArmy(this.SelectedArmy, clickedTile);
         }
     }
 
-    private void MoveArmyTo(BranallyGames.Wism.Tile targetTile)
+    private void MoveArmy(ArmyGameObject armyGo, BranallyGames.Wism.Tile targetTile)
     {
-        BranallyGames.Wism.Tile originalTile = SelectedArmy.Army.Tile;
+        // Move in game model
+        BranallyGames.Wism.Tile originalTile = armyGo.Army.Tile;
         originalTile.Army = null;
-        targetTile.Army = SelectedArmy.Army;
-        SelectedArmy.Army.Tile = targetTile;
+        targetTile.Army = armyGo.Army;
+        armyGo.Army.Tile = targetTile;
 
-        Debug.Log(String.Format("Moved '{0}' to {1}'", SelectedArmy.Army.DisplayName, targetTile.Terrain));
+        // Move in Unity
+        GameObject go = armyGo.GameObject;
+        go.transform.position = ConvertGameToUnityCoordinates(targetTile.Coordinate);
+
+        Debug.Log(String.Format("Moved '{0}' to {1}'", armyGo.Army.DisplayName, targetTile.Terrain));
     }
 
     private BranallyGames.Wism.Tile GetClickedTile()
@@ -181,7 +183,7 @@ public class TerrainTilemap : MonoBehaviour
     {
         MapBuilder.Initialize(GameManager.DefaultModPath);
 
-        TileBase[] tilemapTiles = GetTiles(out int boundsX, out int boundsY);
+        TileBase[] tilemapTiles = GetUnityTiles(out int boundsX, out int boundsY);
         BranallyGames.Wism.Tile[,] gameMap = new BranallyGames.Wism.Tile[boundsX, boundsY];
 
         for (int y = 0; y < boundsY; y++)
@@ -199,13 +201,6 @@ public class TerrainTilemap : MonoBehaviour
                         if (unityTile.name.ToLowerInvariant().Contains(terrain.ID.ToLowerInvariant()))
                         {
                             gameTile.Terrain = terrain;
-
-                            //Instantiate trigger for tile
-                            //Vector3 vector3 = ConvertGameToUnityCoordinates(gameTile.Terrain, this.tileMap);
-                            //Vector3Int tileVector = new Vector3Int(Convert.ToInt32(vector3.x), Convert.ToInt32(vector3.y), 0);
-                            //TileData tileData;
-                            //unityTile.GetTileData(tileVector, this.tileMap, ref tileData);
-
                             break;
                         }
                     }
@@ -229,27 +224,33 @@ public class TerrainTilemap : MonoBehaviour
         return World.Current;
     }
 
-    private void DrawArmies(IList<Player> players)
+    private void DrawArmies()
     {
-        foreach (Player player in players)
+        // Verify that army kids were loaded
+        if (armyKinds == null || armyKinds.Length == 0)
+        {
+            Debug.Log("No army kinds found.");
+            return;
+        }
+
+        foreach (Player player in world.Players)
         {
             foreach (Army army in player.GetArmies())
             {                
-                Vector3 worldVector = ConvertGameToUnityCoordinates(army, tileMap);
+                Vector3 worldVector = ConvertGameToUnityCoordinates(army.GetCoordinates());
                 InstantiateArmy(army, worldVector);
             }
         }
     }
 
-    private static Vector3 ConvertGameToUnityCoordinates(MapObject mapObject, Tilemap tileMap)
+    private Vector3 ConvertGameToUnityCoordinates(Coordinate coord)
     {
-        Coordinate coord = mapObject.GetCoordinates();
         float unityX = coord.X + tileMap.cellBounds.xMin - tileMap.tileAnchor.x + 1;
         float unityY = coord.Y + tileMap.cellBounds.yMin - tileMap.tileAnchor.y + 1;
         return new Vector3(unityX, unityY, 0.0f);
     }
-
-    private static Coordinate ConvertUnityToGameCoordinates(Vector3 unityVector, Tilemap tileMap)
+   
+    private Coordinate ConvertUnityToGameCoordinates(Vector3 unityVector, Tilemap tileMap)
     {
         float gameX = unityVector.x - tileMap.cellBounds.xMin + tileMap.tileAnchor.x - 1;
         float gameY = unityVector.y - tileMap.cellBounds.yMin + tileMap.tileAnchor.y - 1;
@@ -258,31 +259,30 @@ public class TerrainTilemap : MonoBehaviour
 
     private void InstantiateArmy(Army army, Vector3 worldVector)
     {
-        if (armyKinds == null || armyKinds.Length == 0)
-        {
-            Debug.Log("No army kinds found.");
-            return;
-        }
+        // Find or create and set up the GameObject connected to WISM MapObject
+        if (!armyDictionary.ContainsKey(army.Guid))
+        {            
+            ArmyFactory factory = ArmyFactory.Create(armyKinds);
+            
+            GameObject go = factory.FindGameObjectKind(army);
+            if (go == null)
+            {
+                Debug.Log(String.Format("GameObject not found: {0}_{1}", army.ID, army.Affiliation.ID));
+                return;
+            }
 
-        ArmyFactory factory = ArmyFactory.Create(armyKinds);
-        GameObject gameObject = factory.FindGameObject(army);
-        if (gameObject == null)
-        {
-            Debug.Log(String.Format("GameObject not found: {0}_{1}", army.ID, army.Affiliation.ID));
-            return;
-        }
+            Instantiate(go, worldVector, Quaternion.identity);            
 
-        // Create and set up the GameObject connected to WISM MapObject
-        // TODO: Only instantiate if not already exist; and/or cleanup old objects
-        GameObject go = Instantiate(gameObject, worldVector, Quaternion.identity);
-        ClickableObject co = go.GetComponent<ClickableObject>();
-        ArmyGameObject ago = new ArmyGameObject(army, go);
-        co.ArmyGameObject = ago;
-        co.TileMap = this;
-        this.instantiatedArmies.Add(ago);
+            // Add to the instantiated armies dictionary for tracking
+            ArmyGameObject ago = new ArmyGameObject(army, go);
+            ClickableObject co = go.GetComponent<ClickableObject>();
+            co.ArmyGameObject = ago;
+            co.TileMap = this;
+            armyDictionary.Add(army.Guid, ago);
+        }                
     }
 
-    private TileBase[] GetTiles(out int xSize, out int ySize)
+    private TileBase[] GetUnityTiles(out int xSize, out int ySize)
     {
         // Constrain bounds
         const int maxSize = 1000;
@@ -295,5 +295,21 @@ public class TerrainTilemap : MonoBehaviour
         tilemap.ResizeBounds();
 
         return tilemap.GetTilesBlock(tilemap.cellBounds);
+    }
+
+    private void SetupCameras()
+    {
+        foreach (Camera camera in Camera.allCameras)
+        {
+            if (camera.name == "FollowCamera")
+            {
+                followCamera = camera;
+            }
+        }
+
+        if (followCamera == null)
+        {
+            throw new InvalidOperationException("Could not find the FollowCamera.");
+        }
     }
 }

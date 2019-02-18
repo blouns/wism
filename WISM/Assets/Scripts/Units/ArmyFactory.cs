@@ -34,7 +34,7 @@ namespace Assets.Scripts.Units
         }
 
 
-        internal GameObject FindGameObject(Army army)
+        internal GameObject FindGameObjectKind(Army army)
         {
             if ((army == null) || (army.Count == 0))
             {

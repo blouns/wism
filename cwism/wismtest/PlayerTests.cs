@@ -43,7 +43,7 @@ namespace wism.Tests
                 UnitInfo info = unitKinds[i];
                 Tile tile = CreateTile("Grass", i, i + 1);
 
-                player.ConscriptUnit(info, tile);
+                player.ConscriptArmy(info, tile);
             }
 
             IList<Army> armies = player.GetArmies();
@@ -63,7 +63,7 @@ namespace wism.Tests
 
                 // Add player to Void; should fail
                 Tile tile = CreateTile("Void", 0, 0);
-                player.ConscriptUnit(info, tile);
+                player.ConscriptArmy(info, tile);
             }
 
             Assert.Throws<ArgumentException>(

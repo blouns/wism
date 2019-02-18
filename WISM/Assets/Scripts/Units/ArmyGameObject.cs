@@ -1,4 +1,4 @@
-﻿using BranallyGames.Wism;
+using BranallyGames.Wism;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +7,7 @@ public class ArmyGameObject
 {
     private Army army;
     private GameObject gameObject;
+    private bool isAlive;
 
     public ArmyGameObject(Army army, GameObject gameObject)
     {
