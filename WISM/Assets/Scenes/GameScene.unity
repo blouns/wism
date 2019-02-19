@@ -284,8 +284,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d080ad89422d19e489ce97635d0dd0fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Name: 
-  m_EditorClassIdentifier: 
   armyKinds:
   - {fileID: 3222770472658856129, guid: c463593eb2f55c641b1d2e916fbe4e4c, type: 3}
   - {fileID: 750634420397697891, guid: b070b62641ad5f34f80ad798ab882c55, type: 3}
@@ -293,6 +291,8 @@ MonoBehaviour:
   - {fileID: 8908565333520886752, guid: fe7051691dbc9f5478d1408daa2d4b8c, type: 3}
   - {fileID: 2826584993129197440, guid: 09beb4f13e4059f4bbb7e298bdc310f0, type: 3}
   - {fileID: 2183263904272045467, guid: 927fdcd1c7fc6044f9f78412cfe16af8, type: 3}
+  armyPrefab: {fileID: 3836617278113509933, guid: 904f295cda5ee0e478e5dc5dfd6c91c0,
+    type: 3}
 --- !u!483693784 &546283582
 TilemapRenderer:
   m_ObjectHideFlags: 0

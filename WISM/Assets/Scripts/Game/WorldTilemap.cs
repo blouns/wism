@@ -7,20 +7,23 @@ using System;
 using Assets.Scripts.Units;
 using System.IO;
 
-public class WorldTimemap : MonoBehaviour
+public class WorldTilemap : MonoBehaviour
 {
+    public GameObject[] armyKinds;          // Prefabs for units; TODO: automate creation of prefabs
+    public GameObject armyPrefab;
+
     private Camera followCamera;
     private World world;
     private Tilemap tileMap;
     private IList<Player> players;
-    public GameObject[] armyKinds;
+    private ArmyFactory armyFactory;
     private readonly Dictionary<Guid, ArmyGameObject> armyDictionary = new Dictionary<Guid, ArmyGameObject>();
 
-    private ClickableObject.SelectedState selectedState;
+    private SelectedState selectedState;
     private ArmyGameObject selectedArmy;
 
     public ArmyGameObject SelectedArmy { get => selectedArmy; set => selectedArmy = value; }
-    public ClickableObject.SelectedState SelectedState { get => selectedState; set => selectedState = value; }
+    public SelectedState SelectedState { get => selectedState; set => selectedState = value; }
 
     private void Start()
     {
@@ -28,6 +31,14 @@ public class WorldTimemap : MonoBehaviour
         tileMap = transform.GetComponent<Tilemap>();
         world = CreateWorldFromScene();
         players = ReadyPlayerOne();
+        armyFactory = ArmyFactory.Create(armyKinds);
+
+        // TODO: Swap to use Resources or similar run-time generation of units
+        //Sprite[] sprites = Resources.LoadAll<Sprite>("Armies/sirians_hero_ALPHA");
+        //SpriteRenderer sr = armyPrefab.GetComponent<SpriteRenderer>();
+        //sr.sprite = sprites[0];
+        //Instantiate<GameObject>(this.armyPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
+
         DrawArmies();
     }
 
@@ -45,14 +56,14 @@ public class WorldTimemap : MonoBehaviour
 
             switch (this.SelectedState)
             {
-                case ClickableObject.SelectedState.Selected:
+                case SelectedState.Selected:
                     MoveSelectedArmyTo(clickedTile);
-                    this.SelectedState = ClickableObject.SelectedState.Unselected;
+                    this.SelectedState = SelectedState.Unselected;
                     break;
-                case ClickableObject.SelectedState.Moving:
+                case SelectedState.Moving:
                     // Do nothing
                     break;
-                case ClickableObject.SelectedState.Unselected:
+                case SelectedState.Unselected:
                     SelectObject(clickedTile);
                     break;
                 default:
@@ -112,40 +123,31 @@ public class WorldTimemap : MonoBehaviour
             }
 
             this.SelectedArmy = armyDictionary[army.Guid];
-            this.SelectedState = ClickableObject.SelectedState.Selected;
+            this.SelectedState = SelectedState.Selected;
         }
     }
        
-    private void MoveSelectedArmyTo(BranallyGames.Wism.Tile clickedTile)
+    private void MoveSelectedArmyTo(BranallyGames.Wism.Tile targetTile)
     {        
         // Move the selected unit to the clicked tile location
         if (this.SelectedArmy == null)
             throw new InvalidOperationException("Selected Army was null.");
 
-        if (!clickedTile.CanTraverseHere(SelectedArmy.Army))
+        // Move army in game
+        if (!this.SelectedArmy.Army.TryMove(targetTile.Coordinate))
         {
-            Debug.Log(String.Format("Cannot move '{0}' to {1}'", SelectedArmy.Army.DisplayName, clickedTile.Terrain));
+            Debug.Log(String.Format("Cannot move '{0}' to {1}'", SelectedArmy.Army.DisplayName, targetTile.Terrain));
+            return;
         }
-        else
-        {
-            // TODO: Implement path traversal and movement in steps
-            MoveArmy(this.SelectedArmy, clickedTile);
-        }
-    }
-
-    private void MoveArmy(ArmyGameObject armyGo, BranallyGames.Wism.Tile targetTile)
-    {
-        // Move in game model
-        BranallyGames.Wism.Tile originalTile = armyGo.Army.Tile;
-        originalTile.Army = null;
-        targetTile.Army = armyGo.Army;
-        armyGo.Army.Tile = targetTile;
 
         // Move in Unity
-        GameObject go = armyGo.GameObject;
-        go.transform.position = ConvertGameToUnityCoordinates(targetTile.Coordinate);
-
-        Debug.Log(String.Format("Moved '{0}' to {1}'", armyGo.Army.DisplayName, targetTile.Terrain));
+        Vector3 vector = ConvertGameToUnityCoordinates(targetTile.Coordinate);
+        Rigidbody2D rb = this.SelectedArmy.GameObject.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.transform.position = vector;
+        }
+        Debug.Log(String.Format("Moved '{0}' to {1}'", this.SelectedArmy.Army.DisplayName, targetTile.Terrain));
     }
 
     private BranallyGames.Wism.Tile GetClickedTile()
@@ -158,9 +160,9 @@ public class WorldTimemap : MonoBehaviour
 
     private void DeselectObject()
     {
-        if (this.SelectedState == ClickableObject.SelectedState.Selected)
+        if (this.SelectedState == SelectedState.Selected)
         {
-            this.SelectedState = ClickableObject.SelectedState.Unselected;
+            this.SelectedState = SelectedState.Unselected;
             this.SelectedArmy = null;
         }
     }
@@ -171,10 +173,10 @@ public class WorldTimemap : MonoBehaviour
         Player player1 = World.Current.Players[0];
         player1.Affiliation.IsHuman = true;        
         player1.HireHero(World.Current.Map[1, 1]);
-        player1.ConscriptUnit(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
-        player1.ConscriptUnit(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
-        player1.ConscriptUnit(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]);
-        player1.ConscriptUnit(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
 
         return World.Current.Players;
     }
@@ -262,22 +264,17 @@ public class WorldTimemap : MonoBehaviour
         // Find or create and set up the GameObject connected to WISM MapObject
         if (!armyDictionary.ContainsKey(army.Guid))
         {            
-            ArmyFactory factory = ArmyFactory.Create(armyKinds);
-            
-            GameObject go = factory.FindGameObjectKind(army);
-            if (go == null)
+            GameObject prefab = armyFactory.FindGameObjectKind(army);
+            if (prefab == null)
             {
                 Debug.Log(String.Format("GameObject not found: {0}_{1}", army.ID, army.Affiliation.ID));
                 return;
             }
 
-            Instantiate(go, worldVector, Quaternion.identity);            
+            GameObject go2 = Instantiate(prefab, worldVector, Quaternion.identity);
 
             // Add to the instantiated armies dictionary for tracking
-            ArmyGameObject ago = new ArmyGameObject(army, go);
-            ClickableObject co = go.GetComponent<ClickableObject>();
-            co.ArmyGameObject = ago;
-            co.TileMap = this;
+            ArmyGameObject ago = new ArmyGameObject(army, go2);
             armyDictionary.Add(army.Guid, ago);
         }                
     }
@@ -312,4 +309,11 @@ public class WorldTimemap : MonoBehaviour
             throw new InvalidOperationException("Could not find the FollowCamera.");
         }
     }
+}
+
+public enum SelectedState
+{
+    Unselected = 0,
+    Selected,
+    Moving
 }
