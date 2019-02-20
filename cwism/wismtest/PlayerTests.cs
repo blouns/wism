@@ -86,7 +86,7 @@ namespace wism.Tests
         private Tile CreateTile(string id, int x, int y)
         {
             Tile tile = new Tile();
-            tile.Coordinate = new Coordinate(x, y);
+            tile.Coordinates = new Coordinates(x, y);
             tile.Terrain = GetTerrain(id);
 
             return tile;

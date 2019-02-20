@@ -12,7 +12,7 @@ namespace BranallyGames.Wism
 
         public abstract string DisplayName { get; set;  }
 
-        public abstract string ID { get; set; }
+        public abstract string ID { get; }
 
         private Affiliation affiliation;
 
@@ -23,12 +23,12 @@ namespace BranallyGames.Wism
         public Tile Tile { get => tile; set => tile = value; }
         public virtual Guid Guid { get => guid; }
 
-        public Coordinate GetCoordinates()
+        public Coordinates GetCoordinates()
         {
             if (tile == null)
                 throw new InvalidOperationException("Tile is null; cannot get coordinates.");
 
-            return tile.Coordinate;
+            return tile.Coordinates;
         }
         public override string ToString()
         {
@@ -42,6 +42,11 @@ namespace BranallyGames.Wism
                 return false;
 
             return this.Guid.Equals(other.Guid);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Guid.GetHashCode();
         }
     }
 }

@@ -48,6 +48,9 @@
     <Compile Include="Affiliation.cs" />
     <Compile Include="AttackingForceCombatModifier.cs" />
     <Compile Include="Army.cs" />
+    <Compile Include="Pathing\DijkstraPathingStrategy.cs" />
+    <Compile Include="Pathing\IPathingStrategy.cs" />
+    <Compile Include="Pathing\PathNode.cs" />
     <Compile Include="WarStrategy.cs" />
     <Compile Include="DefendingForceCombatModifer.cs" />
     <Compile Include="Hero.cs" />

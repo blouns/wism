@@ -11,7 +11,7 @@ namespace BranallyGames.Wism
 {
     public interface ICustomizable
     {
-        string ID { get; set; }
+        string ID { get; }
 
         string DisplayName { get; set; }
     }
@@ -76,6 +76,18 @@ namespace BranallyGames.Wism
         {
             IList<UnitInfo> infos = LoadUnitInfos(ModPath);
             foreach (UnitInfo info in infos)
+            {
+                if (info.ID == id)
+                    return info;
+            }
+
+            return null; // ID not found
+        }
+
+        public static TerrainInfo FindTerrainInfo(string id)
+        {
+            IList<TerrainInfo> infos = LoadTerrainInfos(ModPath);
+            foreach (TerrainInfo info in infos)
             {
                 if (info.ID == id)
                     return info;

@@ -123,7 +123,7 @@ namespace BranallyGames.cwism
                         unit = tile.Army.ID;
 
                     Console.Write("{0}:[{1},{2}]\t", 
-                        tile.Coordinate.ToString(), 
+                        tile.Coordinates.ToString(), 
                         GetTerrainSymbol(terrain), 
                         GetUnitSymbol(unit));
                 }

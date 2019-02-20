@@ -64,10 +64,6 @@ namespace BranallyGames.Wism
             {
                 return Units[0].ID;
             }
-            set
-            {
-                // N/A
-            }
         }
 
         public int GetCompositeAttackModifier()
@@ -159,22 +155,22 @@ namespace BranallyGames.Wism
 
         public bool TryMove(Direction direction)
         {
-            Coordinate coord = this.GetCoordinates();
+            Coordinates coord = this.GetCoordinates();
 
             // Where are we going?
             switch (direction)
             {
                 case Direction.North:
-                    coord = new Coordinate(coord.X, coord.Y - 1);
+                    coord = new Coordinates(coord.X, coord.Y - 1);
                     break;
                 case Direction.East:
-                    coord = new Coordinate(coord.X + 1, coord.Y);
+                    coord = new Coordinates(coord.X + 1, coord.Y);
                     break;
                 case Direction.South:
-                    coord = new Coordinate(coord.X, coord.Y + 1);
+                    coord = new Coordinates(coord.X, coord.Y + 1);
                     break;
                 case Direction.West:
-                    coord = new Coordinate(coord.X - 1, coord.Y);
+                    coord = new Coordinates(coord.X - 1, coord.Y);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("direction", "Unexpected direction given to unit.");
@@ -183,9 +179,9 @@ namespace BranallyGames.Wism
             return TryMove(coord);
         }
 
-        public bool TryMove(Coordinate to)
+        public bool TryMove(Coordinates to)
         {
-            Coordinate coord = this.GetCoordinates();
+            Coordinates coord = this.GetCoordinates();
             Tile[,] map = World.Current.Map;
             Tile targetTile = map[to.X, to.Y];
             
