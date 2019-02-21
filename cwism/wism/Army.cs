@@ -1,3 +1,4 @@
+using BranallyGames.Wism.Pathing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +41,17 @@ namespace BranallyGames.Wism
         {
         }
 
-        public override Guid Guid { get => this.Units[0].Guid; }
+        public override Guid Guid
+        {
+            get
+            {
+                if (this.Units.Count > 0)
+                    return this.Units[0].Guid;
+
+                return Guid.Empty;
+            }
+        }
+
         public bool IsSpecial()
         {
             return Units.Any<Unit>(v => v.IsSpecial());
@@ -50,7 +61,10 @@ namespace BranallyGames.Wism
         {
             get
             {
-                return Units[0].DisplayName;
+                if (Units.Count > 0)
+                    return Units[0].DisplayName;
+
+                return "Empty army";
             }
             set
             {
@@ -151,6 +165,84 @@ namespace BranallyGames.Wism
             }
 
             return canFly;
+        }
+
+        public bool TryMoveOneStep(Tile target, ref IList<Tile> path, out int distance)
+        {
+            return TryMoveOneStep(target.Coordinates, ref path, out distance);
+        }
+
+        /// <summary>
+        /// Advance the army one step along the shortest route.
+        /// </summary>
+        /// <param name="coord"></param>
+        /// <returns></returns>
+        public bool TryMoveOneStep(Coordinates coord, ref IList<Tile> path, out int distance)
+        {
+            if (coord == null)
+            {
+                throw new ArgumentNullException(nameof(coord));
+            }
+
+            Tile[,] map = World.Current.Map;
+            if ((coord.X > map.GetLength(0)) || (coord.Y > map.GetLength(1)))
+            {
+                throw new ArgumentOutOfRangeException(nameof(coord));
+            }
+
+            if (path != null && path.Count == 1)
+            {
+                // We have arrived
+                path.Clear();
+                distance = 0;
+                return false;
+            }
+
+            IList<Tile> myPath = path;
+            int myDistance = 0;
+            Tile target = map[coord.X, coord.Y];
+           
+            if (myPath == null)
+            {
+                // No current path; calculate the shortest route
+                IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+                pathingStrategy.FindShortestRoute(map, this, target, out myPath, out myDistance);
+
+                if (myPath == null || myPath.Count == 0)
+                {
+                    // Impossible route
+                    Log.WriteLine(Log.TraceLevel.Information, "Path between {0} and {1} is impassable.", this.GetCoordinates(), target.Coordinates);
+
+                    path = null;
+                    distance = 0;
+                    return false;
+                }
+            }
+
+            // Now we have a route
+            bool moveSuccessful = TryMove(myPath[1].Coordinates);
+            if (moveSuccessful)
+            { 
+                // Pop the starting location and return updated path and distance
+                myPath.RemoveAt(0);
+                myDistance = CalculateDistance(myPath);
+            }
+            else
+            {
+                Log.WriteLine(Log.TraceLevel.Warning, "Move failed during path traversal to: {0}", myPath[1].Coordinates);
+                myPath = null;
+                myDistance = 0;
+            }
+
+            path = myPath;
+            distance = myDistance;
+            return moveSuccessful;
+        }
+
+        private int CalculateDistance(IList<Tile> myPath)
+        {
+            // TODO: Calculate based on true unit and affiliation cost; for now, static
+            return myPath.Sum<Tile>(tile => tile.Terrain.MovementCost);
         }
 
         public bool TryMove(Direction direction)

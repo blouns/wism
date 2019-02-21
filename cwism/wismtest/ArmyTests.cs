@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
+using BranallyGames.Wism.Pathing;
 
 namespace wism.Tests
 {
@@ -269,6 +270,33 @@ namespace wism.Tests
             Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
+        }
+
+        [Test]
+        public void MovePathTest()
+        {
+            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "9", "1" },
+                { "1", "9", "9", "9", "9", "1" },
+                { "1", "1", "1", "2", "2", "2" },
+                { "1", "1", "1", "2", "T", "1" },
+                { "1", "1", "1", "2", "1", "1" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out Army army, out Tile target));
+
+            int expectedCount = 6;
+            IList<Tile> path = null;
+            int distance;
+            while (army.TryMoveOneStep(target, ref path, out distance))
+            {
+                Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
+            }
+
+            Assert.AreEqual(0, path.Count, "Mismatch on the number of expected moves remaining.");
         }
 
         #region Helper utility methods

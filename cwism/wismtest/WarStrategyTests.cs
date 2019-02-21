@@ -23,9 +23,9 @@ namespace wism.Tests
             World.CreateDefaultWorld();
             Player orcs = CreatePlayer("Orcs of Kor");
             Player elves = CreatePlayer("Elvallie");
-
-            World.Current.Random = new Random(1990);
+            
             World.Current.Reset();
+            World.Current.Random = new Random(1990);
             World.Current.Players.Clear();
             World.Current.Players.Add(orcs);
             World.Current.Players.Add(elves);

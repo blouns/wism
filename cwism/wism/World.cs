@@ -13,6 +13,7 @@ namespace BranallyGames.Wism
         private Random random;
 
         private IList<Player> players;
+        private int currentPlayer;
 
         public IList<Player> Players { get => players; set => players = value; }
 
@@ -124,6 +125,24 @@ namespace BranallyGames.Wism
 
             // TODO: Move player creation outside of World
             this.players = this.ReadyPlayers();
+        }
+
+        public Player NextTurn()
+        {
+            if (Players == null || Players.Count == 0)
+                throw new InvalidOperationException("No players in the world.");
+
+            this.currentPlayer = (this.currentPlayer + 1) % (Players.Count() - 1);
+
+            return Players[this.currentPlayer];
+        }
+
+        public Player GetCurrentPlayer()
+        {
+            if (Players == null || Players.Count == 0)
+                throw new InvalidOperationException("No players in the world.");
+
+            return Players[this.currentPlayer];
         }
 
         private void Validate(Tile[,] map)

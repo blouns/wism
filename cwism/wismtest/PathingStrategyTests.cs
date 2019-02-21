@@ -35,6 +35,7 @@ namespace wism.Tests
 
             Assert.AreEqual(2, distance, "Did not find the shortest route.");
             Assert.AreEqual(3, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
 
         [Test]
@@ -53,6 +54,7 @@ namespace wism.Tests
 
             Assert.AreEqual(1, distance, "Did not find the shortest route.");
             Assert.AreEqual(2, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }       
 
         [Test]
@@ -71,6 +73,7 @@ namespace wism.Tests
 
             Assert.AreEqual(3, distance, "Did not find the shortest route.");
             Assert.AreEqual(4, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
 
         [Test]
@@ -79,16 +82,17 @@ namespace wism.Tests
             IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
             string[,] matrix = new string[,]
             {
-                { "1", "1", "T;5" },
-                { "1", "S", "1" },
+                { "S", "5", "T" },
+                { "1", "4", "1" },
                 { "1", "1", "1" },
             };
 
             Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out int distance);
 
-            Assert.AreEqual(5, distance, "Did not find the shortest route.");
-            Assert.AreEqual(2, shortestRoute.Count, "Did not find the correct number of steps.");
+            Assert.AreEqual(4, distance, "Did not find the shortest route.");
+            Assert.AreEqual(5, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
 
         [Test]
@@ -122,15 +126,16 @@ namespace wism.Tests
                 { "9", "9", "S", "9", "9", "2" },
                 { "9", "9", "9", "9", "9", "2" },
                 { "9", "9", "9", "9", "9", "2" },
-                { "9", "9", "9", "9", "T;2", "1" },
+                { "9", "9", "9", "9", "T", "1" },
                 { "1", "1", "1", "1", "1", "1" },
             };
 
             Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out int distance);
 
-            Assert.AreEqual(12, distance, "Did not find the shortest route.");
+            Assert.AreEqual(11, distance, "Did not find the shortest route.");
             Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
 
         [Test]
@@ -152,6 +157,7 @@ namespace wism.Tests
 
             Assert.AreEqual(6, distance, "Did not find the shortest route.");
             Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
 
         [Test]
@@ -173,9 +179,16 @@ namespace wism.Tests
 
             Assert.AreEqual(7, distance, "Did not find the shortest route.");
             Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
 
-        #region Private helper methods
+        #region Helper methods
+
+        private void AssertPathStartsWithHeroEndsWithTower(IList<Tile> shortestRoute)
+        {
+            Assert.AreEqual("Hero", shortestRoute[0].Army.ID, "Shortest path did not start with hero.");
+            Assert.AreEqual("Tower", shortestRoute.Last<Tile>().Terrain.ID, "Shortest path did not end with tower.");
+        }
 
         /// <summary>
         /// Converts a simple matrix into a <c>Map</c>.
@@ -194,7 +207,7 @@ namespace wism.Tests
         ///     "1"   = Terrain of weight cost 1
         ///     "9"   = Terrain of weight cost 9
         /// </remarks>
-        private static Tile[,] ConvertMatrixToMap(string[,] matrix, out Army army, out Tile target)
+        public static Tile[,] ConvertMatrixToMap(string[,] matrix, out Army army, out Tile target)
         {
             army = null;
             target = null;

@@ -61,7 +61,6 @@
     <Compile Include="Player.cs" />
     <Compile Include="Terrain.cs" />
     <Compile Include="TerrainInfo.cs" />
-    <Compile Include="TerrainModifierInfo.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="UnitInfo.cs" />
@@ -78,9 +77,6 @@
     <None Include="mod\Unit.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Content Include="World.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
