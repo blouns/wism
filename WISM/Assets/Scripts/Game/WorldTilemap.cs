@@ -19,18 +19,19 @@ public class WorldTilemap : MonoBehaviour
     private ArmyFactory armyFactory;
     private readonly Dictionary<Guid, ArmyGameObject> armyDictionary = new Dictionary<Guid, ArmyGameObject>();
 
-    private SelectedState selectedState;
+    private InputState inputState;
     private ArmyGameObject selectedArmy;
 
     public ArmyGameObject SelectedArmy { get => selectedArmy; set => selectedArmy = value; }
-    public SelectedState SelectedState { get => selectedState; set => selectedState = value; }
+    public InputState InputState { get => inputState; set => inputState = value; }
 
     private void Start()
     {
+        Time.fixedDeltaTime = 0.25f;    // Refresh at 1/4 second
         SetupCameras();
         tileMap = transform.GetComponent<Tilemap>();
         world = CreateWorldFromScene();
-        players = ReadyPlayerOne();
+        players = ReadyPlayers();
         armyFactory = ArmyFactory.Create(armyKinds);
 
         // TODO: Swap to use Resources or similar run-time generation of units
@@ -46,7 +47,7 @@ public class WorldTilemap : MonoBehaviour
     {
         HandleInput();
     }
-
+    
     private void HandleInput()
     {
         if (Input.GetMouseButtonDown(0))
@@ -54,18 +55,17 @@ public class WorldTilemap : MonoBehaviour
             BranallyGames.Wism.Tile clickedTile = GetClickedTile();
             Debug.Log("Clicked on " + clickedTile.Terrain.DisplayName);
 
-            switch (this.SelectedState)
+            switch (this.InputState)
             {
-                case SelectedState.Selected:
-                    MoveSelectedArmyTo(clickedTile);
-                    this.SelectedState = SelectedState.Unselected;
-                    break;
-                case SelectedState.Moving:
-                    // Do nothing
-                    break;
-                case SelectedState.Unselected:
+                case InputState.Unselected:
                     SelectObject(clickedTile);
                     break;
+                case InputState.ArmySelected:
+                    MoveSelectedArmyTo(clickedTile);
+                    break;
+                case InputState.ArmyMoving:
+                    // Do nothing
+                    break;                
                 default:
                     throw new InvalidOperationException("Cannot transition to unknown state.");
             }
@@ -82,8 +82,41 @@ public class WorldTilemap : MonoBehaviour
         if (this.players == null)
             return;
 
+        MoveArmies();
         CleanupArmies();
         DrawArmies();
+    }
+
+    private void MoveArmies()
+    {
+        if (InputState == InputState.ArmyMoving)
+        {
+            if (!this.SelectedArmy.Army.TryMoveOneStep(this.SelectedArmy.TargetTile, ref this.SelectedArmy.Path, out int distance))
+            {
+                InputState = InputState.Unselected;
+
+                if (this.SelectedArmy.Path != null && this.SelectedArmy.Path.Count == 0)
+                {
+                    Debug.Log(String.Format("Successfully moved {0} to {1}.", this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates));
+                }
+                else
+                {
+                    Debug.Log(String.Format("Failed to mov {0} to {1}.", this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates));
+                }
+            }
+            else
+            {
+                Debug.Log(String.Format("Moving {0} to {1}; distance remaining {2}...", 
+                    this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates, distance));
+
+                Vector3 vector = ConvertGameToUnityCoordinates(this.SelectedArmy.Army.GetCoordinates());
+                Rigidbody2D rb = this.SelectedArmy.GameObject.GetComponent<Rigidbody2D>();
+                if (rb != null)
+                {
+                    rb.transform.position = vector;
+                }
+            }
+        }
     }
 
     private void CleanupArmies()
@@ -123,7 +156,7 @@ public class WorldTilemap : MonoBehaviour
             }
 
             this.SelectedArmy = armyDictionary[army.Guid];
-            this.SelectedState = SelectedState.Selected;
+            this.InputState = InputState.ArmySelected;
         }
     }
        
@@ -132,44 +165,35 @@ public class WorldTilemap : MonoBehaviour
         // Move the selected unit to the clicked tile location
         if (this.SelectedArmy == null)
             throw new InvalidOperationException("Selected Army was null.");
-
-        // Move army in game
-        if (!this.SelectedArmy.Army.TryMove(targetTile.Coordinate))
-        {
-            Debug.Log(String.Format("Cannot move '{0}' to {1}'", SelectedArmy.Army.DisplayName, targetTile.Terrain));
-            return;
-        }
-
-        // Move in Unity
-        Vector3 vector = ConvertGameToUnityCoordinates(targetTile.Coordinate);
-        Rigidbody2D rb = this.SelectedArmy.GameObject.GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.transform.position = vector;
-        }
-        Debug.Log(String.Format("Moved '{0}' to {1}'", this.SelectedArmy.Army.DisplayName, targetTile.Terrain));
+      
+        this.SelectedArmy.Path = null;
+        this.SelectedArmy.TargetTile = targetTile;
+        this.InputState = InputState.ArmyMoving;
     }
 
     private BranallyGames.Wism.Tile GetClickedTile()
     {
         Vector3 point = followCamera.ScreenToWorldPoint(Input.mousePosition);
-        Coordinate gameCoord = ConvertUnityToGameCoordinates(point, tileMap);
+        Coordinates gameCoord = ConvertUnityToGameCoordinates(point, tileMap);
         BranallyGames.Wism.Tile gameTile = world.Map[gameCoord.X, gameCoord.Y];
         return gameTile;
     }
 
     private void DeselectObject()
     {
-        if (this.SelectedState == SelectedState.Selected)
+        if (this.InputState == InputState.ArmySelected)
         {
-            this.SelectedState = SelectedState.Unselected;
+            this.InputState = InputState.Unselected;
             this.SelectedArmy = null;
+            Debug.Log("Deleselcted army.");
         }
     }
 
-    private IList<Player> ReadyPlayerOne()
+    private IList<Player> ReadyPlayers()
     {
         // Temp: add armies to map for testing
+
+        // Ready Player One
         Player player1 = World.Current.Players[0];
         player1.Affiliation.IsHuman = true;        
         player1.HireHero(World.Current.Map[1, 1]);
@@ -177,6 +201,12 @@ public class WorldTilemap : MonoBehaviour
         player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
+
+        // Ready Player Two
+        Player player2 = World.Current.Players[1];
+        player2.Affiliation = Affiliation.Create(ModFactory.FindAffiliationInfo("StormGiants")); // Hack
+        player2.Affiliation.IsHuman = false;
+        player2.HireHero(World.Current.Map[18, 10]);
 
         return World.Current.Players;
     }
@@ -245,18 +275,18 @@ public class WorldTilemap : MonoBehaviour
         }
     }
 
-    private Vector3 ConvertGameToUnityCoordinates(Coordinate coord)
+    private Vector3 ConvertGameToUnityCoordinates(Coordinates coord)
     {
         float unityX = coord.X + tileMap.cellBounds.xMin - tileMap.tileAnchor.x + 1;
         float unityY = coord.Y + tileMap.cellBounds.yMin - tileMap.tileAnchor.y + 1;
         return new Vector3(unityX, unityY, 0.0f);
     }
    
-    private Coordinate ConvertUnityToGameCoordinates(Vector3 unityVector, Tilemap tileMap)
+    private Coordinates ConvertUnityToGameCoordinates(Vector3 unityVector, Tilemap tileMap)
     {
         float gameX = unityVector.x - tileMap.cellBounds.xMin + tileMap.tileAnchor.x - 1;
         float gameY = unityVector.y - tileMap.cellBounds.yMin + tileMap.tileAnchor.y - 1;
-        return new Coordinate(Convert.ToInt32(gameX), Convert.ToInt32(gameY));
+        return new Coordinates(Convert.ToInt32(gameX), Convert.ToInt32(gameY));
     }
 
     private void InstantiateArmy(Army army, Vector3 worldVector)
@@ -311,9 +341,9 @@ public class WorldTilemap : MonoBehaviour
     }
 }
 
-public enum SelectedState
+public enum InputState
 {
     Unselected = 0,
-    Selected,
-    Moving
+    ArmySelected,
+    ArmyMoving
 }

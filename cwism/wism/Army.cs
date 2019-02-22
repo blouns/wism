@@ -211,7 +211,7 @@ namespace BranallyGames.Wism
                 if (myPath == null || myPath.Count == 0)
                 {
                     // Impossible route
-                    Log.WriteLine(Log.TraceLevel.Information, "Path between {0} and {1} is impassable.", this.GetCoordinates(), target.Coordinates);
+                    Log.WriteLine(Log.TraceLevel.Information, String.Format("Path between {0} and {1} is impassable.", this.GetCoordinates(), target.Coordinates));
 
                     path = null;
                     distance = 0;
@@ -229,7 +229,7 @@ namespace BranallyGames.Wism
             }
             else
             {
-                Log.WriteLine(Log.TraceLevel.Warning, "Move failed during path traversal to: {0}", myPath[1].Coordinates);
+                Log.WriteLine(Log.TraceLevel.Warning, String.Format("Move failed during path traversal to: {0}", myPath[1].Coordinates));
                 myPath = null;
                 myDistance = 0;
             }

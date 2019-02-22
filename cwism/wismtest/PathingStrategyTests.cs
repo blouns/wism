@@ -257,7 +257,9 @@ namespace wism.Tests
                         {
                             // # = Weight                            
                             // Add terrain variation just for easier debugging
-                            if (weight >= 0 && weight <= 1)
+                            if (weight == 0)
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Water"));
+                            else if (weight == 1)
                                 tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Road"));
                             else if (weight == 2)
                                 tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Grass"));

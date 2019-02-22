@@ -33,7 +33,7 @@ namespace BranallyGames.Wism.Pathing
             List<PathNode> queue = new List<PathNode>();
 
             // Build graph and initialize queue of unvisited nodes
-            PathNode[,] graph = BuildGraph(map, queue);
+            PathNode[,] graph = BuildGraph(map, queue, source);
 
             Coordinates coord = source.GetCoordinates();
             graph[coord.X, coord.Y].Distance = 0;   // Distance from source to source
@@ -69,19 +69,23 @@ namespace BranallyGames.Wism.Pathing
             }
         }
 
-        private static PathNode[,] BuildGraph(Tile[,] map, List<PathNode> queue)
+        private static PathNode[,] BuildGraph(Tile[,] map, List<PathNode> queue, Army army)
         {
             PathNode[,] graph = new PathNode[map.GetLength(0), map.GetLength(1)];
             for (int x = 0; x < map.GetLength(0); x++)
             {
                 for (int y = 0; y < map.GetLength(1); y++)
                 {
-                    PathNode node = new PathNode();
-                    node.Distance = Int32.MaxValue;
-                    node.Value = map[x, y];
-                    node.Previous = null;
-                    graph[x, y] = node;
-                    queue.Add(node);
+                    // Only add a node if the army can actually traverse there
+                    if (map[x, y].CanTraverseHere(army))
+                    {                        
+                        PathNode node = new PathNode();
+                        node.Distance = Int32.MaxValue;
+                        node.Value = map[x, y];
+                        node.Previous = null;
+                        graph[x, y] = node;
+                        queue.Add(node);
+                    }
                 }
             }
 

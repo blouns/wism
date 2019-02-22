@@ -46,7 +46,7 @@ namespace BranallyGames.Wism
             return infos.ToList<T>();
         }
 
-        public static AffiliationInfo FindAffiliation(string id)
+        public static AffiliationInfo FindAffiliationInfo(string id)
         {
             IList<AffiliationInfo> infos = LoadAffiliationInfos(ModPath);
             foreach (AffiliationInfo info in infos)

@@ -7,7 +7,10 @@ public class ArmyGameObject
 {
     private Army army;
     private GameObject gameObject;
-    private bool isAlive;
+
+    // State for moving the army
+    public Tile TargetTile;
+    public IList<Tile> Path;
 
     public ArmyGameObject(Army army, GameObject gameObject)
     {
