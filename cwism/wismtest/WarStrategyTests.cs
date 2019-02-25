@@ -14,26 +14,27 @@ namespace wism.Tests
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
-            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;            
         }
 
         [SetUp]
         public void SetupWorldWithTwoPlayers()
         {
+            World.CreateDefaultWorld();
             Player orcs = CreatePlayer("Orcs of Kor");
             Player elves = CreatePlayer("Elvallie");
-
-            World.Current.Random = new Random(1990);
+            
             World.Current.Reset();
+            World.Current.Random = new Random(1990);
             World.Current.Players.Clear();
             World.Current.Players.Add(orcs);
             World.Current.Players.Add(elves);
 
             orcs.HireHero(World.Current.Map[1, 1]);
-            orcs.ConscriptUnit(UnitInfo.GetUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
+            orcs.ConscriptArmy(UnitInfo.GetUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
 
             elves.HireHero(World.Current.Map[3, 1]);
-            elves.ConscriptUnit(UnitInfo.GetUnitInfo("LightInfantry"), World.Current.Map[3, 2]);
+            elves.ConscriptArmy(UnitInfo.GetUnitInfo("LightInfantry"), World.Current.Map[3, 2]);
         }
 
         [Test]
@@ -63,7 +64,10 @@ namespace wism.Tests
             foreach (Affiliation affiliation in affiliationKinds)
             {
                 if (affiliation.DisplayName == name)
+                {
                     player.Affiliation = affiliation;
+                    break;
+                }
             }
 
             return player;

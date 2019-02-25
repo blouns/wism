@@ -33,6 +33,12 @@ namespace BranallyGames.Wism
         [DataMember]
         internal bool CanFly;
 
+        [DataMember]
+        internal int Strength;
+
+        [DataMember]
+        internal int Moves;
+
         public static UnitInfo GetHeroInfo()
         {
             return GetUnitInfo(HeroId);

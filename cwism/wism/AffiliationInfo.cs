@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +23,7 @@ namespace BranallyGames.Wism
 
         public static AffiliationInfo GetAffiliationInfo(string id)
         {
-            AffiliationInfo info = ModFactory.FindAffiliation(id);
+            AffiliationInfo info = ModFactory.FindAffiliationInfo(id);
             if (info == null)
                 throw new InvalidOperationException("No such type found.");
 

@@ -11,7 +11,7 @@ namespace BranallyGames.Wism
         private const int DefaultHitPoints = 2;        
         internal UnitInfo info;
 
-        private int moves = 1;
+        private int moves;
         private int strength;
 
         // Ephemeral fields only used during battle
@@ -20,9 +20,16 @@ namespace BranallyGames.Wism
 
         public int Moves { get => moves; set => moves = value; }
 
+        internal Unit(UnitInfo info)
+        {
+            this.info = info;
+            this.strength = info.Strength;
+            this.moves = info.Moves;
+        }
+
         public override string DisplayName { get => Info.DisplayName; set => Info.DisplayName = value;  }
 
-        public override string ID { get => Info.ID; set => Info.ID = value; }
+        public override string ID { get => Info.ID; }
 
         public UnitInfo Info
         {
@@ -44,15 +51,6 @@ namespace BranallyGames.Wism
         public static Unit Create(UnitInfo info)
         {
             return new Unit(info);
-        }
-
-        private Unit(UnitInfo info)
-        {
-            this.info = info;
-        }
-
-        public Unit()
-        {
         }
 
         public virtual bool IsSpecial()

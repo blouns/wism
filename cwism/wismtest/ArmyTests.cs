@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
+using BranallyGames.Wism.Pathing;
 
 namespace wism.Tests
 {
@@ -31,6 +32,120 @@ namespace wism.Tests
             Army unit = Army.Create(new UnitInfo());
             unit = Army.Create(Unit.Create(new UnitInfo()));
             unit = Army.Create(new List<Unit>() { Unit.Create(new UnitInfo()) });
+        }
+
+        [Test]
+        public void GuidOverrideTest()
+        {
+            Army army = GetFirstHero();
+            Assert.AreEqual(army.Guid, army.Units[0].Guid);
+        }
+
+        [Test]
+        public void StackOrderTest()
+        {
+            Player player1;
+            IList<Army> armies;
+            Tile tile; 
+
+            // Only hero
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            Assert.AreEqual(armies[0].ID, "Hero");
+
+            // Hero and one army of lesser strength
+            StackOrderReset(out player1, out armies, out tile);
+            World.Current.Players[0].HireHero(World.Current.Map[2, 2]);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            Assert.AreEqual(armies[0].ID, "Hero");
+
+            // Hero and two armies of lesser strength
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            Assert.AreEqual(armies[0].ID, "Hero");
+
+            // Hero and set of armies
+            //StackOrderReset(out player1, out armies, out tile);
+            //player1.HireHero(tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            //Assert.AreEqual(armies[0].ID, "Hero");
+            //Assert.AreEqual(armies[0].Units[0].ID, "Hero", "Hero out of order");
+            //Assert.AreEqual(armies[0].Units[1].ID, "Pegasus", "Pegasus out of order");
+            //Assert.AreEqual(armies[0].Units[2].ID, "Pegasus", "Pegasus out of order");
+            //Assert.AreEqual(armies[0].Units[3].ID, "Cavalry", "Cavalry out of order");
+            //Assert.AreEqual(armies[0].Units[4].ID, "HeavyInfantry", "Heavy infantry out of order");
+            //Assert.AreEqual(armies[0].Units[5].ID, "LightInfantry", "Light infantry out of order");
+            //Assert.AreEqual(armies[0].Units[6].ID, "LightInfantry", "Light infantry out of order");
+            //Assert.AreEqual(armies[0].Units[7].ID, "LightInfantry", "Light infantry out of order");
+
+            // Two heros
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            player1.HireHero(tile);
+            Assert.AreEqual(armies[0].ID, "Hero");
+
+            // Two heros and some armies
+            //StackOrderReset(out player1, out armies, out tile);
+            //player1.HireHero(tile);
+            //player1.HireHero(tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            //Assert.AreEqual(armies[0].ID, "Hero");
+            //Assert.AreEqual(armies[0].Units[0].ID, "Hero", "Hero out of order");
+            //Assert.AreEqual(armies[0].Units[1].ID, "Hero", "Hero out of order");
+            //Assert.AreEqual(armies[0].Units[2].ID, "Pegasus", "Pegasus out of order");
+            //Assert.AreEqual(armies[0].Units[3].ID, "Pegasus", "Pegasus out of order");
+            //Assert.AreEqual(armies[0].Units[4].ID, "Cavalry", "Cavalry out of order");
+            //Assert.AreEqual(armies[0].Units[5].ID, "HeavyInfantry", "Heavy infantry out of order");
+            //Assert.AreEqual(armies[0].Units[6].ID, "LightInfantry", "Light infantry out of order");
+            //Assert.AreEqual(armies[0].Units[7].ID, "LightInfantry", "Light infantry out of order");
+
+            // No heros
+            //StackOrderReset(out player1, out armies, out tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            //Assert.AreEqual(armies[0].ID, "Hero");
+            //Assert.AreEqual(armies[0].Units[0].ID, "Pegasus", "Pegasus out of order");
+            //Assert.AreEqual(armies[0].Units[1].ID, "Pegasus", "Pegasus out of order");
+            //Assert.AreEqual(armies[0].Units[2].ID, "Cavalry", "Cavalry out of order");
+            //Assert.AreEqual(armies[0].Units[3].ID, "HeavyInfantry", "Heavy infantry out of order");
+            //Assert.AreEqual(armies[0].Units[4].ID, "HeavyInfantry", "Light infantry out of order");
+            //Assert.AreEqual(armies[0].Units[5].ID, "LightInfantry", "Light infantry out of order");
+            //Assert.AreEqual(armies[0].Units[6].ID, "LightInfantry", "Light infantry out of order");
+            //Assert.AreEqual(armies[0].Units[7].ID, "LightInfantry", "Light infantry out of order");
+
+            /* TODO: Tests to be added
+             * - Greater strength than hero
+             * - Special, 2 specials
+             * - 2 fliers
+             * - Navy
+             */
+        }
+
+        private static void StackOrderReset(out Player player1, out IList<Army> armies, out Tile tile)
+        {
+            World.CreateDefaultWorld();
+            player1 = World.Current.Players[0];
+            armies = player1.GetArmies();
+            tile = World.Current.Map[2, 2];
         }
 
         [Test]
@@ -155,6 +270,56 @@ namespace wism.Tests
             Assert.AreEqual(hero.Tile.Terrain.ID, "Grass");
 
             Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
+        }
+
+        [Test]
+        public void MoveHeroMountainPathTest()
+        {
+            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "9", "1" },
+                { "1", "9", "9", "9", "9", "1" },
+                { "1", "1", "1", "2", "2", "2" },
+                { "1", "1", "1", "2", "T", "1" },
+                { "1", "1", "1", "2", "1", "1" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out Army army, out Tile target));
+
+            int expectedCount = 6;
+            IList<Tile> path = null;
+            while (army.TryMoveOneStep(target, ref path, out float distance))
+            {
+                Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
+            }
+
+            Assert.AreEqual(0, path.Count, "Mismatch on the number of expected moves remaining.");
+        }
+
+        [Test]
+        public void MoveHeroWaterPathTest()
+        {
+            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "0", "1" },
+                { "1", "0", "0", "0", "0", "1" },
+                { "1", "1", "1", "2", "2", "2" },
+                { "1", "1", "1", "2", "T", "1" },
+                { "1", "1", "1", "2", "1", "1" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out Army army, out Tile target));
+
+            int expectedCount = 6;
+            IList<Tile> path = null;
+            while (army.TryMoveOneStep(target, ref path, out float distance))
+            {
+                Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
+            }
         }
 
         #region Helper utility methods

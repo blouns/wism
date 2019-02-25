@@ -17,7 +17,7 @@ namespace BranallyGames.Wism
 
         public bool IsHuman { get => isHuman; set => isHuman = value; }
 
-        public string ID { get => info.ID; set => info.ID = value; }
+        public string ID { get => info.ID; }
 
         public static Affiliation Create(AffiliationInfo info)
         {

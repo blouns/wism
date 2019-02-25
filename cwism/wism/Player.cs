@@ -77,7 +77,7 @@ namespace BranallyGames.Wism
             this.DeployArmy(tile, Army.Create(hero));
         }
 
-        public void ConscriptUnit(UnitInfo unitInfo, Tile tile)
+        public Army ConscriptArmy(UnitInfo unitInfo, Tile tile)
         {
             if (unitInfo == null)
             {
@@ -95,6 +95,8 @@ namespace BranallyGames.Wism
 
             Army newUnit = Army.Create(unitInfo);
             DeployArmy(tile, newUnit);
+
+            return newUnit;
         }
 
         private void DeployArmy(Tile tile, Army newArmy)
@@ -132,6 +134,7 @@ namespace BranallyGames.Wism
             if (!IsMine(targetArmy))
                 throw new ArgumentException("Cannot remove army that is not mine!");
 
+            // BUGBUG: This will remove the entire stack that isn't obvious and may cause issues.
             this.armies.Remove(targetArmy);
         }
 

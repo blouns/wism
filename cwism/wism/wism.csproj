@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -45,6 +48,9 @@
     <Compile Include="Affiliation.cs" />
     <Compile Include="AttackingForceCombatModifier.cs" />
     <Compile Include="Army.cs" />
+    <Compile Include="Pathing\DijkstraPathingStrategy.cs" />
+    <Compile Include="Pathing\IPathingStrategy.cs" />
+    <Compile Include="Pathing\PathNode.cs" />
     <Compile Include="WarStrategy.cs" />
     <Compile Include="DefendingForceCombatModifer.cs" />
     <Compile Include="Hero.cs" />
@@ -55,7 +61,6 @@
     <Compile Include="Player.cs" />
     <Compile Include="Terrain.cs" />
     <Compile Include="TerrainInfo.cs" />
-    <Compile Include="TerrainModifierInfo.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="UnitInfo.cs" />
@@ -73,9 +78,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <Content Include="World.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

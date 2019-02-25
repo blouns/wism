@@ -16,19 +16,10 @@ namespace BranallyGames.Wism
         }
 
         private Hero(UnitInfo info)
+            : base(info)
         {
-            this.info = info;
-
-            // TODO: This should come from the mod
-            this.ID = "Hero";
-            this.Strength = 5;
-            this.Moves = 14;    // TODO: random
-        }
-
-        public Hero()
-        {
-        }
-
+        }       
+        
         public int GetCommandBonus()
         {
             // TODO: Implement items

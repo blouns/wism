@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,5 +26,8 @@ namespace BranallyGames.Wism
 
         [DataMember]
         public bool AllowWalk { get; set; } = false;
+
+        [DataMember]
+        public int Movement = 99;
     }
 }

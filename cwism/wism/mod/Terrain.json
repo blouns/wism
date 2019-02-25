@@ -4,6 +4,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement" : 4,
         "DisplayName": "Forest"
     },
     {
@@ -11,6 +12,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": false,
+        "Movement": 99,
         "DisplayName": "Mountain"
     },
     {
@@ -18,6 +20,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 2,
         "DisplayName": "Grass"
     },
     {
@@ -25,6 +28,7 @@
         "AllowFlight": true,
         "AllowFloat": true,
         "AllowWalk": false,
+        "Movement": 1,
         "DisplayName": "Water"
     },
     {
@@ -32,6 +36,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 4,
         "DisplayName": "Hill"
     },
     {
@@ -39,6 +44,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 4,
         "DisplayName": "Marsh"
     },
     {
@@ -46,6 +52,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 1,
         "DisplayName": "Road"
     },
     {
@@ -53,6 +60,7 @@
         "AllowFlight": true,
         "AllowFloat": true,
         "AllowWalk": true,
+        "Movement": 1,
         "DisplayName": "Bridge"
     },
     {
@@ -60,6 +68,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 1,
         "DisplayName": "Castle"
     },
     {
@@ -67,6 +76,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 2,
         "DisplayName": "Ruins"
     },
     {
@@ -74,6 +84,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 2,
         "DisplayName": "Temple"
     },
     {
@@ -81,6 +92,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 2,
         "DisplayName": "Tomb"
     },
     {
@@ -88,6 +100,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
+        "Movement": 2,
         "DisplayName": "Tower"
     },
     {
@@ -95,6 +108,7 @@
         "AllowFlight": false,
         "AllowFloat": false,
         "AllowWalk": false,
+        "Movement": 99,
         "DisplayName": "Void"
     }
 ]

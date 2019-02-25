@@ -47,7 +47,7 @@ namespace BranallyGames.cwism
 
             World.CreateDefaultWorld();
             World.Current.Players[0].HireHero(World.Current.Map[2, 2]);
-            World.Current.Players[1].ConscriptUnit(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 1]);
+            World.Current.Players[1].ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 1]);
 
             do
             {                
@@ -123,7 +123,7 @@ namespace BranallyGames.cwism
                         unit = tile.Army.ID;
 
                     Console.Write("{0}:[{1},{2}]\t", 
-                        tile.Coordinate.ToString(), 
+                        tile.Coordinates.ToString(), 
                         GetTerrainSymbol(terrain), 
                         GetUnitSymbol(unit));
                 }

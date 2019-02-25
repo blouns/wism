@@ -43,7 +43,7 @@ namespace wism.Tests
                 UnitInfo info = unitKinds[i];
                 Tile tile = CreateTile("Grass", i, i + 1);
 
-                player.ConscriptUnit(info, tile);
+                player.ConscriptArmy(info, tile);
             }
 
             IList<Army> armies = player.GetArmies();
@@ -63,7 +63,7 @@ namespace wism.Tests
 
                 // Add player to Void; should fail
                 Tile tile = CreateTile("Void", 0, 0);
-                player.ConscriptUnit(info, tile);
+                player.ConscriptArmy(info, tile);
             }
 
             Assert.Throws<ArgumentException>(
@@ -81,12 +81,64 @@ namespace wism.Tests
             Assert.IsTrue(armies.Count > 0, "Count of armies was not > 0.");
         }
 
+        [Test]
+        public void NextPlayerTest()
+        {
+            SetupWorldWithTwoPlayers();
+            World world = World.Current;
+
+            Player currentPlayer = world.GetCurrentPlayer();
+            Assert.AreEqual("OrcsOfKor", currentPlayer.Affiliation.ID);
+
+            currentPlayer = world.NextTurn();
+            Assert.AreEqual("Elvallie", currentPlayer.Affiliation.ID);
+
+            currentPlayer = world.NextTurn();
+            Assert.AreEqual("OrcsOfKor", currentPlayer.Affiliation.ID);
+        }
+
         #region Helper utility methods
+
+        public void SetupWorldWithTwoPlayers()
+        {
+            World.CreateDefaultWorld();
+            Player orcs = CreatePlayer("Orcs of Kor");
+            Player elves = CreatePlayer("Elvallie");
+
+            World.Current.Reset();
+            World.Current.Random = new Random(1990);
+            World.Current.Players.Clear();
+            World.Current.Players.Add(orcs);
+            World.Current.Players.Add(elves);
+
+            orcs.HireHero(World.Current.Map[1, 1]);
+            orcs.ConscriptArmy(UnitInfo.GetUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
+
+            elves.HireHero(World.Current.Map[3, 1]);
+            elves.ConscriptArmy(UnitInfo.GetUnitInfo("LightInfantry"), World.Current.Map[3, 2]);
+        }
+
+        private static Player CreatePlayer(string name)
+        {
+            Player player = new Player();
+
+            IList<Affiliation> affiliationKinds = ModFactory.LoadAffiliations(ModFactory.ModPath);
+            foreach (Affiliation affiliation in affiliationKinds)
+            {
+                if (affiliation.DisplayName == name)
+                {
+                    player.Affiliation = affiliation;
+                    break;
+                }
+            }
+
+            return player;
+        }
 
         private Tile CreateTile(string id, int x, int y)
         {
             Tile tile = new Tile();
-            tile.Coordinate = new Coordinate(x, y);
+            tile.Coordinates = new Coordinates(x, y);
             tile.Terrain = GetTerrain(id);
 
             return tile;

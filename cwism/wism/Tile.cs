@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -26,9 +26,9 @@ namespace BranallyGames.Wism
 
         private Army army;
  
-        private Coordinate coordinate;
+        private Coordinates coordinates;
 
-        public Coordinate Coordinate { get => coordinate; set => coordinate = value; }
+        public Coordinates Coordinates { get => coordinates; set => coordinates = value; }
 
         public Army Army { get => army; set => army = value; }
 
@@ -68,9 +68,19 @@ namespace BranallyGames.Wism
         {
             return ((this.army == null) || (this.army.Count + army.Count <= Army.MaxUnits)) ;
         }
+
+        public override string ToString()
+        {
+            if (Army != null)
+                return Army.ToString();
+            else if (Terrain != null)
+                return Terrain.ToString();
+            else
+                return base.ToString();
+        }
     }
 
-    public sealed class Coordinate
+    public sealed class Coordinates
     {
         private int x;
 
@@ -79,7 +89,7 @@ namespace BranallyGames.Wism
         public int X { get => x; set => x = value; }
         public int Y { get => y; set => y = value; }
 
-        public Coordinate(int x, int y)
+        public Coordinates(int x, int y)
         {
             this.x = x;
             this.y = y;
