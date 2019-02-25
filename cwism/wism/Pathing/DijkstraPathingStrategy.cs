@@ -11,7 +11,7 @@ namespace BranallyGames.Wism.Pathing
         {
         }
 
-        public void FindShortestRoute(Tile[,] map, Army source, Tile target, out IList<Tile> fastestRoute, out int distance)
+        public void FindShortestRoute(Tile[,] map, Army source, Tile target, out IList<Tile> fastestRoute, out float distance)
         {
             if (map == null)
             {
@@ -36,7 +36,7 @@ namespace BranallyGames.Wism.Pathing
             PathNode[,] graph = BuildGraph(map, queue, source);
 
             Coordinates coord = source.GetCoordinates();
-            graph[coord.X, coord.Y].Distance = 0;   // Distance from source to source
+            graph[coord.X, coord.Y].Distance = 0.0f;   // Distance from source to source is zero
 
             while (queue.Count > 0)
             {
@@ -50,7 +50,7 @@ namespace BranallyGames.Wism.Pathing
                     if (currentNode.Previous != null || currentNode.Value == source.Tile)
                     {
                         // Construct the shortest path and record total distance
-                        int totalDistance = currentNode.Distance;
+                        float totalDistance = currentNode.Distance;
                         List<Tile> path = new List<Tile>();
                         while (currentNode != null)
                         {
@@ -65,18 +65,24 @@ namespace BranallyGames.Wism.Pathing
                     }
                 }
 
-                UpdateNeighborsIfShorter(queue, graph, currentNode);
+                foreach (PathNode neighbor in currentNode.Neighbors)
+                {
+                    UpdateNeighborIfShorter(queue, currentNode, neighbor);
+                }
             }
         }
 
         private static PathNode[,] BuildGraph(Tile[,] map, List<PathNode> queue, Army army)
         {
-            PathNode[,] graph = new PathNode[map.GetLength(0), map.GetLength(1)];
+            int mapSizeX = map.GetLength(0);
+            int mapSizeY = map.GetLength(1);
+            PathNode[,] graph = new PathNode[mapSizeX, mapSizeY];
             for (int x = 0; x < map.GetLength(0); x++)
             {
                 for (int y = 0; y < map.GetLength(1); y++)
                 {
                     // Only add a node if the army can actually traverse there
+                    // Note: this will leave some "null" spots as a sparse-array
                     if (map[x, y].CanTraverseHere(army))
                     {                        
                         PathNode node = new PathNode();
@@ -89,101 +95,114 @@ namespace BranallyGames.Wism.Pathing
                 }
             }
 
+            for (int x = 0; x < mapSizeX; x++)
+            {
+                for (int y = 0; y < mapSizeY; y++)
+                {
+                    // Army cannot traverse there
+                    if (graph[x, y] == null)
+                        continue;
+
+                    // Add neighbors if can traverse there
+                    //if (x > 0)
+                    //    graph[x, y].AddNeighbor(graph[x - 1, y]);
+                    //if (x < mapSizeX - 1)
+                    //    graph[x, y].AddNeighbor(graph[x + 1, y]);
+                    //if (y > 0)
+                    //    graph[x, y].AddNeighbor(graph[x, y - 1]);
+                    //if (y < mapSizeY - 1)
+                    //    graph[x, y].AddNeighbor(graph[x, y + 1]);
+
+                    int xMax = graph.GetLength(0) - 1;
+                    int yMax = graph.GetLength(1) - 1;
+                    if (x == 0 && y == 0)
+                    {
+                        // Upper-left corner
+                        graph[x, y].AddNeighbor(graph[x + 1, y]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
+                        graph[x, y].AddNeighbor(graph[x, y + 1]);
+                    }
+                    else if (x == 0 && y == yMax)
+                    {
+                        // Lower-left corner
+                        graph[x, y].AddNeighbor(graph[x + 1, y]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x, y - 1]);
+                    }
+                    else if (x == xMax && y == 0)
+                    {
+                        // Upper-right corner
+                        graph[x, y].AddNeighbor(graph[x - 1, y]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
+                        graph[x, y].AddNeighbor(graph[x, y + 1]);
+                    }
+                    else if (x == xMax && y == yMax)
+                    {
+                        // Lower-right corner
+                        graph[x, y].AddNeighbor(graph[x - 1, y]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x, y - 1]);
+                    }
+                    else if (y == 0)
+                    {
+                        // Top middle
+                        graph[x, y].AddNeighbor(graph[x - 1, y]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
+                        graph[x, y].AddNeighbor(graph[x, y + 1]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
+                    }
+                    else if (y == yMax)
+                    {
+                        // Bottom middle
+                        graph[x, y].AddNeighbor(graph[x - 1, y]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
+                    }
+                    else if (x == 0)
+                    {
+                        // Left middle
+                        graph[x, y].AddNeighbor(graph[x, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x, y + 1]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
+                    }
+                    else if (x == xMax)
+                    {
+                        // Right middle
+                        graph[x, y].AddNeighbor(graph[x, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x, y + 1]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
+                    }
+                    else
+                    {
+                        // Middle
+                        graph[x, y].AddNeighbor(graph[x, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x, y + 1]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
+                        graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
+                    }
+                }
+            }
+
             return graph;
-        }
-
-        private static void UpdateNeighborsIfShorter(List<PathNode> queue, PathNode[,] graph, PathNode currentNode)
-        {
-            int x = currentNode.Value.Coordinates.X;
-            int y = currentNode.Value.Coordinates.Y;
-            int xMax = graph.GetLength(0) - 1;
-            int yMax = graph.GetLength(1) - 1;
-
-            // Check all neighbors
-            if (x == 0 && y == 0)
-            {
-                // Upper-left corner
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y + 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y + 1]);
-            }
-            else if (x == 0 && y == yMax)
-            {
-                // Lower-left corner
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y - 1]);
-            }
-            else if (x == xMax && y == 0)
-            {
-                // Upper-right corner
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y + 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y + 1]);
-            }
-            else if (x == xMax && y == yMax)
-            {
-                // Lower-right corner
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y - 1]);
-            }
-            else if (y == 0)
-            {
-                // Top middle
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y + 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y + 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y + 1]);
-            }
-            else if (y == yMax)
-            {
-                // Bottom middle
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y - 1]);
-            }
-            else if (x == 0)
-            {
-                // Left middle
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y + 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y + 1]);
-            }
-            else if (x == xMax)
-            {
-                // Right middle
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y + 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y + 1]);
-            }
-            else
-            {
-                // Middle
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x, y + 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x - 1, y + 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y - 1]);
-                UpdateNeighborIfShorter(queue, currentNode, graph[x + 1, y + 1]);
-            }
         }
 
         private static void UpdateNeighborIfShorter(List<PathNode> queue, PathNode currentNode, PathNode neighborNode)
         {
             if (queue.Contains(neighborNode))
             {
-                int neighborDistance = GetMovementCost(neighborNode.Value);
-                int altDistance = currentNode.Distance + neighborDistance;
+                // Check alternate route with Euclidean distance
+                float altDistance = currentNode.Distance + currentNode.GetDistanceTo(neighborNode);
                 if (altDistance < neighborNode.Distance)
                 {
                     // Shorter path found

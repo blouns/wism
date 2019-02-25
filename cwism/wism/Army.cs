@@ -167,7 +167,24 @@ namespace BranallyGames.Wism
             return canFly;
         }
 
-        public bool TryMoveOneStep(Tile target, ref IList<Tile> path, out int distance)
+        public void FindPath(Tile target, out IList<Tile> path, out float distance)
+        {
+            IList<Tile> myPath = null;
+            float myDistance = 0.0f;
+
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            pathingStrategy.FindShortestRoute(World.Current.Map, this, target, out myPath, out myDistance);
+
+            path = myPath;
+            distance = myDistance;
+        }
+
+        public bool TryMoveOneStep(Tile target, ref IList<Tile> path, out float distance)
         {
             return TryMoveOneStep(target.Coordinates, ref path, out distance);
         }
@@ -177,7 +194,7 @@ namespace BranallyGames.Wism
         /// </summary>
         /// <param name="coord"></param>
         /// <returns></returns>
-        public bool TryMoveOneStep(Coordinates coord, ref IList<Tile> path, out int distance)
+        public bool TryMoveOneStep(Coordinates coord, ref IList<Tile> path, out float distance)
         {
             if (coord == null)
             {
@@ -199,7 +216,7 @@ namespace BranallyGames.Wism
             }
 
             IList<Tile> myPath = path;
-            int myDistance = 0;
+            float myDistance = 0.0f;
             Tile target = map[coord.X, coord.Y];
            
             if (myPath == null)
@@ -214,7 +231,7 @@ namespace BranallyGames.Wism
                     Log.WriteLine(Log.TraceLevel.Information, String.Format("Path between {0} and {1} is impassable.", this.GetCoordinates(), target.Coordinates));
 
                     path = null;
-                    distance = 0;
+                    distance = 0.0f;
                     return false;
                 }
             }

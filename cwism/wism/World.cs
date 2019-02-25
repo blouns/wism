@@ -132,7 +132,7 @@ namespace BranallyGames.Wism
             if (Players == null || Players.Count == 0)
                 throw new InvalidOperationException("No players in the world.");
 
-            this.currentPlayer = (this.currentPlayer + 1) % (Players.Count() - 1);
+            this.currentPlayer = (this.currentPlayer + 1) % Players.Count();
 
             return Players[this.currentPlayer];
         }

@@ -86,17 +86,15 @@ namespace wism.Tests
         {
             SetupWorldWithTwoPlayers();
             World world = World.Current;
-            Player player1 = world.Players[0];
-            Player player2 = world.Players[1];
 
             Player currentPlayer = world.GetCurrentPlayer();
-            Assert.AreSame(player1, currentPlayer);
+            Assert.AreEqual("OrcsOfKor", currentPlayer.Affiliation.ID);
 
             currentPlayer = world.NextTurn();
-            Assert.AreSame(player2, currentPlayer);
+            Assert.AreEqual("Elvallie", currentPlayer.Affiliation.ID);
 
             currentPlayer = world.NextTurn();
-            Assert.AreSame(player1, currentPlayer);
+            Assert.AreEqual("OrcsOfKor", currentPlayer.Affiliation.ID);
         }
 
         #region Helper utility methods

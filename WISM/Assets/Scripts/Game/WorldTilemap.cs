@@ -47,7 +47,8 @@ public class WorldTilemap : MonoBehaviour
     {
         HandleInput();
     }
-    
+
+
     private void HandleInput()
     {
         if (Input.GetMouseButtonDown(0))
@@ -91,7 +92,7 @@ public class WorldTilemap : MonoBehaviour
     {
         if (InputState == InputState.ArmyMoving)
         {
-            if (!this.SelectedArmy.Army.TryMoveOneStep(this.SelectedArmy.TargetTile, ref this.SelectedArmy.Path, out int distance))
+            if (!this.SelectedArmy.Army.TryMoveOneStep(this.SelectedArmy.TargetTile, ref this.SelectedArmy.Path, out float distance))
             {
                 InputState = InputState.Unselected;
 
