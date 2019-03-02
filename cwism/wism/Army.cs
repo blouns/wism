@@ -50,7 +50,7 @@ namespace BranallyGames.Wism
 
                 return Guid.Empty;
             }
-        }
+        }        
 
         public bool IsSpecial()
         {
@@ -130,7 +130,7 @@ namespace BranallyGames.Wism
             if ((this.Units.Count + army.Units.Count) > Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
 
-            this.units = new List<Unit>(this.Units.Concat(army.Units));
+            this.Units.AddRange(army.Units);
             this.Units.Sort(new ByUnitViewingOrder());
         }
 
@@ -356,11 +356,11 @@ namespace BranallyGames.Wism
             // Heros stack to top
             if ((x is Hero) && !(y is Hero))
             {
-                compare = 1;
+                compare = -1;
             }
             else if (y is Hero)
             {
-                compare = -1;
+                compare = 1;
             }
             else
             {

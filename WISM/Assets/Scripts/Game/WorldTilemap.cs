@@ -11,6 +11,7 @@ public class WorldTilemap : MonoBehaviour
 {
     public GameObject[] armyKinds;          // Prefabs for units; TODO: automate creation of prefabs
     public GameObject armyPrefab;
+    public GameObject WarPanel;
 
     private Camera followCamera;
     private World world;
@@ -47,8 +48,7 @@ public class WorldTilemap : MonoBehaviour
     {
         HandleInput();
     }
-
-
+    
     private void HandleInput()
     {
         if (Input.GetMouseButtonDown(0))
@@ -62,11 +62,21 @@ public class WorldTilemap : MonoBehaviour
                     SelectObject(clickedTile);
                     break;
                 case InputState.ArmySelected:
-                    MoveSelectedArmyTo(clickedTile);
+                    if (MovingOntoEnemy(SelectedArmy.Army, clickedTile))
+                    {
+                        AttackArmyAt(clickedTile);
+                    }
+                    else
+                    {
+                        MoveSelectedArmyTo(clickedTile);
+                    }
                     break;
                 case InputState.ArmyMoving:
                     // Do nothing
-                    break;                
+                    break;
+                case InputState.ArmyAttacking:
+                    // Do nothing
+                    break;
                 default:
                     throw new InvalidOperationException("Cannot transition to unknown state.");
             }
@@ -76,6 +86,17 @@ public class WorldTilemap : MonoBehaviour
         {
             DeselectObject();
         }
+    }
+
+    private void AttackArmyAt(BranallyGames.Wism.Tile targetTile)
+    {
+        Debug.Log(String.Format("{0} are attacking {1}!", 
+            SelectedArmy.Army.Affiliation, 
+            SelectedArmy.TargetTile.Army.Affiliation));
+
+        InputState = InputState.ArmyAttacking;
+        this.SelectedArmy.Path = null;
+        this.SelectedArmy.TargetTile = targetTile;
     }
 
     private void FixedUpdate()
@@ -92,32 +113,104 @@ public class WorldTilemap : MonoBehaviour
     {
         if (InputState == InputState.ArmyMoving)
         {
-            if (!this.SelectedArmy.Army.TryMoveOneStep(this.SelectedArmy.TargetTile, ref this.SelectedArmy.Path, out float distance))
-            {
-                InputState = InputState.Unselected;
+            MoveSelectedArmy();
+        }
+        else if (InputState == InputState.ArmyAttacking)
+        {
+            AttackArmy();
+        }
+    }
 
-                if (this.SelectedArmy.Path != null && this.SelectedArmy.Path.Count == 0)
-                {
-                    Debug.Log(String.Format("Successfully moved {0} to {1}.", this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates));
-                }
-                else
-                {
-                    Debug.Log(String.Format("Failed to mov {0} to {1}.", this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates));
-                }
+    private void AttackArmy()
+    {        
+        Army attacker = SelectedArmy.Army;        
+        Army defender = SelectedArmy.TargetTile.Army;
+
+        string attackingAffiliation = attacker.Affiliation.DisplayName;
+        string defendingAffiliation = defender.Affiliation.DisplayName;
+                
+        // Attack one time
+        // TODO: Need to implement this in Core WISM; currently runs to battle conclusion (all roles)
+        AttackOnce(attacker, defender, out AttackResult result);
+        switch (result)
+        {
+            case AttackResult.AttackerWon:
+                Debug.Log(String.Format("{0} has defeated {1}!", attackingAffiliation, defendingAffiliation));
+                Debug.Log("You are victorious!");
+                DeselectObject();
+                this.WarPanel.SetActive(false);
+                break;
+
+            case AttackResult.DefenderWon:
+                Debug.Log(String.Format("{0} has defeated {1}!", defendingAffiliation, attackingAffiliation));
+                Debug.Log("You have been defeated!");
+                DeselectObject();
+                this.WarPanel.SetActive(false);
+                break;
+
+            case AttackResult.Battling:
+                // Do nothing
+                break;
+
+            default:
+                throw new InvalidOperationException("Unknown attack result from battle.");
+        }
+    }
+
+    private void AttackOnce(Army attacker, Army defender, out AttackResult result)
+    {
+        //AttackResult result = AttackResult.Battling;
+
+        // TODO: Implement Core WISM Attack Once
+        throw new NotImplementedException();
+    }
+
+    private void MoveSelectedArmy()
+    {
+        // Check if the next tile contains an enemy army
+        if (MovingOntoEnemy(SelectedArmy.Army, SelectedArmy.TargetTile))
+        {
+            // Cannot move onto an enemy army without explicity attacking
+            InputState = InputState.ArmySelected;
+            this.SelectedArmy.Path = null;
+            this.SelectedArmy.TargetTile = null;
+
+            Debug.Log(String.Format("Enemy detected at {0}.", this.SelectedArmy.TargetTile.Coordinates));
+        }
+        // Try to move the army one step
+        else if (!this.SelectedArmy.Army.TryMoveOneStep(this.SelectedArmy.TargetTile, ref this.SelectedArmy.Path, out float distance))
+        {
+            // Done moving due to path completion, out of moves, or hit barrier
+            InputState = InputState.Unselected;
+
+            if (this.SelectedArmy.Path != null && this.SelectedArmy.Path.Count == 0)
+            {
+                Debug.Log(String.Format("Successfully moved {0} to {1}.", this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates));
             }
             else
             {
-                Debug.Log(String.Format("Moving {0} to {1}; distance remaining {2}...", 
-                    this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates, distance));
-
-                Vector3 vector = ConvertGameToUnityCoordinates(this.SelectedArmy.Army.GetCoordinates());
-                Rigidbody2D rb = this.SelectedArmy.GameObject.GetComponent<Rigidbody2D>();
-                if (rb != null)
-                {
-                    rb.transform.position = vector;
-                }
+                Debug.Log(String.Format("Failed to mov {0} to {1}.", this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates));
             }
         }
+        // Continue moving along the path
+        else
+        {
+            // 
+            Debug.Log(String.Format("Moving {0} to {1}; distance remaining {2}...",
+                this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates, distance));
+
+            Vector3 vector = ConvertGameToUnityCoordinates(this.SelectedArmy.Army.GetCoordinates());
+            Rigidbody2D rb = this.SelectedArmy.GameObject.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.transform.position = vector;
+            }
+        }
+    }
+
+    private bool MovingOntoEnemy(Army army, BranallyGames.Wism.Tile targetTile)
+    {
+        return (targetTile.HasArmy() && (targetTile.Army.Affiliation != army.Affiliation));
     }
 
     private void CleanupArmies()
@@ -175,6 +268,8 @@ public class WorldTilemap : MonoBehaviour
     private BranallyGames.Wism.Tile GetClickedTile()
     {
         Vector3 point = followCamera.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 cell = tileMap.WorldToCell(point);
+        Vector3 local = tileMap.WorldToLocal(point);
         Coordinates gameCoord = ConvertUnityToGameCoordinates(point, tileMap);
         BranallyGames.Wism.Tile gameTile = world.Map[gameCoord.X, gameCoord.Y];
         return gameTile;
@@ -278,15 +373,32 @@ public class WorldTilemap : MonoBehaviour
 
     private Vector3 ConvertGameToUnityCoordinates(Coordinates coord)
     {
-        float unityX = coord.X + tileMap.cellBounds.xMin - tileMap.tileAnchor.x + 1;
-        float unityY = coord.Y + tileMap.cellBounds.yMin - tileMap.tileAnchor.y + 1;
-        return new Vector3(unityX, unityY, 0.0f);
+        //float unityX = coord.X + tileMap.cellBounds.xMin - tileMap.tileAnchor.x + 1;
+        //float unityY = coord.Y + tileMap.cellBounds.yMin - tileMap.tileAnchor.y + 1;
+        //Vector3 vector = new Vector3(coord.X, coord.Y);
+        //Vector3 cell = tileMap.WorldToCell(vector);
+        //Vector3 local = tileMap.WorldToLocal(vector);
+        //Vector3 world = tileMap.CellToWorld(new Vector3Int(coord.X, coord.Y, 0));
+        //Vector3 world1 = tileMap.LocalToWorld(vector);
+
+        ////int unityX = coord.X - tileMap.size.x;// + tileMap.tileAnchor.x;
+        ////int unityY = coord.Y - tileMap.size.y;// - tileMap.tileAnchor.y;
+
+        Vector3 pointCell = new Vector3(coord.X, coord.Y, 0);
+        Vector3 tileMapMin = new Vector3(tileMap.cellBounds.xMin, tileMap.cellBounds.yMin);
+
+        //return new Vector3(unityX, unityY, 0.0f);
+        ////return tileMap.CellToWorld(new Vector3Int(unityX, unityY, 0));
+        Vector3 corner = pointCell + tileMapMin;
+
+        /// OK So you had it right, you just needed to call celltoworld on it
+        return tileMap.CellToWorld(new Vector3Int((int)corner.x, (int)corner.y, 0));
     }
    
-    private Coordinates ConvertUnityToGameCoordinates(Vector3 unityVector, Tilemap tileMap)
+    private Coordinates ConvertUnityToGameCoordinates(Vector3 worldVector, Tilemap tileMap)
     {
-        float gameX = unityVector.x - tileMap.cellBounds.xMin + tileMap.tileAnchor.x - 1;
-        float gameY = unityVector.y - tileMap.cellBounds.yMin + tileMap.tileAnchor.y - 1;
+        float gameX = worldVector.x - tileMap.cellBounds.xMin + tileMap.tileAnchor.x - 1;
+        float gameY = worldVector.y - tileMap.cellBounds.yMin + tileMap.tileAnchor.y - 1;
         return new Coordinates(Convert.ToInt32(gameX), Convert.ToInt32(gameY));
     }
 
@@ -346,5 +458,13 @@ public enum InputState
 {
     Unselected = 0,
     ArmySelected,
-    ArmyMoving
+    ArmyMoving,
+    ArmyAttacking
+}
+
+public enum AttackResult
+{
+    Battling,
+    AttackerWon,
+    DefenderWon
 }

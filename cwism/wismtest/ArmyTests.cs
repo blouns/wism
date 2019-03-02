@@ -57,14 +57,14 @@ namespace wism.Tests
             StackOrderReset(out player1, out armies, out tile);
             World.Current.Players[0].HireHero(World.Current.Map[2, 2]);
             player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            Assert.AreEqual(armies[0].ID, "Hero");
+            Assert.AreEqual("Hero", armies[0].ID);
 
             // Hero and two armies of lesser strength
             StackOrderReset(out player1, out armies, out tile);
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            Assert.AreEqual(armies[0].ID, "Hero");
+            Assert.AreEqual("Hero", armies[0].ID);
 
             // Hero and set of armies
             //StackOrderReset(out player1, out armies, out tile);
