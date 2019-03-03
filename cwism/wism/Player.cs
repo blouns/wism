@@ -103,6 +103,11 @@ namespace BranallyGames.Wism
         {
             newArmy.Affiliation = this.Affiliation;
             newArmy.Tile = tile;
+            newArmy.Units.ForEach(u =>
+            {
+                u.Tile = tile;
+                u.Affiliation = this.Affiliation;
+            });
             tile.AddArmy(newArmy);
             this.armies.Add(newArmy);
         }

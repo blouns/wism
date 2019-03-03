@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="AffiliationInfo.cs" />
     <Compile Include="Affiliation.cs" />
+    <Compile Include="AffiliationTerrainMappingInfo.cs" />
     <Compile Include="AttackingForceCombatModifier.cs" />
     <Compile Include="Army.cs" />
     <Compile Include="Pathing\DijkstraPathingStrategy.cs" />
@@ -69,6 +70,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="mod\Affiliation.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="mod\AffiliationTerrainMapping.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="mod\Terrain.json">

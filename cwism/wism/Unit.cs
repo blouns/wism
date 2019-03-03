@@ -64,10 +64,10 @@ namespace BranallyGames.Wism
             this.ModifiedStrength = this.Strength;
         }
 
-        public virtual int GetAttackModifier()
+        public virtual int GetAttackModifier(Tile target)
         {
-            ICombatModifier attackModifier = new AttackingForceCombatModifier();            
-            int attackerModifier = attackModifier.Calculate(this);
+            ICombatModifier attackModifier = new AttackingForceCombatModifier();
+            int attackerModifier = attackModifier.Calculate(this, target);
 
             return attackerModifier;
         }
@@ -75,10 +75,87 @@ namespace BranallyGames.Wism
         public virtual int GetDefenseModifier()
         {
             ICombatModifier defenseModifier = new DefendingForceCombatModifer();
-            int defenderModifier = defenseModifier.Calculate(this);
+            int defenderModifier = defenseModifier.Calculate(this, this.Tile);
 
             return defenderModifier;
-        }            
+        }
+    }
+
+    public class ByUnitViewingOrder : Comparer<Unit>
+    {
+        public override int Compare(Unit x, Unit y)
+        {
+            int compare = 0;
+
+            // Heros stack to top
+            if ((x is Hero) && !(y is Hero))
+            {
+                compare = -1;
+            }
+            else if (y is Hero)
+            {
+                compare = 1;
+            }
+            // Specials are next
+            else if (x.IsSpecial() && !y.IsSpecial())
+            {
+                compare = -1;
+            }
+            else if (y.IsSpecial())
+            {
+                compare = 1;
+            }
+            else
+            {
+                compare = x.Strength.CompareTo(y.Strength);
+            }
+
+            return compare;
+        }
+    }
+
+    public class ByUnitBattleOrder : Comparer<Unit>
+    {
+        private readonly Tile battlefieldTile;
+
+        public ByUnitBattleOrder(Tile target)
+        {
+            this.battlefieldTile = target;
+        }
+
+        public override int Compare(Unit x, Unit y)
+        {
+            int compare = 0;
+            
+            // Heros stack to top
+            if ((x is Hero) && !(y is Hero))
+            {
+                compare = 1;
+            }
+            else if (y is Hero)
+            {
+                compare = -1;
+            }
+            // Specials are next
+            else if (x.IsSpecial() && !y.IsSpecial())
+            {
+                compare = 1;
+            }
+            else if (y.IsSpecial())
+            {
+                compare = -1;
+            }
+            else
+            {
+                int modifiedStrengthX = x.GetAttackModifier(this.battlefieldTile) + x.Strength;
+                int modifiedStrengthY = y.GetAttackModifier(this.battlefieldTile) + y.Strength;
+
+                // Stack in reverse order of strength
+                compare = modifiedStrengthY.CompareTo(modifiedStrengthX);
+            }
+
+            return compare;
+        }
     }
 }
 

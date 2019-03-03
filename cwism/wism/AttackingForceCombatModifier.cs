@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +6,19 @@ using System.Threading.Tasks;
 
 namespace BranallyGames.Wism
 {
+    /// <summary>
+    /// Interface to define combat modifiers for calculating bonuses.
+    /// </summary>
     interface ICombatModifier
     {
-        int Calculate(Unit attacker, int modifier = 0);
+        /// <summary>
+        /// Calculate the bonus modifer for the attacker in the target terrain
+        /// </summary>
+        /// <param name="attacker">Attacking unit of an army</param>
+        /// <param name="target">Tile being attacked</param>
+        /// <param name="modifier">Internal composite modifier</param>
+        /// <returns>Aggregate modifier bonus</returns>
+        int Calculate(Unit attacker, Tile target, int modifier = 0);
     }
 
     /// <summary>
@@ -77,12 +87,12 @@ namespace BranallyGames.Wism
             modifiers.Add(new TerrainAFCM());
         }
 
-        public int Calculate(Unit attacker, int modifier = 0)
+        public int Calculate(Unit attacker, Tile target, int modifier = 0)
         {
-            int compositeModifer = modifiers.Sum<ICombatModifier>(v => Convert.ToInt32(v.Calculate(attacker, modifier)));
+            int compositeModifer = modifiers.Sum<ICombatModifier>(v => Convert.ToInt32(v.Calculate(attacker, target, modifier)));
 
             return modifier + compositeModifer;
-        }
+        }        
     }
 
     /// <summary>
@@ -93,7 +103,7 @@ namespace BranallyGames.Wism
     /// </summary>
     public class HeroPresentAFCM : ICombatModifier
     {
-        public int Calculate(Unit attacker, int modifier = 0)
+        public int Calculate(Unit attacker, Tile target, int modifier = 0)
         {            
             if (attacker is Hero)
             {
@@ -117,7 +127,7 @@ namespace BranallyGames.Wism
     /// </summary>
     public class FlyingArmyPresentAFCM : ICombatModifier
     {
-        public int Calculate(Unit attacker, int modifier = 0)
+        public int Calculate(Unit attacker, Tile target, int modifier = 0)
         {
             if (attacker.CanFly)
             {
@@ -134,7 +144,7 @@ namespace BranallyGames.Wism
     /// </summary>
     public class SpecialArmyPresentAFCM : ICombatModifier
     {
-        public int Calculate(Unit attacker, int modifier = 0)
+        public int Calculate(Unit attacker, Tile target, int modifier = 0)
         {
             if (attacker.IsSpecial())
             {
@@ -150,7 +160,7 @@ namespace BranallyGames.Wism
     /// Banner has a command value of 2.
     public class CommandItemPresentAFCM : ICombatModifier
     {
-        public int Calculate(Unit attacker, int modifier = 0)
+        public int Calculate(Unit attacker, Tile target, int modifier = 0)
         {
             Hero hero = attacker as Hero;
             if (hero != null)
@@ -171,10 +181,9 @@ namespace BranallyGames.Wism
     /// </summary>
     public class TerrainAFCM : ICombatModifier
     {
-        public int Calculate(Unit attacker, int modifier = 0)
+        public int Calculate(Unit attacker, Tile target, int modifier = 0)
         {
-            // TODO: Implement when Terrain modifiers are ready
-            return modifier;
+            return attacker.Affiliation.GetTerrainModifier(target);            
         }
     }
 }

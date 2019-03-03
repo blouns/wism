@@ -84,11 +84,11 @@ namespace BranallyGames.Wism
         ///
         /// As soon as an army receives 2 hits it is destroyed.
         /// </summary>
-        /// <param name="tile">Tile that is being attacked.</param>
+        /// <param name="target">Tile that is being attacked.</param>
         /// <returns>True if attacker wins; false otherwise.</returns>
-        public bool AttackOnce(Army attacker, Tile tile)
+        public bool AttackOnce(Army attacker, Tile target)
         {
-            PrepareArmiesForAttack(attacker, tile, out Army defender, out int compositeAFCM, out int compositeDFCM);
+            PrepareArmiesForAttack(attacker, target, out Army defender, out int compositeAFCM, out int compositeDFCM);
 
             bool won = AttackOnceInternal(defender, attacker, compositeAFCM, compositeDFCM);
 
@@ -105,23 +105,23 @@ namespace BranallyGames.Wism
             return (attacker.Count == 0 || defender.Count == 0);
         }
 
-        private void PrepareArmiesForAttack(Army attacker, Tile tile, out Army defender, out int compositeAFCM, out int compositeDFCM)
+        private void PrepareArmiesForAttack(Army attacker, Tile target, out Army defender, out int compositeAFCM, out int compositeDFCM)
         {
             // Muster all units from composite tile (i.e. city) to defend
-            defender = tile.MusterArmy();
-            IList<Unit> defenders = defender.Units;
-            IList<Unit> attackers = attacker.Units;
+            defender = target.MusterArmy();
+            List<Unit> defenders = defender.Units;
+            List<Unit> attackers = attacker.Units;
 
             // Calculate composite modifieres
-            compositeAFCM = attacker.GetCompositeAttackModifier();
+            compositeAFCM = attacker.GetCompositeAttackModifier(target);
             compositeDFCM = defender.GetCompositeDefenseModifier();
 
             // Apply unit-specific terrain modifiers (e.g. elves like forests)
-            ApplyUnitTerrainModifiers(attackers);
-            ApplyUnitTerrainModifiers(defenders);
+            ApplyUnitTerrainModifiers(attackers, target);
+            ApplyUnitTerrainModifiers(defenders, target);
 
             // Order attackers by strength from weakest to strongest
-            // TODO: Heros to back?
+            attackers.Sort(new ByUnitBattleOrder(target));
             attackers.OrderBy(v => v.ModifiedStrength);
             defenders.OrderBy(v => v.ModifiedStrength);
         }
@@ -160,11 +160,11 @@ namespace BranallyGames.Wism
             return attackSucceeded;
         }
 
-        private void ApplyUnitTerrainModifiers(IList<Unit> units)
+        private void ApplyUnitTerrainModifiers(IList<Unit> units, Tile target)
         {            
             foreach (Unit unit in units)
             {
-                // TODO: Apply unit-specific modifiers; for now just raw strength
+                // TODO: Apply unit-specific modifiers; for now just raw strgth
                 unit.ModifiedStrength = unit.Strength; 
             }
             return;

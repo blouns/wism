@@ -21,7 +21,7 @@ namespace BranallyGames.Wism
             }
 
             Army composite = new Army();
-            composite.units = new List<Unit>(units);
+            composite.units = new List<Unit>(units);            
             composite.Units.Sort(new ByUnitViewingOrder());
 
             return composite;
@@ -80,9 +80,9 @@ namespace BranallyGames.Wism
             }
         }
 
-        public int GetCompositeAttackModifier()
+        public int GetCompositeAttackModifier(Tile target)
         {
-            return Units.Sum<Unit>(v => v.GetAttackModifier());
+            return Units.Sum<Unit>(v => v.GetAttackModifier(target));
         }
 
         public int GetCompositeDefenseModifier()
@@ -324,6 +324,11 @@ namespace BranallyGames.Wism
 
             // We are clear to advance!
             this.Tile.MoveArmy(this, targetTile);
+            this.Units.ForEach(u =>
+            {
+                u.Tile = targetTile;
+                u.Affiliation = this.Affiliation;
+            });
 
             return true;
         }
@@ -345,31 +350,5 @@ namespace BranallyGames.Wism
         South,
         East,
         West
-    }
-
-    public class ByUnitViewingOrder : Comparer<Unit>
-    {
-        public override int Compare(Unit x, Unit y)
-        {
-            int compare = 0;
-
-            // Heros stack to top
-            if ((x is Hero) && !(y is Hero))
-            {
-                compare = -1;
-            }
-            else if (y is Hero)
-            {
-                compare = 1;
-            }
-            else
-            {
-                int xStrength = x.GetAttackModifier() + x.Strength;
-                int yStrength = y.GetAttackModifier() + y.Strength;
-                compare = xStrength.CompareTo(yStrength);
-            }
-
-            return compare;
-        }
-    }
+    }    
 }

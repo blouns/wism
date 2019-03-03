@@ -20,9 +20,10 @@ namespace BranallyGames.Wism
     {
         public static string ModPath = "mod";
 
-        private static IList<UnitInfo> unitInfos = null;
-        private static IList<TerrainInfo> terrainInfos = null;
-        private static IList<AffiliationInfo> affiliationInfos = null;
+        private static IList<UnitInfo> unitInfos;
+        private static IList<TerrainInfo> terrainInfos;
+        private static IList<AffiliationInfo> affiliationInfos;
+        private static IList<AffiliationTerrainMappingInfo> affiliationTerrainMappingInfos;
 
         public static IList<T> LoadModFiles<T>(string path)
         {            
@@ -66,7 +67,16 @@ namespace BranallyGames.Wism
             IList<Affiliation> affiliations = new List<Affiliation>();
             foreach (AffiliationInfo ai in affiliationInfos)
             {
-                affiliations.Add(Affiliation.Create(ai));
+                Affiliation affiliation = Affiliation.Create(ai);                
+                IList<AffiliationTerrainMappingInfo> terrainModifiers = LoadAffiliationTerrainMappingInfos(path);
+                foreach (AffiliationTerrainMappingInfo modifier in terrainModifiers)
+                {
+                    if (modifier.AffiliationID == affiliation.ID)
+                    {
+                        affiliation.AddTerrainModifier(modifier);
+                    }
+                }
+                affiliations.Add(affiliation);
             }
 
             return affiliations;
@@ -94,6 +104,22 @@ namespace BranallyGames.Wism
             }
 
             return null; // ID not found
+        }
+
+        public static IList<AffiliationTerrainMappingInfo> FindAffiliationTerrainMappingInfos(string affiliationId)
+        {
+            IList<AffiliationTerrainMappingInfo> terrainModifiers = new List<AffiliationTerrainMappingInfo>();
+
+            IList<AffiliationTerrainMappingInfo> infos = LoadAffiliationTerrainMappingInfos(ModPath);
+            foreach (AffiliationTerrainMappingInfo info in infos)
+            {
+                if (info.AffiliationID == affiliationId)
+                {
+                    terrainModifiers.Add(info);
+                }
+            }
+
+            return terrainModifiers;
         }
 
         public static IList<Unit> LoadUnits(string path)
@@ -137,7 +163,7 @@ namespace BranallyGames.Wism
             }
 
             return affiliationInfos;
-        }
+        }        
 
         public static IList<AffiliationInfo> GetAffiliationInfos()
         {
@@ -178,6 +204,25 @@ namespace BranallyGames.Wism
             }
 
             return terrains;
-        }        
+        }
+
+        public static IList<AffiliationTerrainMappingInfo> LoadAffiliationTerrainMappingInfos(string path)
+        {
+            string filePath = String.Format(@"{0}\{1}", path, AffiliationTerrainMappingInfo.FileName);
+            if (affiliationTerrainMappingInfos == null)
+            {
+                affiliationTerrainMappingInfos = LoadModFiles<AffiliationTerrainMappingInfo>(filePath);
+            }
+
+            return affiliationTerrainMappingInfos;
+        }
+
+        public static IList<AffiliationTerrainMappingInfo> GetAffiliationTerrainMappingInfos()
+        {
+            if (affiliationTerrainMappingInfos == null || affiliationTerrainMappingInfos.Count == 0)
+                throw new InvalidOperationException("Terrain infos not loaded.");
+
+            return new List<AffiliationTerrainMappingInfo>(affiliationTerrainMappingInfos);
+        }
     }    
 }
