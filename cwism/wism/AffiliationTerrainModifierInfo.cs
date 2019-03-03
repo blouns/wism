@@ -35,9 +35,9 @@ namespace BranallyGames.Wism
     ///                                  +---------------------+
     ///                                             .=NO EFFECT
     [DataContract]
-    public class AffiliationTerrainMappingInfo
+    public class AffiliationTerrainModifierInfo
     {
-        public static readonly string FileName = "AffiliationTerrainMapping.json";
+        public static readonly string FileName = "AffiliationTerrainModifier.json";
 
         [DataMember]
         public string AffiliationID { get; set; } = "Unknown";

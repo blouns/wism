@@ -1,5 +1,6 @@
 using BranallyGames.Wism.Pathing;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BranallyGames.Wism
 {
-    public class Army : MapObject
+    public class Army : Unit, IEnumerable<Unit>
     {
         public const int MaxUnits = 8;
 
@@ -21,8 +22,8 @@ namespace BranallyGames.Wism
             }
 
             Army composite = new Army();
-            composite.units = new List<Unit>(units);            
-            composite.Units.Sort(new ByUnitViewingOrder());
+            composite.units = new List<Unit>(units);
+            composite.UpdateCompositeUnits();
 
             return composite;
         }
@@ -32,7 +33,7 @@ namespace BranallyGames.Wism
             return Create(new List<Unit>() { unit });
         }
 
-        public static Army Create(UnitInfo info)
+        public new static Army Create(UnitInfo info)
         {
             return Create(Unit.Create(info));
         }
@@ -45,8 +46,8 @@ namespace BranallyGames.Wism
         {
             get
             {
-                if (this.Units.Count > 0)
-                    return this.Units[0].Guid;
+                if (units.Count > 0)
+                    return units[0].Guid;
 
                 return Guid.Empty;
             }
@@ -54,15 +55,15 @@ namespace BranallyGames.Wism
 
         public bool IsSpecial()
         {
-            return Units.Any<Unit>(v => v.IsSpecial());
+            return units.Any<Unit>(v => v.IsSpecial());
         }
         
         public override string DisplayName
         {
             get
             {
-                if (Units.Count > 0)
-                    return Units[0].DisplayName;
+                if (units.Count > 0)
+                    return units[0].DisplayName;
 
                 return "Empty army";
             }
@@ -76,23 +77,23 @@ namespace BranallyGames.Wism
         {
             get
             {
-                return Units[0].ID;
+                return units[0].ID;
             }
         }
 
         public int GetCompositeAttackModifier(Tile target)
         {
-            return Units.Sum<Unit>(v => v.GetAttackModifier(target));
+            return units.Sum<Unit>(v => v.GetAttackModifier(target));
         }
 
         public int GetCompositeDefenseModifier()
         {
-            return Units.Sum<Unit>(v => v.GetDefenseModifier());
+            return units.Sum<Unit>(v => v.GetDefenseModifier());
         }
 
         public bool Contains(Unit unit)
         {
-            return this.Units.Contains<Unit>(unit);
+            return this.units.Contains<Unit>(unit);
         }
 
         public void Kill(Unit unit)
@@ -100,8 +101,8 @@ namespace BranallyGames.Wism
             if (!Contains(unit))
                 throw new ArgumentException("Unit not in the army: {0}", unit.ToString());
             
-            this.Units.Remove(unit);
-            if (this.Units.Count == 0)
+            this.units.Remove(unit);
+            if (this.units.Count == 0)
             {
                 // No more units in the army; kill it!
                 foreach (Player player in World.Current.Players)
@@ -113,25 +114,34 @@ namespace BranallyGames.Wism
                 }
             }
 
-            this.Units.Sort(new ByUnitViewingOrder());
+            this.units.Sort(new ByUnitViewingOrder());
         }
 
         public void Add(Unit unit)
         {
-            if (this.Units.Count == Army.MaxUnits)
+            if (this.units.Count == Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
 
-            this.Units.Add(unit);
-            this.Units.Sort(new ByUnitViewingOrder());
+            MergeArmies(Army.Create(unit));
         }
 
-        public void Concat(Army army)
+        public void MergeArmies(Army army)
         {
-            if ((this.Units.Count + army.Units.Count) > Army.MaxUnits)
+            if ((this.units.Count + army.units.Count) > Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
+            
+            this.units.AddRange(army.units);
+            UpdateCompositeUnits();            
+        }
 
-            this.Units.AddRange(army.Units);
-            this.Units.Sort(new ByUnitViewingOrder());
+        private void UpdateCompositeUnits()
+        {
+            this.units.ForEach(u => 
+            {
+                u.Affiliation = this.Affiliation;
+                u.Tile = this.Tile;
+            });
+            this.units.Sort(new ByUnitViewingOrder());
         }
 
         public bool CanWalk()
@@ -256,6 +266,11 @@ namespace BranallyGames.Wism
             return moveSuccessful;
         }
 
+        public Unit GetUnitAt(int index)
+        {
+            return this.units[index];
+        }
+
         private int CalculateDistance(IList<Tile> myPath)
         {
             // TODO: Calculate based on true unit and affiliation cost; for now, static
@@ -324,26 +339,48 @@ namespace BranallyGames.Wism
 
             // We are clear to advance!
             this.Tile.MoveArmy(this, targetTile);
-            this.Units.ForEach(u =>
-            {
-                u.Tile = targetTile;
-                u.Affiliation = this.Affiliation;
-            });
+            UpdateCompositeUnits();
 
             return true;
         }
         
-        public int Count
+        public int Size
         {
             get
             {
-                return this.Units.Count();
+                return this.units.Count();
             }
         }
 
-        public List<Unit> Units { get => units; }
-    }
+        public List<Unit> GetUnits()
+        {
+            return new List<Unit>(units);
+        }
 
+        public IEnumerator<Unit> GetEnumerator()
+        {
+            return units.GetEnumerator();
+        } 
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    
+        public Unit this[int index] 
+        {                                                                               
+            get
+            {
+                return units[index];
+            }
+
+            set
+            {
+                units[index] = value;
+            }
+        }
+    }
+    
     public enum Direction
     {
         North,

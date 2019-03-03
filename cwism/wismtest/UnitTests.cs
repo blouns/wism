@@ -34,8 +34,8 @@ namespace wism.Tests
         public void StrengthTest()
         {            
             Player player = World.Current.Players[0];
-            Army lightInfantry = player.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[2, 2]);
-            Assert.AreEqual(3, lightInfantry.Units[0].Strength, "Light Infantry not at the expected strength.");
+            Army army = player.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[2, 2]);
+            Assert.AreEqual(3, army.GetUnitAt(0).Strength, "Light Infantry not at the expected strength.");
         }
     }
 }

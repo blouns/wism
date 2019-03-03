@@ -115,12 +115,12 @@ namespace wism.Tests
             Army attacker = World.Current.Players[0].GetArmies()[0];
             IWarStrategy war = new DefaultWarStrategy();
 
-            while (attacker.Count > 0 && tile.Army.Count > 0)
+            while (attacker.Size > 0 && tile.Army.Size > 0)
             {
                 bool won = war.AttackOnce(attacker, tile);
             }
 
-            Assert.IsTrue(attacker.Count > 0, "Defender was not supposed to win.");
+            Assert.IsTrue(attacker.Size > 0, "Defender was not supposed to win.");
         }
 
         [Test]
@@ -147,12 +147,12 @@ namespace wism.Tests
             Army attacker = World.Current.Players[0].GetArmies()[0];
             IWarStrategy war = new DefaultWarStrategy();
 
-            while (attacker.Count > 0 && tile.Army.Count > 0)
+            while (attacker.Size > 0 && tile.Army.Size > 0)
             {
                 bool won = war.AttackOnce(attacker, tile);
             }
 
-            Assert.IsTrue(attacker.Count == 0, "Attacker was not supposed to win.");
+            Assert.IsTrue(attacker.Size == 0, "Attacker was not supposed to win.");
         }
 
 

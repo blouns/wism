@@ -38,7 +38,9 @@ namespace wism.Tests
         public void GuidOverrideTest()
         {
             Army army = GetFirstHero();
-            Assert.AreEqual(army.Guid, army.Units[0].Guid);
+            Assert.AreEqual(army.Guid, army[0].Guid);
+            Assert.AreEqual(army.Guid, army.GetUnitAt(0).Guid);
+            Assert.AreEqual(army.Guid, army.GetUnits()[0].Guid);
         }
 
         [Test]
@@ -67,24 +69,24 @@ namespace wism.Tests
             Assert.AreEqual("Hero", armies[0].ID);
 
             // Hero and set of armies
-            //StackOrderReset(out player1, out armies, out tile);
-            //player1.HireHero(tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            //Assert.AreEqual(armies[0].ID, "Hero");
-            //Assert.AreEqual(armies[0].Units[0].ID, "Hero", "Hero out of order");
-            //Assert.AreEqual(armies[0].Units[1].ID, "Pegasus", "Pegasus out of order");
-            //Assert.AreEqual(armies[0].Units[2].ID, "Pegasus", "Pegasus out of order");
-            //Assert.AreEqual(armies[0].Units[3].ID, "Cavalry", "Cavalry out of order");
-            //Assert.AreEqual(armies[0].Units[4].ID, "HeavyInfantry", "Heavy infantry out of order");
-            //Assert.AreEqual(armies[0].Units[5].ID, "LightInfantry", "Light infantry out of order");
-            //Assert.AreEqual(armies[0].Units[6].ID, "LightInfantry", "Light infantry out of order");
-            //Assert.AreEqual(armies[0].Units[7].ID, "LightInfantry", "Light infantry out of order");
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            Assert.AreEqual("Hero", armies[0].ID);
+            Assert.AreEqual("Hero", armies[0][0].ID, "Hero out of order");
+            Assert.AreEqual("Pegasus", armies[0][1].ID, "Pegasus out of order");
+            Assert.AreEqual("Pegasus", armies[0][2].ID, "Pegasus out of order");
+            Assert.AreEqual("Cavalry", armies[0][3].ID, "Cavalry out of order");
+            Assert.AreEqual("HeavyInfantry", armies[0][4].ID, "Heavy infantry out of order");
+            Assert.AreEqual("LightInfantry", armies[0][5].ID, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", armies[0][6].ID, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", armies[0][7].ID, "Light infantry out of order");
 
             // Two heros
             StackOrderReset(out player1, out armies, out tile);
@@ -93,49 +95,46 @@ namespace wism.Tests
             Assert.AreEqual(armies[0].ID, "Hero");
 
             // Two heros and some armies
-            //StackOrderReset(out player1, out armies, out tile);
-            //player1.HireHero(tile);
-            //player1.HireHero(tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
-            //Assert.AreEqual(armies[0].ID, "Hero");
-            //Assert.AreEqual(armies[0].Units[0].ID, "Hero", "Hero out of order");
-            //Assert.AreEqual(armies[0].Units[1].ID, "Hero", "Hero out of order");
-            //Assert.AreEqual(armies[0].Units[2].ID, "Pegasus", "Pegasus out of order");
-            //Assert.AreEqual(armies[0].Units[3].ID, "Pegasus", "Pegasus out of order");
-            //Assert.AreEqual(armies[0].Units[4].ID, "Cavalry", "Cavalry out of order");
-            //Assert.AreEqual(armies[0].Units[5].ID, "HeavyInfantry", "Heavy infantry out of order");
-            //Assert.AreEqual(armies[0].Units[6].ID, "LightInfantry", "Light infantry out of order");
-            //Assert.AreEqual(armies[0].Units[7].ID, "LightInfantry", "Light infantry out of order");
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            Assert.AreEqual("Hero", armies[0].ID);
+            Assert.AreEqual("Hero", armies[0][0].ID, "Hero out of order");
+            Assert.AreEqual("Hero", armies[0][1].ID, "Hero out of order");
+            Assert.AreEqual("Pegasus", armies[0][2].ID, "Pegasus out of order");
+            Assert.AreEqual("Pegasus", armies[0][3].ID, "Pegasus out of order");
+            Assert.AreEqual("Cavalry", armies[0][4].ID, "Cavalry out of order");
+            Assert.AreEqual("HeavyInfantry", armies[0][5].ID, "Heavy infantry out of order");
+            Assert.AreEqual("LightInfantry", armies[0][6].ID, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", armies[0][7].ID, "Light infantry out of order");
 
             // No heros
-            //StackOrderReset(out player1, out armies, out tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
-            //Assert.AreEqual(armies[0].ID, "Hero");
-            //Assert.AreEqual(armies[0].Units[0].ID, "Pegasus", "Pegasus out of order");
-            //Assert.AreEqual(armies[0].Units[1].ID, "Pegasus", "Pegasus out of order");
-            //Assert.AreEqual(armies[0].Units[2].ID, "Cavalry", "Cavalry out of order");
-            //Assert.AreEqual(armies[0].Units[3].ID, "HeavyInfantry", "Heavy infantry out of order");
-            //Assert.AreEqual(armies[0].Units[4].ID, "HeavyInfantry", "Light infantry out of order");
-            //Assert.AreEqual(armies[0].Units[5].ID, "LightInfantry", "Light infantry out of order");
-            //Assert.AreEqual(armies[0].Units[6].ID, "LightInfantry", "Light infantry out of order");
-            //Assert.AreEqual(armies[0].Units[7].ID, "LightInfantry", "Light infantry out of order");
+            StackOrderReset(out player1, out armies, out tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            Assert.AreEqual("Pegasus", armies[0].ID);
+            Assert.AreEqual("Pegasus", armies[0][0].ID, "Pegasus out of order");
+            Assert.AreEqual("Pegasus", armies[0][1].ID, "Pegasus out of order");
+            Assert.AreEqual("Cavalry", armies[0][2].ID, "Cavalry out of order");
+            Assert.AreEqual("HeavyInfantry", armies[0][3].ID, "Heavy infantry out of order");
+            Assert.AreEqual("LightInfantry", armies[0][4].ID, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", armies[0][5].ID, "Light infantry out of order");
 
             /* TODO: Tests to be added
              * - Greater strength than hero
-             * - Special, 2 specials
+             * - Special, 2 specials, special+fly
              * - 2 fliers
+             * - moves
              * - Navy
              */
         }
@@ -371,7 +370,7 @@ namespace wism.Tests
 
             foreach (Army army in armies)
             {
-                foreach (Unit unit in army.Units)
+                foreach (Unit unit in army)
                 {
                     hero = unit as Hero;
                     if (hero != null)

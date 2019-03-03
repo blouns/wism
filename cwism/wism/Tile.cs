@@ -46,7 +46,7 @@ namespace BranallyGames.Wism
             }
             else
             {
-                this.Army.Concat(newArmy);
+                this.Army.MergeArmies(newArmy);
             }            
         }
 
@@ -66,7 +66,7 @@ namespace BranallyGames.Wism
 
         internal bool HasRoom(Army army)
         {
-            return ((this.army == null) || (this.army.Count + army.Count <= Army.MaxUnits)) ;
+            return ((this.army == null) || (this.army.Size + army.Size <= Army.MaxUnits)) ;
         }
 
         public override string ToString()

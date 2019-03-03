@@ -10,7 +10,7 @@ namespace BranallyGames.Wism
     public class Affiliation : ICustomizable
     {
         private AffiliationInfo info;
-        private IList<AffiliationTerrainMappingInfo> terrainModifiers = new List<AffiliationTerrainMappingInfo>();
+        private IList<AffiliationTerrainModifierInfo> terrainModifiers = new List<AffiliationTerrainModifierInfo>();
 
         private bool isHuman = false;
 
@@ -40,12 +40,12 @@ namespace BranallyGames.Wism
             }
         }
 
-        public IList<AffiliationTerrainMappingInfo> GetTerrainModifiers()
+        public IList<AffiliationTerrainModifierInfo> GetTerrainModifiers()
         {
-            return new List<AffiliationTerrainMappingInfo>(this.terrainModifiers);
+            return new List<AffiliationTerrainModifierInfo>(this.terrainModifiers);
         }
 
-        public void AddTerrainModifier(AffiliationTerrainMappingInfo modifier)
+        public void AddTerrainModifier(AffiliationTerrainModifierInfo modifier)
         {
             this.terrainModifiers.Add(modifier);
         }
@@ -57,8 +57,8 @@ namespace BranallyGames.Wism
                 throw new ArgumentException("message", nameof(terrainId));
             }
 
-            IList<AffiliationTerrainMappingInfo> modifiers = ModFactory.FindAffiliationTerrainMappingInfos(this.ID);
-            foreach (AffiliationTerrainMappingInfo value in modifiers)
+            IList<AffiliationTerrainModifierInfo> modifiers = ModFactory.FindAffiliationTerrainMappingInfos(this.ID);
+            foreach (AffiliationTerrainModifierInfo value in modifiers)
             {
                 if (value.TerrainID == terrainId)
                 {

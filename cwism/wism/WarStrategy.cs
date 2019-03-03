@@ -53,7 +53,7 @@ namespace BranallyGames.Wism
             Army defender = tile.Army;
 
             // Attack units one-at-a-time to the death!
-            while (attacker.Count > 0 && defender.Count > 0)
+            while (attacker.Size > 0 && defender.Size > 0)
             {
                 if (AttackOnce(attacker, tile))
                 {
@@ -65,7 +65,7 @@ namespace BranallyGames.Wism
                 }
             }
 
-            return attacker.Count > 0;
+            return attacker.Size > 0;
         }
 
         /// <summary>
@@ -102,15 +102,15 @@ namespace BranallyGames.Wism
 
         private bool IsBattleOver(Army defender, Army attacker)
         {
-            return (attacker.Count == 0 || defender.Count == 0);
+            return (attacker.Size == 0 || defender.Size == 0);
         }
 
         private void PrepareArmiesForAttack(Army attacker, Tile target, out Army defender, out int compositeAFCM, out int compositeDFCM)
         {
             // Muster all units from composite tile (i.e. city) to defend
             defender = target.MusterArmy();
-            List<Unit> defenders = defender.Units;
-            List<Unit> attackers = attacker.Units;
+            List<Unit> defenders = defender.GetUnits();
+            List<Unit> attackers = attacker.GetUnits();
 
             // Calculate composite modifieres
             compositeAFCM = attacker.GetCompositeAttackModifier(target);
@@ -128,16 +128,14 @@ namespace BranallyGames.Wism
 
         private static void ResetHitPoints(Army defender, Army attacker)
         {
-            foreach (Unit unit in attacker.Units)
-                unit.Reset();
-            foreach (Unit unit in defender.Units)
-                unit.Reset();
+            attacker.GetUnits().ForEach(u => u.Reset());
+            defender.GetUnits().ForEach(u => u.Reset());
         }
 
         private bool AttackOnceInternal(Army defender, Army attacker, int compositeAFCM, int compositeDFCM)
         {
-            Unit currentAttacker = attacker.Units.First();
-            Unit currentDefender = defender.Units.First();
+            Unit currentAttacker = attacker[0];
+            Unit currentDefender = defender[0];
 
             // Max strength of 9 due to die of 10
             int attackStrength = Math.Min(compositeAFCM + currentAttacker.ModifiedStrength, 9);

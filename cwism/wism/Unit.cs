@@ -20,6 +20,11 @@ namespace BranallyGames.Wism
 
         public int Moves { get => moves; set => moves = value; }
 
+        internal Unit()
+        {
+
+        }
+
         internal Unit(UnitInfo info)
         {
             this.info = info;
@@ -105,10 +110,41 @@ namespace BranallyGames.Wism
             {
                 compare = 1;
             }
-            else
+            // Flying is next
+            else if (x.CanFly && !y.CanFly)
             {
-                compare = x.Strength.CompareTo(y.Strength);
+                compare = -1;
             }
+            else if (y.CanFly)
+            {
+                compare = 1;
+            }
+
+            // Tie-breakers
+            if (compare == 0)
+            {
+                // Differentiate on Flying (e.g. Dragons are Special and Flying)
+                if (x.CanFly && !y.CanFly)
+                {
+                    compare = -1;
+                }
+                else if (y.CanFly)
+                {
+                    compare = 1;
+                }
+            }
+
+            if (compare == 0)
+            {
+                // Differentiate on Strength
+                compare = y.Strength.CompareTo(x.Strength);
+            }
+
+            if (compare == 0)
+            {
+                // Differentiate on Moves
+                compare = y.Moves.CompareTo(x.Moves);
+            }                        
 
             return compare;
         }
@@ -126,32 +162,63 @@ namespace BranallyGames.Wism
         public override int Compare(Unit x, Unit y)
         {
             int compare = 0;
-            
+
             // Heros stack to top
             if ((x is Hero) && !(y is Hero))
             {
-                compare = 1;
+                compare = -1;
             }
             else if (y is Hero)
             {
-                compare = -1;
+                compare = 1;
             }
             // Specials are next
             else if (x.IsSpecial() && !y.IsSpecial())
             {
-                compare = 1;
+                compare = -1;
             }
             else if (y.IsSpecial())
             {
+                compare = 1;
+            }
+            // Flying is next
+            else if (x.CanFly && !y.CanFly)
+            {
                 compare = -1;
             }
-            else
+            else if (y.CanFly)
             {
+                compare = 1;
+            }
+
+            // Tie-breakers
+            if (compare == 0)
+            {
+                // Differentiate on Flying (e.g. Dragons are Special and Flying)
+                if (x.CanFly && !y.CanFly)
+                {
+                    compare = -1;
+                }
+                else if (y.CanFly)
+                {
+                    compare = 1;
+                }
+            }
+
+            if (compare == 0)
+            {
+                // Differentiate on modified battlefield strength
                 int modifiedStrengthX = x.GetAttackModifier(this.battlefieldTile) + x.Strength;
                 int modifiedStrengthY = y.GetAttackModifier(this.battlefieldTile) + y.Strength;
 
                 // Stack in reverse order of strength
-                compare = modifiedStrengthY.CompareTo(modifiedStrengthX);
+                compare = modifiedStrengthX.CompareTo(modifiedStrengthY);
+            }
+
+            if (compare == 0)
+            {
+                // Differentiate on Moves
+                compare = y.Moves.CompareTo(x.Moves);
             }
 
             return compare;

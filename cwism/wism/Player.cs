@@ -103,11 +103,9 @@ namespace BranallyGames.Wism
         {
             newArmy.Affiliation = this.Affiliation;
             newArmy.Tile = tile;
-            newArmy.Units.ForEach(u =>
-            {
-                u.Tile = tile;
-                u.Affiliation = this.Affiliation;
-            });
+
+            // TODO: Only add if it is a unique army (unique tile)?
+            // TODO: Automatically deploy in adjacent tile if blocked?
             tile.AddArmy(newArmy);
             this.armies.Add(newArmy);
         }
@@ -126,7 +124,7 @@ namespace BranallyGames.Wism
 
             Terrain terrain = tile.Terrain;
             return ((terrain.CanTraverse(unitInfo.CanWalk, unitInfo.CanFloat, unitInfo.CanFly)) &&
-                    (!tile.HasArmy() || (tile.Army.Count < Army.MaxUnits)));
+                    (!tile.HasArmy() || (tile.Army.Size < Army.MaxUnits)));
         }
 
         public void KillArmy(Army targetArmy)
