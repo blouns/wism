@@ -51,7 +51,7 @@ public class WorldTilemap : MonoBehaviour
     {
         HandleInput();
     }
-    
+
     private void HandleInput()
     {
         if (Input.GetMouseButtonDown(0))
@@ -66,18 +66,29 @@ public class WorldTilemap : MonoBehaviour
                     break;
                 case InputState.ArmySelected:
                     // TODO: Second click selects top unit in army
-                    // TODO: Double-click selects entire army
+                    // TODO: Double-click selects entire army                    
 
-                    Destroy(this.selectedArmyBox);
-                    if (MovingOntoEnemy(SelectedArmy.Army, clickedTile))
+                    // Move or attack; can only attack from and adjacent tile
+                    bool isAttacking = MovingOntoEnemy(SelectedArmy.Army, clickedTile);
+                    bool isAdjacent = clickedTile.IsNeighbor(SelectedArmy.Army.Tile);
+                    if (isAttacking && isAdjacent)
                     {
+                        // War!
+                        Destroy(this.selectedArmyBox);
                         AttackArmyAt(clickedTile);
                     }
-                    else
+                    // Cannot attack from non-adjacent tile
+                    else if (isAttacking & !isAdjacent)
                     {
+                        // Do nothing
+                        Debug.Log("Too far away to attack.");
+                    }
+                    else if (!isAttacking)
+                    {
+                        // Move
+                        Destroy(this.selectedArmyBox);
                         MoveSelectedArmyTo(clickedTile);
                     }
-                    
                     break;
                 case InputState.ArmyMoving:
                     // Do nothing
@@ -104,8 +115,8 @@ public class WorldTilemap : MonoBehaviour
         if (SelectedArmy.Army == targetTile.Army)
             return;
 
-        Debug.Log(String.Format("{0} are attacking {1}!", 
-            SelectedArmy.Army.Affiliation, 
+        Debug.Log(String.Format("{0} are attacking {1}!",
+            SelectedArmy.Army.Affiliation,
             targetTile.Army.Affiliation));
 
         InputState = InputState.ArmyAttacking;
@@ -136,8 +147,8 @@ public class WorldTilemap : MonoBehaviour
     }
 
     private void AttackArmy()
-    {        
-        Army attacker = SelectedArmy.Army;        
+    {
+        Army attacker = SelectedArmy.Army;
         Army defender = SelectedArmy.TargetTile.Army;
 
         string attackingAffiliation = attacker.Affiliation.DisplayName;
@@ -172,7 +183,7 @@ public class WorldTilemap : MonoBehaviour
         string defendingUnitName = defender[0].DisplayName;
         string attackerName = attacker.Affiliation.ToString();
         string defenderName = defender.Affiliation.ToString();
-        
+
         result = AttackResult.Battling;
         if (GameManager.WarStrategy.AttackOnce(attacker, defender.Tile))
         {
@@ -182,11 +193,11 @@ public class WorldTilemap : MonoBehaviour
         }
         else
         {
-            Debug.Log(String.Format("War: {0}:{1} has killed {2}:{3}.", 
-                defenderName, defendingUnitName, 
+            Debug.Log(String.Format("War: {0}:{1} has killed {2}:{3}.",
+                defenderName, defendingUnitName,
                 attackerName, attackingUnitName));
         }
-        
+
         if (attacker.Size == 0)
         {
             // Attacker has lost the battle (all attacking units killed)
@@ -203,15 +214,23 @@ public class WorldTilemap : MonoBehaviour
 
     private void MoveSelectedArmy()
     {
-        // Check if the next tile contains an enemy army
-        if (MovingOntoEnemy(SelectedArmy.Army, SelectedArmy.TargetTile))
+        if (this.SelectedArmy.Path == null)
         {
-            // Cannot move onto an enemy army without explicity attacking
-            InputState = InputState.ArmySelected;
+            this.SelectedArmy.Army.FindPath(this.SelectedArmy.TargetTile, out this.SelectedArmy.Path, out float distance);
+            if (this.SelectedArmy.Path.Count < 2)
+            {
+                Debug.Log("Impossible route.");
+                return;
+            }
+        }
+
+        // Check if the next tile contains an enemy army; cannot move onto an enemy army without explicity attacking
+        if ((this.SelectedArmy.Path.Count > 1) && MovingOntoEnemy(SelectedArmy.Army, this.SelectedArmy.Path[1]))
+        {
+            Debug.Log(String.Format("Enemy detected at {0}.", this.SelectedArmy.TargetTile.Coordinates));
             this.SelectedArmy.Path = null;
             this.SelectedArmy.TargetTile = null;
-
-            Debug.Log(String.Format("Enemy detected at {0}.", this.SelectedArmy.TargetTile.Coordinates));
+            SelectObject(SelectedArmy.Army.Tile);
         }
         // Try to move the army one step
         else if (!this.SelectedArmy.Army.TryMoveOneStep(this.SelectedArmy.TargetTile, ref this.SelectedArmy.Path, out float distance))
@@ -231,10 +250,6 @@ public class WorldTilemap : MonoBehaviour
         // Continue moving along the path
         else
         {
-            // 
-            Debug.Log(String.Format("Moving {0} to {1}; distance remaining {2}...",
-                this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates, distance));
-
             Vector3 vector = ConvertGameToUnityCoordinates(this.SelectedArmy.Army.GetCoordinates());
             Rigidbody2D rb = this.SelectedArmy.GameObject.GetComponent<Rigidbody2D>();
             if (rb != null)

@@ -32,6 +32,18 @@ namespace BranallyGames.Wism
 
         public Army Army { get => army; set => army = value; }
 
+        public bool IsNeighbor(Tile other)
+        {
+            return (((other.Coordinates.X == this.Coordinates.X - 1) && (other.Coordinates.Y == this.Coordinates.Y - 1)) ||
+                    ((other.Coordinates.X == this.Coordinates.X - 1) && (other.Coordinates.Y == this.Coordinates.Y)) ||
+                    ((other.Coordinates.X == this.Coordinates.X - 1) && (other.Coordinates.Y == this.Coordinates.Y + 1)) ||
+                    ((other.Coordinates.X == this.Coordinates.X) && (other.Coordinates.Y == this.Coordinates.Y - 1)) ||
+                    ((other.Coordinates.X == this.Coordinates.X) && (other.Coordinates.Y == this.Coordinates.Y + 1)) ||
+                    ((other.Coordinates.X == this.Coordinates.X + 1) && (other.Coordinates.Y == this.Coordinates.Y - 1)) ||
+                    ((other.Coordinates.X == this.Coordinates.X + 1) && (other.Coordinates.Y == this.Coordinates.Y)) ||
+                    ((other.Coordinates.X == this.Coordinates.X + 1) && (other.Coordinates.Y == this.Coordinates.Y + 1)));
+        }
+
         public bool HasArmy()
         {
             return this.army != null && this.army.Size > 0;
