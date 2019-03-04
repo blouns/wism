@@ -36,7 +36,7 @@ namespace Assets.Scripts.Units
 
         internal GameObject FindGameObjectKind(Army army)
         {
-            if ((army == null) || (army.Count == 0))
+            if ((army == null) || (army.Size == 0))
             {
                 throw new ArgumentNullException(nameof(army));
             }

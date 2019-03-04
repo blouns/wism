@@ -29,9 +29,10 @@ namespace wism.Tests
         [Test]
         public void CreateTest()
         {
-            Army unit = Army.Create(new UnitInfo());
-            unit = Army.Create(Unit.Create(new UnitInfo()));
-            unit = Army.Create(new List<Unit>() { Unit.Create(new UnitInfo()) });
+            Affiliation affiliation = Affiliation.Create(ModFactory.FindAffiliationInfo("Sirians"));
+            Army unit = Army.Create(affiliation, new UnitInfo());
+            unit = Army.Create(affiliation, Unit.Create(new UnitInfo()));
+            unit = Army.Create(affiliation, new List<Unit>() { Unit.Create(new UnitInfo()) });
         }
 
         [Test]

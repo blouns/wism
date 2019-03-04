@@ -14,7 +14,7 @@ namespace BranallyGames.Wism
 
         List<Unit> units;
 
-        public static Army Create(IList<Unit> units)
+        public static Army Create(Affiliation affiliation, IList<Unit> units)
         {
             if (units == null || units.Count == 0)
             {
@@ -22,20 +22,21 @@ namespace BranallyGames.Wism
             }
 
             Army composite = new Army();
-            composite.units = new List<Unit>(units);
+            composite.Affiliation = affiliation;
+            composite.units = new List<Unit>(units);            
             composite.UpdateCompositeUnits();
 
             return composite;
         }
 
-        public static Army Create(Unit unit)
+        public static Army Create(Affiliation affiliation, Unit unit)
         {
-            return Create(new List<Unit>() { unit });
+            return Create(affiliation, new List<Unit>() { unit });
         }
 
-        public new static Army Create(UnitInfo info)
+        public static Army Create(Affiliation affiliation, UnitInfo info)
         {
-            return Create(Unit.Create(info));
+            return Create(affiliation, Unit.Create(info));
         }
 
         private Army()
@@ -122,7 +123,7 @@ namespace BranallyGames.Wism
             if (this.units.Count == Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
 
-            MergeArmies(Army.Create(unit));
+            MergeArmies(Army.Create(this.Affiliation, unit));
         }
 
         public void MergeArmies(Army army)

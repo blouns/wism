@@ -74,7 +74,7 @@ namespace BranallyGames.Wism
         public void HireHero(Tile tile)
         {
             Hero hero = Hero.Create();
-            this.DeployArmy(tile, Army.Create(hero));
+            this.DeployArmy(tile, Army.Create(this.Affiliation, hero));
         }
 
         public Army ConscriptArmy(UnitInfo unitInfo, Tile tile)
@@ -93,7 +93,7 @@ namespace BranallyGames.Wism
                 throw new ArgumentException(
                     String.Format("Unit type '{0}' cannot be deployed to '{1}'.", unitInfo.DisplayName, tile.Terrain.DisplayName));
 
-            Army newUnit = Army.Create(unitInfo);
+            Army newUnit = Army.Create(this.Affiliation, unitInfo);
             DeployArmy(tile, newUnit);
 
             return newUnit;
@@ -103,6 +103,7 @@ namespace BranallyGames.Wism
         {
             newArmy.Affiliation = this.Affiliation;
             newArmy.Tile = tile;
+            newArmy[0].Tile = tile;     // TODO: Should not do this from Player
 
             // TODO: Only add if it is a unique army (unique tile)?
             // TODO: Automatically deploy in adjacent tile if blocked?

@@ -34,7 +34,7 @@ namespace BranallyGames.Wism
 
         public bool HasArmy()
         {
-            return this.army != null;
+            return this.army != null && this.army.Size > 0;
         }
 
         public void AddArmy(Army newArmy)

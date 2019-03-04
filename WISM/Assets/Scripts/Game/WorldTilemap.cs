@@ -6,6 +6,7 @@ using BranallyGames.Wism;
 using System;
 using Assets.Scripts.Units;
 using System.IO;
+using System.Threading;
 
 public class WorldTilemap : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class WorldTilemap : MonoBehaviour
 
     private InputState inputState;
     private ArmyGameObject selectedArmy;
+    public GameObject SelectedBoxPrefab;
+    private GameObject selectedArmyBox;
 
     public ArmyGameObject SelectedArmy { get => selectedArmy; set => selectedArmy = value; }
     public InputState InputState { get => inputState; set => inputState = value; }
@@ -62,6 +65,10 @@ public class WorldTilemap : MonoBehaviour
                     SelectObject(clickedTile);
                     break;
                 case InputState.ArmySelected:
+                    // TODO: Second click selects top unit in army
+                    // TODO: Double-click selects entire army
+
+                    Destroy(this.selectedArmyBox);
                     if (MovingOntoEnemy(SelectedArmy.Army, clickedTile))
                     {
                         AttackArmyAt(clickedTile);
@@ -70,6 +77,7 @@ public class WorldTilemap : MonoBehaviour
                     {
                         MoveSelectedArmyTo(clickedTile);
                     }
+                    
                     break;
                 case InputState.ArmyMoving:
                     // Do nothing
@@ -84,15 +92,21 @@ public class WorldTilemap : MonoBehaviour
         }
         else if (Input.GetMouseButtonDown(1))
         {
-            DeselectObject();
+            if (this.InputState == InputState.ArmySelected)
+            {
+                DeselectObject();
+            }
         }
     }
 
     private void AttackArmyAt(BranallyGames.Wism.Tile targetTile)
     {
+        if (SelectedArmy.Army == targetTile.Army)
+            return;
+
         Debug.Log(String.Format("{0} are attacking {1}!", 
             SelectedArmy.Army.Affiliation, 
-            SelectedArmy.TargetTile.Army.Affiliation));
+            targetTile.Army.Affiliation));
 
         InputState = InputState.ArmyAttacking;
         this.SelectedArmy.Path = null;
@@ -128,22 +142,17 @@ public class WorldTilemap : MonoBehaviour
 
         string attackingAffiliation = attacker.Affiliation.DisplayName;
         string defendingAffiliation = defender.Affiliation.DisplayName;
-                
-        // Attack one time
-        // TODO: Need to implement this in Core WISM; currently runs to battle conclusion (all roles)
+
+        // Attack one unit is killed, but not the entire army
         AttackOnce(attacker, defender, out AttackResult result);
         switch (result)
         {
             case AttackResult.AttackerWon:
-                Debug.Log(String.Format("{0} has defeated {1}!", attackingAffiliation, defendingAffiliation));
-                Debug.Log("You are victorious!");
-                DeselectObject();
+                MoveSelectedArmyTo(SelectedArmy.TargetTile);
                 this.WarPanel.SetActive(false);
                 break;
 
             case AttackResult.DefenderWon:
-                Debug.Log(String.Format("{0} has defeated {1}!", defendingAffiliation, attackingAffiliation));
-                Debug.Log("You have been defeated!");
                 DeselectObject();
                 this.WarPanel.SetActive(false);
                 break;
@@ -159,10 +168,37 @@ public class WorldTilemap : MonoBehaviour
 
     private void AttackOnce(Army attacker, Army defender, out AttackResult result)
     {
-        //AttackResult result = AttackResult.Battling;
-
-        // TODO: Implement Core WISM Attack Once
-        throw new NotImplementedException();
+        string attackingUnitName = attacker[0].DisplayName;
+        string defendingUnitName = defender[0].DisplayName;
+        string attackerName = attacker.Affiliation.ToString();
+        string defenderName = defender.Affiliation.ToString();
+        
+        result = AttackResult.Battling;
+        if (GameManager.WarStrategy.AttackOnce(attacker, defender.Tile))
+        {
+            Debug.Log(String.Format("War: {0}:{1} has killed {2}:{3}.",
+                attackerName, attackingUnitName,
+                defenderName, defendingUnitName));
+        }
+        else
+        {
+            Debug.Log(String.Format("War: {0}:{1} has killed {2}:{3}.", 
+                defenderName, defendingUnitName, 
+                attackerName, attackingUnitName));
+        }
+        
+        if (attacker.Size == 0)
+        {
+            // Attacker has lost the battle (all attacking units killed)
+            result = AttackResult.DefenderWon;
+            Debug.Log(String.Format("War: {0} have lost!", attackerName));
+        }
+        else if (defender.Size == 0)
+        {
+            // Attack has won the battle (all enemy units killed)
+            result = AttackResult.AttackerWon;
+            Debug.Log(String.Format("War: {0} are victorious!", attackerName));
+        }
     }
 
     private void MoveSelectedArmy()
@@ -251,6 +287,8 @@ public class WorldTilemap : MonoBehaviour
 
             this.SelectedArmy = armyDictionary[army.Guid];
             this.InputState = InputState.ArmySelected;
+            Vector3 worldVector = ConvertGameToUnityCoordinates(army.GetCoordinates());
+            this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, tileMap.transform);
         }
     }
        
@@ -259,30 +297,30 @@ public class WorldTilemap : MonoBehaviour
         // Move the selected unit to the clicked tile location
         if (this.SelectedArmy == null)
             throw new InvalidOperationException("Selected Army was null.");
-      
+
+        if (this.SelectedArmy.Army == targetTile.Army)
+            return;
+
         this.SelectedArmy.Path = null;
         this.SelectedArmy.TargetTile = targetTile;
         this.InputState = InputState.ArmyMoving;
     }
 
     private BranallyGames.Wism.Tile GetClickedTile()
-    {
+    {        
         Vector3 point = followCamera.ScreenToWorldPoint(Input.mousePosition);
-        Vector3 cell = tileMap.WorldToCell(point);
-        Vector3 local = tileMap.WorldToLocal(point);
         Coordinates gameCoord = ConvertUnityToGameCoordinates(point, tileMap);
         BranallyGames.Wism.Tile gameTile = world.Map[gameCoord.X, gameCoord.Y];
+        
         return gameTile;
     }
 
     private void DeselectObject()
-    {
-        if (this.InputState == InputState.ArmySelected)
-        {
-            this.InputState = InputState.Unselected;
-            this.SelectedArmy = null;
-            Debug.Log("Deleselcted army.");
-        }
+    {        
+        this.InputState = InputState.Unselected;
+        this.SelectedArmy = null;
+        Destroy(this.selectedArmyBox);
+        Debug.Log("Deselected army.");
     }
 
     private IList<Player> ReadyPlayers()
@@ -373,33 +411,22 @@ public class WorldTilemap : MonoBehaviour
 
     private Vector3 ConvertGameToUnityCoordinates(Coordinates coord)
     {
-        //float unityX = coord.X + tileMap.cellBounds.xMin - tileMap.tileAnchor.x + 1;
-        //float unityY = coord.Y + tileMap.cellBounds.yMin - tileMap.tileAnchor.y + 1;
-        //Vector3 vector = new Vector3(coord.X, coord.Y);
-        //Vector3 cell = tileMap.WorldToCell(vector);
-        //Vector3 local = tileMap.WorldToLocal(vector);
-        //Vector3 world = tileMap.CellToWorld(new Vector3Int(coord.X, coord.Y, 0));
-        //Vector3 world1 = tileMap.LocalToWorld(vector);
-
-        ////int unityX = coord.X - tileMap.size.x;// + tileMap.tileAnchor.x;
-        ////int unityY = coord.Y - tileMap.size.y;// - tileMap.tileAnchor.y;
-
-        Vector3 pointCell = new Vector3(coord.X, coord.Y, 0);
-        Vector3 tileMapMin = new Vector3(tileMap.cellBounds.xMin, tileMap.cellBounds.yMin);
-
-        //return new Vector3(unityX, unityY, 0.0f);
-        ////return tileMap.CellToWorld(new Vector3Int(unityX, unityY, 0));
-        Vector3 corner = pointCell + tileMapMin;
-
-        /// OK So you had it right, you just needed to call celltoworld on it
-        return tileMap.CellToWorld(new Vector3Int((int)corner.x, (int)corner.y, 0));
+        Vector3 worldVector = tileMap.CellToWorld(new Vector3Int(coord.X + 1, coord.Y + 1, 0));
+        worldVector.x += tileMap.cellBounds.xMin - tileMap.tileAnchor.x;
+        worldVector.y += tileMap.cellBounds.yMin - tileMap.tileAnchor.y;
+        return worldVector;
     }
    
     private Coordinates ConvertUnityToGameCoordinates(Vector3 worldVector, Tilemap tileMap)
     {
-        float gameX = worldVector.x - tileMap.cellBounds.xMin + tileMap.tileAnchor.x - 1;
-        float gameY = worldVector.y - tileMap.cellBounds.yMin + tileMap.tileAnchor.y - 1;
-        return new Coordinates(Convert.ToInt32(gameX), Convert.ToInt32(gameY));
+        // BUGBUG: This is broken; need to adjust to tilemap coordinates in case
+        //       the tilemap is translated to another location. 
+        return new Coordinates(Mathf.FloorToInt(worldVector.x), Mathf.FloorToInt(worldVector.y));        
+        
+        //worldVector.x -= tileMap.cellBounds.xMin + tileMap.tileAnchor.x - 1;
+        //worldVector.y -= tileMap.cellBounds.yMin + tileMap.tileAnchor.y - 1;
+        //Vector3Int cellVector = tileMap.WorldToCell(worldVector);
+        //return new Coordinates(cellVector.x, cellVector.y);
     }
 
     private void InstantiateArmy(Army army, Vector3 worldVector)
@@ -407,18 +434,24 @@ public class WorldTilemap : MonoBehaviour
         // Find or create and set up the GameObject connected to WISM MapObject
         if (!armyDictionary.ContainsKey(army.Guid))
         {            
-            GameObject prefab = armyFactory.FindGameObjectKind(army);
-            if (prefab == null)
+            GameObject armyPrefab = armyFactory.FindGameObjectKind(army);
+            if (armyPrefab == null)
             {
                 Debug.Log(String.Format("GameObject not found: {0}_{1}", army.ID, army.Affiliation.ID));
                 return;
             }
 
-            GameObject go2 = Instantiate(prefab, worldVector, Quaternion.identity);
+            GameObject go = Instantiate<GameObject>(armyPrefab, worldVector, Quaternion.identity, tileMap.transform);
 
             // Add to the instantiated armies dictionary for tracking
-            ArmyGameObject ago = new ArmyGameObject(army, go2);
+            ArmyGameObject ago = new ArmyGameObject(army, go);
             armyDictionary.Add(army.Guid, ago);
+
+            // Select if selected army
+            if ((this.InputState == InputState.ArmySelected) && (SelectedArmy.Army == army))
+            {
+                SelectObject(army.Tile);
+            }
         }                
     }
 

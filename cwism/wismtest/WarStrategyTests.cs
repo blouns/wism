@@ -57,9 +57,19 @@ namespace wism.Tests
         [Test]
         public void AttackOnceWinTest()
         {
-            Army attacker = World.Current.Players[0].GetArmies()[0];
-            Tile tile = World.Current.Map[3, 2];
+            World.CreateDefaultWorld();
+            Player player1 = World.Current.Players[0];
+            Tile tile = World.Current.Map[2, 2];
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
 
+            Player player2 = World.Current.Players[1];
+            tile = World.Current.Map[3, 2];
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+
+            Army attacker = World.Current.Players[0].GetArmies()[0];
             IWarStrategy war = new DefaultWarStrategy();
             Assert.IsTrue(war.AttackOnce(attacker, tile));
         }
@@ -82,8 +92,9 @@ namespace wism.Tests
             player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
             player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
 
+            Army attacker = World.Current.Players[0].GetArmies()[0];
             IWarStrategy war = new DefaultWarStrategy();
-            Assert.IsFalse(war.AttackOnce(player1.GetArmies()[0], tile));
+            Assert.IsFalse(war.AttackOnce(attacker, tile));
         }
 
         [Test]

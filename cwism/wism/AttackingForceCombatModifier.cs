@@ -89,7 +89,7 @@ namespace BranallyGames.Wism
 
         public int Calculate(Unit attacker, Tile target, int modifier = 0)
         {
-            int compositeModifer = modifiers.Sum<ICombatModifier>(v => Convert.ToInt32(v.Calculate(attacker, target, modifier)));
+            int compositeModifer = modifiers.Sum<ICombatModifier>(v => v.Calculate(attacker, target, modifier));
 
             return modifier + compositeModifer;
         }        
