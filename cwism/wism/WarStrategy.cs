@@ -23,6 +23,15 @@ namespace BranallyGames.Wism
         /// <param name="tile"></param>
         /// <returns></returns>
         bool AttackOnce(Army attacker, Tile tile);
+
+        /// <summary>
+        /// Combat strategy for attacking a given tile with a unit (one unit in stack)
+        /// </summary>
+        /// <param name="attacker"></param>
+        /// <param name="tile"></param>
+        /// <param name="wasSuccessful">True if attack succeeded; else false</param>
+        /// <returns>True if the fight continues; else, the battle is over.</returns>
+        bool AttackOnce(Army attacker, Tile tile, out bool wasSuccessful);
     }
 
     /// <summary>
@@ -88,21 +97,32 @@ namespace BranallyGames.Wism
         /// <returns>True if attacker wins; false otherwise.</returns>
         public bool AttackOnce(Army attacker, Tile target)
         {
-            PrepareArmiesForAttack(attacker, target, out Army defender, out int compositeAFCM, out int compositeDFCM);
+            AttackOnce(attacker, target, out bool wasSuccessful);
 
-            bool won = AttackOnceInternal(defender, attacker, compositeAFCM, compositeDFCM);
-
-            if (IsBattleOver(defender, attacker))
-            {
-                ResetHitPoints(defender, attacker);
-            }
-
-            return won;
+            return wasSuccessful;
         }
 
-        private bool IsBattleOver(Army defender, Army attacker)
+        public bool AttackOnce(Army attacker, Tile target, out bool wasSuccessful)
         {
-            return (attacker.Size == 0 || defender.Size == 0);
+            PrepareArmiesForAttack(attacker, target, out Army defender, out int compositeAFCM, out int compositeDFCM);
+
+            wasSuccessful = AttackOnceInternal(defender, attacker, compositeAFCM, compositeDFCM);
+            if (BattleContinues(defender, attacker))
+            {
+                // Keep fighting
+                return true;
+            }
+            else
+            {
+                // Battle is over
+                ResetHitPoints(defender, attacker);
+                return false;
+            }
+        }
+
+        private bool BattleContinues(Army defender, Army attacker)
+        {
+            return (attacker.Size > 0 && defender.Size > 0);
         }
 
         private void PrepareArmiesForAttack(Army attacker, Tile target, out Army defender, out int compositeAFCM, out int compositeDFCM)
@@ -203,5 +223,7 @@ namespace BranallyGames.Wism
 
             return AttackRoll(attacker, attackStrength, defender, defenseStrength);
         }
-    }
+
+
+    }    
 }

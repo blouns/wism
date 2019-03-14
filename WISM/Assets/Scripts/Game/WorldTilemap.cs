@@ -7,12 +7,16 @@ using System;
 using Assets.Scripts.Units;
 using System.IO;
 using System.Threading;
+using UnityEngine.Events;
 
 public class WorldTilemap : MonoBehaviour
 {
     public GameObject[] armyKinds;          // Prefabs for units; TODO: automate creation of prefabs
     public GameObject armyPrefab;
-    public GameObject WarPanel;
+
+    [SerializeField]
+    private GameObject warPanelPrefab;
+    private WarPanel WarPanel;
 
     private Camera followCamera;
     private World world;
@@ -31,9 +35,13 @@ public class WorldTilemap : MonoBehaviour
 
     private void Start()
     {
-        Time.fixedDeltaTime = 0.25f;    // Refresh at 1/4 second
+        // Set up game UI
+        SetTime(GameManager.StandardTime);
         SetupCameras();
         tileMap = transform.GetComponent<Tilemap>();
+        WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
+        
+        // Set up game
         world = CreateWorldFromScene();
         players = ReadyPlayers();
         armyFactory = ArmyFactory.Create(armyKinds);
@@ -45,6 +53,11 @@ public class WorldTilemap : MonoBehaviour
         //Instantiate<GameObject>(this.armyPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
 
         DrawArmies();
+    }
+
+    private void SetTime(float time)
+    {
+        Time.fixedDeltaTime = time;
     }
 
     private void Update()
@@ -64,9 +77,10 @@ public class WorldTilemap : MonoBehaviour
                 case InputState.Unselected:
                     SelectObject(clickedTile);
                     break;
+
                 case InputState.ArmySelected:
                     // TODO: Second click selects top unit in army
-                    // TODO: Double-click selects entire army                    
+                    // TODO: Double-click selects entire army
 
                     // Move or attack; can only attack from and adjacent tile
                     bool isAttacking = MovingOntoEnemy(SelectedArmy.Army, clickedTile);
@@ -90,12 +104,12 @@ public class WorldTilemap : MonoBehaviour
                         MoveSelectedArmyTo(clickedTile);
                     }
                     break;
+
                 case InputState.ArmyMoving:
-                    // Do nothing
-                    break;
                 case InputState.ArmyAttacking:
                     // Do nothing
                     break;
+
                 default:
                     throw new InvalidOperationException("Cannot transition to unknown state.");
             }
@@ -112,7 +126,10 @@ public class WorldTilemap : MonoBehaviour
 
     private void AttackArmyAt(BranallyGames.Wism.Tile targetTile)
     {
-        if (SelectedArmy.Army == targetTile.Army)
+        Army attacker = SelectedArmy.Army;
+        Army defender = targetTile.Army;
+
+        if (attacker == defender)
             return;
 
         Debug.Log(String.Format("{0} are attacking {1}!",
@@ -122,7 +139,11 @@ public class WorldTilemap : MonoBehaviour
         InputState = InputState.ArmyAttacking;
         this.SelectedArmy.Path = null;
         this.SelectedArmy.TargetTile = targetTile;
-    }
+
+        // Set up war UI    
+        WarPanel.Initialize(attacker, defender, armyKinds);
+        SetTime(GameManager.WarTime);
+    }    
 
     private void FixedUpdate()
     {
@@ -131,7 +152,7 @@ public class WorldTilemap : MonoBehaviour
 
         MoveArmies();
         CleanupArmies();
-        DrawArmies();
+        DrawArmies();        
     }
 
     private void MoveArmies()
@@ -160,16 +181,22 @@ public class WorldTilemap : MonoBehaviour
         {
             case AttackResult.AttackerWon:
                 MoveSelectedArmyTo(SelectedArmy.TargetTile);
-                this.WarPanel.SetActive(false);
+
+                // Update UI war panel
+                this.WarPanel.Teardown();
+                SetTime(GameManager.StandardTime);
                 break;
 
             case AttackResult.DefenderWon:
                 DeselectObject();
-                this.WarPanel.SetActive(false);
+
+                // Update UI war panel
+                this.WarPanel.Teardown();
+                SetTime(GameManager.StandardTime);
                 break;
 
             case AttackResult.Battling:
-                // Do nothing
+                SetTime(GameManager.WarTime);
                 break;
 
             default:
@@ -177,15 +204,33 @@ public class WorldTilemap : MonoBehaviour
         }
     }
 
-    private void AttackOnce(Army attacker, Army defender, out AttackResult result)
+    private bool AttackOnce(Army attacker, Army defender, out AttackResult result)
     {
-        string attackingUnitName = attacker[0].DisplayName;
-        string defendingUnitName = defender[0].DisplayName;
         string attackerName = attacker.Affiliation.ToString();
         string defenderName = defender.Affiliation.ToString();
 
+        // Empty army
+        if (attacker.Size == 0)
+        {
+            Debug.LogWarning("Attacker attacked without any units.");
+            result = AttackResult.DefenderWon;
+            return false;
+        }
+        else if(defender.Size == 0)
+        {
+            Debug.LogWarning("Defender attacked without any units.");
+            result = AttackResult.AttackerWon;
+            return false;
+        }
+
+        string attackingUnitName = attacker[0].DisplayName;
+        string defendingUnitName = defender[0].DisplayName;
+
+        // Battle it out
         result = AttackResult.Battling;
-        if (GameManager.WarStrategy.AttackOnce(attacker, defender.Tile))
+        bool battleContinues = GameManager.WarStrategy.AttackOnce(attacker, defender.Tile, out bool attackSuccessful);
+        WarPanel.UpdateBattle(attackSuccessful);
+        if (attackSuccessful)
         {
             Debug.Log(String.Format("War: {0}:{1} has killed {2}:{3}.",
                 attackerName, attackingUnitName,
@@ -198,22 +243,28 @@ public class WorldTilemap : MonoBehaviour
                 attackerName, attackingUnitName));
         }
 
-        if (attacker.Size == 0)
+        if (!battleContinues)
         {
-            // Attacker has lost the battle (all attacking units killed)
-            result = AttackResult.DefenderWon;
-            Debug.Log(String.Format("War: {0} have lost!", attackerName));
+            if (!attackSuccessful)
+            {
+                // Attacker has lost the battle (all attacking units killed)
+                result = AttackResult.DefenderWon;
+                Debug.Log(String.Format("War: {0} have lost!", attackerName));
+            }
+            else if (attackSuccessful)
+            {
+                // Attack has won the battle (all enemy units killed)
+                result = AttackResult.AttackerWon;
+                Debug.Log(String.Format("War: {0} are victorious!", attackerName));
+            }
         }
-        else if (defender.Size == 0)
-        {
-            // Attack has won the battle (all enemy units killed)
-            result = AttackResult.AttackerWon;
-            Debug.Log(String.Format("War: {0} are victorious!", attackerName));
-        }
+
+        return battleContinues;
     }
 
     private void MoveSelectedArmy()
     {
+        SetTime(GameManager.StandardTime);
         if (this.SelectedArmy.Path == null)
         {
             this.SelectedArmy.Army.FindPath(this.SelectedArmy.TargetTile, out this.SelectedArmy.Path, out float distance);
@@ -331,11 +382,11 @@ public class WorldTilemap : MonoBehaviour
     }
 
     private void DeselectObject()
-    {        
+    {
         this.InputState = InputState.Unselected;
         this.SelectedArmy = null;
         Destroy(this.selectedArmyBox);
-        Debug.Log("Deselected army.");
+        SetTime(GameManager.StandardTime);
     }
 
     private IList<Player> ReadyPlayers()
@@ -349,6 +400,15 @@ public class WorldTilemap : MonoBehaviour
         player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), World.Current.Map[9, 17]);
 
         // Ready Player Two
@@ -356,6 +416,8 @@ public class WorldTilemap : MonoBehaviour
         player2.Affiliation = Affiliation.Create(ModFactory.FindAffiliationInfo("StormGiants")); // Hack
         player2.Affiliation.IsHuman = false;
         player2.HireHero(World.Current.Map[18, 10]);
+        player2.HireHero(World.Current.Map[1, 3]);
+        player2.HireHero(World.Current.Map[2, 3]);
 
         return World.Current.Players;
     }
@@ -422,7 +484,7 @@ public class WorldTilemap : MonoBehaviour
                 InstantiateArmy(army, worldVector);
             }
         }
-    }
+    }    
 
     private Vector3 ConvertGameToUnityCoordinates(Coordinates coord)
     {
