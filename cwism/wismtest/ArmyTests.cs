@@ -45,7 +45,7 @@ namespace wism.Tests
         }
 
         [Test]
-        public void StackOrderTest()
+        public void StackViewingOrderTest()
         {
             Player player1;
             IList<Army> armies;
@@ -139,6 +139,160 @@ namespace wism.Tests
              * - Navy
              */
         }
+
+        [Test]
+        public void StackBattleOrderOnlyHeroTest()
+        {
+            Player player1;
+            IList<Army> armies;
+            Tile tile;
+
+            // Only hero
+            StackOrderReset(out player1, out armies, out tile);            
+            player1.HireHero(tile);
+            IList<Unit> units = armies[0].SortByBattleOrder(tile);
+            Assert.AreEqual("Hero", units[0].ID);
+        }
+
+        [Test]
+        public void StackBattleOrderHeroAndWeakerArmyTest()
+        {
+            Player player1;
+            IList<Army> armies;
+            Tile tile;
+
+            StackOrderReset(out player1, out armies, out tile);            
+            World.Current.Players[0].HireHero(World.Current.Map[2, 2]);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+
+            IList<Unit> units = armies[0].SortByBattleOrder(tile);
+            Assert.AreEqual("Hero", units[1].ID);
+            Assert.AreEqual("LightInfantry", units[0].ID);
+        }
+
+        [Test]
+        public void StackBattleOrderHeroAndTwoWeakerArmiesTest()
+        {
+            Player player1;
+            IList<Army> armies;
+            Tile tile;
+
+            // Hero and two armies of lesser strength
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+
+            IList<Unit> units = armies[0].SortByBattleOrder(tile);
+            Assert.AreEqual("LightInfantry", units[0].ID);
+            Assert.AreEqual("LightInfantry", units[1].ID);
+            Assert.AreEqual("Hero", units[2].ID);
+        }
+
+        [Test]
+        public void StackBattleOrderHeroAndSetOfArmiesTest()
+        {
+            Player player1;
+            IList<Army> armies;
+            Tile tile;
+
+            // Hero and set of armies
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+
+            IList<Unit> units = armies[0].SortByBattleOrder(tile);
+            Assert.AreEqual("Hero", units[7].ID, "Hero out of order");
+            Assert.AreEqual("Pegasus", units[6].ID, "Pegasus out of order");
+            Assert.AreEqual("Pegasus", units[5].ID, "Pegasus out of order");
+            Assert.AreEqual("Cavalry", units[4].ID, "Cavalry out of order");
+            Assert.AreEqual("HeavyInfantry", units[3].ID, "Heavy infantry out of order");
+            Assert.AreEqual("LightInfantry", units[2].ID, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", units[1].ID, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", units[0].ID, "Light infantry out of order");
+        }
+
+        [Test]
+        public void StackBattleOrderTwoHeroesTest()
+        {
+            Player player1;
+            IList<Army> armies;
+            Tile tile;
+
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            player1.HireHero(tile);
+
+            IList<Unit> units = armies[0].SortByBattleOrder(tile);
+            Assert.AreEqual("Hero", units[0].ID);
+            Assert.AreEqual("Hero", units[1].ID);
+        }
+
+        public void StackBattleOrderTwoHeroesAndSomeArmiesTest()
+        {
+            Player player1;
+            IList<Army> armies;
+            Tile tile;
+
+            StackOrderReset(out player1, out armies, out tile);
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+
+            IList<Unit> units = armies[0].SortByBattleOrder(tile);
+            Assert.AreEqual("Hero", units[7].ID, "Hero out of order");
+            Assert.AreEqual("Hero", units[6].ID, "Hero out of order");
+            Assert.AreEqual("Pegasus", units[5].ID, "Pegasus out of order");
+            Assert.AreEqual("Pegasus", units[4].ID, "Pegasus out of order");
+            Assert.AreEqual("Cavalry", units[3].ID, "Cavalry out of order");
+            Assert.AreEqual("HeavyInfantry", units[2].ID, "Heavy infantry out of order");
+            Assert.AreEqual("LightInfantry", units[1].ID, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", units[0].ID, "Light infantry out of order");
+        }
+
+        public void StackBattleOrderNoHeroesTest()
+        {
+            Player player1;
+            IList<Army> armies;
+            Tile tile;
+
+            StackOrderReset(out player1, out armies, out tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+
+            IList<Unit> units = armies[0].SortByBattleOrder(tile);
+            Assert.AreEqual("Pegasus", units[5].ID, "Pegasus out of order");
+            Assert.AreEqual("Pegasus", units[4].ID, "Pegasus out of order");
+            Assert.AreEqual("Cavalry", units[3].ID, "Cavalry out of order");
+            Assert.AreEqual("HeavyInfantry", units[2].ID, "Heavy infantry out of order");
+            Assert.AreEqual("LightInfantry", units[1].ID, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", units[0].ID, "Light infantry out of order");
+        }
+
+        /* TODO: Tests to be added
+            * - Different terrain, affiliation, unit bonuses, 
+            * - Greater strength than hero
+            * - Special, 2 specials, special+fly
+            * - 2 fliers
+            * - moves
+            * - Navy
+            */
+        
 
         private static void StackOrderReset(out Player player1, out IList<Army> armies, out Tile tile)
         {

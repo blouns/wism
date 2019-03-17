@@ -380,6 +380,20 @@ namespace BranallyGames.Wism
                 units[index] = value;
             }
         }
+
+        public List<Unit> SortByBattleOrder(Tile target)
+        {
+            List<Unit> battleUnits = new List<Unit>(this.units);
+            battleUnits.Sort(new ByUnitBattleOrder(target));
+            return battleUnits;
+        }
+
+        public List<Unit> SortByViewingOrder()
+        {
+            List<Unit> viewUnits = new List<Unit>(this.units);
+            viewUnits.Sort(new ByUnitViewingOrder());
+            return viewUnits;
+        }
     }
     
     public enum Direction

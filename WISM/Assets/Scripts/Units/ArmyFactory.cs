@@ -33,6 +33,18 @@ namespace Assets.Scripts.Units
             this.unitGameObjectKinds = new List<GameObject>(unitKinds);
         }
 
+        internal GameObject FindGameObjectKind(Unit unit)
+        {
+            foreach (GameObject go in unitGameObjectKinds)
+            {
+                if (go.name == String.Format("{0}_{1}", unit.ID, unit.Affiliation.ID))
+                {
+                    return go;
+                }
+            }
+
+            return null;
+        }
 
         internal GameObject FindGameObjectKind(Army army)
         {
@@ -41,15 +53,7 @@ namespace Assets.Scripts.Units
                 throw new ArgumentNullException(nameof(army));
             }
 
-            foreach (GameObject go in unitGameObjectKinds)
-            {
-                if (go.name == String.Format("{0}_{1}", army.ID, army.Affiliation.ID))
-                {
-                    return go;
-                }
-            }
-
-            return null;
+            return FindGameObjectKind(army[0]);
         }
     }
 }

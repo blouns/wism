@@ -58,6 +58,7 @@ namespace wism.Tests
         public void AttackOnceWinTest()
         {
             World.CreateDefaultWorld();
+            World.Current.Random = new Random(1990);
             Player player1 = World.Current.Players[0];
             Tile tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
@@ -78,6 +79,7 @@ namespace wism.Tests
         public void AttackOnceLoseTest()
         {
             World.CreateDefaultWorld();
+            World.Current.Random = new Random(1990);
             Player player1 = World.Current.Players[0];
             Tile tile = World.Current.Map[2, 2];
             player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
@@ -101,6 +103,7 @@ namespace wism.Tests
         public void AttackUntilWinTest()
         {
             World.CreateDefaultWorld();
+            World.Current.Random = new Random(1990);
             Player player1 = World.Current.Players[0];
             Tile tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
@@ -138,6 +141,7 @@ namespace wism.Tests
         public void AttackUntilLoseTest()
         {
             World.CreateDefaultWorld();
+            World.Current.Random = new Random(1990);
             Player player1 = World.Current.Players[0];
             Tile tile = World.Current.Map[2, 2];
             player1.HireHero(tile);

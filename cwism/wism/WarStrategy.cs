@@ -138,12 +138,7 @@ namespace BranallyGames.Wism
 
             // Apply unit-specific terrain modifiers (e.g. elves like forests)
             ApplyUnitTerrainModifiers(attackers, target);
-            ApplyUnitTerrainModifiers(defenders, target);
-
-            // Order attackers by strength from weakest to strongest
-            attackers.Sort(new ByUnitBattleOrder(target));
-            attackers.OrderBy(v => v.ModifiedStrength);
-            defenders.OrderBy(v => v.ModifiedStrength);
+            ApplyUnitTerrainModifiers(defenders, target);            
         }
 
         private static void ResetHitPoints(Army defender, Army attacker)
@@ -154,8 +149,12 @@ namespace BranallyGames.Wism
 
         private bool AttackOnceInternal(Army defender, Army attacker, int compositeAFCM, int compositeDFCM)
         {
-            Unit currentAttacker = attacker[0];
-            Unit currentDefender = defender[0];
+            // Order attackers by strength from weakest to strongest
+            List<Unit> attackingUnits = attacker.SortByBattleOrder(defender.Tile);
+            List<Unit> defendingUnits = defender.SortByBattleOrder(defender.Tile);
+
+            Unit currentAttacker = attackingUnits[0];
+            Unit currentDefender = defendingUnits[0];
 
             // Max strength of 9 due to die of 10
             int attackStrength = Math.Min(compositeAFCM + currentAttacker.ModifiedStrength, 9);

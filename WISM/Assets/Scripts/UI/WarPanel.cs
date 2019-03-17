@@ -13,43 +13,15 @@ public class WarPanel : MonoBehaviour
     public GameObject AttackerPrefab;
     public GameObject DefenderPrefab;
 
-    private List<GameObject> attackerObjects;
-    private List<GameObject> defenderObjects;
-    private GameObject killedObject;
+    private Dictionary<Unit, GameObject> attackerPanelObjects;
+    private Dictionary<Unit, GameObject> defenderPanelObjects;
     private ArmyFactory armyFactory;
     private List<GameObject> armyKinds;
 
     private Army attacker;
     private Army defender;
     bool attackerWon;
-
-    private void LateUpdate()
-    {
-        if (WarPanelGo.activeSelf)
-        {
-            IList<GameObject> losingUnits = (attackerWon) ? attackerObjects : defenderObjects;
-            //DrawArmyKilled(losingUnits);
-        }
-    }
-
-    private void DrawArmyKilled(IList<GameObject> losingUnits)
-    {
-        if (losingUnits.Count == 0)
-            return;
-
-        GameObject killedArmyGo = losingUnits[0];        
-        Vector3 position = killedArmyGo.transform.position;
-
-        // Draw killed sprite over defeated unit
-        killedObject.transform.SetPositionAndRotation(position, Quaternion.identity);
-        GameObject tempKilledGo = Instantiate(KilledPrefab, position, Quaternion.identity, WarPanelGo.transform);
-        Destroy(tempKilledGo, GameManager.WarTime);
-        Destroy(killedArmyGo, GameManager.WarTime);
-        losingUnits.RemoveAt(0);
-
-        // TODO: Beep        
-    }
-
+    
     public void Initialize(Army attacker, Army defender, GameObject[] armyKinds)
     {
         if (armyKinds == null)
@@ -60,65 +32,98 @@ public class WarPanel : MonoBehaviour
         this.defender = defender ?? throw new ArgumentNullException(nameof(defender));
         
         this.armyFactory = ArmyFactory.Create(armyKinds);
-                
-        attackerObjects = new List<GameObject>();
-        for (int i = 0; i < attacker.Size; i++)
-        {
-            // Calculate attacker rendering position based on number of units
-            // HACK: Just experimenting with positions for now
-            
-            GameObject attackerKind = armyFactory.FindGameObjectKind(attacker);
 
-            // Create the GO for the panel
-            Vector3 position = AttackerPrefab.transform.position;
-            GameObject attackerGo = Instantiate<GameObject>(
-                AttackerPrefab, position, Quaternion.identity, WarPanelGo.transform);
+        List<Unit> attackingUnits = attacker.SortByBattleOrder(defender.Tile);
+        attackerPanelObjects = CreateUnitPanelObjects(attackingUnits, AttackerPrefab, AttackerPrefab.transform.position);
 
-            // Replace image with army kind
-            Image image = attackerGo.GetComponent<Image>();
-            SpriteRenderer spriteRenderer = attackerKind.GetComponent<SpriteRenderer>();
-            image.sprite = spriteRenderer.sprite;
-
-            RectTransform rectTransform = WarPanelGo.GetComponent<RectTransform>();
-            int attackerCount = attacker.Size;
-            float xUnitSize = .75f; //spriteRenderer.size.x;
-            const float xSwag = -.25f;
-            const float xOffset = 0f;
-            //float xTotal = (xUnitSize * attackerCount) + (xOffset * (attackerCount - 1));
-            //float xShifted = ((xUnitSize * (i + 1)) + (xOffset * i)) - (xTotal / 2) + xSwag;
-            float xTotal = xUnitSize * attackerCount;
-            float xShifted = (xUnitSize * (i + 1)) - (xTotal / 2) + xOffset;
-
-            attackerGo.transform.position = new Vector3(position.x - xShifted, position.y);
-            attackerGo.SetActive(true);
-            attackerObjects.Add(attackerGo);
-        }
-
-        //defenderObjects = new List<GameObject>();
-        //for (int i = 0; i < defender.Size; i++)
-        //{
-        //    // Calculate attacker rendering position based on number of units
-        //    // HACK: Just experimenting with positions for now
-        //    Vector3 positionOffset = new Vector3(position.x + .5f, position.y + .5f);
-        //    GameObject defenderPrefab = armyFactory.FindGameObjectKind(defender);
-        //    GameObject defenderGo = Instantiate<GameObject>(
-        //        defenderPrefab, positionOffset, Quaternion.identity, WarPanelGo.transform);
-        //    attackerObjects.Add(defenderGo);
-        //}
+        List<Unit> defendingUnits = defender.SortByBattleOrder(defender.Tile);
+        defenderPanelObjects = CreateUnitPanelObjects(defendingUnits, DefenderPrefab, DefenderPrefab.transform.position);
 
         this.WarPanelGo.SetActive(true);
+    }
+
+    private Dictionary<Unit, GameObject> CreateUnitPanelObjects(List<Unit> units, GameObject prefab, Vector3 position)
+    {
+        Dictionary<Unit, GameObject> unitObject = new Dictionary<Unit, GameObject>();        
+        for (int i = 0; i < units.Count; i++)
+        {
+            // Create the GO for the panel            
+            GameObject unitGo = Instantiate<GameObject>(prefab, position, Quaternion.identity, WarPanelGo.transform);
+
+            // Replace image with army kind
+            ReplaceImage(units[i], unitGo);
+
+            // Calculate attacker rendering position based on number of units
+            unitGo.transform.position = GetUnitPanelPosition(units, position, i, unitGo);
+
+            unitGo.SetActive(true);
+            unitObject.Add(units[i], unitGo);
+        }
+
+        return unitObject;
+    }
+
+    private Vector3 GetUnitPanelPosition(List<Unit> units, Vector3 position, int index, GameObject unitGo)
+    {        
+        const float xUnitSize = .9f;
+        const float xOffset = -.25f;
+
+        index = units.Count - index; // Reverse the order to draw left-to-right
+        float xTotal = xUnitSize * units.Count;
+        float xShifted = (xUnitSize * index) - (xTotal / 2) + xOffset;
+        return new Vector3(position.x - xShifted, position.y);
+    }
+
+    private void ReplaceImage(Unit unit, GameObject unitGo)
+    {
+        GameObject unitKind = armyFactory.FindGameObjectKind(unit);
+        SpriteRenderer spriteRenderer = unitKind.GetComponent<SpriteRenderer>();
+        Image image = unitGo.GetComponent<Image>();
+        image.sprite = spriteRenderer.sprite;
     }
 
     public void Teardown()
     {
         this.WarPanelGo.SetActive(false);
-        //this.killedObject.SetActive(false);
-        this.attackerObjects.ForEach(go => Destroy(go));
-        //this.defenderObjects.ForEach(go => Destroy(go));        
+
+        foreach (GameObject go in attackerPanelObjects.Values)
+        {
+            Destroy(go);
+        }
+
+        foreach (GameObject go in defenderPanelObjects.Values)
+        {
+            Destroy(go);
+        }
     }
 
-    public void UpdateBattle(bool attackerWon)
+    public void UpdateBattle(bool didAttackerWin, Unit losingUnit)
     {
-        this.attackerWon = attackerWon;
+        Dictionary<Unit, GameObject> losingUnits = (didAttackerWin) ? defenderPanelObjects : attackerPanelObjects;
+
+        if (losingUnits.Count == 0)
+        {
+            Debug.LogWarning("WarPanel: losing army had no units remaining.", this);
+            return;
+        }
+
+        if (!losingUnits.ContainsKey(losingUnit))
+        {
+            Debug.LogWarningFormat("WarPanel: Losing unit not present in the units collection: Unit: {0}", losingUnit.ToString());
+        }
+        GameObject losingUnitPanelObject = losingUnits[losingUnit];        
+        Vector3 position = losingUnitPanelObject.transform.position;
+
+        // Draw killed sprite over defeated unit
+        KilledPrefab.transform.SetPositionAndRotation(position, Quaternion.identity);
+        GameObject killedPanelObject = Instantiate(KilledPrefab, position, Quaternion.identity, WarPanelGo.transform);
+        killedPanelObject.SetActive(true);
+
+        // Remove killed sprite and unit from panel after an interval
+        Destroy(killedPanelObject, GameManager.WarTime);
+        Destroy(losingUnitPanelObject, GameManager.WarTime);
+        losingUnits.Remove(losingUnit);
+
+        // TODO: Beep        
     }
 }
