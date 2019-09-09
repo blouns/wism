@@ -52,9 +52,9 @@ namespace BranallyGames.Wism
 
                 return Guid.Empty;
             }
-        }        
+        }
 
-        public bool IsSpecial()
+        public new bool IsSpecial()
         {
             return units.Any<Unit>(v => v.IsSpecial());
         }
@@ -80,6 +80,25 @@ namespace BranallyGames.Wism
             {
                 return units[0].ID;
             }
+        }
+
+        public override int MovesRemaining
+        {
+            get
+            {
+                int min = Int32.MaxValue;
+                this.units.ForEach(u => min = (u.MovesRemaining < min) ? u.MovesRemaining : min);
+                return min;
+            }
+            set
+            {
+                // Do nothing for army container
+            }
+        }
+
+        public override void ResetMoves()
+        {
+            this.units.ForEach(u => u.ResetMoves());
         }
 
         public int GetCompositeAttackModifier(Tile target)
@@ -135,12 +154,19 @@ namespace BranallyGames.Wism
             UpdateCompositeUnits();            
         }
 
+        private void MoveCompositeUnits(Tile targetTile)
+        {
+            this.Tile.MoveArmy(this, targetTile);
+            this.units.ForEach(u => u.MovesRemaining -= this.Tile.Terrain.MovementCost); // TODO: Account for bonuses
+            UpdateCompositeUnits();
+        }
+
         private void UpdateCompositeUnits()
         {
             this.units.ForEach(u => 
             {
                 u.Affiliation = this.Affiliation;
-                u.Tile = this.Tile;
+                u.Tile = this.Tile;                
             });
             this.units.Sort(new ByUnitViewingOrder());
         }
@@ -314,6 +340,13 @@ namespace BranallyGames.Wism
             if (!targetTile.CanTraverseHere(this))
                 return false;
 
+            // Do we have enough moves?
+            // TODO: Account for terrain bonuses
+            if (this.units.Any<Unit>(u => u.MovesRemaining < this.Tile.Terrain.MovementCost))
+            {
+                return false;
+            }
+
             if (targetTile.HasArmy())
             {
                 // Does the tile has room for the unit of the same team?
@@ -336,11 +369,20 @@ namespace BranallyGames.Wism
                         return false;
                     }
                 }
+                else
+                {
+                    // TODO: Need to implement a selected cohort within the army
+                    //       Perhaps implemented using multiple Army objects in an
+                    //       army, or using a new Cohort class.
+                    //
+                    //       Until then, do not auto-merge armies that are moving.
+                    return false;
+                }
             }
 
             // We are clear to advance!
             this.Tile.MoveArmy(this, targetTile);
-            UpdateCompositeUnits();
+            MoveCompositeUnits(targetTile);
 
             return true;
         }

@@ -4,7 +4,7 @@
         "DisplayName": "Hero",
         "ID": "Hero",
         "Strength": 5,
-        "Moves": 14,
+        "Moves": 100,
         "CanWalk": true,
         "CanFloat": false,
         "CanFly": false
@@ -13,7 +13,7 @@
         "DisplayName": "Light Infantry",
         "ID": "LightInfantry",
         "Strength": 3,
-        "Moves" :  12,
+        "Moves" :  100,
         "CanWalk": true,
         "CanFloat": false,
         "CanFly": false
@@ -22,7 +22,7 @@
         "DisplayName": "Heavy Infantry",
         "ID": "HeavyInfantry",
         "Strength": 5,
-        "Moves": 8,
+        "Moves": 100,
         "CanWalk": true,
         "CanFloat": false,
         "CanFly": false
@@ -31,7 +31,7 @@
         "DisplayName": "Cavalry",
         "ID": "Cavalry",
         "Strength": 5,
-        "Moves" : 15,
+        "Moves" : 100,
         "CanWalk": true,
         "CanFloat": false,
         "CanFly": false
@@ -40,6 +40,7 @@
         "DisplayName": "Pegasus",
         "ID": "Pegasus",
         "Strength": 4,
+        "Moves": 100,
         "CanWalk": true,
         "CanFloat": false,
         "CanFly": true

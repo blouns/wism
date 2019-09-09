@@ -11,14 +11,12 @@ namespace BranallyGames.Wism
         private const int DefaultHitPoints = 2;        
         internal UnitInfo info;
 
-        private int moves;
+        private int movesRemaining;
         private int strength;
 
         // Ephemeral fields only used during battle
         private int modifiedStrength;
         private int hitPoints = DefaultHitPoints;
-
-        public int Moves { get => moves; set => moves = value; }
 
         internal Unit()
         {
@@ -29,7 +27,7 @@ namespace BranallyGames.Wism
         {
             this.info = info;
             this.strength = info.Strength;
-            this.moves = info.Moves;
+            this.movesRemaining = info.Moves;
         }
 
         public override string DisplayName { get => Info.DisplayName; set => Info.DisplayName = value;  }
@@ -46,6 +44,12 @@ namespace BranallyGames.Wism
             }
         }
 
+        public virtual void ResetMoves()
+        {
+            this.movesRemaining = info.Moves;
+        }
+
+        public virtual int MovesRemaining { get => movesRemaining; set => movesRemaining = value; }
         public virtual bool CanWalk { get => info.CanWalk; }
         public virtual bool CanFloat { get => info.CanFloat; }
         public virtual bool CanFly { get => info.CanFly; }
@@ -143,7 +147,7 @@ namespace BranallyGames.Wism
             if (compare == 0)
             {
                 // Differentiate on Moves
-                compare = y.Moves.CompareTo(x.Moves);
+                compare = y.MovesRemaining.CompareTo(x.MovesRemaining);
             }
 
             if (compare == 0)
@@ -224,7 +228,7 @@ namespace BranallyGames.Wism
             if (compare == 0)
             {
                 // Differentiate on Moves
-                compare = x.Moves.CompareTo(y.Moves);
+                compare = x.MovesRemaining.CompareTo(y.MovesRemaining);
             }
 
             if (compare == 0)

@@ -476,6 +476,65 @@ namespace wism.Tests
             }
         }
 
+        [Test]
+        public void MovementCostBasicTest()
+        {
+            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "9", "1" },
+                { "1", "9", "9", "9", "9", "1" },
+                { "1", "1", "1", "2", "2", "2" },
+                { "1", "1", "1", "2", "T", "1" },
+                { "1", "1", "1", "2", "1", "1" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out Army army, out Tile target));
+
+            const int expectedCost = 7;
+            const int initialMoves = 10;
+            army[0].MovesRemaining = initialMoves;
+
+            IList<Tile> path = null;
+            while (army.TryMoveOneStep(target, ref path, out float distance))
+            {
+                // do nothing
+            }
+
+            Assert.AreEqual(initialMoves - expectedCost, army.MovesRemaining, "Mismatch on the number of expected moves remaining.");
+        }
+
+        [Test]
+        public void MovementCostNoMovesRemainingTest()
+        {
+            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "9", "1" },
+                { "1", "9", "9", "9", "9", "1" },
+                { "1", "1", "1", "2", "2", "2" },
+                { "1", "1", "1", "2", "T", "1" },
+                { "1", "1", "1", "2", "1", "1" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out Army army, out Tile target));
+
+            const int expectedCost = 7;
+            const int initialMoves = 6;
+            army[0].MovesRemaining = initialMoves;
+
+            IList<Tile> path = null;
+            while (army.TryMoveOneStep(target, ref path, out float distance))
+            {
+                // do nothing
+            }
+
+            //Assert.IsTrue(path.Count == 1, "Movement continued past expected stop point.");
+            Assert.AreEqual(0, army.MovesRemaining, "Mismatch on the number of expected moves remaining.");
+        }
+
         #region Helper utility methods
 
         private void MoveUnitPass(Army army, Direction direction)

@@ -118,12 +118,12 @@ public class WarPanel : MonoBehaviour
         KilledPrefab.transform.SetPositionAndRotation(position, Quaternion.identity);
         GameObject killedPanelObject = Instantiate(KilledPrefab, position, Quaternion.identity, WarPanelGo.transform);
         killedPanelObject.SetActive(true);
+        //AudioClip beep = killedPanelObject.GetComponent<AudioClip>();
+        ////AudioSource.PlayClipAtPoint(beep, Camera.main.transform.position);
 
         // Remove killed sprite and unit from panel after an interval
         Destroy(killedPanelObject, GameManager.WarTime);
         Destroy(losingUnitPanelObject, GameManager.WarTime);
         losingUnits.Remove(losingUnit);
-
-        // TODO: Beep        
     }
 }

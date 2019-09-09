@@ -167,9 +167,9 @@ public class WorldTilemap : MonoBehaviour
         if (attacker == defender)
             return;
 
-        Debug.Log(String.Format("{0} are attacking {1}!",
+        Debug.LogFormat("{0} are attacking {1}!",
             SelectedArmy.Army.Affiliation,
-            targetTile.Army.Affiliation));
+            targetTile.Army.Affiliation);
 
         InputState = InputState.ArmyAttacking;
         this.SelectedArmy.Path = null;
@@ -194,18 +194,18 @@ public class WorldTilemap : MonoBehaviour
     {
         if (InputState == InputState.ArmyMoving)
         {
-            MoveSelectedArmy();
+            MoveArmy(this.SelectedArmy);
         }
         else if (InputState == InputState.ArmyAttacking)
         {
-            AttackArmy();
+            AttackArmy(this.SelectedArmy);
         }
     }
 
-    private void AttackArmy()
+    private void AttackArmy(ArmyGameObject armyGO)
     {
-        Army attacker = SelectedArmy.Army;
-        Army defender = SelectedArmy.TargetTile.Army;
+        Army attacker = armyGO.Army;
+        Army defender = armyGO.TargetTile.Army;
 
         string attackingAffiliation = attacker.Affiliation.DisplayName;
         string defendingAffiliation = defender.Affiliation.DisplayName;
@@ -250,16 +250,16 @@ public class WorldTilemap : MonoBehaviour
         if (didAttackerWin)
         {
             WarPanel.UpdateBattle(didAttackerWin, defendingUnit);
-            Debug.Log(String.Format("War: {0}:{1} has killed {2}:{3}.",
+            Debug.LogFormat("War: {0}:{1} has killed {2}:{3}.",
                 attackerName, attackingUnit.DisplayName,
-                defenderName, defendingUnit.DisplayName));
+                defenderName, defendingUnit.DisplayName);
         }
         else // Attack failed
         {
             WarPanel.UpdateBattle(didAttackerWin, attackingUnit);
-            Debug.Log(String.Format("War: {0}:{1} has killed {2}:{3}.",
+            Debug.LogFormat("War: {0}:{1} has killed {2}:{3}.",
                 defenderName, defendingUnit.DisplayName,
-                attackerName, attackingUnit.DisplayName));
+                attackerName, attackingUnit.DisplayName);
 
             // If Selected Unit lost a unit, reset the top GameObject
             if (battleContinues && (selectedUnitGuid == attackingUnit.Guid))
@@ -278,26 +278,27 @@ public class WorldTilemap : MonoBehaviour
             {
                 // Attacker has lost the battle (all attacking units killed)
                 result = AttackResult.DefenderWon;
-                Debug.Log(String.Format("War: {0} have lost!", attackerName));
+                Debug.LogFormat("War: {0} have lost!", attackerName);
             }
             else if (didAttackerWin)
             {
                 // Attack has won the battle (all enemy units killed)
                 result = AttackResult.AttackerWon;
-                Debug.Log(String.Format("War: {0} are victorious!", attackerName));
+                Debug.LogFormat("War: {0} are victorious!", attackerName);
             }
         }
 
         return battleContinues;
     }
 
-    private void MoveSelectedArmy()
+    private void MoveArmy(ArmyGameObject armyGO)
     {
         SetTime(GameManager.StandardTime);
-        if (this.SelectedArmy.Path == null)
+        SetCameraTarget(armyGO.GameObject.transform);
+        if (armyGO.Path == null)
         {
-            this.SelectedArmy.Army.FindPath(this.SelectedArmy.TargetTile, out this.SelectedArmy.Path, out float distance);
-            if (this.SelectedArmy.Path.Count < 2)
+            armyGO.Army.FindPath(armyGO.TargetTile, out armyGO.Path, out float distance);
+            if (armyGO.Path.Count < 2)
             {
                 Debug.Log("Impossible route.");
                 return;
@@ -305,43 +306,45 @@ public class WorldTilemap : MonoBehaviour
         }
 
         // Check if the next tile contains an enemy army; cannot move onto an enemy army without explicity attacking
-        if ((this.SelectedArmy.Path.Count > 1) && MovingOntoEnemy(SelectedArmy.Army, this.SelectedArmy.Path[1]))
+        if ((armyGO.Path.Count > 1) && MovingOntoEnemy(SelectedArmy.Army, armyGO.Path[1]))
         {
-            Debug.Log(String.Format("Enemy detected at {0}.", this.SelectedArmy.TargetTile.Coordinates));
-            this.SelectedArmy.Path = null;
-            this.SelectedArmy.TargetTile = null;
+            Debug.LogFormat("Enemy detected at {0}.", armyGO.TargetTile.Coordinates);
+            armyGO.Path = null;
+            armyGO.TargetTile = null;
             SelectObject(SelectedArmy.Army.Tile);
         }
         // Try to move the army one step
-        else if (!this.SelectedArmy.Army.TryMoveOneStep(this.SelectedArmy.TargetTile, ref this.SelectedArmy.Path, out float distance))
+        else if (!armyGO.Army.TryMoveOneStep(armyGO.TargetTile, ref armyGO.Path, out float distance))
         {
             // Done moving due to path completion, out of moves, or hit barrier
             InputState = InputState.Unselected;
 
-            if (this.SelectedArmy.Path != null && this.SelectedArmy.Path.Count == 0)
+            if (armyGO.Path != null && armyGO.Path.Count == 0)
             {
-                Debug.Log(String.Format("Successfully moved {0} to {1}.", this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates));
+                Debug.LogFormat("Moved {0} to {1}", armyGO.Army, armyGO.TargetTile.Coordinates);
             }
             else
             {
-                Debug.Log(String.Format("Failed to mov {0} to {1}.", this.SelectedArmy.Army, this.SelectedArmy.TargetTile.Coordinates));
+                Debug.LogFormat("Cannot move {0} to {1}.", armyGO.Army, armyGO.TargetTile.Coordinates);
             }
         }
         // Continue moving along the path
         else
         {
-            Vector3 vector = ConvertGameToUnityCoordinates(this.SelectedArmy.Army.GetCoordinates());
+            Vector3 vector = ConvertGameToUnityCoordinates(armyGO.Army.GetCoordinates());
 
-            if (this.SelectedArmy.GameObject == null)
+            if (armyGO.GameObject == null)
             {
-                Debug.LogErrorFormat("ERROR: Trying to move a destroyed object: {0}",  this.SelectedArmy.Army.Guid);
+                Debug.LogErrorFormat("Trying to move a destroyed object: {0}",  armyGO.Army.Guid);
             }
-            Rigidbody2D rb = this.SelectedArmy.GameObject.GetComponent<Rigidbody2D>();
+            Rigidbody2D rb = armyGO.GameObject.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
                 rb.transform.position = vector;
             }
         }
+
+        Debug.LogFormat("Moves remaining: {0}", armyGO.Army.MovesRemaining);
     }
 
     private bool MovingOntoEnemy(Army army, BranallyGames.Wism.Tile targetTile)
@@ -430,9 +433,24 @@ public class WorldTilemap : MonoBehaviour
             this.InputState = InputState.ArmySelected;
             Vector3 worldVector = ConvertGameToUnityCoordinates(army.GetCoordinates());
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, tileMap.transform);
+
+            SetCameraTarget(this.selectedArmyBox.transform);
+        }
+        else
+        {
+            Vector3 worldVector = ConvertGameToUnityCoordinates(clickedTile.Coordinates);
+            GameObject go = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, tileMap.transform);
+            go.SetActive(false);
+            SetCameraTarget(go.transform);
         }
     }
-       
+
+    private void SetCameraTarget(Transform transform)
+    {
+        CameraFollow camera = this.followCamera.GetComponent<CameraFollow>();
+        camera.target = transform;
+    }
+
     private void MoveSelectedArmyTo(BranallyGames.Wism.Tile targetTile)
     {        
         // Move the selected unit to the clicked tile location
@@ -576,7 +594,7 @@ public class WorldTilemap : MonoBehaviour
             GameObject armyPrefab = armyFactory.FindGameObjectKind(army);
             if (armyPrefab == null)
             {
-                Debug.Log(String.Format("GameObject not found: {0}_{1}", army.ID, army.Affiliation.ID));
+                Debug.LogFormat("GameObject not found: {0}_{1}", army.ID, army.Affiliation.ID);
                 return;
             }
 
@@ -614,7 +632,7 @@ public class WorldTilemap : MonoBehaviour
     {
         foreach (Camera camera in Camera.allCameras)
         {
-            if (camera.name == "FollowCamera")
+            if (camera.name == "MainCamera")
             {
                 followCamera = camera;
             }
@@ -622,7 +640,7 @@ public class WorldTilemap : MonoBehaviour
 
         if (followCamera == null)
         {
-            throw new InvalidOperationException("Could not find the FollowCamera.");
+            throw new InvalidOperationException("Could not find the MainCamera.");
         }
     }
 }
