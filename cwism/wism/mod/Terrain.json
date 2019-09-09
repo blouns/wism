@@ -12,7 +12,7 @@
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": false,
-        "Movement": 99,
+        "Movement": 5,
         "DisplayName": "Mountain"
     },
     {
@@ -108,7 +108,7 @@
         "AllowFlight": false,
         "AllowFloat": false,
         "AllowWalk": false,
-        "Movement": 99,
+        "Movement": 999,
         "DisplayName": "Void"
     }
 ]

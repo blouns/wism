@@ -33,23 +33,27 @@ namespace Assets.Scripts.Units
             this.unitGameObjectKinds = new List<GameObject>(unitKinds);
         }
 
-
-        internal GameObject FindGameObjectKind(Army army)
+        internal GameObject FindGameObjectKind(Unit unit)
         {
-            if ((army == null) || (army.Count == 0))
-            {
-                throw new ArgumentNullException(nameof(army));
-            }
-
             foreach (GameObject go in unitGameObjectKinds)
             {
-                if (go.name == String.Format("{0}_{1}", army.ID, army.Affiliation.ID))
+                if (go.name == String.Format("{0}_{1}", unit.ID, unit.Affiliation.ID))
                 {
                     return go;
                 }
             }
 
             return null;
+        }
+
+        internal GameObject FindGameObjectKind(Army army)
+        {
+            if ((army == null) || (army.Size == 0))
+            {
+                throw new ArgumentNullException(nameof(army));
+            }
+
+            return FindGameObjectKind(army[0]);
         }
     }
 }

@@ -147,13 +147,7 @@ namespace BranallyGames.cwism
             IList<Army> armies = player1.GetArmies();
             foreach(Army army in armies)
             {
-                foreach (Unit unit in army.Units)
-                {
-                    if (unit.ID == "Hero")
-                    {
-                        return army;
-                    }
-                }
+                army.GetUnits().Find(u => u.ID == "Hero");                
             }
 
             return null;

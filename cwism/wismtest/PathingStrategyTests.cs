@@ -211,6 +211,7 @@ namespace wism.Tests
         {
             army = null;
             target = null;
+            Affiliation affiliation = Affiliation.Create(ModFactory.FindAffiliationInfo("Sirians"));
 
             Tile[,] map = new Tile[matrix.GetLength(0), matrix.GetLength(1)];
             for (int x = 0; x < matrix.GetLength(0); x++)
@@ -231,7 +232,7 @@ namespace wism.Tests
                             {
                                 tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Castle"));
                                 tile.Terrain.MovementCost = 1;                                
-                                army = Army.Create(ModFactory.FindUnitInfo("Hero"));
+                                army = Army.Create(affiliation, ModFactory.FindUnitInfo("Hero"));
                                 tile.AddArmy(army);                                
                             }
                             else

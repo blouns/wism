@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -57,11 +57,19 @@ namespace wism.Tests
             {
                 TestContext.WriteLine("Affiliation: {0}", affiliation);
                 if (affiliation.DisplayName == "Orcs of Kor")
+                {
                     foundOrcs = true;
+                    Assert.AreEqual(1, affiliation.GetTerrainModifier("Marsh"));
+                    Assert.AreEqual(-1, affiliation.GetTerrainModifier("Forest"));
+                    Assert.AreEqual(0, affiliation.GetTerrainModifier("Grass"));
+                    Assert.AreEqual(0, affiliation.GetTerrainModifier("Hill"));
+                    Assert.AreEqual(0, affiliation.GetTerrainModifier("OuterSpace"));
+                }
             }
 
             Assert.IsTrue(foundOrcs);
         }
+        
 
         [Test]
         public void LoadUnitsTest()

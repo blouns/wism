@@ -1,5 +1,6 @@
 using BranallyGames.Wism.Pathing;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace BranallyGames.Wism
 {
-    public class Army : MapObject
+    public class Army : Unit, IEnumerable<Unit>
     {
         public const int MaxUnits = 8;
 
         List<Unit> units;
 
-        public static Army Create(IList<Unit> units)
+        public static Army Create(Affiliation affiliation, IList<Unit> units)
         {
             if (units == null || units.Count == 0)
             {
@@ -21,20 +22,21 @@ namespace BranallyGames.Wism
             }
 
             Army composite = new Army();
-            composite.units = new List<Unit>(units);
-            composite.Units.Sort(new ByUnitViewingOrder());
+            composite.Affiliation = affiliation;
+            composite.units = new List<Unit>(units);            
+            composite.UpdateCompositeUnits();
 
             return composite;
         }
 
-        public static Army Create(Unit unit)
+        public static Army Create(Affiliation affiliation, Unit unit)
         {
-            return Create(new List<Unit>() { unit });
+            return Create(affiliation, new List<Unit>() { unit });
         }
 
-        public static Army Create(UnitInfo info)
+        public static Army Create(Affiliation affiliation, UnitInfo info)
         {
-            return Create(Unit.Create(info));
+            return Create(affiliation, Unit.Create(info));
         }
 
         private Army()
@@ -45,24 +47,24 @@ namespace BranallyGames.Wism
         {
             get
             {
-                if (this.Units.Count > 0)
-                    return this.Units[0].Guid;
+                if (units.Count > 0)
+                    return units[0].Guid;
 
                 return Guid.Empty;
             }
         }
 
-        public bool IsSpecial()
+        public new bool IsSpecial()
         {
-            return Units.Any<Unit>(v => v.IsSpecial());
+            return units.Any<Unit>(v => v.IsSpecial());
         }
         
         public override string DisplayName
         {
             get
             {
-                if (Units.Count > 0)
-                    return Units[0].DisplayName;
+                if (units.Count > 0)
+                    return units[0].DisplayName;
 
                 return "Empty army";
             }
@@ -76,23 +78,42 @@ namespace BranallyGames.Wism
         {
             get
             {
-                return Units[0].ID;
+                return units[0].ID;
             }
         }
 
-        public int GetCompositeAttackModifier()
+        public override int MovesRemaining
         {
-            return Units.Sum<Unit>(v => v.GetAttackModifier());
+            get
+            {
+                int min = Int32.MaxValue;
+                this.units.ForEach(u => min = (u.MovesRemaining < min) ? u.MovesRemaining : min);
+                return min;
+            }
+            set
+            {
+                // Do nothing for army container
+            }
+        }
+
+        public override void ResetMoves()
+        {
+            this.units.ForEach(u => u.ResetMoves());
+        }
+
+        public int GetCompositeAttackModifier(Tile target)
+        {
+            return units.Sum<Unit>(v => v.GetAttackModifier(target));
         }
 
         public int GetCompositeDefenseModifier()
         {
-            return Units.Sum<Unit>(v => v.GetDefenseModifier());
+            return units.Sum<Unit>(v => v.GetDefenseModifier());
         }
 
         public bool Contains(Unit unit)
         {
-            return this.Units.Contains<Unit>(unit);
+            return this.units.Contains<Unit>(unit);
         }
 
         public void Kill(Unit unit)
@@ -100,8 +121,8 @@ namespace BranallyGames.Wism
             if (!Contains(unit))
                 throw new ArgumentException("Unit not in the army: {0}", unit.ToString());
             
-            this.Units.Remove(unit);
-            if (this.Units.Count == 0)
+            this.units.Remove(unit);
+            if (this.units.Count == 0)
             {
                 // No more units in the army; kill it!
                 foreach (Player player in World.Current.Players)
@@ -113,25 +134,41 @@ namespace BranallyGames.Wism
                 }
             }
 
-            this.Units.Sort(new ByUnitViewingOrder());
+            this.units.Sort(new ByUnitViewingOrder());
         }
 
         public void Add(Unit unit)
         {
-            if (this.Units.Count == Army.MaxUnits)
+            if (this.units.Count == Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
 
-            this.Units.Add(unit);
-            this.Units.Sort(new ByUnitViewingOrder());
+            MergeArmies(Army.Create(this.Affiliation, unit));
         }
 
-        public void Concat(Army army)
+        public void MergeArmies(Army army)
         {
-            if ((this.Units.Count + army.Units.Count) > Army.MaxUnits)
+            if ((this.units.Count + army.units.Count) > Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
+            
+            this.units.AddRange(army.units);
+            UpdateCompositeUnits();            
+        }
 
-            this.units = new List<Unit>(this.Units.Concat(army.Units));
-            this.Units.Sort(new ByUnitViewingOrder());
+        private void MoveCompositeUnits(Tile targetTile)
+        {
+            this.Tile.MoveArmy(this, targetTile);
+            this.units.ForEach(u => u.MovesRemaining -= this.Tile.Terrain.MovementCost); // TODO: Account for bonuses
+            UpdateCompositeUnits();
+        }
+
+        private void UpdateCompositeUnits()
+        {
+            this.units.ForEach(u => 
+            {
+                u.Affiliation = this.Affiliation;
+                u.Tile = this.Tile;                
+            });
+            this.units.Sort(new ByUnitViewingOrder());
         }
 
         public bool CanWalk()
@@ -256,6 +293,11 @@ namespace BranallyGames.Wism
             return moveSuccessful;
         }
 
+        public Unit GetUnitAt(int index)
+        {
+            return this.units[index];
+        }
+
         private int CalculateDistance(IList<Tile> myPath)
         {
             // TODO: Calculate based on true unit and affiliation cost; for now, static
@@ -298,6 +340,13 @@ namespace BranallyGames.Wism
             if (!targetTile.CanTraverseHere(this))
                 return false;
 
+            // Do we have enough moves?
+            // TODO: Account for terrain bonuses
+            if (this.units.Any<Unit>(u => u.MovesRemaining < this.Tile.Terrain.MovementCost))
+            {
+                return false;
+            }
+
             if (targetTile.HasArmy())
             {
                 // Does the tile has room for the unit of the same team?
@@ -320,56 +369,80 @@ namespace BranallyGames.Wism
                         return false;
                     }
                 }
+                else
+                {
+                    // TODO: Need to implement a selected cohort within the army
+                    //       Perhaps implemented using multiple Army objects in an
+                    //       army, or using a new Cohort class.
+                    //
+                    //       Until then, do not auto-merge armies that are moving.
+                    return false;
+                }
             }
 
             // We are clear to advance!
             this.Tile.MoveArmy(this, targetTile);
+            MoveCompositeUnits(targetTile);
 
             return true;
         }
         
-        public int Count
+        public int Size
         {
             get
             {
-                return this.Units.Count();
+                return this.units.Count();
             }
         }
 
-        public List<Unit> Units { get => units; }
-    }
+        public List<Unit> GetUnits()
+        {
+            return new List<Unit>(units);
+        }
 
+        public IEnumerator<Unit> GetEnumerator()
+        {
+            return units.GetEnumerator();
+        } 
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    
+        public Unit this[int index] 
+        {                                                                               
+            get
+            {
+                return units[index];
+            }
+
+            set
+            {
+                units[index] = value;
+            }
+        }
+
+        public List<Unit> SortByBattleOrder(Tile target)
+        {
+            List<Unit> battleUnits = new List<Unit>(this.units);
+            battleUnits.Sort(new ByUnitBattleOrder(target));
+            return battleUnits;
+        }
+
+        public List<Unit> SortByViewingOrder()
+        {
+            List<Unit> viewUnits = new List<Unit>(this.units);
+            viewUnits.Sort(new ByUnitViewingOrder());
+            return viewUnits;
+        }
+    }
+    
     public enum Direction
     {
         North,
         South,
         East,
         West
-    }
-
-    public class ByUnitViewingOrder : Comparer<Unit>
-    {
-        public override int Compare(Unit x, Unit y)
-        {
-            int compare = 0;
-
-            // Heros stack to top
-            if ((x is Hero) && !(y is Hero))
-            {
-                compare = 1;
-            }
-            else if (y is Hero)
-            {
-                compare = -1;
-            }
-            else
-            {
-                int xStrength = x.GetAttackModifier() + x.Strength;
-                int yStrength = y.GetAttackModifier() + y.Strength;
-                compare = xStrength.CompareTo(yStrength);
-            }
-
-            return compare;
-        }
-    }
+    }    
 }

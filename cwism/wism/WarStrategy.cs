@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,12 +9,29 @@ namespace BranallyGames.Wism
     public interface IWarStrategy
     {
         /// <summary>
-        /// Combat strategy for attacking a given tile with a unit.
+        /// Combat strategy for attacking a given tile with a unit (entire stack)
         /// </summary>
         /// <param name="attacker">Unit attacking</param>
         /// <param name="tile">Tile being defended</param>
         /// <returns>True if attaker wins; false otherwise</returns>
         bool Attack(Army attacker, Tile tile);
+
+        /// <summary>
+        /// Combat strategy for attacking a given tile with a unit (one unit in stack)
+        /// </summary>
+        /// <param name="attacker"></param>
+        /// <param name="tile"></param>
+        /// <returns></returns>
+        bool AttackOnce(Army attacker, Tile tile);
+
+        /// <summary>
+        /// Combat strategy for attacking a given tile with a unit (one unit in stack)
+        /// </summary>
+        /// <param name="attacker"></param>
+        /// <param name="tile"></param>
+        /// <param name="wasSuccessful">True if attack succeeded; else false</param>
+        /// <returns>True if the fight continues; else, the battle is over.</returns>
+        bool AttackOnce(Army attacker, Tile tile, out bool wasSuccessful);
     }
 
     /// <summary>
@@ -41,80 +58,130 @@ namespace BranallyGames.Wism
         /// <param name="tile">Tile that is being attacked.</param>
         /// <returns>True if attacker wins; false otherwise.</returns>
         public bool Attack(Army attacker, Tile tile)
-        {
-            // Muster all units from composite tile (i.e. city) to defend
-            Army defender = tile.MusterArmy();
-                        
-            IList<Unit> defenders = defender.Units;
-            IList<Unit> attackers = attacker.Units;
-
-            // Calculate composite modifieres
-            int compositeAFCM = attacker.GetCompositeAttackModifier();
-            int compositeDFCM = defender.GetCompositeDefenseModifier();
-
-            // Apply unit-specific terrain modifiers (e.g. elves like forests)
-            ApplyUnitTerrainModifiers(attackers);
-            ApplyUnitTerrainModifiers(defenders);
-
-            // Order attackers by strength from weakest to strongest
-            attackers.OrderBy(v => v.ModifiedStrength);
-            defenders.OrderBy(v => v.ModifiedStrength);
+        {            
+            Army defender = tile.Army;
 
             // Attack units one-at-a-time to the death!
-            return AttackInternal(defender, attacker, compositeAFCM, compositeDFCM);
-        }
-
-        private bool AttackInternal(Army defender, Army attacker, int compositeAFCM, int compositeDFCM)
-        {
-            while (attacker.Count > 0 && defender.Count > 0)
+            while (attacker.Size > 0 && defender.Size > 0)
             {
-                Unit currentAttacker = attacker.Units.First();
-                Unit currentDefender = defender.Units.First();
-
-                // Max strength of 9 due to die of 10
-                int attackStrength = Math.Min(compositeAFCM + currentAttacker.ModifiedStrength, 9);
-                int defenseStrength = Math.Min(compositeDFCM + currentDefender.ModifiedStrength, 9);
-
-                bool attackSucceeded = AttackRoll(currentAttacker, attackStrength, currentDefender, defenseStrength);
-                if (attackSucceeded)
+                if (AttackOnce(attacker, tile))
                 {
-                    // Current attacker won
-                    Log.WriteLine(Log.TraceLevel.Information, "Current attacker won.");
-                    defender.Kill(currentDefender);
+                    Log.WriteLine(Log.TraceLevel.Information, "Attacker killed one army.");
                 }
                 else
                 {
-                    // Current attacker lost
-                    Log.WriteLine(Log.TraceLevel.Information, "Current attacker lost.");
-                    attacker.Kill(currentAttacker);
+                    Log.WriteLine(Log.TraceLevel.Information, "Defender killed one army.");
                 }
             }
 
-            // Reset hit points for victor
-            foreach (Unit unit in attacker.Units)
-                unit.Reset();
-            foreach (Unit unit in defender.Units)
-                unit.Reset();
-
-            // Determine winner
-            bool attackerWon = (attacker.Count > 0);
-
-            if ((attacker.Count > 0 && defender.Count > 0) ||
-                (attacker.Count == 0 && defender.Count == 0))
-            {
-                throw new Exception(
-                    String.Format("Attacker and defender count incorrect after battle: Attackers: {0}, Defenders: {1}",
-                    attacker.Count, defender.Count));
-            }
-
-            return attackerWon;
+            return attacker.Size > 0;
         }
 
-        private void ApplyUnitTerrainModifiers(IList<Unit> units)
+        /// <summary>
+        /// Combat is begun. Attacking and Defending armies are sorted on the display with 
+        /// the most valuable armies on the right hand side. Combat is a single one-on-one
+        /// engagement between the left-most army of each side. Combat is fought to the
+        /// death with the survivor going on to fight his opponents's next army. The battle 
+        /// mecanics work like this. Each army rolls a ten-sided die (1-10). The result is 
+        /// low if the die roll is less than or equal to his opponent's AS (or DS as the 
+        /// case may be). The result is high if thedie roll is greater than his opponent's 
+        /// AS (or DS). 
+        /// 
+        /// 1) If both rolls are high or both rolls are low, then the step is repeated.
+        /// 2) If one rolls low and the other rolls high, then the low roller takes 1 hit. 
+        /// 3) If the defender rolls high and the attacker rolls low, the defender takes 1 hit.
+        ///
+        /// As soon as an army receives 2 hits it is destroyed.
+        /// </summary>
+        /// <param name="target">Tile that is being attacked.</param>
+        /// <returns>True if attacker wins; false otherwise.</returns>
+        public bool AttackOnce(Army attacker, Tile target)
+        {
+            AttackOnce(attacker, target, out bool wasSuccessful);
+
+            return wasSuccessful;
+        }
+
+        public bool AttackOnce(Army attacker, Tile target, out bool wasSuccessful)
+        {
+            PrepareArmiesForAttack(attacker, target, out Army defender, out int compositeAFCM, out int compositeDFCM);
+
+            wasSuccessful = AttackOnceInternal(defender, attacker, compositeAFCM, compositeDFCM);
+            if (BattleContinues(defender, attacker))
+            {
+                // Keep fighting
+                return true;
+            }
+            else
+            {
+                // Battle is over
+                ResetHitPoints(defender, attacker);
+                return false;
+            }
+        }
+
+        private bool BattleContinues(Army defender, Army attacker)
+        {
+            return (attacker.Size > 0 && defender.Size > 0);
+        }
+
+        private void PrepareArmiesForAttack(Army attacker, Tile target, out Army defender, out int compositeAFCM, out int compositeDFCM)
+        {
+            // Muster all units from composite tile (i.e. city) to defend
+            defender = target.MusterArmy();
+            List<Unit> defenders = defender.GetUnits();
+            List<Unit> attackers = attacker.GetUnits();
+
+            // Calculate composite modifieres
+            compositeAFCM = attacker.GetCompositeAttackModifier(target);
+            compositeDFCM = defender.GetCompositeDefenseModifier();
+
+            // Apply unit-specific terrain modifiers (e.g. elves like forests)
+            ApplyUnitTerrainModifiers(attackers, target);
+            ApplyUnitTerrainModifiers(defenders, target);            
+        }
+
+        private static void ResetHitPoints(Army defender, Army attacker)
+        {
+            attacker.GetUnits().ForEach(u => u.Reset());
+            defender.GetUnits().ForEach(u => u.Reset());
+        }
+
+        private bool AttackOnceInternal(Army defender, Army attacker, int compositeAFCM, int compositeDFCM)
+        {
+            // Order attackers by strength from weakest to strongest
+            List<Unit> attackingUnits = attacker.SortByBattleOrder(defender.Tile);
+            List<Unit> defendingUnits = defender.SortByBattleOrder(defender.Tile);
+
+            Unit currentAttacker = attackingUnits[0];
+            Unit currentDefender = defendingUnits[0];
+
+            // Max strength of 9 due to die of 10
+            int attackStrength = Math.Min(compositeAFCM + currentAttacker.ModifiedStrength, 9);
+            int defenseStrength = Math.Min(compositeDFCM + currentDefender.ModifiedStrength, 9);
+
+            bool attackSucceeded = AttackRoll(currentAttacker, attackStrength, currentDefender, defenseStrength);
+            if (attackSucceeded)
+            {
+                // Current attacker won
+                Log.WriteLine(Log.TraceLevel.Information, "Current attacker won.");
+                defender.Kill(currentDefender);
+            }
+            else
+            {
+                // Current attacker lost
+                Log.WriteLine(Log.TraceLevel.Information, "Current attacker lost.");
+                attacker.Kill(currentAttacker);
+            }
+
+            return attackSucceeded;
+        }
+
+        private void ApplyUnitTerrainModifiers(IList<Unit> units, Tile target)
         {            
             foreach (Unit unit in units)
             {
-                // TODO: Apply unit-specific modifiers; for now just raw strength
+                // TODO: Apply unit-specific modifiers; for now just raw strgth
                 unit.ModifiedStrength = unit.Strength; 
             }
             return;
@@ -155,5 +222,7 @@ namespace BranallyGames.Wism
 
             return AttackRoll(attacker, attackStrength, defender, defenseStrength);
         }
-    }
+
+
+    }    
 }

@@ -54,6 +54,123 @@ namespace wism.Tests
             Assert.IsTrue(war.Attack(attacker, tile));
         }
 
+        [Test]
+        public void AttackOnceWinTest()
+        {
+            World.CreateDefaultWorld();
+            World.Current.Random = new Random(1990);
+            Player player1 = World.Current.Players[0];
+            Tile tile = World.Current.Map[2, 2];
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+
+            Player player2 = World.Current.Players[1];
+            tile = World.Current.Map[3, 2];
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+
+            Army attacker = World.Current.Players[0].GetArmies()[0];
+            IWarStrategy war = new DefaultWarStrategy();
+            Assert.IsTrue(war.AttackOnce(attacker, tile));
+        }
+
+        [Test]
+        public void AttackOnceLoseTest()
+        {
+            World.CreateDefaultWorld();
+            World.Current.Random = new Random(1990);
+            Player player1 = World.Current.Players[0];
+            Tile tile = World.Current.Map[2, 2];
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            
+            Player player2 = World.Current.Players[1];
+            tile = World.Current.Map[3, 2];            
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+
+            Army attacker = World.Current.Players[0].GetArmies()[0];
+            IWarStrategy war = new DefaultWarStrategy();
+            Assert.IsFalse(war.AttackOnce(attacker, tile));
+        }
+
+        [Test]
+        public void AttackUntilWinTest()
+        {
+            World.CreateDefaultWorld();
+            World.Current.Random = new Random(1990);
+            Player player1 = World.Current.Players[0];
+            Tile tile = World.Current.Map[2, 2];
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+
+            Player player2 = World.Current.Players[1];
+            tile = World.Current.Map[3, 2];
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+
+            Army attacker = World.Current.Players[0].GetArmies()[0];
+            IWarStrategy war = new DefaultWarStrategy();
+
+            while (attacker.Size > 0 && tile.Army.Size > 0)
+            {
+                bool won = war.AttackOnce(attacker, tile);
+            }
+
+            Assert.IsTrue(attacker.Size > 0, "Defender was not supposed to win.");
+        }
+
+        [Test]
+        public void AttackUntilLoseTest()
+        {
+            World.CreateDefaultWorld();
+            World.Current.Random = new Random(1990);
+            Player player1 = World.Current.Players[0];
+            Tile tile = World.Current.Map[2, 2];
+            player1.HireHero(tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+
+            Player player2 = World.Current.Players[1];
+            tile = World.Current.Map[3, 2];
+            player2.HireHero(tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player2.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+
+            Army attacker = World.Current.Players[0].GetArmies()[0];
+            IWarStrategy war = new DefaultWarStrategy();
+
+            while (attacker.Size > 0 && tile.Army.Size > 0)
+            {
+                bool won = war.AttackOnce(attacker, tile);
+            }
+
+            Assert.IsTrue(attacker.Size == 0, "Attacker was not supposed to win.");
+        }
+
+
         #region Helper methods        
 
         private static Player CreatePlayer(string name)

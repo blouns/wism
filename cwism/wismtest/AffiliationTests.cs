@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
@@ -28,6 +28,6 @@ namespace wism.Tests
         {
             Affiliation affiliation = Affiliation.Create(new AffiliationInfo());
             Assert.IsNotNull(affiliation.ToString());
-        }
+        }       
     }
 }
