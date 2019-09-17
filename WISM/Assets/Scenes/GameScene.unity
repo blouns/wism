@@ -462,7 +462,8 @@ MonoBehaviour:
   armyPrefab: {fileID: 3836617278113509933, guid: 904f295cda5ee0e478e5dc5dfd6c91c0,
     type: 3}
   warPanelPrefab: {fileID: 1127945}
-  SelectedBoxPrefab: {fileID: 0}
+  SelectedBoxPrefab: {fileID: 8103216089773565681, guid: a3f1998d461a4894bbd94c4b817ef091,
+    type: 3}
 --- !u!483693784 &572604741
 TilemapRenderer:
   m_ObjectHideFlags: 0

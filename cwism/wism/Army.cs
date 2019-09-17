@@ -21,9 +21,11 @@ namespace BranallyGames.Wism
                 throw new ArgumentNullException(nameof(units));
             }
 
-            Army composite = new Army();
-            composite.Affiliation = affiliation;
-            composite.units = new List<Unit>(units);            
+            Army composite = new Army
+            {
+                Affiliation = affiliation,
+                units = new List<Unit>(units)
+            };
             composite.UpdateCompositeUnits();
 
             return composite;
@@ -137,28 +139,93 @@ namespace BranallyGames.Wism
             this.units.Sort(new ByUnitViewingOrder());
         }
 
+        internal void RemoveUnit(Unit unitToRemove)
+        {
+            if (unitToRemove is null)
+            {
+                throw new ArgumentNullException(nameof(unitToRemove));
+            }
+
+            this.units.Remove(unitToRemove);
+        }
+
         public void Add(Unit unit)
         {
             if (this.units.Count == Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
 
-            MergeArmies(Army.Create(this.Affiliation, unit));
+            Merge(Army.Create(this.Affiliation, unit));
         }
 
-        public void MergeArmies(Army army)
+        public void Merge(Army army)
         {
             if ((this.units.Count + army.units.Count) > Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
             
+            // TODO: Need to remove from the Player context
             this.units.AddRange(army.units);
             UpdateCompositeUnits();            
         }
 
-        private void MoveCompositeUnits(Tile targetTile)
+        public Army Split(IList<Unit> selectedUnits)
         {
-            this.Tile.MoveArmy(this, targetTile);
-            this.units.ForEach(u => u.MovesRemaining -= this.Tile.Terrain.MovementCost); // TODO: Account for bonuses
-            UpdateCompositeUnits();
+            if (this.Size == selectedUnits.Count)
+                throw new ArgumentOutOfRangeException("Split must be a subset of the army.");
+
+            for (int i = 0; i < selectedUnits.Count; i++)
+            {
+                if (!this.units.Contains(selectedUnits[i]))
+                {
+                    throw new ArgumentException("Split must be a subset of the army.");
+                }
+            }
+
+            // TODO: Need to add the new army to the Player context
+            Army selectedArmy = Army.Create(this.Affiliation, selectedUnits);
+            selectedArmy.Tile = this.Tile;
+            return selectedArmy;
+        }
+
+        private static void MoveSelectedArmy(Army selectedArmy, Tile targetTile)
+        { 
+            Tile originatingTile = selectedArmy.Tile;
+
+            targetTile.Army = selectedArmy;
+            selectedArmy.Tile = targetTile;
+            foreach (Unit unit in selectedArmy.units)
+            {
+                unit.Tile = targetTile;
+                unit.MovesRemaining -= targetTile.Terrain.MovementCost;   // TODO: Account for bonuses
+            }
+
+            selectedArmy.units.Sort(new ByUnitViewingOrder());
+
+            RemoveArmiesFromOrginatingTile(selectedArmy, originatingTile);
+        }
+
+        private static void RemoveArmiesFromOrginatingTile(Army armyToRemove, Tile originatingTile)
+        {
+            // If moving entire army (not a subset)
+            if (originatingTile.Army.Size == armyToRemove.Size)
+            {
+                originatingTile.Army = null;
+                return;
+            }
+
+            // Otherwise remove moved units from original army
+            foreach (Unit unitToRemove in armyToRemove.GetUnits())
+            {
+                originatingTile.Army.RemoveUnit(unitToRemove);
+            }
+
+            if (originatingTile.Army.Size == 0)
+            {
+                originatingTile.Army = null;
+            }
+            else
+            {
+                originatingTile.Army.units.Sort(new ByUnitViewingOrder());
+            }
         }
 
         private void UpdateCompositeUnits()
@@ -171,9 +238,9 @@ namespace BranallyGames.Wism
             this.units.Sort(new ByUnitViewingOrder());
         }
 
-        public bool CanWalk()
+        public new bool CanWalk()
         {
-           bool canWalk = true;
+            bool canWalk = true;
             foreach (Unit unit in this.units)
             {
                 canWalk &= unit.CanWalk;
@@ -182,7 +249,7 @@ namespace BranallyGames.Wism
             return canWalk;       
         }
 
-        public bool CanFloat()
+        public new bool CanFloat()
         {
             bool canFloat = true;
             foreach (Unit unit in this.units)
@@ -193,7 +260,7 @@ namespace BranallyGames.Wism
             return canFloat;
         }
 
-        public bool CanFly()
+        public new bool CanFly()
         {
             bool canFly = true;
             foreach (Unit unit in this.units)
@@ -206,8 +273,6 @@ namespace BranallyGames.Wism
 
         public void FindPath(Tile target, out IList<Tile> path, out float distance)
         {
-            IList<Tile> myPath = null;
-            float myDistance = 0.0f;
 
             if (target == null)
             {
@@ -215,7 +280,7 @@ namespace BranallyGames.Wism
             }
 
             IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
-            pathingStrategy.FindShortestRoute(World.Current.Map, this, target, out myPath, out myDistance);
+            pathingStrategy.FindShortestRoute(World.Current.Map, this, target, out IList<Tile> myPath, out float myDistance);
 
             path = myPath;
             distance = myDistance;
@@ -253,14 +318,14 @@ namespace BranallyGames.Wism
             }
 
             IList<Tile> myPath = path;
-            float myDistance = 0.0f;
             Tile target = map[coord.X, coord.Y];
-           
+
+            float myDistance;
             if (myPath == null)
             {
                 // No current path; calculate the shortest route
                 IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
-                pathingStrategy.FindShortestRoute(map, this, target, out myPath, out myDistance);
+                pathingStrategy.FindShortestRoute(map, this, target, out myPath, out _);
 
                 if (myPath == null || myPath.Count == 0)
                 {
@@ -332,17 +397,33 @@ namespace BranallyGames.Wism
 
         public bool TryMove(Coordinates to)
         {
-            Coordinates coord = this.GetCoordinates();
             Tile[,] map = World.Current.Map;
             Tile targetTile = map[to.X, to.Y];
-            
+
+            // If not moving entire army, create a new army subset
+            Army selectedArmy = this;
+            //if (this.Tile.Army.Size > selectedUnits.Count)
+            //{
+            //    selectedArmy = Army.Create(selectedArmy.Affiliation, selectedUnits);
+            //    //
+            //    // TODO: Add army to player? UI? Prob need to return the new object 
+            //    //
+            //    // Or maybe, first select a subset (Split) which creates the army, then
+            //    // if it is the entire army it is the same army object, but
+            //    // if it is a subset then a new army object is created.
+            //    // If the army is deselected, then it gets merged back
+            //    // If it moves to another army then it gets merged.
+            //    // UI prob needs to know if it is a new army object though
+            //    // this way the UI always knows what it's dealing with.
+            //}
+
             // Can we traverse in that terrain?
             if (!targetTile.CanTraverseHere(this))
                 return false;
 
             // Do we have enough moves?
             // TODO: Account for terrain bonuses
-            if (this.units.Any<Unit>(u => u.MovesRemaining < this.Tile.Terrain.MovementCost))
+            if (selectedArmy.units.Any<Unit>(u => u.MovesRemaining < selectedArmy.Tile.Terrain.MovementCost))
             {
                 return false;
             }
@@ -350,7 +431,7 @@ namespace BranallyGames.Wism
             if (targetTile.HasArmy())
             {
                 // Does the tile has room for the unit of the same team?
-                if ((targetTile.Army.Affiliation == this.Affiliation) &&
+                if ((targetTile.Army.Affiliation == selectedArmy.Affiliation) &&
                     (!targetTile.HasRoom(this)))
                 {
                     return false;
@@ -358,12 +439,16 @@ namespace BranallyGames.Wism
 
                 // Is it an enemy tile?
                 if ((targetTile.Army != null) &&
-                    (targetTile.Army.Affiliation != this.Affiliation))
+                    (targetTile.Army.Affiliation != selectedArmy.Affiliation))
                 {
                     IWarStrategy war = World.Current.WarStrategy;
 
                     // WAR! ...in a senseless mind.
-                    if (!war.Attack(this, targetTile))
+
+                    //
+                    // TODO: Need to handle this as a subset too (remove from original)
+                    // 
+                    if (!war.Attack(selectedArmy, targetTile))
                     {
                         // We have lost!
                         return false;
@@ -381,12 +466,11 @@ namespace BranallyGames.Wism
             }
 
             // We are clear to advance!
-            this.Tile.MoveArmy(this, targetTile);
-            MoveCompositeUnits(targetTile);
+            MoveSelectedArmy(selectedArmy, targetTile);
 
             return true;
         }
-        
+
         public int Size
         {
             get

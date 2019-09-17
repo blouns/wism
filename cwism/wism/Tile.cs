@@ -58,22 +58,13 @@ namespace BranallyGames.Wism
             }
             else
             {
-                this.Army.MergeArmies(newArmy);
+                this.Army.Merge(newArmy);
             }            
         }
 
         public bool CanTraverseHere(Army army)
         {
             return this.Terrain.CanTraverse(army.CanWalk(), army.CanFloat(), army.CanFly());
-        }
-
-        public void MoveArmy(Army army, Tile toTile)
-        {
-            Tile fromTile = this;
-
-            fromTile.Army = null;   // Remove army from originating tile            
-            toTile.Army = army;     // Move army to destination tile
-            army.Tile = toTile;     // Set army parent tile to destination tile
         }
 
         internal bool HasRoom(Army army)
@@ -110,6 +101,20 @@ namespace BranallyGames.Wism
         public override string ToString()
         {
             return string.Format("({0},{1})", this.x, this.y);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Coordinates other))
+                return false;
+
+            return (this.X == other.X &&
+                    this.Y == other.Y);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
         }
     }
 }
