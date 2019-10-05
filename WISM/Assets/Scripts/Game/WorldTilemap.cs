@@ -16,7 +16,10 @@ public class WorldTilemap : MonoBehaviour
 
     [SerializeField]
     private GameObject warPanelPrefab;
+    [SerializeField]
+    private GameObject unitPickerPrefab;
     private WarPanel WarPanel;
+    private UnitPicker UnitPickerPanel;
 
     private Camera followCamera;
     private World world;
@@ -41,17 +44,12 @@ public class WorldTilemap : MonoBehaviour
         SetupCameras();
         tileMap = transform.GetComponent<Tilemap>();
         WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
+        UnitPickerPanel = this.unitPickerPrefab.GetComponent<UnitPicker>();
         
         // Set up game
         world = CreateWorldFromScene();
         players = ReadyPlayers();
         armyFactory = ArmyFactory.Create(armyKinds);
-
-        // TODO: Swap to use Resources or similar run-time generation of units
-        //Sprite[] sprites = Resources.LoadAll<Sprite>("Armies/sirians_hero_ALPHA");
-        //SpriteRenderer sr = armyPrefab.GetComponent<SpriteRenderer>();
-        //sr.sprite = sprites[0];
-        //Instantiate<GameObject>(this.armyPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
 
         CreateArmyGameObjects();
     }
@@ -77,6 +75,10 @@ public class WorldTilemap : MonoBehaviour
             {
                 case InputState.Unselected:
                     SelectObject(clickedTile);
+                    break;
+
+                case InputState.SelectingUnits:
+                    // Do nothing
                     break;
 
                 case InputState.ArmySelected:
@@ -128,6 +130,14 @@ public class WorldTilemap : MonoBehaviour
             if (this.InputState == InputState.ArmySelected)
             {
                 DeselectObject();
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.M))
+        {
+            if (this.InputState == InputState.ArmySelected)
+            {
+                UnitPickerPanel.Initialize(this.SelectedArmy.Army, this.armyKinds);
+                this.InputState = InputState.SelectingUnits;
             }
         }
     }
@@ -392,20 +402,12 @@ public class WorldTilemap : MonoBehaviour
             foreach (Army army in player.GetArmies())
             {
                 Vector3 worldVector = ConvertGameToUnityCoordinates(army.GetCoordinates());
-
-                // TODO: Swap to using a Unit collection in addition to Armies;
-                //       Currently creating one Army per Unit which will break
-                //       several scenarios.
                 InstantiateArmy(army, worldVector);
             }
 
             // Draw only the "top" unit for each army on the map
             foreach (BranallyGames.Wism.Tile tile in World.Current.Map)
             {
-                // HACK: Top army is defined by the viewing sort order which Tile. 
-                //       Above change to introduce proper armies as stacks to 
-                //       the Player object will resolve this.
-
                 if (!tile.HasArmy() || !this.armyDictionary.ContainsKey(tile.Army.Guid))
                     continue;
 
@@ -433,6 +435,7 @@ public class WorldTilemap : MonoBehaviour
             this.InputState = InputState.ArmySelected;
             Vector3 worldVector = ConvertGameToUnityCoordinates(army.GetCoordinates());
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, tileMap.transform);
+            this.selectedArmyBox.SetActive(true);
 
             SetCameraTarget(this.selectedArmyBox.transform);
         }
@@ -648,6 +651,7 @@ public class WorldTilemap : MonoBehaviour
 public enum InputState
 {
     Unselected = 0,
+    SelectingUnits,
     ArmySelected,
     ArmyMoving,
     ArmyAttacking,

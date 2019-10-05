@@ -544,6 +544,50 @@ namespace wism.Tests
             Assert.AreEqual(tile.Coordinates, originalArmy.GetCoordinates(), "Standing army did not stay as expected.");
         }
 
+        [Test]
+        public void MoveSelectedUnitFail()
+        {
+            StackOrderReset(out Player player1, out _, out Tile tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindUnitInfo("Pegasus"), tile);
+
+            IList<Army> allArmies = player1.GetArmies();
+            Army originalArmy = allArmies[0];
+
+            // Select two units from the army            
+            IList<Unit> selectedUnits = new List<Unit>
+            {
+                originalArmy.GetUnitAt(4),
+                originalArmy.GetUnitAt(5)
+            };
+            Army selectedArmy = originalArmy.Split(selectedUnits);
+
+            // Move the selected units
+            if (!selectedArmy.TryMove(Direction.North))
+            {
+                Assert.Fail("Could not move the army.");
+            }
+            Coordinates finalCoordinates = selectedArmy.GetCoordinates();
+
+            // Attempt to move into mountains
+            if (selectedArmy.TryMove(Direction.North))
+            {
+                Assert.Fail("Army unexpectedly moved into mountains!");
+            }
+
+            Assert.AreEqual(finalCoordinates, selectedArmy.GetCoordinates(), "Army is not in the expected position.");
+            Assert.IsNotNull(selectedArmy.Tile.Army, "Unit should be set on new tile");
+            Assert.IsNotNull(selectedArmy.Tile.Army.Tile, "Unit's tile should be set on new tile");
+            Assert.AreEqual(2, selectedArmy.Size, "Selected army does not have the expected number of units.");
+            Assert.AreEqual(4, originalArmy.Size, "Standing army does not have the expect number of units.");
+            Assert.AreEqual(new Coordinates(tile.Coordinates.X, tile.Coordinates.Y - 1), selectedArmy.GetCoordinates(), "Selected units did not move as expected.");
+            Assert.AreEqual(tile.Coordinates, originalArmy.GetCoordinates(), "Standing army did not stay as expected.");
+        }
+
         #region Helper utility methods
 
         private void MoveUnitPass(Army army, Direction direction)

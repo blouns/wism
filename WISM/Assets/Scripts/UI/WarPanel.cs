@@ -65,7 +65,7 @@ public class WarPanel : MonoBehaviour
 
     private Vector3 GetUnitPanelPosition(List<Unit> units, Vector3 position, int index, GameObject unitGo)
     {        
-        const float xUnitSize = .9f;
+        const float xUnitSize = .5f;
         const float xOffset = -.25f;
 
         index = units.Count - index; // Reverse the order to draw left-to-right
