@@ -337,8 +337,6 @@ public class WorldTilemap : MonoBehaviour
         else if (!armyGO.Army.TryMoveOneStep(armyGO.TargetTile, ref armyGO.Path, out float distance))
         {
             // Done moving due to path completion, out of moves, or hit barrier
-            InputState = InputState.Unselected;
-
             if (armyGO.Path != null && armyGO.Path.Count == 0)
             {
                 Debug.LogFormat("Moved {0} to {1}", armyGO.Army, armyGO.TargetTile.Coordinates);
@@ -346,6 +344,17 @@ public class WorldTilemap : MonoBehaviour
             else
             {
                 Debug.LogFormat("Cannot move {0} to {1}.", armyGO.Army, armyGO.TargetTile.Coordinates);
+            }
+
+            if (armyGO.Army.MovesRemaining == 0)
+            {
+                InputState = InputState.Unselected;
+            }
+            else
+            {
+                armyGO.Path = null;
+                armyGO.TargetTile = null;
+                SelectObject(SelectedArmy.Army.Tile);
             }
         }
         // Continue moving along the path
@@ -364,7 +373,7 @@ public class WorldTilemap : MonoBehaviour
             }
         }
 
-        Debug.LogFormat("Moves remaining: {0}", armyGO.Army.MovesRemaining);
+        Debug.LogFormat("Moves remaining: {0}", armyGO.Army.MovesRemaining);        
     }
 
     private bool MovingOntoEnemy(Army army, BranallyGames.Wism.Tile targetTile)
@@ -455,6 +464,7 @@ public class WorldTilemap : MonoBehaviour
             GameObject go = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, tileMap.transform);
             go.SetActive(false);
             SetCameraTarget(go.transform);
+            Destroy(go, .5f);
         }
     }
 
