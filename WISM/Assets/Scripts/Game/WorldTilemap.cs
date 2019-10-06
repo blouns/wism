@@ -140,6 +140,16 @@ public class WorldTilemap : MonoBehaviour
                 this.InputState = InputState.SelectingUnits;
             }
         }
+        else if (Input.GetKeyDown(KeyCode.I))
+        {
+            ToggleMinimap();
+        }
+    }
+
+    private void ToggleMinimap()
+    {
+        GameObject map = UnityUtilities.GameObjectHardFind("MinimapBorder");
+        map.SetActive(!map.activeSelf);
     }
 
     private void CompleteBattle()
