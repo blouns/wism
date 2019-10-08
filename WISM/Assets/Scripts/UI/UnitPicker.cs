@@ -28,6 +28,10 @@ public class UnitPicker : MonoBehaviour
         {
             SetSelectedArmy(selectedUnits);
         }
+        else
+        {
+            this.WorldTilemap.DeselectObject();
+        }
 
         Teardown();
     }
@@ -35,16 +39,15 @@ public class UnitPicker : MonoBehaviour
     private void SetSelectedArmy(List<Unit> selectedUnits)
     {
         ArmyGameObject selectedArmyGo = this.WorldTilemap.SelectedArmy;
-
-        // If army is the same do nothing
+        
         bool sameUnitsSelected = true;
         if (selectedArmyGo.Army.Size == selectedUnits.Count)
         {
-            
+
             for (int i = 0; i < selectedUnits.Count; i++)
             {
                 sameUnitsSelected &= selectedUnits.Contains(selectedArmyGo.Army[i]);
-            }            
+            }
         }
 
         if (!sameUnitsSelected)
@@ -91,7 +94,7 @@ public class UnitPicker : MonoBehaviour
             }
         }
 
-        throw new ArgumentOutOfRangeException("Could not find the butto matching the index.");
+        throw new ArgumentOutOfRangeException("Could not find the button matching the index.");
     }
 
     public void Initialize(Army army, GameObject[] armyKinds)
@@ -154,7 +157,8 @@ public class UnitPicker : MonoBehaviour
                 }
                 else if (widget.name == "SelectButton")
                 {
-                    // TODO: Add a pick list and render based on its selected status
+                    Button button = widget.GetComponent<Button>();
+                    button.image.sprite = this.SelectedSprite;
                 }
                 else if (widget.name == "Army")
                 {

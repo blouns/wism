@@ -1,13 +1,9 @@
-using System.Collections;
+using Assets.Scripts.Units;
+using BranallyGames.Wism;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using BranallyGames.Wism;
-using System;
-using Assets.Scripts.Units;
-using System.IO;
-using System.Threading;
-using UnityEngine.Events;
 
 public class WorldTilemap : MonoBehaviour
 {
@@ -45,7 +41,7 @@ public class WorldTilemap : MonoBehaviour
         tileMap = transform.GetComponent<Tilemap>();
         WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
         UnitPickerPanel = this.unitPickerPrefab.GetComponent<UnitPicker>();
-        
+
         // Set up game
         world = CreateWorldFromScene();
         players = ReadyPlayers();
@@ -198,7 +194,7 @@ public class WorldTilemap : MonoBehaviour
         // Set up war UI    
         WarPanel.Initialize(attacker, defender, armyKinds);
         SetTime(GameManager.WarTime);
-    }    
+    }
 
     private void FixedUpdate()
     {
@@ -207,7 +203,7 @@ public class WorldTilemap : MonoBehaviour
 
         MoveArmies();
         CleanupArmies();
-        CreateArmyGameObjects();        
+        CreateArmyGameObjects();
     }
 
     private void MoveArmies()
@@ -251,7 +247,7 @@ public class WorldTilemap : MonoBehaviour
             result = AttackResult.DefenderWon;
             return false;
         }
-        else if(defender.Size == 0)
+        else if (defender.Size == 0)
         {
             Debug.LogWarning("Defender attacked without any units.");
             result = AttackResult.AttackerWon;
@@ -266,7 +262,7 @@ public class WorldTilemap : MonoBehaviour
         Unit attackingUnit = attackingUnits[0];
         Unit defendingUnit = defendingUnits[0];
         bool battleContinues = GameManager.WarStrategy.AttackOnce(attacker, defender.Tile, out bool didAttackerWin);
-        
+
         if (didAttackerWin)
         {
             WarPanel.UpdateBattle(didAttackerWin, defendingUnit);
@@ -364,7 +360,7 @@ public class WorldTilemap : MonoBehaviour
 
             if (armyGO.GameObject == null)
             {
-                Debug.LogErrorFormat("Trying to move a destroyed object: {0}",  armyGO.Army.Guid);
+                Debug.LogErrorFormat("Trying to move a destroyed object: {0}", armyGO.Army.Guid);
             }
             Rigidbody2D rb = armyGO.GameObject.GetComponent<Rigidbody2D>();
             if (rb != null)
@@ -373,7 +369,7 @@ public class WorldTilemap : MonoBehaviour
             }
         }
 
-        Debug.LogFormat("Moves remaining: {0}", armyGO.Army.MovesRemaining);        
+        Debug.LogFormat("Moves remaining: {0}", armyGO.Army.MovesRemaining);
     }
 
     private bool MovingOntoEnemy(Army army, BranallyGames.Wism.Tile targetTile)
@@ -393,7 +389,7 @@ public class WorldTilemap : MonoBehaviour
                 if (armyDictionary.ContainsKey(army.Guid))
                 {
                     // Found the army so don't remove it
-                    toDelete.Remove(army.Guid);                    
+                    toDelete.Remove(army.Guid);
                 }
             }
         }
@@ -475,7 +471,7 @@ public class WorldTilemap : MonoBehaviour
     }
 
     private void MoveSelectedArmyTo(BranallyGames.Wism.Tile targetTile)
-    {        
+    {
         // Move the selected unit to the clicked tile location
         if (this.SelectedArmy == null)
             throw new InvalidOperationException("Selected Army was null.");
@@ -489,16 +485,16 @@ public class WorldTilemap : MonoBehaviour
     }
 
     private BranallyGames.Wism.Tile GetClickedTile()
-    {        
+    {
         // TODO: Clamp to only positions on the world or UI
         Vector3 point = followCamera.ScreenToWorldPoint(Input.mousePosition);
         Coordinates gameCoord = ConvertUnityToGameCoordinates(point, tileMap);
         BranallyGames.Wism.Tile gameTile = world.Map[gameCoord.X, gameCoord.Y];
-        
+
         return gameTile;
     }
 
-    private void DeselectObject()
+    internal void DeselectObject()
     {
         this.InputState = InputState.Unselected;
         this.SelectedArmy = null;
@@ -519,7 +515,7 @@ public class WorldTilemap : MonoBehaviour
         player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 2]);
 
-        player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]); 
+        player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("HeavyInfantry"), World.Current.Map[2, 1]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("Cavalry"), World.Current.Map[2, 1]);
         player1.ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[2, 1]);
@@ -539,13 +535,13 @@ public class WorldTilemap : MonoBehaviour
         player2.Affiliation.IsHuman = false;
         player2.HireHero(World.Current.Map[18, 10]);
         player2.HireHero(World.Current.Map[1, 3]);
-        player2.HireHero(World.Current.Map[2, 3]);        
+        player2.HireHero(World.Current.Map[2, 3]);
         return World.Current.Players;
     }
 
     private World CreateWorldFromScene()
     {
-        MapBuilder.Initialize(GameManager.DefaultModPath);        
+        MapBuilder.Initialize(GameManager.DefaultModPath);
 
         TileBase[] tilemapTiles = GetUnityTiles(out int boundsX, out int boundsY);
         BranallyGames.Wism.Tile[,] gameMap = new BranallyGames.Wism.Tile[boundsX, boundsY];
@@ -568,7 +564,7 @@ public class WorldTilemap : MonoBehaviour
                             break;
                         }
                     }
-                    
+
                     if (gameTile.Terrain == null)
                     {
                         throw new InvalidOperationException("Failed to create world; unknown terrain type: " + unityTile.name);
@@ -587,7 +583,7 @@ public class WorldTilemap : MonoBehaviour
         World.Current.Random = GameManager.Random;
 
         return World.Current;
-    }    
+    }
 
     private Vector3 ConvertGameToUnityCoordinates(Coordinates coord)
     {
@@ -596,13 +592,13 @@ public class WorldTilemap : MonoBehaviour
         worldVector.y += tileMap.cellBounds.yMin - tileMap.tileAnchor.y;
         return worldVector;
     }
-   
+
     private Coordinates ConvertUnityToGameCoordinates(Vector3 worldVector, Tilemap tileMap)
     {
         // BUGBUG: This is broken; need to adjust to tilemap coordinates in case
         //       the tilemap is translated to another location. 
-        return new Coordinates(Mathf.FloorToInt(worldVector.x), Mathf.FloorToInt(worldVector.y));        
-        
+        return new Coordinates(Mathf.FloorToInt(worldVector.x), Mathf.FloorToInt(worldVector.y));
+
         //worldVector.x -= tileMap.cellBounds.xMin + tileMap.tileAnchor.x - 1;
         //worldVector.y -= tileMap.cellBounds.yMin + tileMap.tileAnchor.y - 1;
         //Vector3Int cellVector = tileMap.WorldToCell(worldVector);
@@ -613,7 +609,7 @@ public class WorldTilemap : MonoBehaviour
     {
         // Find or create and set up the GameObject connected to WISM MapObject
         if (!armyDictionary.ContainsKey(army.Guid))
-        {            
+        {
             GameObject armyPrefab = armyFactory.FindGameObjectKind(army);
             if (armyPrefab == null)
             {
@@ -626,14 +622,14 @@ public class WorldTilemap : MonoBehaviour
 
             // Add to the instantiated armies dictionary for tracking
             ArmyGameObject ago = new ArmyGameObject(army, go);
-            armyDictionary.Add(army.Guid, ago);            
+            armyDictionary.Add(army.Guid, ago);
 
             // Select if selected army
             if ((this.InputState == InputState.ArmySelected) && (SelectedArmy.Army == army))
             {
                 SelectObject(army.Tile);
             }
-        }                
+        }
     }
 
     private TileBase[] GetUnityTiles(out int xSize, out int ySize)
