@@ -167,6 +167,31 @@ namespace BranallyGames.Wism
             UpdateCompositeUnits();            
         }
 
+        public Army Split2(IList<Unit> selectedUnits)
+        {
+            if (this.Size == selectedUnits.Count)
+                throw new ArgumentOutOfRangeException("Split must be a subset of the army.");
+
+            for (int i = 0; i < selectedUnits.Count; i++)
+            {
+                if (!this.units.Contains(selectedUnits[i]))
+                {
+                    throw new ArgumentException("Split must be a subset of the army.");
+                }
+            }
+
+            Army selectedArmy = Army.Create(this.Affiliation, selectedUnits);
+            selectedArmy.Tile = this.Tile;
+
+            foreach (Unit unitToRemove in selectedUnits)
+            {
+                this.RemoveUnit(unitToRemove);
+            }
+            this.units.Sort(new ByUnitViewingOrder());
+
+            return selectedArmy;
+        }
+
         public Army Split(IList<Unit> selectedUnits)
         {
             if (this.Size == selectedUnits.Count)

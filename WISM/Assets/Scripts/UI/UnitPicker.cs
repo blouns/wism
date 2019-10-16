@@ -38,26 +38,7 @@ public class UnitPicker : MonoBehaviour
 
     private void SetSelectedArmy(List<Unit> selectedUnits)
     {
-        ArmyGameObject selectedArmyGo = this.WorldTilemap.SelectedArmy;
-        
-        bool sameUnitsSelected = true;
-        if (selectedArmyGo.Army.Size == selectedUnits.Count)
-        {
-
-            for (int i = 0; i < selectedUnits.Count; i++)
-            {
-                sameUnitsSelected &= selectedUnits.Contains(selectedArmyGo.Army[i]);
-            }
-        }
-
-        if (!sameUnitsSelected)
-        {
-            Army selectedArmy = this.army.Split(selectedUnits);
-            GameObject go = this.armyFactory.FindGameObjectKind(selectedArmy);
-            this.WorldTilemap.SelectedArmy = new ArmyGameObject(selectedArmy, go);
-        }
-     
-        this.WorldTilemap.InputState = InputState.ArmySelected;
+        this.WorldTilemap.SetSelectedArmy(selectedUnits);
     }
 
     private List<Unit> GetSelectedUnits()

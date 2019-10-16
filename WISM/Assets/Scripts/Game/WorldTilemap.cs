@@ -30,6 +30,7 @@ public class WorldTilemap : MonoBehaviour
     private GameObject selectedArmyBox;
 
     public ArmyGameObject SelectedArmy { get => selectedArmy; set => selectedArmy = value; }
+    
     public InputState InputState { get => inputState; set => inputState = value; }
     private AttackResult attackResult;
 
@@ -416,8 +417,12 @@ public class WorldTilemap : MonoBehaviour
             // Create all the objects
             foreach (Army army in player.GetArmies())
             {
-                Vector3 worldVector = ConvertGameToUnityCoordinates(army.GetCoordinates());
-                InstantiateArmy(army, worldVector);
+                // Find or create and set up the GameObject connected to WISM MapObject
+                if (!armyDictionary.ContainsKey(army.Guid))
+                {                     
+                    Vector3 worldVector = ConvertGameToUnityCoordinates(army.GetCoordinates());
+                    InstantiateArmy(army, worldVector);
+                }
             }
 
             // Draw only the "top" unit for each army on the map
@@ -469,6 +474,38 @@ public class WorldTilemap : MonoBehaviour
         CameraFollow camera = this.followCamera.GetComponent<CameraFollow>();
         camera.target = transform;
     }
+
+    internal void SetSelectedArmy(List<Unit> selectedUnits)
+    {
+        bool sameUnitsSelected = false;
+        Army originalArmy = this.SelectedArmy.Army;
+
+        if (this.SelectedArmy.Army.Size == selectedUnits.Count)
+        {
+            sameUnitsSelected = true;
+            for (int i = 0; i < selectedUnits.Count; i++)
+            {
+                sameUnitsSelected &= selectedUnits.Contains(this.SelectedArmy.Army[i]);
+            }
+        }
+
+        if (!sameUnitsSelected)
+        {
+            Army selectedArmy = originalArmy.Split(selectedUnits);
+
+            // Remove existing game object; create two new ones for split
+            armyDictionary.Remove(originalArmy.Guid);
+            Vector3 worldVector = ConvertGameToUnityCoordinates(selectedArmy.GetCoordinates());
+            InstantiateArmy(originalArmy, worldVector);
+
+            //BUGBUG: Cannot add the GUID for an army twice. Need a clean split for the army that is staying. 
+            //        Maybe Split shoudl instead return two armies?
+            InstantiateArmy(selectedArmy, worldVector);
+        }
+
+        InputState = InputState.ArmySelected;
+    }
+
 
     private void MoveSelectedArmyTo(BranallyGames.Wism.Tile targetTile)
     {
@@ -585,7 +622,7 @@ public class WorldTilemap : MonoBehaviour
         return World.Current;
     }
 
-    private Vector3 ConvertGameToUnityCoordinates(Coordinates coord)
+    internal Vector3 ConvertGameToUnityCoordinates(Coordinates coord)
     {
         Vector3 worldVector = tileMap.CellToWorld(new Vector3Int(coord.X + 1, coord.Y + 1, 0));
         worldVector.x += tileMap.cellBounds.xMin - tileMap.tileAnchor.x;
@@ -593,7 +630,7 @@ public class WorldTilemap : MonoBehaviour
         return worldVector;
     }
 
-    private Coordinates ConvertUnityToGameCoordinates(Vector3 worldVector, Tilemap tileMap)
+    internal Coordinates ConvertUnityToGameCoordinates(Vector3 worldVector, Tilemap tileMap)
     {
         // BUGBUG: This is broken; need to adjust to tilemap coordinates in case
         //       the tilemap is translated to another location. 
@@ -605,30 +642,26 @@ public class WorldTilemap : MonoBehaviour
         //return new Coordinates(cellVector.x, cellVector.y);
     }
 
-    private void InstantiateArmy(Army army, Vector3 worldVector)
+    internal void InstantiateArmy(Army army, Vector3 worldVector)
     {
-        // Find or create and set up the GameObject connected to WISM MapObject
-        if (!armyDictionary.ContainsKey(army.Guid))
+        GameObject armyPrefab = armyFactory.FindGameObjectKind(army);
+        if (armyPrefab == null)
         {
-            GameObject armyPrefab = armyFactory.FindGameObjectKind(army);
-            if (armyPrefab == null)
-            {
-                Debug.LogFormat("GameObject not found: {0}_{1}", army.ID, army.Affiliation.ID);
-                return;
-            }
+            Debug.LogFormat("GameObject not found: {0}_{1}", army.ID, army.Affiliation.ID);
+            return;
+        }
 
-            GameObject go = Instantiate<GameObject>(armyPrefab, worldVector, Quaternion.identity, tileMap.transform);
-            go.SetActive(false);
+        GameObject go = Instantiate<GameObject>(armyPrefab, worldVector, Quaternion.identity, tileMap.transform);
+        go.SetActive(false);
 
-            // Add to the instantiated armies dictionary for tracking
-            ArmyGameObject ago = new ArmyGameObject(army, go);
-            armyDictionary.Add(army.Guid, ago);
+        // Add to the instantiated armies dictionary for tracking
+        ArmyGameObject ago = new ArmyGameObject(army, go);
+        armyDictionary.Add(army.Guid, ago);
 
-            // Select if selected army
-            if ((this.InputState == InputState.ArmySelected) && (SelectedArmy.Army == army))
-            {
-                SelectObject(army.Tile);
-            }
+        // Select if selected army
+        if ((this.InputState == InputState.ArmySelected) && (SelectedArmy.Army == army))
+        {
+            SelectObject(army.Tile);
         }
     }
 
