@@ -25,6 +25,8 @@ namespace BranallyGames.Wism
         }
 
         private Army army;
+
+        private Army selectedArmy;
  
         private Coordinates coordinates;
 

@@ -496,10 +496,10 @@ public class WorldTilemap : MonoBehaviour
             // Remove existing game object; create two new ones for split
             armyDictionary.Remove(originalArmy.Guid);
             Vector3 worldVector = ConvertGameToUnityCoordinates(selectedArmy.GetCoordinates());
-            InstantiateArmy(originalArmy, worldVector);
+           // InstantiateArmy(originalArmy, worldVector);
 
             //BUGBUG: Cannot add the GUID for an army twice. Need a clean split for the army that is staying. 
-            //        Maybe Split shoudl instead return two armies?
+            //        Maybe Split should instead return two armies?
             InstantiateArmy(selectedArmy, worldVector);
         }
 

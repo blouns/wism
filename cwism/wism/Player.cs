@@ -99,6 +99,21 @@ namespace BranallyGames.Wism
             return newUnit;
         }
 
+        public Army ConscriptArmies(IList<Unit> units)
+        {
+            if (units is null)
+            {
+                throw new ArgumentNullException(nameof(units));
+            }
+
+            if (units.Count == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(units));
+            }
+
+            return null;
+        }
+
         private void DeployArmy(Tile tile, Army newArmy)
         {
             newArmy.Affiliation = this.Affiliation;

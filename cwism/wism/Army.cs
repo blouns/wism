@@ -208,6 +208,7 @@ namespace BranallyGames.Wism
             // TODO: Need to add the new army to the Player context
             Army selectedArmy = Army.Create(this.Affiliation, selectedUnits);
             selectedArmy.Tile = this.Tile;
+            World.Current.GetCurrentPlayer().ConscriptArmy();
             return selectedArmy;
         }
 
