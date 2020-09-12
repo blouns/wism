@@ -17,22 +17,46 @@ namespace BranallyGames.Wism
         /// <summary>
         /// Expands units from composite tile (if present)
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Army combining all defenders.</returns>
         internal Army MusterArmy()
         {
-            // TODO: If castle, muster the troops
-            return this.army;
+            // TODO: If castle, muster the troops            
+            IList<Army> defendingArmies = GetArmies();          //BUGBUG: Believe I need to get the armies from player association table instead
+            if (defendingArmies.Count == 0)
+                return null;
+
+            List<Unit> defendingUnits = new List<Unit>();            
+            foreach (Army defendingArmy in defendingArmies)
+            {
+                defendingUnits.AddRange(defendingArmy);
+            }
+
+            return Army.Create(defendingUnits[0].Player, defendingUnits);
         }
 
         private Army army;
 
-        private Army selectedArmy;
+        private List<Army> armies;
  
         private Coordinates coordinates;
 
         public Coordinates Coordinates { get => coordinates; set => coordinates = value; }
 
         public Army Army { get => army; set => army = value; }
+
+
+        public IList<Army> GetArmies()
+        {
+            return new List<Army>(this.armies);
+        }
+
+        public Army GetTopArmy()
+        {
+            if (this.armies == null)
+                return null;
+
+            return this.armies.Last<Army>();
+        }
 
         public bool IsNeighbor(Tile other)
         {
@@ -53,15 +77,8 @@ namespace BranallyGames.Wism
 
         public void AddArmy(Army newArmy)
         {
-            if (!HasArmy())
-            {
-                this.Army = newArmy;
-                this.Army.Tile = this;
-            }
-            else
-            {
-                this.Army.Merge(newArmy);
-            }            
+            this.Army = newArmy;
+            this.Army.SetTile(this);
         }
 
         public bool CanTraverseHere(Army army)

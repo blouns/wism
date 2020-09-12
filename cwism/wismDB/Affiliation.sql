@@ -1,0 +1,4 @@
+﻿CREATE TABLE [dbo].[Affiliation]
+(
+	[GUID] INT NOT NULL PRIMARY KEY
+)

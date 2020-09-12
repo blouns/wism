@@ -127,33 +127,20 @@ namespace BranallyGames.Wism
             // Tie-breakers
             if (compare == 0)
             {
-                // Differentiate on Flying (e.g. Dragons are Special and Flying)
-                if (x.CanFly && !y.CanFly)
-                {
-                    compare = -1;
-                }
-                else if (y.CanFly)
-                {
-                    compare = 1;
-                }
-            }
-
-            if (compare == 0)
-            {
                 // Differentiate on Strength
-                compare = y.Strength.CompareTo(x.Strength);
+                compare = x.Strength.CompareTo(y.Strength);
             }
 
             if (compare == 0)
             {
                 // Differentiate on Moves
-                compare = y.MovesRemaining.CompareTo(x.MovesRemaining);
+                compare = x.MovesRemaining.CompareTo(y.MovesRemaining);
             }
 
             if (compare == 0)
             {
                 // Differentiate on GUID for consistency
-                compare = y.Guid.CompareTo(x.Guid);
+                compare = x.Guid.CompareTo(y.Guid);
             }
 
             return compare;
@@ -204,25 +191,12 @@ namespace BranallyGames.Wism
             // Tie-breakers
             if (compare == 0)
             {
-                // Differentiate on Flying (e.g. Dragons are Special and Flying)
-                if (x.CanFly && !y.CanFly)
-                {
-                    compare = 1;
-                }
-                else if (y.CanFly)
-                {
-                    compare = -1;
-                }
-            }
-
-            if (compare == 0)
-            {
                 // Differentiate on modified battlefield strength
                 int modifiedStrengthX = x.GetAttackModifier(this.battlefieldTile) + x.Strength;
                 int modifiedStrengthY = y.GetAttackModifier(this.battlefieldTile) + y.Strength;
 
                 // Stack in reverse order of strength
-                compare = modifiedStrengthX.CompareTo(modifiedStrengthY);
+                compare = modifiedStrengthY.CompareTo(modifiedStrengthX);
             }
 
             if (compare == 0)

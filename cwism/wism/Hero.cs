@@ -8,11 +8,13 @@ namespace BranallyGames.Wism
 {
     public class Hero : Unit
     {
-        public static Hero Create()
+        public static Hero Create(Player player)
         {
             UnitInfo info = UnitInfo.GetHeroInfo();
+            Hero hero = new Hero(info);
+            hero.Player = player;
 
-            return new Hero(info);
+            return hero;
         }
 
         private Hero(UnitInfo info)

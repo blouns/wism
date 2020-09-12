@@ -13,7 +13,7 @@
         "DisplayName": "Light Infantry",
         "ID": "LightInfantry",
         "Strength": 3,
-        "Moves" :  100,
+        "Moves" :  95,
         "CanWalk": true,
         "CanFloat": false,
         "CanFly": false
@@ -22,7 +22,7 @@
         "DisplayName": "Heavy Infantry",
         "ID": "HeavyInfantry",
         "Strength": 5,
-        "Moves": 100,
+        "Moves": 90,
         "CanWalk": true,
         "CanFloat": false,
         "CanFly": false

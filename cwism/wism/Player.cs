@@ -11,8 +11,11 @@ namespace BranallyGames.Wism
         private Affiliation affiliation;
 
         public Affiliation Affiliation { get => affiliation; set => affiliation = value; }
+        public Army SelectedArmy { get => selectedArmy; }
 
-        private IList<Army> armies = new List<Army>();
+        private IList<Army> myArmies = new List<Army>();
+
+        private Army selectedArmy = null;
 
         public Player()
         {
@@ -61,7 +64,7 @@ namespace BranallyGames.Wism
 
         public IList<Army> GetArmies()
         {
-            return armies;
+            return myArmies;
         }
 
         public void HireHero()
@@ -73,8 +76,8 @@ namespace BranallyGames.Wism
 
         public void HireHero(Tile tile)
         {
-            Hero hero = Hero.Create();
-            this.DeployArmy(tile, Army.Create(this.Affiliation, hero));
+            Hero hero = Hero.Create(this);
+            DeployArmy(tile, Army.Create(this, hero));
         }
 
         public Army ConscriptArmy(UnitInfo unitInfo, Tile tile)
@@ -93,7 +96,7 @@ namespace BranallyGames.Wism
                 throw new ArgumentException(
                     String.Format("Unit type '{0}' cannot be deployed to '{1}'.", unitInfo.DisplayName, tile.Terrain.DisplayName));
 
-            Army newUnit = Army.Create(this.Affiliation, unitInfo);
+            Army newUnit = Army.Create(this, unitInfo);
             DeployArmy(tile, newUnit);
 
             return newUnit;
@@ -114,16 +117,25 @@ namespace BranallyGames.Wism
             return null;
         }
 
+        public Army SelectArmy(IList<Unit> units)
+        {
+            this.selectedArmy = Army.Create(this, units);
+            return SelectedArmy;
+        }
+
         private void DeployArmy(Tile tile, Army newArmy)
         {
-            newArmy.Affiliation = this.Affiliation;
-            newArmy.Tile = tile;
-            newArmy[0].Tile = tile;     // TODO: Should not do this from Player
-
-            // TODO: Only add if it is a unique army (unique tile)?
-            // TODO: Automatically deploy in adjacent tile if blocked?
-            tile.AddArmy(newArmy);
-            this.armies.Add(newArmy);
+            if (tile.HasArmy())
+            {
+                tile.Army.Merge(newArmy);
+                // TODO: Automatically deploy in adjacent tile if blocked?
+                newArmy.SetTile(tile);
+            }
+            else
+            {
+                tile.AddArmy(newArmy);
+            }
+            this.myArmies.Add(newArmy);
         }
 
         private bool CanDeploy(UnitInfo unitInfo, Tile tile)
@@ -154,7 +166,7 @@ namespace BranallyGames.Wism
                 throw new ArgumentException("Cannot remove army that is not mine!");
 
             // BUGBUG: This will remove the entire stack that isn't obvious and may cause issues.
-            this.armies.Remove(targetArmy);
+            this.myArmies.Remove(targetArmy);
         }
 
         public bool IsMine(Army army)
@@ -170,7 +182,7 @@ namespace BranallyGames.Wism
 
         private Army FindArmy(Army targetArmy)
         {
-            foreach (Army army in this.armies)
+            foreach (Army army in this.myArmies)
             {
                 if (army == targetArmy)
                     return army;

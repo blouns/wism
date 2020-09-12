@@ -14,14 +14,21 @@ namespace BranallyGames.Wism
 
         public abstract string ID { get; }
 
-        private Affiliation affiliation;
+        private Player player;
 
-        public Affiliation Affiliation { get => affiliation; set => affiliation = value; }
+        public Affiliation Affiliation { get => Player.Affiliation; }
         
         private Tile tile;
         
         public Tile Tile { get => tile; set => tile = value; }
         public virtual Guid Guid { get => guid; }
+
+        public Player Player { get => player; set => player = value; }
+
+        public virtual void SetTile(Tile newTile)
+        {
+            this.Tile = newTile;
+        }
 
         public Coordinates GetCoordinates()
         {

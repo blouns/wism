@@ -43,7 +43,6 @@ namespace BranallyGames.Wism
 
         private World()
         {
-            // Create from Factory method
         }
 
         public static void CreateDefaultWorld()
@@ -143,6 +142,14 @@ namespace BranallyGames.Wism
                 throw new InvalidOperationException("No players in the world.");
 
             return Players[this.currentPlayer];
+        }
+
+        public Army[] FindArmies(Tile tile)
+        {
+            // get army associated with tile
+            // get any selected armies associated with tile
+            // Server=localhost\SQLEXPRESS;Database=master;Trusted_Connection=True;
+            throw new NotImplementedException();
         }
 
         private void Validate(Tile[,] map)

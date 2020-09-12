@@ -14,7 +14,7 @@ namespace BranallyGames.Wism
 
         List<Unit> units;
 
-        public static Army Create(Affiliation affiliation, IList<Unit> units)
+        public static Army Create(Player player, IList<Unit> units)
         {
             if (units == null || units.Count == 0)
             {
@@ -23,7 +23,7 @@ namespace BranallyGames.Wism
 
             Army composite = new Army
             {
-                Affiliation = affiliation,
+                Player = player,
                 units = new List<Unit>(units)
             };
             composite.UpdateCompositeUnits();
@@ -31,14 +31,14 @@ namespace BranallyGames.Wism
             return composite;
         }
 
-        public static Army Create(Affiliation affiliation, Unit unit)
+        public static Army Create(Player player, Unit unit)
         {
-            return Create(affiliation, new List<Unit>() { unit });
+            return Create(player, new List<Unit>() { unit });
         }
 
-        public static Army Create(Affiliation affiliation, UnitInfo info)
+        public static Army Create(Player player, UnitInfo info)
         {
-            return Create(affiliation, Unit.Create(info));
+            return Create(player, Unit.Create(info));
         }
 
         private Army()
@@ -54,6 +54,12 @@ namespace BranallyGames.Wism
 
                 return Guid.Empty;
             }
+        }
+
+        public override void SetTile(Tile newTile)
+        {
+            base.SetTile(newTile);
+            UpdateCompositeUnits();
         }
 
         public new bool IsSpecial()
@@ -154,7 +160,7 @@ namespace BranallyGames.Wism
             if (this.units.Count == Army.MaxUnits)
                 throw new ArgumentException("Cannot add more than {0} units.", Army.MaxUnits.ToString());
 
-            Merge(Army.Create(this.Affiliation, unit));
+            Merge(Army.Create(this.Player, unit));
         }
 
         public void Merge(Army army)
@@ -165,31 +171,6 @@ namespace BranallyGames.Wism
             // TODO: Need to remove from the Player context
             this.units.AddRange(army.units);
             UpdateCompositeUnits();            
-        }
-
-        public Army Split2(IList<Unit> selectedUnits)
-        {
-            if (this.Size == selectedUnits.Count)
-                throw new ArgumentOutOfRangeException("Split must be a subset of the army.");
-
-            for (int i = 0; i < selectedUnits.Count; i++)
-            {
-                if (!this.units.Contains(selectedUnits[i]))
-                {
-                    throw new ArgumentException("Split must be a subset of the army.");
-                }
-            }
-
-            Army selectedArmy = Army.Create(this.Affiliation, selectedUnits);
-            selectedArmy.Tile = this.Tile;
-
-            foreach (Unit unitToRemove in selectedUnits)
-            {
-                this.RemoveUnit(unitToRemove);
-            }
-            this.units.Sort(new ByUnitViewingOrder());
-
-            return selectedArmy;
         }
 
         public Army Split(IList<Unit> selectedUnits)
@@ -205,10 +186,15 @@ namespace BranallyGames.Wism
                 }
             }
 
-            // TODO: Need to add the new army to the Player context
-            Army selectedArmy = Army.Create(this.Affiliation, selectedUnits);
+            Army selectedArmy = Army.Create(this.Player, selectedUnits);
             selectedArmy.Tile = this.Tile;
-            World.Current.GetCurrentPlayer().ConscriptArmy();
+
+            foreach (Unit unitToRemove in selectedUnits)
+            {
+                this.RemoveUnit(unitToRemove);
+            }
+            this.units.Sort(new ByUnitViewingOrder());
+
             return selectedArmy;
         }
 
@@ -258,7 +244,7 @@ namespace BranallyGames.Wism
         {
             this.units.ForEach(u => 
             {
-                u.Affiliation = this.Affiliation;
+                u.Player = this.Player;
                 u.Tile = this.Tile;                
             });
             this.units.Sort(new ByUnitViewingOrder());
