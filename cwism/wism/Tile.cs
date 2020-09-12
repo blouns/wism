@@ -20,23 +20,11 @@ namespace BranallyGames.Wism
         /// <returns>Army combining all defenders.</returns>
         internal Army MusterArmy()
         {
-            // TODO: If castle, muster the troops            
-            IList<Army> defendingArmies = GetArmies();          //BUGBUG: Believe I need to get the armies from player association table instead
-            if (defendingArmies.Count == 0)
-                return null;
-
-            List<Unit> defendingUnits = new List<Unit>();            
-            foreach (Army defendingArmy in defendingArmies)
-            {
-                defendingUnits.AddRange(defendingArmy);
-            }
-
-            return Army.Create(defendingUnits[0].Player, defendingUnits);
+            // TODO: Get surrounding armies in castle
+            return this.army;
         }
 
         private Army army;
-
-        private List<Army> armies;
  
         private Coordinates coordinates;
 
@@ -47,15 +35,8 @@ namespace BranallyGames.Wism
 
         public IList<Army> GetArmies()
         {
-            return new List<Army>(this.armies);
-        }
-
-        public Army GetTopArmy()
-        {
-            if (this.armies == null)
-                return null;
-
-            return this.armies.Last<Army>();
+            //TODO: This is temporary; future idea is ability to have sets of armies for selected army movement
+            return new List<Army>() { this.Army };  
         }
 
         public bool IsNeighbor(Tile other)

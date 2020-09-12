@@ -184,7 +184,7 @@ namespace BranallyGames.Wism
         {
             foreach (Army army in this.myArmies)
             {
-                if (army == targetArmy)
+                if (army.Guid == targetArmy.Guid)
                     return army;
             }
 

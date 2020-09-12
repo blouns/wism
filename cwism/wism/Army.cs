@@ -21,9 +21,11 @@ namespace BranallyGames.Wism
                 throw new ArgumentNullException(nameof(units));
             }
 
+            Tile tile = units[0].Tile;
             Army composite = new Army
             {
                 Player = player,
+                Tile = tile,
                 units = new List<Unit>(units)
             };
             composite.UpdateCompositeUnits();
@@ -129,19 +131,27 @@ namespace BranallyGames.Wism
             if (!Contains(unit))
                 throw new ArgumentException("Unit not in the army: {0}", unit.ToString());
             
-            this.units.Remove(unit);
-            if (this.units.Count == 0)
+            bool isFound = false;
+            if (this.units.Count == 1)
             {
                 // No more units in the army; kill it!
                 foreach (Player player in World.Current.Players)
                 {
                     if (player.IsMine(this))
                     {
+                        isFound = true;
                         player.KillArmy(this);
+                        //this.Tile.Army = null;
                     }
+                }
+
+                if (!isFound)
+                {
+                    throw new InvalidOperationException("Cannot remove an army that does not belong to a player!");
                 }
             }
 
+            this.units.Remove(unit);
             this.units.Sort(new ByUnitViewingOrder());
         }
 
@@ -196,6 +206,17 @@ namespace BranallyGames.Wism
             this.units.Sort(new ByUnitViewingOrder());
 
             return selectedArmy;
+        }
+
+        public override bool Equals(object obj)
+        {
+            Army other = obj as Army;
+            if (other == null)
+            {
+                return false;
+            }
+
+            return (this.Guid == other.Guid);
         }
 
         private static void MoveSelectedArmy(Army selectedArmy, Tile targetTile)
