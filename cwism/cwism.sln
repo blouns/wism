@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cwism", "cwism\cwism.csproj", "{1C86443D-5D1A-46A5-B881-39A9D233365D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wism.client", "cwism\wism.client.csproj", "{1C86443D-5D1A-46A5-B881-39A9D233365D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wism", "wism\wism.csproj", "{6150D953-BF84-439D-8AFA-C885613A6BB9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wism.core", "wism\wism.core.csproj", "{6150D953-BF84-439D-8AFA-C885613A6BB9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wismtest", "wismtest\wismtest.csproj", "{9FBDB7CD-3960-4250-B871-CB2C01E045ED}"
-EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "wismDB", "wismDB\wismDB.sqlproj", "{68BCFB65-E0C1-488B-A738-ED3F6A20C424}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wismData", "wismData\wismData.csproj", "{F1B27CA8-4A24-4668-AF54-F675A7F4894E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,16 +27,6 @@ Global
 		{9FBDB7CD-3960-4250-B871-CB2C01E045ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FBDB7CD-3960-4250-B871-CB2C01E045ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FBDB7CD-3960-4250-B871-CB2C01E045ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{68BCFB65-E0C1-488B-A738-ED3F6A20C424}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{68BCFB65-E0C1-488B-A738-ED3F6A20C424}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{68BCFB65-E0C1-488B-A738-ED3F6A20C424}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{68BCFB65-E0C1-488B-A738-ED3F6A20C424}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{68BCFB65-E0C1-488B-A738-ED3F6A20C424}.Release|Any CPU.Build.0 = Release|Any CPU
-		{68BCFB65-E0C1-488B-A738-ED3F6A20C424}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{F1B27CA8-4A24-4668-AF54-F675A7F4894E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1B27CA8-4A24-4668-AF54-F675A7F4894E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1B27CA8-4A24-4668-AF54-F675A7F4894E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1B27CA8-4A24-4668-AF54-F675A7F4894E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

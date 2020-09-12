@@ -75,9 +75,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\wism\wism.csproj">
+    <ProjectReference Include="..\wism\wism.core.csproj">
       <Project>{6150d953-bf84-439d-8afa-c885613a6bb9}</Project>
-      <Name>wism</Name>
+      <Name>wism.core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
