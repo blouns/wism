@@ -141,7 +141,6 @@ namespace BranallyGames.Wism
                     {
                         isFound = true;
                         player.KillArmy(this);
-                        //this.Tile.Army = null;
                     }
                 }
 
@@ -206,17 +205,6 @@ namespace BranallyGames.Wism
             this.units.Sort(new ByUnitViewingOrder());
 
             return selectedArmy;
-        }
-
-        public override bool Equals(object obj)
-        {
-            Army other = obj as Army;
-            if (other == null)
-            {
-                return false;
-            }
-
-            return (this.Guid == other.Guid);
         }
 
         private static void MoveSelectedArmy(Army selectedArmy, Tile targetTile)

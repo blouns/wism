@@ -9,9 +9,9 @@ namespace BranallyGames.Wism
 {
     public static class MapBuilder
     {
-        private static Dictionary<string, Terrain> terrainKinds = new Dictionary<string, Terrain>();
-        private static Dictionary<string, Unit> unitKinds = new Dictionary<string, Unit>();
-        private static Dictionary<string, Affiliation> affiliationKinds = new Dictionary<string, Affiliation>();
+        private static readonly Dictionary<string, Terrain> terrainKinds = new Dictionary<string, Terrain>();
+        private static readonly Dictionary<string, Unit> unitKinds = new Dictionary<string, Unit>();
+        private static readonly Dictionary<string, Affiliation> affiliationKinds = new Dictionary<string, Affiliation>();
 
         public static Dictionary<string, Terrain> TerrainKinds { get => terrainKinds; }
         public static Dictionary<string, Unit> UnitKinds { get => unitKinds; }
