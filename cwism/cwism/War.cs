@@ -138,7 +138,7 @@ namespace BranallyGames.cwism
 
         private char GetUnitSymbol(string unit)
         {
-            return (terrainMap.Keys.Contains(unit)) ? unitMap[unit] : '?';
+            return (unitMap.Keys.Contains(unit)) ? unitMap[unit] : ' ';
         }
 
         private Army FindFirstHero()
@@ -147,7 +147,10 @@ namespace BranallyGames.cwism
             IList<Army> armies = player1.GetArmies();
             foreach(Army army in armies)
             {
-                army.GetUnits().Find(u => u.ID == "Hero");                
+                if (army.GetUnits().Find(u => u.ID == "Hero") != null)
+                {
+                    return army;
+                }
             }
 
             return null;
