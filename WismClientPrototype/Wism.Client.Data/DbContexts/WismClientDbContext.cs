@@ -44,33 +44,6 @@ namespace Wism.Client.Data.DbContexts
             modelBuilder.Entity<ArmyMoveCommand>()
                 .HasBaseType<Command>();
 
-            //modelBuilder.Entity<Command>().HasData(
-            //    new ArmyMoveCommand()
-            //    {
-            //        X = 0,
-            //        Y = 1
-            //    },
-            //    new ArmyMoveCommand()
-            //    {
-            //        X = 0,
-            //        Y = 2
-            //    },
-            //    new ArmyMoveCommand()
-            //    {
-            //        X = 0,
-            //        Y = 3
-            //    },
-            //    new ArmyMoveCommand()
-            //    {
-            //        X = 0,
-            //        Y = 4
-            //    },
-            //    new ArmyAttackCommand()
-            //    {
-            //        X = 0,
-            //        Y = 5
-            //    });
-
             base.OnModelCreating(modelBuilder);
         }
     }

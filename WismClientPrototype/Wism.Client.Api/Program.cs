@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
@@ -40,6 +41,8 @@ namespace Wism.Client.Api
 
         public static async Task MainAsync(string[] args)
         {
+            //CreateHostBuilder(args).Build().Run();
+
             Log.Information("Creating service collection");
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
@@ -66,6 +69,13 @@ namespace Wism.Client.Api
                 Log.CloseAndFlush();
             }
         }
+
+        //private static IHostBuilder CreateHostBuilder(string[] args)
+        //{
+        //    // Host.CreateDefaultBuilder(args)
+        //    // TODO: Need to find new impl of this 
+        //    // https://docs.microsoft.com/en-us/ef/core/miscellaneous/cli/dbcontext-creation
+        //}
 
         public static WismClientDbContext GetDbContext()
         {
