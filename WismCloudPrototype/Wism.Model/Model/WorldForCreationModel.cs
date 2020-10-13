@@ -10,6 +10,9 @@ namespace BranallyGames.Wism.API.Model
     /// </summary>
     public class WorldForCreationModel : GameObjectNoIdModelBase
     {
+        /// <summary>
+        /// Players in the game world
+        /// </summary>
         public IEnumerable<PlayerModel> Players { get; set; }
     }
 }

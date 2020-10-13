@@ -11,6 +11,9 @@ namespace BranallyGames.Wism.API.Model
     /// </summary>
     public class PlayerModel : GameObjectModelBase
     {
+        /// <summary>
+        /// True this player is a human
+        /// </summary>
         public bool IsHuman { get; set; }
     }
 }
