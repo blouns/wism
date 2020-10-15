@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Wism.Client.Data.DbContexts;
 using Wism.Client.Data.Entities;
@@ -26,19 +27,19 @@ namespace Wism.Client.Data.Services
             context.Commands.Add(command);
         }
 
-        public void DeleteCommand(Command Command)
+        public void DeleteCommand(Command command)
         {
-            if (Command is null)
+            if (command is null)
             {
-                throw new ArgumentNullException(nameof(Command));
+                throw new ArgumentNullException(nameof(command));
             }
 
-            context.Remove(Command);
+            context.Remove(command);
         }
 
-        public async Task<Command> GetCommandAsync(int CommandId)
+        public async Task<Command> GetCommandAsync(int commandId)
         {
-            return await context.Commands.FirstOrDefaultAsync(a => a.Id == CommandId);
+            return await context.Commands.FirstOrDefaultAsync(a => a.Id == commandId);
         }
 
         public Task<List<Command>> GetCommandsAsync()
@@ -46,16 +47,22 @@ namespace Wism.Client.Data.Services
             return context.Commands.ToListAsync();
         }
 
+        public Task<List<Command>> GetCommandsAfterIdAsync(int lastSeenCommandId)
+        {
+            // TODO: Do we need pagination for large requests?
+            return context.Commands.Where(c => c.Id > lastSeenCommandId).ToListAsync();
+        }
+
         public bool Save()
         {
             return context.SaveChanges() >= 0;
         }
 
-        public Command UpdateCommand(Command Command)
+        public Command UpdateCommand(Command command)
         {
-            var entity = context.Attach(Command);
+            var entity = context.Attach(command);
             entity.State = EntityState.Modified;
-            return Command;
+            return command;
         }
 
         public async Task<bool> CommandExistsAsync(int CommandId)

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using Wism.Client.Model.Commands;
 using Wism.Client.Data.Services;
+using Wism.Client.Data;
 using AutoMapper;
+using Wism.Client.Data.Entities;
 
 namespace Wism.Client.Api.Controllers
 {
@@ -17,19 +19,43 @@ namespace Wism.Client.Api.Controllers
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public ArmyMoveCommandModel CreateArmyMoveCommand()
+        public void AddCommand(CommandModel command)
         {
-            throw new NotImplementedException();
+            if (command is null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
+            var commandToAdd = mapper.Map<Command>(command);
+            wismClientRepository.AddCommand(commandToAdd);
+            wismClientRepository.Save();
+        }
+
+        /// <summary>
+        /// Gets a command
+        /// </summary>
+        /// <param name="commandId">ID of the command</param>
+        /// <returns>Command</returns>
+        public CommandModel GetCommand(int commandId)
+        {
+            if (!wismClientRepository.CommandExistsAsync(commandId).Result)
+            {
+                throw new ArgumentOutOfRangeException(nameof(commandId));
+            }
+
+            var commandFromRepo = wismClientRepository.GetCommandAsync(commandId).Result;
+
+            return mapper.Map<CommandModel>(commandFromRepo);
         }
 
         /// <summary>
         /// Gets all commands
         /// </summary>
         /// <returns>All commands</returns>
-        public IEnumerable<GameCommandModel> GetCommands()
+        public IEnumerable<CommandModel> GetCommands()
         {
             var commandsFromRepo = wismClientRepository.GetCommandsAsync().Result;
-            return mapper.Map<IEnumerable<GameCommandModel>>(commandsFromRepo);
+            return mapper.Map<IEnumerable<CommandModel>>(commandsFromRepo);
         }
 
         /// <summary>
@@ -37,9 +63,10 @@ namespace Wism.Client.Api.Controllers
         /// </summary>
         /// <param name="lastSeenCommandId"></param>
         /// <returns>All commands after <c>lastSeenCommandId</c></returns>
-        public IEnumerable<GameCommandModel> GetCommandsAfterId(int lastSeenCommandId)
+        public IEnumerable<CommandModel> GetCommandsAfterId(int lastSeenCommandId)
         {
-            throw new NotImplementedException();
+            var commandsFromRepo = wismClientRepository.GetCommandsAfterIdAsync(lastSeenCommandId).Result;
+            return mapper.Map<IEnumerable<CommandModel>>(commandsFromRepo);
         }
     }
 }

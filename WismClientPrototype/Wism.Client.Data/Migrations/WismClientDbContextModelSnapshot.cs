@@ -13,7 +13,7 @@ namespace Wism.Client.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.8");
+                .HasAnnotation("ProductVersion", "3.1.9");
 
             modelBuilder.Entity("Wism.Client.Data.Entities.Army", b =>
                 {

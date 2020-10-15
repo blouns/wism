@@ -10,16 +10,18 @@ namespace Wism.Client.Data.Services
     {
         void AddCommand(Command command);
 
-        void DeleteCommand(Command Command);
+        void DeleteCommand(Command command);
 
-        Task<Command> GetCommandAsync(int CommandId);
+        Task<Command> GetCommandAsync(int commandId);
 
         Task<List<Command>> GetCommandsAsync();
 
+        Task<List<Command>> GetCommandsAfterIdAsync(int commandId);
+
         bool Save();
 
-        Command UpdateCommand(Command Command);
+        Command UpdateCommand(Command command);
 
-        Task<bool> CommandExistsAsync(int CommandId);
+        Task<bool> CommandExistsAsync(int commandId);
     }
 }

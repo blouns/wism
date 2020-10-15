@@ -2,10 +2,8 @@
 
 namespace Wism.Client.Model.Commands
 {
-    public class GameCommandModel
+    public class CommandModel
     {
         public int Id { get; set; }
-
-
     }
 }

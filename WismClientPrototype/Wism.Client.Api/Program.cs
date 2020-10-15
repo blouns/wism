@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,8 +42,6 @@ namespace Wism.Client.Api
 
         public static async Task MainAsync(string[] args)
         {
-            //CreateHostBuilder(args).Build().Run();
-
             Log.Information("Creating service collection");
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
@@ -102,6 +101,8 @@ namespace Wism.Client.Api
 
             services.AddSingleton<IConfigurationRoot>(_configuration);
 
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             services.AddScoped<IWismClientRepository, WismClientSqliteRepository>();
 
             services.AddDbContextPool<WismClientDbContext>(options =>
@@ -109,7 +110,6 @@ namespace Wism.Client.Api
                 options.UseSqlite(_configuration.GetConnectionString("WismClientDb"));
             });            
 
-            // Start up the app
             services.AddTransient<WismApp>();
         }
     }
