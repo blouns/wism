@@ -5,12 +5,12 @@ namespace Wism.Client.Api.Commands
 {
     public class AttackCommand : Command
     {
-        private readonly ArmyModel army;
+        private readonly ArmyDto army;
         private int? hitPointsBefore;
         private int x;
         private int y;
 
-        public AttackCommand(ArmyModel army, int x, int y)
+        public AttackCommand(ArmyDto army, int x, int y)
         {
             this.army = army?? throw new ArgumentNullException(nameof(army));
             this.x = x;

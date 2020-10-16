@@ -2,7 +2,7 @@
 
 namespace Wism.Client.Model.Commands
 {
-    public class CommandModel
+    public class CommandDto
     {
         public int Id { get; set; }
     }

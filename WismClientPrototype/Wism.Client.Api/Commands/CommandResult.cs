@@ -7,8 +7,8 @@ namespace Wism.Client.Api.Commands
     {
         public DateTime ExecutedTime { get; set; }
 
-        public MapObjectBase Before { get; set; }
+        public MapObjectBaseDto Before { get; set; }
 
-        public MapObjectBase After{ get; set; }
+        public MapObjectBaseDto After{ get; set; }
     }
 }

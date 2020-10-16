@@ -39,7 +39,7 @@ namespace Wism.Client.Test
                 CommandController commandController = new CommandController(wismRepository, mapper);
 
                 // Act
-                commandController.AddCommand(new ArmyMoveCommandModel()
+                commandController.AddCommand(new ArmyMoveCommandDto()
                 {
                     X = 3,
                     Y = 4
@@ -50,7 +50,7 @@ namespace Wism.Client.Test
             using (var context = new WismClientDbContext(options))
             {
                 var commandFromRepo = context.Commands.FirstOrDefaultAsync(a => a.Id == 1).Result;
-                var command = mapper.Map<ArmyMoveCommandModel>(commandFromRepo);
+                var command = mapper.Map<ArmyMoveCommandDto>(commandFromRepo);
                 
                 Assert.Equal(3, command.X);
                 Assert.Equal(4, command.Y);
@@ -106,7 +106,7 @@ namespace Wism.Client.Test
                 CommandController commandController = new CommandController(wismRepository, mapper);
 
                 // Act
-                List<CommandModel> commands = new List<CommandModel>(commandController.GetCommands());
+                List<CommandDto> commands = new List<CommandDto>(commandController.GetCommands());
 
                 // Assert
                 Assert.Equal(3, commands.Count);
@@ -114,8 +114,8 @@ namespace Wism.Client.Test
                 Assert.Equal(2, commands[1].Id);
                 Assert.Equal(3, commands[2].Id);
 
-                Assert.IsAssignableFrom<ArmyMoveCommandModel>(commands[0]);
-                ArmyMoveCommandModel armyMoveCommand = (ArmyMoveCommandModel)commands[0];
+                Assert.IsAssignableFrom<ArmyMoveCommandDto>(commands[0]);
+                ArmyMoveCommandDto armyMoveCommand = (ArmyMoveCommandDto)commands[0];
                 Assert.Equal(0, armyMoveCommand.X);
                 Assert.Equal(1, armyMoveCommand.Y);
             }          
@@ -171,7 +171,7 @@ namespace Wism.Client.Test
 
                 // Act
                 // Should return only ID 3
-                List<CommandModel> commands = new List<CommandModel>(commandController.GetCommandsAfterId(2));
+                List<CommandDto> commands = new List<CommandDto>(commandController.GetCommandsAfterId(2));
 
                 // Assert
                 Assert.Single(commands);

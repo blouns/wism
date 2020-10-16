@@ -11,19 +11,19 @@ namespace Wism.Client.Api.Profiles
     {
         public CommandProfile()
         {
-            CreateMap<Command, CommandModel>()
-                .Include<ArmyAttackCommand, ArmyAttackCommandModel>()
-                .Include<ArmyMoveCommand, ArmyMoveCommandModel>();
+            CreateMap<Command, CommandDto>()
+                .Include<ArmyAttackCommand, ArmyAttackCommandDto>()
+                .Include<ArmyMoveCommand, ArmyMoveCommandDto>();
 
-            CreateMap<ArmyAttackCommand, ArmyAttackCommandModel>();
-            CreateMap<ArmyMoveCommand, ArmyMoveCommandModel>();
+            CreateMap<ArmyAttackCommand, ArmyAttackCommandDto>();
+            CreateMap<ArmyMoveCommand, ArmyMoveCommandDto>();
 
-            CreateMap<CommandModel, Command>()
-                .Include<ArmyAttackCommandModel, ArmyAttackCommand>()
-                .Include<ArmyMoveCommandModel, ArmyMoveCommand>();
+            CreateMap<CommandDto, Command>()
+                .Include<ArmyAttackCommandDto, ArmyAttackCommand>()
+                .Include<ArmyMoveCommandDto, ArmyMoveCommand>();
 
-            CreateMap<ArmyAttackCommandModel, ArmyAttackCommand>();
-            CreateMap<ArmyMoveCommandModel, ArmyMoveCommand>();            
+            CreateMap<ArmyAttackCommandDto, ArmyAttackCommand>();
+            CreateMap<ArmyMoveCommandDto, ArmyMoveCommand>();            
         }
     }
 }

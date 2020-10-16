@@ -1,6 +1,6 @@
 ﻿namespace Wism.Client.Model
 {
-    public abstract class MapObjectBase
+    public abstract class MapObjectBaseDto
     {
         public int ID { get; set; }
 

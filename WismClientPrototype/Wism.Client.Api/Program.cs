@@ -55,7 +55,7 @@ namespace Wism.Client.Api
             try
             {
                 Log.Information("Starting service");
-                await serviceProvider.GetService<WismApp>().Run();
+                await serviceProvider.GetService<Game>().Run();
                 Log.Information("Ending service");
             }
             catch (Exception ex)
@@ -110,7 +110,7 @@ namespace Wism.Client.Api
                 options.UseSqlite(_configuration.GetConnectionString("WismClientDb"));
             });            
 
-            services.AddTransient<WismApp>();
+            services.AddTransient<Game>();
         }
     }
 

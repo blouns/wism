@@ -19,7 +19,7 @@ namespace Wism.Client.Api.Controllers
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public void AddCommand(CommandModel command)
+        public void AddCommand(CommandDto command)
         {
             if (command is null)
             {
@@ -36,7 +36,7 @@ namespace Wism.Client.Api.Controllers
         /// </summary>
         /// <param name="commandId">ID of the command</param>
         /// <returns>Command</returns>
-        public CommandModel GetCommand(int commandId)
+        public CommandDto GetCommand(int commandId)
         {
             if (!wismClientRepository.CommandExistsAsync(commandId).Result)
             {
@@ -45,17 +45,17 @@ namespace Wism.Client.Api.Controllers
 
             var commandFromRepo = wismClientRepository.GetCommandAsync(commandId).Result;
 
-            return mapper.Map<CommandModel>(commandFromRepo);
+            return mapper.Map<CommandDto>(commandFromRepo);
         }
 
         /// <summary>
         /// Gets all commands
         /// </summary>
         /// <returns>All commands</returns>
-        public IEnumerable<CommandModel> GetCommands()
+        public IEnumerable<CommandDto> GetCommands()
         {
             var commandsFromRepo = wismClientRepository.GetCommandsAsync().Result;
-            return mapper.Map<IEnumerable<CommandModel>>(commandsFromRepo);
+            return mapper.Map<IEnumerable<CommandDto>>(commandsFromRepo);
         }
 
         /// <summary>
@@ -63,10 +63,10 @@ namespace Wism.Client.Api.Controllers
         /// </summary>
         /// <param name="lastSeenCommandId"></param>
         /// <returns>All commands after <c>lastSeenCommandId</c></returns>
-        public IEnumerable<CommandModel> GetCommandsAfterId(int lastSeenCommandId)
+        public IEnumerable<CommandDto> GetCommandsAfterId(int lastSeenCommandId)
         {
             var commandsFromRepo = wismClientRepository.GetCommandsAfterIdAsync(lastSeenCommandId).Result;
-            return mapper.Map<IEnumerable<CommandModel>>(commandsFromRepo);
+            return mapper.Map<IEnumerable<CommandDto>>(commandsFromRepo);
         }
     }
 }

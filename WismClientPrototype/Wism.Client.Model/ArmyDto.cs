@@ -2,7 +2,7 @@
 
 namespace Wism.Client.Model
 {
-    public class ArmyModel : MapObjectBase
+    public class ArmyDto : MapObjectBaseDto
     {
         public int HitPoints { get; set; }
 

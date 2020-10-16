@@ -6,9 +6,9 @@ namespace Wism.Client.Api.Commands
 {
     public class MoveCommand : Command
     {
-        private readonly ArmyModel army;
+        private readonly ArmyDto army;
 
-        private readonly ArmyMoveCommandModel moveModel;
+        private readonly ArmyMoveCommandDto moveModel;
 
         public MoveCommand(int armyId, int x, int y)
         {
