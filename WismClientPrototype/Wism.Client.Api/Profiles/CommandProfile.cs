@@ -23,7 +23,7 @@ namespace Wism.Client.Api.Profiles
                 .Include<ArmyMoveCommandDto, ArmyMoveCommand>();
 
             CreateMap<ArmyAttackCommandDto, ArmyAttackCommand>();
-            CreateMap<ArmyMoveCommandDto, ArmyMoveCommand>();            
+            CreateMap<ArmyMoveCommandDto, ArmyMoveCommand>();
         }
     }
 }

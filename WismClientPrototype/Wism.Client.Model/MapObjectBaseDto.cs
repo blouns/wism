@@ -1,21 +1,19 @@
-﻿namespace Wism.Client.Model
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace Wism.Client.Model
 {
     public abstract class MapObjectBaseDto
     {
-        public int ID { get; set; }
+        [Key]
+        public Guid Guid { get; set; }
 
-        public string Name { get; set; }
+        public string ID { get; set; }
+
+        public string DisplayName { get; set; }
 
         public int X { get; set; }
 
         public int Y { get; set; }
-
-        public bool TryMove(int newX, int newY)
-        {
-            X = newX;
-            Y = newY;
-
-            return true;
-        }
     }
 }

@@ -4,9 +4,9 @@ using Wism.Client.Model;
 
 namespace Wism.Client.Api.Commands
 {
-    public abstract class Command
+    public interface IAction
     {
-        public abstract CommandResult Execute();
+        public abstract void Execute();
 
         public abstract void Undo();
     }

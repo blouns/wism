@@ -3,29 +3,27 @@ using Wism.Client.Model;
 
 namespace Wism.Client.Api.Commands
 {
-    public class AttackCommand : Command
+    public class AttackAction : IAction
     {
         private readonly ArmyDto army;
         private int? hitPointsBefore;
         private int x;
         private int y;
 
-        public AttackCommand(ArmyDto army, int x, int y)
+        public AttackAction(ArmyDto army, int x, int y)
         {
             this.army = army?? throw new ArgumentNullException(nameof(army));
             this.x = x;
             this.y = y;
         }
 
-        public override CommandResult Execute()
+        public void Execute()
         {
             hitPointsBefore = army.HitPoints;
-            army.Attack(x, y);
-
-            throw new NotImplementedException();
+            
         }
 
-        public override void Undo()
+        public void Undo()
         {
             if (hitPointsBefore == null)
                 throw new InvalidOperationException("This command has not yet been executed.");

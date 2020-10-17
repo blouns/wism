@@ -5,6 +5,8 @@ using Wism.Client.Data.Services;
 using Wism.Client.Data;
 using AutoMapper;
 using Wism.Client.Data.Entities;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
 
 namespace Wism.Client.Api.Controllers
 {
@@ -12,9 +14,16 @@ namespace Wism.Client.Api.Controllers
     {
         private readonly IWismClientRepository wismClientRepository;
         private readonly IMapper mapper;
+        private readonly ILogger logger;
 
-        public CommandController(IWismClientRepository wismClientRepository, IMapper mapper)
+        public CommandController(ILoggerFactory loggerFactory, IWismClientRepository wismClientRepository, IMapper mapper)
         {
+            if (loggerFactory is null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            this.logger = loggerFactory.CreateLogger<CommandController>();
             this.wismClientRepository = wismClientRepository ?? throw new ArgumentNullException(nameof(wismClientRepository));
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }

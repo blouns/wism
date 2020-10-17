@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Moq;
 using System.Collections.Generic;
 using Wism.Client.Api.Controllers;
 using Wism.Client.Api.Profiles;
@@ -34,9 +37,9 @@ namespace Wism.Client.Test
             {
                 context.Database.OpenConnection();
                 context.Database.EnsureCreated();
-                
+
                 var wismRepository = new WismClientSqliteRepository(context);
-                CommandController commandController = new CommandController(wismRepository, mapper);
+                CommandController commandController = new CommandController(CreateLogFactory(), wismRepository, mapper);
 
                 // Act
                 commandController.AddCommand(new ArmyMoveCommandDto()
@@ -103,7 +106,7 @@ namespace Wism.Client.Test
             using (var context = new WismClientDbContext(options))
             {                
                 var wismRepository = new WismClientSqliteRepository(context);
-                CommandController commandController = new CommandController(wismRepository, mapper);
+                CommandController commandController = new CommandController(CreateLogFactory(), wismRepository, mapper);
 
                 // Act
                 List<CommandDto> commands = new List<CommandDto>(commandController.GetCommands());
@@ -167,7 +170,7 @@ namespace Wism.Client.Test
             using (var context = new WismClientDbContext(options))
             {
                 var wismRepository = new WismClientSqliteRepository(context);
-                CommandController commandController = new CommandController(wismRepository, mapper);
+                CommandController commandController = new CommandController(CreateLogFactory(), wismRepository, mapper);
 
                 // Act
                 // Should return only ID 3
@@ -175,8 +178,17 @@ namespace Wism.Client.Test
 
                 // Assert
                 Assert.Single(commands);
-                Assert.Equal(3, commands[0].Id);                
+                Assert.Equal(3, commands[0].Id);
             }
+        }
+
+        private static ILoggerFactory CreateLogFactory()
+        {
+            var serviceProvider = new ServiceCollection()
+                                .AddLogging()
+                                .BuildServiceProvider();
+            var logFactory = serviceProvider.GetService<ILoggerFactory>();
+            return logFactory;
         }
     }
 }
