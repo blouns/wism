@@ -1,7 +1,7 @@
 ﻿using System;
 using Wism.Client.Model;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Agent.Commands
 {
     public class AttackAction : IAction
     {

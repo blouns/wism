@@ -1,23 +1,12 @@
 ﻿using AutoMapper;
-using BranallyGames.Wism;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Wism.Client.Api.Controllers;
-using Wism.Client.Data.DbContexts;
-using Wism.Client.Data.Services;
-using Wism.Client.Model;
-using Wism.Client.Model.Commands;
+using Wism.Client.Agent.Controllers;
 
-namespace Wism.Client.Api
+namespace Wism.Client.Agent
 {
     public class WismAgent : BackgroundService
     {

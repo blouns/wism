@@ -3,12 +3,11 @@ using BranallyGames.Wism;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using Wism.Client.Api;
-using Wism.Client.Api.Controllers;
+using Wism.Client.Agent.Controllers;
 using Wism.Client.Model;
 using Wism.Client.Model.Commands;
 
-namespace Wism.Client.AsciiUi
+namespace Wism.Client.View
 {
     /// <summary>
     /// Basic ASCII Console-based UI for testing
@@ -18,8 +17,6 @@ namespace Wism.Client.AsciiUi
         private readonly ILogger logger;
         private readonly CommandController commandController;
         private readonly IMapper mapper;
-        private int lastId = 0;
-        private Army selectedArmy;
 
         IDictionary<string, char> unitMap = new Dictionary<string, char>
         {
@@ -55,15 +52,7 @@ namespace Wism.Client.AsciiUi
             this.commandController = commandController ?? throw new ArgumentNullException(nameof(commandController));
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
-
-        private void GameOver()
-        {
-            // You have lost!
-            Console.WriteLine("Your hero has died and you have lost!");
-            Console.WriteLine("Press any key to quit...");
-            Console.ReadKey();
-        }
-
+        
         private char GetTerrainSymbol(string terrain)
         {
             return (terrainMap.Keys.Contains(terrain)) ? terrainMap[terrain] : '?';
@@ -76,8 +65,30 @@ namespace Wism.Client.AsciiUi
 
         protected override void DoTasks(ref int lastId)
         {
-            logger.LogInformation("Doing tasks");
-            System.Threading.Thread.Sleep(1000);
+            if (this.selectedArmy == null)
+            {
+                // You have lost!
+                Console.WriteLine("Your hero has died and you have lost!");
+                Console.WriteLine("Press any key to quit...");
+                Console.ReadKey();
+                return;
+            }
+
+            foreach (CommandDto command in commandController.GetCommandsAfterId(lastId))
+            {
+                logger.LogInformation($"Executing Task: {command.Id}: {command.GetType().ToString()}");
+                lastId = command.Id;
+
+                if (command is ArmyMoveCommandDto)
+                {
+                    ArmyMoveCommandDto armyMoveCommand = (ArmyMoveCommandDto)command;
+                    if (!this.selectedArmy.TryMove(new Coordinates(armyMoveCommand.X, armyMoveCommand.Y)))
+                    {
+                        Console.WriteLine("Cannot move there.");
+                        Console.Beep();
+                    }
+                }
+            }
         }
 
         protected override void HandleInput()
@@ -143,14 +154,6 @@ namespace Wism.Client.AsciiUi
                 }
                 Console.WriteLine();
             }
-        }
-
-        private void SetupWorld()
-        {
-            World.CreateDefaultWorld();
-            World.Current.Players[0].HireHero(World.Current.Map[2, 2]);
-            World.Current.Players[1].ConscriptArmy(ModFactory.FindUnitInfo("LightInfantry"), World.Current.Map[1, 1]);
-            this.selectedArmy = World.Current.Players[0].GetArmies()[0];
         }
     }
 }

@@ -8,7 +8,7 @@ using Wism.Client.Data.Entities;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 
-namespace Wism.Client.Api.Controllers
+namespace Wism.Client.Agent.Controllers
 {
     public class CommandController
     {

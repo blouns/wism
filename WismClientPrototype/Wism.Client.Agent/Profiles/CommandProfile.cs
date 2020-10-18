@@ -5,7 +5,7 @@ using System.Text;
 using Wism.Client.Data.Entities;
 using Wism.Client.Model.Commands;
 
-namespace Wism.Client.Api.Profiles
+namespace Wism.Client.Agent.Profiles
 {
     public class CommandProfile : Profile
     {

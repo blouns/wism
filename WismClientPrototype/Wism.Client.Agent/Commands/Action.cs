@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Wism.Client.Model;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Agent.Commands
 {
     public interface IAction
     {
