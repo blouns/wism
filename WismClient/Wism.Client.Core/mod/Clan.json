@@ -1,0 +1,56 @@
+[
+    {
+        "ShortName": "Sirians",
+        "PrimaryColor": "(199, 199, 199)",
+        "SecondaryColor": "(0, 0, 0)",
+        "DisplayName": "The Sirians"
+    },
+    {
+        "ShortName": "StormGiants",
+        "PrimaryColor": "(199, 199, 0)",
+        "SecondaryColor": "(0, 0, 0)",
+        "DisplayName": "Storm Giants"
+    },
+    {
+        "ShortName": "GreyDwarves",
+        "PrimaryColor": "(199, 134, 0)",
+        "SecondaryColor": "(0, 0, 0)",
+        "DisplayName": "Grey Dwarves"
+    },
+    {
+        "ShortName": "OrcsOfKor",
+        "PrimaryColor": "(199, 0, 0)",
+        "SecondaryColor": "(0, 0, 0)",
+        "DisplayName": "Orcs of Kor"
+    },
+    {
+        "ShortName": "Elvallie",
+        "PrimaryColor": "(85, 150, 85)",
+        "SecondaryColor": "(0, 0, 0)",
+        "DisplayName": "Elvallie"
+    },
+    {
+        "ShortName": "Selentines",
+        "PrimaryColor": "(255, 0, 0)",
+        "SecondaryColor": "(0, 85, 119)",
+        "DisplayName": "The Selentines"
+    },
+    {
+        "ShortName": "HorseLords",
+        "PrimaryColor": "(134, 199, 0)",
+        "SecondaryColor": "(0, 0, 0)",
+        "DisplayName": "Horse Lords"
+    },
+    {
+        "ShortName": "LordBane",
+        "PrimaryColor": "(0, 0, 0)",
+        "SecondaryColor": "(199, 0, 0)",
+        "DisplayName": "Lord Bane"
+    },
+    {
+        "ShortName": "Neutral",
+        "PrimaryColor": "(100, 100, 100)",
+        "SecondaryColor": "(0, 0, 0)",
+        "DisplayName": "Neutral"
+    }
+]

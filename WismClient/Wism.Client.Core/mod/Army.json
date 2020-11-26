@@ -1,0 +1,48 @@
+[
+
+    {
+        "DisplayName": "Hero",
+        "ShortName": "Hero",
+        "Strength": 5,
+        "Moves": 100,
+        "CanWalk": true,
+        "CanFloat": false,
+        "CanFly": false
+    },
+    {
+        "DisplayName": "Light Infantry",
+        "ShortName": "LightInfantry",
+        "Strength": 3,
+        "Moves" :  95,
+        "CanWalk": true,
+        "CanFloat": false,
+        "CanFly": false
+    },
+    {
+        "DisplayName": "Heavy Infantry",
+        "ShortName": "HeavyInfantry",
+        "Strength": 5,
+        "Moves": 90,
+        "CanWalk": true,
+        "CanFloat": false,
+        "CanFly": false
+    },
+    {
+        "DisplayName": "Cavalry",
+        "ShortName": "Cavalry",
+        "Strength": 5,
+        "Moves" : 100,
+        "CanWalk": true,
+        "CanFloat": false,
+        "CanFly": false
+    },
+    {
+        "DisplayName": "Pegasus",
+        "ShortName": "Pegasus",
+        "Strength": 4,
+        "Moves": 100,
+        "CanWalk": true,
+        "CanFloat": false,
+        "CanFly": true
+    }
+]
