@@ -7,6 +7,7 @@ TagManager:
   - Attacker
   - Defender
   - Killed
+  - Minimap
   layers:
   - Default
   - TransparentFX

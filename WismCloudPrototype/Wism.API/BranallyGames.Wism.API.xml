@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BranallyGames.Wism.API</name>
+    </assembly>
+    <members>
+        <member name="M:BranallyGames.Wism.API.Controllers.PlayersController.GetPlayersForWorld(System.Guid)">
+            <summary>
+            Get all available Players in the world
+            </summary>
+            <returns>ActionResult of all available Players</returns>
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.PlayersController.GetPlayerForWorld(System.Guid,System.Guid)">
+            <summary>
+            Get a player by its ID for a given world
+            </summary>
+            <param name="worldId">The ID of the world with the player</param>
+            <param name="playerId">The ID of the player to get</param>
+            <returns>ActionResult of a player with ID, name, and details</returns>
+            <response code="200">Returns the requested player</response>
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.PlayersController.CreatePlayer(System.Guid,BranallyGames.Wism.API.Model.PlayerForCreationModel)">
+            <summary>
+            Create a new player
+            </summary>
+            <param name="worldId">World ID for the new player</param>
+            <param name="player">Player name and details to create</param>
+            <returns>ActionResult of a new player with ID and details</returns>
+            <response code="201">Returns the created player</response>
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.PlayersController.UpdatePlayerForWorld(System.Guid,System.Guid,BranallyGames.Wism.API.Model.PlayerForUpdateModel)">
+            <summary>
+            Updates the given player by ID from body in JSON format
+            </summary>
+            <param name="worldId">World ID containing player</param>
+            <param name="playerId">Player ID to update</param>
+            <param name="player">Player value from body in JSON</param>
+            <returns>No response except for update or Player with updated ID for upsert</returns>
+            <response code="204">No content</response>
+            <response code="201">Player with updated ID and values</response>        
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.PlayersController.PatchPlayerForWorld(System.Guid,System.Guid,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{BranallyGames.Wism.API.Model.PlayerForUpdateModel})">
+            <summary>
+            Updates a Player partially
+            </summary>
+            <param name="worldId">World ID containing the player</param>
+            <param name="playerId">Player ID to be udpated or inserted</param>
+            <param name="patchDocument">Player to update from body</param>
+            <returns>No content on update or new player on upsert</returns>
+            <response code="204">No response</response>
+            <response code="201">Player with updated ID and values</response> 
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.PlayersController.DeletePlayer(System.Guid,System.Guid)">
+            <summary>
+            Delete the given player by ID
+            </summary>
+            <param name="worldId">World ID containing the player</param>
+            <param name="playerId">Player ID to delete</param>
+            <returns>No content</returns>
+            <response code="204">No content</response>
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.WorldsController.GetWorlds">
+            <summary>
+            Get all available worlds.
+            </summary>
+            <returns>ActionResult of all available worlds</returns>
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.WorldsController.GetWorld(System.Guid)">
+            <summary>
+            Get a world by its ID
+            </summary>
+            <param name="worldId">The ID of the world to get</param>
+            <returns>ActionResult of a world with ID, name, and details</returns>
+            <response code="200">Returns the requested world</response>
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.WorldsController.CreateWorld(BranallyGames.Wism.API.Model.WorldForCreationModel)">
+            <summary>
+            Create a new world
+            </summary>
+            <param name="world">World name and details to create</param>
+            <returns>ActionResult of a new world with ID and details</returns>
+            <response code="201">Returns the created world</response>
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.WorldsController.UpdateWorld(System.Guid,BranallyGames.Wism.API.Model.WorldForUpdateModel)">
+            <summary>
+            Updates the given world by ID from body in JSON format
+            </summary>
+            <param name="worldId">World ID to update</param>
+            <param name="world">World value from body in JSON</param>
+            <returns>World with updated values</returns>
+        </member>
+        <member name="M:BranallyGames.Wism.API.Controllers.WorldsController.DeleteWorld(System.Guid)">
+            <summary>
+            Delete the given world by ID
+            </summary>
+            <param name="worldId">World ID to delete</param>
+            <returns>No content</returns>
+        </member>
+    </members>
+</doc>

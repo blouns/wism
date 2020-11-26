@@ -1,0 +1,102 @@
+[
+    {
+        "AffiliationID": "Sirians",
+        "TerrainID": "Road",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "Sirians",
+        "TerrainID": "Plain",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "StormGiants",
+        "TerrainID": "Hill",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "StormGiants",
+        "TerrainID": "Marsh",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "GreyDwarves",
+        "TerrainID": "Forest",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "GreyDwarves",
+        "TerrainID": "Hill",
+        "Modifier": 2
+    },
+    {
+        "AffiliationID": "GreyDwarves",
+        "TerrainID": "Marsh",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "OrcsOfKor",
+        "TerrainID": "Marsh",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "OrcsOfKor",
+        "TerrainID": "Forest",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "Elvallie",
+        "TerrainID": "Marsh",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "Elvallie",
+        "TerrainID": "Hill",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "Elvallie",
+        "TerrainID": "Forest",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "Selentines",
+        "TerrainID": "Water",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "Selentines",
+        "TerrainID": "Shore",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "HorseLords",
+        "TerrainID": "Road",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "HorseLords",
+        "TerrainID": "Grass",
+        "Modifier": 1
+    },
+    {
+        "AffiliationID": "HorseLords",
+        "TerrainID": "Hill",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "HorseLords",
+        "TerrainID": "Forest",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "LordBane",
+        "TerrainID": "Forest",
+        "Modifier": -1
+    },
+    {
+        "AffiliationID": "LordBane",
+        "TerrainID": "Marsh",
+        "Modifier": 1
+    }
+]
