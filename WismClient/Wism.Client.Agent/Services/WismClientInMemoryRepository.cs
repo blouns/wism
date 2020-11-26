@@ -29,8 +29,9 @@ namespace Wism.Client.Agent
 
             lock (sync)
             {
-                // Generate the ID on the database side
-                commands.Add(++lastId, command);
+                // Generate the ID on the client side
+                command.Id = ++lastId;
+                commands.Add(command.Id, command);
             }
         }
 

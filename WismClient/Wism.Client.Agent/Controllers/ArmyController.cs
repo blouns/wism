@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
@@ -23,11 +22,6 @@ namespace Wism.Client.Agent.Controllers
             }
 
             this.logger = loggerFactory.CreateLogger<CommandController>();
-        }
-
-        public Army CreateArmy(Player player, ArmyInfo info)
-        {
-            return ArmyFactory.CreateArmy(player, info);
         }
 
         /// <summary>
@@ -55,7 +49,7 @@ namespace Wism.Client.Agent.Controllers
             
             if (targetTile.HasArmies())
             {
-                // Does the tile has room for the unit of the same team?
+                // Does the tile have room for the unit of the same team?
                 if ((targetTile.Armies[0].Clan == armiesToMove[0].Clan) &&
                     (!targetTile.HasRoom(armiesToMove.Count)))
                 {
@@ -94,46 +88,87 @@ namespace Wism.Client.Agent.Controllers
             return true;
         }
 
+        /// <summary>
+        /// Prepares the army to move (changes from "Armies" to "VisitingArmies".
+        /// </summary>
+        /// <param name="armies">Armies to move</param>
+        public void StartMoving(List<Army> armies)
+        {
+            if (armies is null || armies.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(armies));
+            }
+
+            var tile = armies[0].Tile;
+            if (!armies.TrueForAll(a => a.Tile == tile))
+            {
+                throw new ArgumentException("All armies must originate from the same location.");
+            }
+
+            if (tile.HasVisitingArmies())
+            {
+                throw new InvalidOperationException("Tile already has visiting armies.");
+            }
+
+            // Move selected armies to Visiting Armies
+            tile.VisitingArmies = new List<Army>(armies);
+            foreach (Army army in armies)
+            {
+                tile.Armies.Remove(army);
+            }
+
+            // Clean up tile's armies
+            if (tile.HasArmies())
+            {
+                tile.Armies.Sort(new ByArmyViewingOrder());
+            }
+            else
+            {
+                tile.Armies = null;
+            }
+        }
+
+        /// <summary>
+        /// Commits the armies to their current tile (changes from "VisitingArmies" to "Armies").
+        /// </summary>
+        /// <param name="armies">Armies to commit to current tile</param>
+        public void StopMoving(List<Army> armies)
+        {
+            if (armies is null || armies.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(armies));
+            }
+
+            var tile = armies[0].Tile;
+            if (!armies.TrueForAll(a => a.Tile == tile))
+            {
+                throw new ArgumentException("All armies must originate from the same location.");
+            }
+
+            tile.CommitVisitingArmies();
+        }
+
+
         // TODO: Incorporate the "Visiting Armies" slot
         private void MoveSelectedArmies(List<Army> armiesToMove, Tile targetTile)
         {
             Tile originatingTile = armiesToMove[0].Tile;
 
-            targetTile.Armies = armiesToMove;
+            targetTile.VisitingArmies = armiesToMove;
             armiesToMove.ForEach(a =>
             {
                 a.Tile = targetTile;
                 a.MovesRemaining -= targetTile.Terrain.MovementCost;   // TODO: Account for bonuses
             });
 
-            //targetTile.Armies.Sort(new ByUnitViewingOrder());
+            targetTile.VisitingArmies.Sort(new ByArmyViewingOrder());
 
             RemoveArmiesFromOrginatingTile(armiesToMove, originatingTile);
         }
 
         private static void RemoveArmiesFromOrginatingTile(List<Army> armiesToRemove, Tile originatingTile)
         {
-            // If moving entire army (not a subset)
-            if (originatingTile.Armies.Count == armiesToRemove.Count)
-            {
-                originatingTile.Armies = null;
-                return;
-            }
-
-            // Otherwise remove moved units from original army
-            foreach (Army armyToRemove in armiesToRemove)
-            {
-                originatingTile.Armies.Remove(armyToRemove);
-            }
-
-            if (originatingTile.Armies.Count == 0)
-            {
-                originatingTile.Armies = null;
-            }
-            else
-            {
-                //originatingTile.Army.units.Sort(new ByUnitViewingOrder());
-            }
+            originatingTile.VisitingArmies = null;
         }
     }
 }

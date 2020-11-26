@@ -17,7 +17,7 @@ namespace Wism.Client.Agent.InputProviders
             this.commandController = commandController;
         }
 
-        public void Produce()
+        public void GenerateCommands()
         {
             var army = Game.Current.Players[0].GetArmies()[0];
 

@@ -79,7 +79,7 @@ namespace Wism.Client.Agent
 
             foreach (Command command in commandController.GetCommandsAfterId(lastId))
             {
-                logger.LogInformation($"Executing Task: {command.Id}: {command.GetType().ToString()}");
+                logger.LogInformation($"Executing Task: {command.Id}: {command.GetType()}");
                 lastId = command.Id;
 
                 // TODO: Move to IAction
@@ -94,11 +94,13 @@ namespace Wism.Client.Agent
                     // Get the destination tile
                     Tile targetTile = World.Current.Map[armyMoveCommand.X, armyMoveCommand.Y];
 
+                    armyController.StartMoving(armies);
                     if (!armyController.TryMove(armies, targetTile))
                     {
                         Console.WriteLine("Cannot move there.");
                         Console.Beep();
                     }
+                    armyController.StopMoving(armies);
                 }
             }
         }
@@ -123,7 +125,7 @@ namespace Wism.Client.Agent
         {
             foreach (ICommandProvider provider in this.commandProviders)
             {
-                provider.Produce();
+                provider.GenerateCommands();
             }
         }
 

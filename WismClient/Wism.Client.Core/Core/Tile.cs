@@ -113,5 +113,17 @@ namespace Wism.Client.Core
             // TODO: Get surrounding armies in castle
             return this.Armies;
         }
+
+        public void CommitVisitingArmies()
+        {
+            if (this.VisitingArmies == null)
+            {
+                throw new InvalidOperationException("There are no visiting armies to commit on this tile.");
+            }
+
+            this.Armies = new List<Army>(this.VisitingArmies);
+            this.Armies.Sort(new ByArmyViewingOrder());
+            this.VisitingArmies = null;
+        }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface ICommandProvider
     {
-        void Produce();
+        void GenerateCommands();
     }
 }

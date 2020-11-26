@@ -50,6 +50,7 @@ namespace Wism.Client.Core
         {
             current = new Game();
             current.Random = new Random(Game.DefaultRandomSeed);
+            current.WarStrategy = new DefaultWarStrategy();
 
             // Setup default players for testing
             current.Players = new List<Player>();

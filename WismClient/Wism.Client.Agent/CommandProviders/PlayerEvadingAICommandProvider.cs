@@ -17,7 +17,7 @@ namespace Wism.Client.Agent.InputProviders
         }
 
         // Generate 'input' commands from the AI
-        public void Produce()
+        public void GenerateCommands()
         {
             var myArmy = Game.Current.Players[1]
                 .GetArmies()[0];
