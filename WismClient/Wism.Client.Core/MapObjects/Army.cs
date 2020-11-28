@@ -18,6 +18,7 @@ namespace Wism.Client.MapObjects
         public int Strength { get; set; }
         public int MovesRemaining { get; set; }
         public Clan Clan { get => Player.Clan; }
+        public bool IsDead { get; set; }
 
         // Static info
         public int Moves { get => Info.Moves; }
@@ -39,6 +40,7 @@ namespace Wism.Client.MapObjects
 
         public void Kill()
         {
+            this.IsDead = true;
             Player.KillArmy(this);
         }
 

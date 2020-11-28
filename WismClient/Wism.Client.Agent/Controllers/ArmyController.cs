@@ -32,6 +32,18 @@ namespace Wism.Client.Agent.Controllers
         /// <param name="y">Y-coordinate to move to</param>
         public bool TryMove(List<Army> armiesToMove, Tile targetTile)
         {
+            if (targetTile is null)
+            {
+                throw new ArgumentNullException(nameof(targetTile));
+            }
+
+            if (armiesToMove is null || armiesToMove.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(armiesToMove));
+            }
+
+            VerifyArmiesStillAlive(armiesToMove);
+
             // Can we traverse in that terrain?            
             if (!armiesToMove.TrueForAll(
                 army => targetTile.CanTraverseHere(army)))
@@ -60,24 +72,6 @@ namespace Wism.Client.Agent.Controllers
                 if ((targetTile.HasArmies()) &&
                     (targetTile.Armies[0].Clan != armiesToMove[0].Clan))
                 {
-                    IWarStrategy war = Game.Current.WarStrategy;
-
-                    // WAR! ...in a senseless mind.
-
-                    // TODO: Do not enagage in combat without explicit AttackCommand
-                    if (!war.Attack(armiesToMove, targetTile))
-                    {
-                        // We have lost!
-                        return false;
-                    }
-                }
-                else
-                {
-                    // TODO: Need to implement a selected cohort within the army
-                    //       Perhaps implemented using multiple Army objects in an
-                    //       army, or using a new Cohort class.
-                    //
-                    //       Until then, do not auto-merge armies that are moving.
                     return false;
                 }
             }
@@ -98,6 +92,8 @@ namespace Wism.Client.Agent.Controllers
             {
                 throw new ArgumentNullException(nameof(armies));
             }
+
+            VerifyArmiesStillAlive(armies);
 
             var tile = armies[0].Tile;
             if (!armies.TrueForAll(a => a.Tile == tile))
@@ -139,6 +135,8 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(armies));
             }
 
+            VerifyArmiesStillAlive(armies);
+
             var tile = armies[0].Tile;
             if (!armies.TrueForAll(a => a.Tile == tile))
             {
@@ -148,6 +146,35 @@ namespace Wism.Client.Agent.Controllers
             tile.CommitVisitingArmies();
         }
 
+        /// <summary>
+        /// WAR! ...in a senseless mind. Attack until win or lose.
+        /// </summary>
+        /// <param name="armies">Attacking armies</param>
+        /// <param name="targetTile">Defending tile</param>
+        /// <returns>True if attacker wins; else False</returns>
+        public bool TryAttack(List<Army> armiesToAttackWith, Tile targetTile)
+        {
+            if (armiesToAttackWith is null || armiesToAttackWith.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(armiesToAttackWith));
+            }
+
+            if (targetTile is null)
+            {
+                throw new ArgumentNullException(nameof(targetTile));
+            }
+
+            VerifyArmiesStillAlive(armiesToAttackWith);
+
+            var tile = armiesToAttackWith[0].Tile;
+            if (!armiesToAttackWith.TrueForAll(a => a.Tile == tile))
+            {
+                throw new ArgumentException("All attacking armies must originate from the same location.");
+            }
+
+            var war = Game.Current.WarStrategy;
+            return war.Attack(armiesToAttackWith, targetTile);            
+        }
 
         // TODO: Incorporate the "Visiting Armies" slot
         private void MoveSelectedArmies(List<Army> armiesToMove, Tile targetTile)
@@ -169,6 +196,14 @@ namespace Wism.Client.Agent.Controllers
         private static void RemoveArmiesFromOrginatingTile(List<Army> armiesToRemove, Tile originatingTile)
         {
             originatingTile.VisitingArmies = null;
+        }
+
+        private static void VerifyArmiesStillAlive(List<Army> armies)
+        {
+            if (armies.Any<Army>(army => army.IsDead))
+            {
+                throw new InvalidOperationException("Cannot move a dead army!");
+            }
         }
     }
 }

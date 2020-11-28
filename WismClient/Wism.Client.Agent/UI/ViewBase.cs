@@ -12,24 +12,24 @@ namespace Wism.Client.Agent
     /// <summary>
     /// Template base class for a generic UI
     /// </summary>
-    public abstract class WismViewBase
+    public abstract class ViewBase
     {
         private ILogger logger;
         protected List<Army> selectedArmies;
 
-        public WismViewBase(ILoggerFactory loggerFactory)
+        public ViewBase(ILoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
             {
                 throw new System.ArgumentNullException(nameof(loggerFactory));
             }
 
-            logger = loggerFactory.CreateLogger<WismViewBase>();
+            logger = loggerFactory.CreateLogger<ViewBase>();
         }
 
         public async Task RunAsync()
         {
-            logger.LogInformation("WISM View successfully started");
+            logger.LogInformation("WISM successfully started");
 
             try
             {
@@ -68,6 +68,12 @@ namespace Wism.Client.Agent
             
             // Create a default hero for testing
             Game.Current.Players[0].HireHero(World.Current.Map[1, 1]);
+            Game.Current.Players[0].ConscriptArmy(
+                ModFactory.FindArmyInfo("HeavyInfantry"),
+                World.Current.Map[1, 1]);
+            Game.Current.Players[0].ConscriptArmy(
+                ModFactory.FindArmyInfo("Pegasus"),
+                World.Current.Map[1, 1]);
 
             // Set the player's selected army to a default for testing
             this.selectedArmies = new List<Army>();
@@ -76,6 +82,9 @@ namespace Wism.Client.Agent
             // Create an opponent with a light infantry for testing
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
+                World.Current.Map[2, 2]);
+            Game.Current.Players[1].ConscriptArmy(
+                ModFactory.FindArmyInfo("Cavalry"),
                 World.Current.Map[2, 2]);
         }
     }

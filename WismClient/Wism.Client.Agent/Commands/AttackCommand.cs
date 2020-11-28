@@ -6,14 +6,14 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands
 {
-    public class MoveCommand : Command
+    public class AttackCommand : Command
     {
         private readonly ArmyController armyController;
 
         public int X { get; set; }
         public int Y { get; set; }
 
-        public MoveCommand(ArmyController armyController, List<Army> armies, int x, int y)
+        public AttackCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armies)
         {
             this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
@@ -23,7 +23,17 @@ namespace Wism.Client.Agent.Commands
 
         public override bool Execute()
         {
-            return armyController.TryMove(Armies, World.Current.Map[X, Y]);
+            if (!armyController.TryAttack(Armies, World.Current.Map[X, Y]))
+            {
+                return false;
+            }
+
+            // Attack successful; move into the location
+            armyController.StartMoving(Armies);
+            bool success = armyController.TryMove(Armies, World.Current.Map[X, Y]);
+            armyController.StopMoving(Armies);
+
+            return success;
         }
     }
 }

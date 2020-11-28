@@ -54,7 +54,7 @@ namespace Wism.Client.Agent
                         host.RunAsync(),
 
                         // Start the UI
-                        scope.ServiceProvider.GetService<WismViewBase>().RunAsync()
+                        scope.ServiceProvider.GetService<ViewBase>().RunAsync()
                 };
                 Task.WaitAny(tasks);
                 Log.Information("Ending services");
@@ -94,11 +94,11 @@ namespace Wism.Client.Agent
                     );
 
                     // Add controllers
-                    services.AddScoped<CommandController>(provider =>
+                    services.AddSingleton<CommandController>(provider =>
                         new CommandController(
                                 provider.GetService<ILoggerFactory>(),
                                 provider.GetService<IWismClientRepository>()));
-                    services.AddScoped<ArmyController>(provider =>
+                    services.AddSingleton<ArmyController>(provider =>
                         new ArmyController(
                                 provider.GetService<ILoggerFactory>()));
 
@@ -109,8 +109,8 @@ namespace Wism.Client.Agent
                             provider.GetService<CommandController>()));
 
                     // Add command consumer view
-                    services.AddTransient<WismViewBase, WismAsciiView>(provider =>
-                        new WismAsciiView(
+                    services.AddTransient<ViewBase, AsciiView>(provider =>
+                        new AsciiView(
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<ArmyController>(),
                             provider.GetService<CommandController>()));
