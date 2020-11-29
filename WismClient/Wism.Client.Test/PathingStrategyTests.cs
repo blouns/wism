@@ -30,7 +30,7 @@ namespace Wism.Client.Test
                 { "S", "1", "1" },
             };
 
-            Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
             //Assert.AreEqual(2, distance, "Did not find the shortest route.");
@@ -49,7 +49,7 @@ namespace Wism.Client.Test
                 { "1", "1", "1" },
             };
 
-            Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
             //Assert.AreEqual(1, distance, "Did not find the shortest route.");
@@ -68,7 +68,7 @@ namespace Wism.Client.Test
                 { "S", "1", "1" },
             };
 
-            Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
             //Assert.AreEqual(3, distance, "Did not find the shortest route.");
@@ -87,7 +87,7 @@ namespace Wism.Client.Test
                 { "1", "1", "1" },
             };
 
-            Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
             //Assert.AreEqual(4, distance, "Did not find the shortest route.");
@@ -109,7 +109,7 @@ namespace Wism.Client.Test
                 { "1", "1", "1", "1", "1", "1" },
             };
 
-            Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
             //Assert.AreEqual(6, distance, "Did not find the shortest route.");
@@ -130,7 +130,7 @@ namespace Wism.Client.Test
                 { "1", "1", "1", "1", "1", "1" },
             };
 
-            Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
             //Assert.AreEqual(11, distance, "Did not find the shortest route.");
@@ -152,7 +152,7 @@ namespace Wism.Client.Test
                 { "1", "1", "1", "1", "1", "1" },
             };
 
-            Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
             //Assert.AreEqual(6, distance, "Did not find the shortest route.");
@@ -174,7 +174,7 @@ namespace Wism.Client.Test
                 { "1", "1", "1", "2", "1", "1" },
             };
 
-            Tile[,] map = ConvertMatrixToMap(matrix, out Army start, out Tile target);
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
             //Assert.AreEqual(7, distance, "Did not find the shortest route.");
@@ -207,9 +207,9 @@ namespace Wism.Client.Test
         ///     "1"   = Terrain of weight cost 1
         ///     "9"   = Terrain of weight cost 9
         /// </remarks>
-        public static Tile[,] ConvertMatrixToMap(string[,] matrix, out Army army, out Tile target)
+        public static Tile[,] ConvertMatrixToMap(string[,] matrix, out List<Army> armies, out Tile target)
         {
-            army = null;
+            armies = null;
             target = null;
             Clan clan = Clan.Create(ModFactory.FindClanInfo("Sirians"));
 
@@ -229,12 +229,13 @@ namespace Wism.Client.Test
                         if (tokens[i] == "S")
                         {
                             // S = Start
-                            if (army == null)
+                            if (armies == null)
                             {
                                 tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Castle"));
                                 tile.Terrain.MovementCost = 1;
-                                army = ArmyFactory.CreateArmy(ArmyInfo.GetHeroInfo());
+                                var army = ArmyFactory.CreateArmy(ArmyInfo.GetHeroInfo());
                                 tile.AddArmy(army);
+                                armies = new List<Army>() { army };
                             }
                             else
                             {
@@ -282,7 +283,7 @@ namespace Wism.Client.Test
                 }
             }
 
-            if (army == null || target == null)
+            if (armies == null || target == null)
                 throw new ArgumentException("TEST: Must have at least one starting army and target.");
 
             return map;

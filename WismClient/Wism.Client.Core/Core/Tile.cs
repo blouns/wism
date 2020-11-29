@@ -89,6 +89,12 @@ namespace Wism.Client.Core
             return this.Terrain.CanTraverse(army.CanWalk, army.CanFloat, army.CanFly);
         }
 
+        public bool CanTraverseHere(List<Army> armies)
+        {
+            return armies.TrueForAll(
+                army => this.CanTraverseHere(army));
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();

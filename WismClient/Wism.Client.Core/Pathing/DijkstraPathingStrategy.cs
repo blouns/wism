@@ -11,16 +11,16 @@ namespace Wism.Client.Pathing
         {
         }
 
-        public void FindShortestRoute(Tile[,] map, Army source, Tile target, out IList<Tile> fastestRoute, out float distance)
+        public void FindShortestRoute(Tile[,] map, List<Army> armiesToMove, Tile target, out IList<Tile> fastestRoute, out float distance)
         {
             if (map == null)
             {
                 throw new ArgumentNullException(nameof(map));
             }
 
-            if (source == null)
+            if (armiesToMove == null || armiesToMove.Count == 0)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw new ArgumentNullException(nameof(armiesToMove));
             }
 
             if (map.GetLength(0) == 1 || map.GetLength(1) == 1)
@@ -33,9 +33,10 @@ namespace Wism.Client.Pathing
             List<PathNode> queue = new List<PathNode>();
 
             // Build graph and initialize queue of unvisited nodes
-            PathNode[,] graph = BuildGraph(map, queue, source);
-          
-            graph[source.X, source.Y].Distance = 0.0f;   // Distance from source to source is zero
+            PathNode[,] graph = BuildGraph(map, queue, armiesToMove);
+
+            // Distance from source to source is zero
+            graph[armiesToMove[0].X, armiesToMove[0].Y].Distance = 0.0f;   
 
             while (queue.Count > 0)
             {
@@ -46,7 +47,7 @@ namespace Wism.Client.Pathing
 
                 if (currentNode.Value == target)
                 {
-                    if (currentNode.Previous != null || currentNode.Value == source.Tile)
+                    if (currentNode.Previous != null || currentNode.Value == armiesToMove[0].Tile)
                     {
                         // Construct the shortest path and record total distance
                         float totalDistance = currentNode.Distance;
@@ -71,7 +72,7 @@ namespace Wism.Client.Pathing
             }
         }
 
-        private static PathNode[,] BuildGraph(Tile[,] map, List<PathNode> queue, Army army)
+        private static PathNode[,] BuildGraph(Tile[,] map, List<PathNode> queue, List<Army> armies)
         {
             int mapSizeX = map.GetLength(0);
             int mapSizeY = map.GetLength(1);
@@ -82,7 +83,7 @@ namespace Wism.Client.Pathing
                 {
                     // Only add a node if the army can actually traverse there
                     // Note: this will leave some "null" spots as a sparse-array
-                    if (map[x, y].CanTraverseHere(army))
+                    if (map[x, y].CanTraverseHere(armies))
                     {                        
                         PathNode node = new PathNode();
                         node.Distance = Int32.MaxValue;
@@ -199,17 +200,6 @@ namespace Wism.Client.Pathing
                     neighborNode.Previous = currentNode;
                 }
             }
-        }
-
-        private static int GetMovementCost(Tile tile)
-        {
-            // TODO: Factor in unit and Clan cost mappings; for now, static
-            return tile.Terrain.MovementCost;
-        }
-
-        private Queue<PathNode> BuildQueue(Tile[,] map)
-        {
-            throw new NotImplementedException();
         }
     }
 }

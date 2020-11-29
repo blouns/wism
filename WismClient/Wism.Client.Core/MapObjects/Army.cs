@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Wism.Client.Agent.Factories;
 using Wism.Client.Core;

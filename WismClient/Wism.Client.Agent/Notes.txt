@@ -1,0 +1,42 @@
+﻿[What's Next?]
+Goal for the next phase is to implement a turn-based system with tests that cover: end turn,
+multi-tile movement, and multi-player action (human and AI). 
+
+Considerations:
+Consider a simple AI that attacks if it has the tactical advantage (strength) and runs if it 
+is weaker. Also, consider adding ASCII shortcuts for common tasks (perhaps a recorder for the 
+moves that can be saved?).
+
+TODO List:
+* Complete port of TryMoveOnce
+* Add tests for Visiting Armies
+* Implement turn-based system
+* Implement state machine
+
+[State machine]
+The UI needs to drive states like Select Armies, Next, Move, Attack. The challenge is for the UI 
+to effectively react after a state transition. The UI cannot drive the state transition directly, 
+but must instead create Commands and pop them off the queue. To avoid having to interrogate each
+Command as its popped, the commands will return a State which will allow the UI to react.
+
+Example: 
+1. Human selects a unit in UI (double-click or picker); the UI creates a StartMovingCommand in
+   Input Handler; the UI pops and runs the command then inspects the State; draws the selected
+   armies.
+
+2. Human moves a selected unit in UI. Remaining moves are not 0, so the armies remain selected
+   after the completion of the task. This can occur by using a tri-state for the Command: 
+   a) Success, b) Failure, c) Incomplete. If a Command is in the Success or Failure state, then
+   it will be poped from the queue. Otherwise it remains for the next game loop.
+
+
+[Next Command]
+Next command needs a list of armies that are new or not marked "Defend". This can be implemented
+using the Player's armies list checking at the start of each turn for any !Defend armies. This
+will be added to a Next-list which will allow the UI to advance quickly through each unit.
+
+[Production Queue]
+Production only occurs at the start of a turn. For any new unit created, it must be added to a 
+new-units list. This will allow the UI to prompt to notify the human of new units and allow them
+to renew production or cancel.
+

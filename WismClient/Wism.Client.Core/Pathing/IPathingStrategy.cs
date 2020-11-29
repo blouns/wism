@@ -6,6 +6,6 @@ namespace Wism.Client.Pathing
 {
     public interface IPathingStrategy
     {
-        void FindShortestRoute(Tile[,] map, Army source, Tile target, out IList<Tile> fastestRoute, out float distance);
+        void FindShortestRoute(Tile[,] map, List<Army> armies, Tile target, out IList<Tile> fastestRoute, out float distance);
     }
 }

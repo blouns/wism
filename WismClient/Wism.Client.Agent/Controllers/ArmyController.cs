@@ -7,6 +7,7 @@ using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Pathing;
 using Wism.Client.War;
 
 namespace Wism.Client.Agent.Controllers
@@ -28,9 +29,6 @@ namespace Wism.Client.Agent.Controllers
         /// <summary>
         /// Attempt to move the given army to the (x,y) destination.
         /// </summary>
-        /// <param name="armiesToMove">Army to move</param>
-        /// <param name="x">X-coordinate to move to</param>
-        /// <param name="y">Y-coordinate to move to</param>
         public bool TryMove(List<Army> armiesToMove, Tile targetTile)
         {
             if (targetTile is null)
@@ -86,6 +84,72 @@ namespace Wism.Client.Agent.Controllers
             MoveSelectedArmies(armiesToMove, targetTile);
 
             return true;
+        }
+
+        /// <summary>
+        /// Advance the army one step along the shortest route.
+        /// </summary>
+        /// <param name="coord"></param>
+        /// <returns></returns>
+        public bool TryMoveOneStep(List<Army> armiesToMove, Tile targetTile, ref IList<Tile> path, out float distance)
+        {
+            if (armiesToMove is null || armiesToMove.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(armiesToMove));
+            }
+
+            if (targetTile is null)
+            {
+                throw new ArgumentNullException(nameof(targetTile));
+            }
+
+            if (path != null && path.Count == 1)
+            {
+                // We have arrived
+                logger.LogInformation($"{ArmiesToString(armiesToMove)} arrived at its destination.");
+                path.Clear();
+                distance = 0;
+                return false;
+            }
+
+            IList<Tile> myPath = path;
+
+            float myDistance;
+            if (myPath == null)
+            {
+                // No current path; calculate the shortest route
+                IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+                pathingStrategy.FindShortestRoute(World.Current.Map, armiesToMove, targetTile, out myPath, out _);
+
+                if (myPath == null || myPath.Count == 0)
+                {
+                    // Impossible route
+                    logger.LogInformation($"Path between {ArmiesToString(armiesToMove)} and {targetTile} is impassable.");
+
+                    path = null;
+                    distance = 0.0f;
+                    return false;
+                }
+            }
+
+            // Now we have a route
+            bool moveSuccessful = TryMove(armiesToMove, myPath[1]);
+            if (moveSuccessful)
+            {
+                // Pop the starting location and return updated path and distance
+                myPath.RemoveAt(0);
+                myDistance = CalculateDistance(myPath);
+            }
+            else
+            {
+                logger.LogWarning($"Move failed during path traversal to: {myPath[1]}");
+                myPath = null;
+                myDistance = 0;
+            }
+
+            path = myPath;
+            distance = myDistance;
+            return moveSuccessful;
         }
 
         /// <summary>
@@ -189,7 +253,13 @@ namespace Wism.Client.Agent.Controllers
         private static void RemoveArmiesFromOrginatingTile(List<Army> armiesToRemove, Tile originatingTile)
         {
             originatingTile.VisitingArmies = null;
-        }        
+        }
+
+        private int CalculateDistance(IList<Tile> myPath)
+        {
+            // TODO: Calculate based on true unit and affiliation cost; for now, static
+            return myPath.Sum<Tile>(tile => tile.Terrain.MovementCost);
+        }
 
         private static string ArmiesToString(List<Army> armies)
         {
