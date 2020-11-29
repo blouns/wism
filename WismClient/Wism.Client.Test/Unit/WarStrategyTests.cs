@@ -6,7 +6,7 @@ using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.War;
 
-namespace Wism.Client.Test
+namespace Wism.Client.Test.Unit
 {
     [TestFixture]
     public class WarStrategyTests

@@ -76,6 +76,8 @@ namespace Wism.Client.Agent
                 lastId = command.Id;
 
                 logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
+                // TODO: Implement tri-state to return success, failure, or incomplete/continue
+                // TODO: Switch to returning game state
                 var success = command.Execute();
 
                 if (success)

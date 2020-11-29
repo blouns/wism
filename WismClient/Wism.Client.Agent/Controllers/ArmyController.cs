@@ -153,10 +153,10 @@ namespace Wism.Client.Agent.Controllers
         }
 
         /// <summary>
-        /// Prepares the army to move (changes from "Armies" to "VisitingArmies".
+        /// Selects the army to prepare to move or attack (changes from "Armies" to "VisitingArmies".
         /// </summary>
-        /// <param name="armies">Armies to move</param>
-        public void StartMoving(List<Army> armies)
+        /// <param name="armies">Armies to select</param>
+        public void SelectArmy(List<Army> armies)
         {
             if (armies is null || armies.Count == 0)
             {
@@ -173,7 +173,7 @@ namespace Wism.Client.Agent.Controllers
             }
 
             // Move selected armies to Visiting Armies
-            logger.LogInformation($"Preparing to move: {ArmiesToString(armies)}");
+            logger.LogInformation($"Selecting army: {ArmiesToString(armies)}");
             tile.VisitingArmies = new List<Army>(armies);
             foreach (Army army in armies)
             {
@@ -192,19 +192,22 @@ namespace Wism.Client.Agent.Controllers
         }
 
         /// <summary>
-        /// Commits the armies to their current tile (changes from "VisitingArmies" to "Armies").
+        /// Deselects armies (changes from "VisitingArmies" to "Armies").
         /// </summary>
         /// <param name="armies">Armies to commit to current tile</param>
-        public void StopMoving(List<Army> armies)
+        public void DeselectArmy(List<Army> armies)
         {
             if (armies is null || armies.Count == 0)
             {
                 throw new ArgumentNullException(nameof(armies));
             }
 
-            ArmyUtilities.VerifyArmies(logger, armies);
+            // Simplify deselect for attack scenarios
+            var armiesToDeselect = RemoveDeadArmies(armies);
 
-            armies[0].Tile.CommitVisitingArmies();
+            ArmyUtilities.VerifyArmies(logger, armiesToDeselect);
+
+            armiesToDeselect[0].Tile.CommitVisitingArmies();
         }
 
         /// <summary>
@@ -227,12 +230,31 @@ namespace Wism.Client.Agent.Controllers
 
             ArmyUtilities.VerifyArmies(logger, armiesToAttackWith);
 
+            var attackingFromTile = armiesToAttackWith[0].Tile;
+
             logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile}");
             var war = Game.Current.WarStrategy;
-            return war.Attack(armiesToAttackWith, targetTile);            
+            var result = war.Attack(armiesToAttackWith, targetTile);
+            CleanupAfterBattle(targetTile, attackingFromTile, result);
+
+            return result;
         }
 
-        private void MoveSelectedArmies(List<Army> armiesToMove, Tile targetTile)
+        private static void CleanupAfterBattle(Tile targetTile, Tile attackingFromTile, bool result)
+        {
+            if (result)
+            {
+                // Attacker won
+                targetTile.Armies = null;
+            }
+            else
+            {
+                // Defender won
+                attackingFromTile.VisitingArmies = null;
+            }
+        }
+
+        private static void MoveSelectedArmies(List<Army> armiesToMove, Tile targetTile)
         {
             Tile originatingTile = armiesToMove[0].Tile;
 
@@ -255,7 +277,7 @@ namespace Wism.Client.Agent.Controllers
             originatingTile.VisitingArmies = null;
         }
 
-        private int CalculateDistance(IList<Tile> myPath)
+        private static int CalculateDistance(IList<Tile> myPath)
         {
             // TODO: Calculate based on true unit and affiliation cost; for now, static
             return myPath.Sum<Tile>(tile => tile.Terrain.MovementCost);
@@ -264,6 +286,20 @@ namespace Wism.Client.Agent.Controllers
         private static string ArmiesToString(List<Army> armies)
         {
             return $"Armies[{armies.Count}:{armies[0]}]";
+        }
+
+        private static List<Army> RemoveDeadArmies(List<Army> armies)
+        {
+            var armiesToReturn = new List<Army>(armies);
+            foreach (Army army in armies)
+            {
+                if (!army.IsDead)
+                {
+                    armiesToReturn.Add(army);
+                }
+            }
+
+            return armiesToReturn;
         }
     }
 }

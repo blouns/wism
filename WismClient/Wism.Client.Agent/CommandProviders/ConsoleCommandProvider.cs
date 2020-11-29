@@ -65,17 +65,21 @@ namespace Wism.Client.Agent.InputProviders
             {
                 // Attack the location
                 commandController.AddCommand(
+                    new SelectArmyCommand(armyController, armies));
+                commandController.AddCommand(
                     new AttackCommand(armyController, armies, x, y));
+                commandController.AddCommand(
+                    new DeselectArmyCommand(armyController, armies));
             }
             else
             {
                 // Move to the new location
                 commandController.AddCommand(
-                    new StartMovingCommand(armyController, armies));
+                    new SelectArmyCommand(armyController, armies));
                 commandController.AddCommand(
                     new MoveCommand(armyController, armies, x, y));
                 commandController.AddCommand(
-                    new StopMovingCommand(armyController, armies));
+                    new DeselectArmyCommand(armyController, armies));
             }
         }
 

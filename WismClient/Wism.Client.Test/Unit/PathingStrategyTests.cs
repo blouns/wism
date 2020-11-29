@@ -8,7 +8,7 @@ using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Pathing;
 
-namespace Wism.Client.Test
+namespace Wism.Client.Test.Unit
 {
     [TestFixture]
     public class PathingStrategyTests

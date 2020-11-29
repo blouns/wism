@@ -4,11 +4,11 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands
 {
-    public class StopMovingCommand : Command
+    public class DeselectArmyCommand : Command
     {
         private readonly ArmyController armyController;
 
-        public StopMovingCommand(ArmyController armyController, List<Army> armies) 
+        public DeselectArmyCommand(ArmyController armyController, List<Army> armies) 
             : base(armies)
         {
             this.armyController = armyController;
@@ -16,7 +16,7 @@ namespace Wism.Client.Agent.Commands
 
         public override bool Execute()
         { 
-            armyController.StopMoving(Armies);
+            armyController.DeselectArmy(Armies);
 
             return true;
         }

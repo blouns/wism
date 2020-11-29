@@ -130,7 +130,12 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("There are no visiting armies to commit on this tile.");
             }
 
-            this.Armies = new List<Army>(this.VisitingArmies);
+            if (!HasArmies())
+            {
+                this.Armies = new List<Army>();                
+            }
+
+            this.Armies.AddRange(this.VisitingArmies);
             this.Armies.Sort(new ByArmyViewingOrder());
             this.VisitingArmies = null;
         }

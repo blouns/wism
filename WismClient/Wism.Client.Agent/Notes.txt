@@ -8,10 +8,12 @@ is weaker. Also, consider adding ASCII shortcuts for common tasks (perhaps a rec
 moves that can be saved?).
 
 TODO List:
-* Complete port of TryMoveOnce
-* Add tests for Visiting Armies
+* Add integration tests for moving and attacking via commands
 * Implement turn-based system
 * Implement state machine
+
+BUGS:
+* AsciiView fails after attacking
 
 [State machine]
 The UI needs to drive states like Select Armies, Next, Move, Attack. The challenge is for the UI 

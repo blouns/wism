@@ -10,7 +10,7 @@ namespace Wism.Client.Agent
     {
         private object sync = new object();
 
-        private static int lastId;
+        private int lastId;
 
         // Key: CommandId, Value: Command
         private readonly SortedList<int, Command> commands;

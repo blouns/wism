@@ -16,11 +16,11 @@ namespace Wism.Client.Agent
                 if (army.Tile != tile)
                 {
                     throw new ArgumentException(
-                        $"Armies must originate from the same location. Expected: {tile}, Actual: {army.Tile} | {army}");
+                        $"Selected armies must originate from the same location. Expected: {tile}, Actual: {army.Tile} | {army}");
                 }
                 else if (army.IsDead)
                 {
-                    throw new InvalidOperationException($"Cannot move a dead army: {army}");
+                    throw new InvalidOperationException($"Cannot operate on a dead army: {army}");
                 }
             }
 #endif

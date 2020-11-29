@@ -78,11 +78,11 @@ namespace Wism.Client.Agent.InputProviders
         {
             // Move requires a select, move, unselect in this simple UI
             commandController.AddCommand(
-                new StartMovingCommand(armyController, armies));
+                new SelectArmyCommand(armyController, armies));
             commandController.AddCommand(
                 new MoveCommand(armyController, armies, x, y));
             commandController.AddCommand(
-                new StopMovingCommand(armyController, armies));
+                new DeselectArmyCommand(armyController, armies));
         }
     }
 }

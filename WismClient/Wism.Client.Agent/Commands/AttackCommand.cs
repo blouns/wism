@@ -29,9 +29,8 @@ namespace Wism.Client.Agent.Commands
             }
 
             // Attack successful; move into the location
-            armyController.StartMoving(Armies);
+            // TODO: Check game state to ensure attacking army is selected
             bool success = armyController.TryMove(Armies, World.Current.Map[X, Y]);
-            armyController.StopMoving(Armies);
 
             return success;
         }

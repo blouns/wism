@@ -1,14 +1,13 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Wism.Client.Agent.Controllers;
-using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Test.Common;
 
-namespace Wism.Client.Test
+namespace Wism.Client.Test.Unit
 {
     [TestFixture]
     public class ArmyTests
@@ -26,7 +25,7 @@ namespace Wism.Client.Test
         {
             Game.CreateDefaultGame();
             Game.Current.Players[0].HireHero(World.Current.Map[2, 2]);
-            armyController = CreateArmyController();
+            armyController = TestUtilities.CreateArmyController();
         }
 
         [Test]
@@ -438,7 +437,7 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void Move_SelectedArmyBasic()
+        public void Move_SelectedArmy_Basic()
         {
             // ASSEMBLE
             var player1 = Game.Current.Players[0];
@@ -463,7 +462,7 @@ namespace Wism.Client.Test
             };
             originalArmies.RemoveAt(4);
             originalArmies.RemoveAt(5);         
-            armyController.StartMoving(selectedArmies);
+            armyController.SelectArmy(selectedArmies);
 
             // ACT: Move the selected armies
             if (!TryMove(selectedArmies, Direction.North))
@@ -472,7 +471,7 @@ namespace Wism.Client.Test
             }
 
             // Deselect the armies
-            armyController.StopMoving(selectedArmies);
+            armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
@@ -487,7 +486,7 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void Move_SelectedArmyFail()
+        public void Move_SelectedArmy_BasicFail()
         {
             // ASSEMBLE
             var player1 = Game.Current.Players[0];
@@ -512,7 +511,7 @@ namespace Wism.Client.Test
             };
             originalArmies.RemoveAt(4);
             originalArmies.RemoveAt(5);
-            armyController.StartMoving(selectedArmies);
+            armyController.SelectArmy(selectedArmies);
 
             // ACT: Move the selected armies
             if (!TryMove(selectedArmies, Direction.North))
@@ -527,7 +526,7 @@ namespace Wism.Client.Test
             }
 
             // Deselect the armies
-            armyController.StopMoving(selectedArmies);
+            armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
@@ -539,6 +538,153 @@ namespace Wism.Client.Test
             Assert.AreEqual(originalArmies.Count, originalTile.Armies.Count, "Standing army does not have the expect number of armies.");
             Assert.AreEqual(originalTile.X, originalArmies[0].X, "Standing army did not stay as expected.");
             Assert.AreEqual(originalTile.Y, originalArmies[0].Y, "Standing army did not stay as expected.");
+        }
+
+        [Test]
+        public void Move_SelectedArmy_Merge()
+        {
+            // ASSEMBLE
+            var player1 = Game.Current.Players[0];
+
+            var originalTile = World.Current.Map[2, 2];
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
+            var originalArmies = new List<Army>(originalTile.Armies);
+
+            var mergeTile = World.Current.Map[2, 4];
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), mergeTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), mergeTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), mergeTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), mergeTile);
+            var mergeArmies = new List<Army>(mergeTile.Armies);
+
+            int expectedX = mergeArmies[0].X;
+            int expectedY = mergeArmies[0].Y;
+
+            // Select all armies from the original tile            
+            List<Army> selectedArmies = new List<Army>(originalTile.Armies);            
+            armyController.SelectArmy(selectedArmies);
+
+            // ACT
+            
+            // Move the selected armies one south
+            if (!TryMove(selectedArmies, Direction.South))
+            {
+                Assert.Fail("Could not move the army.");
+            }
+
+            // Move the selected armies one south onto merge armies
+            if (!TryMove(selectedArmies, Direction.South))
+            {
+                Assert.Fail("Could not move the army.");
+            }
+
+            // Deselect the armies
+            armyController.DeselectArmy(selectedArmies);
+
+            // ASSERT
+            var newTile = selectedArmies[0].Tile;
+            Assert.IsNull(newTile.VisitingArmies, "Visiting Army should not be set on new tile");
+            Assert.IsNull(originalTile.VisitingArmies, "Visiting Army should not be set on original tile");
+            Assert.AreEqual(selectedArmies.Count + mergeArmies.Count, newTile.Armies.Count, "Selected army does not have the expected number of armies.");
+            Assert.AreEqual(expectedX, newTile.X, "Selected armies did not move as expected.");
+            Assert.AreEqual(expectedY, newTile.Y, "Selected armies did not move as expected.");
+        }
+
+        [Test]
+        public void Move_SelectedArmy_PassThroughArmy()
+        {
+            // ASSEMBLE
+            var player1 = Game.Current.Players[0];
+
+            var originalTile = World.Current.Map[2, 2];
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
+            var originalArmies = new List<Army>(originalTile.Armies);
+
+            var mergeTile = World.Current.Map[2, 3];
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), mergeTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), mergeTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), mergeTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), mergeTile);
+            var mergeArmies = new List<Army>(mergeTile.Armies);
+
+            int expectedX = 2;
+            int expectedY = 4;
+
+            // Select all armies from the original tile            
+            armyController.SelectArmy(originalArmies);
+
+            // ACT
+
+            // Move the selected armies one south onto merge armies
+            if (!TryMove(originalArmies, Direction.South))
+            {
+                Assert.Fail("Could not move the army.");
+            }
+
+            // Move the selected armies one south away from merge armies
+            if (!TryMove(originalArmies, Direction.South))
+            {
+                Assert.Fail("Could not move the army.");
+            }
+
+            // Deselect the armies
+            armyController.DeselectArmy(originalArmies);
+
+            // ASSERT
+            var newTile = originalArmies[0].Tile;
+            Assert.IsNull(newTile.VisitingArmies, "Visiting Army should not be set on new tile");
+            Assert.IsNull(originalTile.VisitingArmies, "Visiting Army should not be set on original tile");
+            Assert.IsNull(mergeTile.VisitingArmies, "Visiting Army should not be set on merge tile");
+            Assert.AreEqual(originalArmies.Count, newTile.Armies.Count, "Selected army does not have the expected number of armies.");
+            Assert.AreEqual(expectedX, newTile.X, "Selected armies did not move as expected.");
+            Assert.AreEqual(expectedY, newTile.Y, "Selected armies did not move as expected.");
+        }
+
+        [Test]
+        public void Attack_SelectedArmy_DefeatEnemyStack()
+        {
+            // ASSEMBLE
+            var player1 = Game.Current.Players[0];
+            var player2 = Game.Current.Players[1];
+
+            var originalTile = World.Current.Map[2, 2];
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
+            var originalArmies = new List<Army>(originalTile.Armies);
+
+            var enemyTile = World.Current.Map[2, 3];
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            var enemyArmies = new List<Army>(enemyTile.Armies);
+
+            int expectedX = originalArmies[0].X;
+            int expectedY = originalArmies[0].Y;
+            int expectedHumanArmies = 3;
+            int expectedEnemyArmies = 0;
+
+            // Select all armies from the original tile            
+            List<Army> selectedArmies = new List<Army>(originalArmies);
+            armyController.SelectArmy(selectedArmies);
+
+            // ACT
+            // Attack: Should win but not advance
+            var result = armyController.TryAttack(selectedArmies, enemyTile);
+
+            // Deselect the armies
+            armyController.DeselectArmy(selectedArmies);
+
+            // ASSERT
+            var newTile = selectedArmies[0].Tile;
+            Assert.IsTrue(result, "Original army was defeated.");
+            Assert.AreEqual(3, selectedArmies.Count, "Selected army does not have the expected number of armies.");
+            Assert.IsNull(enemyTile.Armies, "Enemy army still exists.");
+            Assert.AreEqual(expectedX, originalArmies[0].X, "Selected armies moved unexpectedly.");
+            Assert.AreEqual(expectedY, originalArmies[0].Y, "Selected armies moved unexpectedly.");
+            enemyArmies.ForEach(e => Assert.IsTrue(e.IsDead, "Enemy is not dead."));
+            Assert.AreEqual(expectedHumanArmies, player1.GetArmies().Count, "Human player has incorrect army count.");
+            Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
         }
 
         #region Helper utility methods
@@ -555,13 +701,13 @@ namespace Wism.Client.Test
 
             TestContext.WriteLine("Trying to move {0} {1}; should succeed...", army.ToString(), directionName);
             var armies = new List<Army>() { army };
-            armyController.StartMoving(armies);
+            armyController.SelectArmy(armies);
             if (!TryMove(armies, direction))
             {
                 Assert.Fail(
                     String.Format("Unable to move {0} {1}.", army.ToString(), direction));
             }
-            armyController.StopMoving(armies);
+            armyController.DeselectArmy(armies);
 
             Tile newTile = army.Tile;
             Assert.AreNotEqual(originalTile, newTile, String.Format("{0} could not move to tile.", army.ToString()));
@@ -603,12 +749,7 @@ namespace Wism.Client.Test
             }
 
             throw new InvalidOperationException("Cannot find the hero in the world.");
-        }
-
-        private static ArmyController CreateArmyController()
-        {
-            return new ArmyController(TestUtilities.CreateLogFactory());
-        }
+        }        
 
         private bool TryMove(List<Army> armies, Direction direction)
         {
