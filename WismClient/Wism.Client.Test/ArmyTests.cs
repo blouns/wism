@@ -30,22 +30,29 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void StackViewingOrderTest()
+        public void StackViewingOrder_HeroOnlyTest()
         {
-
-            // Only hero
-            ResetForStackOrderTest(out Player player1, out Tile tile);
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             Assert.AreEqual(tile.Armies[0].ShortName, "Hero");
+        }
 
-            // Hero and one army of lesser strength
-            ResetForStackOrderTest(out player1, out tile);
+        [Test]
+        public void StackViewingOrder_HeroAndLesserArmyTest()
+        {
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
-            Assert.AreEqual("Hero", tile.Armies[0].ShortName);
+            Assert.AreEqual("Hero", tile.Armies[0].ShortName);           
+        }
 
-            // Hero and two armies of lesser strength
-            ResetForStackOrderTest(out player1, out tile);
+        [Test]
+        public void StackViewingOrder_HeroAndTwoLesserArmiesTest()
+        {
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
@@ -65,21 +72,21 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void StackBattleOrderOnlyHeroTest()
+        public void StackBattleOrder_OnlyHeroTest()
         {
-
-            // Only hero
-            ResetForStackOrderTest(out Player player1, out Tile tile);
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             tile.Armies.Sort(new ByArmyBattleOrder(tile));
             Assert.AreEqual("Hero", tile.Armies[0].ShortName);
         }
 
         [Test]
-        public void StackBattleOrderHeroAndWeakerArmyTest()
+        public void StackBattleOrder_HeroAndWeakerArmyTest()
         {
 
-            ResetForStackOrderTest(out Player player1, out Tile tile);
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2];
             Game.Current.Players[0].HireHero(World.Current.Map[2, 2]);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
 
@@ -89,11 +96,10 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void StackBattleOrderHeroAndTwoWeakerArmiesTest()
+        public void StackBattleOrder_HeroAndTwoWeakerArmiesTest()
         {
-
-            // Hero and two armies of lesser strength
-            ResetForStackOrderTest(out Player player1, out Tile tile);
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
@@ -105,11 +111,12 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void StackBattleOrderHeroAndSetOfArmiesTest()
+        public void StackBattleOrder_HeroAndSetOfArmiesTest()
         {
 
             // Hero and set of armies
-            ResetForStackOrderTest(out Player player1, out Tile tile);
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
@@ -123,11 +130,11 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void StackBattleOrderTwoHeroesTest()
+        public void StackBattleOrder_TwoHeroesTest()
         {
 
-            ResetForStackOrderTest(out Player player1, out Tile tile);
-            player1.HireHero(tile);
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2]; player1.HireHero(tile);
             player1.HireHero(tile);
 
             tile.Armies.Sort(new ByArmyBattleOrder(tile));
@@ -135,11 +142,10 @@ namespace Wism.Client.Test
             Assert.AreEqual("Hero", tile.Armies[1].ShortName);
         }
 
-        public void StackBattleOrderTwoHeroesAndSomeArmiesTest()
+        public void StackBattleOrder_TwoHeroesAndSomeArmiesTest()
         {
-
-            ResetForStackOrderTest(out Player player1, out Tile tile);
-            player1.HireHero(tile);
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2]; player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
@@ -159,11 +165,11 @@ namespace Wism.Client.Test
             Assert.AreEqual("LightInfantry", tile.Armies[0].ShortName, "Light infantry out of order");
         }
 
-        public void StackBattleOrderNoHeroesTest()
+        public void StackBattleOrder_NoHeroesTest()
         {
 
-            ResetForStackOrderTest(out Player player1, out Tile tile);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2]; player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
@@ -188,43 +194,38 @@ namespace Wism.Client.Test
             * - Navy
             */
 
-
-        private static void ResetForStackOrderTest(out Player player1, out Tile tile)
-        {
-            Game.CreateDefaultGame();
-            player1 = Game.Current.Players[0];
-            tile = World.Current.Map[2, 2];
-        }
-
         [Test]
-        public void HeroCanFlyWalkFloatTest()
+        public void Hero_CannotFlyFloatTest()
         {
+            // ASSEMBLE / ACT
             Army army = GetFirstHero();
 
+            // ASSERT
             Assert.IsTrue(army.CanWalk, "Hero cannot walk. Broken leg?");
             Assert.IsFalse(army.CanFloat, "Hero learned how to swim!");
             Assert.IsFalse(army.CanFly, "Heros can fly!? Crazy talk.");
-
         }
 
         [Test]
-        public void MoveHeroToMeadowTest()
+        public void Move_HeroToMeadowTest()
         {
+            // ASSEMBLE
             Army hero = GetFirstHero();
-            Assert.IsNotNull(hero, "Could not find the hero.");
             List<Army> armies = new List<Army>() { hero };
 
+            // ACT / ASSERT
             MoveArmyPass(hero, Direction.North);
             if (!TryMove(armies, Direction.North))
                 Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
         }        
 
         [Test]
-        public void MoveHeroToMountainTest()
+        public void Move_HeroToMountainTest()
         {
+            // ASSEMBLE
             Army hero = GetFirstHero();
-            Assert.IsNotNull(hero, "Could not find the hero.");
-
+            
+            // ACT / ASSERT
             // Walk into meadow
             MoveArmyPass(hero, Direction.East);
             Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
@@ -239,10 +240,12 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void MoveHeroToCoastTest()
+        public void Move_HeroToCoastTest()
         {
+            // ASSEMBLE
             Army hero = GetFirstHero();
-            Assert.IsNotNull(hero, "Could not find the hero.");
+
+            // ACT / ASSERT
 
             // Move north to meadow
             MoveArmyPass(hero, Direction.North);
@@ -256,11 +259,11 @@ namespace Wism.Client.Test
         [Test]
         public void MoveNorthThenSouth()
         {
-            Army hero = GetFirstHero();
-            Assert.IsNotNull(hero, "Could not find the hero.");
-
+            // ASSEMBLE
+            Army hero = GetFirstHero();            
             Tile originalTile = hero.Tile;
 
+            // ACT / ASSERT
             MoveArmyPass(hero, Direction.North);
             Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
 
@@ -271,13 +274,13 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void MoveSouthThenNorth()
+        public void Move_SouthThenNorth()
         {
+            // ASSEMBLE
             Army hero = GetFirstHero();
-            Assert.IsNotNull(hero, "Could not find the hero.");
-
             Tile originalTile = hero.Tile;
 
+            // ACT / ASSERT
             MoveArmyPass(hero, Direction.South);
             Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
 
@@ -288,13 +291,13 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void MoveWestThenEast()
+        public void Move_WestThenEast()
         {
+            // ASSEMBLE
             Army hero = GetFirstHero();
-            Assert.IsNotNull(hero, "Could not find the hero.");
-
             Tile originalTile = hero.Tile;
 
+            // ACT / ASSERT
             MoveArmyPass(hero, Direction.West);
             Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
 
@@ -305,12 +308,13 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void MoveEastThenWest()
+        public void Move_EastThenWest()
         {
+            // ASSEMBLE
             Army hero = GetFirstHero();
-
             Tile originalTile = hero.Tile;
 
+            // ACT / ASSERT
             MoveArmyPass(hero, Direction.West);
             Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
 
@@ -321,8 +325,9 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void MoveHeroMountainPathTest()
+        public void Move_HeroMountainPathTest()
         {
+            // ASSEMBLE
             string[,] matrix = new string[,]
             {
                 { "1", "1", "1", "1", "1", "1" },
@@ -334,8 +339,9 @@ namespace Wism.Client.Test
             };
 
             World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out List<Army> armies, out Tile target));
-
             int expectedCount = 6;
+
+            // ACT / ASSERT
             IList<Tile> path = null;
             while (armyController.TryMoveOneStep(armies, target, ref path, out _))
             {
@@ -346,8 +352,9 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void MoveHeroWaterPathTest()
+        public void Move_HeroWaterPathTest()
         {
+            // ASSEMBLE
             string[,] matrix = new string[,]
             {
                 { "1", "1", "1", "1", "1", "1" },
@@ -359,8 +366,9 @@ namespace Wism.Client.Test
             };
 
             World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out List<Army> armies, out Tile target));
-
             int expectedCount = 6;
+
+            // ACT / ASSERT
             IList<Tile> path = null;
             while (armyController.TryMoveOneStep(armies, target, ref path, out _))
             {
@@ -369,8 +377,9 @@ namespace Wism.Client.Test
         }
 
         [Test]
-        public void MovementCostBasicTest()
+        public void MovementCost_BasicTest()
         {
+            // ASSEMBLE
             string[,] matrix = new string[,]
             {
                 { "1", "1", "1", "1", "1", "1" },
@@ -387,18 +396,21 @@ namespace Wism.Client.Test
             const int initialMoves = 10;
             armies[0].MovesRemaining = initialMoves;
 
+            // ACT
             IList<Tile> path = null;
             while (armyController.TryMoveOneStep(armies, target, ref path, out _))
             {
                 // do nothing
             }
 
+            // ASSERT
             Assert.AreEqual(initialMoves - expectedCost, armies[0].MovesRemaining, "Mismatch on the number of expected moves remaining.");
         }
 
         [Test]
-        public void MovementCostNoMovesRemainingTest()
+        public void MovementCost_NoMovesRemainingTest()
         {
+            // ASSEMBLE
             string[,] matrix = new string[,]
             {
                 { "1", "1", "1", "1", "1", "1" },
@@ -414,97 +426,119 @@ namespace Wism.Client.Test
             const int initialMoves = 6;
             armies[0].MovesRemaining = initialMoves;
 
+            // ACT
             IList<Tile> path = null;
             while (armyController.TryMoveOneStep(armies, target, ref path, out _))
             {
                 // do nothing
             }
 
+            // ASSERT
             Assert.AreEqual(0, armies[0].MovesRemaining, "Mismatch on the number of expected moves remaining.");
         }
 
         [Test]
-        public void MoveSelectedArmyBasic()
+        public void Move_SelectedArmyBasic()
         {
-            throw new NotImplementedException();
+            // ASSEMBLE
+            var player1 = Game.Current.Players[0];
+            var originalTile = World.Current.Map[2, 2];
+
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), originalTile);
             
-            //StackOrderReset(out Player player1, out _, out Tile tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
+            var originalArmies = new List<Army>(originalTile.Armies);
+            int expectedX = originalArmies[0].X;
+            int expectedY = originalArmies[0].Y - 1;
 
-            //List<Army> allArmies = player1.GetArmies();
-            //Army originalArmy = allArmies[0];
+            // Select two armies from the tile            
+            List<Army> selectedArmies = new List<Army>
+            {
+                originalTile.Armies[4],
+                originalTile.Armies[5]
+            };
+            originalArmies.RemoveAt(4);
+            originalArmies.RemoveAt(5);         
+            armyController.StartMoving(selectedArmies);
 
-            //// Select two armies from the army            
-            //List<Army> selectedArmys = new List<Army>
-            //{
-            //    originalArmy.GetArmyAt(4),
-            //    originalArmy.GetArmyAt(5)
-            //};
-            //Army selectedArmy = originalArmy.Split(selectedArmys);
+            // ACT: Move the selected armies
+            if (!TryMove(selectedArmies, Direction.North))
+            {
+                Assert.Fail("Could not move the army.");
+            }
 
-            //// Move the selected armies
-            //if (!selectedArmy.TryMove(Direction.North))
-            //{
-            //    Assert.Fail("Could not move the army.");
-            //}
+            // Deselect the armies
+            armyController.StopMoving(selectedArmies);
 
-            //Assert.IsNotNull(selectedArmy.Tile.Army, "Army should be set on new tile");
-            //Assert.IsNotNull(selectedArmy.Tile.Army.Tile, "Army's tile should be set on new tile");
-            //Assert.AreEqual(2, selectedArmy.Size, "Selected army does not have the expected number of armies.");
-            //Assert.AreEqual(4, originalArmy.Size, "Standing army does not have the expect number of armies.");
-            //Assert.AreEqual(new Coordinates(tile.Coordinates.X, tile.Coordinates.Y - 1), selectedArmy.GetCoordinates(), "Selected armies did not move as expected.");
-            //Assert.AreEqual(tile.Coordinates, originalArmy.GetCoordinates(), "Standing army did not stay as expected.");
+            // ASSERT
+            var newTile = selectedArmies[0].Tile;
+            Assert.IsNotNull(newTile.Armies, "Army should be set on new tile");
+            Assert.IsNotNull(newTile.Armies[0].Tile, "Army's tile should be set on new tile");
+            Assert.AreEqual(selectedArmies.Count, newTile.Armies.Count, "Selected army does not have the expected number of armies.");
+            Assert.AreEqual(originalArmies.Count, originalTile.Armies.Count, "Standing army does not have the expect number of armies.");
+            Assert.AreEqual(expectedX, newTile.X, "Selected armies did not move as expected.");
+            Assert.AreEqual(expectedY, newTile.Y, "Selected armies did not move as expected.");
+            Assert.AreEqual(originalTile.X, originalArmies[0].X, "Standing army did not stay as expected.");
+            Assert.AreEqual(originalTile.Y, originalArmies[0].Y, "Standing army did not stay as expected.");
         }
 
         [Test]
-        public void MoveSelectedArmyFail()
+        public void Move_SelectedArmyFail()
         {
-            throw new NotImplementedException();
+            // ASSEMBLE
+            var player1 = Game.Current.Players[0];
+            var originalTile = World.Current.Map[2, 2];
 
-            //StackOrderReset(out Player player1, out _, out Tile tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
-            //player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), originalTile);
+            
+            var originalArmies = new List<Army>(originalTile.Armies);
+            int expectedX = originalArmies[0].X;
+            int expectedY = originalArmies[0].Y - 1;
 
-            //List<Army> allArmies = player1.GetArmies();
-            //Army originalArmy = allArmies[0];
+            // Select two armies from the tile            
+            List<Army> selectedArmies = new List<Army>
+            {
+                originalTile.Armies[4],
+                originalTile.Armies[5]
+            };
+            originalArmies.RemoveAt(4);
+            originalArmies.RemoveAt(5);
+            armyController.StartMoving(selectedArmies);
 
-            //// Select two armies from the army            
-            //List<Army> selectedArmys = new List<Army>
-            //{
-            //    originalArmy.GetArmyAt(4),
-            //    originalArmy.GetArmyAt(5)
-            //};
-            //Army selectedArmy = originalArmy.Split(selectedArmys);
+            // ACT: Move the selected armies
+            if (!TryMove(selectedArmies, Direction.North))
+            {
+                Assert.Fail("Could not move the army.");
+            }
 
-            //// Move the selected armies
-            //if (!selectedArmy.TryMove(Direction.North))
-            //{
-            //    Assert.Fail("Could not move the army.");
-            //}
-            //Coordinates finalCoordinates = selectedArmy.GetCoordinates();
+            // Attempt to move into the mountains (should fail)
+            if (TryMove(selectedArmies, Direction.North))
+            {
+                Assert.Fail("Could not move the army.");
+            }
 
-            //// Attempt to move into mountains
-            //if (selectedArmy.TryMove(Direction.North))
-            //{
-            //    Assert.Fail("Army unexpectedly moved into mountains!");
-            //}
+            // Deselect the armies
+            armyController.StopMoving(selectedArmies);
 
-            //Assert.AreEqual(finalCoordinates, selectedArmy.GetCoordinates(), "Army is not in the expected position.");
-            //Assert.IsNotNull(selectedArmy.Tile.Army, "Army should be set on new tile");
-            //Assert.IsNotNull(selectedArmy.Tile.Army.Tile, "Army's tile should be set on new tile");
-            //Assert.AreEqual(2, selectedArmy.Size, "Selected army does not have the expected number of armies.");
-            //Assert.AreEqual(4, originalArmy.Size, "Standing army does not have the expect number of armies.");
-            //Assert.AreEqual(new Coordinates(tile.Coordinates.X, tile.Coordinates.Y - 1), selectedArmy.GetCoordinates(), "Selected armies did not move as expected.");
-            //Assert.AreEqual(tile.Coordinates, originalArmy.GetCoordinates(), "Standing army did not stay as expected.");
+            // ASSERT
+            var newTile = selectedArmies[0].Tile;
+            Assert.AreEqual(expectedX, newTile.X, "Army is not in the expected position.");
+            Assert.AreEqual(expectedY, newTile.Y, "Army is not in the expected position.");
+            Assert.IsNotNull(newTile.Armies, "Army should be set on new tile");
+            Assert.IsNotNull(newTile.Armies[0].Tile, "Army's tile should be set on new tile");
+            Assert.AreEqual(selectedArmies.Count, newTile.Armies.Count, "Selected army does not have the expected number of armies.");
+            Assert.AreEqual(originalArmies.Count, originalTile.Armies.Count, "Standing army does not have the expect number of armies.");
+            Assert.AreEqual(originalTile.X, originalArmies[0].X, "Standing army did not stay as expected.");
+            Assert.AreEqual(originalTile.Y, originalArmies[0].Y, "Standing army did not stay as expected.");
         }
 
         #region Helper utility methods
