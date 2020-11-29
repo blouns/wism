@@ -135,5 +135,10 @@ namespace Wism.Client.Core
 
             return tile;
         }
+
+        public override string ToString()
+        {
+            return this.Clan.ToString();
+        }
     }
 }

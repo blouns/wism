@@ -80,13 +80,13 @@ namespace Wism.Client.Agent
                     services.AddSingleton<IConfigurationRoot>(configuration);
 
 
-                    // Add logging                    
-                    services.AddSingleton(LoggerFactory.Create(builder =>
-                    {
-                        builder.AddSerilog(dispose: true);
-                        builder.AddConfiguration(configuration);
-                    }));
-                    services.AddLogging();
+                    //// Add logging                    
+                    //services.AddSingleton(LoggerFactory.Create(builder =>
+                    //{
+                    //    builder.AddSerilog(dispose: true);
+                    //    builder.AddConfiguration(configuration);
+                    //}));
+                    //services.AddLogging();
 
                     // Add database
                     services.AddSingleton<IWismClientRepository, WismClientInMemoryRepository>(provider =>
@@ -114,6 +114,9 @@ namespace Wism.Client.Agent
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<ArmyController>(),
                             provider.GetService<CommandController>()));
-                });
+                })
+                .UseSerilog((hostingContext, loggerConfig) =>
+                    loggerConfig.ReadFrom.Configuration(hostingContext.Configuration)
+                );
     }
 }

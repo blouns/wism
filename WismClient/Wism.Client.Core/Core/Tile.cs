@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Core
@@ -90,12 +91,14 @@ namespace Wism.Client.Core
 
         public override string ToString()
         {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"({X},{Y}):{Terrain}");
             if (HasArmies())
-                return Armies[0].ToString();
-            else if (Terrain != null)
-                return Terrain.ToString();
-            else
-                return base.ToString();
+            {
+                sb.Append($"[{Armies.Count}:{Armies[0]}]");
+            }
+
+            return sb.ToString();
         }
 
         public void AddArmy(Army army)

@@ -132,7 +132,7 @@ namespace Wism.Client.Test
         [Test]
         public void AttackUntilLoseTest()
         {
-            World.CreateDefaultWorld();
+            Game.CreateDefaultGame();
             Game.Current.Random = new Random(1990);
             Player player1 = Game.Current.Players[0];
             Tile tile = World.Current.Map[2, 2];
@@ -151,7 +151,7 @@ namespace Wism.Client.Test
             player2.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player2.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
 
-            List<Army> attackers = Game.Current.Players[0].GetArmies();
+            List<Army> attackers = player1.GetArmies();
             IWarStrategy war = new DefaultWarStrategy();
 
             while (attackers.Count > 0 && tile.Armies.Count> 0)

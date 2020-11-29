@@ -149,14 +149,14 @@ namespace Wism.Client.War
                 // Current attacker won
                 Log.WriteLine(Log.TraceLevel.Information, "Current attacker won.");
                 currentDefender.Kill();
-                //defenders.Remove(currentDefender);
+                defenders.Remove(currentDefender);
             }
             else
             {
                 // Current attacker lost
                 Log.WriteLine(Log.TraceLevel.Information, "Current attacker lost.");
                 currentAttacker.Kill();
-                //attackers.Remove(currentAttacker);
+                attackers.Remove(currentAttacker);
             }
 
             return attackSucceeded;

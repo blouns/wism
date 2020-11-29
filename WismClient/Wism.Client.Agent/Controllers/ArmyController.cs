@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
@@ -42,12 +43,13 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(armiesToMove));
             }
 
-            VerifyArmiesStillAlive(armiesToMove);
+            ArmyUtilities.VerifyArmies(logger, armiesToMove);
 
             // Can we traverse in that terrain?            
             if (!armiesToMove.TrueForAll(
                 army => targetTile.CanTraverseHere(army)))
             {
+                logger.LogInformation($"{ArmiesToString(armiesToMove)} cannot traverse {targetTile}");
                 return false;
             }
 
@@ -56,6 +58,7 @@ namespace Wism.Client.Agent.Controllers
             // TODO: Shouldn't this check the entire path instead of target tile?
             if (armiesToMove.Any<Army>(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
             {
+                logger.LogInformation($"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");
                 return false;
             }
             
@@ -65,6 +68,7 @@ namespace Wism.Client.Agent.Controllers
                 if ((targetTile.Armies[0].Clan == armiesToMove[0].Clan) &&
                     (!targetTile.HasRoom(armiesToMove.Count)))
                 {
+                    logger.LogInformation($"{targetTile} has too many units to move there");
                     return false;
                 }
 
@@ -72,6 +76,8 @@ namespace Wism.Client.Agent.Controllers
                 if ((targetTile.HasArmies()) &&
                     (targetTile.Armies[0].Clan != armiesToMove[0].Clan))
                 {
+                    logger.LogInformation(
+                        $"Army cannot move {ArmiesToString(armiesToMove)} to {targetTile} as it occupied by {targetTile.Armies[0].Clan}");
                     return false;
                 }
             }
@@ -93,20 +99,17 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(armies));
             }
 
-            VerifyArmiesStillAlive(armies);
+            ArmyUtilities.VerifyArmies(logger, armies);
 
-            var tile = armies[0].Tile;
-            if (!armies.TrueForAll(a => a.Tile == tile))
-            {
-                throw new ArgumentException("All armies must originate from the same location.");
-            }
-
+            Tile tile = armies[0].Tile;
             if (tile.HasVisitingArmies())
             {
-                throw new InvalidOperationException("Tile already has visiting armies.");
+                throw new InvalidOperationException(
+                    $"Tile already has visiting armies: {ArmiesToString(tile.VisitingArmies)}");
             }
 
             // Move selected armies to Visiting Armies
+            logger.LogInformation($"Preparing to move: {ArmiesToString(armies)}");
             tile.VisitingArmies = new List<Army>(armies);
             foreach (Army army in armies)
             {
@@ -135,15 +138,9 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(armies));
             }
 
-            VerifyArmiesStillAlive(armies);
+            ArmyUtilities.VerifyArmies(logger, armies);
 
-            var tile = armies[0].Tile;
-            if (!armies.TrueForAll(a => a.Tile == tile))
-            {
-                throw new ArgumentException("All armies must originate from the same location.");
-            }
-
-            tile.CommitVisitingArmies();
+            armies[0].Tile.CommitVisitingArmies();
         }
 
         /// <summary>
@@ -164,19 +161,13 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
-            VerifyArmiesStillAlive(armiesToAttackWith);
+            ArmyUtilities.VerifyArmies(logger, armiesToAttackWith);
 
-            var tile = armiesToAttackWith[0].Tile;
-            if (!armiesToAttackWith.TrueForAll(a => a.Tile == tile))
-            {
-                throw new ArgumentException("All attacking armies must originate from the same location.");
-            }
-
+            logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile}");
             var war = Game.Current.WarStrategy;
             return war.Attack(armiesToAttackWith, targetTile);            
         }
 
-        // TODO: Incorporate the "Visiting Armies" slot
         private void MoveSelectedArmies(List<Army> armiesToMove, Tile targetTile)
         {
             Tile originatingTile = armiesToMove[0].Tile;
@@ -185,7 +176,9 @@ namespace Wism.Client.Agent.Controllers
             armiesToMove.ForEach(a =>
             {
                 a.Tile = targetTile;
-                a.MovesRemaining -= targetTile.Terrain.MovementCost;   // TODO: Account for bonuses
+
+                // TODO: Account for bonuses
+                a.MovesRemaining -= targetTile.Terrain.MovementCost;   
             });
 
             targetTile.VisitingArmies.Sort(new ByArmyViewingOrder());
@@ -196,14 +189,11 @@ namespace Wism.Client.Agent.Controllers
         private static void RemoveArmiesFromOrginatingTile(List<Army> armiesToRemove, Tile originatingTile)
         {
             originatingTile.VisitingArmies = null;
-        }
+        }        
 
-        private static void VerifyArmiesStillAlive(List<Army> armies)
+        private static string ArmiesToString(List<Army> armies)
         {
-            if (armies.Any<Army>(army => army.IsDead))
-            {
-                throw new InvalidOperationException("Cannot move a dead army!");
-            }
+            return $"Armies[{armies.Count}:{armies[0]}]";
         }
     }
 }
