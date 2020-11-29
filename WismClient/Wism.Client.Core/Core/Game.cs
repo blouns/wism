@@ -11,6 +11,8 @@ namespace Wism.Client.Core
 
         public const int DefaultRandomSeed = 1990;
 
+        private int currentPlayerIndex;
+
         public World World { get; set; }
 
         public List<Player> Players { get; set; }
@@ -32,6 +34,44 @@ namespace Wism.Client.Core
             }
         }
 
+        public Player GetCurrentPlayer()
+        {
+            if (Players == null || Players.Count == 0)
+            {
+                throw new InvalidOperationException("Players have not been initialized.");
+            }
+
+            return Players[currentPlayerIndex];
+        }
+
+        /// <summary>
+        /// End the players turn.
+        /// </summary>
+        /// <remarks>
+        /// Resets moves, triggers production, and allows for other clans 
+        /// to complete their turns.
+        /// </remarks>
+        public bool EndTurn(Player player)
+        {
+            if (Players == null || Players.Count == 0)
+            {
+                throw new InvalidOperationException("Players have not been initialized.");
+            }
+
+            if (player != Players[currentPlayerIndex])
+            {
+                return false;
+            }
+
+            // End current players turn
+            Players[currentPlayerIndex].EndTurn();
+
+            // Set next players turn
+            currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
+
+            return true;
+        }
+
         public static void CreateDefaultPlayers()
         {
             // Default two players for now
@@ -44,6 +84,8 @@ namespace Wism.Client.Core
             clan = Clan.Create(clanInfo);
             Player player2 = Player.Create(clan);
             Current.Players.Add(player2);
+
+            Game.Current.currentPlayerIndex = 0;
         }
 
         public static void CreateDefaultGame()

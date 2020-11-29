@@ -25,16 +25,21 @@ namespace Wism.Client.Test.Common
             
             if (repo == null)
             {
-                var commands = new SortedList<int, Command>();
+                var commands = new SortedList<int, ArmyCommand>();
                 repo = new WismClientInMemoryRepository(commands);
             }
 
-            return new CommandController(TestUtilities.CreateLogFactory(), repo);
+            return new CommandController(CreateLogFactory(), repo);
         }
 
         public static ArmyController CreateArmyController()
         {
-            return new ArmyController(TestUtilities.CreateLogFactory());
+            return new ArmyController(CreateLogFactory());
+        }
+
+        public static GameController CreateGameController()
+        {
+            return new GameController(CreateLogFactory());
         }
     }
 }

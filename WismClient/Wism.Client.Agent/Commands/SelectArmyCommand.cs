@@ -4,14 +4,11 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands
 {
-    public class SelectArmyCommand : Command
+    public class SelectArmyCommand : ArmyCommand
     {
-        private readonly ArmyController armyController;
-
         public SelectArmyCommand(ArmyController armyController, List<Army> armies)
-            : base(armies)
+            : base(armyController, armies)
         {
-            this.armyController = armyController;
         }
 
         public override bool Execute()

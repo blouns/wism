@@ -2,13 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
 using Wism.Client.Pathing;
-using Wism.Client.War;
 
 namespace Wism.Client.Agent.Controllers
 {
@@ -23,7 +19,7 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
-            this.logger = loggerFactory.CreateLogger<CommandController>();
+            this.logger = loggerFactory.CreateLogger<ArmyController>();
         }
 
         /// <summary>

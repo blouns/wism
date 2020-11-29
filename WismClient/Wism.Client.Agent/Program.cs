@@ -90,7 +90,7 @@ namespace Wism.Client.Agent
 
                     // Add database
                     services.AddSingleton<IWismClientRepository, WismClientInMemoryRepository>(provider =>
-                        new WismClientInMemoryRepository(new SortedList<int, Command>())
+                        new WismClientInMemoryRepository(new SortedList<int, ArmyCommand>())
                     );
 
                     // Add controllers
@@ -101,14 +101,17 @@ namespace Wism.Client.Agent
                     services.AddSingleton<ArmyController>(provider =>
                         new ArmyController(
                                 provider.GetService<ILoggerFactory>()));
+                    services.AddSingleton<GameController>(provider =>
+                        new GameController(
+                                provider.GetService<ILoggerFactory>()));
 
-                    // Add command provider agent
+                    // Add command agent
                     services.AddSingleton<IHostedService>(provider =>
                         new WismAgent(
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<CommandController>()));
 
-                    // Add command consumer view
+                    // Add view
                     services.AddTransient<ViewBase, AsciiView>(provider =>
                         new AsciiView(
                             provider.GetService<ILoggerFactory>(),

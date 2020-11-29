@@ -1,23 +1,20 @@
-﻿using System.Collections.Generic;
-using Wism.Client.Core;
-using Wism.Client.MapObjects;
+﻿using Wism.Client.Core;
 
 namespace Wism.Client.Agent.Commands
 {
     public abstract class Command : IAction
     {
-        private Player player;
-
         public int Id { get; set; }
 
-        public Player Player { get => player; }
+        public Player Player { get; set; }
 
-        public List<Army> Armies { get; set; }
-
-        public Command(List<Army> armies)
+        public Command()
         {
-            Armies = armies ?? throw new System.ArgumentNullException(nameof(armies));
-            this.player = Armies[0].Player;
+        }
+
+        public Command(Player player)
+        {
+            Player = player ?? throw new System.ArgumentNullException(nameof(player));
         }
 
         public abstract bool Execute();

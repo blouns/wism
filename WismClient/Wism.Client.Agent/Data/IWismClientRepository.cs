@@ -6,19 +6,19 @@ namespace Wism.Client.Agent
 {
     public interface IWismClientRepository
     {
-        void AddCommand(Command command);
+        void AddCommand(ArmyCommand command);
 
-        void DeleteCommand(Command command);
+        void DeleteCommand(ArmyCommand command);
 
-        Task<Command> GetCommandAsync(int commandId);
+        Task<ArmyCommand> GetCommandAsync(int commandId);
 
-        Task<List<Command>> GetCommandsAsync();
+        Task<List<ArmyCommand>> GetCommandsAsync();
 
-        Task<List<Command>> GetCommandsAfterIdAsync(int commandId);
+        Task<List<ArmyCommand>> GetCommandsAfterIdAsync(int commandId);
 
         bool Save();
 
-        Command UpdateCommand(Command command);
+        ArmyCommand UpdateCommand(ArmyCommand command);
 
         Task<bool> CommandExistsAsync(int commandId);
     }

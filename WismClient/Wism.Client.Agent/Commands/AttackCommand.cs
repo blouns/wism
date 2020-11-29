@@ -6,17 +6,14 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands
 {
-    public class AttackCommand : Command
+    public class AttackCommand : ArmyCommand
     {
-        private readonly ArmyController armyController;
-
         public int X { get; set; }
         public int Y { get; set; }
 
         public AttackCommand(ArmyController armyController, List<Army> armies, int x, int y)
-            : base(armies)
+            : base(armyController, armies)
         {
-            this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
             this.X = x;
             this.Y = y;
         }
