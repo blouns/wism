@@ -21,7 +21,7 @@ namespace Wism.Client.Test.Unit
             Player player2 = Game.Current.Players[1];
 
             // Act
-            gameController.EndTurn(player1);
+            gameController.EndTurn();
 
             // Assert
             Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(), 
@@ -38,28 +38,12 @@ namespace Wism.Client.Test.Unit
             Player player2 = Game.Current.Players[1];
 
             // Act
-            gameController.EndTurn(player1);
-            gameController.EndTurn(player2);
+            gameController.EndTurn();
+            gameController.EndTurn();
 
             // Assert
             Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(), 
                 "Current player is incorrect.");
-        }
-
-        [Test]
-        public void EndTurn_WrongPlayerTest()
-        {
-            // Assemble
-            GameController gameController = TestUtilities.CreateGameController();
-            Game.CreateDefaultGame();
-            Player player1 = Game.Current.Players[0];
-            Player player2 = Game.Current.Players[1];
-
-            // Act
-            bool success = gameController.EndTurn(player2);
-
-            // Assert
-            Assert.IsFalse(success, "Turn was ended using incorrect player.");
         }
     }
 }

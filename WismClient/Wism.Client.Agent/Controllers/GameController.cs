@@ -20,10 +20,12 @@ namespace Wism.Client.Agent.Controllers
             this.logger = loggerFactory.CreateLogger<GameController>();
         }
 
-        public bool EndTurn(Player player)
+        public bool EndTurn()
         {
-            logger.LogInformation($"{player} has ended their turn.");
-            return Game.Current.EndTurn(player);
+            logger.LogInformation(
+                $"{Game.Current.GetCurrentPlayer()} has ended their turn.");
+            
+            return Game.Current.EndTurn();
         }
     }
 }

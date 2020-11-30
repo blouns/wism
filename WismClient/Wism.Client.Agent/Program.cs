@@ -90,7 +90,7 @@ namespace Wism.Client.Agent
 
                     // Add database
                     services.AddSingleton<IWismClientRepository, WismClientInMemoryRepository>(provider =>
-                        new WismClientInMemoryRepository(new SortedList<int, ArmyCommand>())
+                        new WismClientInMemoryRepository(new SortedList<int, Command>())
                     );
 
                     // Add controllers

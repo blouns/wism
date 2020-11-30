@@ -13,14 +13,14 @@ namespace Wism.Client.Agent
         private int lastId;
 
         // Key: CommandId, Value: Command
-        private readonly SortedList<int, ArmyCommand> commands;
+        private readonly SortedList<int, Command> commands;
 
-        public WismClientInMemoryRepository(SortedList<int, ArmyCommand> commands)
+        public WismClientInMemoryRepository(SortedList<int, Command> commands)
         {
             this.commands = commands ?? throw new ArgumentNullException(nameof(commands));
         }
 
-        public void AddCommand(ArmyCommand command)
+        public void AddCommand(Command command)
         {
             if (command is null)
             {
@@ -46,7 +46,7 @@ namespace Wism.Client.Agent
             });
         }
 
-        public void DeleteCommand(ArmyCommand command)
+        public void DeleteCommand(Command command)
         {
             if (command is null)
             {
@@ -59,10 +59,10 @@ namespace Wism.Client.Agent
             }
         }
 
-        public async Task<ArmyCommand> GetCommandAsync(int commandId)
+        public async Task<Command> GetCommandAsync(int commandId)
         {
-            ArmyCommand commandToReturn = null;
-            return await Task<ArmyCommand>.Run(() =>
+            Command commandToReturn = null;
+            return await Task<Command>.Run(() =>
             {
                 lock (sync)
                 {
@@ -74,12 +74,12 @@ namespace Wism.Client.Agent
             });
         }
 
-        public async Task<List<ArmyCommand>> GetCommandsAfterIdAsync(int lastSeenCommandId)
+        public async Task<List<Command>> GetCommandsAfterIdAsync(int lastSeenCommandId)
         {
-            List<ArmyCommand> commandsToReturn = new List<ArmyCommand>();
-            IEnumerable<KeyValuePair<int, ArmyCommand>> sortedCommands;
+            List<Command> commandsToReturn = new List<Command>();
+            IEnumerable<KeyValuePair<int, Command>> sortedCommands;
 
-            return await Task<List<ArmyCommand>>.Run(() =>
+            return await Task<List<Command>>.Run(() =>
             {
                 lock (sync)
                 {
@@ -95,13 +95,13 @@ namespace Wism.Client.Agent
             });
         }
 
-        public async Task<List<ArmyCommand>> GetCommandsAsync()
+        public async Task<List<Command>> GetCommandsAsync()
         {
-            return await Task<List<ArmyCommand>>.Run(() =>
+            return await Task<List<Command>>.Run(() =>
             {
                 lock (sync)
                 {
-                    return commands.Values.ToList<ArmyCommand>();
+                    return commands.Values.ToList<Command>();
                 }
             });
         }
@@ -112,7 +112,7 @@ namespace Wism.Client.Agent
             return true;
         }
 
-        public ArmyCommand UpdateCommand(ArmyCommand command)
+        public Command UpdateCommand(Command command)
         {
             // Do nothing
             return command;

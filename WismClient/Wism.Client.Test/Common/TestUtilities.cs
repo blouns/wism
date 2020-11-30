@@ -25,7 +25,7 @@ namespace Wism.Client.Test.Common
             
             if (repo == null)
             {
-                var commands = new SortedList<int, ArmyCommand>();
+                var commands = new SortedList<int, Command>();
                 repo = new WismClientInMemoryRepository(commands);
             }
 

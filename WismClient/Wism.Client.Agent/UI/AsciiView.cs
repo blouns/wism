@@ -71,7 +71,7 @@ namespace Wism.Client.Agent
         {
             Player humanPlayer = Game.Current.Players[0];
 
-            foreach (ArmyCommand command in commandController.GetCommandsAfterId(lastId))
+            foreach (Command command in commandController.GetCommandsAfterId(lastId))
             {
                 lastId = command.Id;
 

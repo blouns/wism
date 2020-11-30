@@ -22,7 +22,7 @@ namespace Wism.Client.Test.Unit
         public void AddCommand_ArmyMoveCommand_CommandAdded()
         {
             // Arrange
-            var commands = new SortedList<int, ArmyCommand>();
+            var commands = new SortedList<int, Command>();
             var repo = new WismClientInMemoryRepository(commands);
             var commandController = TestUtilities.CreateCommandController(repo);
             var armyController = TestUtilities.CreateArmyController();
@@ -34,7 +34,7 @@ namespace Wism.Client.Test.Unit
                 new MoveCommand(armyController, armies, 3, 4));
 
             // Assert
-            ArmyCommand command = repo.GetCommandAsync(1).Result;
+            Command command = repo.GetCommandAsync(1).Result;
             Assert.IsTrue(command is MoveCommand, "Command was not a MoveCommand.");
             MoveCommand moveCommand = command as MoveCommand;
             Assert.AreEqual(3, moveCommand.X);
@@ -45,7 +45,7 @@ namespace Wism.Client.Test.Unit
         public void GetCommands_MixedCommandTypes_GetThreeMixedCommands()
         {
             // Arrange
-            var repoCommands = new SortedList<int, ArmyCommand>();
+            var repoCommands = new SortedList<int, Command>();
             var repo = new WismClientInMemoryRepository(repoCommands);
             var commandController = TestUtilities.CreateCommandController(repo);
             var armyController = TestUtilities.CreateArmyController();
@@ -58,7 +58,7 @@ namespace Wism.Client.Test.Unit
             repo.Save();           
 
             // Act
-            var commands = new List<ArmyCommand>(commandController.GetCommands());
+            var commands = new List<Command>(commandController.GetCommands());
 
             // Assert
             Assert.AreEqual(3, commands.Count);
@@ -77,7 +77,7 @@ namespace Wism.Client.Test.Unit
         public void GetCommandsAfterId_GetCommandsNotYetSeen_LatestCommands()
         {
             // Arrange
-            var repoCommands = new SortedList<int, ArmyCommand>();
+            var repoCommands = new SortedList<int, Command>();
             var repo = new WismClientInMemoryRepository(repoCommands);
             var commandController = TestUtilities.CreateCommandController(repo);
             var armyController = TestUtilities.CreateArmyController();
@@ -91,7 +91,7 @@ namespace Wism.Client.Test.Unit
 
             // Act
             // Should return only ID 3
-            var commands = new List<ArmyCommand>(commandController.GetCommandsAfterId(2));
+            var commands = new List<Command>(commandController.GetCommandsAfterId(2));
 
             // Assert
             Assert.AreEqual(1, commands.Count, "More than one command returned.");

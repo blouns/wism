@@ -1,6 +1,6 @@
 ﻿[What's Next?]
 Goal for the next phase is to implement a turn-based system with tests that cover: end turn,
-multi-tile movement, and multi-player action (human and AI). 
+multi-tile movement, and multi-player attacks (human and AI). 
 
 Considerations:
 Consider a simple AI that attacks if it has the tactical advantage (strength) and runs if it 

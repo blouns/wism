@@ -171,7 +171,7 @@ namespace Wism.Client.Agent.Controllers
             // Move selected armies to Visiting Armies
             logger.LogInformation($"Selecting army: {ArmiesToString(armies)}");
             tile.VisitingArmies = new List<Army>(armies);
-            foreach (Army army in armies)
+            foreach (Army army in tile.VisitingArmies)
             {
                 tile.Armies.Remove(army);
             }

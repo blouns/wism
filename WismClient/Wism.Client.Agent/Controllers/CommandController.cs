@@ -21,7 +21,7 @@ namespace Wism.Client.Agent.Controllers
             this.wismClientRepository = wismClientRepository ?? throw new ArgumentNullException(nameof(wismClientRepository));
         }
 
-        public void AddCommand(ArmyCommand command)
+        public void AddCommand(Command command)
         {
             if (command is null)
             {
@@ -37,7 +37,7 @@ namespace Wism.Client.Agent.Controllers
         /// </summary>
         /// <param name="commandId">ID of the command</param>
         /// <returns>Command</returns>
-        public ArmyCommand GetCommand(int commandId)
+        public Command GetCommand(int commandId)
         {
             if (!wismClientRepository.CommandExistsAsync(commandId).Result)
             {
@@ -51,7 +51,7 @@ namespace Wism.Client.Agent.Controllers
         /// Gets all commands
         /// </summary>
         /// <returns>All commands</returns>
-        public IEnumerable<ArmyCommand> GetCommands()
+        public IEnumerable<Command> GetCommands()
         {
             return wismClientRepository.GetCommandsAsync().Result;
         }
@@ -61,7 +61,7 @@ namespace Wism.Client.Agent.Controllers
         /// </summary>
         /// <param name="lastSeenCommandId"></param>
         /// <returns>All commands after <c>lastSeenCommandId</c></returns>
-        public IEnumerable<ArmyCommand> GetCommandsAfterId(int lastSeenCommandId)
+        public IEnumerable<Command> GetCommandsAfterId(int lastSeenCommandId)
         {
             return wismClientRepository.GetCommandsAfterIdAsync(lastSeenCommandId).Result;
         }

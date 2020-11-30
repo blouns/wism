@@ -51,18 +51,8 @@ namespace Wism.Client.Core
         /// Resets moves, triggers production, and allows for other clans 
         /// to complete their turns.
         /// </remarks>
-        public bool EndTurn(Player player)
-        {
-            if (Players == null || Players.Count == 0)
-            {
-                throw new InvalidOperationException("Players have not been initialized.");
-            }
-
-            if (player != Players[currentPlayerIndex])
-            {
-                return false;
-            }
-
+        public bool EndTurn()
+        {            
             // End current players turn
             Players[currentPlayerIndex].EndTurn();
 
