@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.War;
 
@@ -12,6 +13,8 @@ namespace Wism.Client.Core
         public const int DefaultRandomSeed = 1990;
 
         private int currentPlayerIndex;
+        private GameState gameState;
+        private List<Army> selectedArmies;
 
         public World World { get; set; }
 
@@ -20,6 +23,8 @@ namespace Wism.Client.Core
         public Random Random { get; set; }
 
         public IWarStrategy WarStrategy { get; set; }
+
+        public GameState GameState { get => gameState; }
 
         public static Game Current
         {
@@ -44,6 +49,12 @@ namespace Wism.Client.Core
             return Players[currentPlayerIndex];
         }
 
+        public void Transition(GameState newState)
+        {
+            // For now just set it; later we can validate and manage the state machine
+            this.gameState = newState;
+        }
+
         /// <summary>
         /// End the players turn.
         /// </summary>
@@ -59,7 +70,51 @@ namespace Wism.Client.Core
             // Set next players turn
             currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
 
+            Transition(GameState.StartingTurn);
+
             return true;
+        }
+
+        public bool StartTurn()
+        {
+            // TODO: Process production, new heros, evaluate if player is alive, etc.
+
+            Transition(GameState.Ready);
+
+            return true;
+        }
+
+        public List<Army> GetSelectedArmies()
+        {
+            if (selectedArmies == null)
+            {
+                return null;
+            }
+
+            // return a copy of the list
+            return new List<Army>(selectedArmies);
+        }
+
+        public void SelectArmies(List<Army> visitingArmies)
+        {
+            if (visitingArmies is null)
+            {
+                throw new ArgumentNullException(nameof(visitingArmies));
+            }
+
+            if (!visitingArmies.TrueForAll(army => GetCurrentPlayer() == army.Player))
+            {
+                throw new InvalidOperationException("Only the current player can select an army.");
+            }
+
+            this.selectedArmies = new List<Army>(visitingArmies);
+            Transition(GameState.SelectedArmy);
+        }
+
+        public void DeselectArmies()
+        {
+            this.selectedArmies = null;
+            Transition(GameState.Ready);
         }
 
         public static void CreateDefaultPlayers()
@@ -90,6 +145,16 @@ namespace Wism.Client.Core
 
             // Setup default world for testing.
             World.CreateDefaultWorld();
-        }
+        }       
+    }
+    public enum GameState
+    {
+        Ready,
+        SelectedArmy,
+        MovingArmy,
+        AttackingArmy,
+        EndingTurn,
+        StartingTurn,
+        GameOver
     }
 }

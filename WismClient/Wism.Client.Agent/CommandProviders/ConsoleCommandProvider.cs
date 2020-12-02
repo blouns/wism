@@ -6,7 +6,7 @@ using Wism.Client.Agent.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.InputProviders
+namespace Wism.Client.Agent.CommandProviders
 {
     public class ConsoleCommandProvider : ICommandProvider
     {

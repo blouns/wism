@@ -12,6 +12,8 @@ namespace Wism.Client.Core
 
         public Clan Clan { get; set; }
 
+
+
         private Player()
         {
         }

@@ -22,10 +22,28 @@ namespace Wism.Client.Agent.Controllers
 
         public bool EndTurn()
         {
+            return EndTurn(Game.Current);
+        }
+
+        public bool EndTurn(Game game)
+        {
             logger.LogInformation(
-                $"{Game.Current.GetCurrentPlayer()} has ended their turn.");
+                $"{game.GetCurrentPlayer()} has ended their turn.");
             
-            return Game.Current.EndTurn();
+            return game.EndTurn();
+        }
+
+        public bool StartTurn()
+        {
+            return StartTurn(Game.Current);
+        }
+
+        public bool StartTurn(Game game)
+        {
+            logger.LogInformation(
+                $"{game.GetCurrentPlayer()} is starting their turn.");
+
+            return game.StartTurn();
         }
     }
 }

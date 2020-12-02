@@ -21,7 +21,7 @@ namespace Wism.Client.Agent.Commands
 
         public override bool Execute()
         {
-            return gameController.EndTurn();
+            return gameController.EndTurn(Game.Current);
         }
     }
 }

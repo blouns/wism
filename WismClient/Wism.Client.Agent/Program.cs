@@ -94,14 +94,14 @@ namespace Wism.Client.Agent
                     );
 
                     // Add controllers
-                    services.AddSingleton<CommandController>(provider =>
+                    services.AddSingleton(provider =>
                         new CommandController(
                                 provider.GetService<ILoggerFactory>(),
                                 provider.GetService<IWismClientRepository>()));
-                    services.AddSingleton<ArmyController>(provider =>
+                    services.AddSingleton(provider =>
                         new ArmyController(
                                 provider.GetService<ILoggerFactory>()));
-                    services.AddSingleton<GameController>(provider =>
+                    services.AddSingleton(provider =>
                         new GameController(
                                 provider.GetService<ILoggerFactory>()));
 
@@ -112,8 +112,8 @@ namespace Wism.Client.Agent
                             provider.GetService<CommandController>()));
 
                     // Add view
-                    services.AddTransient<ViewBase, AsciiView>(provider =>
-                        new AsciiView(
+                    services.AddTransient<ViewBase, AsciiTurnBasedView>(provider =>
+                        new AsciiTurnBasedView(
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<ArmyController>(),
                             provider.GetService<CommandController>()));

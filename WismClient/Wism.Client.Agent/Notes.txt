@@ -8,7 +8,6 @@ is weaker. Also, consider adding ASCII shortcuts for common tasks (perhaps a rec
 moves that can be saved?).
 
 TODO List:
-* Add integration tests for moving and attacking via commands
 * Implement turn-based system
 * Implement state machine
 

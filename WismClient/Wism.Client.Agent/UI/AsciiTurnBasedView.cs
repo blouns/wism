@@ -11,7 +11,7 @@ namespace Wism.Client.Agent
     /// <summary>
     /// Basic ASCII Console-based UI for testing
     /// </summary>
-    public class AsciiView : ViewBase
+    public class AsciiTurnBasedView : ViewBase
     {
         private readonly ILogger logger;
         private readonly CommandController commandController;
@@ -44,7 +44,7 @@ namespace Wism.Client.Agent
             { "Void", 'v' }
         };
 
-        public AsciiView(ILoggerFactory logFactory, ArmyController armyController, CommandController commandController)
+        public AsciiTurnBasedView(ILoggerFactory logFactory, ArmyController armyController, CommandController commandController)
             : base(logFactory)
         {
             if (logFactory is null)
@@ -62,8 +62,7 @@ namespace Wism.Client.Agent
 
             this.commandProviders = new List<ICommandProvider>()
             {
-                new ConsoleCommandProvider(logFactory, commandController, armyController),
-                new PlayerEvadingAICommandProvider(logFactory, commandController, armyController)
+                new ConsoleTurnBasedCommandProvider(logFactory, commandController, armyController)
             };
         }
 
@@ -105,27 +104,45 @@ namespace Wism.Client.Agent
 
         protected override void Draw()
         {
-            Console.Clear();
+            var selectedArmies = Game.Current.GetSelectedArmies();
+            Tile selectedTile = null;
+            if (selectedArmies != null)
+            {
+                selectedTile = selectedArmies[0].Tile;
+            }
+
+            Console.WriteLine("=========================================================================================");
             for (int y = 0; y < World.Current.Map.GetLength(1); y++)
             {
                 for (int x = 0; x < World.Current.Map.GetLength(0); x++)
                 {
                     Tile tile = World.Current.Map[x, y];
                     string terrain = tile.Terrain.ShortName;
-                    string unit = String.Empty;
-                    if (tile.HasArmies())
+                    string army = String.Empty;
+                    if (tile.HasVisitingArmies())
                     {
-                        unit = tile.Armies[0].ShortName;
+                        army = tile.VisitingArmies[0].ShortName;
+                    }
+                    else if (tile.HasArmies())
+                    {
+                        army = tile.Armies[0].ShortName;
                     }
 
-                    Console.Write("({0},{1}):[{2},{3}]\t",
+                    string format = "({0},{1}):[{2},{3}]\t";
+                    if (selectedTile == tile)
+                    {
+                        format = "({0},{1}):{{{2},{3}}}\t";
+                    }
+
+                    Console.Write(format,
                         tile.X,
                         tile.Y,
                         GetTerrainSymbol(terrain),
-                        GetUnitSymbol(unit));
+                        GetArmySymbol(army));
                 }
-                Console.WriteLine();
+                Console.WriteLine();                
             }
+            Console.WriteLine("=========================================================================================");
         }
 
         private char GetTerrainSymbol(string terrain)
@@ -133,7 +150,7 @@ namespace Wism.Client.Agent
             return (terrainMap.Keys.Contains(terrain)) ? terrainMap[terrain] : '?';
         }
 
-        private char GetUnitSymbol(string unit)
+        private char GetArmySymbol(string unit)
         {
             return (armyMap.Keys.Contains(unit)) ? armyMap[unit] : ' ';
         }

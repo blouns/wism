@@ -86,7 +86,7 @@ namespace Wism.Client.Agent.Controllers
         /// Advance the army one step along the shortest route.
         /// </summary>
         /// <param name="coord"></param>
-        /// <returns></returns>
+        /// <returns>True if armies have not yet reached their destination; otherwise, false</returns>
         public bool TryMoveOneStep(List<Army> armiesToMove, Tile targetTile, ref IList<Tile> path, out float distance)
         {
             if (armiesToMove is null || armiesToMove.Count == 0)
@@ -105,6 +105,13 @@ namespace Wism.Client.Agent.Controllers
                 logger.LogInformation($"{ArmiesToString(armiesToMove)} arrived at its destination.");
                 path.Clear();
                 distance = 0;
+
+                if (armiesToMove.Any(a => a.MovesRemaining == 0))
+                {
+                    Game.Current.DeselectArmies();
+                }
+
+                // False indicates no further movement is required
                 return false;
             }
 
@@ -176,7 +183,7 @@ namespace Wism.Client.Agent.Controllers
                 tile.Armies.Remove(army);
             }
 
-            // Clean up tile's armies
+            // Clean up tile's unselected armies
             if (tile.HasArmies())
             {
                 tile.Armies.Sort(new ByArmyViewingOrder());
@@ -185,6 +192,8 @@ namespace Wism.Client.Agent.Controllers
             {
                 tile.Armies = null;
             }
+
+            Game.Current.SelectArmies(tile.VisitingArmies);
         }
 
         /// <summary>
@@ -204,6 +213,8 @@ namespace Wism.Client.Agent.Controllers
             ArmyUtilities.VerifyArmies(logger, armiesToDeselect);
 
             armiesToDeselect[0].Tile.CommitVisitingArmies();
+
+            Game.Current.DeselectArmies();
         }
 
         /// <summary>
@@ -229,9 +240,10 @@ namespace Wism.Client.Agent.Controllers
             var attackingFromTile = armiesToAttackWith[0].Tile;
 
             logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile}");
+            Game.Current.Transition(GameState.AttackingArmy);
             var war = Game.Current.WarStrategy;
             var result = war.Attack(armiesToAttackWith, targetTile);
-            CleanupAfterBattle(targetTile, attackingFromTile, result);
+            CleanupAfterBattle(targetTile, attackingFromTile, result);            
 
             return result;
         }
@@ -242,16 +254,20 @@ namespace Wism.Client.Agent.Controllers
             {
                 // Attacker won
                 targetTile.Armies = null;
+                Game.Current.Transition(GameState.SelectedArmy);
             }
             else
             {
-                // Defender won
+                // Defender won                
                 attackingFromTile.VisitingArmies = null;
+                Game.Current.Transition(GameState.Ready);
             }
         }
 
         private static void MoveSelectedArmies(List<Army> armiesToMove, Tile targetTile)
         {
+            Game.Current.Transition(GameState.MovingArmy);
+
             Tile originatingTile = armiesToMove[0].Tile;
 
             targetTile.VisitingArmies = armiesToMove;
@@ -260,17 +276,20 @@ namespace Wism.Client.Agent.Controllers
                 a.Tile = targetTile;
 
                 // TODO: Account for bonuses
-                a.MovesRemaining -= targetTile.Terrain.MovementCost;   
+                a.MovesRemaining -= targetTile.Terrain.MovementCost;
             });
 
             targetTile.VisitingArmies.Sort(new ByArmyViewingOrder());
-
-            RemoveArmiesFromOrginatingTile(armiesToMove, originatingTile);
-        }
-
-        private static void RemoveArmiesFromOrginatingTile(List<Army> armiesToRemove, Tile originatingTile)
-        {
             originatingTile.VisitingArmies = null;
+
+            if (armiesToMove.Any(a => a.MovesRemaining == 0))
+            {
+                Game.Current.DeselectArmies();
+            }
+            else
+            {
+                Game.Current.Transition(GameState.SelectedArmy);
+            }
         }
 
         private static int CalculateDistance(IList<Tile> myPath)
