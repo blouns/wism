@@ -12,7 +12,7 @@ namespace Wism.Client.Test.Integration
     public class ArmyIntegrationTests
     {
         [Test]
-        public void MoveArmy_Batch()
+        public void MoveArmy_Path()
         {
             // Assemble
             var armyController = TestUtilities.CreateArmyController();
@@ -29,10 +29,7 @@ namespace Wism.Client.Test.Integration
             List<Command> commandsToAdd = new List<Command>()
             {
                 new SelectArmyCommand(armyController, armiesToMove),
-                new MoveCommand(armyController, armiesToMove, 2, 3),
-                new MoveCommand(armyController, armiesToMove, 2, 4),
-                new MoveCommand(armyController, armiesToMove, 3, 4),
-                new MoveCommand(armyController, armiesToMove, 4, 4),
+                new MoveAlongPathCommand(armyController, armiesToMove, 4, 4),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };
 
@@ -43,23 +40,30 @@ namespace Wism.Client.Test.Integration
             }
 
             var commandsToExecute = commandController.GetCommandsAfterId(0);
-            int lastId = 0;
             foreach (var command in commandsToExecute)
             {
-                lastId = command.Id;
-                if (!command.Execute())
+                while (true)
                 {
-                    Assert.Fail("Command failed to execute.");
-                }
-            }
+                    var result = command.Execute();
+                    switch (result)
+                    {
+                        case ActionState.Succeeded:
+                            break;
+                        case ActionState.Failed:
+                            Assert.Fail($"Command failed to execute: {command.GetType()}");
+                            break;
+                        case ActionState.InProgress:
+                            // Do not advance the command (in-progress)
+                            continue;
+                    }
 
-            // Should be zero
-            var additionalCommands = new List<Command>(commandController.GetCommandsAfterId(lastId));
+                    break;
+                } 
+            }
 
             // Assert
             Assert.AreEqual(expectedX, armiesToMove[0].Tile.X, "Army not in expected location.");
             Assert.AreEqual(expectedY, armiesToMove[0].Tile.Y, "Army not in expected location.");
-            Assert.AreEqual(0, additionalCommands.Count, "Unexpectedly there are more commands to execute.");
         }
 
         [Test]
@@ -95,11 +99,19 @@ namespace Wism.Client.Test.Integration
             int lastId = 0;
             foreach (MoveCommand command in commandsToExecute)
             {
-                lastId = command.Id;
-                if (!command.Execute())
+                var result = command.Execute();
+                switch (result)
                 {
-                    if (hero.MovesRemaining != 0)
-                        Assert.Fail("Command failed to execute.");
+                    case ActionState.Succeeded:
+                        lastId = command.Id;
+                        break;
+                    case ActionState.Failed:
+                        if (hero.MovesRemaining != 0)
+                            Assert.Fail("Command failed to execute.");
+                        break;
+                    case ActionState.InProgress:
+                        // Do not advance the command (in-progress)
+                        break;
                 }
             }
         }
@@ -139,10 +151,19 @@ namespace Wism.Client.Test.Integration
             int lastId = 0;
             foreach (var command in commandsToExecute)
             {
-                lastId = command.Id;
-                if (!command.Execute())
+                var result = command.Execute();
+                switch (result)
                 {
-                    Assert.Fail("Command failed to execute.");
+                    case ActionState.Succeeded:
+                        lastId = command.Id;
+                        break;
+                    case ActionState.Failed:
+                        lastId = command.Id;
+                        Assert.Fail($"Command failed to execute: {command.GetType()}");
+                        break;
+                    case ActionState.InProgress:
+                        // Do not advance the command (in-progress)
+                        break;
                 }
             }
 
@@ -188,13 +209,22 @@ namespace Wism.Client.Test.Integration
             // Act
 
             var commandsToExecute = commandController.GetCommandsAfterId(0);
-            int lastId = 0;
+            int lastId;
             foreach (var command in commandsToExecute)
             {
-                lastId = command.Id;
-                if (!command.Execute())
+                var result = command.Execute();
+                switch (result)
                 {
-                    Assert.Fail("Command failed to execute.");
+                    case ActionState.Succeeded:
+                        lastId = command.Id;
+                        break;
+                    case ActionState.Failed:
+                        lastId = command.Id;
+                        Assert.Fail($"Command failed to execute: {command.GetType()}");
+                        break;
+                    case ActionState.InProgress:
+                        // Do not advance the command (in-progress)
+                        break;
                 }
             }
 
@@ -249,13 +279,22 @@ namespace Wism.Client.Test.Integration
             // Act
 
             var commandsToExecute = commandController.GetCommandsAfterId(0);
-            int lastId = 0;
+            int lastId;
             foreach (var command in commandsToExecute)
             {
-                lastId = command.Id;
-                if (!command.Execute())
+                var result = command.Execute();
+                switch (result)
                 {
-                    Assert.Fail("Command failed to execute.");
+                    case ActionState.Succeeded:
+                        lastId = command.Id;
+                        break;
+                    case ActionState.Failed:
+                        lastId = command.Id;
+                        Assert.Fail($"Command failed to execute: {command.GetType()}");
+                        break;
+                    case ActionState.InProgress:
+                        // Do not advance the command (in-progress)
+                        break;
                 }
             }
 

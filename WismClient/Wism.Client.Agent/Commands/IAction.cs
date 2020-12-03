@@ -4,8 +4,16 @@ using System.Text;
 
 namespace Wism.Client.Agent.Commands
 {
+    public enum ActionState
+    {
+        NotStarted,
+        InProgress,
+        Succeeded,
+        Failed,        
+    }
+
     public interface IAction
     {
-        public bool Execute();
+        public ActionState Execute();
     }
 }

@@ -136,7 +136,7 @@ namespace Wism.Client.Agent.CommandProviders
             }
 
             commandController.AddCommand(
-                    new MoveCommand(armyController, armies, x, y));
+                    new MoveAlongPathCommand(armyController, armies, x, y));
         }
 
         private void DoGameOver()

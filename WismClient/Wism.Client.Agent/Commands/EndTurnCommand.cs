@@ -19,9 +19,11 @@ namespace Wism.Client.Agent.Commands
             this.gameController = gameController;
         }
 
-        public override bool Execute()
+        public override ActionState Execute()
         {
-            return gameController.EndTurn(Game.Current);
+            bool success = gameController.EndTurn(Game.Current);
+
+            return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
     }
 }

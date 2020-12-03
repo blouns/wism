@@ -17,6 +17,6 @@ namespace Wism.Client.Agent.Commands
             Player = player ?? throw new System.ArgumentNullException(nameof(player));
         }
 
-        public abstract bool Execute();
+        public abstract ActionState Execute();
     }
 }

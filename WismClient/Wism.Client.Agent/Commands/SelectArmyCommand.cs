@@ -11,11 +11,11 @@ namespace Wism.Client.Agent.Commands
         {
         }
 
-        public override bool Execute()
+        public override ActionState Execute()
         {
             armyController.SelectArmy(Armies);
 
-            return true;
+            return ActionState.Succeeded;
         }
     }
 }

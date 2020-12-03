@@ -18,18 +18,17 @@ namespace Wism.Client.Agent.Commands
             this.Y = y;
         }
 
-        public override bool Execute()
+        public override ActionState Execute()
         {
             if (!armyController.TryAttack(Armies, World.Current.Map[X, Y]))
             {
-                return false;
+                return ActionState.Failed;
             }
 
             // Attack successful; move into the location
-            // TODO: Check game state to ensure attacking army is selected
             bool success = armyController.TryMove(Armies, World.Current.Map[X, Y]);
 
-            return success;
+            return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
     }
 }

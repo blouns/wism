@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Wism.Client.Agent.Commands;
 using Wism.Client.Agent.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
@@ -342,7 +343,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            while (armyController.TryMoveOneStep(armies, target, ref path, out _))
+            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
             }
@@ -369,7 +370,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            while (armyController.TryMoveOneStep(armies, target, ref path, out _))
+            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
             }
@@ -397,7 +398,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT
             IList<Tile> path = null;
-            while (armyController.TryMoveOneStep(armies, target, ref path, out _))
+            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 // do nothing
             }
@@ -427,7 +428,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT
             IList<Tile> path = null;
-            while (armyController.TryMoveOneStep(armies, target, ref path, out _))
+            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 // do nothing
             }

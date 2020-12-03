@@ -5,6 +5,7 @@ using Wism.Client.Agent.Commands;
 using Wism.Client.Agent.Controllers;
 using Wism.Client.Agent.CommandProviders;
 using Wism.Client.Core;
+using System.Linq;
 
 namespace Wism.Client.Agent
 {
@@ -72,30 +73,56 @@ namespace Wism.Client.Agent
 
             foreach (Command command in commandController.GetCommandsAfterId(lastId))
             {
-                lastId = command.Id;
-
                 logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
-                // TODO: Implement tri-state to return success, failure, or incomplete/continue
-                // TODO: Switch to returning game state
-                var success = command.Execute();
 
-                if (success)
+                var result = command.Execute();
+                if (result == ActionState.Succeeded)
                 {
                     logger.LogInformation($"Task successful");
+                    lastId = command.Id;
+                    DeselectIfNoMovesRemaining();
                 }
-                else if (!success)
+                else if (result == ActionState.Failed)
                 {
                     logger.LogInformation($"Task failed");
+                    lastId = command.Id;
                     if (command.Player == humanPlayer)
                     {                 
                         Console.Beep();
                     }
+                    DeselectIfNoMovesRemaining();
                 }
+                else if (result == ActionState.InProgress)
+                {
+                    logger.LogInformation("Task started and in progress");                    
+                    Game.Current.Transition(GameState.MovingArmy);
+
+                    // Do not advance Command ID as we are still processing this command
+                }
+            }
+        }
+
+        private static void DeselectIfNoMovesRemaining()
+        {
+            if (Game.Current.GetSelectedArmies().Any(a => a.MovesRemaining == 0))
+            {
+                Game.Current.Transition(GameState.Ready);
+            }
+            else
+            {
+                Game.Current.Transition(GameState.SelectedArmy);
             }
         }
 
         protected override void HandleInput()
         {
+            if ((Game.Current.GameState != GameState.Ready) &&
+                (Game.Current.GameState != GameState.SelectedArmy))
+            {
+                // Do not solicit additional input
+                return;
+            }
+
             foreach (ICommandProvider provider in this.commandProviders)
             {
                 provider.GenerateCommands();
@@ -150,9 +177,9 @@ namespace Wism.Client.Agent
             return (terrainMap.Keys.Contains(terrain)) ? terrainMap[terrain] : '?';
         }
 
-        private char GetArmySymbol(string unit)
+        private char GetArmySymbol(string army)
         {
-            return (armyMap.Keys.Contains(unit)) ? armyMap[unit] : ' ';
+            return (armyMap.Keys.Contains(army)) ? armyMap[army] : ' ';
         }
     }
 }

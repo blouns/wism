@@ -86,6 +86,8 @@ namespace Wism.Client.Agent
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("Cavalry"),
                 World.Current.Map[2, 2]);
+
+            Game.Current.Transition(GameState.Ready);
         }
     }
 }

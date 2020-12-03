@@ -76,21 +76,25 @@ namespace Wism.Client.Agent
                 lastId = command.Id;
 
                 logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
-                // TODO: Implement tri-state to return success, failure, or incomplete/continue
-                // TODO: Switch to returning game state
-                var success = command.Execute();
-
-                if (success)
+                var result = command.Execute();
+                if (result == ActionState.Succeeded)
                 {
                     logger.LogInformation($"Task successful");
+                    lastId = command.Id;
                 }
-                else if (!success)
+                else if (result == ActionState.Failed)
                 {
                     logger.LogInformation($"Task failed");
+                    lastId = command.Id;
                     if (command.Player == humanPlayer)
-                    {                 
+                    {
                         Console.Beep();
                     }
+                }
+                else if (result == ActionState.InProgress)
+                {
+                    logger.LogInformation("Task started and in progress");
+                    // Do not advance Command ID
                 }
             }
         }

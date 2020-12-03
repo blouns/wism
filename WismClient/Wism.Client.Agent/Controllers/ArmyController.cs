@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Wism.Client.Agent.Commands;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
@@ -86,8 +87,8 @@ namespace Wism.Client.Agent.Controllers
         /// Advance the army one step along the shortest route.
         /// </summary>
         /// <param name="coord"></param>
-        /// <returns>True if armies have not yet reached their destination; otherwise, false</returns>
-        public bool TryMoveOneStep(List<Army> armiesToMove, Tile targetTile, ref IList<Tile> path, out float distance)
+        /// <returns>Action state</returns>
+        public ActionState MoveOneStep(List<Army> armiesToMove, Tile targetTile, ref IList<Tile> path, out float distance)
         {
             if (armiesToMove is null || armiesToMove.Count == 0)
             {
@@ -111,8 +112,7 @@ namespace Wism.Client.Agent.Controllers
                     Game.Current.DeselectArmies();
                 }
 
-                // False indicates no further movement is required
-                return false;
+                return ActionState.Succeeded;
             }
 
             IList<Tile> myPath = path;
@@ -131,28 +131,31 @@ namespace Wism.Client.Agent.Controllers
 
                     path = null;
                     distance = 0.0f;
-                    return false;
+                    return ActionState.Failed;
                 }
             }
 
             // Now we have a route
+            ActionState result;
             bool moveSuccessful = TryMove(armiesToMove, myPath[1]);
             if (moveSuccessful)
             {
                 // Pop the starting location and return updated path and distance
                 myPath.RemoveAt(0);
                 myDistance = CalculateDistance(myPath);
+                result = ActionState.InProgress;
             }
             else
             {
                 logger.LogWarning($"Move failed during path traversal to: {myPath[1]}");
                 myPath = null;
                 myDistance = 0;
+                result = ActionState.Failed;
             }
 
             path = myPath;
             distance = myDistance;
-            return moveSuccessful;
+            return result;
         }
 
         /// <summary>

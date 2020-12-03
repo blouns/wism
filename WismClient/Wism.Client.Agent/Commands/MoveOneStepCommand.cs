@@ -7,12 +7,13 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands
 {
-    public class MoveCommand : ArmyCommand
+    public class MoveAlongPathCommand : ArmyCommand
     {
+        private IList<Tile> path;
         public int X { get; set; }
         public int Y { get; set; }
 
-        public MoveCommand(ArmyController armyController, List<Army> armies, int x, int y)
+        public MoveAlongPathCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armyController, armies)
         {
             this.X = x;
@@ -21,9 +22,7 @@ namespace Wism.Client.Agent.Commands
 
         public override ActionState Execute()
         {
-            bool success = armyController.TryMove(Armies, World.Current.Map[X, Y]);
-            
-            return (success) ? ActionState.Succeeded : ActionState.Failed;            
+            return armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);                        
         }
     }
 }
