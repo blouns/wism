@@ -145,7 +145,8 @@ namespace Wism.Client.Agent
 
         protected override void Draw()
         {
-            var currentPlayerArmies = Game.Current.GetCurrentPlayer().GetArmies();
+            var currentPlayer = Game.Current.GetCurrentPlayer();
+            var currentPlayerArmies = currentPlayer.GetArmies();
             var selectedArmies = Game.Current.GetSelectedArmies();
             Tile selectedTile = null;
 
@@ -156,7 +157,7 @@ namespace Wism.Client.Agent
             else if (currentPlayerArmies.Count == 0)
             {
                 // Game over
-                Console.WriteLine("You have lost.");
+                Console.WriteLine($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
                 System.Environment.Exit(1);
             }
 

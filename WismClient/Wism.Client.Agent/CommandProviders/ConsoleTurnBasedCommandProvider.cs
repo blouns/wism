@@ -29,10 +29,10 @@ namespace Wism.Client.Agent.CommandProviders
 
         public void GenerateCommands()
         {
-            Player humanPlayer = Game.Current.Players[0];
+            Player currentPlayer = Game.Current.GetCurrentPlayer();
 
             // End game?
-            if (humanPlayer.GetArmies().Count == 0)
+            if (currentPlayer.GetArmies().Count == 0)
             {
                 DoGameOver();
                 logger.LogInformation("No commands. We have lost.");
