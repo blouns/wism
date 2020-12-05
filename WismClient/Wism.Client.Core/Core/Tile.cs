@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Wism.Client.MapObjects;
 
@@ -38,6 +39,42 @@ namespace Wism.Client.Core
             return (VisitingArmies != null && VisitingArmies.Count > 0);
         }
 
+        public bool HasArmies(List<Army> armies)
+        {
+            if (!HasArmies())
+            {
+                return false;
+            }
+
+            foreach (Army army in armies)
+            {
+                if (!this.Armies.Contains(army))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool HasVisitingArmies(List<Army> armies)
+        {
+            if (!HasVisitingArmies())
+            {
+                return false;
+            }
+
+            foreach (Army army in armies)
+            {
+                if (!this.VisitingArmies.Contains(army))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public void AddArmies(List<Army> newArmies)
         {
             if (!HasRoom(newArmies.Count))
@@ -74,6 +111,29 @@ namespace Wism.Client.Core
                 }
 
                 this.Armies.Remove(army);
+            }
+        }
+
+        public void RemoveVisitingArmies(List<Army> armiesToRemove)
+        {
+            if (armiesToRemove is null)
+            {
+                throw new ArgumentNullException(nameof(armiesToRemove));
+            }
+
+            if (VisitingArmies == null)
+            {
+                throw new InvalidOperationException("Cannot remove visiting armies from a tile with no armies.");
+            }
+
+            foreach (Army army in armiesToRemove)
+            {
+                if (!this.VisitingArmies.Contains(army))
+                {
+                    throw new InvalidOperationException("Cannot remove visiting army from tile as it does not exist.");
+                }
+
+                this.VisitingArmies.Remove(army);
             }
         }
 
@@ -120,7 +180,7 @@ namespace Wism.Client.Core
         public List<Army> MusterArmy()
         {
             // TODO: Get surrounding armies in castle
-            return this.Armies;
+            return new List<Army>(this.Armies);
         }
 
         public void CommitVisitingArmies()

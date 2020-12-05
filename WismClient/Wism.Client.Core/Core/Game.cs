@@ -66,6 +66,7 @@ namespace Wism.Client.Core
         {            
             // End current players turn
             Players[currentPlayerIndex].EndTurn();
+            this.selectedArmies = null;
 
             // Set next players turn
             currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
@@ -111,6 +112,16 @@ namespace Wism.Client.Core
             Transition(GameState.SelectedArmy);
         }
 
+        public void RemoveSelectedArmies(List<Army> armies)
+        {
+            if (selectedArmies == null || selectedArmies.Count == 0)
+            {
+                return;
+            }
+
+            armies.ForEach(a => selectedArmies.Remove(a));
+        }
+
         public void DeselectArmies()
         {
             this.selectedArmies = null;
@@ -144,7 +155,7 @@ namespace Wism.Client.Core
             CreateDefaultPlayers();
 
             // Setup default world for testing.
-            World.CreateDefaultWorld();
+            World.CreateDefaultWorld();            
         }       
     }
     public enum GameState

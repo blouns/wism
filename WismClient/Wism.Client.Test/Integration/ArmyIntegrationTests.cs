@@ -106,7 +106,7 @@ namespace Wism.Client.Test.Integration
                         lastId = command.Id;
                         break;
                     case ActionState.Failed:
-                        if (hero.MovesRemaining != 0)
+                        if (hero.MovesRemaining != 1)
                             Assert.Fail("Command failed to execute.");
                         break;
                     case ActionState.InProgress:

@@ -116,7 +116,8 @@ namespace Wism.Client.Agent
                         new AsciiTurnBasedView(
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<ArmyController>(),
-                            provider.GetService<CommandController>()));
+                            provider.GetService<CommandController>(),
+                            provider.GetService<GameController>()));
                 })
                 .UseSerilog((hostingContext, loggerConfig) =>
                     loggerConfig.ReadFrom.Configuration(hostingContext.Configuration)

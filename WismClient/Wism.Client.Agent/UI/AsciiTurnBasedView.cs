@@ -45,8 +45,8 @@ namespace Wism.Client.Agent
             { "Void", 'v' }
         };
 
-        public AsciiTurnBasedView(ILoggerFactory logFactory, ArmyController armyController, CommandController commandController)
-            : base(logFactory)
+        public AsciiTurnBasedView(ILoggerFactory logFactory, ArmyController armyController, CommandController commandController, GameController gameController)
+            : base(logFactory, armyController)
         {
             if (logFactory is null)
             {
@@ -58,12 +58,16 @@ namespace Wism.Client.Agent
                 throw new ArgumentNullException(nameof(armyController));
             }
 
+            if (gameController is null)
+            {
+                throw new ArgumentNullException(nameof(gameController));
+            }
+
             this.logger = logFactory.CreateLogger<AsciiView>();
             this.commandController = commandController ?? throw new ArgumentNullException(nameof(commandController));
-
             this.commandProviders = new List<ICommandProvider>()
             {
-                new ConsoleTurnBasedCommandProvider(logFactory, commandController, armyController)
+                new ConsoleTurnBasedCommandProvider(logFactory, commandController, armyController, gameController)
             };
         }
 
@@ -75,12 +79,15 @@ namespace Wism.Client.Agent
             {
                 logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
 
+                // Run the command
                 var result = command.Execute();
+
+                // Process the result
                 if (result == ActionState.Succeeded)
                 {
                     logger.LogInformation($"Task successful");
                     lastId = command.Id;
-                    DeselectIfNoMovesRemaining();
+                    UpdateGameState();
                 }
                 else if (result == ActionState.Failed)
                 {
@@ -90,7 +97,7 @@ namespace Wism.Client.Agent
                     {                 
                         Console.Beep();
                     }
-                    DeselectIfNoMovesRemaining();
+                    UpdateGameState();
                 }
                 else if (result == ActionState.InProgress)
                 {
@@ -102,9 +109,16 @@ namespace Wism.Client.Agent
             }
         }
 
-        private static void DeselectIfNoMovesRemaining()
+        private static void UpdateGameState()
         {
-            if (Game.Current.GetSelectedArmies().Any(a => a.MovesRemaining == 0))
+            var player1Armies = Game.Current.GetCurrentPlayer().GetArmies();
+            if (player1Armies == null || player1Armies.Count == 0)
+            {
+                Game.Current.Transition(GameState.GameOver);
+            }
+            else if (Game.Current.GetSelectedArmies() == null ||
+                     Game.Current.GetSelectedArmies().Count == 0 ||
+                     Game.Current.GetSelectedArmies().Any(a => a.MovesRemaining == 0))
             {
                 Game.Current.Transition(GameState.Ready);
             }
@@ -131,11 +145,19 @@ namespace Wism.Client.Agent
 
         protected override void Draw()
         {
+            var currentPlayerArmies = Game.Current.GetCurrentPlayer().GetArmies();
             var selectedArmies = Game.Current.GetSelectedArmies();
             Tile selectedTile = null;
-            if (selectedArmies != null)
+
+            if (selectedArmies != null && selectedArmies.Count > 0)
             {
                 selectedTile = selectedArmies[0].Tile;
+            }
+            else if (currentPlayerArmies.Count == 0)
+            {
+                // Game over
+                Console.WriteLine("You have lost.");
+                System.Environment.Exit(1);
             }
 
             Console.WriteLine("=========================================================================================");

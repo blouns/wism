@@ -30,8 +30,8 @@
     {
         "DisplayName": "Cavalry",
         "ShortName": "Cavalry",
-        "Strength": 16,
-        "Moves" : 100,
+        "Strength": 5,
+        "Moves" : 16,
         "CanWalk": true,
         "CanFloat": false,
         "CanFly": false

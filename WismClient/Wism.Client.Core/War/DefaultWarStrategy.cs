@@ -44,7 +44,7 @@ namespace Wism.Client.War
                 else
                 {
                     Log.WriteLine(Log.TraceLevel.Information, "Defender killed one army.");
-                    attackers.Remove(attackers[0]);
+                    //attackers.Remove(attackers[0]);
                 }
             }
 

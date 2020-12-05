@@ -112,7 +112,17 @@ namespace Wism.Client.Core
         {
             // Remove from the world
             var armies = new List<Army>() { army };
-            army.Tile.RemoveArmies(armies);
+            var tile = army.Tile;
+            if (tile.HasArmies(armies))
+            {
+                tile.RemoveArmies(armies);
+            }                 
+            else
+            {
+                // It was an attacking army
+                tile.RemoveVisitingArmies(armies);
+                Game.Current.RemoveSelectedArmies(armies);
+            }
 
             // Remove from player armies for tracking
             myArmies.Remove(army);

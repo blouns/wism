@@ -45,16 +45,11 @@ namespace Wism.Client.Agent
         };
 
         public AsciiView(ILoggerFactory logFactory, ArmyController armyController, CommandController commandController)
-            : base(logFactory)
+            : base(logFactory, armyController)
         {
             if (logFactory is null)
             {
                 throw new ArgumentNullException(nameof(logFactory));
-            }
-
-            if (armyController is null)
-            {
-                throw new ArgumentNullException(nameof(armyController));
             }
 
             this.logger = logFactory.CreateLogger<AsciiView>();

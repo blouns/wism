@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Wism.Client.Agent.Commands;
 using Wism.Client.Agent.Controllers;
 using Wism.Client.Core;
-using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProviders
 {
@@ -12,9 +11,10 @@ namespace Wism.Client.Agent.CommandProviders
     {
         private readonly CommandController commandController;
         private readonly ArmyController armyController;
+        private readonly GameController gameController;
         private readonly ILogger logger;
 
-        public ConsoleTurnBasedCommandProvider(ILoggerFactory loggerFactory, CommandController commandController, ArmyController armyController)
+        public ConsoleTurnBasedCommandProvider(ILoggerFactory loggerFactory, CommandController commandController, ArmyController armyController, GameController gameController)
         {
             if (loggerFactory is null)
             {
@@ -24,11 +24,14 @@ namespace Wism.Client.Agent.CommandProviders
             logger = loggerFactory.CreateLogger<ConsoleTurnBasedCommandProvider>();
             this.commandController = commandController ?? throw new ArgumentNullException(nameof(commandController));
             this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
+            this.gameController = gameController ?? throw new ArgumentNullException(nameof(gameController));
         }
 
         public void GenerateCommands()
         {
             Player humanPlayer = Game.Current.Players[0];
+
+            // End game?
             if (humanPlayer.GetArmies().Count == 0)
             {
                 DoGameOver();
@@ -40,6 +43,7 @@ namespace Wism.Client.Agent.CommandProviders
             Console.WriteLine("(D)eselect");
             Console.WriteLine("(M)ove");
             Console.WriteLine("(A)ttack");
+            Console.WriteLine("[E]nd turn");
             Console.Write("Enter a command: ");
             var keyInfo = Console.ReadKey();
             Console.WriteLine();
@@ -58,6 +62,54 @@ namespace Wism.Client.Agent.CommandProviders
                 case ConsoleKey.A:
                     DoAttackArmy();
                     break;
+                case ConsoleKey.E:
+                    DoEndTurn();
+                    break;
+                case ConsoleKey.UpArrow:
+                    DoMoveArmyOneStep(0, -1);
+                    break;
+                case ConsoleKey.DownArrow:
+                    DoMoveArmyOneStep(0, 1);
+                    break;
+                case ConsoleKey.LeftArrow:
+                    DoMoveArmyOneStep(-1, 0);
+                    break;
+                case ConsoleKey.RightArrow:
+                    DoMoveArmyOneStep(1, 0);
+                    break;
+            }
+        }
+
+        private void DoEndTurn()
+        {
+            commandController.AddCommand(
+                    new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
+        }
+
+        private void DoMoveArmyOneStep(int xDelta, int yDelta)
+        {
+            if (Game.Current.GameState == GameState.Ready)
+            {
+                Console.WriteLine("You need to select an army.");
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var army = armies[0];
+            int x = army.X + xDelta;
+            int y = army.Y + yDelta;
+
+            if (EnemyInTargetTile(armies[0].Clan, x, y))
+            {
+                // Attack the location
+                commandController.AddCommand(
+                    new AttackCommand(armyController, armies, x, y));
+            }
+            else
+            {
+                // Move to the new location
+                commandController.AddCommand(
+                    new MoveCommand(armyController, armies, x, y));
             }
         }
 
