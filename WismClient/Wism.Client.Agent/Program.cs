@@ -112,8 +112,8 @@ namespace Wism.Client.Agent
                             provider.GetService<CommandController>()));
 
                     // Add view
-                    services.AddTransient<ViewBase, AsciiTurnBasedView>(provider =>
-                        new AsciiTurnBasedView(
+                    services.AddTransient<ViewBase, AsciiView>(provider =>
+                        new AsciiView(
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<ArmyController>(),
                             provider.GetService<CommandController>(),

@@ -12,6 +12,7 @@ namespace Wism.Client.Core
 
         public const int DefaultRandomSeed = 1990;
 
+        private int turn = 1;
         private int currentPlayerIndex;
         private GameState gameState;
         private List<Army> selectedArmies;
@@ -25,6 +26,8 @@ namespace Wism.Client.Core
         public IWarStrategy WarStrategy { get; set; }
 
         public GameState GameState { get => gameState; }
+
+        public int Turn { get => turn;  }
 
         public static Game Current
         {
@@ -71,6 +74,7 @@ namespace Wism.Client.Core
             // Set next players turn
             currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
 
+            turn++;
             Transition(GameState.StartingTurn);
 
             return true;

@@ -5,6 +5,7 @@ using Wism.Client.Agent.Commands;
 using Wism.Client.Agent.Controllers;
 using Wism.Client.Agent.CommandProviders;
 using Wism.Client.Core;
+using System.Linq;
 
 namespace Wism.Client.Agent
 {
@@ -44,7 +45,7 @@ namespace Wism.Client.Agent
             { "Void", 'v' }
         };
 
-        public AsciiView(ILoggerFactory logFactory, ArmyController armyController, CommandController commandController)
+        public AsciiView(ILoggerFactory logFactory, ArmyController armyController, CommandController commandController, GameController gameController)
             : base(logFactory, armyController)
         {
             if (logFactory is null)
@@ -52,13 +53,21 @@ namespace Wism.Client.Agent
                 throw new ArgumentNullException(nameof(logFactory));
             }
 
+            if (armyController is null)
+            {
+                throw new ArgumentNullException(nameof(armyController));
+            }
+
+            if (gameController is null)
+            {
+                throw new ArgumentNullException(nameof(gameController));
+            }
+
             this.logger = logFactory.CreateLogger<AsciiView>();
             this.commandController = commandController ?? throw new ArgumentNullException(nameof(commandController));
-
             this.commandProviders = new List<ICommandProvider>()
             {
-                new ConsoleCommandProvider(logFactory, commandController, armyController),
-                new PlayerEvadingAICommandProvider(logFactory, commandController, armyController)
+                new ConsoleCommandProvider(logFactory, commandController, armyController, gameController)
             };
         }
 
@@ -68,34 +77,66 @@ namespace Wism.Client.Agent
 
             foreach (Command command in commandController.GetCommandsAfterId(lastId))
             {
-                lastId = command.Id;
-
                 logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
+
+                // Run the command
                 var result = command.Execute();
+
+                // Process the result
                 if (result == ActionState.Succeeded)
                 {
                     logger.LogInformation($"Task successful");
                     lastId = command.Id;
+                    UpdateGameState();
                 }
                 else if (result == ActionState.Failed)
                 {
                     logger.LogInformation($"Task failed");
                     lastId = command.Id;
                     if (command.Player == humanPlayer)
-                    {
+                    {                 
                         Console.Beep();
                     }
+                    UpdateGameState();
                 }
                 else if (result == ActionState.InProgress)
                 {
-                    logger.LogInformation("Task started and in progress");
-                    // Do not advance Command ID
+                    logger.LogInformation("Task started and in progress");                    
+                    Game.Current.Transition(GameState.MovingArmy);
+
+                    // Do not advance Command ID as we are still processing this command
                 }
+            }
+        }
+
+        private static void UpdateGameState()
+        {
+            var player1Armies = Game.Current.GetCurrentPlayer().GetArmies();
+            if (player1Armies == null || player1Armies.Count == 0)
+            {
+                Game.Current.Transition(GameState.GameOver);
+            }
+            else if (Game.Current.GetSelectedArmies() == null ||
+                     Game.Current.GetSelectedArmies().Count == 0 ||
+                     Game.Current.GetSelectedArmies().Any(a => a.MovesRemaining == 0))
+            {
+                Game.Current.Transition(GameState.Ready);
+            }
+            else
+            {
+                Game.Current.Transition(GameState.SelectedArmy);
             }
         }
 
         protected override void HandleInput()
         {
+            if ((Game.Current.GameState != GameState.Ready) &&
+                (Game.Current.GameState != GameState.SelectedArmy))
+            {
+                // Do not solicit additional input
+                return;
+            }
+
             foreach (ICommandProvider provider in this.commandProviders)
             {
                 provider.GenerateCommands();
@@ -104,27 +145,54 @@ namespace Wism.Client.Agent
 
         protected override void Draw()
         {
-            Console.Clear();
+            var currentPlayer = Game.Current.GetCurrentPlayer();
+            var currentPlayerArmies = currentPlayer.GetArmies();
+            var selectedArmies = Game.Current.GetSelectedArmies();
+            Tile selectedTile = null;
+
+            if (selectedArmies != null && selectedArmies.Count > 0)
+            {
+                selectedTile = selectedArmies[0].Tile;
+            }
+            else if (currentPlayerArmies.Count == 0)
+            {
+                // Game over
+                Console.WriteLine($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
+                System.Environment.Exit(1);
+            }
+
+            Console.WriteLine("=========================================================================================");
             for (int y = 0; y < World.Current.Map.GetLength(1); y++)
             {
                 for (int x = 0; x < World.Current.Map.GetLength(0); x++)
                 {
                     Tile tile = World.Current.Map[x, y];
                     string terrain = tile.Terrain.ShortName;
-                    string unit = String.Empty;
-                    if (tile.HasArmies())
+                    string army = String.Empty;
+                    if (tile.HasVisitingArmies())
                     {
-                        unit = tile.Armies[0].ShortName;
+                        army = tile.VisitingArmies[0].ShortName;
+                    }
+                    else if (tile.HasArmies())
+                    {
+                        army = tile.Armies[0].ShortName;
                     }
 
-                    Console.Write("({0},{1}):[{2},{3}]\t",
+                    string format = "({0},{1}):[{2},{3}]\t";
+                    if (selectedTile == tile)
+                    {
+                        format = "({0},{1}):{{{2},{3}}}\t";
+                    }
+
+                    Console.Write(format,
                         tile.X,
                         tile.Y,
                         GetTerrainSymbol(terrain),
-                        GetUnitSymbol(unit));
+                        GetArmySymbol(army));
                 }
-                Console.WriteLine();
+                Console.WriteLine();                
             }
+            Console.WriteLine("=========================================================================================");
         }
 
         private char GetTerrainSymbol(string terrain)
@@ -132,9 +200,9 @@ namespace Wism.Client.Agent
             return (terrainMap.Keys.Contains(terrain)) ? terrainMap[terrain] : '?';
         }
 
-        private char GetUnitSymbol(string unit)
+        private char GetArmySymbol(string army)
         {
-            return (armyMap.Keys.Contains(unit)) ? armyMap[unit] : ' ';
+            return (armyMap.Keys.Contains(army)) ? armyMap[army] : ' ';
         }
     }
 }

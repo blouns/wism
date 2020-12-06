@@ -238,6 +238,11 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
+            if (targetTile.Armies == null)
+            {
+                throw new ArgumentException("Target tile has no armies to attack.");
+            }
+
             ArmyUtilities.VerifyArmies(logger, armiesToAttackWith);
 
             var attackingFromTile = armiesToAttackWith[0].Tile;
