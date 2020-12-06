@@ -12,6 +12,8 @@ namespace Wism.Client.Core
 
         public Clan Clan { get; set; }
 
+
+
         private Player()
         {
         }
@@ -72,11 +74,55 @@ namespace Wism.Client.Core
             return newArmy;
         }
 
+        /// <summary>
+        /// End the players turn.
+        /// </summary>
+        /// <remarks>
+        /// Resets moves, triggers production, and allows for other clans 
+        /// to complete their turns.
+        /// </remarks>
+        internal void EndTurn()
+        {
+            if (Game.Current.GetCurrentPlayer() != this)
+            {
+                throw new InvalidOperationException("Cannot end turn; it's not my turn!");
+            }
+
+            ResetArmies();
+        }
+
+        /// <summary>
+        /// Reset armies to their start-of-turn state.
+        /// </summary>
+        private void ResetArmies()
+        {
+            foreach (Army army in GetArmies())
+            {
+                if (army.IsDead)
+                {
+                    throw new InvalidOperationException("Player cannot reset a dead army.");
+                }
+
+                army.Reset();
+                army.MovesRemaining = army.Info.Moves;
+            }
+        }
+
         internal void KillArmy(Army army)
         {
             // Remove from the world
             var armies = new List<Army>() { army };
-            army.Tile.RemoveArmies(armies);
+            var tile = army.Tile;
+            if (tile.HasArmies(armies))
+            {
+                tile.RemoveArmies(armies);
+            }                 
+            else
+            {
+                // It was an attacking army
+                tile.RemoveVisitingArmies(armies);
+                Game.Current.RemoveSelectedArmies(armies);
+            }
 
             // Remove from player armies for tracking
             myArmies.Remove(army);
@@ -134,6 +180,11 @@ namespace Wism.Client.Core
             }
 
             return tile;
+        }
+
+        public override string ToString()
+        {
+            return this.Clan.ToString();
         }
     }
 }

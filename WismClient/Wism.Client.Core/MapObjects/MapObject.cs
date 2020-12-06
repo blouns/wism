@@ -1,4 +1,5 @@
-﻿using Wism.Client.Core;
+﻿using System.Text;
+using Wism.Client.Core;
 using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
@@ -25,6 +26,18 @@ namespace Wism.Client.MapObjects
         public override int GetHashCode()
         {
             return $"{this.GetType()}({this.Id})".GetHashCode();
+        }
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            if (Player != null)
+            {
+                sb.Append(Player.Clan);
+            }
+
+            sb.Append($"{ShortName}({Id})");
+
+            return sb.ToString();
         }
     }
 }

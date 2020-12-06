@@ -56,12 +56,12 @@
         "DisplayName": "Road"
     },
     {
-        "ShortName": "BrShortNamege",
+        "ShortName": "Bridge",
         "AllowFlight": true,
         "AllowFloat": true,
         "AllowWalk": true,
         "Movement": 1,
-        "DisplayName": "BrShortNamege"
+        "DisplayName": "Bridge"
     },
     {
         "ShortName": "Castle",
@@ -104,11 +104,11 @@
         "DisplayName": "Tower"
     },
     {
-        "ShortName": "VoShortName",
+        "ShortName": "Void",
         "AllowFlight": false,
         "AllowFloat": false,
         "AllowWalk": false,
         "Movement": 999,
-        "DisplayName": "VoShortName"
+        "DisplayName": "Void"
     }
 ]

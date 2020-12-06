@@ -12,24 +12,25 @@ namespace Wism.Client.Agent
     /// <summary>
     /// Template base class for a generic UI
     /// </summary>
-    public abstract class WismViewBase
+    public abstract class ViewBase
     {
         private ILogger logger;
-        protected List<Army> selectedArmies;
+        private readonly ArmyController armyController;
 
-        public WismViewBase(ILoggerFactory loggerFactory)
+        public ViewBase(ILoggerFactory loggerFactory, ArmyController armyController)
         {
             if (loggerFactory is null)
             {
                 throw new System.ArgumentNullException(nameof(loggerFactory));
             }
 
-            logger = loggerFactory.CreateLogger<WismViewBase>();
+            logger = loggerFactory.CreateLogger<ViewBase>();
+            this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
         }
 
         public async Task RunAsync()
         {
-            logger.LogInformation("WISM View successfully started");
+            logger.LogInformation("WISM successfully started");
 
             try
             {
@@ -65,18 +66,40 @@ namespace Wism.Client.Agent
         private void CreateDefaultGame()
         {
             Game.CreateDefaultGame();
-            
+
             // Create a default hero for testing
-            Game.Current.Players[0].HireHero(World.Current.Map[1, 1]);
+            var heroTile = World.Current.Map[1, 1];
+            Game.Current.Players[0].HireHero(heroTile);
+            Game.Current.Players[0].ConscriptArmy(
+                ModFactory.FindArmyInfo("HeavyInfantry"),
+                heroTile);
+            Game.Current.Players[0].ConscriptArmy(
+                ModFactory.FindArmyInfo("Pegasus"),
+                heroTile);
+            Game.Current.Players[0].ConscriptArmy(
+                ModFactory.FindArmyInfo("Pegasus"),
+                heroTile);
+
+            Game.Current.Players[0].ConscriptArmy(
+                ModFactory.FindArmyInfo("Pegasus"),
+                heroTile);
+
+            Game.Current.Players[0].ConscriptArmy(
+                ModFactory.FindArmyInfo("Pegasus"),
+                heroTile);
+
 
             // Set the player's selected army to a default for testing
-            this.selectedArmies = new List<Army>();
-            this.selectedArmies.Add(Game.Current.Players[0].GetArmies()[0]);
+            armyController.SelectArmy(heroTile.Armies);
 
             // Create an opponent with a light infantry for testing
+            var enemyTile = World.Current.Map[2, 2];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
-                World.Current.Map[2, 2]);
+                enemyTile);
+            Game.Current.Players[1].ConscriptArmy(
+                ModFactory.FindArmyInfo("Cavalry"),
+                enemyTile);
         }
     }
 }

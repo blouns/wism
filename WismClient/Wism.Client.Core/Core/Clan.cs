@@ -78,9 +78,7 @@ namespace Wism.Client.Core
 
         public override string ToString()
         {
-            return String.Format("{0} ({1})",
-                this.DisplayName,
-                isHuman ? "Human" : "CPU");
+            return ShortName;
         }
     }
 }

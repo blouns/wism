@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Core
@@ -35,6 +37,42 @@ namespace Wism.Client.Core
         public bool HasVisitingArmies()
         {
             return (VisitingArmies != null && VisitingArmies.Count > 0);
+        }
+
+        public bool HasArmies(List<Army> armies)
+        {
+            if (!HasArmies())
+            {
+                return false;
+            }
+
+            foreach (Army army in armies)
+            {
+                if (!this.Armies.Contains(army))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool HasVisitingArmies(List<Army> armies)
+        {
+            if (!HasVisitingArmies())
+            {
+                return false;
+            }
+
+            foreach (Army army in armies)
+            {
+                if (!this.VisitingArmies.Contains(army))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public void AddArmies(List<Army> newArmies)
@@ -76,6 +114,29 @@ namespace Wism.Client.Core
             }
         }
 
+        public void RemoveVisitingArmies(List<Army> armiesToRemove)
+        {
+            if (armiesToRemove is null)
+            {
+                throw new ArgumentNullException(nameof(armiesToRemove));
+            }
+
+            if (VisitingArmies == null)
+            {
+                throw new InvalidOperationException("Cannot remove visiting armies from a tile with no armies.");
+            }
+
+            foreach (Army army in armiesToRemove)
+            {
+                if (!this.VisitingArmies.Contains(army))
+                {
+                    throw new InvalidOperationException("Cannot remove visiting army from tile as it does not exist.");
+                }
+
+                this.VisitingArmies.Remove(army);
+            }
+        }
+
         public bool HasRoom(int newArmyCount)
         {
             return 
@@ -88,14 +149,22 @@ namespace Wism.Client.Core
             return this.Terrain.CanTraverse(army.CanWalk, army.CanFloat, army.CanFly);
         }
 
+        public bool CanTraverseHere(List<Army> armies)
+        {
+            return armies.TrueForAll(
+                army => this.CanTraverseHere(army));
+        }
+
         public override string ToString()
         {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"({X},{Y}):{Terrain}");
             if (HasArmies())
-                return Armies[0].ToString();
-            else if (Terrain != null)
-                return Terrain.ToString();
-            else
-                return base.ToString();
+            {
+                sb.Append($"[{Armies.Count}:{Armies[0]}]");
+            }
+
+            return sb.ToString();
         }
 
         public void AddArmy(Army army)
@@ -111,7 +180,7 @@ namespace Wism.Client.Core
         public List<Army> MusterArmy()
         {
             // TODO: Get surrounding armies in castle
-            return this.Armies;
+            return new List<Army>(this.Armies);
         }
 
         public void CommitVisitingArmies()
@@ -121,7 +190,12 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("There are no visiting armies to commit on this tile.");
             }
 
-            this.Armies = new List<Army>(this.VisitingArmies);
+            if (!HasArmies())
+            {
+                this.Armies = new List<Army>();                
+            }
+
+            this.Armies.AddRange(this.VisitingArmies);
             this.Armies.Sort(new ByArmyViewingOrder());
             this.VisitingArmies = null;
         }

@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Wism.Client.Agent.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands
 {
-    public class MoveCommand : ArmyCommand
+    public class AttackCommand : ArmyCommand
     {
         public int X { get; set; }
         public int Y { get; set; }
 
-        public MoveCommand(ArmyController armyController, List<Army> armies, int x, int y)
+        public AttackCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armyController, armies)
         {
             this.X = x;
@@ -21,9 +20,15 @@ namespace Wism.Client.Agent.Commands
 
         public override ActionState Execute()
         {
+            if (!armyController.TryAttack(Armies, World.Current.Map[X, Y]))
+            {
+                return ActionState.Failed;
+            }
+
+            // Attack successful; move into the location
             bool success = armyController.TryMove(Armies, World.Current.Map[X, Y]);
-            
-            return (success) ? ActionState.Succeeded : ActionState.Failed;            
+
+            return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
     }
 }

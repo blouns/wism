@@ -1,0 +1,22 @@
+﻿[What's Next?]
+Goal for the next phase is to implement cities and the production system. This will see new
+armies created, next-army select, city defense and army mustering, and city ownership.
+
+TODO List:
+* Refactor state-machine
+* Sub-select armies from a stack
+
+[Next Command]
+Next command needs a list of armies that are new or not marked "Defend". This can be implemented
+using the Player's armies list checking at the start of each turn for any !Defend armies. This
+will be added to a Next-list which will allow the UI to advance quickly through each unit.
+
+[Production Queue]
+Production only occurs at the start of a turn. For any new unit created, it must be added to a 
+new-units list. This will allow the UI to prompt to notify the human of new units and allow them
+to renew production or cancel.
+
+[Other]
+Consider a simple AI that attacks if it has the tactical advantage (strength) and runs if it 
+is weaker. Also, consider adding ASCII shortcuts for common tasks (perhaps a recorder for the 
+moves that can be saved?).
