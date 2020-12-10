@@ -12,10 +12,20 @@ namespace Wism.Client.Agent
         private readonly ILogger<WismAgent> logger;
         private readonly CommandController commandController;
 
-        public WismAgent(ILoggerFactory loggerFactory, CommandController commandController)
+        public WismAgent(ILoggerFactory loggerFactory, ControllerProvider wismController)
         {
+            if (loggerFactory is null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            if (wismController is null)
+            {
+                throw new ArgumentNullException(nameof(wismController));
+            }
+
             this.logger = loggerFactory.CreateLogger<WismAgent>();
-            this.commandController = commandController;
+            this.commandController = wismController.CommandController;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

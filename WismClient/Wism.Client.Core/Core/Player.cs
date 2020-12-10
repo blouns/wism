@@ -113,7 +113,7 @@ namespace Wism.Client.Core
             // Remove from the world
             var armies = new List<Army>() { army };
             var tile = army.Tile;
-            if (tile.HasArmies(armies))
+            if (tile.ContainsArmies(armies))
             {
                 tile.RemoveArmies(armies);
             }                 

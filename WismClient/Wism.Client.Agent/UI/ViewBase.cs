@@ -17,15 +17,20 @@ namespace Wism.Client.Agent
         private ILogger logger;
         private readonly ArmyController armyController;
 
-        public ViewBase(ILoggerFactory loggerFactory, ArmyController armyController)
+        public ViewBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
         {
             if (loggerFactory is null)
             {
                 throw new System.ArgumentNullException(nameof(loggerFactory));
             }
 
+            if (controllerProvider is null)
+            {
+                throw new ArgumentNullException(nameof(controllerProvider));
+            }
+
             logger = loggerFactory.CreateLogger<ViewBase>();
-            this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
+            this.armyController = controllerProvider.ArmyController;
         }
 
         public async Task RunAsync()
@@ -76,18 +81,6 @@ namespace Wism.Client.Agent
             Game.Current.Players[0].ConscriptArmy(
                 ModFactory.FindArmyInfo("Pegasus"),
                 heroTile);
-            Game.Current.Players[0].ConscriptArmy(
-                ModFactory.FindArmyInfo("Pegasus"),
-                heroTile);
-
-            Game.Current.Players[0].ConscriptArmy(
-                ModFactory.FindArmyInfo("Pegasus"),
-                heroTile);
-
-            Game.Current.Players[0].ConscriptArmy(
-                ModFactory.FindArmyInfo("Pegasus"),
-                heroTile);
-
 
             // Set the player's selected army to a default for testing
             armyController.SelectArmy(heroTile.Armies);

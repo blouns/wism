@@ -19,10 +19,11 @@ namespace Wism.Client.Modules
         private static IList<TerrainInfo> terrainInfos;
         private static IList<ClanInfo> ClanInfos;
         private static IList<ClanTerrainModifierInfo> ClanTerrainMappingInfos;
+        private static IList<CityInfo> cityInfos;
 
         public static IList<T> LoadModFiles<T>(string path)
-        {            
-            IList <T> objects = new List<T>();
+        {
+            IList<T> objects = new List<T>();
 
             // Load JSON file containing mod object array
             object obj;
@@ -54,15 +55,28 @@ namespace Wism.Client.Modules
             return null; // ID not found
         }
 
+        internal static IList<City> LoadCities(string path)
+        {
+            IList<City> cities = new List<City>();
+
+            IList<CityInfo> infos = LoadCityInfos(path);
+            foreach (CityInfo info in infos)
+            {
+                cities.Add(City.Create(info));
+            }
+
+            return cities;
+        }
+
         public static IList<Clan> LoadClans(string path)
         {
             string filePath = String.Format(@"{0}\{1}", path, ClanInfo.FileName);
             ClanInfos = LoadModFiles<ClanInfo>(filePath);
 
             IList<Clan> Clans = new List<Clan>();
-            foreach (ClanInfo ai in ClanInfos)
+            foreach (ClanInfo ci in ClanInfos)
             {
-                Clan Clan = Clan.Create(ai);                
+                Clan Clan = Clan.Create(ci);
                 IList<ClanTerrainModifierInfo> terrainModifiers = LoadClanTerrainMappingInfos(path);
                 foreach (ClanTerrainModifierInfo modifier in terrainModifiers)
                 {
@@ -93,6 +107,18 @@ namespace Wism.Client.Modules
         {
             IList<TerrainInfo> infos = LoadTerrainInfos(ModPath);
             foreach (TerrainInfo info in infos)
+            {
+                if (info.ShortName == shortName)
+                    return info;
+            }
+
+            return null; // ID not found
+        }
+
+        public static CityInfo FindCityInfo(string shortName)
+        {
+            IList<CityInfo> infos = LoadCityInfos(ModPath);
+            foreach (CityInfo info in infos)
             {
                 if (info.ShortName == shortName)
                     return info;
@@ -158,7 +184,7 @@ namespace Wism.Client.Modules
             }
 
             return ClanInfos;
-        }        
+        }
 
         public static IList<ClanInfo> GetClanInfos()
         {
@@ -192,7 +218,7 @@ namespace Wism.Client.Modules
             string filePath = String.Format(@"{0}\{1}", path, TerrainInfo.FileName);
             IList<Terrain> terrains = new List<Terrain>();
 
-            IList<TerrainInfo> modInfos = LoadModFiles<TerrainInfo>(filePath);            
+            IList<TerrainInfo> modInfos = LoadModFiles<TerrainInfo>(filePath);
             foreach (TerrainInfo info in modInfos)
             {
                 terrains.Add(Terrain.Create(info));
@@ -219,5 +245,24 @@ namespace Wism.Client.Modules
 
             return new List<ClanTerrainModifierInfo>(ClanTerrainMappingInfos);
         }
-    }    
+
+        public static IList<CityInfo> LoadCityInfos(string path)
+        {
+            string filePath = String.Format(@"{0}\{1}", path, CityInfo.FileName);
+            if (cityInfos == null)
+            {
+                cityInfos = LoadModFiles<CityInfo>(filePath);
+            }
+
+            return cityInfos;
+        }
+
+        public static IList<CityInfo> GetCityInfos()
+        {
+            if (cityInfos == null || cityInfos.Count == 0)
+                throw new InvalidOperationException("City infos not loaded.");
+
+            return new List<CityInfo>(cityInfos);
+        }
+    }
 }

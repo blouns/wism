@@ -22,6 +22,16 @@ namespace Wism.Client.Test.Common
             return logFactory;
         }
 
+        public static ControllerProvider CreateControllerProvider()
+        {
+            return new ControllerProvider()
+            {
+                ArmyController = CreateArmyController(),
+                CommandController = CreateCommandController(),
+                GameController = CreateGameController()
+            };
+        }
+
         public static CommandController CreateCommandController(IWismClientRepository repo = null)
         {
             

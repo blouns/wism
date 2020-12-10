@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 
 namespace Wism.Client.Core
 {
@@ -11,11 +12,25 @@ namespace Wism.Client.Core
         public int X { get; set; }
         public int Y { get; set; }
 
+        /// <summary>
+        /// Armies are optional (null) and are present when stationary on tile
+        /// </summary>
         public List<Army> Armies { get; set; }
 
+        /// <summary>
+        /// Visiting armies are optional (null) and are present when an army is moving
+        /// </summary>
         public List<Army> VisitingArmies { get; set; }
 
+        /// <summary>
+        /// Must have a Terrain (Void is default)
+        /// </summary>
         public Terrain Terrain { get; set; }
+
+        /// <summary>
+        /// May have zero or one buildings (e.g. City, Tower, Ruins, Temple)
+        /// </summary>
+        public City City { get; set; }
 
         public bool IsNeighbor(Tile other)
         {
@@ -29,17 +44,30 @@ namespace Wism.Client.Core
                     ((other.X == this.X + 1) && (other.Y == this.Y + 1)));
         }
 
+        /// <summary>
+        /// Checks if armies are present on the tile
+        /// </summary>
+        /// <returns>True if armies are present; otherwise, false</returns>
         public bool HasArmies()
         {
             return (Armies != null && Armies.Count > 0);
         }
 
+        /// <summary>
+        /// Check is visiting armies are present on the tile
+        /// </summary>
+        /// <returns>True if armies are present; otherwise, false</returns>
         public bool HasVisitingArmies()
         {
             return (VisitingArmies != null && VisitingArmies.Count > 0);
         }
 
-        public bool HasArmies(List<Army> armies)
+        /// <summary>
+        /// Checks if specific armies are present on the tile
+        /// </summary>
+        /// <param name="armies">Armies to check for</param>
+        /// <returns>True if all armies are present; otherwise, false</returns>
+        public bool ContainsArmies(List<Army> armies)
         {
             if (!HasArmies())
             {
@@ -57,7 +85,32 @@ namespace Wism.Client.Core
             return true;
         }
 
-        public bool HasVisitingArmies(List<Army> armies)
+        /// <summary>
+        /// Raze the any structure on the tile
+        /// </summary>
+        /// <remarks>Internal only; call Raze on IBuildable (tower, city)</remarks>
+        internal void RazeInternal()
+        {
+            // TODO: Raze Tower    
+            if (City == null)
+            {
+                throw new InvalidOperationException("Cannot raze a tile that has no structures!");
+            }
+
+            if (City != null)
+            {
+                City = null;
+                Terrain = MapBuilder.TerrainKinds["Ruins"];
+                return;
+            }        
+        }
+
+        /// <summary>
+        /// Checks if specific armies are present as visiting on the tile
+        /// </summary>
+        /// <param name="armies">Armies to check for</param>
+        /// <returns>True if all armies are present; otherwise, false</returns>
+        public bool ContainsVisitingArmies(List<Army> armies)
         {
             if (!HasVisitingArmies())
             {
@@ -75,6 +128,10 @@ namespace Wism.Client.Core
             return true;
         }
 
+        /// <summary>
+        /// Adds a set of armies to the tile
+        /// </summary>
+        /// <param name="newArmies">Armies to add</param>
         public void AddArmies(List<Army> newArmies)
         {
             if (!HasRoom(newArmies.Count))
@@ -91,6 +148,10 @@ namespace Wism.Client.Core
             newArmies.ForEach(a => a.Tile = this);
         }
 
+        /// <summary>
+        /// Removes armies from a tile
+        /// </summary>
+        /// <param name="armiesToRemove">Armies to remove</param>
         public void RemoveArmies(List<Army> armiesToRemove)
         {
             if (armiesToRemove is null)
@@ -114,6 +175,10 @@ namespace Wism.Client.Core
             }
         }
 
+        /// <summary>
+        /// Removes visiting armies from a tile
+        /// </summary>
+        /// <param name="armiesToRemove">Armies to remove</param>
         public void RemoveVisitingArmies(List<Army> armiesToRemove)
         {
             if (armiesToRemove is null)
@@ -137,6 +202,11 @@ namespace Wism.Client.Core
             }
         }
 
+        /// <summary>
+        /// Checks if there is room in the tile
+        /// </summary>
+        /// <param name="newArmyCount">Number of new armies to test if there is room for</param>
+        /// <returns></returns>
         public bool HasRoom(int newArmyCount)
         {
             return 
@@ -144,17 +214,31 @@ namespace Wism.Client.Core
                 ((this.Armies.Count + newArmyCount) <= Army.MaxUnits));
         }
 
+        /// <summary>
+        /// Check if the given army can move onto this tile
+        /// </summary>
+        /// <param name="army">Army to test</param>
+        /// <returns>True if the army can move here; otherwise, false</returns>
         public bool CanTraverseHere(Army army)
         {
             return this.Terrain.CanTraverse(army.CanWalk, army.CanFloat, army.CanFly);
         }
 
+        /// <summary>
+        /// Check if the given armies can move onto this tile
+        /// </summary>
+        /// <param name="army">Armies to test</param>
+        /// <returns>True if the armies can move here; otherwise, false</returns>
         public bool CanTraverseHere(List<Army> armies)
         {
             return armies.TrueForAll(
                 army => this.CanTraverseHere(army));
         }
 
+        /// <summary>
+        /// Print the tile
+        /// </summary>
+        /// <returns>String representation of the tile</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -177,9 +261,14 @@ namespace Wism.Client.Core
             AddArmies(new List<Army>() { army });
         }
 
+        /// <summary>
+        /// Gets all armies stationed on the tile. If in a city, 
+        /// returns all the armies in all city tiles as a garrison.
+        /// </summary>
+        /// <returns>Cities to defend current tile</returns>
         public List<Army> MusterArmy()
         {
-            // TODO: Get surrounding armies in castle
+            
             return new List<Army>(this.Armies);
         }
 
@@ -198,6 +287,18 @@ namespace Wism.Client.Core
             this.Armies.AddRange(this.VisitingArmies);
             this.Armies.Sort(new ByArmyViewingOrder());
             this.VisitingArmies = null;
+        }
+        
+        /// <summary>
+        /// Sets the clan owner for the tile.
+        /// </summary>
+        /// <param name="clan">Claim for which to stake the claim</param>
+        public void Claim(Clan clan)
+        {
+            if (City != null)
+            {
+                City.Claim(clan);
+            }
         }
     }
 }

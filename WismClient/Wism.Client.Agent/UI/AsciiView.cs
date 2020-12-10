@@ -29,45 +29,54 @@ namespace Wism.Client.Agent
 
         IDictionary<string, char> terrainMap = new Dictionary<string, char>
         {
-            { "Forest", 'F' },
-            { "Mountain", 'M' },
-            { "Grass", 'G' },
-            { "Water", 'W' },
+            { "Forest", '¶' },
+            { "Mountain", '^' },
+            { "Grass", '.' },
+            { "Water", '~' },
             { "Hill", 'h' },
-            { "Marsh", 'm' },
-            { "Road", 'R' },
-            { "Bridge", 'B' },
-            { "Castle", 'C' },
-            { "Ruins", 'r' },
-            { "Temple", 'T' },
-            { "Tomb", 't' },
-            { "Tower", 'K' },
+            { "Marsh", '%' },
+            { "Road", '=' },
+            { "Bridge", '=' },
+            { "Castle", '$' },
+            { "Ruins", '¥' },
+            { "Temple", '†' },
+            { "Tomb", '€' },
+            { "Tower", '\u0087' },
             { "Void", 'v' }
         };
 
-        public AsciiView(ILoggerFactory logFactory, ArmyController armyController, CommandController commandController, GameController gameController)
-            : base(logFactory, armyController)
+        IDictionary<string, ConsoleColor> clanColorsMap = new Dictionary<string, ConsoleColor>
+        {
+            { "Sirians", ConsoleColor.White },
+            { "StormGiants", ConsoleColor.Yellow },
+            { "GreyDwarves", ConsoleColor.DarkYellow },
+            { "OrcsOfKor", ConsoleColor.Red },
+            { "Elvallie", ConsoleColor.Green },
+            { "Selentines", ConsoleColor.DarkBlue },
+            { "HorseLords", ConsoleColor.Blue },
+            { "LordBane", ConsoleColor.DarkRed },
+            { "Neutral", ConsoleColor.Gray }
+        };
+
+        public AsciiView(ILoggerFactory logFactory, ControllerProvider controllerProvider)
+            : base(logFactory, controllerProvider)
         {
             if (logFactory is null)
             {
                 throw new ArgumentNullException(nameof(logFactory));
             }
 
-            if (armyController is null)
+            if (controllerProvider is null)
             {
-                throw new ArgumentNullException(nameof(armyController));
-            }
-
-            if (gameController is null)
-            {
-                throw new ArgumentNullException(nameof(gameController));
+                throw new ArgumentNullException(nameof(controllerProvider));
             }
 
             this.logger = logFactory.CreateLogger<AsciiView>();
-            this.commandController = commandController ?? throw new ArgumentNullException(nameof(commandController));
+            this.commandController = controllerProvider.CommandController;
             this.commandProviders = new List<ICommandProvider>()
             {
-                new ConsoleCommandProvider(logFactory, commandController, armyController, gameController)
+                new ConsoleCommandProvider(logFactory, 
+                controllerProvider.CommandController, controllerProvider.ArmyController, controllerProvider.GameController)
             };
         }
 
@@ -161,38 +170,86 @@ namespace Wism.Client.Agent
                 System.Environment.Exit(1);
             }
 
-            Console.WriteLine("=========================================================================================");
+            Console.Clear();
+            Console.SetCursorPosition(0, 0);
+            Console.WriteLine("==========================================");
             for (int y = 0; y < World.Current.Map.GetLength(1); y++)
             {
                 for (int x = 0; x < World.Current.Map.GetLength(0); x++)
-                {
+                {                    
                     Tile tile = World.Current.Map[x, y];
                     string terrain = tile.Terrain.ShortName;
                     string army = String.Empty;
+                    Clan clan = null;
                     if (tile.HasVisitingArmies())
                     {
                         army = tile.VisitingArmies[0].ShortName;
+                        clan = tile.VisitingArmies[0].Clan;
                     }
                     else if (tile.HasArmies())
                     {
                         army = tile.Armies[0].ShortName;
+                        clan = tile.Armies[0].Clan;
                     }
 
-                    string format = "({0},{1}):[{2},{3}]\t";
                     if (selectedTile == tile)
                     {
-                        format = "({0},{1}):{{{2},{3}}}\t";
+                        Console.BackgroundColor = ConsoleColor.Gray;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                    }
+                    else
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.Gray;
                     }
 
-                    Console.Write(format,
-                        tile.X,
-                        tile.Y,
-                        GetTerrainSymbol(terrain),
-                        GetArmySymbol(army));
+                    // Location
+                    Console.Write($"{tile.X}{tile.Y}");
+
+                    // Terrain
+                    Console.Write($"{GetTerrainSymbol(terrain)}");
+                    
+                    // Army
+                    var beforeColor = Console.ForegroundColor;
+                    Console.ForegroundColor = GetColorForClan(clan);
+                    Console.Write($"{GetArmySymbol(army)}");
+                    Console.ForegroundColor = beforeColor;
+                    
+                    // Army Count
+                    Console.Write($"{GetArmyCount(tile)}");
+
+                    // Buffer
+                    Console.Write("\t");
                 }
                 Console.WriteLine();                
             }
-            Console.WriteLine("=========================================================================================");
+            Console.WriteLine("==========================================");
+        }
+
+        private ConsoleColor GetColorForClan(Clan clan)
+        {
+            if (clan == null)
+            {
+                return ConsoleColor.Gray;
+            }
+
+            return clanColorsMap.Keys.Contains(clan.ShortName) ? clanColorsMap[clan.ShortName] : ConsoleColor.Gray;
+        }
+
+        private static string GetArmyCount(Tile tile)
+        {
+            int totalArmies = 0;
+            if (tile.HasArmies())
+            {
+                totalArmies = tile.Armies.Count;
+            }
+
+            if (tile.HasVisitingArmies())
+            {
+                totalArmies += tile.VisitingArmies.Count;
+            }
+
+            return (totalArmies == 0) ? " " : totalArmies.ToString();
         }
 
         private char GetTerrainSymbol(string terrain)
