@@ -3,8 +3,9 @@ Goal for the next phase is to implement cities and the production system. This w
 armies created, next-army select, city defense and army mustering, and city ownership.
 
 TODO List:
-* Refactor state-machine
-* Sub-select armies from a stack
+* Refactor state-machine in ASCII UI
+* Sub-select armies from a stack in ASCII UI
+* Add attack of city owned by clan with no armies or no armies in tile but armies in city
 
 [Next Command]
 Next command needs a list of armies that are new or not marked "Defend". This can be implemented

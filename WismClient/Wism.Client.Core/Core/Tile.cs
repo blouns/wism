@@ -300,5 +300,31 @@ namespace Wism.Client.Core
                 City.Claim(clan);
             }
         }
+
+        /// <summary>
+        /// Returns the surrounding tiles as a nine-grid with current tile at the center (1, 1).        
+        /// </summary>
+        /// <returns>
+        /// 3x3 tile grid in the form:
+        ///  { [0] [1] [2] },
+        ///  { [3] [4] [5] },
+        ///  { [6] [7] [8] }
+        ///  where [4] is the current tile.
+        /// </returns>
+        public Tile[,] GetNineGrid()
+        {
+            var map = World.Current.Map;
+            var nineGrid = new Tile[3, 3];
+
+            for (int yDelta = 1; yDelta >= -1; yDelta--)
+            {
+                for (int xDelta = -1; xDelta <= 1; xDelta++)
+                {
+                    nineGrid[X + xDelta, Y + yDelta] = map[X + xDelta, Y + yDelta];
+                }
+            }
+
+            return nineGrid;
+        }
     }
 }

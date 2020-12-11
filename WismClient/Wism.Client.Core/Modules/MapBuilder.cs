@@ -147,8 +147,8 @@ namespace Wism.Client.Modules
             AffixMapObjects(map);
 
             // Add cities
-            AddCity(map, 1, 3, "Marthos", "Sirians");
-            AddCity(map, 4, 1, "BanesCitadel", "LordBane");
+            //AddCity(map, 1, 3, "Marthos", "Sirians");
+            //AddCity(map, 4, 1, "BanesCitadel", "LordBane");
 
             return map;
         }
@@ -184,7 +184,7 @@ namespace Wism.Client.Modules
             var player = Game.Current.Players.Find(p => p.Clan.ShortName == clanName);
             if (player != null)
             {
-                city.Claim(player.Clan, tiles);
+                player.ClaimCity(city, tiles);
             }
              
         }

@@ -9,10 +9,9 @@ namespace Wism.Client.Core
     public class Player
     {
         private List<Army> myArmies = new List<Army>();
+        private List<City> myCities = new List<City>();
 
         public Clan Clan { get; set; }
-
-
 
         private Player()
         {
@@ -38,11 +37,9 @@ namespace Wism.Client.Core
             return new List<Army>(this.myArmies);
         }
 
-        public void HireHero()
+        public List<City> GetCities()
         {
-            Tile tile = FindTileForNewHero();
-
-            HireHero(tile);
+            return new List<City>(this.myCities);
         }
 
         public void HireHero(Tile tile)
@@ -154,37 +151,59 @@ namespace Wism.Client.Core
                     (!tile.HasArmies() || (tile.Armies.Count < Army.MaxUnits)));
         }
 
-        private Tile FindTileForNewHero()
-        {
-            // TODO: Temp code; need a home tile for the Hero; for now random location
-            Tile tile = null;
-            int retries = 0;
-            int maxRetries = 100;
-            ArmyInfo unitInfo = ArmyInfo.GetHeroInfo();
-
-            bool deployedHero = false;
-            while (!deployedHero)
-            {
-                if (retries++ > maxRetries)
-                {
-                    throw new ArgumentException(
-                        String.Format("Hero cannot be deployed to '{0}'.", tile.Terrain.DisplayName));
-                }
-
-                int x = Game.Current.Random.Next(0, World.Current.Map.GetLength(0));
-                int y = Game.Current.Random.Next(0, World.Current.Map.GetLength(1));
-
-                tile = World.Current.Map[x, y];
-
-                deployedHero = CanDeploy(unitInfo, tile);
-            }
-
-            return tile;
-        }
-
         public override string ToString()
         {
             return this.Clan.ToString();
+        }
+
+        /// <summary>
+        /// Stake a claims for a city.
+        /// </summary>
+        /// <param name="city">City to claim</param>
+        public void ClaimCity(City city)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            city.Claim(Clan, city.GetTiles());
+        }
+
+        /// <summary>
+        /// Stake a claim for a city; Internal-only used by MapBuilder
+        /// </summary>
+        /// <param name="city">City to claim</param>
+        /// <param name="tiles">Tiles for the city</param>
+        internal void ClaimCity(City city, Tile[] tiles)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            if (tiles is null)
+            {
+                throw new ArgumentNullException(nameof(tiles));
+            }
+
+            city.Claim(Clan, tiles);
+
+            // Add city to Player for tracking
+            this.myCities.Add(city);
+        }
+
+        public void RazeCity(City city)
+        {
+            if (city.Clan != Clan)
+            {
+                throw new ArgumentException($"Cannot raze a city not owned by the player. Player: {this}, City: {city}");
+            }
+
+            city.Raze();
+
+            // Remove city from Player tracking
+            this.myCities.Remove(city);
         }
     }
 }

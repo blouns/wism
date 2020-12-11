@@ -54,6 +54,11 @@ namespace Wism.Client.Test.Common
             return new GameController(CreateLogFactory());
         }
 
+        public static CityController CreateCityController()
+        {
+            return new CityController(CreateLogFactory());
+        }
+
         public static ActionState Select(CommandController commandController, ArmyController armyController, List<Army> armies)
         {
             return ExecuteCommandUntilDone(commandController,

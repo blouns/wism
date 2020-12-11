@@ -51,45 +51,40 @@ namespace Wism.Client.MapObjects
         {
             List<Army> armies = new List<Army>();
 
-            var quadrants = GetTileQuadrants();
+            var tiles = GetTiles();
             for (int i = 0; i < 4; i++)
             {
-                if (quadrants[i].Tile.HasArmies())
+                if (tiles[i].HasArmies())
                 {
-                    armies.AddRange(quadrants[i].Tile.Armies);
+                    armies.AddRange(tiles[i].Armies);
                 }
             }
 
             return armies;
         }
 
-        public (Tile Tile, Quadrant Quadrant)[] GetTileQuadrants()
+        /// <summary>
+        /// Gets the tiles for the city (4x4)
+        /// </summary>
+        /// <returns>Array contain four tiles</returns>
+        public Tile[] GetTiles()
         {
-            var quadrants = new (Tile, Quadrant)[4];
-
-            // The MapObject's tile is top-left quadrant by convention
-            quadrants[0] = (Tile, Quadrant.TopLeft);
-            quadrants[1] = (World.Current.Map[Tile.X + 1, Tile.Y], Quadrant.TopRight);
-            quadrants[2] = (World.Current.Map[Tile.X, Tile.Y - 1], Quadrant.BottomLeft);
-            quadrants[3] = (World.Current.Map[Tile.X + 1, Tile.Y - 1], Quadrant.BottomRight);
-
-            return quadrants;
-        }
-
-        public Quadrant GetQuadrant(Tile tile)
-        {
-            var tileQuadrants = GetTileQuadrants();
-
-            for (int i = 0; i < 4; i++)
+            if (Tile == null)
             {
-                if (tile == tileQuadrants[i].Tile)
-                {
-                    return tileQuadrants[i].Quadrant;
-                }
+                throw new InvalidOperationException("Cannot get tiles as the Tile was null.");
             }
 
-            throw new ArgumentOutOfRangeException(nameof(tile));
-        }
+            var nineGrid = Tile.GetNineGrid();
+
+            return new Tile[4]
+            {
+                nineGrid[1, 1],
+                nineGrid[1, 2],
+                nineGrid[2, 1],
+                nineGrid[2, 2]
+            };
+
+        }    
 
         public bool TryBuild()
         {
@@ -109,10 +104,10 @@ namespace Wism.Client.MapObjects
         /// </summary>
         public void Raze()
         {            
-            var quadrants = GetTileQuadrants();
+            var quadrants = GetTiles();
             for (int i = 0; i < 4; i++)
             {
-                quadrants[i].Tile.RazeInternal();                
+                quadrants[i].RazeInternal();                
             }
 
             // TODO: Reset production
@@ -121,43 +116,45 @@ namespace Wism.Client.MapObjects
         /// <summary>
         /// Stake a claim for the given clan
         /// </summary>
-        /// <param name="clan"></param>
-        internal void Claim(Clan clan)
+        /// <param name="clan">Clan to stake claim</param>
+        public void Claim(Clan clan)
         {
-            var quadrants = GetTileQuadrants();
-            for (int i = 0; i < 4; i++)
-            {
-                quadrants[i].Tile.City.Clan = clan;
-            }
-
-            // TODO: Ensure all armies are friendly
-            // TODO: Reset production
+            Claim(clan, GetTiles());
         }
 
-        internal void Claim(Clan clan, Tile[] tile4x4)
-        {           
+        internal void Claim(Clan clan, Tile[] tiles)
+        {
+            if (clan is null)
+            {
+                throw new ArgumentNullException(nameof(clan));
+            }
+
+            if (tiles is null)
+            {
+                throw new ArgumentNullException(nameof(tiles));
+            }
+            // Ensure all armies are friendly in the city
+            var cityArmies = MusterArmies();
+            if (!cityArmies.TrueForAll(a => a.Clan == clan))
+            {
+                throw new ArgumentException("Clan cannot claim a city when there are armies of another clan present.");
+            }
+
             for (int i = 0; i < 4; i++)
             {
-                if (tile4x4[i].City == null)
+                if (tiles[i].City == null)
                 {
                     throw new InvalidOperationException("Not able to claim as there is no city on this tile.");
                 }
-                tile4x4[i].City.Clan = clan;
+                tiles[i].City.Clan = clan;
             }
 
-            // TODO: Ensure all armies are friendly
             // TODO: Reset production
         }
-    }
 
-    /// <summary>
-    /// Helper enum to identify corner of the city (4x4)
-    /// </summary>
-    public enum Quadrant
-    {
-        TopLeft,
-        TopRight,
-        BottomRight,
-        BottomLeft
+        public override string ToString()
+        {
+            return this.ShortName;
+        }
     }
 }

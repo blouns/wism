@@ -6,7 +6,7 @@ using Wism.Client.Agent.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Test.Common;
 
-namespace Wism.Client.Test.Unit
+namespace Wism.Client.Test.Controller
 {
     [TestFixture]
     public class GameControllerTests

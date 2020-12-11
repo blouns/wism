@@ -5,7 +5,7 @@ using Wism.Client.Agent.Commands;
 using Wism.Client.Core;
 using Wism.Client.Test.Common;
 
-namespace Wism.Client.Test.Unit
+namespace Wism.Client.Test.Controller
 {
     [TestFixture]
     public class CommandControllerTests
