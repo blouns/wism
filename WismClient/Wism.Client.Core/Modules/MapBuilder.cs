@@ -146,10 +146,6 @@ namespace Wism.Client.Modules
 
             AffixMapObjects(map);
 
-            // Add cities
-            //AddCity(map, 1, 3, "Marthos", "Sirians");
-            //AddCity(map, 4, 1, "BanesCitadel", "LordBane");
-
             return map;
         }
 
@@ -160,7 +156,7 @@ namespace Wism.Client.Modules
         /// <param name="y">Top-left Y coordinate of tile for the city</param>
         /// <param name="shortName">Name of city</param>
         /// <remarks>Cities are four tiles and mutable so add clone to each.</remarks>
-        private static void AddCity(Tile[,] map, int x, int y, string shortName, string clanName)
+        internal static void AddCity(Tile[,] map, int x, int y, string shortName, string clanName)
         {
             var city = MapBuilder.CityKinds[shortName].Clone();
 

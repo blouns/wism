@@ -8,10 +8,14 @@ namespace Wism.Client.Core
 {
     public class Player
     {
+        private const int StartingGold = 432;
+
         private List<Army> myArmies = new List<Army>();
         private List<City> myCities = new List<City>();
 
         public Clan Clan { get; set; }
+
+        public int Gold { get; set; }
 
         private Player()
         {
@@ -26,7 +30,8 @@ namespace Wism.Client.Core
 
             Player player = new Player()
             {
-                Clan = clan
+                Clan = clan,
+                Gold = StartingGold
             };
 
             return player;
@@ -40,6 +45,30 @@ namespace Wism.Client.Core
         public List<City> GetCities()
         {
             return new List<City>(this.myCities);
+        }
+
+        public int GetIncome()
+        {
+            int income = 0;
+
+            foreach (City city in myCities)
+            {
+                income += city.Income;
+            }
+
+            return income;
+        }
+
+        public int GetUpkeep()
+        {
+            int upkeep = 0;
+
+            foreach (Army army in myArmies)
+            {
+                upkeep += army.Upkeep;
+            }
+
+            return upkeep;
         }
 
         public void HireHero(Tile tile)
@@ -85,7 +114,20 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot end turn; it's not my turn!");
             }
 
+            DoTheBooks();
             ResetArmies();
+        }
+
+        /// <summary>
+        /// Process city income and army upkeep for the turn.
+        /// </summary>
+        private void DoTheBooks()
+        {
+            Gold += GetIncome() - GetUpkeep();
+            if (Gold < 0)
+            {               
+                Gold = 0;
+            }
         }
 
         /// <summary>
@@ -167,7 +209,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(city));
             }
 
-            city.Claim(Clan, city.GetTiles());
+            ClaimCity(city, city.GetTiles());            
         }
 
         /// <summary>
@@ -187,10 +229,48 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(tiles));
             }
 
-            city.Claim(Clan, tiles);
+            // Are we claiming from another clan?
+            if (city.Clan != Clan && city.Clan != null)
+            {                
+                PillageGoldFromClan(city.Clan);
+            }
+
+            city.Claim(Clan, tiles);                        
 
             // Add city to Player for tracking
             this.myCities.Add(city);
+        }
+
+        /// <summary>
+        /// Pillage gold from the clan's city.
+        /// </summary>
+        /// <param name="clan">Clan to pillage from.</param>
+        /// <remarks>
+        ///  An Empire's treasury is considered to be distributed equally amongst all of
+        ///  its cities. If a city is captured, the Empire loses a proportional amount of
+        ///  its total treasury. Half of this money goes to the Empire that captured the
+        ///  city; the other half is considered to be liberated by the troops that did
+        ///  the pillaging!
+        /// </remarks>
+        private void PillageGoldFromClan(Clan clan)
+        {
+            // Find matching player
+            Player playerToPillage = Game.Current.Players.Find(p => p.Clan == clan);
+            if (playerToPillage == null)
+            {
+                return;
+            }
+
+            // Assume player-to-pillage's cities will be > 0 as we haven't claimed it yet
+
+            int cityCoffers = playerToPillage.Gold / playerToPillage.GetCities().Count;
+            Gold += (playerToPillage.Gold / playerToPillage.GetCities().Count) / 2;
+            
+            playerToPillage.Gold -= cityCoffers;
+            if (playerToPillage.Gold < 0)
+            {
+                playerToPillage.Gold = 0;
+            }
         }
 
         public void RazeCity(City city)

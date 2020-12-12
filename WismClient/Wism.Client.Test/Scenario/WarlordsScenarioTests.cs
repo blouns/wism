@@ -143,5 +143,35 @@ namespace Wism.Client.Test.Scenario
             Assert.AreEqual(4, Game.Current.Turn, "Unexpected player's turn");
             Assert.AreEqual("LordBane", Game.Current.GetCurrentPlayer().Clan.ShortName, "Unexpected player's turn");
         }
+
+        [Test]
+        public void MrMoneybags()
+        {
+            // Assemble
+            var cityController = TestUtilities.CreateCityController();
+            var commandController = TestUtilities.CreateCommandController();
+            var gameController = TestUtilities.CreateGameController();
+         
+            Game.CreateDefaultGame();
+            World.Current.AddDefaultCities();
+            Player sirians = Game.Current.Players[0];
+            Player lordBane = Game.Current.Players[1];
+
+            // Act
+            // Starting with 432 gp
+            // +216 gp for pillaging Lord Bane (50% of 432)
+            cityController.ClaimCity(lordBane.GetCities()[0], sirians);
+
+            // Do nothing; earn money!
+            for (int i = 0; i < 100; i++)
+            {
+                // +(30gp + 32gp) = +$62gp per turn
+                TestUtilities.EndTurn(commandController, gameController);
+                TestUtilities.EndTurn(commandController, gameController);
+            }
+
+            // Assert
+            Assert.AreEqual(432 + 216 + (100 * 62), sirians.Gold);
+        }
     }
 }

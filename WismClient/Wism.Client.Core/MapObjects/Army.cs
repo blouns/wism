@@ -16,6 +16,7 @@ namespace Wism.Client.MapObjects
 
         internal ArmyInfo Info { get => info; set => info = value; }
 
+        public int Upkeep { get; set; }
         public int Strength { get; set; }
         public int MovesRemaining { get; set; }
         public Clan Clan { get => Player.Clan; }

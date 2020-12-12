@@ -17,6 +17,8 @@ namespace Wism.Client.MapObjects
 
         public Clan Clan { get; private set; }
 
+        public int Income { get => Info.Income;  }
+
         public override string DisplayName { get => Info.DisplayName; }
 
         public override string ShortName { get => Info.ShortName; }        

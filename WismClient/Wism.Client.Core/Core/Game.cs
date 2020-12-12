@@ -160,7 +160,8 @@ namespace Wism.Client.Core
 
             // Setup default world for testing.
             World.CreateDefaultWorld();            
-        }       
+        }
+
     }
     public enum GameState
     {

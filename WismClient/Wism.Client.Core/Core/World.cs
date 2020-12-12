@@ -113,6 +113,13 @@ namespace Wism.Client.Core
             Reset(map);
         }
 
+        public void AddDefaultCities()
+        {
+            // Add cities
+            MapBuilder.AddCity(Map, 1, 3, "Marthos", "Sirians");
+            MapBuilder.AddCity(Map, 3, 1, "BanesCitadel", "LordBane");
+        }
+
         public void Reset(Tile[,] map)
         {
             //Validate(map);

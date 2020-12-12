@@ -320,7 +320,7 @@ namespace Wism.Client.Core
             {
                 for (int xDelta = -1; xDelta <= 1; xDelta++)
                 {
-                    nineGrid[X + xDelta, Y + yDelta] = map[X + xDelta, Y + yDelta];
+                    nineGrid[1 + xDelta, 1 + yDelta] = map[X + xDelta, Y + yDelta];
                 }
             }
 
