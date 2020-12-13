@@ -8,7 +8,8 @@ namespace Wism.Client.Core
 {
     public class Player
     {
-        private const int StartingGold = 432;
+        // TODO: Starting gold varies by clan
+        private const int StartingGold = 100;
 
         private List<Army> myArmies = new List<Army>();
         private List<City> myCities = new List<City>();
@@ -16,6 +17,7 @@ namespace Wism.Client.Core
         public Clan Clan { get; set; }
 
         public int Gold { get; set; }
+        public int Turn { get; private set; }
 
         private Player()
         {
@@ -31,7 +33,8 @@ namespace Wism.Client.Core
             Player player = new Player()
             {
                 Clan = clan,
-                Gold = StartingGold
+                Gold = StartingGold,
+                Turn = 1
             };
 
             return player;
@@ -76,6 +79,31 @@ namespace Wism.Client.Core
             return (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
         }
 
+        /// <summary>
+        /// Conscript an army from an army-in-training. Overrides defaults
+        /// with city-specific modifiers from training.
+        /// </summary>
+        /// <param name="ait">Army-in-training</param>
+        /// <param name="tile">Destination tile</param>
+        /// <returns>New army</returns>
+        public Army ConscriptArmy(ArmyInTraining ait, Tile tile)
+        {
+            var army = ConscriptArmy(ait.ArmyInfo, tile);
+            army.Upkeep = ait.Upkeep;
+            army.Strength += ait.StrengthModifier;
+            army.Moves += ait.MovesModifier;
+            army.MovesRemaining = army.Moves;
+            army.DisplayName = ait.DisplayName;
+
+            return army;
+        }
+
+        /// <summary>
+        /// Conscript an army from an army-in-training.
+        /// </summary>
+        /// <param name="armyInfo">Army kind</param>
+        /// <param name="tile">Destination tile</param>
+        /// <returns>New army</returns>
         public Army ConscriptArmy(ArmyInfo armyInfo, Tile tile)
         {
             if (armyInfo == null)
@@ -101,6 +129,28 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
+        /// Start production on a new army
+        /// </summary>
+        /// <param name="armyInfo">Army kind to produce</param>
+        /// <param name="productionCity">City to produce it from</param>
+        /// <param name="destinationCity">Desitination city for the army</param>
+        /// <returns>True if there is sufficient funds to start producing; otherwise, false</returns>
+        public bool ProduceArmy(ArmyInfo armyInfo, City productionCity, City destinationCity = null)
+        {
+            if (armyInfo is null)
+            {
+                throw new ArgumentNullException(nameof(armyInfo));
+            }
+
+            if (productionCity is null)
+            {
+                throw new ArgumentNullException(nameof(productionCity));
+            }
+
+            return productionCity.ProduceArmy(armyInfo, destinationCity);
+        }
+
+        /// <summary>
         /// End the players turn.
         /// </summary>
         /// <remarks>
@@ -114,8 +164,36 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot end turn; it's not my turn!");
             }
 
-            DoTheBooks();
+            Turn++;
             ResetArmies();
+        }
+
+        internal void StartTurn()
+        {
+            if (Game.Current.GetCurrentPlayer() != this)
+            {
+                throw new InvalidOperationException("Cannot start turn; it's not my turn!");
+            }
+
+            DoTheBooks();
+            ProduceArmies();
+            DeliverArmies();            
+        }
+
+        internal void DeliverArmies()
+        {
+            foreach (var city in myCities)
+            {
+                city.Barracks.Deliver();
+            }
+        }
+
+        internal void ProduceArmies()
+        {
+            foreach (var city in myCities)
+            {
+                city.Barracks.Produce();
+            }
         }
 
         /// <summary>
@@ -236,7 +314,7 @@ namespace Wism.Client.Core
                 city.Clan.Player.RemoveCity(city);
             }
 
-            city.Claim(Clan, tiles);                        
+            city.Claim(this, tiles);                        
 
             // Add city to Player for tracking
             this.myCities.Add(city);

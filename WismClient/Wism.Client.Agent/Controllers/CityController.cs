@@ -96,5 +96,94 @@ namespace Wism.Client.Agent.Controllers
 
             player.RazeCity(city);
         }
+
+        /// <summary>
+        /// Start production on an army.
+        /// </summary>
+        /// <param name="city">City to produce in</param>
+        /// <param name="armyInfo">Army kind to produce</param>
+        /// <returns>True if production started; otherwise, false (not enough money)</returns>
+        public bool TryStartingProduction(City city, ArmyInfo armyInfo)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            if (armyInfo is null)
+            {
+                throw new ArgumentNullException(nameof(armyInfo));
+            }
+
+            return city.Barracks.StartProduction(armyInfo);
+        }
+
+        /// <summary>
+        /// Start production on an army that will be delivered to the destination city.
+        /// </summary>
+        /// <param name="city">City to produce from</param>
+        /// <param name="armyInfo">Army kind to produce</param>
+        /// <param name="destinationCity">City to deliver to</param>
+        /// <returns>True if production started; otherwise, false (not enough money)</returns>
+        public bool TryStartingProductionToDestination(City city, ArmyInfo armyInfo, City destinationCity)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            if (armyInfo is null)
+            {
+                throw new ArgumentNullException(nameof(armyInfo));
+            }
+
+            if (destinationCity is null)
+            {
+                throw new ArgumentNullException(nameof(destinationCity));
+            }
+            
+            return city.Barracks.StartProduction(armyInfo, destinationCity);
+        }
+
+        /// <summary>
+        /// Advance production for all cities for one turn for current player.
+        /// </summary>
+        /// <returns>True if an army was produced.</returns>
+        public bool ProcessProductionForTurn()
+        {
+            bool result = false;
+            foreach(City city in Game.Current.GetCurrentPlayer().GetCities())
+            {
+                result |= city.Barracks.Produce();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Advance deliveries for armies pending for all cities for one turn
+        /// for current player.
+        /// </summary>
+        /// <returns>True if an army was delivered.</returns>
+        public bool DeliverArmiesForTurn()
+        {
+            bool result = false;
+            foreach (City city in Game.Current.GetCurrentPlayer().GetCities())
+            {
+                result |= city.Barracks.Deliver();
+            }
+
+            return result;
+        }
+
+        public void StopProduction(City city)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            city.Barracks.StopProduction();
+        }
     }
 }

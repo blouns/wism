@@ -90,6 +90,12 @@ namespace Wism.Client.Test.Common
                 new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
         }
 
+        public static ActionState StartTurn(CommandController commandController, GameController gameController)
+        {
+            return ExecuteCommandUntilDone(commandController,
+                new StartTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
+        }
+
         public static ActionState ExecuteCommandUntilDone(CommandController commandController, Command command)
         {
             // Simulate two-phase execution            

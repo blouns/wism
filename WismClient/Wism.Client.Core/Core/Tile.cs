@@ -328,14 +328,14 @@ namespace Wism.Client.Core
         }
         
         /// <summary>
-        /// Sets the clan owner for the tile.
+        /// Sets the owner for the tile.
         /// </summary>
-        /// <param name="clan">Claim for which to stake the claim</param>
-        public void Claim(Clan clan)
+        /// <param name="player">Player for which to stake the claim</param>
+        public void Claim(Player player)
         {
             if (City != null)
             {
-                City.Claim(clan);
+                City.Claim(player);
             }
         }
 

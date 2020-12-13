@@ -17,11 +17,11 @@ namespace Wism.Client.MapObjects
 
         public Clan Clan { get; private set; }
 
-        public int Income { get => Info.Income;  }
+        public int Income { get => Info.Income;  }        
 
-        public override string DisplayName { get => Info.DisplayName; }
+        public override string ShortName { get => Info.ShortName; }
 
-        public override string ShortName { get => Info.ShortName; }        
+        public Barracks Barracks { get; set; }
 
         public CityInfo Info
         {
@@ -37,6 +37,8 @@ namespace Wism.Client.MapObjects
         {
             this.info = info ?? throw new System.ArgumentNullException(nameof(info));
             this.Defense = info.Defense;
+            this.DisplayName = info.DisplayName;
+            this.Barracks = new Barracks(this, info.ProductionInfos);
         }
 
         public static City Create(CityInfo info)
@@ -106,29 +108,30 @@ namespace Wism.Client.MapObjects
         /// </summary>
         public void Raze()
         {            
-            var quadrants = GetTiles();
+            var tiles = GetTiles();
             for (int i = 0; i < 4; i++)
             {
-                quadrants[i].RazeInternal();                
+                tiles[i].RazeInternal();                
             }
 
-            // TODO: Reset production
+            // Reset production
+            this.Barracks.Reset();
         }
 
         /// <summary>
-        /// Stake a claim for the given clan
+        /// Stake a claim for the given player
         /// </summary>
-        /// <param name="clan">Clan to stake claim</param>
-        public void Claim(Clan clan)
+        /// <param name="player">Player to stake claim</param>
+        public void Claim(Player player)
         {
-            Claim(clan, GetTiles());
+            Claim(player, GetTiles());
         }
 
-        internal void Claim(Clan clan, Tile[] tiles)
+        internal void Claim(Player player, Tile[] tiles)
         {
-            if (clan is null)
+            if (player is null)
             {
-                throw new ArgumentNullException(nameof(clan));
+                throw new ArgumentNullException(nameof(player));
             }
 
             if (tiles is null)
@@ -137,21 +140,51 @@ namespace Wism.Client.MapObjects
             }
             // Ensure all armies are friendly in the city
             var cityArmies = MusterArmies();
-            if (!cityArmies.TrueForAll(a => a.Clan == clan))
+            if (!cityArmies.TrueForAll(a => a.Clan == player.Clan))
             {
                 throw new ArgumentException("Clan cannot claim a city when there are armies of another clan present.");
             }
 
+            // Claim the city
+            this.Player = player;
             for (int i = 0; i < 4; i++)
             {
                 if (tiles[i].City == null)
                 {
                     throw new InvalidOperationException("Not able to claim as there is no city on this tile.");
                 }
-                tiles[i].City.Clan = clan;
+                tiles[i].City.Clan = player.Clan;
             }
 
-            // TODO: Reset production
+            // Reset production
+            this.Barracks.Reset();
+            CancelIncomingProduction();
+        }
+
+        private void CancelIncomingProduction()
+        {
+            if (this.Player == null)
+            {
+                // Neutral city
+                return;
+            }    
+
+            var cities = this.Player.GetCities();
+            foreach (City otherCity in cities)
+            {
+                otherCity.Barracks.CancelDelivery(this);                
+            }
+        }
+
+        /// <summary>
+        /// Start producing an army in the barracks.
+        /// </summary>
+        /// <param name="armyInfo"></param>
+        /// <param name="destinationCity"></param>
+        /// <returns></returns>
+        internal bool ProduceArmy(ArmyInfo armyInfo, City destinationCity = null)
+        {
+            return this.Barracks.StartProduction(armyInfo, destinationCity);
         }
 
         public override string ToString()

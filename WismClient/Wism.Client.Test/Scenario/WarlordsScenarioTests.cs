@@ -54,7 +54,7 @@ namespace Wism.Client.Test.Scenario
 
             // Act
 
-            // Turn 1
+            // Turn 1: Sirians
             //  =========================================================================================
             // (0, 0):[M,]     (1, 0):[M,]     (2, 0):[M,]     (3, 0):[M,]     (4, 0):[M,]     (5, 0):[M,]
             // (0, 1):[M,]     (1, 1):[G,]     (2, 1):[G,]     (3, 1):[G,]     (4, 1):[G,]     (5, 1):[M,]
@@ -79,7 +79,7 @@ namespace Wism.Client.Test.Scenario
 
             TestUtilities.EndTurn(commandController, gameController);
 
-            // Turn 2
+            // Turn 1: Lord Bane
             //  =========================================================================================
             // (0, 0):[M,]     (1, 0):[M,]     (2, 0):[M,]     (3, 0):[M,]     (4, 0):[M,]     (5, 0):[M,]
             // (0, 1):[M,]     (1, 1):[L,H]    (2, 1):[G,]     (3, 1):[G,]     (4, 1):[G,]     (5, 1):[M,]
@@ -88,6 +88,8 @@ namespace Wism.Client.Test.Scenario
             // (0, 4):[M,]     (1, 4):[G,]     (2, 4):[G,]     (3, 4):[G,]     (4, 4):[G,]     (5, 4):[M,]
             // (0, 5):[M,]     (1, 5):[M,]     (2, 5):[M,]     (3, 5):[M,]     (4, 5):[M,]     (5, 5):[M,]
             //  =========================================================================================  
+            TestUtilities.StartTurn(commandController, gameController);
+
             // Attack and lose
             TestUtilities.Select(commandController, armyController,
                 lordBaneHero1);
@@ -106,7 +108,7 @@ namespace Wism.Client.Test.Scenario
 
             TestUtilities.EndTurn(commandController, gameController);
 
-            // Turn 3
+            // Turn 2: Sirians
             //  =========================================================================================
             // (0, 0):[M,]     (1, 0):[M,]     (2, 0):[M,]     (3, 0):[M,]     (4, 0):[M,]     (5, 0):[M,]
             // (0, 1):[M,]     (1, 1):[L,H]    (2, 1):[G,]     (3, 1):[G,]     (4, 1):[G,]     (5, 1):[M,]
@@ -115,6 +117,8 @@ namespace Wism.Client.Test.Scenario
             // (0, 4):[M,]     (1, 4):[G,]     (2, 4):[G,]     (3, 4):[G,]     (4, 4):[G,]     (5, 4):[M,]
             // (0, 5):[M,]     (1, 5):[M,]     (2, 5):[M,]     (3, 5):[M,]     (4, 5):[M,]     (5, 5):[M,]
             //  =========================================================================================   
+            TestUtilities.StartTurn(commandController, gameController);
+
             // Chase Lord Bane!
             TestUtilities.Select(commandController, armyController,
                 siriansHero1);
@@ -136,12 +140,12 @@ namespace Wism.Client.Test.Scenario
             TestUtilities.AttackUntilDone(commandController, armyController,
                 Game.Current.GetSelectedArmies(), 1, 1);
 
-            TestUtilities.EndTurn(commandController, gameController);
+            TestUtilities.EndTurn(commandController, gameController);           
 
             // Assert
             Assert.AreEqual(0, lordBane.GetArmies().Count, "Lord Bane is not yet defeated!");
             Assert.AreEqual(2, sirians.GetArmies().Count, "Sirians army took more losses than expected!");
-            Assert.AreEqual(4, Game.Current.Turn, "Unexpected player's turn");
+            Assert.AreEqual(3, sirians.Turn, "Unexpected player's turn");
             Assert.AreEqual("LordBane", Game.Current.GetCurrentPlayer().Clan.ShortName, "Unexpected player's turn");
         }
 
@@ -160,6 +164,9 @@ namespace Wism.Client.Test.Scenario
             World.Current.AddDefaultCities();
             Player sirians = Game.Current.Players[0];
             Player lordBane = Game.Current.Players[1];
+            const int startingGold = 432;
+            sirians.Gold = startingGold;
+            lordBane.Gold = startingGold;
 
             // Act
             // Starting with 432 gp
@@ -169,13 +176,18 @@ namespace Wism.Client.Test.Scenario
             // Do nothing; earn money!
             for (int i = 0; i < 100; i++)
             {
+                // Player 1
                 // +(30gp + 32gp) = +$62gp per turn
                 TestUtilities.EndTurn(commandController, gameController);
+                TestUtilities.StartTurn(commandController, gameController);
+
+                // Player 2
                 TestUtilities.EndTurn(commandController, gameController);
+                TestUtilities.StartTurn(commandController, gameController);
             }
 
             // Assert
-            Assert.AreEqual(432 + 216 + (100 * 62), sirians.Gold, "Sirians have a sketchy accountant");
+            Assert.AreEqual(startingGold + 216 + (100 * 62), sirians.Gold, "Sirians have a sketchy accountant");
             Assert.AreEqual(0, lordBane.Gold, "Lord Bane has a great accountant.");
         }
 

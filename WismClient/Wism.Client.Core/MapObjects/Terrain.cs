@@ -8,8 +8,6 @@ namespace Wism.Client.MapObjects
 
         public int MovementCost { get; set; }
 
-        public override string DisplayName { get => Info.DisplayName; }
-
         public override string ShortName { get => Info.ShortName; }
         public TerrainInfo Info 
         {
@@ -25,6 +23,7 @@ namespace Wism.Client.MapObjects
         {
             this.info = info ?? throw new System.ArgumentNullException(nameof(info));
             this.MovementCost = info.Movement;
+            this.DisplayName = info.DisplayName;
         }
 
         public static Terrain Create(TerrainInfo info)

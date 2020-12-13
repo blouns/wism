@@ -8,6 +8,7 @@ namespace Wism.Client.MapObjects
         internal Hero()
         {
             this.Info = ArmyInfo.GetHeroInfo();
+            this.DisplayName = Info.DisplayName;
         }
 
         public int GetCommandBonus()

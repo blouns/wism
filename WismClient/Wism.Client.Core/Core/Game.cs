@@ -12,7 +12,6 @@ namespace Wism.Client.Core
 
         public const int DefaultRandomSeed = 1990;
 
-        private int turn = 1;
         private int currentPlayerIndex;
         private GameState gameState;
         private List<Army> selectedArmies;
@@ -26,8 +25,6 @@ namespace Wism.Client.Core
         public IWarStrategy WarStrategy { get; set; }
 
         public GameState GameState { get => gameState; }
-
-        public int Turn { get => turn;  }
 
         public static Game Current
         {
@@ -65,33 +62,62 @@ namespace Wism.Client.Core
         /// Resets moves, triggers production, and allows for other clans 
         /// to complete their turns.
         /// </remarks>
-        public bool EndTurn()
-        {            
+        public void EndTurn()
+        {
             // End current players turn
-            Players[currentPlayerIndex].EndTurn();
+            var player = GetCurrentPlayer(); 
+            player.EndTurn();
             this.selectedArmies = null;
 
             // Set next players turn
             currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
 
-            turn++;
             Transition(GameState.StartingTurn);
-
-            return true;
         }
 
-        public bool StartTurn()
+        /// <summary>
+        /// Process production, new heros, evaluate if player is alive, etc.
+        /// </summary>
+        public void StartTurn()
         {
-            // TODO: Process production, new heros, evaluate if player is alive, etc.
+            // TODO: New heros, evaluate if player is alive, etc.
+            var player = GetCurrentPlayer();
+            player.StartTurn();
+            _ = SelectNextArmy();
 
             Transition(GameState.Ready);
+        }
 
-            return true;
+        /// <summary>
+        /// Selects the next army with moves remaining
+        /// </summary>
+        /// <returns>True if a new army has been selected; otherwise, False</returns>
+        public bool SelectNextArmy()
+        {
+            if (GameState != GameState.Ready &&
+                GameState != GameState.SelectedArmy)
+            {
+                return false;
+            }
+
+            var player = GetCurrentPlayer();
+            var armies = player.GetArmies();
+            foreach (Army army in armies)
+            {
+                if (!army.IsDefending &&
+                    army.MovesRemaining > 0)
+                {
+                    SelectArmies(army.Tile.Armies);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public List<Army> GetSelectedArmies()
         {
-            if (selectedArmies == null)
+            if (!ArmiesSelected())
             {
                 return null;
             }
@@ -102,6 +128,12 @@ namespace Wism.Client.Core
 
         public void SelectArmies(List<Army> visitingArmies)
         {
+            if (GameState != GameState.Ready &&
+                ArmiesSelected())
+            {
+                return;
+            }
+
             if (visitingArmies is null)
             {
                 throw new ArgumentNullException(nameof(visitingArmies));
@@ -113,12 +145,17 @@ namespace Wism.Client.Core
             }
 
             this.selectedArmies = new List<Army>(visitingArmies);
+            this.selectedArmies.ForEach(a => a.IsDefending = false);
             Transition(GameState.SelectedArmy);
         }
 
+        /// <summary>
+        /// Removes the given armies from currently selected armies
+        /// </summary>
+        /// <param name="armies">Armies to remove</param>
         public void RemoveSelectedArmies(List<Army> armies)
         {
-            if (selectedArmies == null || selectedArmies.Count == 0)
+            if (!ArmiesSelected())
             {
                 return;
             }
@@ -126,10 +163,38 @@ namespace Wism.Client.Core
             armies.ForEach(a => selectedArmies.Remove(a));
         }
 
+        public bool ArmiesSelected()
+        {
+            return (GameState == GameState.SelectedArmy) &&
+                   (selectedArmies != null) &&
+                   (selectedArmies.Count > 0);
+        }
+
+        /// <summary>
+        /// Deselect the selected armies.
+        /// </summary>
         public void DeselectArmies()
         {
+            if (!ArmiesSelected())
+            {
+                return;
+            }
+
             this.selectedArmies = null;
             Transition(GameState.Ready);
+        }
+
+        /// <summary>
+        /// Set the armies into defensive sentry mode
+        /// </summary>
+        public void DefendSelectedArmies()
+        {
+            if (!ArmiesSelected())
+            {
+                return;
+            }
+            
+            this.selectedArmies.ForEach(a => a.Defend());
         }
 
         public static void CreateDefaultPlayers()
@@ -159,7 +224,7 @@ namespace Wism.Client.Core
             CreateDefaultPlayers();
 
             // Setup default world for testing.
-            World.CreateDefaultWorld();            
+            World.CreateDefaultWorld();
         }
 
     }

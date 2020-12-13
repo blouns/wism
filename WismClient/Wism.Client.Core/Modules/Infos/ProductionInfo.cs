@@ -19,6 +19,5 @@ namespace Wism.Client.Modules
 
         [DataMember]
         public int MovesModifier { get; set; }
-
     }
 }

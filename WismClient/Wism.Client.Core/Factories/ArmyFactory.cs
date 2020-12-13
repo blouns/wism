@@ -28,6 +28,8 @@ namespace Wism.Client.Agent.Factories
             newArmy.MovesRemaining = info.Moves;
             newArmy.Player = player;
             newArmy.HitPoints = DefaultHitPoints;
+            newArmy.DisplayName = info.DisplayName;
+            newArmy.Moves = info.Moves;
 
             return newArmy;
         }
