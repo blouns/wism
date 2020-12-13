@@ -86,8 +86,16 @@ namespace Wism.Client.Agent.Controllers
         /// <summary>
         /// Advance the army one step along the shortest route.
         /// </summary>
-        /// <param name="coord"></param>
-        /// <returns>Action state</returns>
+        /// <param name="armiesToMove">Armies to move</param>
+        /// <param name="targetTile">Tile to move towards</param>
+        /// <param name="path">Path to the tile (null input will find a new route)</param>
+        /// <param name="distance">Distance in moves to tile</param>
+        /// <returns>
+        /// Action state:
+        ///   * Success if move completed
+        ///   * Failed if blocked or out of moves
+        ///   * In-Progress if destination not yet reached
+        /// </returns>
         public ActionState MoveOneStep(List<Army> armiesToMove, Tile targetTile, ref IList<Tile> path, out float distance)
         {
             if (armiesToMove is null || armiesToMove.Count == 0)
@@ -116,7 +124,6 @@ namespace Wism.Client.Agent.Controllers
             }
 
             IList<Tile> myPath = path;
-
             float myDistance;
             if (myPath == null)
             {
@@ -238,7 +245,8 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
-            if (targetTile.Armies == null)
+            if (!targetTile.HasArmies() &&
+                !targetTile.HasCity())
             {
                 throw new ArgumentException("Target tile has no armies to attack.");
             }
@@ -262,6 +270,11 @@ namespace Wism.Client.Agent.Controllers
             {
                 // Attacker won
                 targetTile.Armies = null;
+                if (targetTile.HasCity())
+                {
+                    var player = attackingFromTile.VisitingArmies[0].Player;
+                    player.ClaimCity(targetTile.City);
+                }
                 Game.Current.Transition(GameState.SelectedArmy);
             }
             else

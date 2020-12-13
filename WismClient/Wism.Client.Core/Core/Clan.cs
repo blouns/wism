@@ -17,6 +17,8 @@ namespace Wism.Client.Core
 
         public string ShortName { get => info.ShortName; }
 
+        public Player Player { get => Game.Current.Players.Find(p => p.Clan == this);  }
+
         public static Clan Create(ClanInfo info)
         {
             return new Clan(info);

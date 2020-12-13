@@ -71,9 +71,9 @@ namespace Wism.Client.Core
             return upkeep;
         }
 
-        public void HireHero(Tile tile)
+        public Hero HireHero(Tile tile)
         {
-            ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            return (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
         }
 
         public Army ConscriptArmy(ArmyInfo armyInfo, Tile tile)
@@ -233,12 +233,18 @@ namespace Wism.Client.Core
             if (city.Clan != Clan && city.Clan != null)
             {                
                 PillageGoldFromClan(city.Clan);
+                city.Clan.Player.RemoveCity(city);
             }
 
             city.Claim(Clan, tiles);                        
 
             // Add city to Player for tracking
             this.myCities.Add(city);
+        }
+
+        private void RemoveCity(City city)
+        {
+            this.myCities.Remove(city);
         }
 
         /// <summary>

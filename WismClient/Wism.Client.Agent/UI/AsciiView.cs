@@ -41,7 +41,7 @@ namespace Wism.Client.Agent
             { "Ruins", '¥' },
             { "Temple", '†' },
             { "Tomb", '€' },
-            { "Tower", '\u0087' },
+            { "Tower", '#' },
             { "Void", 'v' }
         };
 
@@ -158,6 +158,7 @@ namespace Wism.Client.Agent
             var currentPlayerArmies = currentPlayer.GetArmies();
             var selectedArmies = Game.Current.GetSelectedArmies();
             Tile selectedTile = null;
+            ConsoleColor beforeColor;
 
             if (selectedArmies != null && selectedArmies.Count > 0)
             {
@@ -207,10 +208,20 @@ namespace Wism.Client.Agent
                     Console.Write($"{tile.X}{tile.Y}");
 
                     // Terrain
-                    Console.Write($"{GetTerrainSymbol(terrain)}");
+                    if (tile.HasCity())
+                    {
+                        beforeColor = Console.ForegroundColor;
+                        Console.ForegroundColor = GetColorForClan(tile.City.Clan);
+                        Console.Write($"{GetTerrainSymbol(terrain)}");
+                        Console.ForegroundColor = beforeColor;
+                    }
+                    else
+                    {
+                        Console.Write($"{GetTerrainSymbol(terrain)}");
+                    }
                     
                     // Army
-                    var beforeColor = Console.ForegroundColor;
+                    beforeColor = Console.ForegroundColor;
                     Console.ForegroundColor = GetColorForClan(clan);
                     Console.Write($"{GetArmySymbol(army)}");
                     Console.ForegroundColor = beforeColor;

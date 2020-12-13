@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Wism.Client.Agent.Commands;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Scenario
@@ -38,7 +39,7 @@ namespace Wism.Client.Test.Scenario
             Tile tile1 = World.Current.Map[1, 1];
             Tile tile2 = World.Current.Map[1, 2];
             sirians.HireHero(tile1);
-            sirians.HireHero(tile2);            
+            sirians.HireHero(tile2);
             var siriansHero1 = new List<Army>(tile1.Armies);
             var siriansHero2 = new List<Army>(tile2.Armies);
 
@@ -91,8 +92,8 @@ namespace Wism.Client.Test.Scenario
             TestUtilities.Select(commandController, armyController,
                 lordBaneHero1);
             TestUtilities.AttackUntilDone(commandController, armyController,
-                lordBaneHero1, 3, 3);       
-            
+                lordBaneHero1, 3, 3);
+
             // Run away
             TestUtilities.Select(commandController, armyController,
                 lordBaneHero2);
@@ -134,7 +135,7 @@ namespace Wism.Client.Test.Scenario
                 World.Current.Map[2, 2].Armies);
             TestUtilities.AttackUntilDone(commandController, armyController,
                 Game.Current.GetSelectedArmies(), 1, 1);
-            
+
             TestUtilities.EndTurn(commandController, gameController);
 
             // Assert
@@ -144,14 +145,17 @@ namespace Wism.Client.Test.Scenario
             Assert.AreEqual("LordBane", Game.Current.GetCurrentPlayer().Clan.ShortName, "Unexpected player's turn");
         }
 
+        /// <summary>
+        /// Scenario: Investing 101: Real estate! Gather money over a set of turns.
+        /// </summary>
         [Test]
-        public void MrMoneybags()
+        public void Gold_MrMoneybags()
         {
             // Assemble
             var cityController = TestUtilities.CreateCityController();
             var commandController = TestUtilities.CreateCommandController();
             var gameController = TestUtilities.CreateGameController();
-         
+
             Game.CreateDefaultGame();
             World.Current.AddDefaultCities();
             Player sirians = Game.Current.Players[0];
@@ -171,7 +175,305 @@ namespace Wism.Client.Test.Scenario
             }
 
             // Assert
-            Assert.AreEqual(432 + 216 + (100 * 62), sirians.Gold);
+            Assert.AreEqual(432 + 216 + (100 * 62), sirians.Gold, "Sirians have a sketchy accountant");
+            Assert.AreEqual(0, lordBane.Gold, "Lord Bane has a great accountant.");
+        }
+
+        /// <summary>
+        /// Scenario: Move hero around an unowned city to a tower on the other side.
+        /// 
+        /// Start state:
+        /// ============================================
+        ///   00^   10^     20^     30^     40^     50^
+        ///   01^   11.H1   21^     31^     41#     51^
+        ///   02^   12.     22$     32$     42.     52^
+        ///   03^   13.     23$     33$     43.     53^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   05^   15^     25^     35^     45^     55^
+        /// ============================================
+        /// 
+        /// End State:
+        /// ============================================
+        ///   00^   10^     20^     30^     40^     50^
+        ///   01^   11.     21^     31^     41#H1   51^
+        ///   02^   12.     22$     32$     42.     52^
+        ///   03^   13.     23$     33$     43.     53^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   05^   15^     25^     35^     45^     55^
+        /// ============================================
+        /// Legend: 1:X, 2:Y, 3:Terrain, 4:Army 5:ArmyCount
+        /// </summary>
+        [Test]
+        public void Move_RouteAroundUnownedCityToTower()
+        {
+            // Assemble
+            var armyController = TestUtilities.CreateArmyController();
+            var commandController = TestUtilities.CreateCommandController();
+
+            Game.CreateDefaultGame();
+            World.Current.Map[2, 1].Terrain = MapBuilder.TerrainKinds["Mountain"];
+            World.Current.Map[3, 1].Terrain = MapBuilder.TerrainKinds["Mountain"];
+
+            // Initial Sirians setup
+            Player sirians = Game.Current.Players[0];
+            Tile tile1 = World.Current.Map[1, 1];            
+            var siriansHero1 = new List<Army>() 
+            {
+                sirians.HireHero(tile1)
+            };
+
+            // Add city owned by Lord Bane to route around
+            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+
+            // Act
+            TestUtilities.Select(commandController, armyController,
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                siriansHero1, 4, 1);
+            TestUtilities.Deselect(commandController, armyController,
+                siriansHero1);
+
+            // Assert
+            Assert.AreEqual(4, siriansHero1[0].X, "Hero did not move to the correct position.");
+            Assert.AreEqual(1, siriansHero1[0].Y, "Hero did not move to the correct position.");
+            Assert.AreEqual(
+                siriansHero1[0].Moves - 14,      // Should take 14 moves
+                siriansHero1[0].MovesRemaining, 
+                "Hero did not follow the expected route.");
+        }
+
+
+        /// <summary>
+        /// Scenario: Attack a city full of troops, but where no armies are stationed.
+        /// 
+        /// Start state:
+        /// ============================================
+        ///   00^   10^     20^     30^     40^     50^
+        ///   01^   11.H1   21^     31^     41.     51^
+        ///   02^   12.     22$     32$i8   42.     52^
+        ///   03^   13.     23$i8   33$i8   43.     53^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   05^   15^     25^     35^     45^     55^
+        /// ============================================
+        /// 
+        /// End State:
+        /// ============================================
+        ///   00^   10^     20^     30^     40^     50^
+        ///   01^   11.     21^     31^     41.     51^
+        ///   02^   12.     22$     32$i8   42.     52^
+        ///   03^   13.     23$i5   33$i8   43.     53^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   05^   15^     25^     35^     45^     55^
+        /// ============================================
+        /// Legend: 1:X, 2:Y, 3:Terrain, 4:Army 5:ArmyCount
+        /// </summary>
+        [Test]
+        public void Attack_CityWithArmies_Fail()
+        {
+            // Assemble
+            var armyController = TestUtilities.CreateArmyController();
+            var commandController = TestUtilities.CreateCommandController();
+
+            Game.CreateDefaultGame();
+
+            // Initial Sirians setup
+            Player sirians = Game.Current.Players[0];
+            Tile tile1 = World.Current.Map[1, 1];
+            var siriansHero1 = new List<Army>()
+            {
+                sirians.HireHero(tile1)
+            };
+
+            // Initial Bane's setup
+            Player bane = Game.Current.Players[1];
+            Tile tile2 = World.Current.Map[2, 3];
+            Tile tile3 = World.Current.Map[3, 2];
+            Tile tile4 = World.Current.Map[3, 3];
+            var bane1 = new List<Army>()
+            {
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2)
+            };
+            var bane2 = new List<Army>()
+            {
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3)
+            };
+            var bane3 = new List<Army>()
+            {
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4),
+                bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4)
+            };
+
+            // Add city owned by Lord Bane full of troops (but not in (2,2); attack the 'empty' tile)
+            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+
+            // Act
+            TestUtilities.Select(commandController, armyController,
+                siriansHero1);
+            TestUtilities.AttackUntilDone(commandController, armyController,
+                siriansHero1, 2, 2);
+            
+            // Assert
+            Assert.AreEqual(0, sirians.GetArmies().Count, "Hero is still alive!.");
+            Assert.AreEqual(5, tile2.Armies.Count, "Unexpected number of armies remaining.");
+        }
+
+        /// <summary>
+        /// Scenario: Take the city!
+        /// 
+        /// Start state:
+        /// ============================================
+        ///   00^   10^     20^     30^     40^     50^
+        ///   01^   11.H8   21^     31^     41.     51^
+        ///   02^   12.     22$     32$i1   42.     52^
+        ///   03^   13.     23$i1   33$i1   43.     53^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   05^   15^     25^     35^     45^     55^
+        /// ============================================
+        /// 
+        /// End State:
+        /// ============================================
+        ///   00^   10^     20^     30^     40^     50^
+        ///   01^   11.     21^     31^     41.     51^
+        ///   02^   12.     22$H8   32$     42.     52^
+        ///   03^   13.     23$     33$     43.     53^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   05^   15^     25^     35^     45^     55^
+        /// ============================================
+        /// Legend: 1:X, 2:Y, 3:Terrain, 4:Army 5:ArmyCount
+        /// </summary>
+        [Test]
+        public void Attack_CityWithArmies_Succcess()
+        {
+            // Assemble
+            var armyController = TestUtilities.CreateArmyController();
+            var commandController = TestUtilities.CreateCommandController();
+
+            Game.CreateDefaultGame();
+
+            // Initial Sirians setup
+            Player sirians = Game.Current.Players[0];
+            Tile tile1 = World.Current.Map[1, 1];
+            var siriansHero1 = new List<Army>()
+            {
+                sirians.HireHero(tile1),
+                sirians.HireHero(tile1),
+                sirians.HireHero(tile1),
+                sirians.HireHero(tile1),
+                sirians.HireHero(tile1),
+                sirians.HireHero(tile1),
+                sirians.HireHero(tile1),
+                sirians.HireHero(tile1)
+            };
+
+            // Initial Bane's setup
+            Player bane = Game.Current.Players[1];
+            Tile tile2 = World.Current.Map[2, 3];
+            Tile tile3 = World.Current.Map[3, 2];
+            Tile tile4 = World.Current.Map[3, 3];
+            bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2);
+            bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3);
+            bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4);
+
+            // Add city owned by Lord Bane full of troops (but not in (2,2))
+            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+
+            // Act
+            TestUtilities.Select(commandController, armyController,
+                siriansHero1);
+            TestUtilities.AttackUntilDone(commandController, armyController,
+                siriansHero1, 2, 2);
+
+            // Assert
+            Assert.AreEqual(8, sirians.GetArmies().Count, "More heros fell than expected.");
+            Assert.AreEqual(0, bane.GetArmies().Count, "Unexpected number of armies remaining.");
+            Assert.AreEqual(1, sirians.GetCities().Count, "Unexpected number of cities.");
+            Assert.AreEqual(0, bane.GetCities().Count, "Unexpected number of cities.");
+            Assert.AreEqual(2, siriansHero1[0].X, "Army didn't actually move into the city.");
+            Assert.AreEqual(2, siriansHero1[0].Y, "Army didn't actually move into the city.");
+            Assert.AreEqual(sirians.Clan, World.Current.Map[2, 2].City.Clan,
+                "Sirian's couldn't take the city.");
+        }
+
+        /// <summary>
+        /// Scenario: Take an empty city.
+        /// 
+        /// Start state:
+        /// ============================================
+        ///   00^   10^     20^     30^     40^     50^
+        ///   01^   11.H1   21^     31^     41.     51^
+        ///   02^   12.     22$     32$     42.     52^
+        ///   03^   13.     23$     33$     43.     53^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   05^   15^     25^     35^     45^     55^
+        /// ============================================
+        /// 
+        /// End State:
+        /// ============================================
+        ///   00^   10^     20^     30^     40^     50^
+        ///   01^   11.     21^     31^     41.     51^
+        ///   02^   12.     22$H1   32$     42.     52^
+        ///   03^   13.     23$     33$     43.     53^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   05^   15^     25^     35^     45^     55^
+        /// ============================================
+        /// Legend: 1:X, 2:Y, 3:Terrain, 4:Army 5:ArmyCount
+        /// </summary>
+        [Test]
+        public void Attack_EmptyCity_Succcess()
+        {
+            // Assemble
+            var armyController = TestUtilities.CreateArmyController();
+            var commandController = TestUtilities.CreateCommandController();
+
+            Game.CreateDefaultGame();
+
+            // Initial Sirians setup
+            Player sirians = Game.Current.Players[0];
+            Tile tile1 = World.Current.Map[1, 1];
+            var siriansHero1 = new List<Army>()
+            {
+                sirians.HireHero(tile1)
+            };
+
+            // Initial Bane's setup
+            Player bane = Game.Current.Players[1];
+            
+            // Add city owned by Lord Bane full of troops (but not in (2,2))
+            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+
+            // Act
+            TestUtilities.Select(commandController, armyController,
+                siriansHero1);
+            TestUtilities.AttackUntilDone(commandController, armyController,
+                siriansHero1, 2, 2);
+
+            // Assert
+            Assert.AreEqual(sirians.Clan, World.Current.Map[2, 2].City.Clan, 
+                "Sirian's can't even take an empty city!");
+            Assert.AreEqual(2, siriansHero1[0].X, "Army didn't actually move into the city.");
+            Assert.AreEqual(2, siriansHero1[0].Y, "Army didn't actually move into the city.");
+            Assert.AreEqual(1, sirians.GetCities().Count, "Unexpected number of cities.");
+            Assert.AreEqual(0, bane.GetCities().Count, "Unexpected number of cities.");
         }
     }
 }

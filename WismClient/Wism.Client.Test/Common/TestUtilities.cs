@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -102,6 +103,26 @@ namespace Wism.Client.Test.Common
             }
 
             return result;
+        }
+
+        public static void PlotRouteOnMap(Tile[,] map, List<Tile> path)
+        {
+            for (int y = 0; y <= map.GetUpperBound(0); y++)
+            {
+                for (int x = 0; x <= map.GetUpperBound(1); x++)
+                {
+                    var tile = path.Find(t => ((t.X == x) && (t.Y == y)));
+                    if (tile != null)
+                    {
+                        TestContext.Write($"({x},{y}){{{map[x, y]}}}>\t");
+                    }
+                    else
+                    {
+                        TestContext.Write($"({x},{y})[{map[x, y]}]\t");
+                    }
+                }
+                TestContext.WriteLine();
+            }
         }
     }
 }

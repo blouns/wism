@@ -152,15 +152,37 @@ namespace Wism.Client.Modules
         /// <summary>
         /// Add a city to the map
         /// </summary>
+        /// <param name="map">World map to add the city to</param>
         /// <param name="x">Top-left X coordinate of tile for the city</param>
         /// <param name="y">Top-left Y coordinate of tile for the city</param>
         /// <param name="shortName">Name of city</param>
+        /// <param name="clanName">Name of clan or Neutral</param>
         /// <remarks>Cities are four tiles and mutable so add clone to each.</remarks>
-        internal static void AddCity(Tile[,] map, int x, int y, string shortName, string clanName)
+        public static void AddCity(Tile[,] map, int x, int y, string shortName, string clanName = "Neutral")
         {
-            var city = MapBuilder.CityKinds[shortName].Clone();
+            if (map is null)
+            {
+                throw new ArgumentNullException(nameof(map));
+            }
 
-            // Add to map
+            if (string.IsNullOrEmpty(shortName))
+            {
+                throw new ArgumentException($"'{nameof(shortName)}' cannot be null or empty", nameof(shortName));
+            }
+
+            if (string.IsNullOrEmpty(clanName))
+            {
+                throw new ArgumentException($"'{nameof(clanName)}' cannot be null or empty", nameof(clanName));
+            }
+
+            var city = MapBuilder.CityKinds[shortName];
+            if (city == null)
+            {
+                throw new ArgumentException($"{shortName} not found in city modules.");
+            }
+            city = city.Clone();
+
+            // Add to map            
             city.Tile = map[x, y];
             var tiles = new Tile[]
             {

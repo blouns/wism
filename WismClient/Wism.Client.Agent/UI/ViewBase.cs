@@ -86,13 +86,21 @@ namespace Wism.Client.Agent
             armyController.SelectArmy(heroTile.Armies);
 
             // Create an opponent with a light infantry for testing
-            var enemyTile = World.Current.Map[2, 2];
+            var enemyTile1 = World.Current.Map[2, 2];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
-                enemyTile);
+                enemyTile1);
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("Cavalry"),
-                enemyTile);
+                enemyTile1);
+
+            var enemyTile2 = World.Current.Map[2, 3];
+            Game.Current.Players[1].ConscriptArmy(
+                ModFactory.FindArmyInfo("LightInfantry"),
+                enemyTile2);
+
+            // Add cities
+            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
         }
     }
 }

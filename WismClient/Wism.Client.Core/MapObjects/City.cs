@@ -158,5 +158,15 @@ namespace Wism.Client.MapObjects
         {
             return this.ShortName;
         }
+
+        internal bool CanTraverse(Army army)
+        {
+            if (army is null)
+            {
+                throw new ArgumentNullException(nameof(army));
+            }
+
+            return this.Clan == army.Clan;
+        }
     }
 }

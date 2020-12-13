@@ -221,7 +221,27 @@ namespace Wism.Client.Core
         /// <returns>True if the army can move here; otherwise, false</returns>
         public bool CanTraverseHere(Army army)
         {
-            return this.Terrain.CanTraverse(army.CanWalk, army.CanFloat, army.CanFly);
+            if (army is null)
+            {
+                throw new ArgumentNullException(nameof(army));
+            }
+
+            bool canTraverse;
+            if (HasCity())
+            {
+                canTraverse = this.City.CanTraverse(army);
+            }
+            else
+            {
+                canTraverse = this.Terrain.CanTraverse(army.CanWalk, army.CanFloat, army.CanFly);
+            }
+
+            return canTraverse;
+        }
+
+        public bool HasCity()
+        {
+            return (this.City != null);
         }
 
         /// <summary>
@@ -268,8 +288,26 @@ namespace Wism.Client.Core
         /// <returns>Cities to defend current tile</returns>
         public List<Army> MusterArmy()
         {
-            
-            return new List<Army>(this.Armies);
+            var allArmies = new List<Army>();
+
+            if (HasCity())
+            {
+                // Muster troops from across the city!
+                var tiles = City.GetTiles();
+                for (int i = 0; i < tiles.Length; i++)
+                {
+                    if (tiles[i].HasArmies())
+                    {
+                        allArmies.AddRange(tiles[i].Armies);
+                    }
+                }
+            }
+            else
+            {
+                allArmies.AddRange(this.Armies);
+            }
+
+            return allArmies;
         }
 
         public void CommitVisitingArmies()

@@ -87,5 +87,7 @@ namespace Wism.Client.Test.Controller
             // Assert
             Assert.AreEqual(expectedDefense, marthos.Defense);
         }
+
+
     }
 }

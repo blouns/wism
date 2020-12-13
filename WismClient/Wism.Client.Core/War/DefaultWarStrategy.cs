@@ -32,7 +32,7 @@ namespace Wism.Client.War
         /// <returns>True if attacker wins; false otherwise.</returns>
         public bool Attack(List<Army> attackers, Tile tile)
         {
-            List<Army> defenders = tile.Armies;
+            List<Army> defenders = tile.MusterArmy();
 
             // Attack armys one-at-a-time to the death!
             while (attackers.Count > 0 && defenders.Count > 0)
@@ -44,8 +44,10 @@ namespace Wism.Client.War
                 else
                 {
                     Log.WriteLine(Log.TraceLevel.Information, "Defender killed one army.");
-                    //attackers.Remove(attackers[0]);
                 }
+
+                // Refresh the list
+                defenders = tile.MusterArmy();
             }
 
             return attackers.Count > 0;

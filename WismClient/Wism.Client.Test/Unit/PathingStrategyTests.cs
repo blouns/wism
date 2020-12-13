@@ -182,7 +182,70 @@ namespace Wism.Client.Test.Unit
             AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
 
+        [Test]
+        public void DijkstraRouteAroundUnownedCity_6x6Test()
+        {
+            // Assemble
+            Game.CreateDefaultGame();
+            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            var matrix = new string[,]
+            {
+                { "2", "2", "2", "2", "2", "2" },
+                { "2", "2", "2", "2", "2", "2" },   
+                { "2", "2", "2", "2", "2", "2" },
+                { "2", "2", "1", "1", "2", "2" },
+                { "2", "2", "1", "1", "2", "2" },
+                { "S", "2", "9", "9", "2", "T" }
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            
+            // TODO: Coupling issue: need to create a world; consider mocking
+            World.CreateWorld(map);
+            map = World.Current.Map;
+            MapBuilder.AddCity(map, 3, 2, "Marthos");
+
+            // Act
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            // Assert
+            PlotRouteOnMatrix(matrix, new List<Tile>(shortestRoute));
+            Assert.AreEqual(8, shortestRoute.Count, "Did not find the correct number of steps.");
+        }
+
         #region Helper methods
+        private void PlotRouteOnMatrix(string[,] matrix, List<Tile> path)
+        {
+            for (int y = 0; y <= matrix.GetUpperBound(0); y++)
+            {
+                for (int x = 0; x <= matrix.GetUpperBound(1); x++)
+                {
+                    var tile = path.Find(t => ((t.X == x) && (t.Y == y)));
+                    if (tile != null)
+                    {
+                        TestContext.Write($"({x},{y}){{{matrix[x, y]}}}>\t");
+                    }
+                    else
+                    {
+                        TestContext.Write($"({x},{y})[{matrix[x, y]}]\t");
+                    }
+                }
+                TestContext.WriteLine();
+            }
+        }       
+
+        private void PrintMatrix(string[,] matrix)
+        {
+            for (int y = 0; y <= matrix.GetUpperBound(0); y++)
+            {
+                for (int x = 0; x <= matrix.GetUpperBound(1); x++)
+                {
+                    TestContext.Write($"({x},{y})[{matrix[x,y]}]\t");
+                }
+                TestContext.WriteLine();
+            }
+        }
+
 
         private void AssertPathStartsWithHeroEndsWithTower(IList<Tile> shortestRoute)
         {
@@ -197,9 +260,10 @@ namespace Wism.Client.Test.Unit
         /// <returns></returns>
         /// <remarks>
         /// Token strings are semicolon separated lists where:
-        ///     S = Starting location of hero in a castle (optional; must be one and only one in matrix)
-        ///     T = Target destination of a tower (optional; must be one and only one in matrix)
-        ///     # = Numeral (positive integer) indicating the Weight of the terrain
+        ///     S   = Starting location of hero in a castle (optional; must be one and only one in matrix)
+        ///     T   = Target destination of a tower (optional; must be one and only one in matrix)
+        ///     $   = Neutral city (will create 4x4 city using this as top-left location
+        ///     1-9 = Numeral (positive integer) indicating the Weight of the terrain
         ///     
         /// Example tokens:
         ///     "S;1" = Start with weight 1
@@ -211,17 +275,17 @@ namespace Wism.Client.Test.Unit
         {
             armies = null;
             target = null;
-            Clan clan = Clan.Create(ModFactory.FindClanInfo("Sirians"));
 
+            MapBuilder.Initialize();
             Tile[,] map = new Tile[matrix.GetLength(0), matrix.GetLength(1)];
-            for (int x = 0; x < matrix.GetLength(0); x++)
+            for (int y = 0; y < matrix.GetLength(0); y++)
             {
-                for (int y = 0; y < matrix.GetLength(1); y++)
+                for (int x = 0; x < matrix.GetLength(1); x++)
                 {
                     Tile tile = new Tile();
                     tile.X = x;
                     tile.Y = y;
-                    map[x, y] = tile;
+                    map[tile.X, tile.Y] = tile;
                     string[] tokens = matrix[x, y].Split(';');
                     for (int i = 0; i < tokens.Length; i++)
                     {
@@ -231,11 +295,12 @@ namespace Wism.Client.Test.Unit
                             // S = Start
                             if (armies == null)
                             {
-                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Castle"));
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Ruins"));
                                 tile.Terrain.MovementCost = 1;
-                                var army = ArmyFactory.CreateArmy(ArmyInfo.GetHeroInfo());
-                                tile.AddArmy(army);
-                                armies = new List<Army>() { army };
+
+                                // TODO: Coupling issue: need a player for an army; consider mock
+                                var player = Game.Current.GetCurrentPlayer();
+                                armies = new List<Army>() { player.HireHero(tile) };
                             }
                             else
                             {
