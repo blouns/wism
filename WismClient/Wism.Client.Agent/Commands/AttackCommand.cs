@@ -25,7 +25,7 @@ namespace Wism.Client.Agent.Commands
                 return ActionState.Failed;
             }
 
-            // Attack successful; move into the location
+            // Attack successful; move into the location            
             bool success = armyController.TryMove(Armies, World.Current.Map[X, Y]);
 
             return (success) ? ActionState.Succeeded : ActionState.Failed;

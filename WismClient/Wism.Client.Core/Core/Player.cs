@@ -8,11 +8,16 @@ namespace Wism.Client.Core
 {
     public class Player
     {
+        // TODO: Starting gold varies by clan
+        private const int StartingGold = 100;
+
         private List<Army> myArmies = new List<Army>();
+        private List<City> myCities = new List<City>();
 
         public Clan Clan { get; set; }
 
-
+        public int Gold { get; set; }
+        public int Turn { get; private set; }
 
         private Player()
         {
@@ -27,7 +32,9 @@ namespace Wism.Client.Core
 
             Player player = new Player()
             {
-                Clan = clan
+                Clan = clan,
+                Gold = StartingGold,
+                Turn = 1
             };
 
             return player;
@@ -38,18 +45,65 @@ namespace Wism.Client.Core
             return new List<Army>(this.myArmies);
         }
 
-        public void HireHero()
+        public List<City> GetCities()
         {
-            Tile tile = FindTileForNewHero();
-
-            HireHero(tile);
+            return new List<City>(this.myCities);
         }
 
-        public void HireHero(Tile tile)
+        public int GetIncome()
         {
-            ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            int income = 0;
+
+            foreach (City city in myCities)
+            {
+                income += city.Income;
+            }
+
+            return income;
         }
 
+        public int GetUpkeep()
+        {
+            int upkeep = 0;
+
+            foreach (Army army in myArmies)
+            {
+                upkeep += army.Upkeep;
+            }
+
+            return upkeep;
+        }
+
+        public Hero HireHero(Tile tile)
+        {
+            return (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+        }
+
+        /// <summary>
+        /// Conscript an army from an army-in-training. Overrides defaults
+        /// with city-specific modifiers from training.
+        /// </summary>
+        /// <param name="ait">Army-in-training</param>
+        /// <param name="tile">Destination tile</param>
+        /// <returns>New army</returns>
+        public Army ConscriptArmy(ArmyInTraining ait, Tile tile)
+        {
+            var army = ConscriptArmy(ait.ArmyInfo, tile);
+            army.Upkeep = ait.Upkeep;
+            army.Strength += ait.StrengthModifier;
+            army.Moves += ait.MovesModifier;
+            army.MovesRemaining = army.Moves;
+            army.DisplayName = ait.DisplayName;
+
+            return army;
+        }
+
+        /// <summary>
+        /// Conscript an army from an army-in-training.
+        /// </summary>
+        /// <param name="armyInfo">Army kind</param>
+        /// <param name="tile">Destination tile</param>
+        /// <returns>New army</returns>
         public Army ConscriptArmy(ArmyInfo armyInfo, Tile tile)
         {
             if (armyInfo == null)
@@ -75,6 +129,28 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
+        /// Start production on a new army
+        /// </summary>
+        /// <param name="armyInfo">Army kind to produce</param>
+        /// <param name="productionCity">City to produce it from</param>
+        /// <param name="destinationCity">Desitination city for the army</param>
+        /// <returns>True if there is sufficient funds to start producing; otherwise, false</returns>
+        public bool ProduceArmy(ArmyInfo armyInfo, City productionCity, City destinationCity = null)
+        {
+            if (armyInfo is null)
+            {
+                throw new ArgumentNullException(nameof(armyInfo));
+            }
+
+            if (productionCity is null)
+            {
+                throw new ArgumentNullException(nameof(productionCity));
+            }
+
+            return productionCity.ProduceArmy(armyInfo, destinationCity);
+        }
+
+        /// <summary>
         /// End the players turn.
         /// </summary>
         /// <remarks>
@@ -88,7 +164,48 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot end turn; it's not my turn!");
             }
 
+            Turn++;
             ResetArmies();
+        }
+
+        internal void StartTurn()
+        {
+            if (Game.Current.GetCurrentPlayer() != this)
+            {
+                throw new InvalidOperationException("Cannot start turn; it's not my turn!");
+            }
+
+            DoTheBooks();
+            ProduceArmies();
+            DeliverArmies();            
+        }
+
+        internal void DeliverArmies()
+        {
+            foreach (var city in myCities)
+            {
+                city.Barracks.Deliver();
+            }
+        }
+
+        internal void ProduceArmies()
+        {
+            foreach (var city in myCities)
+            {
+                city.Barracks.Produce();
+            }
+        }
+
+        /// <summary>
+        /// Process city income and army upkeep for the turn.
+        /// </summary>
+        private void DoTheBooks()
+        {
+            Gold += GetIncome() - GetUpkeep();
+            if (Gold < 0)
+            {               
+                Gold = 0;
+            }
         }
 
         /// <summary>
@@ -113,14 +230,13 @@ namespace Wism.Client.Core
             // Remove from the world
             var armies = new List<Army>() { army };
             var tile = army.Tile;
-            if (tile.HasArmies(armies))
+            if (tile.ContainsArmies(armies))
             {
                 tile.RemoveArmies(armies);
             }                 
             else
             {
-                // It was an attacking army
-                tile.RemoveVisitingArmies(armies);
+                // It was an attacking army                
                 Game.Current.RemoveSelectedArmies(armies);
             }
 
@@ -151,40 +267,106 @@ namespace Wism.Client.Core
 
             Terrain terrain = tile.Terrain;
             return ((terrain.CanTraverse(armyInfo.CanWalk, armyInfo.CanFloat, armyInfo.CanFly)) &&
-                    (!tile.HasArmies() || (tile.Armies.Count < Army.MaxUnits)));
-        }
-
-        private Tile FindTileForNewHero()
-        {
-            // TODO: Temp code; need a home tile for the Hero; for now random location
-            Tile tile = null;
-            int retries = 0;
-            int maxRetries = 100;
-            ArmyInfo unitInfo = ArmyInfo.GetHeroInfo();
-
-            bool deployedHero = false;
-            while (!deployedHero)
-            {
-                if (retries++ > maxRetries)
-                {
-                    throw new ArgumentException(
-                        String.Format("Hero cannot be deployed to '{0}'.", tile.Terrain.DisplayName));
-                }
-
-                int x = Game.Current.Random.Next(0, World.Current.Map.GetLength(0));
-                int y = Game.Current.Random.Next(0, World.Current.Map.GetLength(1));
-
-                tile = World.Current.Map[x, y];
-
-                deployedHero = CanDeploy(unitInfo, tile);
-            }
-
-            return tile;
+                    (!tile.HasArmies() || (tile.Armies.Count < Army.MaxArmies)));
         }
 
         public override string ToString()
         {
             return this.Clan.ToString();
+        }
+
+        /// <summary>
+        /// Stake a claims for a city.
+        /// </summary>
+        /// <param name="city">City to claim</param>
+        public void ClaimCity(City city)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            ClaimCity(city, city.GetTiles());            
+        }
+
+        /// <summary>
+        /// Stake a claim for a city; Internal-only used by MapBuilder
+        /// </summary>
+        /// <param name="city">City to claim</param>
+        /// <param name="tiles">Tiles for the city</param>
+        internal void ClaimCity(City city, Tile[] tiles)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            if (tiles is null)
+            {
+                throw new ArgumentNullException(nameof(tiles));
+            }
+
+            // Are we claiming from another clan?
+            if (city.Clan != Clan && city.Clan != null)
+            {                
+                PillageGoldFromClan(city.Clan);
+                city.Clan.Player.RemoveCity(city);
+            }
+
+            city.Claim(this, tiles);                        
+
+            // Add city to Player for tracking
+            this.myCities.Add(city);
+        }
+
+        private void RemoveCity(City city)
+        {
+            this.myCities.Remove(city);
+        }
+
+        /// <summary>
+        /// Pillage gold from the clan's city.
+        /// </summary>
+        /// <param name="clan">Clan to pillage from.</param>
+        /// <remarks>
+        ///  An Empire's treasury is considered to be distributed equally amongst all of
+        ///  its cities. If a city is captured, the Empire loses a proportional amount of
+        ///  its total treasury. Half of this money goes to the Empire that captured the
+        ///  city; the other half is considered to be liberated by the troops that did
+        ///  the pillaging!
+        /// </remarks>
+        private void PillageGoldFromClan(Clan clan)
+        {
+            // Find matching player
+            Player playerToPillage = Game.Current.Players.Find(p => p.Clan == clan);
+            if (playerToPillage == null)
+            {
+                return;
+            }
+
+            // Assume player-to-pillage's cities will be > 0 as we haven't claimed it yet
+
+            int cityCoffers = playerToPillage.Gold / playerToPillage.GetCities().Count;
+            Gold += (playerToPillage.Gold / playerToPillage.GetCities().Count) / 2;
+            
+            playerToPillage.Gold -= cityCoffers;
+            if (playerToPillage.Gold < 0)
+            {
+                playerToPillage.Gold = 0;
+            }
+        }
+
+        public void RazeCity(City city)
+        {
+            if (city.Clan != Clan)
+            {
+                throw new ArgumentException($"Cannot raze a city not owned by the player. Player: {this}, City: {city}");
+            }
+
+            city.Raze();
+
+            // Remove city from Player tracking
+            this.myCities.Remove(city);
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Wism.Client.Pathing
         {
             if (this.Value != null)
             {
-                return String.Format("{0}:({1},{2}):{3}", 
+                return String.Format("({0},{1});{2};{3}", 
                     this.Value.X,
                     this.Value.Y,
                     this.Value.Terrain.ToString(), 

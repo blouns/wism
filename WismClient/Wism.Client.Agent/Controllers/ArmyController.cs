@@ -23,6 +23,18 @@ namespace Wism.Client.Agent.Controllers
             this.logger = loggerFactory.CreateLogger<ArmyController>();
         }
 
+        public void DefendArmy(List<Army> armies)
+        {
+            logger.LogInformation("Setting armies to defensive sentry.");
+            Game.Current.DefendSelectedArmies();
+        }
+
+        public bool SelectNextArmy()
+        {
+            logger.LogInformation("Selecting next non-defending army with moves.");
+            return Game.Current.SelectNextArmy();
+        }
+
         /// <summary>
         /// Attempt to move the given army to the (x,y) destination.
         /// </summary>
@@ -86,8 +98,16 @@ namespace Wism.Client.Agent.Controllers
         /// <summary>
         /// Advance the army one step along the shortest route.
         /// </summary>
-        /// <param name="coord"></param>
-        /// <returns>Action state</returns>
+        /// <param name="armiesToMove">Armies to move</param>
+        /// <param name="targetTile">Tile to move towards</param>
+        /// <param name="path">Path to the tile (null input will find a new route)</param>
+        /// <param name="distance">Distance in moves to tile</param>
+        /// <returns>
+        /// Action state:
+        ///   * Success if move completed
+        ///   * Failed if blocked or out of moves
+        ///   * In-Progress if destination not yet reached
+        /// </returns>
         public ActionState MoveOneStep(List<Army> armiesToMove, Tile targetTile, ref IList<Tile> path, out float distance)
         {
             if (armiesToMove is null || armiesToMove.Count == 0)
@@ -116,7 +136,6 @@ namespace Wism.Client.Agent.Controllers
             }
 
             IList<Tile> myPath = path;
-
             float myDistance;
             if (myPath == null)
             {
@@ -159,7 +178,7 @@ namespace Wism.Client.Agent.Controllers
         }
 
         /// <summary>
-        /// Selects the army to prepare to move or attack (changes from "Armies" to "VisitingArmies".
+        /// Selects the army to prepare to move or attack (changes from "Armies" to "VisitingArmies").
         /// </summary>
         /// <param name="armies">Armies to select</param>
         public void SelectArmy(List<Army> armies)
@@ -169,34 +188,9 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(armies));
             }
 
-            ArmyUtilities.VerifyArmies(logger, armies);
+            ArmyUtilities.VerifyArmies(logger, armies);            
 
-            Tile tile = armies[0].Tile;
-            if (tile.HasVisitingArmies())
-            {
-                throw new InvalidOperationException(
-                    $"Tile already has visiting armies: {ArmiesToString(tile.VisitingArmies)}");
-            }
-
-            // Move selected armies to Visiting Armies
-            logger.LogInformation($"Selecting army: {ArmiesToString(armies)}");
-            tile.VisitingArmies = new List<Army>(armies);
-            foreach (Army army in tile.VisitingArmies)
-            {
-                tile.Armies.Remove(army);
-            }
-
-            // Clean up tile's unselected armies
-            if (tile.HasArmies())
-            {
-                tile.Armies.Sort(new ByArmyViewingOrder());
-            }
-            else
-            {
-                tile.Armies = null;
-            }
-
-            Game.Current.SelectArmies(tile.VisitingArmies);
+            Game.Current.SelectArmies(armies);
         }
 
         /// <summary>
@@ -209,13 +203,6 @@ namespace Wism.Client.Agent.Controllers
             {
                 throw new ArgumentNullException(nameof(armies));
             }
-
-            // Simplify deselect for attack scenarios
-            var armiesToDeselect = RemoveDeadArmies(armies);
-
-            ArmyUtilities.VerifyArmies(logger, armiesToDeselect);
-
-            armiesToDeselect[0].Tile.CommitVisitingArmies();
 
             Game.Current.DeselectArmies();
         }
@@ -238,9 +225,9 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
-            if (targetTile.Armies == null)
+            if (!targetTile.CanAttackHere(armiesToAttackWith))
             {
-                throw new ArgumentException("Target tile has no armies to attack.");
+                throw new ArgumentException("Target tile must have armies of another clan.");
             }
 
             ArmyUtilities.VerifyArmies(logger, armiesToAttackWith);
@@ -262,6 +249,11 @@ namespace Wism.Client.Agent.Controllers
             {
                 // Attacker won
                 targetTile.Armies = null;
+                if (targetTile.HasCity())
+                {
+                    var player = attackingFromTile.VisitingArmies[0].Player;
+                    player.ClaimCity(targetTile.City);
+                }
                 Game.Current.Transition(GameState.SelectedArmy);
             }
             else
@@ -309,20 +301,6 @@ namespace Wism.Client.Agent.Controllers
         private static string ArmiesToString(List<Army> armies)
         {
             return $"Armies[{armies.Count}:{armies[0]}]";
-        }
-
-        private static List<Army> RemoveDeadArmies(List<Army> armies)
-        {
-            var armiesToReturn = new List<Army>(armies);
-            foreach (Army army in armies)
-            {
-                if (!army.IsDead)
-                {
-                    armiesToReturn.Add(army);
-                }
-            }
-
-            return armiesToReturn;
-        }
+        }        
     }
 }

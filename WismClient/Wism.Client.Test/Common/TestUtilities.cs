@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,6 +23,16 @@ namespace Wism.Client.Test.Common
             return logFactory;
         }
 
+        public static ControllerProvider CreateControllerProvider()
+        {
+            return new ControllerProvider()
+            {
+                ArmyController = CreateArmyController(),
+                CommandController = CreateCommandController(),
+                GameController = CreateGameController()
+            };
+        }
+
         public static CommandController CreateCommandController(IWismClientRepository repo = null)
         {
             
@@ -42,6 +53,11 @@ namespace Wism.Client.Test.Common
         public static GameController CreateGameController()
         {
             return new GameController(CreateLogFactory());
+        }
+
+        public static CityController CreateCityController()
+        {
+            return new CityController(CreateLogFactory());
         }
 
         public static ActionState Select(CommandController commandController, ArmyController armyController, List<Army> armies)
@@ -71,7 +87,13 @@ namespace Wism.Client.Test.Common
         public static ActionState EndTurn(CommandController commandController, GameController gameController)
         {
             return ExecuteCommandUntilDone(commandController,
-                new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
+                new EndTurnCommand(gameController));
+        }
+
+        public static ActionState StartTurn(CommandController commandController, GameController gameController)
+        {
+            return ExecuteCommandUntilDone(commandController,
+                new StartTurnCommand(gameController));
         }
 
         public static ActionState ExecuteCommandUntilDone(CommandController commandController, Command command)
@@ -87,6 +109,26 @@ namespace Wism.Client.Test.Common
             }
 
             return result;
+        }
+
+        public static void PlotRouteOnMap(Tile[,] map, List<Tile> path)
+        {
+            for (int y = 0; y <= map.GetUpperBound(0); y++)
+            {
+                for (int x = 0; x <= map.GetUpperBound(1); x++)
+                {
+                    var tile = path.Find(t => ((t.X == x) && (t.Y == y)));
+                    if (tile != null)
+                    {
+                        TestContext.Write($"({x},{y}){{{map[x, y]}}}>\t");
+                    }
+                    else
+                    {
+                        TestContext.Write($"({x},{y})[{map[x, y]}]\t");
+                    }
+                }
+                TestContext.WriteLine();
+            }
         }
     }
 }

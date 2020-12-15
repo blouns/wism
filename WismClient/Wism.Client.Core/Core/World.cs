@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
 namespace Wism.Client.Core
 {
     public class World
     {
+        private List<City> cities = new List<City>();
+
         public Tile[,] Map { get; protected set; }
 
         // Navigation associations
-        public Game Game { get; }
+        public Game Game { get; }        
 
         private static World current;
 
@@ -62,10 +64,60 @@ namespace Wism.Client.Core
             }
         }
 
+        public void AddCity(City city, Tile tile)
+        {
+            if (tile is null)
+            {
+                throw new ArgumentNullException(nameof(tile));
+            }
+
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            // Ensure the city does not already exist
+            if (this.cities.Contains(city))
+            {
+                throw new ArgumentException($"{city} already exists in the world.");
+            }
+            
+            int x = tile.X;
+            int y = tile.Y;
+
+            // Add to map
+            city.Tile = World.Current.Map[x, y];
+            var tiles = new Tile[]
+            {
+                World.Current.Map[x,y],
+                World.Current.Map[x,y+1],
+                World.Current.Map[x+1,y],
+                World.Current.Map[x+1,y+1]
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                tiles[i].City = city;
+                tiles[i].Terrain = MapBuilder.TerrainKinds["Castle"];
+            }
+        }
+
+        public List<City> GetCities()
+        {
+            return new List<City>(this.cities);
+        }
+
         public void Reset()
         {
             Tile[,] map = MapBuilder.CreateDefaultMap();
             Reset(map);
+        }
+
+        public void AddDefaultCities()
+        {
+            // Add cities
+            MapBuilder.AddCity(Map, 1, 3, "Marthos", "Sirians");
+            MapBuilder.AddCity(Map, 3, 1, "BanesCitadel", "LordBane");
         }
 
         public void Reset(Tile[,] map)

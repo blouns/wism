@@ -77,9 +77,9 @@ namespace Wism.Client.Pathing
             int mapSizeX = map.GetLength(0);
             int mapSizeY = map.GetLength(1);
             PathNode[,] graph = new PathNode[mapSizeX, mapSizeY];
-            for (int x = 0; x < map.GetLength(0); x++)
+            for (int y = 0; y < map.GetLength(0); y++)
             {
-                for (int y = 0; y < map.GetLength(1); y++)
+                for (int x = 0; x < map.GetLength(1); x++)
                 {
                     // Only add a node if the army can actually traverse there
                     // Note: this will leave some "null" spots as a sparse-array
@@ -95,16 +95,16 @@ namespace Wism.Client.Pathing
                 }
             }
 
-            for (int x = 0; x < mapSizeX; x++)
+            for (int y = 0; y < mapSizeY; y++)
             {
-                for (int y = 0; y < mapSizeY; y++)
+                for (int x = 0; x < mapSizeX; x++)
                 {
                     // Army cannot traverse there
                     if (graph[x, y] == null)
                         continue;
 
-                    int xMax = graph.GetLength(0) - 1;
-                    int yMax = graph.GetLength(1) - 1;
+                    int yMax = graph.GetLength(0) - 1;
+                    int xMax = graph.GetLength(1) - 1;
                     if (x == 0 && y == 0)
                     {
                         // Upper-left corner

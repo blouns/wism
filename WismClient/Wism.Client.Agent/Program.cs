@@ -79,15 +79,6 @@ namespace Wism.Client.Agent
                         .Build();
                     services.AddSingleton<IConfigurationRoot>(configuration);
 
-
-                    //// Add logging                    
-                    //services.AddSingleton(LoggerFactory.Create(builder =>
-                    //{
-                    //    builder.AddSerilog(dispose: true);
-                    //    builder.AddConfiguration(configuration);
-                    //}));
-                    //services.AddLogging();
-
                     // Add database
                     services.AddSingleton<IWismClientRepository, WismClientInMemoryRepository>(provider =>
                         new WismClientInMemoryRepository(new SortedList<int, Command>())
@@ -95,29 +86,30 @@ namespace Wism.Client.Agent
 
                     // Add controllers
                     services.AddSingleton(provider =>
-                        new CommandController(
+                        new ControllerProvider()
+                        {
+                            ArmyController = new ArmyController(
+                                provider.GetService<ILoggerFactory>()),
+                            CommandController = new CommandController(
                                 provider.GetService<ILoggerFactory>(),
-                                provider.GetService<IWismClientRepository>()));
-                    services.AddSingleton(provider =>
-                        new ArmyController(
-                                provider.GetService<ILoggerFactory>()));
-                    services.AddSingleton(provider =>
-                        new GameController(
-                                provider.GetService<ILoggerFactory>()));
-
+                                provider.GetService<IWismClientRepository>()),
+                            GameController = new GameController(
+                                provider.GetService<ILoggerFactory>()),
+                            CityController = new CityController(
+                                provider.GetService<ILoggerFactory>())
+                        });
+                    
                     // Add command agent
                     services.AddSingleton<IHostedService>(provider =>
                         new WismAgent(
                             provider.GetService<ILoggerFactory>(),
-                            provider.GetService<CommandController>()));
+                            provider.GetService<ControllerProvider>()));
 
                     // Add view
                     services.AddTransient<ViewBase, AsciiView>(provider =>
                         new AsciiView(
                             provider.GetService<ILoggerFactory>(),
-                            provider.GetService<ArmyController>(),
-                            provider.GetService<CommandController>(),
-                            provider.GetService<GameController>()));
+                            provider.GetService<ControllerProvider>()));
                 })
                 .UseSerilog((hostingContext, loggerConfig) =>
                     loggerConfig.ReadFrom.Configuration(hostingContext.Configuration)

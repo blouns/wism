@@ -7,7 +7,7 @@ namespace Wism.Client.MapObjects
     public abstract class MapObject : ICustomizable
     {
         public int Id { get; set; }
-        public abstract string DisplayName { get; }
+        public string DisplayName { get; set; }
         public abstract string ShortName { get; }
         public Tile Tile { get; set; }
         public Player Player { get; set; }

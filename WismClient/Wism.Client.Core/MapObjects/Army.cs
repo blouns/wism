@@ -10,20 +10,22 @@ namespace Wism.Client.MapObjects
 {
     public class Army : MapObject
     {
-        public const int MaxUnits = 8;
+        public const int MaxArmies = 8;
 
         private ArmyInfo info;
 
         internal ArmyInfo Info { get => info; set => info = value; }
 
+        public int Upkeep { get; set; }
         public int Strength { get; set; }
         public int MovesRemaining { get; set; }
         public Clan Clan { get => Player.Clan; }
+        public string MyProperty { get; set; }
         public bool IsDead { get; set; }
 
         // Static info
-        public int Moves { get => Info.Moves; }
-        public override string DisplayName => Info.DisplayName;
+        public int Moves { get; internal set; }
+
         public override string ShortName => Info.ShortName;
 
         // Traversal info
@@ -33,10 +35,16 @@ namespace Wism.Client.MapObjects
 
         // Ephemeral properties used during combat only
         public int HitPoints { get; set; }
-        public int ModifiedStrength { get; set; }        
+        public int ModifiedStrength { get; set; }
+        public bool IsDefending { get; internal set; }
 
         internal Army()
         {            
+        }
+
+        public void Defend()
+        {
+            this.IsDefending = true;
         }
 
         public void Kill()

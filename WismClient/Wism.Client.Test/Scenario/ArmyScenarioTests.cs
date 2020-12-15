@@ -6,10 +6,10 @@ using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Test.Common;
 
-namespace Wism.Client.Test.Integration
+namespace Wism.Client.Test.Scenario
 {
     [TestFixture]
-    public class ArmyIntegrationTests
+    public class ArmyScenarioTests
     {
         [Test]
         public void MoveArmy_Path()
