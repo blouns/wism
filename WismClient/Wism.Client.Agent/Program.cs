@@ -94,7 +94,9 @@ namespace Wism.Client.Agent
                                 provider.GetService<ILoggerFactory>(),
                                 provider.GetService<IWismClientRepository>()),
                             GameController = new GameController(
-                                    provider.GetService<ILoggerFactory>())
+                                provider.GetService<ILoggerFactory>()),
+                            CityController = new CityController(
+                                provider.GetService<ILoggerFactory>())
                         });
                     
                     // Add command agent

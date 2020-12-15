@@ -11,5 +11,7 @@ namespace Wism.Client.Agent.Controllers
         public CommandController CommandController { get; set; }
 
         public ArmyController ArmyController { get; set; }
+
+        public CityController CityController { get; set; }
     }
 }

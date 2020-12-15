@@ -53,5 +53,24 @@
     "CanWalk": true,
     "CanFloat": false,
     "CanFly": true
+  },
+  {
+    "DisplayName": "Giant Warriors",
+    "ShortName": "GiantWarriors",
+    "Strength": 6,
+    "Moves": 12,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false
+  },
+  {
+    "DisplayName": "Wolf Riders",
+    "ShortName": "WolfRiders",
+    "Strength": 5,
+    "Moves": 14,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false
   }
+
 ]

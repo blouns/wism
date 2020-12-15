@@ -236,8 +236,7 @@ namespace Wism.Client.Core
             }                 
             else
             {
-                // It was an attacking army
-                tile.RemoveVisitingArmies(armies);
+                // It was an attacking army                
                 Game.Current.RemoveSelectedArmies(armies);
             }
 
@@ -268,7 +267,7 @@ namespace Wism.Client.Core
 
             Terrain terrain = tile.Terrain;
             return ((terrain.CanTraverse(armyInfo.CanWalk, armyInfo.CanFloat, armyInfo.CanFly)) &&
-                    (!tile.HasArmies() || (tile.Armies.Count < Army.MaxUnits)));
+                    (!tile.HasArmies() || (tile.Armies.Count < Army.MaxArmies)));
         }
 
         public override string ToString()

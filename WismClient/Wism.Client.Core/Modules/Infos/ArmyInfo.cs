@@ -15,25 +15,23 @@ namespace Wism.Client.Modules
         [DataMember]
         public string ShortName { get; set; } = "x";
 
-        private bool isSpecial = false;
-
         [DataMember]
         public bool IsSpecial { get; internal set; }
 
         [DataMember]
-        internal bool CanWalk;
+        public bool CanWalk;
 
         [DataMember]
-        internal bool CanFloat;
+        public bool CanFloat;
 
         [DataMember]
-        internal bool CanFly;
+        public bool CanFly;
 
         [DataMember]
-        internal int Strength;
+        public int Strength;
 
         [DataMember]
-        internal int Moves;
+        public int Moves;
 
         public static ArmyInfo GetHeroInfo()
         {

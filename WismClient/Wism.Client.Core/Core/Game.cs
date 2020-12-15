@@ -65,9 +65,9 @@ namespace Wism.Client.Core
         public void EndTurn()
         {
             // End current players turn
+            DeselectArmies();
             var player = GetCurrentPlayer(); 
-            player.EndTurn();
-            this.selectedArmies = null;
+            player.EndTurn();            
 
             // Set next players turn
             currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
@@ -83,9 +83,10 @@ namespace Wism.Client.Core
             // TODO: New heros, evaluate if player is alive, etc.
             var player = GetCurrentPlayer();
             player.StartTurn();
-            _ = SelectNextArmy();
-
-            Transition(GameState.Ready);
+            if (!SelectNextArmy())
+            {
+                Transition(GameState.Ready);
+            }
         }
 
         /// <summary>
@@ -98,15 +99,26 @@ namespace Wism.Client.Core
                 GameState != GameState.SelectedArmy)
             {
                 return false;
-            }
+            }            
 
             var player = GetCurrentPlayer();
             var armies = player.GetArmies();
             foreach (Army army in armies)
             {
-                if (!army.IsDefending &&
-                    army.MovesRemaining > 0)
+                // Exclude Defending and out-of-moves armies
+                if (!army.IsDefending && army.MovesRemaining > 0)
                 {
+                    if (ArmiesSelected())
+                    {
+                        // Exclude currently selected armies
+                        if (this.selectedArmies.Contains(army))
+                        {
+                            continue;
+                        }
+
+                        DeselectArmies();
+                    }
+
                     SelectArmies(army.Tile.Armies);
                     return true;
                 }
@@ -126,26 +138,57 @@ namespace Wism.Client.Core
             return new List<Army>(selectedArmies);
         }
 
-        public void SelectArmies(List<Army> visitingArmies)
+        public void SelectArmies(List<Army> armies)
         {
+            if (armies is null)
+            {
+                throw new ArgumentNullException(nameof(armies));
+            }
+
             if (GameState != GameState.Ready &&
-                ArmiesSelected())
+                GameState != GameState.SelectedArmy)
             {
                 return;
             }
 
-            if (visitingArmies is null)
-            {
-                throw new ArgumentNullException(nameof(visitingArmies));
-            }
-
-            if (!visitingArmies.TrueForAll(army => GetCurrentPlayer() == army.Player))
+            if (!armies.TrueForAll(army => GetCurrentPlayer() == army.Player))
             {
                 throw new InvalidOperationException("Only the current player can select an army.");
             }
 
-            this.selectedArmies = new List<Army>(visitingArmies);
+            if (ArmiesSelected())
+            {
+                DeselectArmies();
+            }            
+
+            Tile tile = armies[0].Tile;
+            if (tile.HasVisitingArmies())
+            {
+                throw new InvalidOperationException(
+                    $"Tile already has visiting armies: {ArmiesToString(tile.VisitingArmies)}");
+            }
+
+            // Move selected armies to Visiting Armies
+            Log.WriteLine(Log.TraceLevel.Information, $"Selecting army: {ArmiesToString(armies)}");
+            tile.VisitingArmies = new List<Army>(armies);
+            foreach (Army army in tile.VisitingArmies)
+            {
+                tile.Armies.Remove(army);
+            }
+
+            // Clean up tile's unselected armies
+            if (tile.HasArmies())
+            {
+                tile.Armies.Sort(new ByArmyViewingOrder());
+            }
+            else
+            {
+                tile.Armies = null;
+            }
+
+            this.selectedArmies = new List<Army>(tile.VisitingArmies);
             this.selectedArmies.ForEach(a => a.IsDefending = false);
+            
             Transition(GameState.SelectedArmy);
         }
 
@@ -160,6 +203,10 @@ namespace Wism.Client.Core
                 return;
             }
 
+            // Commit armies to tile
+            armies[0].Tile.RemoveVisitingArmies(armies);
+
+            // Remove from selected armies
             armies.ForEach(a => selectedArmies.Remove(a));
         }
 
@@ -180,6 +227,11 @@ namespace Wism.Client.Core
                 return;
             }
 
+            // Simplify deselect for attack scenarios
+            var armiesToDeselect = RemoveDeadArmies(this.selectedArmies);
+
+            // Deselect
+            armiesToDeselect[0].Tile.CommitVisitingArmies();
             this.selectedArmies = null;
             Transition(GameState.Ready);
         }
@@ -227,6 +279,24 @@ namespace Wism.Client.Core
             World.CreateDefaultWorld();
         }
 
+        private static List<Army> RemoveDeadArmies(List<Army> armies)
+        {
+            var armiesToReturn = new List<Army>(armies);
+            foreach (Army army in armies)
+            {
+                if (!army.IsDead)
+                {
+                    armiesToReturn.Add(army);
+                }
+            }
+
+            return armiesToReturn;
+        }
+
+        private static string ArmiesToString(List<Army> armies)
+        {
+            return $"Armies[{armies.Count}:{armies[0]}]";
+        }
     }
     public enum GameState
     {

@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Wism.Client.Agent.Commands;
 using Wism.Client.Agent.Controllers;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 
 namespace Wism.Client.Agent.CommandProviders
 {
@@ -12,19 +15,26 @@ namespace Wism.Client.Agent.CommandProviders
         private readonly CommandController commandController;
         private readonly ArmyController armyController;
         private readonly GameController gameController;
+        private readonly CityController cityController;
         private readonly ILogger logger;
 
-        public ConsoleCommandProvider(ILoggerFactory loggerFactory, CommandController commandController, ArmyController armyController, GameController gameController)
+        public ConsoleCommandProvider(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
         {
             if (loggerFactory is null)
             {
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
+            if (controllerProvider is null)
+            {
+                throw new ArgumentNullException(nameof(controllerProvider));
+            }
+
             logger = loggerFactory.CreateLogger<ConsoleCommandProvider>();
-            this.commandController = commandController ?? throw new ArgumentNullException(nameof(commandController));
-            this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
-            this.gameController = gameController ?? throw new ArgumentNullException(nameof(gameController));
+            this.commandController = controllerProvider.CommandController;
+            this.armyController = controllerProvider.ArmyController;
+            this.gameController = controllerProvider.GameController;
+            this.cityController = controllerProvider.CityController;
         }
 
         public void GenerateCommands()
@@ -39,11 +49,14 @@ namespace Wism.Client.Agent.CommandProviders
                 return;
             }
 
-            Console.WriteLine("(S)elect");
-            Console.WriteLine("(D)eselect");
+            Console.WriteLine("(Esc) Deselect");
+            Console.WriteLine("(S)elect");            
             Console.WriteLine("(M)ove");
             Console.WriteLine("(A)ttack");
-            Console.WriteLine("[E]nd turn");
+            Console.WriteLine("(P)roduce");
+            Console.WriteLine("(N)ext");
+            Console.WriteLine("(D)efend");
+            Console.WriteLine("(E)nd turn");
             Console.Write("Enter a command: ");
             var keyInfo = Console.ReadKey();
             Console.WriteLine();
@@ -53,8 +66,11 @@ namespace Wism.Client.Agent.CommandProviders
                 case ConsoleKey.S:
                     DoSelectArmy();
                     break;
-                case ConsoleKey.D:
+                case ConsoleKey.Escape:
                     DoDeselectArmy();
+                    break;
+                case ConsoleKey.D:
+                    DoDefendArmy();
                     break;
                 case ConsoleKey.M:
                     DoMoveArmy();
@@ -64,6 +80,15 @@ namespace Wism.Client.Agent.CommandProviders
                     break;
                 case ConsoleKey.E:
                     DoEndTurn();
+                    break;
+                case ConsoleKey.Q:
+                    DoQuit();
+                    break;
+                case ConsoleKey.P:
+                    DoProduce();
+                    break;
+                case ConsoleKey.N:
+                    DoNextArmy();
                     break;
                 case ConsoleKey.UpArrow:
                     DoMoveArmyOneStep(0, -1);
@@ -80,17 +105,99 @@ namespace Wism.Client.Agent.CommandProviders
             }
         }
 
+        private void DoDefendArmy()
+        {
+            commandController.AddCommand(
+                new DefendCommand(armyController, Game.Current.GetSelectedArmies()));
+        }
+
+        private void DoNextArmy()
+        {
+            commandController.AddCommand(
+                new SelectNextArmyCommand(armyController));
+        }
+
+        private void DoProduce()
+        {
+            // Needed for the command:
+            City productionCity = null;
+            City destinationCity = null;
+            ArmyInfo armyInfo = null;
+
+            // Get the city to produce from
+            Console.Write("X location? : ");
+            int x = ReadLocationInput(0);
+            Console.Write("Y location? : ");
+            int y = ReadLocationInput(1);
+
+            Tile tile = World.Current.Map[x, y];
+            if (!tile.HasCity())
+            {
+                NotifyUser("Must select a tile with a city.");
+                return;
+            }
+            productionCity = tile.City;
+
+            // Get the army kind to produce
+            var barracks = productionCity.Barracks;
+            var production = barracks.GetProductionKinds();
+            for (int i = 0; i < production.Count; i++)
+            {
+                armyInfo = ModFactory.FindArmyInfo(production[i].ArmyInfoName);
+                Console.WriteLine($"({i}) " +
+                    $"{armyInfo.DisplayName}\t" +
+                    $"Strength: {armyInfo.Strength + production[i].StrengthModifier}\t" +
+                    $"Moves: {armyInfo.Moves + production[i].MovesModifier}\t" +
+                    $"Turns: {production[i].TurnsToProduce}\t" +
+                    $"Upkeep: {production[i].Upkeep}");
+            }
+            Console.WriteLine("Which would you like to produce? [#]: ");
+            int index = (int)Char.GetNumericValue(Console.ReadLine(), 0);
+            armyInfo = ModFactory.FindArmyInfo(production[index].ArmyInfoName);
+
+            // Produce locally or deliver to remote city?
+            var myCities = Game.Current.GetCurrentPlayer().GetCities();
+            if (myCities.Count > 1)
+            {
+                Console.WriteLine("Produce in current city? [y/n] : ");
+                var yn = Console.ReadKey();
+                Console.WriteLine();
+                if (yn.Key == ConsoleKey.N)
+                {
+                    // Print all the owned cities except production city                    
+                    myCities.Remove(productionCity);
+                    for (int i = 0; i < myCities.Count; i++)
+                    {
+                        Console.WriteLine($"({i}) {myCities[i].DisplayName}");
+                    }
+                    Console.WriteLine("Which city would you like to deliver to? [#]: ");
+                    index = (int)Char.GetNumericValue(Console.ReadLine(), 0);
+                    destinationCity = myCities[index];
+                }
+            }
+
+            commandController.AddCommand(
+                new StartProductionCommand(cityController, productionCity, armyInfo, destinationCity));
+        }
+
+        private void DoQuit()
+        {
+            System.Environment.Exit(1);
+        }
+
         private void DoEndTurn()
         {
             commandController.AddCommand(
-                    new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
+                    new EndTurnCommand(gameController));
+            commandController.AddCommand(
+                    new StartTurnCommand(gameController));
         }
 
         private void DoMoveArmyOneStep(int xDelta, int yDelta)
         {
             if (Game.Current.GameState == GameState.Ready)
             {
-                Console.WriteLine("You need to select an army.");
+                NotifyUser("You need to select an army.");
                 return;
             }
 
@@ -98,8 +205,9 @@ namespace Wism.Client.Agent.CommandProviders
             var army = armies[0];
             int x = army.X + xDelta;
             int y = army.Y + yDelta;
+            var tile = World.Current.Map[x, y];
 
-            if (EnemyInTargetTile(armies[0].Clan, x, y))
+            if (tile.CanAttackHere(armies))
             {
                 // Attack the location
                 commandController.AddCommand(
@@ -117,7 +225,7 @@ namespace Wism.Client.Agent.CommandProviders
         {
             if (Game.Current.GameState != GameState.SelectedArmy)
             {
-                Console.WriteLine("Error: You must first select an army.");
+                NotifyUser("Error: You must first select an army.");                
                 return;
             }
 
@@ -128,14 +236,14 @@ namespace Wism.Client.Agent.CommandProviders
             }
 
             Console.Write("X location? : ");
-            int x = ReadInput(0);
+            int x = ReadLocationInput(0);
             Console.Write("Y location? : ");
-            int y = ReadInput(1);
+            int y = ReadLocationInput(1);
 
             Tile tile = World.Current.Map[x, y];
-            if (!EnemyInTargetTile(armies[0].Clan, x, y))
+            if (!tile.CanAttackHere(armies))
             {
-                Console.WriteLine("Error: Can only attack an enemy controlled location.");
+                NotifyUser("Can only attack an enemy controlled location.");
                 return;
             }
 
@@ -143,11 +251,18 @@ namespace Wism.Client.Agent.CommandProviders
                     new AttackCommand(armyController, armies, x, y));
         }
 
+        private static void NotifyUser(string message)
+        {
+            Console.Beep(1000, 500);
+            Console.WriteLine(message);
+            Thread.Sleep(2000);
+        }
+
         private void DoDeselectArmy()
         {
             if (Game.Current.GameState == GameState.Ready)
             {
-                Console.WriteLine("Error: You must first select an army.");
+                NotifyUser("Error: You must first select an army.");
                 return;
             }
 
@@ -165,7 +280,7 @@ namespace Wism.Client.Agent.CommandProviders
         {
             if (Game.Current.GameState != GameState.SelectedArmy)
             {
-                Console.WriteLine("Error: You must first select an army.");
+                NotifyUser("You must first select an army.");
                 return;
             }
 
@@ -176,14 +291,14 @@ namespace Wism.Client.Agent.CommandProviders
             }
 
             Console.Write("X location? : ");
-            int x = ReadInput(0);
+            int x = ReadLocationInput(0);
             Console.Write("Y location? : ");
-            int y = ReadInput(1);
+            int y = ReadLocationInput(1);
+            var tile = World.Current.Map[x, y];
 
-            Tile tile = World.Current.Map[x, y];
-            if (EnemyInTargetTile(armies[0].Clan, x, y))
+            if (tile.CanAttackHere(armies))
             {
-                Console.WriteLine("Error: Cannot move onto an enemy controlled location.");
+                NotifyUser("Cannot move onto an enemy controlled location.");
                 return;
             }
 
@@ -195,54 +310,82 @@ namespace Wism.Client.Agent.CommandProviders
         {
             if (Game.Current.GameState == GameState.GameOver)
             {
-                Console.WriteLine("The game is over.");
+                NotifyUser("The game is over.");
                 System.Environment.Exit(1);
             }
         }
 
         private void DoSelectArmy()
         {
-            if (Game.Current.GameState != GameState.Ready)
-            {
-                Console.WriteLine("Error: You must first deselect the army.");
-                return;
-            }
-
+            // Get location to select
             Console.Write("X location? : ");
-            int x = ReadInput(0);
+            int x = ReadLocationInput(0);
             Console.Write("Y location? : ");
-            int y = ReadInput(1);
+            int y = ReadLocationInput(1);
 
             Tile tile = World.Current.Map[x, y];
             if (!tile.HasArmies())
             {
-                Console.WriteLine("Error: Tile must have armies to select.");
+                NotifyUser("Tile must have armies to select.");
                 return;
             }
 
-            commandController.AddCommand(
-                    new SelectArmyCommand(armyController, tile.Armies));
-        }       
+            // Select all or specific armies?
+            List<Army> armies = tile.Armies;
+            Console.WriteLine("Select all? [y/n] (default: Y): ");
+            var yn = Console.ReadKey();
+            Console.WriteLine();
+            if (yn.Key == ConsoleKey.N)
+            {
+                // Specific armies
+                List<Army> specificArmies = new List<Army>();
+                for (int i = 0; i < tile.Armies.Count; i++)
+                {
+                    Console.WriteLine(
+                        $"({i}) {armies[i].DisplayName}\t" +
+                        $"Strength: {armies[i].Strength}\t" +
+                        $"Moves: {armies[i].MovesRemaining}");
+                }
+                
+                Console.WriteLine("Select which? [#[,#,...]]: ");
+                string[] numbers = Console.ReadLine().Split(",");
+                for (int i = 0; i < numbers.Length; i++)
+                {
+                    if (!Int32.TryParse(numbers[i], out int index) &&
+                        index < 0 || index > Army.MaxArmies)
+                    {
+                        Console.WriteLine("Must enter a valid number or a number list (e.g. 1,2,3");
+                        return;
+                    }
 
-        private static int ReadInput(int dimension)
+                    specificArmies.Add(armies[index]);                    
+                }
+
+                if (specificArmies.Count == 0)
+                {
+                    NotifyUser("Must select at least one army.");
+                    return;
+                }
+
+                armies = new List<Army>(specificArmies);
+            }
+
+            // Select the armies
+            commandController.AddCommand(
+                    new SelectArmyCommand(armyController, armies));
+        }
+
+        private static int ReadLocationInput(int dimension)
         {
             int value = (int)Char.GetNumericValue(Console.ReadLine(), 0);
-            
+
             if (value > World.Current.Map.GetUpperBound(dimension) ||
                 value < World.Current.Map.GetLowerBound(dimension))
             {
-                Console.WriteLine("Value must be within the bounds of the map.");
+                NotifyUser("Value must be within the bounds of the map.");
             }
 
             return value;
-        }
-
-        private static bool EnemyInTargetTile(Clan myClan, int x, int y)
-        {
-            Tile targetTile = World.Current.Map[x, y];
-
-            return (targetTile.HasArmies() &&
-                    targetTile.Armies[0].Clan != myClan);
         }
     }
 }

@@ -4,7 +4,6 @@ armies created, next-army select, city defense and army mustering, and city owne
 
 TODO List:
 * Refactor state-machine in ASCII UI
-* Sub-select armies from a stack in ASCII UI
 
 [Next Command]
 Next command needs a list of armies that are new or not marked "Defend". This can be implemented

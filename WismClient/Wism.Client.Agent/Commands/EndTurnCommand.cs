@@ -8,8 +8,8 @@ namespace Wism.Client.Agent.Commands
     {
         private readonly GameController gameController;
 
-        public EndTurnCommand(GameController gameController, Player player)
-            : base(player)
+        public EndTurnCommand(GameController gameController)
+            : base()
         {
             if (gameController is null)
             {

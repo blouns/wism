@@ -75,8 +75,7 @@ namespace Wism.Client.Agent
             this.commandController = controllerProvider.CommandController;
             this.commandProviders = new List<ICommandProvider>()
             {
-                new ConsoleCommandProvider(logFactory, 
-                controllerProvider.CommandController, controllerProvider.ArmyController, controllerProvider.GameController)
+                new ConsoleCommandProvider(logFactory, controllerProvider)
             };
         }
 

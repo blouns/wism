@@ -39,7 +39,7 @@ namespace Wism.Client.Agent
 
             try
             {
-                CreateDefaultGame();
+                CreateTestGame();
 
                 int lastId = 0;
                 while (true)
@@ -54,6 +54,7 @@ namespace Wism.Client.Agent
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 logger.LogError(ex.ToString());
                 throw;
             }
@@ -68,7 +69,7 @@ namespace Wism.Client.Agent
         /// <summary>
         /// For testing purposes only. Creates a default world for testing.
         /// </summary>
-        private void CreateDefaultGame()
+        private void CreateTestGame()
         {
             Game.CreateDefaultGame();
 
@@ -86,7 +87,7 @@ namespace Wism.Client.Agent
             armyController.SelectArmy(heroTile.Armies);
 
             // Create an opponent with a light infantry for testing
-            var enemyTile1 = World.Current.Map[2, 2];
+            var enemyTile1 = World.Current.Map[3, 3];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile1);
@@ -94,13 +95,14 @@ namespace Wism.Client.Agent
                 ModFactory.FindArmyInfo("Cavalry"),
                 enemyTile1);
 
-            var enemyTile2 = World.Current.Map[2, 3];
+            var enemyTile2 = World.Current.Map[3, 4];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile2);
 
             // Add cities
-            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+            MapBuilder.AddCity(World.Current.Map, 1, 1, "Marthos", "Sirians");
+            MapBuilder.AddCity(World.Current.Map, 3, 3, "BanesCitadel", "LordBane");
         }
     }
 }

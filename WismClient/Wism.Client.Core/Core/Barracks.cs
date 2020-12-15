@@ -35,6 +35,11 @@ namespace Wism.Client.Core
             }
         }
 
+        public List<ProductionInfo> GetProductionKinds()
+        {
+            return new List<ProductionInfo>(this.productionInfoDictionary.Keys);
+        }
+
         /// <summary>
         /// Start producing an army in the destination city
         /// </summary>

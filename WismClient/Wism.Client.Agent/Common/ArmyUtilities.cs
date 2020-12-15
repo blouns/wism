@@ -25,5 +25,10 @@ namespace Wism.Client.Agent
             }
 #endif
         }
+
+        public static string ArmiesToString(List<Army> armies)
+        {
+            return $"Armies[{armies.Count}:{armies[0]}]";
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace Wism.Client.MapObjects
 {
     public class Army : MapObject
     {
-        public const int MaxUnits = 8;
+        public const int MaxArmies = 8;
 
         private ArmyInfo info;
 

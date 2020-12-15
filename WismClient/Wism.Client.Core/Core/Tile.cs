@@ -211,7 +211,18 @@ namespace Wism.Client.Core
         {
             return 
                 (!HasArmies() || 
-                ((this.Armies.Count + newArmyCount) <= Army.MaxUnits));
+                ((this.Armies.Count + newArmyCount) <= Army.MaxArmies));
+        }
+
+        public bool CanAttackHere(List<Army> armies)
+        {
+            if (armies is null || armies.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(armies));
+            }
+
+            return (this.HasArmies() && (this.Armies[0].Clan != armies[0].Clan)) ||
+                   (this.HasCity() && (this.City.Clan != armies[0].Clan));            
         }
 
         /// <summary>
