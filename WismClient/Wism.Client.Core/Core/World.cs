@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Common;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 

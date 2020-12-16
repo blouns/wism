@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using Wism.Client.Core;
+﻿using System;
+using Wism.Client.Common;
 
 namespace Wism.Client.Core.Controllers
 {
@@ -15,7 +14,7 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
-            this.logger = loggerFactory.CreateLogger<GameController>();
+            this.logger = loggerFactory.CreateLogger();
         }
 
         public void EndTurn()

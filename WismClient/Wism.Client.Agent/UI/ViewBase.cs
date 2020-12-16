@@ -1,11 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Threading.Tasks;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
-using Wism.Client.MapObjects;
+using Wism.Client.Core.Controllers;
 using Wism.Client.Modules;
+using Wism.Client.Common;
 
 namespace Wism.Client.Agent
 {
@@ -29,7 +27,7 @@ namespace Wism.Client.Agent
                 throw new ArgumentNullException(nameof(controllerProvider));
             }
 
-            logger = loggerFactory.CreateLogger<ViewBase>();
+            logger = loggerFactory.CreateLogger();
             this.armyController = controllerProvider.ArmyController;
         }
 

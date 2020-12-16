@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Wism.Client.Core;
+using Wism.Client.Common;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
 
@@ -19,7 +18,7 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
-            this.logger = loggerFactory.CreateLogger<ArmyController>();
+            this.logger = loggerFactory.CreateLogger();
         }
 
         public void DefendArmy(List<Army> armies)

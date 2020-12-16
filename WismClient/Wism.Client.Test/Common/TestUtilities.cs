@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Collections.Generic;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
+using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
@@ -14,11 +13,13 @@ namespace Wism.Client.Test.Common
     {
         public static ILoggerFactory CreateLogFactory()
         {
-            var serviceProvider = new ServiceCollection()
-                                .AddLogging()
-                                .BuildServiceProvider();
-            var logFactory = serviceProvider.GetService<ILoggerFactory>();
-            return logFactory;
+            return new WismLoggerFactory();
+
+            //var serviceProvider = new ServiceCollection()
+            //                    .AddLogging()
+            //                    .BuildServiceProvider();
+            //var logFactory = serviceProvider.GetService<ILoggerFactory>();
+            //return logFactory;
         }
 
         public static ControllerProvider CreateControllerProvider()

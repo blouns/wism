@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
 using Wism.Client.Core.Controllers;
+using Wism.Client.Common;
 
 namespace Wism.Client.Agent
 {
@@ -16,11 +15,11 @@ namespace Wism.Client.Agent
     {
         public static int Main(string[] args)
         {
-            Serilog.Log.Logger = new LoggerConfiguration()
-                 .WriteTo.Console(Serilog.Events.LogEventLevel.Debug).MinimumLevel
-                 .Debug().Enrich
-                 .FromLogContext()
-                 .CreateLogger();
+            //Serilog.Log.Logger = new LoggerConfiguration()
+            //     .WriteTo.Console(Serilog.Events.LogEventLevel.Debug).MinimumLevel
+            //     .Debug().Enrich
+            //     .FromLogContext()
+            //     .CreateLogger();
 
             try
             {
@@ -48,7 +47,7 @@ namespace Wism.Client.Agent
         {
             try
             {
-                Log.Information("Starting services");
+                //Log.Information("Starting services");
                 Task[] tasks = new Task[]
                 {
                         // Start the host
@@ -58,15 +57,15 @@ namespace Wism.Client.Agent
                         scope.ServiceProvider.GetService<ViewBase>().RunAsync()
                 };
                 Task.WaitAny(tasks);
-                Log.Information("Ending services");
+                //Log.Information("Ending services");
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Error running service");
+                //Log.Fatal(ex, "Error running service");
             }
             finally
             {
-                Log.CloseAndFlush();
+                //Log.CloseAndFlush();
             }
         }
 
@@ -85,6 +84,8 @@ namespace Wism.Client.Agent
                         new WismClientInMemoryRepository(new SortedList<int, Command>())
                     );
 
+                    services.AddSingleton<ILoggerFactory, WismLoggerFactory>();
+
                     // Add controllers
                     services.AddSingleton(provider =>
                         new ControllerProvider()
@@ -99,7 +100,7 @@ namespace Wism.Client.Agent
                             CityController = new CityController(
                                 provider.GetService<ILoggerFactory>())
                         });
-                    
+
                     // Add command agent
                     services.AddSingleton<IHostedService>(provider =>
                         new WismAgent(
@@ -111,9 +112,9 @@ namespace Wism.Client.Agent
                         new AsciiView(
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<ControllerProvider>()));
-                })
-                .UseSerilog((hostingContext, loggerConfig) =>
-                    loggerConfig.ReadFrom.Configuration(hostingContext.Configuration)
-                );
+                });
+                //.UseSerilog((hostingContext, loggerConfig) =>
+                //    loggerConfig.ReadFrom.Configuration(hostingContext.Configuration)
+                //);
     }
 }

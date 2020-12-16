@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using Wism.Client.Api.Commands;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Common;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -30,7 +30,7 @@ namespace Wism.Client.Api.CommandProviders
                 throw new ArgumentNullException(nameof(controllerProvider));
             }
 
-            logger = loggerFactory.CreateLogger<ConsoleCommandProvider>();
+            logger = loggerFactory.CreateLogger();
             this.commandController = controllerProvider.CommandController;
             this.armyController = controllerProvider.ArmyController;
             this.gameController = controllerProvider.GameController;

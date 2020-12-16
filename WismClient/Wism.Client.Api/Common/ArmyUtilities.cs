@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Common;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Api

@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using Wism.Client.Core;
+﻿using System;
+using Wism.Client.Common;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -17,7 +16,7 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
-            this.logger = loggerFactory.CreateLogger<CityController>();
+            this.logger = loggerFactory.CreateLogger();
         }
 
         /// <summary>

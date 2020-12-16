@@ -1,0 +1,114 @@
+[
+    {
+        "ShortName": "Forest",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement" : 4,
+        "DisplayName": "Forest"
+    },
+    {
+        "ShortName": "Mountain",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": false,
+        "Movement": 5,
+        "DisplayName": "Mountain"
+    },
+    {
+        "ShortName": "Grass",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 2,
+        "DisplayName": "Grass"
+    },
+    {
+        "ShortName": "Water",
+        "AllowFlight": true,
+        "AllowFloat": true,
+        "AllowWalk": false,
+        "Movement": 1,
+        "DisplayName": "Water"
+    },
+    {
+        "ShortName": "Hill",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 4,
+        "DisplayName": "Hill"
+    },
+    {
+        "ShortName": "Marsh",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 4,
+        "DisplayName": "Marsh"
+    },
+    {
+        "ShortName": "Road",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 1,
+        "DisplayName": "Road"
+    },
+    {
+        "ShortName": "Bridge",
+        "AllowFlight": true,
+        "AllowFloat": true,
+        "AllowWalk": true,
+        "Movement": 1,
+        "DisplayName": "Bridge"
+    },
+    {
+        "ShortName": "Castle",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 1,
+        "DisplayName": "Castle"
+    },
+    {
+        "ShortName": "Ruins",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 2,
+        "DisplayName": "Ruins"
+    },
+    {
+        "ShortName": "Temple",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 2,
+        "DisplayName": "Temple"
+    },
+    {
+        "ShortName": "Tomb",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 2,
+        "DisplayName": "Tomb"
+    },
+    {
+        "ShortName": "Tower",
+        "AllowFlight": true,
+        "AllowFloat": false,
+        "AllowWalk": true,
+        "Movement": 2,
+        "DisplayName": "Tower"
+    },
+    {
+        "ShortName": "Void",
+        "AllowFlight": false,
+        "AllowFloat": false,
+        "AllowWalk": false,
+        "Movement": 999,
+        "DisplayName": "Void"
+    }
+]

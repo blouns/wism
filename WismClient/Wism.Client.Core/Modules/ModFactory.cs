@@ -1,10 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
 using Wism.Client.Agent.Factories;
+using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 

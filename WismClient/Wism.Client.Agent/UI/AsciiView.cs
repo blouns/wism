@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Api.Commands;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Api.CommandProviders;
+using Wism.Client.Api.Commands;
 using Wism.Client.Core;
-using System.Linq;
+using Wism.Client.Core.Controllers;
+using Wism.Client.Common;
 
 namespace Wism.Client.Agent
 {
@@ -71,7 +70,7 @@ namespace Wism.Client.Agent
                 throw new ArgumentNullException(nameof(controllerProvider));
             }
 
-            this.logger = logFactory.CreateLogger<AsciiView>();
+            this.logger = logFactory.CreateLogger();
             this.commandController = controllerProvider.CommandController;
             this.commandProviders = new List<ICommandProvider>()
             {

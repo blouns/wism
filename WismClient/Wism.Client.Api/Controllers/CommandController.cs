@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
+using Wism.Client.Common;
 
 namespace Wism.Client.Core.Controllers
 {
@@ -18,7 +18,7 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
-            this.logger = loggerFactory.CreateLogger<CommandController>();
+            this.logger = loggerFactory.CreateLogger();
             this.wismClientRepository = wismClientRepository ?? throw new ArgumentNullException(nameof(wismClientRepository));
         }
 
