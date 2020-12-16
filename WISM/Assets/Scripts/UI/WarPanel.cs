@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class WarPanel : MonoBehaviour
 {
+    /*
     public GameObject WarPanelGo;
     public GameObject KilledPrefab;
     public GameObject AttackerPrefab;
@@ -126,4 +127,5 @@ public class WarPanel : MonoBehaviour
         Destroy(losingUnitPanelObject, GameManager.WarTime);
         losingUnits.Remove(losingUnit);
     }
+    */
 }

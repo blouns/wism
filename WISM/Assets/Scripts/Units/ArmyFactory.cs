@@ -1,15 +1,13 @@
 using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts.Units
 {
     public class ArmyFactory
     {
+        /*
         private static ArmyFactory factory = null;
 
         private IList<AffiliationInfo> affiliationInfos;
@@ -55,5 +53,6 @@ namespace Assets.Scripts.Units
 
             return FindGameObjectKind(army[0]);
         }
+        */
     }
 }

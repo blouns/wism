@@ -1,5 +1,4 @@
 using Assets.Scripts.Units;
-using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,9 +17,9 @@ public class WorldTilemap : MonoBehaviour
     private UnitPicker UnitPickerPanel;
 
     private Camera followCamera;
-    private World world;
+    //private World world;
     private Tilemap tileMap;
-    private IList<Player> players;
+    //private IList<Player> players;
     private ArmyFactory armyFactory;
     private readonly Dictionary<Guid, ArmyGameObject> armyDictionary = new Dictionary<Guid, ArmyGameObject>();
 
@@ -44,11 +43,11 @@ public class WorldTilemap : MonoBehaviour
         UnitPickerPanel = this.unitPickerPrefab.GetComponent<UnitPicker>();
 
         // Set up game
-        world = CreateWorldFromScene();
-        players = ReadyPlayers();
-        armyFactory = ArmyFactory.Create(armyKinds);
+        //world = CreateWorldFromScene();
+        //players = ReadyPlayers();
+        //armyFactory = ArmyFactory.Create(armyKinds);
 
-        CreateArmyGameObjects();
+        //CreateArmyGameObjects();
     }
 
     private void SetTime(float time)
@@ -63,6 +62,7 @@ public class WorldTilemap : MonoBehaviour
 
     private void HandleInput()
     {
+        /*
         if (Input.GetMouseButtonDown(0))
         {
             BranallyGames.Wism.Tile clickedTile = GetClickedTile();
@@ -141,6 +141,7 @@ public class WorldTilemap : MonoBehaviour
         {
             ToggleMinimap();
         }
+        */
     }
 
     private void ToggleMinimap()
@@ -149,6 +150,7 @@ public class WorldTilemap : MonoBehaviour
         map.SetActive(!map.activeSelf);
     }
 
+    /*
     private void CompleteBattle()
     {
         switch (this.attackResult)
@@ -175,7 +177,7 @@ public class WorldTilemap : MonoBehaviour
                 throw new InvalidOperationException("Unknown attack result from battle.");
         }
     }
-
+      
     private void AttackArmyAt(BranallyGames.Wism.Tile targetTile)
     {
         Army attacker = SelectedArmy.Army;
@@ -196,7 +198,7 @@ public class WorldTilemap : MonoBehaviour
         WarPanel.Initialize(attacker, defender, armyKinds);
         SetTime(GameManager.WarTime);
     }
-
+    
     private void FixedUpdate()
     {
         if (this.players == null)
@@ -664,7 +666,7 @@ public class WorldTilemap : MonoBehaviour
             SelectObject(army.Tile);
         }
     }
-
+    */
     private TileBase[] GetUnityTiles(out int xSize, out int ySize)
     {
         // Constrain bounds

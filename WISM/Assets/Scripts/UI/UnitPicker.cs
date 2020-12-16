@@ -1,13 +1,12 @@
 using Assets.Scripts.Units;
-using BranallyGames.Wism;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UnitPicker : MonoBehaviour
 {
+    /*
     public GameObject UnitPickerPanel;
     public GameObject[] ArmyRows;
     public WorldTilemap WorldTilemap;
@@ -183,4 +182,5 @@ public class UnitPicker : MonoBehaviour
     {
         this.UnitPickerPanel.SetActive(false);
     }
+    */
 }

@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class ArmyGameObject
 {
+    /*
     private Army army;
     private GameObject gameObject;
 
@@ -22,4 +23,5 @@ public class ArmyGameObject
 
     public GameObject GameObject { get => gameObject; set => gameObject = value; }
     public Army Army { get => army; set => army = value; }
+    */
 }
