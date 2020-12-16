@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using Wism.Client.Agent.Commands;
+using Wism.Client.Api.Commands;
 using Wism.Client.Core.Controllers;
-using Wism.Client.Agent.CommandProviders;
+using Wism.Client.Api.CommandProviders;
 using Wism.Client.Core;
 using System.Linq;
 

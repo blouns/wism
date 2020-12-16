@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
-using Wism.Client.Agent;
-using Wism.Client.Agent.Commands;
+using Wism.Client.Api;
+using Wism.Client.Api.Commands;
 using Wism.Client.Core;
 using Wism.Client.Test.Common;
 

@@ -3,7 +3,7 @@ using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
-namespace Wism.Client.Agent.Commands
+namespace Wism.Client.Api.Commands
 {
     public class StartProductionCommand : Command
     {

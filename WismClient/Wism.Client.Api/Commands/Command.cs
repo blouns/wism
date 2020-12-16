@@ -1,7 +1,7 @@
 ﻿using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 
-namespace Wism.Client.Agent.Commands
+namespace Wism.Client.Api.Commands
 {
     public abstract class Command : ICommandAction
     {

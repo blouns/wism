@@ -2,13 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Wism.Client.Agent.Commands;
+using Wism.Client.Api.Commands;
 using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
-namespace Wism.Client.Agent.CommandProviders
+namespace Wism.Client.Api.CommandProviders
 {
     public class ConsoleCommandProvider : ICommandProvider
     {
@@ -348,7 +348,7 @@ namespace Wism.Client.Agent.CommandProviders
                 }
                 
                 Console.WriteLine("Select which? [#[,#,...]]: ");
-                string[] numbers = Console.ReadLine().Split(",");
+                string[] numbers = Console.ReadLine().Split(new char[] { ',' });
                 for (int i = 0; i < numbers.Length; i++)
                 {
                     if (!Int32.TryParse(numbers[i], out int index) &&

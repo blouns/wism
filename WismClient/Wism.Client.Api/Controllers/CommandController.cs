@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using Wism.Client.Agent;
-using Wism.Client.Agent.Commands;
+using Wism.Client.Api;
+using Wism.Client.Api.Commands;
 
 namespace Wism.Client.Core.Controllers
 {

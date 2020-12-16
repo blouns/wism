@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Wism.Client.Agent.Commands;
+using Wism.Client.Api.Commands;
 
-namespace Wism.Client.Agent
+namespace Wism.Client.Api
 {
     public interface IWismClientRepository
     {

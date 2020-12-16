@@ -1,13 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.Text;
-using Wism.Client.Agent;
-using Wism.Client.Agent.Commands;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Api;
+using Wism.Client.Api.Commands;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Test.Common

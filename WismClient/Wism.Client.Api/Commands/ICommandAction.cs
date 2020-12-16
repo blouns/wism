@@ -1,6 +1,6 @@
 ﻿using Wism.Client.Core.Controllers;
 
-namespace Wism.Client.Agent.Commands
+namespace Wism.Client.Api.Commands
 {
     public interface ICommandAction
     {

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent
+namespace Wism.Client.Api
 {
     public static class ArmyUtilities
     {

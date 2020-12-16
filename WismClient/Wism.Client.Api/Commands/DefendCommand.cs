@@ -2,18 +2,18 @@
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.Commands
+namespace Wism.Client.Api.Commands
 {
-    public class SelectArmyCommand : ArmyCommand
+    public class DefendCommand : ArmyCommand
     {
-        public SelectArmyCommand(ArmyController armyController, List<Army> armies)
+        public DefendCommand(ArmyController armyController, List<Army> armies)
             : base(armyController, armies)
         {
         }
 
         public override ActionState Execute()
-        {
-            armyController.SelectArmy(Armies);
+        {            
+            armyController.DefendArmy(this.Armies);
 
             return ActionState.Succeeded;
         }

@@ -2,13 +2,13 @@
 using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
 
-namespace Wism.Client.Agent.Commands
+namespace Wism.Client.Api.Commands
 {
-    public class StartTurnCommand : Command
+    public class EndTurnCommand : Command
     {
         private readonly GameController gameController;
 
-        public StartTurnCommand(GameController gameController)
+        public EndTurnCommand(GameController gameController)
             : base()
         {
             if (gameController is null)
@@ -21,7 +21,7 @@ namespace Wism.Client.Agent.Commands
 
         public override ActionState Execute()
         {
-            gameController.StartTurn(Game.Current);
+            gameController.EndTurn(Game.Current);
 
             return ActionState.Succeeded;
         }
