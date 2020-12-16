@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Wism.Client.Agent.Controllers;
+﻿using System.Collections.Generic;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands
@@ -24,11 +23,11 @@ namespace Wism.Client.Agent.Commands
             {
                 return ActionState.Failed;
             }
+          
+            IList<Tile> path = null;
+            _ = armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);
 
-            // Attack successful; move into the location            
-            bool success = armyController.TryMove(Armies, World.Current.Map[X, Y]);
-
-            return (success) ? ActionState.Succeeded : ActionState.Failed;
+            return ActionState.Succeeded;
         }
     }
 }

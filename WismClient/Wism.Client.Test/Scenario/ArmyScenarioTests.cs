@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Wism.Client.Agent.Commands;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Test.Common;
 
@@ -91,13 +92,14 @@ namespace Wism.Client.Test.Scenario
                     direction *= -1;
                 }
                 x += direction;
-                commandController.AddCommand(new MoveCommand(armyController, armiesToMove, x, y));                
+                commandController.AddCommand(new MoveAlongPathCommand(armyController, armiesToMove, x, y));                
             };
 
             // Act / Assert                     
             var commandsToExecute = commandController.GetCommandsAfterId(0);
-            int lastId = 0;
-            foreach (MoveCommand command in commandsToExecute)
+            int lastId;
+            bool done = false;
+            foreach (MoveAlongPathCommand command in commandsToExecute)
             {
                 var result = command.Execute();
                 switch (result)
@@ -108,10 +110,16 @@ namespace Wism.Client.Test.Scenario
                     case ActionState.Failed:
                         if (hero.MovesRemaining != 1)
                             Assert.Fail("Command failed to execute.");
+                        done = true;
                         break;
                     case ActionState.InProgress:
                         // Do not advance the command (in-progress)
                         break;
+                }
+
+                if (done)
+                {
+                    break;
                 }
             }
         }

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Wism.Client.Agent.Commands;
-using Wism.Client.Agent.Controllers;
+using Wism.Client.Core.Controllers;
 using Wism.Client.Agent.CommandProviders;
 using Wism.Client.Core;
 using System.Linq;
@@ -95,7 +95,6 @@ namespace Wism.Client.Agent
                 {
                     logger.LogInformation($"Task successful");
                     lastId = command.Id;
-                    UpdateGameState();
                 }
                 else if (result == ActionState.Failed)
                 {
@@ -105,34 +104,13 @@ namespace Wism.Client.Agent
                     {                 
                         Console.Beep();
                     }
-                    UpdateGameState();
                 }
                 else if (result == ActionState.InProgress)
                 {
-                    logger.LogInformation("Task started and in progress");                    
-                    Game.Current.Transition(GameState.MovingArmy);
-
-                    // Do not advance Command ID as we are still processing this command
+                    logger.LogInformation("Task started and in progress");
+                    // Do NOT advance Command ID; we are still processing this command
+                    // TODO: Perhaps shift to using GameState instead of ActionState?
                 }
-            }
-        }
-
-        private static void UpdateGameState()
-        {
-            var player1Armies = Game.Current.GetCurrentPlayer().GetArmies();
-            if (player1Armies == null || player1Armies.Count == 0)
-            {
-                Game.Current.Transition(GameState.GameOver);
-            }
-            else if (Game.Current.GetSelectedArmies() == null ||
-                     Game.Current.GetSelectedArmies().Count == 0 ||
-                     Game.Current.GetSelectedArmies().Any(a => a.MovesRemaining == 0))
-            {
-                Game.Current.Transition(GameState.Ready);
-            }
-            else
-            {
-                Game.Current.Transition(GameState.SelectedArmy);
             }
         }
 

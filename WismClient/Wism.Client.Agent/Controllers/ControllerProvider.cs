@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Wism.Client.Agent.Controllers
+namespace Wism.Client.Core.Controllers
 {
     public class ControllerProvider
     {

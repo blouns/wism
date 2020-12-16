@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Wism.Client.Agent.Controllers;
+﻿using System.Collections.Generic;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands

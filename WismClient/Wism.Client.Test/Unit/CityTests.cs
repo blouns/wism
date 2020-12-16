@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
-using Wism.Client.Agent.Controllers;
+using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;

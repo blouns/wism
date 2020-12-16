@@ -2,12 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Wism.Client.Agent.Commands;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
 
-namespace Wism.Client.Agent.Controllers
+namespace Wism.Client.Core.Controllers
 {
     public class ArmyController
     {
@@ -50,22 +49,21 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(armiesToMove));
             }
 
-            ArmyUtilities.VerifyArmies(logger, armiesToMove);
-
             // Can we traverse in that terrain?            
             if (!armiesToMove.TrueForAll(
                 army => targetTile.CanTraverseHere(army)))
             {
                 logger.LogInformation($"{ArmiesToString(armiesToMove)} cannot traverse {targetTile}");
+                Game.Current.Transition(GameState.SelectedArmy);
                 return false;
             }
 
             // Do we have enough moves?
             // TODO: Account for terrain bonuses
-            // TODO: Shouldn't this check the entire path instead of target tile?
-            if (armiesToMove.Any<Army>(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
+            if (armiesToMove.Any(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
             {
                 logger.LogInformation($"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");
+                Game.Current.Transition(GameState.Ready);
                 return false;
             }
             
@@ -76,6 +74,7 @@ namespace Wism.Client.Agent.Controllers
                     (!targetTile.HasRoom(armiesToMove.Count)))
                 {
                     logger.LogInformation($"{targetTile} has too many units to move there");
+                    Game.Current.Transition(GameState.SelectedArmy);
                     return false;
                 }
 
@@ -84,7 +83,9 @@ namespace Wism.Client.Agent.Controllers
                     (targetTile.Armies[0].Clan != armiesToMove[0].Clan))
                 {
                     logger.LogInformation(
-                        $"Army cannot move {ArmiesToString(armiesToMove)} to {targetTile} as it occupied by {targetTile.Armies[0].Clan}");
+                        $"Army cannot move {ArmiesToString(armiesToMove)} to {targetTile} " +
+                        $"as it occupied by {targetTile.Armies[0].Clan}");
+                    Game.Current.Transition(GameState.SelectedArmy);
                     return false;
                 }
             }
@@ -120,44 +121,30 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
-            if (path != null && path.Count == 1)
+            // Have we arrived at our destination?
+            if (AtDestination(path))
             {
-                // We have arrived
-                logger.LogInformation($"{ArmiesToString(armiesToMove)} arrived at its destination.");
-                path.Clear();
-                distance = 0;
-
-                if (armiesToMove.Any(a => a.MovesRemaining == 0))
-                {
-                    Game.Current.DeselectArmies();
-                }
-
+                PrepareArmiesForArrival(armiesToMove, path, out distance);
                 return ActionState.Succeeded;
             }
 
+            // Get a route            
+            float myDistance = 0.0f;
             IList<Tile> myPath = path;
-            float myDistance;
-            if (myPath == null)
+            if (NoPathYet(myPath))
             {
-                // No current path; calculate the shortest route
-                IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
-                pathingStrategy.FindShortestRoute(World.Current.Map, armiesToMove, targetTile, out myPath, out _);
-
-                if (myPath == null || myPath.Count == 0)
+                myPath = FindPath(armiesToMove, targetTile, ref myDistance);
+                if (myPath == null)
                 {
                     // Impossible route
-                    logger.LogInformation($"Path between {ArmiesToString(armiesToMove)} and {targetTile} is impassable.");
-
-                    path = null;
-                    distance = 0.0f;
+                    distance = myDistance;
                     return ActionState.Failed;
                 }
             }
 
-            // Now we have a route
+            // Now we have a route; move ahead
             ActionState result;
-            bool moveSuccessful = TryMove(armiesToMove, myPath[1]);
-            if (moveSuccessful)
+            if (TryMove(armiesToMove, myPath[1]))
             {
                 // Pop the starting location and return updated path and distance
                 myPath.RemoveAt(0);
@@ -177,6 +164,50 @@ namespace Wism.Client.Agent.Controllers
             return result;
         }
 
+        private IList<Tile> FindPath(List<Army> armiesToMove, Tile targetTile, ref float distance)
+        {
+            IList<Tile> path;
+
+            // Calculate the shortest route
+            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            pathingStrategy.FindShortestRoute(World.Current.Map, armiesToMove, targetTile, out path, out _);
+
+            if (path == null || path.Count == 0)
+            {
+                // Impossible route
+                logger.LogInformation($"Path between {ArmiesToString(armiesToMove)} and {targetTile} is impassable.");
+
+                distance = 0.0f;
+                path = null;                
+                Game.Current.Transition(GameState.SelectedArmy);
+            }
+
+            return path;
+        }
+
+        private static bool NoPathYet(IList<Tile> myPath)
+        {
+            return myPath == null;
+        }
+
+        private static bool AtDestination(IList<Tile> path)
+        {
+            return path != null && path.Count == 1;
+        }
+
+        private void PrepareArmiesForArrival(List<Army> armiesToMove, IList<Tile> path, out float distance)
+        {
+            logger.LogInformation($"{ArmiesToString(armiesToMove)} arrived at its destination.");
+            path.Clear();
+            distance = 0;
+
+            Game.Current.Transition(GameState.SelectedArmy);
+            if (armiesToMove.Any(a => a.MovesRemaining == 0))
+            {
+                Game.Current.DeselectArmies();
+            }
+        }
+
         /// <summary>
         /// Selects the army to prepare to move or attack (changes from "Armies" to "VisitingArmies").
         /// </summary>
@@ -187,8 +218,6 @@ namespace Wism.Client.Agent.Controllers
             {
                 throw new ArgumentNullException(nameof(armies));
             }
-
-            ArmyUtilities.VerifyArmies(logger, armies);            
 
             Game.Current.SelectArmies(armies);
         }
@@ -229,8 +258,6 @@ namespace Wism.Client.Agent.Controllers
             {
                 throw new ArgumentException("Target tile must have armies of another clan.");
             }
-
-            ArmyUtilities.VerifyArmies(logger, armiesToAttackWith);
 
             var attackingFromTile = armiesToAttackWith[0].Tile;
 
@@ -284,12 +311,11 @@ namespace Wism.Client.Agent.Controllers
 
             if (armiesToMove.Any(a => a.MovesRemaining == 0))
             {
+                // Ran out of moves so just stop here
                 Game.Current.DeselectArmies();
             }
-            else
-            {
-                Game.Current.Transition(GameState.SelectedArmy);
-            }
+
+            Game.Current.Transition(GameState.SelectedArmy);
         }
 
         private static int CalculateDistance(IList<Tile> myPath)

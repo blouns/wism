@@ -1,9 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using Wism.Client.Agent.Commands;
-using Wism.Client.Agent.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Test.Common;
@@ -257,7 +256,7 @@ namespace Wism.Client.Test.Unit
         }
 
         [Test]
-        public void MoveNorthThenSouth()
+        public void Move_NorthThenSouth()
         {
             // ASSEMBLE
             Army hero = GetFirstHero();            
@@ -757,7 +756,6 @@ namespace Wism.Client.Test.Unit
             int x = armies[0].X;
             int y = armies[0].Y;
 
-            // BUGBUG: North/South should be flipped for proper coord system.
             switch (direction)
             {
                 case Direction.North:
@@ -774,7 +772,9 @@ namespace Wism.Client.Test.Unit
                     break;
             }
 
-            return armyController.TryMove(armies, World.Current.Map[x, y]);
+            IList<Tile> path = null;
+            var state = armyController.MoveOneStep(armies, World.Current.Map[x, y], ref path, out _);
+            return (state == ActionState.Succeeded || state == ActionState.InProgress);
         }
 
         public enum Direction

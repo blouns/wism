@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using Wism.Client.Agent;
 using Wism.Client.Agent.Commands;
-using Wism.Client.Agent.Controllers;
+using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 

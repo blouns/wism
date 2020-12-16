@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wism.Client.Agent.Commands;
-using Wism.Client.Agent.Controllers;
+using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.Agent
 {

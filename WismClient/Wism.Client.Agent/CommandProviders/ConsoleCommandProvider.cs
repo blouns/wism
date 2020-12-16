@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Wism.Client.Agent.Commands;
-using Wism.Client.Agent.Controllers;
+using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -119,10 +119,10 @@ namespace Wism.Client.Agent.CommandProviders
 
         private void DoProduce()
         {
-            // Needed for the command:
-            City productionCity = null;
-            City destinationCity = null;
-            ArmyInfo armyInfo = null;
+            // Arguments for the command
+            City productionCity;            
+            ArmyInfo armyInfo;
+            City destinationCity = null;    // Optional
 
             // Get the city to produce from
             Console.Write("X location? : ");
@@ -217,7 +217,7 @@ namespace Wism.Client.Agent.CommandProviders
             {
                 // Move to the new location
                 commandController.AddCommand(
-                    new MoveCommand(armyController, armies, x, y));
+                    new MoveAlongPathCommand(armyController, armies, x, y)); 
             }
         }
 

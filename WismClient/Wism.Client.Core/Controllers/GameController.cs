@@ -1,10 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Wism.Client.Core;
 
-namespace Wism.Client.Agent.Controllers
+namespace Wism.Client.Core.Controllers
 {
     public class GameController
     {

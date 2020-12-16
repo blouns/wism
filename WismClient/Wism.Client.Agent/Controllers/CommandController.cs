@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using Wism.Client.Agent;
 using Wism.Client.Agent.Commands;
 
-namespace Wism.Client.Agent.Controllers
+namespace Wism.Client.Core.Controllers
 {
     public class CommandController
     {

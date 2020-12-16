@@ -247,6 +247,7 @@ namespace Wism.Client.Core
             }
             
             this.selectedArmies.ForEach(a => a.Defend());
+            DeselectArmies();
         }
 
         public static void CreateDefaultPlayers()
@@ -279,6 +280,8 @@ namespace Wism.Client.Core
             World.CreateDefaultWorld();
         }
 
+        #region Helper methods
+
         private static List<Army> RemoveDeadArmies(List<Army> armies)
         {
             var armiesToReturn = new List<Army>(armies);
@@ -297,6 +300,8 @@ namespace Wism.Client.Core
         {
             return $"Armies[{armies.Count}:{armies[0]}]";
         }
+
+        #endregion
     }
     public enum GameState
     {

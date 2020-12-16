@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
-namespace Wism.Client.Agent.Controllers
+namespace Wism.Client.Core.Controllers
 {
     public class CityController
     {

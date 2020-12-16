@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Wism.Client.Agent.Controllers;
+﻿using System.Collections.Generic;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.Commands
@@ -21,9 +19,8 @@ namespace Wism.Client.Agent.Commands
 
         public override ActionState Execute()
         {
-            bool success = armyController.TryMove(Armies, World.Current.Map[X, Y]);
-            
-            return (success) ? ActionState.Succeeded : ActionState.Failed;            
+            IList<Tile> path = null;
+            return armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);
         }
     }
 }

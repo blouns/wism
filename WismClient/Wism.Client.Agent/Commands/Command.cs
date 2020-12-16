@@ -1,8 +1,9 @@
 ﻿using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.Agent.Commands
 {
-    public abstract class Command : IAction
+    public abstract class Command : ICommandAction
     {
         public int Id { get; set; }
 
