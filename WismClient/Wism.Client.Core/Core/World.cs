@@ -30,8 +30,6 @@ namespace Wism.Client.Core
             }
         }
 
-        public object Players { get; set; }
-
         public static void CreateDefaultWorld()
         {
             World oldWorld = World.current;

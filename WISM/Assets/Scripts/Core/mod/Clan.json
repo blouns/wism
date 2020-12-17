@@ -1,0 +1,65 @@
+[
+  {
+    "ShortName": "Sirians",
+    "PrimaryColor": "(199, 199, 199)",
+    "SecondaryColor": "(0, 0, 0)",
+    "DisplayName": "The Sirians",
+    "Capitol": "Marthos"
+  },
+  {
+    "ShortName": "StormGiants",
+    "PrimaryColor": "(199, 199, 0)",
+    "SecondaryColor": "(0, 0, 0)",
+    "DisplayName": "Storm Giants",
+    "Capitol": "Stormheim"
+  },
+  {
+    "ShortName": "GreyDwarves",
+    "PrimaryColor": "(199, 134, 0)",
+    "SecondaryColor": "(0, 0, 0)",
+    "DisplayName": "Grey Dwarves",
+    "Capitol": "Khamar"
+  },
+  {
+    "ShortName": "OrcsOfKor",
+    "PrimaryColor": "(199, 0, 0)",
+    "SecondaryColor": "(0, 0, 0)",
+    "DisplayName": "Orcs of Kor",
+    "Capitol": "Kor"
+  },
+  {
+    "ShortName": "Elvallie",
+    "PrimaryColor": "(85, 150, 85)",
+    "SecondaryColor": "(0, 0, 0)",
+    "DisplayName": "Elvallie",
+    "Capitol": "Elvallie"
+  },
+  {
+    "ShortName": "Selentines",
+    "PrimaryColor": "(255, 0, 0)",
+    "SecondaryColor": "(0, 85, 119)",
+    "DisplayName": "The Selentines",
+    "Capitol": "Enmouth"
+  },
+  {
+    "ShortName": "HorseLords",
+    "PrimaryColor": "(134, 199, 0)",
+    "SecondaryColor": "(0, 0, 0)",
+    "DisplayName": "Horse Lords",
+    "Capitol": "Dunethel"
+  },
+  {
+    "ShortName": "LordBane",
+    "PrimaryColor": "(0, 0, 0)",
+    "SecondaryColor": "(199, 0, 0)",
+    "DisplayName": "Lord Bane",
+    "Capitol": "BanesCitadel"
+  },
+  {
+    "ShortName": "Neutral",
+    "PrimaryColor": "(100, 100, 100)",
+    "SecondaryColor": "(0, 0, 0)",
+    "DisplayName": "Neutral",
+    "Capitol": "None"
+  }
+]

@@ -1,13 +1,10 @@
-using Assets.Scripts.Units;
-using BranallyGames.Wism;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
 public class ArmyGameObject
-{
-    /*
+{    
     private Army army;
     private GameObject gameObject;
 
@@ -23,5 +20,4 @@ public class ArmyGameObject
 
     public GameObject GameObject { get => gameObject; set => gameObject = value; }
     public Army Army { get => army; set => army = value; }
-    */
 }

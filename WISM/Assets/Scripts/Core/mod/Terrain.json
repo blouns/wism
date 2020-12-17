@@ -1,6 +1,6 @@
 [
     {
-        "ID": "Forest",
+        "ShortName": "Forest",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -8,7 +8,7 @@
         "DisplayName": "Forest"
     },
     {
-        "ID": "Mountain",
+        "ShortName": "Mountain",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": false,
@@ -16,7 +16,7 @@
         "DisplayName": "Mountain"
     },
     {
-        "ID": "Grass",
+        "ShortName": "Grass",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -24,7 +24,7 @@
         "DisplayName": "Grass"
     },
     {
-        "ID": "Water",
+        "ShortName": "Water",
         "AllowFlight": true,
         "AllowFloat": true,
         "AllowWalk": false,
@@ -32,7 +32,7 @@
         "DisplayName": "Water"
     },
     {
-        "ID": "Hill",
+        "ShortName": "Hill",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -40,7 +40,7 @@
         "DisplayName": "Hill"
     },
     {
-        "ID": "Marsh",
+        "ShortName": "Marsh",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -48,7 +48,7 @@
         "DisplayName": "Marsh"
     },
     {
-        "ID": "Road",
+        "ShortName": "Road",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -56,7 +56,7 @@
         "DisplayName": "Road"
     },
     {
-        "ID": "Bridge",
+        "ShortName": "Bridge",
         "AllowFlight": true,
         "AllowFloat": true,
         "AllowWalk": true,
@@ -64,7 +64,7 @@
         "DisplayName": "Bridge"
     },
     {
-        "ID": "Castle",
+        "ShortName": "Castle",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -72,7 +72,7 @@
         "DisplayName": "Castle"
     },
     {
-        "ID": "Ruins",
+        "ShortName": "Ruins",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -80,7 +80,7 @@
         "DisplayName": "Ruins"
     },
     {
-        "ID": "Temple",
+        "ShortName": "Temple",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -88,7 +88,7 @@
         "DisplayName": "Temple"
     },
     {
-        "ID": "Tomb",
+        "ShortName": "Tomb",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -96,7 +96,7 @@
         "DisplayName": "Tomb"
     },
     {
-        "ID": "Tower",
+        "ShortName": "Tower",
         "AllowFlight": true,
         "AllowFloat": false,
         "AllowWalk": true,
@@ -104,7 +104,7 @@
         "DisplayName": "Tower"
     },
     {
-        "ID": "Void",
+        "ShortName": "Void",
         "AllowFlight": false,
         "AllowFloat": false,
         "AllowWalk": false,

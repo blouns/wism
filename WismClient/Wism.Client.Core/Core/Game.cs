@@ -281,6 +281,11 @@ namespace Wism.Client.Core
             World.CreateDefaultWorld();
         }
 
+        public static void CreateEmpty()
+        {
+            current = new Game();
+        }
+
         #region Helper methods
 
         private static List<Army> RemoveDeadArmies(List<Army> armies)
@@ -303,15 +308,5 @@ namespace Wism.Client.Core
         }
 
         #endregion
-    }
-    public enum GameState
-    {
-        Ready,
-        SelectedArmy,
-        MovingArmy,
-        AttackingArmy,
-        EndingTurn,
-        StartingTurn,
-        GameOver
     }
 }
