@@ -25,9 +25,15 @@ namespace Wism.Client.Api.Commands
             }
           
             IList<Tile> path = null;
-            _ = armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);
+            _ = armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);   // Move
+            _ = armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);   // Arrive
 
             return ActionState.Succeeded;
+        }
+
+        public override string ToString()
+        {
+            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} attack ({World.Current.Map[X, Y]}";
         }
     }
 }

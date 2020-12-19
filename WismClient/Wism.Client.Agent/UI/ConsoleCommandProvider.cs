@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
@@ -8,7 +9,7 @@ using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
-namespace Wism.Client.Api.CommandProviders
+namespace Wism.Client.Agent
 {
     public class ConsoleCommandProvider : ICommandProvider
     {

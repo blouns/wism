@@ -20,7 +20,12 @@ namespace Wism.Client.Api.Commands
 
         public override ActionState Execute()
         {
-            return armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);                        
+            return armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);
+        }
+
+        public override string ToString()
+        {
+            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} move to ({World.Current.Map[X, Y]}";
         }
     }
 }

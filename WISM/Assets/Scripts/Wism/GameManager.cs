@@ -135,7 +135,7 @@ public class GameManager : MonoBehaviour
         clanInfo = ClanInfo.GetClanInfo("StormGiants");
         clan = Clan.Create(clanInfo);
         Player player2 = Player.Create(clan);
-        Game.Current.Players.Add(player1);
+        Game.Current.Players.Add(player2);
         player2.Clan.IsHuman = false;
 
         return Game.Current.Players;

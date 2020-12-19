@@ -40,13 +40,13 @@ namespace Wism.Client.Core.Controllers
         /// <returns>Command</returns>
         public Command GetCommand(int commandId)
         {
-            if (!wismClientRepository.CommandExistsAsync(commandId).Result)
+            if (!wismClientRepository.CommandExists(commandId))
             {
                 throw new ArgumentOutOfRangeException(nameof(commandId));
             }
 
-            return wismClientRepository.GetCommandAsync(commandId).Result;
-        }
+            return wismClientRepository.GetCommand(commandId);
+        }      
 
         /// <summary>
         /// Gets all commands
@@ -54,7 +54,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns>All commands</returns>
         public IEnumerable<Command> GetCommands()
         {
-            return wismClientRepository.GetCommandsAsync().Result;
+            return wismClientRepository.GetCommands();
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns>All commands after <c>lastSeenCommandId</c></returns>
         public IEnumerable<Command> GetCommandsAfterId(int lastSeenCommandId)
         {
-            return wismClientRepository.GetCommandsAfterIdAsync(lastSeenCommandId).Result;
+            return wismClientRepository.GetCommandsAfterId(lastSeenCommandId);
         }
     }
 }

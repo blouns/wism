@@ -23,5 +23,10 @@ namespace Wism.Client.Api.Commands
 
             return ActionState.Succeeded;
         }
+
+        public override string ToString()
+        {
+            return $"{ProductionCity} stop production";
+        }
     }
 }

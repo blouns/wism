@@ -21,5 +21,10 @@ namespace Wism.Client.Api.Commands
 
             return result ? ActionState.Succeeded : ActionState.Failed;
         }
+
+        public override string ToString()
+        {
+            return $"Command: Select next";
+        }
     }
 }

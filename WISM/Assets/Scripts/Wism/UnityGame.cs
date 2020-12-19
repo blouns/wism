@@ -42,11 +42,8 @@ namespace Assets.Scripts.Wism
         public GameObject SelectedBoxPrefab;
         private GameObject selectedArmyBox;
 
-        //public ArmyGameObject SelectedArmyGameObject { get => selectedArmyGo; set => selectedArmyGo = value; }
-
         private AttackResult attackResult;
-        bool armyPickerActive = false;
-        bool initialized = false;
+        private bool armyPickerActive = false;
 
         public void Start()
         {
@@ -55,21 +52,28 @@ namespace Assets.Scripts.Wism
         }
 
         public void Update()
-        {
-            if (!initialized)
-            {
-                return;
-            }
-
-            RunOnce();
+        {            
+            HandleInput();
         }
 
         public void FixedUpdate()
-        {
-            if (!initialized)
+        {            
+            try
             {
-                return;
+                Draw();
+                DoTasks();
             }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                throw;
+            }
+        }
+
+        private void Draw()
+        {
+            DrawSelectedArmiesBox();
+            CreateArmyGameObjects();
         }
 
         private void SetTime(float time)
@@ -87,6 +91,8 @@ namespace Assets.Scripts.Wism
             SetupCameras();            
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
             ArmyPickerPanel = this.unitPickerPrefab.GetComponent<UnitPicker>();
+            Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(1, 1);
+            this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
 
             // Set up game            
             world = WorldTilemap.CreateWorldFromScene();
@@ -129,33 +135,22 @@ namespace Assets.Scripts.Wism
         }
 
         /// <summary>
-        /// Run one iteration of the game loop
+        /// Execute the commands from the UI, AI, or other devices
         /// </summary>
-        public void RunOnce()
-        {
-            try
-            {
-                Draw();
-                HandleInput();
-                DoTasks();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(ex.ToString());
-            }
-        }
-
         private void DoTasks()
-        {
+        {            
             foreach (Command command in provider.CommandController.GetCommandsAfterId(lastCommandId))
             {
                 logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
+                Debug.Log($"Pre-command GameState: {Game.Current.GameState}");
+                Debug.Log($"{command}");
 
                 // Run the command
                 var result = command.Execute();
 
+                Debug.Log($"Post-command GameState: {Game.Current.GameState}");
+
                 // Process the result
-                // TODO: Perhaps shift to using GameState instead of ActionState?
                 if (result == ActionState.Succeeded)
                 {
                     logger.LogInformation($"Task successful");
@@ -169,7 +164,7 @@ namespace Assets.Scripts.Wism
                 else if (result == ActionState.InProgress)
                 {
                     logger.LogInformation("Task started and in progress");
-                    // Do NOT advance Command ID; we are still processing this command                    
+                    // Do nothing; do not advance Command ID
                 }
             }
         }
@@ -191,6 +186,13 @@ namespace Assets.Scripts.Wism
                         break;
 
                     case GameState.SelectedArmy:
+                        if (!armyPickerActive)
+                        {
+                            SelectObject(clickedTile);
+                        }
+
+                        MoveSelectedArmyTo(clickedTile);
+
                         // TODO: Second click selects top unit in army
                         // TODO: Double-click selects entire army
 
@@ -214,7 +216,7 @@ namespace Assets.Scripts.Wism
                         //    // Move
                         //    Destroy(this.selectedArmyBox);
                         //    MoveSelectedArmyTo(clickedTile);
-                        //}
+                        //}                        
                         break;
 
                     case GameState.MovingArmy:
@@ -233,12 +235,13 @@ namespace Assets.Scripts.Wism
                         throw new InvalidOperationException("Cannot transition to unknown state.");
                 }
 
+                Draw();
             }
             else if (Input.GetMouseButtonDown(1))
             {
                 if (Game.Current.GameState == GameState.SelectedArmy)
                 {
-                    //DeselectObject();
+                    DeselectObject();
                 }
             }
             else if (Input.GetKeyDown(KeyCode.M))
@@ -253,11 +256,85 @@ namespace Assets.Scripts.Wism
             {
                 ToggleMinimap();
             }
+        }        
+
+        /// <summary>
+        /// Find the currently selected army GameObject
+        /// </summary>
+        /// <returns></returns>
+        private ArmyGameObject GetSelectedArmyGameObject()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return null;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var army = armies.Find(a => this.armyDictionary.ContainsKey(a.Id));
+            return this.armyDictionary[army.Id];
         }
 
-        private void Draw()
+        private void DrawSelectedArmiesBox()
         {
-            // Do nothing
+            if (!Game.Current.ArmiesSelected())
+            {
+                // None; so delete bounding box if it exists
+                if (IsSelectedBoxActive())
+                {
+                    HideSelectedBox();
+                }
+
+                return;
+            }
+
+            List<Army> armies = Game.Current.GetSelectedArmies();
+            Army army = armies[0];
+            Tile tile = army.Tile;
+
+            // Have the selected armies already been rendered?
+            if (IsSelectedBoxActive())
+            {
+                var boxGameCoords = WorldTilemap.ConvertUnityToGameCoordinates(this.selectedArmyBox.transform.position);
+                if (boxGameCoords.Item1 == tile.X &&
+                    boxGameCoords.Item2 == tile.Y)
+                {
+                    // Do nothing; already rendered
+                    return;
+                }
+                else
+                {
+                    // Clear the old box; it is stale
+                    HideSelectedBox();
+                }
+            }
+
+            if (!armyDictionary.ContainsKey(army.Id))
+            {
+                throw new InvalidOperationException("Could not find selected army in game objects.");
+            }
+
+            // Render the selected box
+            ShowSelectedBox(army);
+
+        }
+
+        private void ShowSelectedBox(Army army)
+        {
+            Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(army.X, army.Y);
+            this.selectedArmyBox.transform.position = worldVector;
+            this.selectedArmyBox.SetActive(true);
+            SetCameraTarget(this.selectedArmyBox.transform);
+        }
+
+        private void HideSelectedBox()
+        {
+            this.selectedArmyBox.SetActive(false);
+            SetTime(GameManager.StandardTime);
+        }
+
+        private bool IsSelectedBoxActive()
+        {
+            return (this.selectedArmyBox != null && this.selectedArmyBox.activeSelf);
         }
 
         private void SetupCameras()
@@ -435,22 +512,7 @@ namespace Assets.Scripts.Wism
 
             return battleContinues;
         }
-        */
-
-        private void MoveArmySelectedArmiesOneStep(ArmyGameObject armyGO)
-        {
-            SetTime(GameManager.StandardTime);
-            SetCameraTarget(armyGO.GameObject.transform);
-
-            if (Game.Current.GameState != GameState.SelectedArmy)
-            {
-                Debug.Log("You must first select an army.");
-            }
-
-
-        }
-
-        /*
+        
         private void MoveArmy(ArmyGameObject armyGO)
         {
             SetTime(GameManager.StandardTime);
@@ -578,6 +640,7 @@ namespace Assets.Scripts.Wism
                     if (tile.HasVisitingArmies() && armyDictionary.ContainsKey(tile.VisitingArmies[0].Id))
                     {
                         armyId = tile.VisitingArmies[0].Id;
+                        SetCameraTarget(armyDictionary[armyId].GameObject.transform);
                     }
                     else if (tile.HasArmies() && this.armyDictionary.ContainsKey(tile.Armies[0].Id))
                     {
@@ -588,8 +651,10 @@ namespace Assets.Scripts.Wism
                         // Not a "top" army
                         continue;
                     }
-
+                    
                     ArmyGameObject ago = this.armyDictionary[armyId];
+                    Vector3 vector = WorldTilemap.ConvertGameToUnityCoordinates(ago.Army.X, ago.Army.Y);
+                    ago.GameObject.transform.position = vector;
                     ago.GameObject.SetActive(true);
                 }
             }
@@ -598,31 +663,61 @@ namespace Assets.Scripts.Wism
 
         private void SelectObject(Tile clickedTile)
         {
-            // If tile contains an army, select it     
             if (clickedTile.HasArmies())
             {
-                List<Army> armies = clickedTile.Armies;
-                Army army = armies[0];
-
-                if (!armyDictionary.ContainsKey(army.Id))
-                {
-                    throw new InvalidOperationException("Could not find selected army in game objects.");
-                }
-
-                //this.SelectedArmyGameObject = armyDictionary[army.Id];
-                Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(army.X, army.Y);
-                this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
-                this.selectedArmyBox.SetActive(true);
+                // Select top stationed army
+                var armies = new List<Army>() { clickedTile.Armies[0] };
+                GameManager.SelectArmies(armies);
+            }
+            else if (clickedTile.HasVisitingArmies())
+            {
+                // Select top visiting army
+                var armies = new List<Army>() { clickedTile.VisitingArmies[0] };
+                GameManager.SelectArmies(armies);
+            }
+            else if (Game.Current.GameState == GameState.Ready)
+            {
+                // Center window on tile
+                Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
+                this.selectedArmyBox.SetActive(false);
+                this.selectedArmyBox.transform.position = worldVector;
                 SetCameraTarget(this.selectedArmyBox.transform);
             }
-            else
-            {
-                Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
-                GameObject go = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
-                go.SetActive(false);
-                SetCameraTarget(go.transform);
-                Destroy(go, .5f);
-            }
+        }
+
+        //private void SelectObject(Tile clickedTile)
+        //{
+        //    // If tile contains an army, select it     
+        //    if (clickedTile.HasArmies())
+        //    {
+        //        List<Army> armies = clickedTile.Armies;
+        //        Army army = armies[0];
+
+        //        if (!armyDictionary.ContainsKey(army.Id))
+        //        {
+        //            throw new InvalidOperationException("Could not find selected army in game objects.");
+        //        }
+
+        //        //this.SelectedArmyGameObject = armyDictionary[army.Id];
+        //        Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(army.X, army.Y);
+        //        this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
+        //        this.selectedArmyBox.SetActive(true);
+        //        SetCameraTarget(this.selectedArmyBox.transform);
+        //    }
+        //    else
+        //    {
+        //        Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
+        //        GameObject go = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
+        //        go.SetActive(false);
+        //        SetCameraTarget(go.transform);
+        //        Destroy(go, .5f);
+        //    }
+        //}
+
+        private void SetCameraTarget(Vector3 vector3)
+        {
+            CameraFollow camera = this.followCamera.GetComponent<CameraFollow>();
+            camera.target.position = vector3;
         }
 
         private void SetCameraTarget(Transform transform)
@@ -651,8 +746,7 @@ namespace Assets.Scripts.Wism
         {
             GameManager.DeselectArmies();
 
-            //this.SelectedArmyGameObject = null;
-            Destroy(this.selectedArmyBox);
+            HideSelectedBox();
             SetTime(GameManager.StandardTime);
         }
 

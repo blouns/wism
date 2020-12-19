@@ -35,6 +35,14 @@ namespace Wism.Client.Api
             }
         }
 
+        public bool CommandExists(int commandId)
+        {
+            lock (sync)
+            {
+                return commands.ContainsKey(commandId);
+            }            
+        }
+
         public async Task<bool> CommandExistsAsync(int commandId)
         {
             return await Task<bool>.Run(() =>
@@ -59,6 +67,17 @@ namespace Wism.Client.Api
             }
         }
 
+        public Command GetCommand(int commandId)
+        {
+            Command commandToReturn = null;
+            lock (sync)
+            {
+                _ = commands.TryGetValue(commandId, out commandToReturn);
+            }
+
+            return commandToReturn;
+        }
+
         public async Task<Command> GetCommandAsync(int commandId)
         {
             Command commandToReturn = null;
@@ -72,6 +91,24 @@ namespace Wism.Client.Api
 
                 return commandToReturn;
             });
+        }
+
+        public List<Command> GetCommandsAfterId(int lastSeenCommandId)
+        {
+            List<Command> commandsToReturn = new List<Command>();
+            IEnumerable<KeyValuePair<int, Command>> sortedCommands;
+
+            lock (sync)
+            {
+                sortedCommands = commands.Where(c => c.Key > lastSeenCommandId);
+            }
+
+            foreach (var pair in sortedCommands)
+            {
+                commandsToReturn.Add(pair.Value);
+            }
+
+            return commandsToReturn;
         }
 
         public async Task<List<Command>> GetCommandsAfterIdAsync(int lastSeenCommandId)
@@ -93,6 +130,14 @@ namespace Wism.Client.Api
 
                 return commandsToReturn;
             });
+        }
+
+        public List<Command> GetCommands()
+        {
+            lock (sync)
+            {
+                return commands.Values.ToList<Command>();
+            }
         }
 
         public async Task<List<Command>> GetCommandsAsync()

@@ -7,6 +7,13 @@ using Wism.Client.Pathing;
 
 namespace Wism.Client.Core.Controllers
 {
+    public enum MoveResult
+    {
+        Moved,
+        InsuffientMoves,
+        Blocked    
+    }
+
     public class ArmyController
     {
         private readonly ILogger logger;
@@ -36,7 +43,7 @@ namespace Wism.Client.Core.Controllers
         /// <summary>
         /// Attempt to move the given army to the (x,y) destination.
         /// </summary>
-        public bool TryMove(List<Army> armiesToMove, Tile targetTile)
+        public MoveResult TryMove(List<Army> armiesToMove, Tile targetTile)
         {
             if (targetTile is null)
             {
@@ -54,7 +61,7 @@ namespace Wism.Client.Core.Controllers
             {
                 logger.LogInformation($"{ArmiesToString(armiesToMove)} cannot traverse {targetTile}");
                 Game.Current.Transition(GameState.SelectedArmy);
-                return false;
+                return MoveResult.Blocked;
             }
 
             // Do we have enough moves?
@@ -62,8 +69,8 @@ namespace Wism.Client.Core.Controllers
             if (armiesToMove.Any(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
             {
                 logger.LogInformation($"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");
-                Game.Current.Transition(GameState.Ready);
-                return false;
+                Game.Current.DeselectArmies();
+                return MoveResult.InsuffientMoves;
             }
             
             if (targetTile.HasArmies())
@@ -74,7 +81,7 @@ namespace Wism.Client.Core.Controllers
                 {
                     logger.LogInformation($"{targetTile} has too many units to move there");
                     Game.Current.Transition(GameState.SelectedArmy);
-                    return false;
+                    return MoveResult.Blocked;
                 }
 
                 // Is it an enemy tile?
@@ -85,14 +92,14 @@ namespace Wism.Client.Core.Controllers
                         $"Army cannot move {ArmiesToString(armiesToMove)} to {targetTile} " +
                         $"as it occupied by {targetTile.Armies[0].Clan}");
                     Game.Current.Transition(GameState.SelectedArmy);
-                    return false;
+                    return MoveResult.Blocked;
                 }
             }
 
             // We are clear to advance!
             MoveSelectedArmies(armiesToMove, targetTile);
 
-            return true;
+            return MoveResult.Moved;
         }
 
         /// <summary>
@@ -143,16 +150,23 @@ namespace Wism.Client.Core.Controllers
 
             // Now we have a route; move ahead
             ActionState result;
-            if (TryMove(armiesToMove, myPath[1]))
+            var moveResult = TryMove(armiesToMove, myPath[1]);
+            if (moveResult == MoveResult.Moved)
             {
                 // Pop the starting location and return updated path and distance
                 myPath.RemoveAt(0);
                 myDistance = CalculateDistance(myPath);
                 result = ActionState.InProgress;
             }
+            else if (moveResult == MoveResult.InsuffientMoves)
+            {
+                // Could not move due to lack of moves remaining
+                logger.LogWarning($"Could not move due to lack of moves remaining to: {myPath[1]}");
+                result = ActionState.Failed;
+            }
             else
             {
-                logger.LogWarning($"Move failed during path traversal to: {myPath[1]}");
+                logger.LogWarning($"Move was blocked: {myPath[1]}");
                 myPath = null;
                 myDistance = 0;
                 result = ActionState.Failed;
@@ -308,13 +322,12 @@ namespace Wism.Client.Core.Controllers
             targetTile.VisitingArmies.Sort(new ByArmyViewingOrder());
             originatingTile.VisitingArmies = null;
 
-            if (armiesToMove.Any(a => a.MovesRemaining == 0))
-            {
-                // Ran out of moves so just stop here
-                Game.Current.DeselectArmies();
-            }
-
-            Game.Current.Transition(GameState.SelectedArmy);
+            //if (armiesToMove.Any(a => a.MovesRemaining == 0))
+            //{
+            //    // Ran out of moves so just stop here
+            //    Game.Current.DeselectArmies();
+            //}
+            //Game.Current.Transition(GameState.SelectedArmy);
         }
 
         private static int CalculateDistance(IList<Tile> myPath)

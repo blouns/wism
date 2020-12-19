@@ -143,8 +143,8 @@ namespace Wism.Client.Test.Scenario
             List<Command> commandsToAdd = new List<Command>()
             {
                 new SelectArmyCommand(armyController, armiesToMove),
-                new MoveCommand(armyController, armiesToMove, 2, 3),
-                new MoveCommand(armyController, armiesToMove, 2, 4),
+                new MoveAlongPathCommand(armyController, armiesToMove, 2, 3),
+                new MoveAlongPathCommand(armyController, armiesToMove, 2, 4),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };
 
@@ -159,20 +159,24 @@ namespace Wism.Client.Test.Scenario
             int lastId = 0;
             foreach (var command in commandsToExecute)
             {
-                var result = command.Execute();
-                switch (result)
+                var result = ActionState.NotStarted;
+                do
                 {
-                    case ActionState.Succeeded:
-                        lastId = command.Id;
-                        break;
-                    case ActionState.Failed:
-                        lastId = command.Id;
-                        Assert.Fail($"Command failed to execute: {command.GetType()}");
-                        break;
-                    case ActionState.InProgress:
-                        // Do not advance the command (in-progress)
-                        break;
-                }
+                    result = command.Execute();
+                    switch (result)
+                    {
+                        case ActionState.Succeeded:
+                            lastId = command.Id;
+                            break;
+                        case ActionState.Failed:
+                            lastId = command.Id;
+                            Assert.Fail($"Command failed to execute: {command.GetType()}");
+                            break;
+                        case ActionState.InProgress:
+                            // Do not advance the command (in-progress)
+                            break;
+                    }
+                } while (result == ActionState.InProgress);
             }
 
             // Assert
@@ -220,20 +224,24 @@ namespace Wism.Client.Test.Scenario
             int lastId;
             foreach (var command in commandsToExecute)
             {
-                var result = command.Execute();
-                switch (result)
+                var result = ActionState.NotStarted;
+                do
                 {
-                    case ActionState.Succeeded:
-                        lastId = command.Id;
-                        break;
-                    case ActionState.Failed:
-                        lastId = command.Id;
-                        Assert.Fail($"Command failed to execute: {command.GetType()}");
-                        break;
-                    case ActionState.InProgress:
-                        // Do not advance the command (in-progress)
-                        break;
-                }
+                    result = command.Execute();
+                    switch (result)
+                    {
+                        case ActionState.Succeeded:
+                            lastId = command.Id;
+                            break;
+                        case ActionState.Failed:
+                            lastId = command.Id;
+                            Assert.Fail($"Command failed to execute: {command.GetType()}");
+                            break;
+                        case ActionState.InProgress:
+                            // Do not advance the command (in-progress)
+                            break;
+                    }
+                } while (result == ActionState.InProgress);
             }
 
             // Assert
@@ -275,7 +283,7 @@ namespace Wism.Client.Test.Scenario
             {
                 new SelectArmyCommand(armyController, armiesToMove),
                 new AttackCommand(armyController, armiesToMove, 2, 3),
-                new MoveCommand(armyController, armiesToMove, 2, 2),
+                new MoveAlongPathCommand(armyController, armiesToMove, 2, 2),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };
 
@@ -290,20 +298,24 @@ namespace Wism.Client.Test.Scenario
             int lastId;
             foreach (var command in commandsToExecute)
             {
-                var result = command.Execute();
-                switch (result)
+                var result = ActionState.NotStarted;
+                do
                 {
-                    case ActionState.Succeeded:
-                        lastId = command.Id;
-                        break;
-                    case ActionState.Failed:
-                        lastId = command.Id;
-                        Assert.Fail($"Command failed to execute: {command.GetType()}");
-                        break;
-                    case ActionState.InProgress:
-                        // Do not advance the command (in-progress)
-                        break;
-                }
+                    result = command.Execute();
+                    switch (result)
+                    {
+                        case ActionState.Succeeded:
+                            lastId = command.Id;
+                            break;
+                        case ActionState.Failed:
+                            lastId = command.Id;
+                            Assert.Fail($"Command failed to execute: {command.GetType()}");
+                            break;
+                        case ActionState.InProgress:
+                            // Do not advance the command (in-progress)
+                            break;
+                    }
+                } while (result == ActionState.InProgress);
             }
 
             // Assert

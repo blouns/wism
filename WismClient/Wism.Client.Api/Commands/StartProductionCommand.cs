@@ -32,5 +32,11 @@ namespace Wism.Client.Api.Commands
 
             return state;
         }
+
+        public override string ToString()
+        {
+            var dest = (DestinationCity == null) ? DestinationCity.DisplayName : ProductionCity.DisplayName;
+            return $"{ProductionCity.DisplayName} start production of {ArmyInfo.DisplayName} at {dest}";                
+        }
     }
 }

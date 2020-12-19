@@ -73,13 +73,13 @@ namespace Wism.Client.Pathing
         }
 
         private static PathNode[,] BuildGraph(Tile[,] map, List<PathNode> queue, List<Army> armies)
-        {
+        {            
             int mapSizeX = map.GetLength(0);
             int mapSizeY = map.GetLength(1);
             PathNode[,] graph = new PathNode[mapSizeX, mapSizeY];
-            for (int y = 0; y < map.GetLength(0); y++)
+            for (int y = 0; y < mapSizeY; y++)
             {
-                for (int x = 0; x < map.GetLength(1); x++)
+                for (int x = 0; x < mapSizeX; x++)
                 {
                     // Only add a node if the army can actually traverse there
                     // Note: this will leave some "null" spots as a sparse-array
@@ -103,8 +103,8 @@ namespace Wism.Client.Pathing
                     if (graph[x, y] == null)
                         continue;
 
-                    int yMax = graph.GetLength(0) - 1;
-                    int xMax = graph.GetLength(1) - 1;
+                    int xMax = mapSizeX - 1;
+                    int yMax = mapSizeY - 1;                    
                     if (x == 0 && y == 0)
                     {
                         // Upper-left corner

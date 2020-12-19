@@ -10,15 +10,22 @@ namespace Wism.Client.Api
 
         void DeleteCommand(Command command);
 
+        Command GetCommand(int commandId);
         Task<Command> GetCommandAsync(int commandId);
 
+        List<Command> GetCommands();
+
         Task<List<Command>> GetCommandsAsync();
+
+        List<Command> GetCommandsAfterId(int commandId);
 
         Task<List<Command>> GetCommandsAfterIdAsync(int commandId);
 
         bool Save();
 
         Command UpdateCommand(Command command);
+
+        bool CommandExists(int commandId);
 
         Task<bool> CommandExistsAsync(int commandId);
     }

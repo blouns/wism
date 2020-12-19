@@ -213,7 +213,9 @@ namespace Wism.Client.Core
 
         public bool ArmiesSelected()
         {
-            return (GameState == GameState.SelectedArmy) &&
+            return (GameState == GameState.SelectedArmy || 
+                    GameState == GameState.MovingArmy ||
+                    GameState == GameState.AttackingArmy) &&
                    (selectedArmies != null) &&
                    (selectedArmies.Count > 0);
         }

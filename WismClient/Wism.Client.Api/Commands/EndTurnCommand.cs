@@ -25,5 +25,10 @@ namespace Wism.Client.Api.Commands
 
             return ActionState.Succeeded;
         }
+
+        public override string ToString()
+        {
+            return $"Command: {Player.Clan} end turn";
+        }
     }
 }
