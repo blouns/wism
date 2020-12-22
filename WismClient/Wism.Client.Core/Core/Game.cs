@@ -172,6 +172,7 @@ namespace Wism.Client.Core
             // Move selected armies to Visiting Armies
             Log.WriteLine(Log.TraceLevel.Information, $"Selecting army: {ArmiesToString(armies)}");
             tile.VisitingArmies = new List<Army>(armies);
+            tile.VisitingArmies.Sort(new ByArmyViewingOrder());
             foreach (Army army in tile.VisitingArmies)
             {
                 tile.Armies.Remove(army);

@@ -40,19 +40,19 @@ namespace Wism.Client.MapObjects
             if (compare == 0)
             {
                 // Differentiate on Strength
-                compare = x.Strength.CompareTo(y.Strength);
+                compare = y.Strength.CompareTo(x.Strength);
             }
 
             if (compare == 0)
             {
                 // Differentiate on Moves
-                compare = x.MovesRemaining.CompareTo(y.MovesRemaining);
+                compare = y.Moves.CompareTo(x.Moves);
             }
 
             if (compare == 0)
             {
-                // Differentiate on ID for consistency
-                compare = x.Id.CompareTo(y.Id);
+                // Last resort: differentiate on ID for consistency
+                compare = y.Id.CompareTo(x.Id);
             }
 
             return compare;

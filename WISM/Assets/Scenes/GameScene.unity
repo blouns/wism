@@ -1526,7 +1526,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dd572435d576704ab585948c0e0b21c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UnityGame: {fileID: 0}
 --- !u!4 &430121302
 Transform:
   m_ObjectHideFlags: 0
@@ -9311,6 +9310,39 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1652651306}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1494044691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1494044689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39bf93b4551a1164cafee3b974a4215a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!50 &1494044692
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1494044689}
+  m_BodyType: 2
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &1544519393
 GameObject:
   m_ObjectHideFlags: 0
@@ -9753,6 +9785,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8103216089773565681, guid: a3f1998d461a4894bbd94c4b817ef091,
+        type: 3}
+      propertyPath: m_TagString
+      value: Selected
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a3f1998d461a4894bbd94c4b817ef091, type: 3}

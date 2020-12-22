@@ -23,9 +23,6 @@ public class GameManager : MonoBehaviour
     public const int MaxArmysPerArmy = Army.MaxArmies;
     public static readonly string DefaultModPath = @"Assets\Scripts\Core\mod";
 
-    // Primary game loop
-    public UnityGame UnityGame;
-
     // Controllers for the WISM Client API
     private ControllerProvider provider;
     private CommandController commandController;

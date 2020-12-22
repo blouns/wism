@@ -1,7 +1,10 @@
-﻿using Assets.Scripts.Units;
+﻿using Assets.Scripts.UI;
+using Assets.Scripts.Units;
 using System;
 using System.Collections.Generic;
+using System.Timers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -14,14 +17,19 @@ using Tile = Wism.Client.Core.Tile;
 
 namespace Assets.Scripts.Wism
 {
+    /// <summary>
+    /// Unity game is the primary game loop and bridge to the Unity UI and WISM API via GameManager
+    /// </summary>
     public class UnityGame : MonoBehaviour
     {
         private int lastCommandId = 0;
         private ILogger logger;
         private ControllerProvider provider;
 
-        public GameObject[] ArmyKinds;          // Prefabs for units; TODO: automate creation of prefabs
+        // TODO: automate creation of army prefabs
+        public GameObject[] ArmyKinds;
         public GameObject ArmyPrefab;
+
         public WorldTilemap WorldTilemap;
         public GameManager GameManager;
 
@@ -33,31 +41,30 @@ namespace Assets.Scripts.Wism
         private UnitPicker ArmyPickerPanel;
 
         private Camera followCamera;
-        private World world;
-        private List<Player> players;
         private ArmyFactory armyFactory;
         private readonly Dictionary<int, ArmyGameObject> armyDictionary = new Dictionary<int, ArmyGameObject>();
 
-        private ArmyGameObject selectedArmyGo;
         public GameObject SelectedBoxPrefab;
-        private GameObject selectedArmyBox;
+        private SelectedArmyBox selectedArmyBox;
+        private int selectedArmyIndex;
 
-        private AttackResult attackResult;
-        private bool armyPickerActive = false;
+        // Input handling
+        private readonly Timer mouseSingleClickTimer = new Timer();
+        private bool singleClickProcessed;
 
         public void Start()
         {
             GameManager.Initialize();
             Initialize(GameManager.LoggerFactory, GameManager.ControllerProvider);
-        }
+        }        
 
-        public void Update()
-        {            
+        private void Update()
+        {
             HandleInput();
-        }
+        }        
 
         public void FixedUpdate()
-        {            
+        {
             try
             {
                 Draw();
@@ -70,16 +77,55 @@ namespace Assets.Scripts.Wism
             }
         }
 
+        void SingleClick(object o, System.EventArgs e)
+        {
+            mouseSingleClickTimer.Stop();
+
+            singleClickProcessed = true;
+        }
+
+        private void HandleInput()
+        {
+            if (singleClickProcessed)
+            {
+                // Single click performed
+                HandleLeftClick();
+                singleClickProcessed = false;
+            }
+            else if (Input.GetMouseButtonDown(0))
+            {
+                // Detect single vs. double-click
+                if (mouseSingleClickTimer.Enabled == false)
+                {
+                    // ... timer start
+                    mouseSingleClickTimer.Start();
+                    // ... wait for double click...
+                    return;
+                }
+                else
+                {
+                    // Doubleclick performed - Cancel single click
+                    mouseSingleClickTimer.Stop();
+
+                    HandleLeftClick(true);
+                }
+            }
+            else if (Input.GetMouseButtonDown(1))
+            {
+                HandleRightClick();
+            }
+            else
+            {
+                HandleKeyboard();
+            }
+        }
+
         private void Draw()
         {
             DrawSelectedArmiesBox();
-            CreateArmyGameObjects();
+            DrawArmyGameObjects();
         }
 
-        private void SetTime(float time)
-        {
-            Time.fixedDeltaTime = time;
-        }
 
         public void Initialize(ILoggerFactory loggerFactory, ControllerProvider provider)
         {
@@ -91,49 +137,22 @@ namespace Assets.Scripts.Wism
             SetupCameras();            
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
             ArmyPickerPanel = this.unitPickerPrefab.GetComponent<UnitPicker>();
+
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(1, 1);
-            this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
+            this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
+            this.selectedArmyIndex = -1;
 
-            // Set up game            
-            world = WorldTilemap.CreateWorldFromScene();
-            players = Game.Current.Players;
-            CreateDefaultArmies();
-
+            // Set up game    
+            World.CreateWorld(WorldTilemap.CreateWorldFromScene().Map);
             armyFactory = ArmyFactory.Create(ArmyKinds);
-            CreateArmyGameObjects();
+            CreateDefaultArmies();
+            DrawArmyGameObjects();
+
+            mouseSingleClickTimer.Interval = 400;
+            mouseSingleClickTimer.Elapsed += SingleClick;
         }
 
-        private void CreateDefaultArmies()
-        {
-            // Ready Player One
-            Player player1 = Game.Current.Players[0];
-            player1.HireHero(World.Current.Map[1, 1]);
-
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
-
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), World.Current.Map[2, 1]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), World.Current.Map[2, 1]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), World.Current.Map[2, 1]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[2, 1]);
-
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-
-            // Ready Player Two
-            Player player2 = Game.Current.Players[1];
-            player2.Clan.IsHuman = false;
-            player2.HireHero(World.Current.Map[18, 10]);
-            player2.HireHero(World.Current.Map[1, 3]);
-            player2.HireHero(World.Current.Map[2, 3]);
-        }
-
+        
         /// <summary>
         /// Execute the commands from the UI, AI, or other devices
         /// </summary>
@@ -169,82 +188,14 @@ namespace Assets.Scripts.Wism
             }
         }
 
-        private void HandleInput()
+        private void SetTime(float time)
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                Tile clickedTile = WorldTilemap.GetClickedTile(followCamera);
-                Debug.Log("Clicked on " + clickedTile.Terrain.DisplayName);
+            Time.fixedDeltaTime = time;
+        }
 
-                switch (Game.Current.GameState)
-                {
-                    case GameState.Ready:
-                        if (!armyPickerActive)
-                        {
-                            SelectObject(clickedTile);
-                        }
-                        break;
-
-                    case GameState.SelectedArmy:
-                        if (!armyPickerActive)
-                        {
-                            SelectObject(clickedTile);
-                        }
-
-                        MoveSelectedArmyTo(clickedTile);
-
-                        // TODO: Second click selects top unit in army
-                        // TODO: Double-click selects entire army
-
-                        // Move or attack; can only attack from and adjacent tile
-                        //bool isAttacking = MovingOntoEnemy(SelectedArmy.Army, clickedTile);
-                        //bool isAdjacent = clickedTile.IsNeighbor(SelectedArmy.Army.Tile);
-                        //if (isAttacking && isAdjacent)
-                        //{
-                        //    // War!
-                        //    Destroy(this.selectedArmyBox);
-                        //    AttackArmyAt(clickedTile);
-                        //}
-                        //// Cannot attack from non-adjacent tile
-                        //else if (isAttacking & !isAdjacent)
-                        //{
-                        //    // Do nothing
-                        //    Debug.Log("Too far away to attack.");
-                        //}
-                        //else if (!isAttacking)
-                        //{
-                        //    // Move
-                        //    Destroy(this.selectedArmyBox);
-                        //    MoveSelectedArmyTo(clickedTile);
-                        //}                        
-                        break;
-
-                    case GameState.MovingArmy:
-                        // Do nothing
-                        break;
-
-                    case GameState.AttackingArmy:
-                        // Do nothing
-                        break;
-
-                    case GameState.CompletedBattle:
-                        //CompleteBattle();
-                        break;
-
-                    default:
-                        throw new InvalidOperationException("Cannot transition to unknown state.");
-                }
-
-                Draw();
-            }
-            else if (Input.GetMouseButtonDown(1))
-            {
-                if (Game.Current.GameState == GameState.SelectedArmy)
-                {
-                    DeselectObject();
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.M))
+        private void HandleKeyboard()
+        {   
+            if (Input.GetKeyDown(KeyCode.M))
             {
                 if (Game.Current.GameState == GameState.SelectedArmy)
                 {
@@ -256,7 +207,81 @@ namespace Assets.Scripts.Wism
             {
                 ToggleMinimap();
             }
-        }        
+        }
+
+        private void HandleRightClick()
+        {
+            if (Game.Current.GameState == GameState.SelectedArmy)
+            {
+                DeselectObject();
+            }
+        }
+
+        private void HandleLeftClick(bool isDoubleClick = false)
+        {
+            Tile clickedTile = WorldTilemap.GetClickedTile(followCamera);
+            switch (Game.Current.GameState)
+            {
+                case GameState.Ready:
+                    SelectObject(clickedTile, isDoubleClick);                    
+                    break;
+
+                case GameState.SelectedArmy:
+                    if (Game.Current.ArmiesSelected() &&
+                        clickedTile == Game.Current.GetSelectedArmies()[0].Tile)
+                    {
+                        // Clicking on already selected tile
+                        SelectObject(clickedTile, isDoubleClick);
+                    }
+                    else
+                    {
+                        // Clicking on a move target
+                        MoveSelectedArmyTo(clickedTile);
+                    }
+
+                    // TODO: Second click selects top unit in army
+
+                    // Move or attack; can only attack from and adjacent tile
+                    //bool isAttacking = MovingOntoEnemy(SelectedArmy.Army, clickedTile);
+                    //bool isAdjacent = clickedTile.IsNeighbor(SelectedArmy.Army.Tile);
+                    //if (isAttacking && isAdjacent)
+                    //{
+                    //    // War!
+                    //    Destroy(this.selectedArmyBox);
+                    //    AttackArmyAt(clickedTile);
+                    //}
+                    //// Cannot attack from non-adjacent tile
+                    //else if (isAttacking & !isAdjacent)
+                    //{
+                    //    // Do nothing
+                    //    Debug.Log("Too far away to attack.");
+                    //}
+                    //else if (!isAttacking)
+                    //{
+                    //    // Move
+                    //    Destroy(this.selectedArmyBox);
+                    //    MoveSelectedArmyTo(clickedTile);
+                    //}                        
+                    break;
+
+                case GameState.MovingArmy:
+                    // Do nothing
+                    break;
+
+                case GameState.AttackingArmy:
+                    // Do nothing
+                    break;
+
+                case GameState.CompletedBattle:
+                    //CompleteBattle();
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Cannot transition to unknown state.");
+            }
+
+            Draw();
+        }
 
         /// <summary>
         /// Find the currently selected army GameObject
@@ -276,12 +301,17 @@ namespace Assets.Scripts.Wism
 
         private void DrawSelectedArmiesBox()
         {
+            if (this.selectedArmyBox == null)
+            {
+                throw new InvalidOperationException("Selected army box was null.");
+            }
+
             if (!Game.Current.ArmiesSelected())
             {
                 // None; so delete bounding box if it exists
-                if (IsSelectedBoxActive())
+                if (this.selectedArmyBox.IsSelectedBoxActive())
                 {
-                    HideSelectedBox();
+                    this.selectedArmyBox.HideSelectedBox();
                 }
 
                 return;
@@ -292,7 +322,7 @@ namespace Assets.Scripts.Wism
             Tile tile = army.Tile;
 
             // Have the selected armies already been rendered?
-            if (IsSelectedBoxActive())
+            if (this.selectedArmyBox.IsSelectedBoxActive())
             {
                 var boxGameCoords = WorldTilemap.ConvertUnityToGameCoordinates(this.selectedArmyBox.transform.position);
                 if (boxGameCoords.Item1 == tile.X &&
@@ -304,7 +334,7 @@ namespace Assets.Scripts.Wism
                 else
                 {
                     // Clear the old box; it is stale
-                    HideSelectedBox();
+                    this.selectedArmyBox.HideSelectedBox();
                 }
             }
 
@@ -314,28 +344,10 @@ namespace Assets.Scripts.Wism
             }
 
             // Render the selected box
-            ShowSelectedBox(army);
-
-        }
-
-        private void ShowSelectedBox(Army army)
-        {
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(army.X, army.Y);
-            this.selectedArmyBox.transform.position = worldVector;
-            this.selectedArmyBox.SetActive(true);
+            this.selectedArmyBox.ShowSelectedBox(worldVector);
             SetCameraTarget(this.selectedArmyBox.transform);
-        }
-
-        private void HideSelectedBox()
-        {
-            this.selectedArmyBox.SetActive(false);
-            SetTime(GameManager.StandardTime);
-        }
-
-        private bool IsSelectedBoxActive()
-        {
-            return (this.selectedArmyBox != null && this.selectedArmyBox.activeSelf);
-        }
+        }        
 
         private void SetupCameras()
         {
@@ -610,7 +622,7 @@ namespace Assets.Scripts.Wism
             });
         }
 
-        private void CreateArmyGameObjects()
+        private void DrawArmyGameObjects()
         {
             // Verify that army kinds were loaded
             if (ArmyKinds == null || ArmyKinds.Length == 0)
@@ -621,7 +633,7 @@ namespace Assets.Scripts.Wism
 
             foreach (Player player in Game.Current.Players)
             {
-                // Create all the objects
+                // Create all the objects if not already present
                 foreach (Army army in player.GetArmies())
                 {
                     // Find or create and set up the GameObject connected to WISM MapObject
@@ -629,6 +641,10 @@ namespace Assets.Scripts.Wism
                     {
                         Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(army.X, army.Y);
                         InstantiateArmy(army, worldVector);
+                    }
+                    else
+                    {
+                        armyDictionary[army.Id].GameObject.SetActive(false);
                     }
                 }
 
@@ -648,7 +664,7 @@ namespace Assets.Scripts.Wism
                     }
                     else
                     {
-                        // Not a "top" army
+                        // Not a "top" army                        
                         continue;
                     }
                     
@@ -661,58 +677,60 @@ namespace Assets.Scripts.Wism
 
         }
 
-        private void SelectObject(Tile clickedTile)
+        private void SelectObject(Tile tile, bool selectAll)
         {
-            if (clickedTile.HasArmies())
-            {
-                // Select top stationed army
-                var armies = new List<Army>() { clickedTile.Armies[0] };
-                GameManager.SelectArmies(armies);
+            // If no armies on selected tile
+            if ((Game.Current.GameState == GameState.Ready) &&
+                !tile.HasVisitingArmies() &&
+                !tile.HasArmies())
+            {                
+                CenterOnTile(tile);
+                return;
             }
-            else if (clickedTile.HasVisitingArmies())
+
+            var armiesToSelect = new List<Army>();
+            if (selectAll)
             {
-                // Select top visiting army
-                var armies = new List<Army>() { clickedTile.VisitingArmies[0] };
-                GameManager.SelectArmies(armies);
+                // Selecting all armies on tile
+                this.selectedArmyIndex = -1;
+                armiesToSelect = tile.GetAllArmies();
             }
-            else if (Game.Current.GameState == GameState.Ready)
+            else if ((tile.HasVisitingArmies() && tile.VisitingArmies.Count > 1) ||
+                     (!tile.HasVisitingArmies() && tile.HasArmies()))
             {
-                // Center window on tile
-                Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
-                this.selectedArmyBox.SetActive(false);
-                this.selectedArmyBox.transform.position = worldVector;
-                SetCameraTarget(this.selectedArmyBox.transform);
+                // Select "top" army on tile
+                var allArmies = tile.GetAllArmies();
+                allArmies.Sort(new ByArmyViewingOrder());
+
+                this.selectedArmyIndex = 0;
+                armiesToSelect.Add(allArmies[0]);
+            }
+            else if (tile.HasVisitingArmies() && tile.VisitingArmies.Count == 1 &&
+                     tile.HasArmies())
+            {
+                // Cycle next army on tile
+                var allArmies = tile.GetAllArmies();
+                allArmies.Sort(new ByArmyViewingOrder());
+
+                // Now there are only Armies (no Visiting Armies)
+                this.selectedArmyIndex = (this.selectedArmyIndex + 1) % allArmies.Count;
+                armiesToSelect.Add(allArmies[this.selectedArmyIndex]);
+            }
+
+            if (armiesToSelect.Count > 0)
+            {
+                armiesToSelect.Sort(new ByArmyViewingOrder());
+                GameManager.SelectArmies(armiesToSelect);
             }
         }
 
-        //private void SelectObject(Tile clickedTile)
-        //{
-        //    // If tile contains an army, select it     
-        //    if (clickedTile.HasArmies())
-        //    {
-        //        List<Army> armies = clickedTile.Armies;
-        //        Army army = armies[0];
-
-        //        if (!armyDictionary.ContainsKey(army.Id))
-        //        {
-        //            throw new InvalidOperationException("Could not find selected army in game objects.");
-        //        }
-
-        //        //this.SelectedArmyGameObject = armyDictionary[army.Id];
-        //        Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(army.X, army.Y);
-        //        this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
-        //        this.selectedArmyBox.SetActive(true);
-        //        SetCameraTarget(this.selectedArmyBox.transform);
-        //    }
-        //    else
-        //    {
-        //        Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
-        //        GameObject go = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
-        //        go.SetActive(false);
-        //        SetCameraTarget(go.transform);
-        //        Destroy(go, .5f);
-        //    }
-        //}
+        private void CenterOnTile(Tile clickedTile)
+        {
+            Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
+            this.selectedArmyBox.SetActive(false);
+            this.selectedArmyBox.transform.position = worldVector;
+            SetCameraTarget(this.selectedArmyBox.transform);
+        }
 
         private void SetCameraTarget(Vector3 vector3)
         {
@@ -746,7 +764,8 @@ namespace Assets.Scripts.Wism
         {
             GameManager.DeselectArmies();
 
-            HideSelectedBox();
+            this.selectedArmyBox.HideSelectedBox();
+            this.selectedArmyIndex = -1;
             SetTime(GameManager.StandardTime);
         }
 
@@ -765,6 +784,37 @@ namespace Assets.Scripts.Wism
             // Add to the instantiated army to dictionary for tracking
             ArmyGameObject ago = new ArmyGameObject(army, go);
             armyDictionary.Add(army.Id, ago);
+        }
+
+        private void CreateDefaultArmies()
+        {
+            // Ready Player One
+            Player player1 = Game.Current.Players[0];
+            player1.HireHero(World.Current.Map[1, 1]);
+
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
+
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), World.Current.Map[2, 1]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), World.Current.Map[2, 1]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), World.Current.Map[2, 1]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[2, 1]);
+
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+
+            // Ready Player Two
+            Player player2 = Game.Current.Players[1];
+            player2.Clan.IsHuman = false;
+            player2.HireHero(World.Current.Map[18, 10]);
+            player2.HireHero(World.Current.Map[1, 3]);
+            player2.HireHero(World.Current.Map[2, 3]);
         }
 
         public enum AttackResult

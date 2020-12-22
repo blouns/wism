@@ -31,43 +31,49 @@ namespace Wism.Client.Test.Unit
         [Test]
         public void StackViewingOrder_HeroOnlyTest()
         {
+            // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
+
+            // Act
+            tile.Armies.Sort(new ByArmyViewingOrder());
+
+            // Assert
             Assert.AreEqual(tile.Armies[0].ShortName, "Hero");
         }
 
         [Test]
         public void StackViewingOrder_HeroAndLesserArmyTest()
         {
+            // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
+
+            // Act
+            tile.Armies.Sort(new ByArmyViewingOrder());
+
+            // Assert
             Assert.AreEqual("Hero", tile.Armies[0].ShortName);           
         }
 
         [Test]
         public void StackViewingOrder_HeroAndTwoLesserArmiesTest()
         {
+            // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
-            Assert.AreEqual("Hero", tile.Armies[0].ShortName);
 
-            // Hero and set of armies
-            // Two heros
-            // Two heros and some armies
-            // No heros            
-            /* TODO: Tests to be added
-             * - Greater strength than hero
-             * - Special, 2 specials, special+fly
-             * - 2 fliers
-             * - moves
-             * - Navy
-             */
+            // Act
+            tile.Armies.Sort(new ByArmyViewingOrder());
+
+            // Assert
+            Assert.AreEqual("Hero", tile.Armies[0].ShortName);            
         }
 
         [Test]

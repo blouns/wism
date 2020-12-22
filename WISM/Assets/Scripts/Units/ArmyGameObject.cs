@@ -8,10 +8,6 @@ public class ArmyGameObject
     private Army army;
     private GameObject gameObject;
 
-    // State for moving the army
-    public Tile TargetTile;
-    public IList<Tile> Path;
-
     public ArmyGameObject(Army army, GameObject gameObject)
     {
         this.army = army ?? throw new System.ArgumentNullException(nameof(army));
