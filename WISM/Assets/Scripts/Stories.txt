@@ -5,7 +5,7 @@ stack selection using the UI picker, and WAR!
 
 Todo:
 * Implement AttackOnce
-* Picker and select-all
+* Picker
 * War panel
 
 Backlog:

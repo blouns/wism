@@ -36,9 +36,9 @@ namespace Assets.Scripts.Wism
         [SerializeField]
         private GameObject warPanelPrefab;
         [SerializeField]
-        private GameObject unitPickerPrefab;
+        private GameObject armyPickerPrefab;
         private WarPanel WarPanel;
-        private UnitPicker ArmyPickerPanel;
+        private ArmyPicker ArmyPickerPanel;
 
         private Camera followCamera;
         private ArmyFactory armyFactory;
@@ -51,6 +51,8 @@ namespace Assets.Scripts.Wism
         // Input handling
         private readonly Timer mouseSingleClickTimer = new Timer();
         private bool singleClickProcessed;
+
+        public bool SelectingArmies { get; set; }
 
         public void Start()
         {
@@ -86,6 +88,12 @@ namespace Assets.Scripts.Wism
 
         private void HandleInput()
         {
+            if (SelectingArmies)
+            {
+                // Army picker has focus
+                return;
+            }
+
             if (singleClickProcessed)
             {
                 // Single click performed
@@ -136,7 +144,7 @@ namespace Assets.Scripts.Wism
             SetTime(GameManager.StandardTime);
             SetupCameras();            
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
-            ArmyPickerPanel = this.unitPickerPrefab.GetComponent<UnitPicker>();
+            ArmyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
 
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(1, 1);
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
@@ -199,8 +207,8 @@ namespace Assets.Scripts.Wism
             {
                 if (Game.Current.GameState == GameState.SelectedArmy)
                 {
-                    //ArmyPickerPanel.Initialize(this.SelectedArmy.Army, this.armyKinds);
-                    //this.InputState = InputState.SelectingArmys;
+                    var armiesToPick = Game.Current.GetSelectedArmies()[0].Tile.GetAllArmies();
+                    ArmyPickerPanel.Initialize(this, armiesToPick, armyFactory);
                 }
             }
             else if (Input.GetKeyDown(KeyCode.I))
@@ -235,8 +243,8 @@ namespace Assets.Scripts.Wism
                     }
                     else
                     {
-                        // Clicking on a move target
-                        MoveSelectedArmyTo(clickedTile);
+                        // Move
+                        GameManager.MoveSelectedArmies(clickedTile.X, clickedTile.Y);
                     }
 
                     // TODO: Second click selects top unit in army
@@ -281,22 +289,6 @@ namespace Assets.Scripts.Wism
             }
 
             Draw();
-        }
-
-        /// <summary>
-        /// Find the currently selected army GameObject
-        /// </summary>
-        /// <returns></returns>
-        private ArmyGameObject GetSelectedArmyGameObject()
-        {
-            if (!Game.Current.ArmiesSelected())
-            {
-                return null;
-            }
-
-            var armies = Game.Current.GetSelectedArmies();
-            var army = armies.Find(a => this.armyDictionary.ContainsKey(a.Id));
-            return this.armyDictionary[army.Id];
         }
 
         private void DrawSelectedArmiesBox()
@@ -419,22 +411,6 @@ namespace Assets.Scripts.Wism
             WarPanel.Initialize(attacker, defender, armyKinds);
             SetTime(GameManager.WarTime);
         }
-        */
-
-
-        /*
-        private void MoveArmies()
-        {
-            if (Game.Current.GameState == GameState.MovingArmy)
-            {
-                GameManager.MoveSelectedArmies()
-            }
-            else if (Game.Current.GameState == GameState.AttackingArmy)
-            {
-                AttackArmy(this.SelectedArmy);
-            }
-        }
-
 
         private void AttackArmy(ArmyGameObject armyGO)
         {
@@ -523,73 +499,6 @@ namespace Assets.Scripts.Wism
             }
 
             return battleContinues;
-        }
-        
-        private void MoveArmy(ArmyGameObject armyGO)
-        {
-            SetTime(GameManager.StandardTime);
-            var armies = Game.Current.GetSelectedArmies();
-            var armyGo = armyFactory.FindGameObjectKind(armies[0]);
-            SetCameraTarget(armyGO.GameObject.transform);
-            if (armyGO.Path == null)
-            {
-                armyGO.Armies.FindPath(armyGO.TargetTile, out armyGO.Path, out float distance);
-                if (armyGO.Path.Count < 2)
-                {
-                    Debug.Log("Impossible route.");
-                    return;
-                }
-            }
-
-            // Check if the next tile contains an enemy army; cannot move onto an enemy army without explicity attacking
-            if ((armyGO.Path.Count > 1) && MovingOntoEnemy(SelectedArmy.Armies, armyGO.Path[1]))
-            {
-                Debug.LogFormat("Enemy detected at {0}.", armyGO.TargetTile.Coordinates);
-                armyGO.Path = null;
-                armyGO.TargetTile = null;
-                SelectObject(SelectedArmy.Armies.Tile);
-            }
-            // Try to move the army one step
-            else if (!armyGO.Armies.TryMoveOneStep(armyGO.TargetTile, ref armyGO.Path, out float distance))
-            {
-                // Done moving due to path completion, out of moves, or hit barrier
-                if (armyGO.Path != null && armyGO.Path.Count == 0)
-                {
-                    Debug.LogFormat("Moved {0} to {1}", armyGO.Armies, armyGO.TargetTile.Coordinates);
-                }
-                else
-                {
-                    Debug.LogFormat("Cannot move {0} to {1}.", armyGO.Armies, armyGO.TargetTile.Coordinates);
-                }
-
-                if (armyGO.Armies.MovesRemaining == 0)
-                {
-                    InputState = InputState.Unselected;
-                }
-                else
-                {
-                    armyGO.Path = null;
-                    armyGO.TargetTile = null;
-                    SelectObject(SelectedArmy.Armies.Tile);
-                }
-            }
-            // Continue moving along the path
-            else
-            {
-                Vector3 vector = ConvertGameToUnityCoordinates(armyGO.Armies.GetCoordinates());
-
-                if (armyGO.GameObject == null)
-                {
-                    Debug.LogErrorFormat("Trying to move a destroyed object: {0}", armyGO.Armies.Guid);
-                }
-                Rigidbody2D rb = armyGO.GameObject.GetComponent<Rigidbody2D>();
-                if (rb != null)
-                {
-                    rb.transform.position = vector;
-                }
-            }
-
-            Debug.LogFormat("Moves remaining: {0}", armyGO.Armies.MovesRemaining);
         }
 */
         private bool IsMovingOntoEnemy(List<Army> armies, Tile targetTile)
@@ -724,6 +633,15 @@ namespace Assets.Scripts.Wism
             }
         }
 
+        internal void DeselectObject()
+        {
+            GameManager.DeselectArmies();
+
+            this.selectedArmyBox.HideSelectedBox();
+            this.selectedArmyIndex = -1;
+            SetTime(GameManager.StandardTime);
+        }
+
         private void CenterOnTile(Tile clickedTile)
         {
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
@@ -732,41 +650,10 @@ namespace Assets.Scripts.Wism
             SetCameraTarget(this.selectedArmyBox.transform);
         }
 
-        private void SetCameraTarget(Vector3 vector3)
-        {
-            CameraFollow camera = this.followCamera.GetComponent<CameraFollow>();
-            camera.target.position = vector3;
-        }
-
         private void SetCameraTarget(Transform transform)
         {
             CameraFollow camera = this.followCamera.GetComponent<CameraFollow>();
             camera.target = transform;
-        }
-
-        private void MoveSelectedArmyTo(Tile targetTile)
-        {
-            // Move the selected unit to the clicked tile location
-            GameManager.MoveSelectedArmies(targetTile.X, targetTile.Y);
-
-            //if (this.SelectedArmy == null)
-            //    throw new InvalidOperationException("Selected Army was null.");
-
-            //if (this.SelectedArmyGameObject.Army == targetTile.Armies)
-            //    return;
-
-            //this.SelectedArmy.Path = null;
-            //this.SelectedArmy.TargetTile = targetTile;
-            //this.InputState = GameState.MovingArmy;
-        }        
-
-        internal void DeselectObject()
-        {
-            GameManager.DeselectArmies();
-
-            this.selectedArmyBox.HideSelectedBox();
-            this.selectedArmyIndex = -1;
-            SetTime(GameManager.StandardTime);
         }
 
         internal void InstantiateArmy(Army army, Vector3 worldVector)

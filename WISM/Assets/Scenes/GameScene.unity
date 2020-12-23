@@ -452,7 +452,7 @@ RectTransform:
   m_Children:
   - {fileID: 2110021228}
   m_Father: {fileID: 149804624}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -507,7 +507,7 @@ GameObject:
   - component: {fileID: 156407255}
   - component: {fileID: 156407258}
   m_Layer: 5
-  m_Name: UnitPickerPanel
+  m_Name: ArmyPickerPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -521,8 +521,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 156407253}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalPosition: {x: 0, y: 0, z: -5}
+  m_LocalScale: {x: 2.4253247, y: 2.4253247, z: 2.4253247}
   m_Children:
   - {fileID: 2000995176}
   - {fileID: 1479410946}
@@ -540,12 +540,12 @@ RectTransform:
   - {fileID: 1277044037}
   - {fileID: 976607551}
   - {fileID: 702058096}
-  m_Father: {fileID: 149804624}
-  m_RootOrder: 1
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.3, y: 0.15}
+  m_AnchoredPosition: {x: 5.313467, y: 4.241312}
   m_SizeDelta: {x: 10.35, y: 9.02}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &156407255
@@ -598,6 +598,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48745f5b9c164324c9f0181d4e79fd10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ArmyRows:
+  - {fileID: 1141744436}
+  - {fileID: 1041588821}
+  - {fileID: 953133916}
+  - {fileID: 840238208}
+  - {fileID: 1301523117}
+  - {fileID: 101920827}
+  - {fileID: 835440059}
+  - {fileID: 1277044036}
+  SelectedSprite: {fileID: 21300000, guid: 4d5e4f1ce8a09d84788028fa085a10c5, type: 3}
+  UnselectedSprite: {fileID: 21300000, guid: a8d727a0f251d8747aecf13078eb0a6f, type: 3}
 --- !u!1 &158012102
 GameObject:
   m_ObjectHideFlags: 0
@@ -10832,7 +10843,7 @@ MonoBehaviour:
   WorldTilemap: {fileID: 572604740}
   GameManager: {fileID: 430121301}
   warPanelPrefab: {fileID: 1127945}
-  unitPickerPrefab: {fileID: 156407253}
+  armyPickerPrefab: {fileID: 0}
   SelectedBoxPrefab: {fileID: 1494044689}
 --- !u!4 &2053934880
 Transform:
