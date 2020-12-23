@@ -99,6 +99,7 @@ namespace Assets.Scripts.Wism
                 // Single click performed
                 HandleLeftClick();
                 singleClickProcessed = false;
+                Draw();
             }
             else if (Input.GetMouseButtonDown(0))
             {
@@ -116,15 +117,18 @@ namespace Assets.Scripts.Wism
                     mouseSingleClickTimer.Stop();
 
                     HandleLeftClick(true);
+                    Draw();
                 }
             }
             else if (Input.GetMouseButtonDown(1))
             {
                 HandleRightClick();
+                Draw();
             }
             else
             {
                 HandleKeyboard();
+                Draw();
             }
         }
 
@@ -214,6 +218,10 @@ namespace Assets.Scripts.Wism
             else if (Input.GetKeyDown(KeyCode.I))
             {
                 ToggleMinimap();
+            }
+            else if (Input.GetKeyDown(KeyCode.N))
+            {
+                GameManager.SelectNextArmy();
             }
         }
 

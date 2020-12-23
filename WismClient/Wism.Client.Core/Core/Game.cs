@@ -16,6 +16,7 @@ namespace Wism.Client.Core
         private int currentPlayerIndex;
         private GameState gameState;
         private List<Army> selectedArmies;
+        private Queue<Tile> nextArmyQueue = new Queue<Tile>();
 
         public World World { get; set; }
 
@@ -100,32 +101,40 @@ namespace Wism.Client.Core
                 GameState != GameState.SelectedArmy)
             {
                 return false;
-            }            
+            }
 
-            var player = GetCurrentPlayer();
-            var armies = player.GetArmies();
-            foreach (Army army in armies)
+            if (nextArmyQueue.Count == 0)
             {
-                // Exclude Defending and out-of-moves armies
-                if (!army.IsDefending && army.MovesRemaining > 0)
+                this.nextArmyQueue = GetTilesWithArmiesWithMoves(GetCurrentPlayer());
+
+                // No more armies with moves
+                if (nextArmyQueue.Count == 0)
                 {
-                    if (ArmiesSelected())
-                    {
-                        // Exclude currently selected armies
-                        if (this.selectedArmies.Contains(army))
-                        {
-                            continue;
-                        }
-
-                        DeselectArmies();
-                    }
-
-                    SelectArmies(army.Tile.Armies);
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            Game.Current.DeselectArmies();
+            var tileWithArmies = nextArmyQueue.Dequeue();            
+            SelectArmies(tileWithArmies.Armies);            
+
+            return true;
+        }
+
+        private Queue<Tile> GetTilesWithArmiesWithMoves(Player player)
+        {
+            var tiles = new HashSet<Tile>();
+            var armies = player.GetArmies();
+
+            foreach (var army in armies)
+            {
+                if (!army.IsDefending && army.MovesRemaining > 0)
+                {
+                    tiles.Add(army.Tile);
+                }
+            }
+
+            return new Queue<Tile>(tiles);
         }
 
         public List<Army> GetSelectedArmies()
