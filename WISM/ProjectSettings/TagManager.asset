@@ -8,6 +8,7 @@ TagManager:
   - Defender
   - Killed
   - Minimap
+  - Selected
   layers:
   - Default
   - TransparentFX

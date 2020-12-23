@@ -148,6 +148,27 @@ namespace Wism.Client.Core
             newArmies.ForEach(a => a.Tile = this);
         }
 
+        public bool HasAnyArmies()
+        {
+            return HasVisitingArmies() || HasArmies();
+        }
+
+        public List<Army> GetAllArmies()
+        {
+            var armies = new List<Army>();
+            if (HasVisitingArmies())
+            {
+                armies.AddRange(VisitingArmies);
+            }
+
+            if (HasArmies())
+            {
+                armies.AddRange(Armies);
+            }
+
+            return armies;
+        }
+
         /// <summary>
         /// Removes armies from a tile
         /// </summary>

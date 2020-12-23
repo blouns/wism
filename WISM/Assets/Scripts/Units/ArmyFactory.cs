@@ -1,10 +1,8 @@
-using BranallyGames.Wism;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
+using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 
 namespace Assets.Scripts.Units
 {
@@ -12,9 +10,9 @@ namespace Assets.Scripts.Units
     {
         private static ArmyFactory factory = null;
 
-        private IList<AffiliationInfo> affiliationInfos;
-        private IList<UnitInfo> unitInfos;
-        private IList<GameObject> unitGameObjectKinds;
+        private IList<ClanInfo> clanInfos;
+        private IList<ArmyInfo> armyInfos;
+        private IList<GameObject> armyGameObjectKinds;
 
         public static ArmyFactory Create(GameObject[] unitKinds)
         {
@@ -28,16 +26,16 @@ namespace Assets.Scripts.Units
 
         private ArmyFactory(GameObject[] unitKinds)
         {
-            this.affiliationInfos = ModFactory.GetAffiliationInfos();
-            this.unitInfos = ModFactory.GetUnitInfos();
-            this.unitGameObjectKinds = new List<GameObject>(unitKinds);
+            this.clanInfos = ModFactory.GetClanInfos();
+            this.armyInfos = ModFactory.GetArmyInfos();
+            this.armyGameObjectKinds = new List<GameObject>(unitKinds);
         }
 
-        internal GameObject FindGameObjectKind(Unit unit)
+        internal GameObject FindGameObjectKind(Army army)
         {
-            foreach (GameObject go in unitGameObjectKinds)
+            foreach (GameObject go in armyGameObjectKinds)
             {
-                if (go.name == String.Format("{0}_{1}", unit.ID, unit.Affiliation.ID))
+                if (go.name == String.Format("{0}_{1}", army.ShortName, army.Clan.ShortName))
                 {
                     return go;
                 }
@@ -46,14 +44,14 @@ namespace Assets.Scripts.Units
             return null;
         }
 
-        internal GameObject FindGameObjectKind(Army army)
+        internal GameObject FindGameObjectKind(List<Army> armies)
         {
-            if ((army == null) || (army.Size == 0))
+            if ((armies == null) || (armies.Count == 0))
             {
-                throw new ArgumentNullException(nameof(army));
+                throw new ArgumentNullException(nameof(armies));
             }
 
-            return FindGameObjectKind(army[0]);
+            return FindGameObjectKind(armies[0]);
         }
     }
 }

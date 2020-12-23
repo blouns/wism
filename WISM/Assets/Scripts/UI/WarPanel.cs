@@ -1,5 +1,4 @@
 using Assets.Scripts.Units;
-using BranallyGames.Wism;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +7,7 @@ using UnityEngine.UI;
 
 public class WarPanel : MonoBehaviour
 {
+    /*
     public GameObject WarPanelGo;
     public GameObject KilledPrefab;
     public GameObject AttackerPrefab;
@@ -126,4 +126,5 @@ public class WarPanel : MonoBehaviour
         Destroy(losingUnitPanelObject, GameManager.WarTime);
         losingUnits.Remove(losingUnit);
     }
+    */
 }

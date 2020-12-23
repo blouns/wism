@@ -211,7 +211,7 @@ namespace Wism.Client.Modules
         /// Affix all map objects with there initial locations.
         /// </summary>
         /// <param name="map"></param>
-        private static void AffixMapObjects(Tile[,] map)
+        public static void AffixMapObjects(Tile[,] map)
         {
             for (int x = 0; x < map.GetLength(0); x++)
             {

@@ -1,0 +1,102 @@
+[
+    {
+        "ClanName": "Sirians",
+        "TerrainName": "Road",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "Sirians",
+        "TerrainName": "Plain",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "StormGiants",
+        "TerrainName": "Hill",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "StormGiants",
+        "TerrainName": "Marsh",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "GreyDwarves",
+        "TerrainName": "Forest",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "GreyDwarves",
+        "TerrainName": "Hill",
+        "Modifier": 2
+    },
+    {
+        "ClanName": "GreyDwarves",
+        "TerrainName": "Marsh",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "OrcsOfKor",
+        "TerrainName": "Marsh",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "OrcsOfKor",
+        "TerrainName": "Forest",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "Elvallie",
+        "TerrainName": "Marsh",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "Elvallie",
+        "TerrainName": "Hill",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "Elvallie",
+        "TerrainName": "Forest",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "Selentines",
+        "TerrainName": "Water",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "Selentines",
+        "TerrainName": "Shore",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "HorseLords",
+        "TerrainName": "Road",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "HorseLords",
+        "TerrainName": "Grass",
+        "Modifier": 1
+    },
+    {
+        "ClanName": "HorseLords",
+        "TerrainName": "Hill",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "HorseLords",
+        "TerrainName": "Forest",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "LordBane",
+        "TerrainName": "Forest",
+        "Modifier": -1
+    },
+    {
+        "ClanName": "LordBane",
+        "TerrainName": "Marsh",
+        "Modifier": 1
+    }
+]

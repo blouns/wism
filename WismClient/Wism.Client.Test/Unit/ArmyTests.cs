@@ -1,9 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using Wism.Client.Agent.Commands;
-using Wism.Client.Agent.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Test.Common;
@@ -32,43 +31,49 @@ namespace Wism.Client.Test.Unit
         [Test]
         public void StackViewingOrder_HeroOnlyTest()
         {
+            // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
+
+            // Act
+            tile.Armies.Sort(new ByArmyViewingOrder());
+
+            // Assert
             Assert.AreEqual(tile.Armies[0].ShortName, "Hero");
         }
 
         [Test]
         public void StackViewingOrder_HeroAndLesserArmyTest()
         {
+            // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
+
+            // Act
+            tile.Armies.Sort(new ByArmyViewingOrder());
+
+            // Assert
             Assert.AreEqual("Hero", tile.Armies[0].ShortName);           
         }
 
         [Test]
         public void StackViewingOrder_HeroAndTwoLesserArmiesTest()
         {
+            // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
             player1.HireHero(tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
-            Assert.AreEqual("Hero", tile.Armies[0].ShortName);
 
-            // Hero and set of armies
-            // Two heros
-            // Two heros and some armies
-            // No heros            
-            /* TODO: Tests to be added
-             * - Greater strength than hero
-             * - Special, 2 specials, special+fly
-             * - 2 fliers
-             * - moves
-             * - Navy
-             */
+            // Act
+            tile.Armies.Sort(new ByArmyViewingOrder());
+
+            // Assert
+            Assert.AreEqual("Hero", tile.Armies[0].ShortName);            
         }
 
         [Test]
@@ -204,125 +209,7 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(army.CanWalk, "Hero cannot walk. Broken leg?");
             Assert.IsFalse(army.CanFloat, "Hero learned how to swim!");
             Assert.IsFalse(army.CanFly, "Heros can fly!? Crazy talk.");
-        }
-
-        [Test]
-        public void Move_HeroToMeadowTest()
-        {
-            // ASSEMBLE
-            Army hero = GetFirstHero();
-            List<Army> armies = new List<Army>() { hero };
-
-            // ACT / ASSERT
-            MoveArmyPass(hero, Direction.North);
-            if (!TryMove(armies, Direction.North))
-                Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
         }        
-
-        [Test]
-        public void Move_HeroToMountainTest()
-        {
-            // ASSEMBLE
-            Army hero = GetFirstHero();
-            
-            // ACT / ASSERT
-            // Walk into meadow
-            MoveArmyPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            // Walk into meadow
-            MoveArmyPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            // Try to walk onto an impassable mountain; should fail
-            MoveArmyFail(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass"); // Still on meadow
-        }
-
-        [Test]
-        public void Move_HeroToCoastTest()
-        {
-            // ASSEMBLE
-            Army hero = GetFirstHero();
-
-            // ACT / ASSERT
-
-            // Move north to meadow
-            MoveArmyPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            // Try to walk onto an impassable coast
-            MoveArmyFail(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass"); // Still on meadow            
-        }
-
-        [Test]
-        public void MoveNorthThenSouth()
-        {
-            // ASSEMBLE
-            Army hero = GetFirstHero();            
-            Tile originalTile = hero.Tile;
-
-            // ACT / ASSERT
-            MoveArmyPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            MoveArmyPass(hero, Direction.South);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
-        }
-
-        [Test]
-        public void Move_SouthThenNorth()
-        {
-            // ASSEMBLE
-            Army hero = GetFirstHero();
-            Tile originalTile = hero.Tile;
-
-            // ACT / ASSERT
-            MoveArmyPass(hero, Direction.South);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            MoveArmyPass(hero, Direction.North);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
-        }
-
-        [Test]
-        public void Move_WestThenEast()
-        {
-            // ASSEMBLE
-            Army hero = GetFirstHero();
-            Tile originalTile = hero.Tile;
-
-            // ACT / ASSERT
-            MoveArmyPass(hero, Direction.West);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            MoveArmyPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
-        }
-
-        [Test]
-        public void Move_EastThenWest()
-        {
-            // ASSEMBLE
-            Army hero = GetFirstHero();
-            Tile originalTile = hero.Tile;
-
-            // ACT / ASSERT
-            MoveArmyPass(hero, Direction.West);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            MoveArmyPass(hero, Direction.East);
-            Assert.AreEqual(hero.Tile.Terrain.ShortName, "Grass");
-
-            Assert.AreEqual(originalTile, hero.Tile, "Hero didn't make it back.");
-        }
 
         [Test]
         public void Move_HeroMountainPathTest()
@@ -453,7 +340,7 @@ namespace Wism.Client.Test.Unit
             
             var originalArmies = new List<Army>(originalTile.Armies);
             int expectedX = originalArmies[0].X;
-            int expectedY = originalArmies[0].Y - 1;
+            int expectedY = originalArmies[0].Y + 1;
 
             // Select two armies from the tile            
             List<Army> selectedArmies = new List<Army>
@@ -502,7 +389,7 @@ namespace Wism.Client.Test.Unit
             
             var originalArmies = new List<Army>(originalTile.Armies);
             int expectedX = originalArmies[0].X;
-            int expectedY = originalArmies[0].Y - 1;
+            int expectedY = originalArmies[0].Y + 2;
 
             // Select two armies from the tile            
             List<Army> selectedArmies = new List<Army>
@@ -515,6 +402,12 @@ namespace Wism.Client.Test.Unit
             armyController.SelectArmy(selectedArmies);
 
             // ACT: Move the selected armies
+            if (!TryMove(selectedArmies, Direction.North))
+            {
+                Assert.Fail("Could not move the army.");
+            }
+
+            // Move north
             if (!TryMove(selectedArmies, Direction.North))
             {
                 Assert.Fail("Could not move the army.");
@@ -568,14 +461,14 @@ namespace Wism.Client.Test.Unit
 
             // ACT
             
-            // Move the selected armies one south
-            if (!TryMove(selectedArmies, Direction.South))
+            // Move the selected armies one north
+            if (!TryMove(selectedArmies, Direction.North))
             {
                 Assert.Fail("Could not move the army.");
             }
 
-            // Move the selected armies one south onto merge armies
-            if (!TryMove(selectedArmies, Direction.South))
+            // Move the selected armies one north onto merge armies
+            if (!TryMove(selectedArmies, Direction.North))
             {
                 Assert.Fail("Could not move the army.");
             }
@@ -618,14 +511,14 @@ namespace Wism.Client.Test.Unit
 
             // ACT
 
-            // Move the selected armies one south onto merge armies
-            if (!TryMove(originalArmies, Direction.South))
+            // Move the selected armies one north onto merge armies
+            if (!TryMove(originalArmies, Direction.North))
             {
                 Assert.Fail("Could not move the army.");
             }
 
-            // Move the selected armies one south away from merge armies
-            if (!TryMove(originalArmies, Direction.South))
+            // Move the selected armies one north away from merge armies
+            if (!TryMove(originalArmies, Direction.North))
             {
                 Assert.Fail("Could not move the army.");
             }
@@ -712,9 +605,11 @@ namespace Wism.Client.Test.Unit
 
             Tile newTile = army.Tile;
             Assert.AreNotEqual(originalTile, newTile, String.Format("{0} could not move to tile.", army.ToString()));
-            Assert.IsNotNull(army.Tile.Armies);         // Army should be set on new tile
-            Assert.IsNotNull(army.Tile.Armies[0].Tile); // Army's tile should be set on new tile
-            Assert.IsNull(originalTile.Armies);         // Army should be null on old tile
+            Assert.IsNull(army.Tile.Armies);                    // Army should be set on new tile
+            Assert.IsNotNull(army.Tile.VisitingArmies);            // Visiting Army should be set on new tile
+            Assert.IsNotNull(army.Tile.VisitingArmies[0].Tile); // Visiting Army's tile should be set on new tile
+            Assert.IsNull(originalTile.Armies);                 // Army should be null on old tile
+            Assert.IsNull(originalTile.VisitingArmies);         // Visiting Army should be null on old tile
         }
 
         private void MoveArmyFail(Army army, Direction direction)
@@ -757,24 +652,31 @@ namespace Wism.Client.Test.Unit
             int x = armies[0].X;
             int y = armies[0].Y;
 
-            // BUGBUG: North/South should be flipped for proper coord system.
             switch (direction)
             {
                 case Direction.North:
-                    y--;
+                    y++;
                     break;
                 case Direction.East:
                     x++;
                     break;
                 case Direction.South:
-                    y++;
+                    y--;
                     break;
                 case Direction.West:
                     x--;
                     break;
             }
 
-            return armyController.TryMove(armies, World.Current.Map[x, y]);
+            IList<Tile> path = null;
+            var state = armyController.MoveOneStep(armies, World.Current.Map[x, y], ref path, out _);
+            if (state == ActionState.InProgress &&
+                path.Count == 1)
+            {
+                // We are only moving one step; calling again to "reach destination"
+                state = armyController.MoveOneStep(armies, World.Current.Map[x, y], ref path, out _);
+            }
+            return state == ActionState.Succeeded;
         }
 
         public enum Direction

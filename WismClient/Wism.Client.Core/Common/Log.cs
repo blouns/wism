@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Wism.Client.Core
+namespace Wism.Client.Common
 {
     public static class Log
     {

@@ -1,15 +1,16 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+//using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Wism.Client.Agent.Controllers;
+using Wism.Client.Core.Controllers;
+using Wism.Client.Common;
 
 namespace Wism.Client.Agent
 {
     public class WismAgent : BackgroundService
     {
-        private readonly ILogger<WismAgent> logger;
+        private readonly ILogger logger;
         private readonly CommandController commandController;
 
         public WismAgent(ILoggerFactory loggerFactory, ControllerProvider wismController)
@@ -24,7 +25,7 @@ namespace Wism.Client.Agent
                 throw new ArgumentNullException(nameof(wismController));
             }
 
-            this.logger = loggerFactory.CreateLogger<WismAgent>();
+            this.logger = loggerFactory.CreateLogger();
             this.commandController = wismController.CommandController;
         }
 

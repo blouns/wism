@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Common;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.War;
@@ -15,6 +16,7 @@ namespace Wism.Client.Core
         private int currentPlayerIndex;
         private GameState gameState;
         private List<Army> selectedArmies;
+        private Queue<Tile> nextArmyQueue = new Queue<Tile>();
 
         public World World { get; set; }
 
@@ -99,32 +101,40 @@ namespace Wism.Client.Core
                 GameState != GameState.SelectedArmy)
             {
                 return false;
-            }            
+            }
 
-            var player = GetCurrentPlayer();
-            var armies = player.GetArmies();
-            foreach (Army army in armies)
+            if (nextArmyQueue.Count == 0)
             {
-                // Exclude Defending and out-of-moves armies
-                if (!army.IsDefending && army.MovesRemaining > 0)
+                this.nextArmyQueue = GetTilesWithArmiesWithMoves(GetCurrentPlayer());
+
+                // No more armies with moves
+                if (nextArmyQueue.Count == 0)
                 {
-                    if (ArmiesSelected())
-                    {
-                        // Exclude currently selected armies
-                        if (this.selectedArmies.Contains(army))
-                        {
-                            continue;
-                        }
-
-                        DeselectArmies();
-                    }
-
-                    SelectArmies(army.Tile.Armies);
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            Game.Current.DeselectArmies();
+            var tileWithArmies = nextArmyQueue.Dequeue();            
+            SelectArmies(tileWithArmies.Armies);            
+
+            return true;
+        }
+
+        private Queue<Tile> GetTilesWithArmiesWithMoves(Player player)
+        {
+            var tiles = new HashSet<Tile>();
+            var armies = player.GetArmies();
+
+            foreach (var army in armies)
+            {
+                if (!army.IsDefending && army.MovesRemaining > 0)
+                {
+                    tiles.Add(army.Tile);
+                }
+            }
+
+            return new Queue<Tile>(tiles);
         }
 
         public List<Army> GetSelectedArmies()
@@ -171,6 +181,7 @@ namespace Wism.Client.Core
             // Move selected armies to Visiting Armies
             Log.WriteLine(Log.TraceLevel.Information, $"Selecting army: {ArmiesToString(armies)}");
             tile.VisitingArmies = new List<Army>(armies);
+            tile.VisitingArmies.Sort(new ByArmyViewingOrder());
             foreach (Army army in tile.VisitingArmies)
             {
                 tile.Armies.Remove(army);
@@ -212,7 +223,9 @@ namespace Wism.Client.Core
 
         public bool ArmiesSelected()
         {
-            return (GameState == GameState.SelectedArmy) &&
+            return (GameState == GameState.SelectedArmy || 
+                    GameState == GameState.MovingArmy ||
+                    GameState == GameState.AttackingArmy) &&
                    (selectedArmies != null) &&
                    (selectedArmies.Count > 0);
         }
@@ -247,6 +260,7 @@ namespace Wism.Client.Core
             }
             
             this.selectedArmies.ForEach(a => a.Defend());
+            DeselectArmies();
         }
 
         public static void CreateDefaultPlayers()
@@ -279,6 +293,13 @@ namespace Wism.Client.Core
             World.CreateDefaultWorld();
         }
 
+        public static void CreateEmpty()
+        {
+            current = new Game();
+        }
+
+        #region Helper methods
+
         private static List<Army> RemoveDeadArmies(List<Army> armies)
         {
             var armiesToReturn = new List<Army>(armies);
@@ -297,15 +318,7 @@ namespace Wism.Client.Core
         {
             return $"Armies[{armies.Count}:{armies[0]}]";
         }
-    }
-    public enum GameState
-    {
-        Ready,
-        SelectedArmy,
-        MovingArmy,
-        AttackingArmy,
-        EndingTurn,
-        StartingTurn,
-        GameOver
+
+        #endregion
     }
 }

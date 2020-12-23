@@ -1,18 +1,12 @@
-using Assets.Scripts.Units;
-using BranallyGames.Wism;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
 public class ArmyGameObject
-{
+{    
     private Army army;
     private GameObject gameObject;
-
-    // State for moving the army
-    public Tile TargetTile;
-    public IList<Tile> Path;
 
     public ArmyGameObject(Army army, GameObject gameObject)
     {
