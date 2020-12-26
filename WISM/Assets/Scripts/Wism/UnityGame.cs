@@ -86,6 +86,9 @@ namespace Assets.Scripts.Wism
             singleClickProcessed = true;
         }
 
+        /// <summary>
+        /// Process keyboard and mouse input, including single and double click handling
+        /// </summary>
         private void HandleInput()
         {
             if (SelectingArmies)
@@ -106,14 +109,13 @@ namespace Assets.Scripts.Wism
                 // Detect single vs. double-click
                 if (mouseSingleClickTimer.Enabled == false)
                 {
-                    // ... timer start
                     mouseSingleClickTimer.Start();
-                    // ... wait for double click...
+                    // Wait for double click
                     return;
                 }
                 else
                 {
-                    // Doubleclick performed - Cancel single click
+                    // Double click performed, so cancel single click
                     mouseSingleClickTimer.Stop();
 
                     HandleLeftClick(true);
@@ -370,145 +372,141 @@ namespace Assets.Scripts.Wism
             GameObject map = UnityUtilities.GameObjectHardFind("MinimapBorder");
             map.SetActive(!map.activeSelf);
         }
+        //private void CompleteBattle()
+        //{
+        //    switch (this.attackResult)
+        //    {
+        //        case AttackResult.AttackerWon:
+        //            this.WarPanel.Teardown();
+        //            SetTime(GameManager.StandardTime);
+        //            break;
 
-        /*
-        private void CompleteBattle()
-        {
-            switch (this.attackResult)
-            {
-                case AttackResult.AttackerWon:
-                    MoveSelectedArmyTo(SelectedArmy.TargetTile);
+        //        case AttackResult.DefenderWon:
+        //            DeselectObject();
 
-                    this.WarPanel.Teardown();
-                    SetTime(GameManager.StandardTime);
-                    break;
+        //            this.WarPanel.Teardown();
+        //            SetTime(GameManager.StandardTime);
+        //            break;
 
-                case AttackResult.DefenderWon:
-                    DeselectObject();
+        //        case AttackResult.Battling:
+        //            SetTime(GameManager.WarTime);
+        //            break;
 
-                    this.WarPanel.Teardown();
-                    SetTime(GameManager.StandardTime);
-                    break;
-
-                case AttackResult.Battling:
-                    SetTime(GameManager.WarTime);
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Unknown attack result from battle.");
-            }
-        }
+        //        default:
+        //            throw new InvalidOperationException("Unknown attack result from battle.");
+        //    }
+        //}
       
-        private void AttackArmyAt(Wism.Client.Core.Tile targetTile)
-        {
-            Army attacker = SelectedArmy.Army;
-            Army defender = targetTile.Army;
+        //private void AttackArmyAt(Tile targetTile)
+        //{
+        //    Army attacker = SelectedArmy.Army;
+        //    Army defender = targetTile.Army;
 
-            if (attacker == defender)
-                return;
+        //    if (attacker == defender)
+        //        return;
 
-            Debug.LogFormat("{0} are attacking {1}!",
-                SelectedArmy.Army.Clan,
-                targetTile.Army.Clan);
+        //    Debug.LogFormat("{0} are attacking {1}!",
+        //        SelectedArmy.Army.Clan,
+        //        targetTile.Army.Clan);
 
-            InputState = GameState.AttackingArmy;
-            this.SelectedArmy.Path = null;
-            this.SelectedArmy.TargetTile = targetTile;
+        //    InputState = GameState.AttackingArmy;
+        //    this.SelectedArmy.Path = null;
+        //    this.SelectedArmy.TargetTile = targetTile;
 
-            // Set up war UI    
-            WarPanel.Initialize(attacker, defender, armyKinds);
-            SetTime(GameManager.WarTime);
-        }
+        //    // Set up war UI    
+        //    WarPanel.Initialize(attacker, defender, armyKinds);
+        //    SetTime(GameManager.WarTime);
+        //}
 
-        private void AttackArmy(ArmyGameObject armyGO)
-        {
-            List<Army> attackers = armyGO.Armies;
-            List<Army> defenders = armyGO.TargetTile.Armies;
+        //private void AttackArmy(ArmyGameObject armyGO)
+        //{
+        //    List<Army> attackers = armyGO.Armies;
+        //    List<Army> defenders = armyGO.TargetTile.Armies;
 
-            string attackingClan = attackers[0].Clan.DisplayName;
-            string defendingClan = defenders[0].Clan.DisplayName;
+        //    string attackingClan = attackers[0].Clan.DisplayName;
+        //    string defendingClan = defenders[0].Clan.DisplayName;
 
-            // Attack until one unit is killed, but not the entire army
-            AttackOnce(attackers, defenders, out this.attackResult);
+        //    // Attack until one unit is killed, but not the entire army
+        //    AttackOnce(attackers, defenders, out this.attackResult);
 
-            if (this.attackResult != AttackResult.Battling)
-            {
-                GameState = GameState.BattleCompleted;
-            }
-        }
+        //    if (this.attackResult != AttackResult.Battling)
+        //    {
+        //        GameState = GameState.BattleCompleted;
+        //    }
+        //}
 
-        private bool AttackOnce(List<Army> attackers, List<Army> defenders, out AttackResult result)
-        {
-            // Empty army
-            if (attackers.Count == 0)
-            {
-                Debug.LogWarning("Attacker attacked without any units.");
-                result = AttackResult.DefenderWon;
-                return false;
-            }
-            else if (defenders.Count == 0)
-            {
-                Debug.LogWarning("Defender attacked without any units.");
-                result = AttackResult.AttackerWon;
-                return false;
-            }
+        //private bool AttackOnce(List<Army> attackers, List<Army> defenders, out AttackResult result)
+        //{
+        //    // Empty army
+        //    if (attackers.Count == 0)
+        //    {
+        //        Debug.LogWarning("Attacker attacked without any units.");
+        //        result = AttackResult.DefenderWon;
+        //        return false;
+        //    }
+        //    else if (defenders.Count == 0)
+        //    {
+        //        Debug.LogWarning("Defender attacked without any units.");
+        //        result = AttackResult.AttackerWon;
+        //        return false;
+        //    }
 
-            string attackerName = attackers[0].Clan.ToString();
-            string defenderName = defenders[0].Clan.ToString();
+        //    string attackerName = attackers[0].Clan.ToString();
+        //    string defenderName = defenders[0].Clan.ToString();
 
-            // Battle it out
-            //result = AttackResult.Battling;
-            Guid selectedArmyGuid = this.SelectedArmy.Armies.Guid;
-            IList<Army> attackingArmys = attackers.SortByBattleOrder(defenders.Tile);
-            IList<Army> defendingArmys = defenders.SortByBattleOrder(defenders.Tile);
-            Army attackingArmy = attackingArmys[0];
-            Army defendingArmy = defendingArmys[0];
-            bool battleContinues = GameManager.WarStrategy.AttackOnce(attackers, defenders.Tile, out bool didAttackerWin);
+        //    // Battle it out
+        //    //result = AttackResult.Battling;
+        //    Guid selectedArmyGuid = this.SelectedArmy.Armies.Guid;
+        //    IList<Army> attackingArmys = attackers.SortByBattleOrder(defenders.Tile);
+        //    IList<Army> defendingArmys = defenders.SortByBattleOrder(defenders.Tile);
+        //    Army attackingArmy = attackingArmys[0];
+        //    Army defendingArmy = defendingArmys[0];
+        //    bool battleContinues = GameManager.WarStrategy.AttackOnce(attackers, defenders.Tile, out bool didAttackerWin);
 
-            if (didAttackerWin)
-            {
-                WarPanel.UpdateBattle(didAttackerWin, defendingArmy);
-                Debug.LogFormat("War: {0}:{1} has killed {2}:{3}.",
-                    attackerName, attackingArmy.DisplayName,
-                    defenderName, defendingArmy.DisplayName);
-            }
-            else // Attack failed
-            {
-                WarPanel.UpdateBattle(didAttackerWin, attackingArmy);
-                Debug.LogFormat("War: {0}:{1} has killed {2}:{3}.",
-                    defenderName, defendingArmy.DisplayName,
-                    attackerName, attackingArmy.DisplayName);
+        //    if (didAttackerWin)
+        //    {
+        //        WarPanel.UpdateBattle(didAttackerWin, defendingArmy);
+        //        Debug.LogFormat("War: {0}:{1} has killed {2}:{3}.",
+        //            attackerName, attackingArmy.DisplayName,
+        //            defenderName, defendingArmy.DisplayName);
+        //    }
+        //    else // Attack failed
+        //    {
+        //        WarPanel.UpdateBattle(didAttackerWin, attackingArmy);
+        //        Debug.LogFormat("War: {0}:{1} has killed {2}:{3}.",
+        //            defenderName, defendingArmy.DisplayName,
+        //            attackerName, attackingArmy.DisplayName);
 
-                // If Selected Army lost a unit, reset the top GameObject
-                if (battleContinues && (selectedArmyGuid == attackingArmy.Guid))
-                {
-                    // TODO: Move this into the core game loop to reset all armies; this could impact any army
+        //        // If Selected Army lost a unit, reset the top GameObject
+        //        if (battleContinues && (selectedArmyGuid == attackingArmy.Guid))
+        //        {
+        //            // TODO: Move this into the core game loop to reset all armies; this could impact any army
 
-                    // Replace the GameObject with the next unit in the army               
-                    ArmyGameObject ago = this.armyDictionary[selectedArmyGuid];
-                    ago.GameObject.SetActive(true);
-                }
-            }
+        //            // Replace the GameObject with the next unit in the army               
+        //            ArmyGameObject ago = this.armyDictionary[selectedArmyGuid];
+        //            ago.GameObject.SetActive(true);
+        //        }
+        //    }
 
-            if (!battleContinues)
-            {
-                if (!didAttackerWin)
-                {
-                    // Attacker has lost the battle (all attacking units killed)
-                    result = AttackResult.DefenderWon;
-                    Debug.LogFormat("War: {0} have lost!", attackerName);
-                }
-                else if (didAttackerWin)
-                {
-                    // Attack has won the battle (all enemy units killed)
-                    result = AttackResult.AttackerWon;
-                    Debug.LogFormat("War: {0} are victorious!", attackerName);
-                }
-            }
+        //    if (!battleContinues)
+        //    {
+        //        if (!didAttackerWin)
+        //        {
+        //            // Attacker has lost the battle (all attacking units killed)
+        //            result = AttackResult.DefenderWon;
+        //            Debug.LogFormat("War: {0} have lost!", attackerName);
+        //        }
+        //        else if (didAttackerWin)
+        //        {
+        //            // Attack has won the battle (all enemy units killed)
+        //            result = AttackResult.AttackerWon;
+        //            Debug.LogFormat("War: {0} are victorious!", attackerName);
+        //        }
+        //    }
 
-            return battleContinues;
-        }
-*/
+        //    return battleContinues;
+        //}
+
         private bool IsMovingOntoEnemy(List<Army> armies, Tile targetTile)
         {
             return targetTile.CanAttackHere(armies);

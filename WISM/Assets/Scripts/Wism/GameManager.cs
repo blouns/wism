@@ -72,13 +72,13 @@ public class GameManager : MonoBehaviour
     public void AttackWithSelectedArmies(int x, int y)
     {
         commandController.AddCommand(
-            new AttackCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
+            new AttackOnceCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
     }
 
     public void MoveSelectedArmies(int x, int y)
     {
         commandController.AddCommand(
-            new MoveAlongPathCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
+            new MoveOnceCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
     }
 
     public void DefendSelectedArmies()

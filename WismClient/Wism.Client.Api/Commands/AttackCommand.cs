@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Api.Commands
 {
+    [Obsolete]
     public class AttackCommand : ArmyCommand
     {
         public int X { get; set; }

@@ -14,6 +14,9 @@ namespace Wism.Client.Agent
     {
         private ILogger logger;
         private readonly ArmyController armyController;
+        private int lastId;
+
+        public int LastId { get => lastId; set => lastId = value; }
 
         public ViewBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
         {
@@ -38,8 +41,7 @@ namespace Wism.Client.Agent
             try
             {
                 CreateTestGame();
-
-                int lastId = 0;
+                
                 while (true)
                 {
                     // Game loop

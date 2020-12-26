@@ -346,7 +346,7 @@ namespace Wism.Client.Test.Scenario
             
             // Assert
             Assert.AreEqual(0, sirians.GetArmies().Count, "Hero is still alive!.");
-            Assert.AreEqual(5, tile2.Armies.Count, "Unexpected number of armies remaining.");
+            Assert.AreEqual(8, tile2.Armies.Count, "Unexpected number of armies remaining.");
         }
 
         /// <summary>

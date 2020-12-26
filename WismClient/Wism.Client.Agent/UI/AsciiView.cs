@@ -5,6 +5,8 @@ using Wism.Client.Api.Commands;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.Common;
+using System.Threading;
+using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent
 {
@@ -23,7 +25,10 @@ namespace Wism.Client.Agent
             { "LightInfantry", 'i' },
             { "HeavyInfantry", 'I' },
             { "Cavalry", 'c' },
-            { "Pegasus", 'P' }
+            { "Pegasus", 'P' },
+            { "WolfRiders", 'R' },
+            { "GiantWarriors", 'R' },
+            { "Archers", 'R' }
         };
 
         IDictionary<string, char> terrainMap = new Dictionary<string, char>
@@ -80,8 +85,6 @@ namespace Wism.Client.Agent
 
         protected override void DoTasks(ref int lastId)
         {
-            Player humanPlayer = Game.Current.Players[0];
-
             foreach (Command command in commandController.GetCommandsAfterId(lastId))
             {
                 logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
@@ -99,16 +102,11 @@ namespace Wism.Client.Agent
                 {
                     logger.LogInformation($"Task failed");
                     lastId = command.Id;
-                    if (command.Player == humanPlayer)
-                    {                 
-                        Console.Beep();
-                    }
                 }
                 else if (result == ActionState.InProgress)
                 {
                     logger.LogInformation("Task started and in progress");
                     // Do NOT advance Command ID; we are still processing this command
-                    // TODO: Perhaps shift to using GameState instead of ActionState?
                 }
             }
         }
@@ -145,6 +143,15 @@ namespace Wism.Client.Agent
                 // Game over
                 Console.WriteLine($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
                 System.Environment.Exit(1);
+            }
+
+            if (Game.Current.GameState == GameState.AttackingArmy)
+            {
+                DoBattleCutScene();
+                if (Game.Current.ArmiesSelected())
+                {
+                    selectedTile = selectedArmies[0].Tile;
+                }
             }
 
             Console.Clear();
@@ -211,6 +218,110 @@ namespace Wism.Client.Agent
                 Console.WriteLine();                
             }
             Console.WriteLine("==========================================");
+        }
+
+        private void DoBattleCutScene()
+        {
+            var battleCommand = (PrepareForBattleCommand)this.commandController.
+                GetCommand(LastId);
+
+            var targetTile = World.Current.Map[battleCommand.X, battleCommand.Y];
+            var attackingPlayer = battleCommand.Armies[0].Player;
+            var attackingArmies = new List<Army>(battleCommand.Armies);
+            attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
+
+            var defendingPlayer = battleCommand.Defenders[0].Player;
+            var defendingArmies = targetTile.MusterArmy();
+            defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
+
+            // Draw the initial battle
+            DrawBattleSetupSequence(attackingPlayer, defendingPlayer);            
+
+            var result = ActionState.NotStarted;
+            var command = this.commandController.GetCommand(++LastId);
+
+            while (result == ActionState.NotStarted ||
+                   result == ActionState.InProgress)
+            {
+                DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
+
+                Thread.Sleep(750);
+
+                // Attack                             
+                result = command.Execute();
+            }
+
+            // Battle outcome
+            DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
+
+            var name = attackingPlayer.Clan.DisplayName;
+            var presentVerb = name.EndsWith('s') ? "are" : "is";
+            var pastVerb = name.EndsWith('s') ? "have" : "has";
+
+            if (result == ActionState.Succeeded)
+            {
+                Console.WriteLine($"{name} {presentVerb} victorious!");
+            }
+            else if (result == ActionState.Failed)
+            {
+                Console.WriteLine($"{name} {pastVerb} been defeated!");
+            }
+            else
+            {
+                Console.WriteLine("Error: Unexpected game state" + result);
+            }
+            Console.ReadKey();
+        }
+
+        private void DrawBattleUpdate(Clan attackingClan, List<Army> attackingArmies, Clan defendingClan, List<Army> defendingArmies)
+        {
+            var color = Console.ForegroundColor;
+            Console.Clear();
+
+            Console.ForegroundColor = GetColorForClan(defendingClan);
+            Console.WriteLine($"{defendingClan.DisplayName}:");
+            DrawArmies(defendingArmies);
+
+            Console.WriteLine();
+
+            Console.ForegroundColor = GetColorForClan(attackingClan);
+            Console.WriteLine($"{attackingClan.DisplayName}:");
+            DrawArmies(attackingArmies);
+
+            Console.ForegroundColor = color;
+            Console.Beep();
+        }
+
+        private void DrawArmies(List<Army> armies)
+        {
+            var originalColor = Console.ForegroundColor;
+
+            foreach (var army in armies)
+            {
+                Console.ForegroundColor = GetColorForClan(army.Clan);
+
+                Console.Write(army.DisplayName);
+                if (army.IsDead)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write(" [X]");
+                }
+                Console.WriteLine();
+            }
+
+            Console.ForegroundColor = originalColor;
+        }
+
+        private void DrawBattleSetupSequence(Player attacker, Player defender)
+        {
+            Console.Clear();
+            Console.WriteLine("War! ...in a senseless mind.");
+            Console.WriteLine($"{attacker.Clan.DisplayName} is attacking {defender.Clan.DisplayName}!");
+            for (int i = 0; i < 3; i++)
+            {
+                Console.Beep();
+                Thread.Sleep(750);
+            }
         }
 
         private ConsoleColor GetColorForClan(Clan clan)

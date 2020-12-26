@@ -93,7 +93,18 @@ namespace Wism.Client.War
 
             PrepareArmiesForAttack(attackers, target, out List<Army> defenders, out int compositeAFCM, out int compositeDFCM);
 
-            wasSuccessful = AttackOnceInternal(defenders, attackers, compositeAFCM, compositeDFCM);
+            // Attacking an empty city always succeeds
+            if (defenders.Count == 0 && target.HasCity())
+            {
+                // TODO: Add concept of attacking a Neutral city (which has no armies, but can defend)
+                wasSuccessful = true;
+            }
+            else
+            {
+                // Attack
+                wasSuccessful = AttackOnceInternal(defenders, attackers, compositeAFCM, compositeDFCM);
+            }
+            
             if (BattleContinues(defenders, attackers))
             {
                 // Keep fighting
@@ -107,12 +118,12 @@ namespace Wism.Client.War
             }
         }
 
-        private bool BattleContinues(List<Army> defenders, List<Army> attacker)
+        public bool BattleContinues(List<Army> defenders, List<Army> attacker)
         {
             return (attacker.Count > 0 && defenders.Count > 0);
         }
 
-        private void PrepareArmiesForAttack(List<Army> attackers, Tile target, out List<Army> defenders, out int compositeAFCM, out int compositeDFCM)
+        private static void PrepareArmiesForAttack(List<Army> attackers, Tile target, out List<Army> defenders, out int compositeAFCM, out int compositeDFCM)
         {
             // Muster all armys from composite tile (i.e. city) to defend
             defenders = target.MusterArmy();
@@ -132,7 +143,7 @@ namespace Wism.Client.War
             defenders.ForEach(u => u.Reset());
         }
 
-        private bool AttackOnceInternal(List<Army> defenders, List<Army> attackers, int compositeAFCM, int compositeDFCM)
+        private static bool AttackOnceInternal(List<Army> defenders, List<Army> attackers, int compositeAFCM, int compositeDFCM)
         {
             // Order attackers by strength from weakest to strongest
             Tile defendingTile = defenders[0].Tile;
@@ -165,7 +176,7 @@ namespace Wism.Client.War
             return attackSucceeded;
         }
 
-        private void ApplyArmyTerrainModifiers(IList<Army> armys, Tile target)
+        private static void ApplyArmyTerrainModifiers(IList<Army> armys, Tile target)
         {
             foreach (Army army in armys)
             {
@@ -175,7 +186,7 @@ namespace Wism.Client.War
             return;
         }
 
-        private bool AttackRoll(Army attacker, int attackStrength, Army defender, int defenseStrength)
+        private static bool AttackRoll(Army attacker, int attackStrength, Army defender, int defenseStrength)
         {
             Random random = Game.Current.Random;
             // Have we won?

@@ -14,6 +14,15 @@ namespace Wism.Client.Core.Controllers
         Blocked    
     }
 
+    public enum AttackResult
+    {
+        NotStarted,
+        AttackerWinsRound,
+        AttackerWinsBattle,
+        DefenderWinsRound,
+        DefenderWinBattle
+    }
+
     public class ArmyController
     {
         private readonly ILogger logger;
@@ -26,6 +35,20 @@ namespace Wism.Client.Core.Controllers
             }
 
             this.logger = loggerFactory.CreateLogger();
+        }
+
+        public ActionState PrepareForBattle()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                logger.LogInformation("Cannot prepare for battle when no armies are selected.");
+                return ActionState.Failed;
+            }
+
+            logger.LogInformation("Transitioning to AttackingArmy state.");
+            Game.Current.Transition(GameState.AttackingArmy);
+
+            return ActionState.Succeeded;
         }
 
         public void DefendArmy(List<Army> armies)
@@ -97,6 +120,7 @@ namespace Wism.Client.Core.Controllers
             }
 
             // We are clear to advance!
+            logger.LogInformation($"Moving {ArmiesToString(armiesToMove)} to {targetTile}");
             MoveSelectedArmies(armiesToMove, targetTile);
 
             return MoveResult.Moved;
@@ -153,6 +177,8 @@ namespace Wism.Client.Core.Controllers
             var moveResult = TryMove(armiesToMove, myPath[1]);
             if (moveResult == MoveResult.Moved)
             {
+                logger.LogInformation($"Moved {ArmiesToString(armiesToMove)} to {targetTile}");
+
                 // Pop the starting location and return updated path and distance
                 myPath.RemoveAt(0);
                 myDistance = CalculateDistance(myPath);
@@ -247,6 +273,52 @@ namespace Wism.Client.Core.Controllers
             }
 
             Game.Current.DeselectArmies();
+        }
+
+        public AttackResult AttackOnce(List<Army> armiesToAttackWith, Tile targetTile)
+        {
+            AttackResult result;
+
+            if (armiesToAttackWith is null || armiesToAttackWith.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(armiesToAttackWith));
+            }
+
+            if (targetTile is null)
+            {
+                throw new ArgumentNullException(nameof(targetTile));
+            }
+
+            if (Game.Current.GameState != GameState.AttackingArmy)
+            {
+                throw new InvalidOperationException("Cannot attack without preparing for battle.");
+            }
+
+            if (!targetTile.CanAttackHere(armiesToAttackWith))
+            {
+                throw new ArgumentException("Target tile must have armies of another clan.");
+            }
+
+            var attackingFromTile = armiesToAttackWith[0].Tile;
+
+            logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile} once");
+
+            // Attack!
+            var war = Game.Current.WarStrategy;
+            var attackSucceeded = war.AttackOnce(armiesToAttackWith, targetTile);
+
+            // Is the battle over?
+            if (war.BattleContinues(targetTile.MusterArmy(), armiesToAttackWith))
+            {
+                result = (attackSucceeded) ? AttackResult.AttackerWinsRound : AttackResult.DefenderWinsRound;
+            }
+            else
+            {
+                CleanupAfterBattle(targetTile, attackingFromTile, attackSucceeded);
+                result = (attackSucceeded) ? AttackResult.AttackerWinsBattle : AttackResult.DefenderWinBattle;
+            }
+                        
+            return result;
         }
 
         /// <summary>

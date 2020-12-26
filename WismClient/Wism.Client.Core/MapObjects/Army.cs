@@ -22,9 +22,8 @@ namespace Wism.Client.MapObjects
         public Clan Clan { get => Player.Clan; }
         public string MyProperty { get; set; }
         public bool IsDead { get; set; }
-
-        // Static info
         public int Moves { get; internal set; }
+        public string KindName { get => Info.DisplayName; }
 
         public override string ShortName => Info.ShortName;
 

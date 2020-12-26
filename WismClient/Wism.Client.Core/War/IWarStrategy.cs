@@ -30,5 +30,13 @@ namespace Wism.Client.War
         /// <param name="wasSuccessful">True if attack succeeded; else false</param>
         /// <returns>True if the fight continues; else, the battle is over.</returns>
         bool AttackOnce(List<Army> attackers, Tile tile, out bool wasSuccessful);
+
+        /// <summary>
+        /// Test if the battle is still in progress or completed.
+        /// </summary>
+        /// <param name="defenders">Defenders currently battling</param>
+        /// <param name="attacker">Attackers currently battling</param>
+        /// <returns>True if battle continues; otherwise, False</returns>
+        bool BattleContinues(List<Army> defenders, List<Army> attacker);
     }
 }

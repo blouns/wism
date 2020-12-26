@@ -30,7 +30,7 @@ namespace Wism.Client.Test.Scenario
             List<Command> commandsToAdd = new List<Command>()
             {
                 new SelectArmyCommand(armyController, armiesToMove),
-                new MoveAlongPathCommand(armyController, armiesToMove, 4, 4),
+                new MoveOnceCommand(armyController, armiesToMove, 4, 4),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };
 
@@ -92,14 +92,14 @@ namespace Wism.Client.Test.Scenario
                     direction *= -1;
                 }
                 x += direction;
-                commandController.AddCommand(new MoveAlongPathCommand(armyController, armiesToMove, x, y));                
+                commandController.AddCommand(new MoveOnceCommand(armyController, armiesToMove, x, y));                
             };
 
             // Act / Assert                     
             var commandsToExecute = commandController.GetCommandsAfterId(0);
             int lastId;
             bool done = false;
-            foreach (MoveAlongPathCommand command in commandsToExecute)
+            foreach (MoveOnceCommand command in commandsToExecute)
             {
                 var result = command.Execute();
                 switch (result)
@@ -143,8 +143,8 @@ namespace Wism.Client.Test.Scenario
             List<Command> commandsToAdd = new List<Command>()
             {
                 new SelectArmyCommand(armyController, armiesToMove),
-                new MoveAlongPathCommand(armyController, armiesToMove, 2, 3),
-                new MoveAlongPathCommand(armyController, armiesToMove, 2, 4),
+                new MoveOnceCommand(armyController, armiesToMove, 2, 3),
+                new MoveOnceCommand(armyController, armiesToMove, 2, 4),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };
 
@@ -209,7 +209,8 @@ namespace Wism.Client.Test.Scenario
             List<Command> commandsToAdd = new List<Command>()
             {
                 new SelectArmyCommand(armyController, armiesToMove),
-                new AttackCommand(armyController, armiesToMove, 2, 3),
+                new PrepareForBattleCommand(armyController, armiesToMove, 2, 3),
+                new AttackOnceCommand(armyController, armiesToMove, 2, 3),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };
 
@@ -282,8 +283,9 @@ namespace Wism.Client.Test.Scenario
             List<Command> commandsToAdd = new List<Command>()
             {
                 new SelectArmyCommand(armyController, armiesToMove),
-                new AttackCommand(armyController, armiesToMove, 2, 3),
-                new MoveAlongPathCommand(armyController, armiesToMove, 2, 2),
+                new PrepareForBattleCommand(armyController, armiesToMove, 2, 3),
+                new AttackOnceCommand(armyController, armiesToMove, 2, 3),
+                new MoveOnceCommand(armyController, armiesToMove, 2, 2),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };
 
