@@ -564,14 +564,17 @@ namespace Wism.Client.Test.Unit
 
             // ACT
             // Attack: Should win but not advance
-            var result = armyController.TryAttack(selectedArmies, enemyTile);
+            armyController.PrepareForBattle();
+            var result = armyController.AttackOnce(selectedArmies, enemyTile);
+            Assert.AreEqual(AttackResult.AttackerWinsRound, result, "Attacker did not win round.");
+            result = armyController.AttackOnce(selectedArmies, enemyTile);
 
             // Deselect the armies
             armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
-            Assert.IsTrue(result, "Original army was defeated.");
+            Assert.AreEqual(AttackResult.AttackerWinsBattle, result, "Original army was defeated.");
             Assert.AreEqual(3, selectedArmies.Count, "Selected army does not have the expected number of armies.");
             Assert.IsNull(enemyTile.Armies, "Enemy army still exists.");
             Assert.AreEqual(expectedX, originalArmies[0].X, "Selected armies moved unexpectedly.");

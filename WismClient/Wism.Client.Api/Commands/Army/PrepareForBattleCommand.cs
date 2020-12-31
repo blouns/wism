@@ -18,11 +18,19 @@ namespace Wism.Client.Api.Commands
             this.X = x;
             this.Y = y;
             this.Defenders = World.Current.Map[X, Y].MusterArmy();
+            this.Defenders.Sort(new ByArmyBattleOrder(World.Current.Map[X, Y]));
+            armies.Sort(new ByArmyBattleOrder(World.Current.Map[X, Y]));
         }
 
-        public override ActionState Execute()
+        protected override ActionState ExecuteInternal()
         {
             return this.armyController.PrepareForBattle();
+        }
+
+        public override string ToString()
+        {
+            return $"Command: Prepare for battle of {ArmyUtilities.ArmiesToString(Armies)} against " +
+                $"{World.Current.Map[X, Y]}";
         }
     }
 }

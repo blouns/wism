@@ -8,6 +8,7 @@ using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.War;
 using Command = Wism.Client.Api.Commands.Command;
 
 /// <summary>
@@ -49,6 +50,7 @@ public class GameManager : MonoBehaviour
         MapBuilder.Initialize(DefaultModPath);
         Game.CreateEmpty();        
         Game.Current.Random = new System.Random(DefaultRandom);
+        Game.Current.WarStrategy = new DefaultWarStrategy();
         Game.Current.Players = ReadyPlayers();
     }
 
@@ -68,11 +70,33 @@ public class GameManager : MonoBehaviour
         commandController.AddCommand(
             new DeselectArmyCommand(provider.ArmyController, Game.Current.GetSelectedArmies()));
     }
-    
-    public void AttackWithSelectedArmies(int x, int y)
+
+    public void PrepareForBattle(int x, int y)
     {
         commandController.AddCommand(
-            new AttackOnceCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
+            new PrepareForBattleCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
+    }
+
+    /// <summary>
+    /// Attack the target with currently selected armies.
+    /// </summary>
+    /// <param name="x">X coordinate to attack</param>
+    /// <param name="y">Y coordinate to attack</param>
+    /// <remarks>
+    /// Attacking is comprised of three commands:
+    ///   1. Prepare
+    ///   2. Attack
+    ///   3. Complete
+    /// </remarks>
+    public void AttackWithSelectedArmies(int x, int y)
+    {
+        PrepareForBattle(x, y);
+
+        var attackCommand = new AttackOnceCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y);
+        commandController.AddCommand(attackCommand);
+
+        commandController.AddCommand(
+            new CompleteBattleCommand(provider.ArmyController, attackCommand));
     }
 
     public void MoveSelectedArmies(int x, int y)

@@ -1,6 +1,0 @@
-﻿[What's Next?]
-Complete the ASCII UI by adding attack sequence.
-
-TODO List:
-* Add AttackOnce
-* Add ASCII UI attack step-by-step

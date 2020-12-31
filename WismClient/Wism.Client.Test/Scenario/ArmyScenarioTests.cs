@@ -206,11 +206,13 @@ namespace Wism.Client.Test.Scenario
             int expectedY = 3;
 
             var commandController = TestUtilities.CreateCommandController();
+            var attackCommand = new AttackOnceCommand(armyController, armiesToMove, 2, 3);
             List<Command> commandsToAdd = new List<Command>()
             {
                 new SelectArmyCommand(armyController, armiesToMove),
                 new PrepareForBattleCommand(armyController, armiesToMove, 2, 3),
-                new AttackOnceCommand(armyController, armiesToMove, 2, 3),
+                attackCommand,
+                new CompleteBattleCommand(armyController, attackCommand),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };
 
@@ -280,11 +282,13 @@ namespace Wism.Client.Test.Scenario
             int expectedY = 2;
 
             var commandController = TestUtilities.CreateCommandController();
+            var attackCommand = new AttackOnceCommand(armyController, armiesToMove, 2, 3);
             List<Command> commandsToAdd = new List<Command>()
             {
                 new SelectArmyCommand(armyController, armiesToMove),
                 new PrepareForBattleCommand(armyController, armiesToMove, 2, 3),
-                new AttackOnceCommand(armyController, armiesToMove, 2, 3),
+                attackCommand,
+                new CompleteBattleCommand(armyController, attackCommand),
                 new MoveOnceCommand(armyController, armiesToMove, 2, 2),
                 new DeselectArmyCommand(armyController, armiesToMove)
             };

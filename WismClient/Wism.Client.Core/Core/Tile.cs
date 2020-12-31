@@ -336,7 +336,10 @@ namespace Wism.Client.Core
             }
             else
             {
-                allArmies.AddRange(this.Armies);
+                if (this.HasArmies())
+                {
+                    allArmies.AddRange(this.Armies);
+                }
             }
 
             return allArmies;

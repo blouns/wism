@@ -73,14 +73,20 @@ namespace Wism.Client.Test.Common
 
         public static ActionState AttackUntilDone(CommandController commandController, ArmyController armyController, List<Army> armies, int x, int y)
         {
+            var targetTile = World.Current.Map[x, y];
+            var originalAttackingArmies = new List<Army>(armies);
+            
             var result = armyController.PrepareForBattle();
             if (result != ActionState.Succeeded)
             {
                 return result;
             }
 
-            return ExecuteCommandUntilDone(commandController,
-                new AttackOnceCommand(armyController, armies, x, y));
+            var attackCommand = new AttackOnceCommand(armyController, armies, x, y);
+            result = ExecuteCommandUntilDone(commandController, attackCommand);
+            _ = armyController.CompleteBattle(originalAttackingArmies, targetTile, result == ActionState.Succeeded);
+
+            return result;
         }
 
         public static ActionState MoveUntilDone(CommandController commandController, ArmyController armyController, List<Army> armies, int x, int y)

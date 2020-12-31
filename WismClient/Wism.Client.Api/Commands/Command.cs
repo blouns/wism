@@ -9,6 +9,8 @@ namespace Wism.Client.Api.Commands
 
         public Player Player { get; set; }
 
+        public ActionState Result { get; private set; }
+
         public Command()
         {
         }
@@ -18,6 +20,13 @@ namespace Wism.Client.Api.Commands
             Player = player ?? throw new System.ArgumentNullException(nameof(player));
         }
 
-        public abstract ActionState Execute();
+        public ActionState Execute()
+        {
+            this.Result = ExecuteInternal();
+
+            return this.Result;
+        }
+
+        protected abstract ActionState ExecuteInternal();
     }
 }

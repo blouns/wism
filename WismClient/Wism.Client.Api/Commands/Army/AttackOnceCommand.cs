@@ -12,14 +12,29 @@ namespace Wism.Client.Api.Commands
 
         public List<Army> Defenders { get; set; }
 
+        public List<Army> OriginalAttackingArmies { get; set; }
+        public List<Army> OriginalDefendingArmies { get; set; }
+
+
         public AttackOnceCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armyController, armies)
         {
             this.X = x;
             this.Y = y;
+
+            var targetTile = World.Current.Map[x, y];
+            this.Defenders = targetTile.MusterArmy();
+            this.Defenders.Sort(new ByArmyBattleOrder(targetTile));
+            
+            this.OriginalDefendingArmies = new List<Army>(this.Defenders);
+            this.OriginalDefendingArmies.Sort(new ByArmyBattleOrder(targetTile));
+
+            this.OriginalAttackingArmies = new List<Army>(armies);
+            this.OriginalAttackingArmies.Sort(new ByArmyBattleOrder(targetTile));
+
         }
 
-        public override ActionState Execute()
+        protected override ActionState ExecuteInternal()
         {
             var targetTile = World.Current.Map[X, Y];
             var result = armyController.AttackOnce(Armies, targetTile);
@@ -30,10 +45,6 @@ namespace Wism.Client.Api.Commands
             }
             else if (result == AttackResult.AttackerWinsBattle)
             {
-                IList<Tile> path = null;
-                _ = armyController.MoveOneStep(Armies, targetTile, ref path, out _);   // Move
-                _ = armyController.MoveOneStep(Armies, targetTile, ref path, out _);   // Arrive
-
                 return ActionState.Succeeded;
             }
             else
@@ -45,7 +56,7 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} attack ({World.Current.Map[X, Y]}";
+            return $"Command: {ArmyUtilities.ArmiesToString(OriginalAttackingArmies)} attack ({World.Current.Map[X, Y]}";
         }
     }
 }

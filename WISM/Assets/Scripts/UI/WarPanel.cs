@@ -7,7 +7,6 @@ using Wism.Client.MapObjects;
 
 public class WarPanel : MonoBehaviour
 {
-    public GameObject WarPanelGo;
     public GameObject KilledPrefab;
     public GameObject AttackerPrefab;
     public GameObject DefenderPrefab;
@@ -15,6 +14,9 @@ public class WarPanel : MonoBehaviour
     private Dictionary<Army, GameObject> attackerPanelObjects;
     private Dictionary<Army, GameObject> defenderPanelObjects;
     private ArmyFactory armyFactory;
+
+    private int currentAttackerIndex;
+    private int currentDefenderIndex;
     
     public void Initialize(List<Army> attackers, List<Army> defenders, GameObject[] armyKinds)
     {
@@ -36,15 +38,21 @@ public class WarPanel : MonoBehaviour
         this.armyFactory = ArmyFactory.Create(armyKinds);
         var targetTile = defenders[0].Tile;
 
+        currentAttackerIndex = 0;
+        currentDefenderIndex = 0;
+
         List<Army> attackingArmies = new List<Army>(attackers);
-        attackers.Sort(new ByArmyBattleOrder(targetTile));
-        attackerPanelObjects = CreateArmyPanelObjects(attackingArmies, AttackerPrefab, AttackerPrefab.transform.position);
+        attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
+        attackerPanelObjects = CreateArmyPanelObjects(attackingArmies, AttackerPrefab, AttackerPrefab.transform.position);        
 
-        List<Army> defendingArmies = new List<Army>(defenders);
-        defenders.Sort(new ByArmyBattleOrder(targetTile));
-        defenderPanelObjects = CreateArmyPanelObjects(defendingArmies, DefenderPrefab, DefenderPrefab.transform.position);
+        if (defenders.Count > 0)
+        {
+            List<Army> defendingArmies = new List<Army>(defenders);
+            defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
+            defenderPanelObjects = CreateArmyPanelObjects(defendingArmies, DefenderPrefab, DefenderPrefab.transform.position);
+        }
 
-        this.WarPanelGo.SetActive(true);
+        this.gameObject.SetActive(true);
     }
 
     private Dictionary<Army, GameObject> CreateArmyPanelObjects(List<Army> armies, GameObject prefab, Vector3 position)
@@ -53,7 +61,7 @@ public class WarPanel : MonoBehaviour
         for (int i = 0; i < armies.Count; i++)
         {
             // Create the GO for the panel            
-            GameObject armyGo = Instantiate<GameObject>(prefab, position, Quaternion.identity, WarPanelGo.transform);
+            GameObject armyGo = Instantiate<GameObject>(prefab, position, Quaternion.identity, gameObject.transform);
 
             // Replace image with army kind
             ReplaceImage(armies[i], armyGo);
@@ -89,7 +97,7 @@ public class WarPanel : MonoBehaviour
 
     public void Teardown()
     {
-        this.WarPanelGo.SetActive(false);
+        this.gameObject.SetActive(false);
 
         foreach (GameObject go in attackerPanelObjects.Values)
         {
@@ -102,13 +110,31 @@ public class WarPanel : MonoBehaviour
         }
     }
 
-    public void UpdateBattle(bool didAttackerWin, Army losingArmy)
+    public void UpdateBattle(List<Army> attackers, List<Army> defenders)
     {
+        var attacker = attackers[currentAttackerIndex];
+        var defender = (defenders.Count > 0) ? defenders[currentDefenderIndex] : null;
+        bool didAttackerWin;
+        Army losingArmy;
+        
+        if (attacker.IsDead)
+        {
+            didAttackerWin = false;
+            losingArmy = attacker;
+            currentAttackerIndex++;
+        }
+        else
+        {
+            didAttackerWin = true;
+            losingArmy = defender;
+            currentDefenderIndex++;
+        }
+
         Dictionary<Army, GameObject> losingArmies = (didAttackerWin) ? defenderPanelObjects : attackerPanelObjects;
 
         if (losingArmies.Count == 0)
         {
-            Debug.LogWarning("WarPanel: losing army had no armies remaining.", this);
+            Debug.Log("WarPanel: Losing player had no armies.", this);
             return;
         }
 
@@ -121,7 +147,7 @@ public class WarPanel : MonoBehaviour
 
         // Draw killed sprite over defeated army
         KilledPrefab.transform.SetPositionAndRotation(position, Quaternion.identity);
-        GameObject killedPanelObject = Instantiate(KilledPrefab, position, Quaternion.identity, WarPanelGo.transform);
+        GameObject killedPanelObject = Instantiate(KilledPrefab, position, Quaternion.identity, gameObject.transform);
         killedPanelObject.SetActive(true);
         //AudioClip beep = killedPanelObject.GetComponent<AudioClip>();
         ////AudioSource.PlayClipAtPoint(beep, Camera.main.transform.position);

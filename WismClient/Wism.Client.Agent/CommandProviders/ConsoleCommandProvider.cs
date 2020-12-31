@@ -211,10 +211,7 @@ namespace Wism.Client.Agent
             if (tile.CanAttackHere(armies))
             {
                 // Attack the location
-                commandController.AddCommand(
-                    new PrepareForBattleCommand(armyController, armies, x, y));
-                commandController.AddCommand(
-                    new AttackOnceCommand(armyController, armies, x, y));
+                AddAttackCommands(armies, x, y);
             }
             else
             {
@@ -222,6 +219,17 @@ namespace Wism.Client.Agent
                 commandController.AddCommand(
                     new MoveOnceCommand(armyController, armies, x, y)); 
             }
+        }
+
+        private void AddAttackCommands(List<Army> armies, int x, int y)
+        {
+            commandController.AddCommand(
+                                new PrepareForBattleCommand(armyController, armies, x, y));
+            var attackCommand = new AttackOnceCommand(armyController, armies, x, y);
+            commandController.AddCommand(
+                attackCommand);
+            commandController.AddCommand(
+                new CompleteBattleCommand(armyController, attackCommand));
         }
 
         private void DoAttackOnce()
@@ -249,10 +257,7 @@ namespace Wism.Client.Agent
                 return;
             }
 
-            commandController.AddCommand(
-                    new PrepareForBattleCommand(armyController, armies, x, y));
-            commandController.AddCommand(
-                    new AttackOnceCommand(armyController, armies, x, y));
+            AddAttackCommands(armies, x, y);
         }
 
         private void DoAttackArmy()

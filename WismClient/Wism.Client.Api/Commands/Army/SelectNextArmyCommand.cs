@@ -15,7 +15,7 @@ namespace Wism.Client.Api.Commands
             this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
         }
 
-        public override ActionState Execute()
+        protected override ActionState ExecuteInternal()
         {
             var result = armyController.SelectNextArmy();
 

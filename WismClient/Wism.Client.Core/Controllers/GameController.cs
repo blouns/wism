@@ -25,7 +25,7 @@ namespace Wism.Client.Core.Controllers
         public void EndTurn(Game game)
         {
             logger.LogInformation(
-                $"{game.GetCurrentPlayer()} has ended their turn.");
+                $"{game.GetCurrentPlayer()} ended their turn.");
             
             game.EndTurn();
         }
