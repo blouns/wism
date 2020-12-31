@@ -19,7 +19,7 @@ namespace Wism.Client.Test.Controller
         }
 
         [Test]
-        public void AddCommand_ArmyMoveCommand_CommandAdded()
+        public void AddCommand_ArmyMoveOnceCommand_CommandAdded()
         {
             // Arrange
             var commands = new SortedList<int, Command>();
@@ -31,12 +31,12 @@ namespace Wism.Client.Test.Controller
 
             // Act
             commandController.AddCommand(
-                new MoveCommand(armyController, armies, 3, 4));
+                new MoveOnceCommand(armyController, armies, 3, 4));
 
             // Assert
             Command command = repo.GetCommandAsync(1).Result;
-            Assert.IsTrue(command is MoveCommand, "Command was not a MoveCommand.");
-            MoveCommand moveCommand = command as MoveCommand;
+            Assert.IsTrue(command is MoveOnceCommand, "Command was not a MoveOnceCommand.");
+            MoveOnceCommand moveCommand = command as MoveOnceCommand;
             Assert.AreEqual(3, moveCommand.X);
             Assert.AreEqual(4, moveCommand.Y);
         }
@@ -52,9 +52,9 @@ namespace Wism.Client.Test.Controller
             var player1 = Game.Current.Players[0];
             var armies = player1.GetArmies();
 
-            repo.AddCommand(new MoveCommand(armyController, armies, 0, 1));
-            repo.AddCommand(new MoveCommand(armyController, armies, 0, 2));
-            repo.AddCommand(new AttackCommand(armyController, armies, 0, 3));
+            repo.AddCommand(new MoveOnceCommand(armyController, armies, 0, 1));
+            repo.AddCommand(new MoveOnceCommand(armyController, armies, 0, 2));
+            repo.AddCommand(new AttackOnceCommand(armyController, armies, 0, 3));
             repo.Save();           
 
             // Act
@@ -66,11 +66,11 @@ namespace Wism.Client.Test.Controller
             Assert.AreEqual(2, commands[1].Id);
             Assert.AreEqual(3, commands[2].Id);
 
-            Assert.IsAssignableFrom<MoveCommand>(commands[0]);
-            MoveCommand armyMoveCommand = (MoveCommand)commands[0];
-            Assert.AreEqual(0, armyMoveCommand.X);
-            Assert.AreEqual(1, armyMoveCommand.Y);
-            Assert.IsAssignableFrom<AttackCommand>(commands[2]);
+            Assert.IsAssignableFrom<MoveOnceCommand>(commands[0]);
+            MoveOnceCommand armyMoveOnceCommand = (MoveOnceCommand)commands[0];
+            Assert.AreEqual(0, armyMoveOnceCommand.X);
+            Assert.AreEqual(1, armyMoveOnceCommand.Y);
+            Assert.IsAssignableFrom<AttackOnceCommand>(commands[2]);
         }
         
         [Test]
@@ -84,9 +84,9 @@ namespace Wism.Client.Test.Controller
             var player1 = Game.Current.Players[0];
             var armies = player1.GetArmies();
 
-            repo.AddCommand(new MoveCommand(armyController, armies, 0, 1));
-            repo.AddCommand(new MoveCommand(armyController, armies, 0, 2));
-            repo.AddCommand(new AttackCommand(armyController, armies, 0, 3));
+            repo.AddCommand(new MoveOnceCommand(armyController, armies, 0, 1));
+            repo.AddCommand(new MoveOnceCommand(armyController, armies, 0, 2));
+            repo.AddCommand(new AttackOnceCommand(armyController, armies, 0, 3));
             repo.Save();
 
             // Act

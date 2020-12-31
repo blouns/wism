@@ -77,7 +77,7 @@ namespace Wism.Client.Agent
                     DoMoveArmy();
                     break;
                 case ConsoleKey.A:
-                    DoAttackArmy();
+                    DoAttackOnce();
                     break;
                 case ConsoleKey.E:
                     DoEndTurn();
@@ -211,22 +211,60 @@ namespace Wism.Client.Agent
             if (tile.CanAttackHere(armies))
             {
                 // Attack the location
-                commandController.AddCommand(
-                    new AttackCommand(armyController, armies, x, y));
+                AddAttackCommands(armies, x, y);
             }
             else
             {
                 // Move to the new location
                 commandController.AddCommand(
-                    new MoveAlongPathCommand(armyController, armies, x, y)); 
+                    new MoveOnceCommand(armyController, armies, x, y)); 
             }
+        }
+
+        private void AddAttackCommands(List<Army> armies, int x, int y)
+        {
+            commandController.AddCommand(
+                                new PrepareForBattleCommand(armyController, armies, x, y));
+            var attackCommand = new AttackOnceCommand(armyController, armies, x, y);
+            commandController.AddCommand(
+                attackCommand);
+            commandController.AddCommand(
+                new CompleteBattleCommand(armyController, attackCommand));
+        }
+
+        private void DoAttackOnce()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            if (armies == null)
+            {
+                throw new InvalidOperationException("Selected armies were not set.");
+            }
+
+            Console.Write("X location? : ");
+            int x = ReadLocationInput(0);
+            Console.Write("Y location? : ");
+            int y = ReadLocationInput(1);
+
+            Tile tile = World.Current.Map[x, y];
+            if (!tile.CanAttackHere(armies))
+            {
+                NotifyUser("Can only attack an enemy controlled location.");
+                return;
+            }
+
+            AddAttackCommands(armies, x, y);
         }
 
         private void DoAttackArmy()
         {
-            if (Game.Current.GameState != GameState.SelectedArmy)
+            if (!Game.Current.ArmiesSelected())
             {
-                NotifyUser("Error: You must first select an army.");                
+                NotifyUser("You must first select an army.");
                 return;
             }
 
@@ -249,7 +287,9 @@ namespace Wism.Client.Agent
             }
 
             commandController.AddCommand(
-                    new AttackCommand(armyController, armies, x, y));
+                new PrepareForBattleCommand(armyController, armies, x, y));
+            commandController.AddCommand(
+                    new AttackOnceCommand(armyController, armies, x, y));
         }
 
         private static void NotifyUser(string message)
@@ -304,7 +344,7 @@ namespace Wism.Client.Agent
             }
 
             commandController.AddCommand(
-                    new MoveAlongPathCommand(armyController, armies, x, y));
+                    new MoveOnceCommand(armyController, armies, x, y));
         }
 
         private void DoGameOver()

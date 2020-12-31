@@ -17,7 +17,7 @@ namespace Wism.Client.Api.Commands
         public CityController CityController { get; }
         public City ProductionCity { get; }
 
-        public override ActionState Execute()
+        protected override ActionState ExecuteInternal()
         {
             ProductionCity.Barracks.StopProduction();
 

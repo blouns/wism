@@ -564,14 +564,17 @@ namespace Wism.Client.Test.Unit
 
             // ACT
             // Attack: Should win but not advance
-            var result = armyController.TryAttack(selectedArmies, enemyTile);
+            armyController.PrepareForBattle();
+            var result = armyController.AttackOnce(selectedArmies, enemyTile);
+            Assert.AreEqual(AttackResult.AttackerWinsRound, result, "Attacker did not win round.");
+            result = armyController.AttackOnce(selectedArmies, enemyTile);
 
             // Deselect the armies
             armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
-            Assert.IsTrue(result, "Original army was defeated.");
+            Assert.AreEqual(AttackResult.AttackerWinsBattle, result, "Original army was defeated.");
             Assert.AreEqual(3, selectedArmies.Count, "Selected army does not have the expected number of armies.");
             Assert.IsNull(enemyTile.Armies, "Enemy army still exists.");
             Assert.AreEqual(expectedX, originalArmies[0].X, "Selected armies moved unexpectedly.");
@@ -581,55 +584,157 @@ namespace Wism.Client.Test.Unit
             Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
         }
 
-        #region Helper utility methods
-
-        /// <summary>
-        /// Moves the army one step by selecting, moving, deselecting.
-        /// </summary>
-        /// <param name="army">army to move</param>
-        /// <param name="direction">direction to move</param>
-        private void MoveArmyPass(Army army, Direction direction)
+        [Test]
+        public void AttackOnce_SelectedArmy_Win()
         {
-            string directionName = Enum.GetName(typeof(Direction), direction);
-            Tile originalTile = army.Tile;
+            // ASSEMBLE
+            var player1 = Game.Current.Players[0];
+            var player2 = Game.Current.Players[1];
 
-            TestContext.WriteLine("Trying to move {0} {1}; should succeed...", army.ToString(), directionName);
-            var armies = new List<Army>() { army };
-            armyController.SelectArmy(armies);
-            if (!TryMove(armies, direction))
-            {
-                Assert.Fail(
-                    String.Format("Unable to move {0} {1}.", army.ToString(), direction));
-            }
-            armyController.DeselectArmy(armies);
+            var originalTile = World.Current.Map[2, 2];
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            var originalArmies = new List<Army>(originalTile.Armies);
+            
+            var enemyTile = World.Current.Map[2, 3];
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            var enemyArmies = new List<Army>(enemyTile.Armies);
 
-            Tile newTile = army.Tile;
-            Assert.AreNotEqual(originalTile, newTile, String.Format("{0} could not move to tile.", army.ToString()));
-            Assert.IsNull(army.Tile.Armies);                    // Army should be set on new tile
-            Assert.IsNotNull(army.Tile.VisitingArmies);            // Visiting Army should be set on new tile
-            Assert.IsNotNull(army.Tile.VisitingArmies[0].Tile); // Visiting Army's tile should be set on new tile
-            Assert.IsNull(originalTile.Armies);                 // Army should be null on old tile
-            Assert.IsNull(originalTile.VisitingArmies);         // Visiting Army should be null on old tile
+            int expectedX = originalArmies[0].X;
+            int expectedY = originalArmies[0].Y;
+            int expectedHumanArmies = 2;
+            int expectedEnemyArmies = 0;
+
+            // Select all armies from the original tile            
+            List<Army> selectedArmies = new List<Army>(originalArmies);
+            armyController.SelectArmy(selectedArmies);
+            armyController.PrepareForBattle();
+
+            // ACT
+            // Attack: Should win but not advance
+            var result = armyController.AttackOnce(selectedArmies, enemyTile);
+
+            // Deselect the armies
+            armyController.DeselectArmy(selectedArmies);
+
+            // ASSERT
+            var newTile = selectedArmies[0].Tile;
+            Assert.AreEqual(AttackResult.AttackerWinsBattle, result, "Original army was defeated.");
+            Assert.IsNull(enemyTile.Armies, "Enemy army still exists.");
+            Assert.AreEqual(expectedX, originalArmies[0].X, "Selected armies moved unexpectedly.");
+            Assert.AreEqual(expectedY, originalArmies[0].Y, "Selected armies moved unexpectedly.");
+            enemyArmies.ForEach(e => Assert.IsTrue(e.IsDead, "Enemy is not dead."));
+            Assert.AreEqual(expectedHumanArmies, player1.GetArmies().Count, "Human player has incorrect army count.");
+            Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
         }
 
-        private void MoveArmyFail(Army army, Direction direction)
+        [Test]
+        public void AttackOnce_SelectedArmy_Lose()
         {
-            string directionName = Enum.GetName(typeof(Direction), direction);
-            Tile originalTile = army.Tile;
+            // ASSEMBLE
+            var player1 = Game.Current.Players[0];
+            var player2 = Game.Current.Players[1];
 
-            TestContext.WriteLine("Trying to move {0} {1}; should fail...", army.ToString(), directionName);
-            var armies = new List<Army>() { army };
-            if (TryMove(armies, direction))
-            {
-                Assert.Fail(
-                    String.Format("{0} moved {1} onto {2}.", army, direction, army.Tile.Terrain));
-            }
+            var originalTile = World.Current.Map[2, 2];
+            // Only hero (from setup)
+            var originalArmies = new List<Army>(originalTile.Armies);
 
-            // Should fail
-            Assert.AreEqual(originalTile, army.Tile, "{0} moved unexpectedly {1}.", army, directionName);
-            Assert.IsNotNull(army.Tile.Armies[0].Tile);  // Army's tile should be set on new tile
-            Assert.IsNotNull(originalTile.Armies);    // Army should be set on old tile
+            var enemyTile = World.Current.Map[2, 3];
+            player2.HireHero(enemyTile);
+            player2.HireHero(enemyTile);
+            player2.HireHero(enemyTile);
+            player2.HireHero(enemyTile);
+            player2.HireHero(enemyTile);
+            player2.HireHero(enemyTile);
+            player2.HireHero(enemyTile);
+            player2.HireHero(enemyTile);            
+            var enemyArmies = new List<Army>(enemyTile.Armies);
+
+            int expectedX = originalArmies[0].X;
+            int expectedY = originalArmies[0].Y;
+            int expectedHumanArmies = 0;
+            int expectedEnemyArmies = 8;
+
+            // Select all armies from the original tile            
+            List<Army> selectedArmies = new List<Army>(originalArmies);
+            armyController.SelectArmy(selectedArmies);
+            armyController.PrepareForBattle();
+
+            // ACT
+            // Attack: Should win but not advance
+            var result = armyController.AttackOnce(selectedArmies, enemyTile);
+
+            // ASSERT
+            Assert.AreEqual(AttackResult.DefenderWinBattle, result, "Original army was defeated.");
+            Assert.IsNull(originalTile.Armies, "Attacking army still exists.");
+            Assert.IsNull(originalTile.VisitingArmies, "Attacking army still exists.");
+            originalArmies.ForEach(e => Assert.IsTrue(e.IsDead, "Attacker is not dead."));
+            Assert.AreEqual(expectedHumanArmies, player1.GetArmies().Count, "Human player has incorrect army count.");
+            Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
         }
+
+        [Test]
+        public void AttackOnce_SelectedArmy_AttackUntilDone()
+        {
+            // ASSEMBLE
+            var player1 = Game.Current.Players[0];
+            var player2 = Game.Current.Players[1];
+
+            var originalTile = World.Current.Map[2, 2];
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
+            var originalArmies = new List<Army>(originalTile.Armies);
+
+            var enemyTile = World.Current.Map[2, 3];
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
+            var enemyArmies = new List<Army>(enemyTile.Armies);
+
+            int expectedX = originalArmies[0].X;
+            int expectedY = originalArmies[0].Y;
+            int expectedHumanArmies = 6;
+            int expectedEnemyArmies = 0;
+
+            // Select all armies from the original tile            
+            List<Army> selectedArmies = new List<Army>(originalArmies);
+            armyController.SelectArmy(selectedArmies);
+            armyController.PrepareForBattle();
+
+            // ACT
+            // Attack until battle completed: Should win but not advance
+            var result = AttackResult.NotStarted;
+            do
+            {
+                result = armyController.AttackOnce(selectedArmies, enemyTile);
+
+            } while (result == AttackResult.AttackerWinsRound ||
+                     result == AttackResult.DefenderWinsRound);
+
+            // Deselect the armies
+            armyController.DeselectArmy(selectedArmies);
+
+            // ASSERT
+            var newTile = selectedArmies[0].Tile;
+            Assert.AreEqual(AttackResult.AttackerWinsBattle, result, "Original army was defeated.");
+            Assert.IsNull(enemyTile.Armies, "Enemy army still exists.");
+            Assert.AreEqual(expectedX, originalArmies[0].X, "Selected armies moved unexpectedly.");
+            Assert.AreEqual(expectedY, originalArmies[0].Y, "Selected armies moved unexpectedly.");
+            enemyArmies.ForEach(e => Assert.IsTrue(e.IsDead, "Enemy is not dead."));
+            Assert.AreEqual(expectedHumanArmies, player1.GetArmies().Count, "Human player has incorrect army count.");
+            Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
+        }
+
+        #region Helper utility methods             
 
         public static Army GetFirstHero()
         {

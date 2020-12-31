@@ -66,5 +66,15 @@ namespace Wism.Client.Core.Controllers
         {
             return wismClientRepository.GetCommandsAfterId(lastSeenCommandId);
         }
+
+        /// <summary>
+        /// Checks if the given command exists.
+        /// </summary>
+        /// <param name="commandId">ID of command</param>
+        /// <returns>True if command exists; otherwise, False</returns>
+        public bool CommandExists(int commandId)
+        {
+            return wismClientRepository.CommandExists(commandId);
+        }
     }
 }

@@ -5,20 +5,20 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Api.Commands
 {
-    public class MoveAlongPathCommand : ArmyCommand
+    public class MoveOnceCommand : ArmyCommand
     {
         private IList<Tile> path;
         public int X { get; set; }
         public int Y { get; set; }
 
-        public MoveAlongPathCommand(ArmyController armyController, List<Army> armies, int x, int y)
+        public MoveOnceCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armyController, armies)
         {
             this.X = x;
             this.Y = y;
         }
 
-        public override ActionState Execute()
+        protected override ActionState ExecuteInternal()
         {
             return armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);
         }

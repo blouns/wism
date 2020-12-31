@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using Wism.Client.Common;
 using Wism.Client.MapObjects;
@@ -68,12 +68,12 @@ namespace Wism.Client.Core
         {
             // End current players turn
             DeselectArmies();
+            nextArmyQueue.Clear();
             var player = GetCurrentPlayer(); 
             player.EndTurn();            
 
             // Set next players turn
-            currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
-
+            currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;            
             Transition(GameState.StartingTurn);
         }
 

@@ -14,6 +14,15 @@ namespace Wism.Client.Core.Controllers
         Blocked    
     }
 
+    public enum AttackResult
+    {
+        NotStarted,
+        AttackerWinsRound,
+        AttackerWinsBattle,
+        DefenderWinsRound,
+        DefenderWinBattle
+    }
+
     public class ArmyController
     {
         private readonly ILogger logger;
@@ -26,6 +35,20 @@ namespace Wism.Client.Core.Controllers
             }
 
             this.logger = loggerFactory.CreateLogger();
+        }
+
+        public ActionState PrepareForBattle()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                logger.LogInformation("Cannot prepare for battle when no armies are selected.");
+                return ActionState.Failed;
+            }
+
+            logger.LogInformation("Transitioning to AttackingArmy state.");
+            Game.Current.Transition(GameState.AttackingArmy);
+
+            return ActionState.Succeeded;
         }
 
         public void DefendArmy(List<Army> armies)
@@ -97,6 +120,7 @@ namespace Wism.Client.Core.Controllers
             }
 
             // We are clear to advance!
+            logger.LogInformation($"Moving {ArmiesToString(armiesToMove)} to {targetTile}");
             MoveSelectedArmies(armiesToMove, targetTile);
 
             return MoveResult.Moved;
@@ -153,6 +177,8 @@ namespace Wism.Client.Core.Controllers
             var moveResult = TryMove(armiesToMove, myPath[1]);
             if (moveResult == MoveResult.Moved)
             {
+                logger.LogInformation($"Moved {ArmiesToString(armiesToMove)} to {targetTile}");
+
                 // Pop the starting location and return updated path and distance
                 myPath.RemoveAt(0);
                 myDistance = CalculateDistance(myPath);
@@ -249,14 +275,11 @@ namespace Wism.Client.Core.Controllers
             Game.Current.DeselectArmies();
         }
 
-        /// <summary>
-        /// WAR! ...in a senseless mind. Attack until win or lose.
-        /// </summary>
-        /// <param name="armies">Attacking armies</param>
-        /// <param name="targetTile">Defending tile</param>
-        /// <returns>True if attacker wins; else False</returns>
-        public bool TryAttack(List<Army> armiesToAttackWith, Tile targetTile)
+        public AttackResult AttackOnce(List<Army> armiesToAttackWith, Tile targetTile)
         {
+            AttackResult result;
+            Tile attackingFromTile = armiesToAttackWith[0].Tile;
+
             if (armiesToAttackWith is null || armiesToAttackWith.Count == 0)
             {
                 throw new ArgumentNullException(nameof(armiesToAttackWith));
@@ -267,41 +290,44 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
+            if (Game.Current.GameState != GameState.AttackingArmy)
+            {
+                throw new InvalidOperationException("Cannot attack without preparing for battle.");
+            }
+
             if (!targetTile.CanAttackHere(armiesToAttackWith))
             {
                 throw new ArgumentException("Target tile must have armies of another clan.");
             }
 
-            var attackingFromTile = armiesToAttackWith[0].Tile;
+            logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile} once");
 
-            logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile}");
-            Game.Current.Transition(GameState.AttackingArmy);
+            // Attack!
             var war = Game.Current.WarStrategy;
-            var result = war.Attack(armiesToAttackWith, targetTile);
-            CleanupAfterBattle(targetTile, attackingFromTile, result);            
-
-            return result;
-        }
-
-        private static void CleanupAfterBattle(Tile targetTile, Tile attackingFromTile, bool result)
-        {
-            if (result)
+            var attackSucceeded = war.AttackOnce(armiesToAttackWith, targetTile);
+            
+            if (war.BattleContinues(targetTile.MusterArmy(), armiesToAttackWith))
             {
-                // Attacker won
-                targetTile.Armies = null;
-                if (targetTile.HasCity())
-                {
-                    var player = attackingFromTile.VisitingArmies[0].Player;
-                    player.ClaimCity(targetTile.City);
-                }
-                Game.Current.Transition(GameState.SelectedArmy);
+                // Battle continues
+                result = (attackSucceeded) ? AttackResult.AttackerWinsRound : AttackResult.DefenderWinsRound;
             }
             else
-            {
-                // Defender won                
-                attackingFromTile.VisitingArmies = null;
-                Game.Current.Transition(GameState.Ready);
-            }
+            {               
+                // Battle is over
+                Game.Current.Transition(GameState.CompletedBattle);
+                if (attackSucceeded)
+                {
+                    targetTile.Armies = null;
+                    result = AttackResult.AttackerWinsBattle;
+                }
+                else
+                {
+                    attackingFromTile.VisitingArmies = null;
+                    result = AttackResult.DefenderWinBattle;
+                }                
+            }            
+                        
+            return result;
         }
 
         private static void MoveSelectedArmies(List<Army> armiesToMove, Tile targetTile)
@@ -321,13 +347,6 @@ namespace Wism.Client.Core.Controllers
 
             targetTile.VisitingArmies.Sort(new ByArmyViewingOrder());
             originatingTile.VisitingArmies = null;
-
-            //if (armiesToMove.Any(a => a.MovesRemaining == 0))
-            //{
-            //    // Ran out of moves so just stop here
-            //    Game.Current.DeselectArmies();
-            //}
-            //Game.Current.Transition(GameState.SelectedArmy);
         }
 
         private static int CalculateDistance(IList<Tile> myPath)
@@ -339,6 +358,36 @@ namespace Wism.Client.Core.Controllers
         private static string ArmiesToString(List<Army> armies)
         {
             return $"Armies[{armies.Count}:{armies[0]}]";
-        }        
+        }
+
+        public ActionState CompleteBattle(List<Army> attackingArmies, Tile targetTile, bool attackerWon)
+        {
+            if (Game.Current.GameState != GameState.CompletedBattle)
+            {
+                throw new InvalidOperationException("Cannot complete the battle in this state: " + Game.Current.GameState);
+            }            
+
+            if (attackerWon)
+            {
+                // Attacker won                
+                targetTile.Armies = null;
+                if (targetTile.HasCity())
+                {
+                    var player = attackingArmies[0].Player;
+                    player.ClaimCity(targetTile.City);
+                }
+                var remainingAttackers = attackingArmies[0].Tile.VisitingArmies;
+                MoveSelectedArmies(remainingAttackers, targetTile);
+                Game.Current.Transition(GameState.SelectedArmy);
+            }
+            else
+            {
+                // Defender won                
+                attackingArmies[0].Tile.VisitingArmies = null;
+                Game.Current.Transition(GameState.Ready);
+            }
+
+            return ActionState.Succeeded;
+        }
     }
 }

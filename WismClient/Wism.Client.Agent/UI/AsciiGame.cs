@@ -1,63 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Agent.CommandProcessors;
+using Wism.Client.Agent.UI;
+using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
+using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
-using Wism.Client.Common;
 
 namespace Wism.Client.Agent
 {
     /// <summary>
     /// Basic ASCII Console-based UI for testing
     /// </summary>
-    public class AsciiView : ViewBase
+    public class AsciiGame : GameBase
     {
         private readonly ILogger logger;
         private readonly CommandController commandController;
         private readonly List<ICommandProvider> commandProviders;
+        private readonly List<ICommandProcessor> commandProcessors;
 
-        IDictionary<string, char> armyMap = new Dictionary<string, char>
-        {
-            { "Hero", 'H' },
-            { "LightInfantry", 'i' },
-            { "HeavyInfantry", 'I' },
-            { "Cavalry", 'c' },
-            { "Pegasus", 'P' }
-        };
-
-        IDictionary<string, char> terrainMap = new Dictionary<string, char>
-        {
-            { "Forest", '¶' },
-            { "Mountain", '^' },
-            { "Grass", '.' },
-            { "Water", '~' },
-            { "Hill", 'h' },
-            { "Marsh", '%' },
-            { "Road", '=' },
-            { "Bridge", '=' },
-            { "Castle", '$' },
-            { "Ruins", '¥' },
-            { "Temple", '†' },
-            { "Tomb", '€' },
-            { "Tower", '#' },
-            { "Void", 'v' }
-        };
-
-        IDictionary<string, ConsoleColor> clanColorsMap = new Dictionary<string, ConsoleColor>
-        {
-            { "Sirians", ConsoleColor.White },
-            { "StormGiants", ConsoleColor.Yellow },
-            { "GreyDwarves", ConsoleColor.DarkYellow },
-            { "OrcsOfKor", ConsoleColor.Red },
-            { "Elvallie", ConsoleColor.Green },
-            { "Selentines", ConsoleColor.DarkBlue },
-            { "HorseLords", ConsoleColor.Blue },
-            { "LordBane", ConsoleColor.DarkRed },
-            { "Neutral", ConsoleColor.Gray }
-        };
-
-        public AsciiView(ILoggerFactory logFactory, ControllerProvider controllerProvider)
+        public AsciiGame(ILoggerFactory logFactory, ControllerProvider controllerProvider)
             : base(logFactory, controllerProvider)
         {
             if (logFactory is null)
@@ -76,18 +40,31 @@ namespace Wism.Client.Agent
             {
                 new ConsoleCommandProvider(logFactory, controllerProvider)
             };
+            this.commandProcessors = new List<ICommandProcessor>()
+            {
+                new PrepareForBattleProcessor(logFactory, this),
+                new BattleProcessor(logFactory),
+                new CompleteBattleProcessor(logFactory, this),
+                new StandardProcessor(logFactory)
+            };
         }
 
         protected override void DoTasks(ref int lastId)
         {
-            Player humanPlayer = Game.Current.Players[0];
-
             foreach (Command command in commandController.GetCommandsAfterId(lastId))
             {
                 logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
 
                 // Run the command
-                var result = command.Execute();
+                var result = ActionState.NotStarted;
+                foreach (var processor in this.commandProcessors)
+                {
+                    if (processor.CanExecute(command))
+                    {
+                        result = processor.Execute(command);
+                        break;
+                    }
+                }
 
                 // Process the result
                 if (result == ActionState.Succeeded)
@@ -99,16 +76,12 @@ namespace Wism.Client.Agent
                 {
                     logger.LogInformation($"Task failed");
                     lastId = command.Id;
-                    if (command.Player == humanPlayer)
-                    {                 
-                        Console.Beep();
-                    }
                 }
                 else if (result == ActionState.InProgress)
                 {
                     logger.LogInformation("Task started and in progress");
-                    // Do NOT advance Command ID; we are still processing this command
-                    // TODO: Perhaps shift to using GameState instead of ActionState?
+                    // Do NOT advance Command ID
+                    break;
                 }
             }
         }
@@ -147,6 +120,14 @@ namespace Wism.Client.Agent
                 System.Environment.Exit(1);
             }
 
+            // Attack cut scene is handled by attack processors
+            if (Game.Current.GameState == GameState.AttackingArmy ||
+                Game.Current.GameState == GameState.CompletedBattle)
+            {
+                return;
+            }
+
+            // Draw standard map
             Console.Clear();
             Console.SetCursorPosition(0, 0);
             Console.WriteLine("==========================================");
@@ -187,19 +168,19 @@ namespace Wism.Client.Agent
                     if (tile.HasCity())
                     {
                         beforeColor = Console.ForegroundColor;
-                        Console.ForegroundColor = GetColorForClan(tile.City.Clan);
-                        Console.Write($"{GetTerrainSymbol(terrain)}");
+                        Console.ForegroundColor = AsciiMapper.GetColorForClan(tile.City.Clan);
+                        Console.Write($"{AsciiMapper.GetTerrainSymbol(terrain)}");
                         Console.ForegroundColor = beforeColor;
                     }
                     else
                     {
-                        Console.Write($"{GetTerrainSymbol(terrain)}");
+                        Console.Write($"{AsciiMapper.GetTerrainSymbol(terrain)}");
                     }
                     
                     // Army
                     beforeColor = Console.ForegroundColor;
-                    Console.ForegroundColor = GetColorForClan(clan);
-                    Console.Write($"{GetArmySymbol(army)}");
+                    Console.ForegroundColor = AsciiMapper.GetColorForClan(clan);
+                    Console.Write($"{AsciiMapper.GetArmySymbol(army)}");
                     Console.ForegroundColor = beforeColor;
                     
                     // Army Count
@@ -211,16 +192,6 @@ namespace Wism.Client.Agent
                 Console.WriteLine();                
             }
             Console.WriteLine("==========================================");
-        }
-
-        private ConsoleColor GetColorForClan(Clan clan)
-        {
-            if (clan == null)
-            {
-                return ConsoleColor.Gray;
-            }
-
-            return clanColorsMap.Keys.Contains(clan.ShortName) ? clanColorsMap[clan.ShortName] : ConsoleColor.Gray;
         }
 
         private static string GetArmyCount(Tile tile)
@@ -237,16 +208,6 @@ namespace Wism.Client.Agent
             }
 
             return (totalArmies == 0) ? " " : totalArmies.ToString();
-        }
-
-        private char GetTerrainSymbol(string terrain)
-        {
-            return (terrainMap.Keys.Contains(terrain)) ? terrainMap[terrain] : '?';
-        }
-
-        private char GetArmySymbol(string army)
-        {
-            return (armyMap.Keys.Contains(army)) ? armyMap[army] : ' ';
         }
     }
 }

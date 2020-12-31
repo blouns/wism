@@ -54,7 +54,7 @@ namespace Wism.Client.Agent
                         host.RunAsync(),
 
                         // Start the UI
-                        scope.ServiceProvider.GetService<ViewBase>().RunAsync()
+                        scope.ServiceProvider.GetService<GameBase>().RunAsync()
                 };
                 Task.WaitAny(tasks);
                 //Log.Information("Ending services");
@@ -108,8 +108,8 @@ namespace Wism.Client.Agent
                             provider.GetService<ControllerProvider>()));
 
                     // Add view
-                    services.AddTransient<ViewBase, AsciiView>(provider =>
-                        new AsciiView(
+                    services.AddTransient<GameBase, AsciiGame>(provider =>
+                        new AsciiGame(
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<ControllerProvider>()));
                 });

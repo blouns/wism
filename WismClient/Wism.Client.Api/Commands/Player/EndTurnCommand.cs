@@ -19,7 +19,7 @@ namespace Wism.Client.Api.Commands
             this.gameController = gameController;
         }
 
-        public override ActionState Execute()
+        protected override ActionState ExecuteInternal()
         {
             gameController.EndTurn(Game.Current);
 

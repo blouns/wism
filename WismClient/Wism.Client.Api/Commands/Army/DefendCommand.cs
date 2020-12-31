@@ -4,23 +4,23 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Api.Commands
 {
-    public class DeselectArmyCommand : ArmyCommand
+    public class DefendCommand : ArmyCommand
     {
-        public DeselectArmyCommand(ArmyController armyController, List<Army> armies) 
+        public DefendCommand(ArmyController armyController, List<Army> armies)
             : base(armyController, armies)
         {
         }
 
-        public override ActionState Execute()
-        { 
-            armyController.DeselectArmy(Armies);
+        protected override ActionState ExecuteInternal()
+        {            
+            armyController.DefendArmy(this.Armies);
 
             return ActionState.Succeeded;
         }
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} deselect";
+            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} defend";
         }
     }
 }

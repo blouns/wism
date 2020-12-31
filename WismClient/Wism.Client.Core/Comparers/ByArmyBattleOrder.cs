@@ -58,13 +58,13 @@ namespace Wism.Client.MapObjects
             if (compare == 0)
             {
                 // Differentiate on Moves
-                compare = x.MovesRemaining.CompareTo(y.MovesRemaining);
+                compare = y.MovesRemaining.CompareTo(x.MovesRemaining);
             }
 
             if (compare == 0)
             {
                 // Differentiate on ID for consistency
-                compare = x.Id.CompareTo(y.Id);
+                compare = y.Id.CompareTo(x.Id);
             }
 
             return compare;

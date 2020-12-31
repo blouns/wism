@@ -21,7 +21,7 @@ namespace Wism.Client.Api.Commands
         public ArmyInfo ArmyInfo { get; }
         public City DestinationCity { get; }
 
-        public override ActionState Execute()
+        protected override ActionState ExecuteInternal()
         {
             ActionState state = ActionState.Failed;
 

@@ -10,12 +10,20 @@ namespace Wism.Client.Agent
     /// <summary>
     /// Template base class for a generic UI
     /// </summary>
-    public abstract class ViewBase
+    public abstract class GameBase
     {
         private ILogger logger;
         private readonly ArmyController armyController;
+        private int lastId;
 
-        public ViewBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
+        public const int DefaultGameSpeed = 100;
+        public const int DefaultAttackSpeed = 750;
+
+        public int GameSpeed { get; set; }
+
+        public int LastId { get => lastId; set => lastId = value; }
+
+        public GameBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
         {
             if (loggerFactory is null)
             {
@@ -29,6 +37,7 @@ namespace Wism.Client.Agent
 
             logger = loggerFactory.CreateLogger();
             this.armyController = controllerProvider.ArmyController;
+            this.GameSpeed = DefaultGameSpeed;
         }
 
         public async Task RunAsync()
@@ -38,8 +47,7 @@ namespace Wism.Client.Agent
             try
             {
                 CreateTestGame();
-
-                int lastId = 0;
+                
                 while (true)
                 {
                     // Game loop
@@ -47,7 +55,7 @@ namespace Wism.Client.Agent
                     HandleInput();
                     DoTasks(ref lastId);
 
-                    await Task.Delay(100);
+                    await Task.Delay(GameSpeed);
                 }
             }
             catch (Exception ex)

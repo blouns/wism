@@ -132,15 +132,13 @@ public class ArmyPicker : MonoBehaviour
                 if (widget.name == "NameDisplay")
                 {
                     widget.GetComponent<Text>().text = armies[i].DisplayName;
+                    widget.GetComponent<Text>().text =
+                        (armies[i] is Hero) ? armies[i].DisplayName : armies[i].KindName;
                 }
                 else if (widget.name == "BonusDisplay")
                 {
-                    string bonusText = "-";
-                    if (armies[i] is Hero)
-                    {
-                        bonusText = ((Hero)armies[i]).GetCombatBonus().ToString();
-                    }
-                    widget.GetComponent<Text>().text = bonusText;
+                    widget.GetComponent<Text>().text = 
+                        (armies[i] is Hero) ? ((Hero)armies[i]).GetCombatBonus().ToString() : "-";
                 }
                 else if (widget.name == "MoveDisplay")
                 {
@@ -153,7 +151,8 @@ public class ArmyPicker : MonoBehaviour
                 else if (widget.name == "SelectButton")
                 {
                     Button button = widget.GetComponent<Button>();
-                    button.image.sprite = (this.selected[i]) ? this.SelectedSprite : this.UnselectedSprite;
+                    button.image.sprite = 
+                        (this.selected[i]) ? this.SelectedSprite : this.UnselectedSprite;
                 }
                 else if (widget.name == "Army")
                 {

@@ -142,6 +142,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 181a214c8ada7504dbc343ff8a35fa75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  KilledPrefab: {fileID: 1560647270}
+  AttackerPrefab: {fileID: 133348687}
+  DefenderPrefab: {fileID: 1598883542}
 --- !u!1 &2694327
 GameObject:
   m_ObjectHideFlags: 0
@@ -415,6 +418,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 113946323}
   m_CullTransparentMesh: 0
+--- !u!1 &133348687 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 315210888506854828, guid: 7e7c9301a3d843845a973598c70e65bc,
+    type: 3}
+  m_PrefabInstance: {fileID: 315210889879984276}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &149804624 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 315210890008612548, guid: 7e7c9301a3d843845a973598c70e65bc,
@@ -521,8 +530,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 156407253}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -5}
-  m_LocalScale: {x: 2.4253247, y: 2.4253247, z: 2.4253247}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 3.5989976, y: 3.5989976, z: 3.5989976}
   m_Children:
   - {fileID: 2000995176}
   - {fileID: 1479410946}
@@ -540,12 +549,12 @@ RectTransform:
   - {fileID: 1277044037}
   - {fileID: 976607551}
   - {fileID: 702058096}
-  m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_Father: {fileID: 149804624}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 5.313467, y: 4.241312}
+  m_AnchoredPosition: {x: -12.088837, y: -8.545456}
   m_SizeDelta: {x: 10.35, y: 9.02}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &156407255
@@ -9514,6 +9523,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1596974543}
   m_CullTransparentMesh: 0
+--- !u!1 &1598883542 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 315210889678446379, guid: 7e7c9301a3d843845a973598c70e65bc,
+    type: 3}
+  m_PrefabInstance: {fileID: 315210889879984276}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1613515314
 GameObject:
   m_ObjectHideFlags: 0
@@ -10843,7 +10858,7 @@ MonoBehaviour:
   WorldTilemap: {fileID: 572604740}
   GameManager: {fileID: 430121301}
   warPanelPrefab: {fileID: 1127945}
-  armyPickerPrefab: {fileID: 0}
+  armyPickerPrefab: {fileID: 156407253}
   SelectedBoxPrefab: {fileID: 1494044689}
 --- !u!4 &2053934880
 Transform:

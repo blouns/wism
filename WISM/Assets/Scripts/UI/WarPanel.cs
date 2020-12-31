@@ -1,90 +1,103 @@
 using Assets.Scripts.Units;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Wism.Client.MapObjects;
 
 public class WarPanel : MonoBehaviour
 {
-    /*
-    public GameObject WarPanelGo;
     public GameObject KilledPrefab;
     public GameObject AttackerPrefab;
     public GameObject DefenderPrefab;
 
-    private Dictionary<Unit, GameObject> attackerPanelObjects;
-    private Dictionary<Unit, GameObject> defenderPanelObjects;
+    private Dictionary<Army, GameObject> attackerPanelObjects;
+    private Dictionary<Army, GameObject> defenderPanelObjects;
     private ArmyFactory armyFactory;
-    private List<GameObject> armyKinds;
 
-    private Army attacker;
-    private Army defender;
-    bool attackerWon;
+    private int currentAttackerIndex;
+    private int currentDefenderIndex;
     
-    public void Initialize(Army attacker, Army defender, GameObject[] armyKinds)
+    public void Initialize(List<Army> attackers, List<Army> defenders, GameObject[] armyKinds)
     {
-        if (armyKinds == null)
+        if (attackers is null)
+        {
+            throw new ArgumentNullException(nameof(attackers));
+        }
+
+        if (defenders is null || defenders.Count == 0)
+        {
+            throw new ArgumentNullException(nameof(defenders));
+        }
+
+        if (armyKinds == null || attackers.Count == 0)
         {
             throw new ArgumentNullException(nameof(armyKinds));
         }
-        this.attacker = attacker ?? throw new ArgumentNullException(nameof(attacker));
-        this.defender = defender ?? throw new ArgumentNullException(nameof(defender));
         
         this.armyFactory = ArmyFactory.Create(armyKinds);
+        var targetTile = defenders[0].Tile;
 
-        List<Unit> attackingUnits = attacker.SortByBattleOrder(defender.Tile);
-        attackerPanelObjects = CreateUnitPanelObjects(attackingUnits, AttackerPrefab, AttackerPrefab.transform.position);
+        currentAttackerIndex = 0;
+        currentDefenderIndex = 0;
 
-        List<Unit> defendingUnits = defender.SortByBattleOrder(defender.Tile);
-        defenderPanelObjects = CreateUnitPanelObjects(defendingUnits, DefenderPrefab, DefenderPrefab.transform.position);
+        List<Army> attackingArmies = new List<Army>(attackers);
+        attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
+        attackerPanelObjects = CreateArmyPanelObjects(attackingArmies, AttackerPrefab, AttackerPrefab.transform.position);        
 
-        this.WarPanelGo.SetActive(true);
-    }
-
-    private Dictionary<Unit, GameObject> CreateUnitPanelObjects(List<Unit> units, GameObject prefab, Vector3 position)
-    {
-        Dictionary<Unit, GameObject> unitObject = new Dictionary<Unit, GameObject>();        
-        for (int i = 0; i < units.Count; i++)
+        if (defenders.Count > 0)
         {
-            // Create the GO for the panel            
-            GameObject unitGo = Instantiate<GameObject>(prefab, position, Quaternion.identity, WarPanelGo.transform);
-
-            // Replace image with army kind
-            ReplaceImage(units[i], unitGo);
-
-            // Calculate attacker rendering position based on number of units
-            unitGo.transform.position = GetUnitPanelPosition(units, position, i, unitGo);
-
-            unitGo.SetActive(true);
-            unitObject.Add(units[i], unitGo);
+            List<Army> defendingArmies = new List<Army>(defenders);
+            defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
+            defenderPanelObjects = CreateArmyPanelObjects(defendingArmies, DefenderPrefab, DefenderPrefab.transform.position);
         }
 
-        return unitObject;
+        this.gameObject.SetActive(true);
     }
 
-    private Vector3 GetUnitPanelPosition(List<Unit> units, Vector3 position, int index, GameObject unitGo)
+    private Dictionary<Army, GameObject> CreateArmyPanelObjects(List<Army> armies, GameObject prefab, Vector3 position)
+    {
+        Dictionary<Army, GameObject> armyObject = new Dictionary<Army, GameObject>();        
+        for (int i = 0; i < armies.Count; i++)
+        {
+            // Create the GO for the panel            
+            GameObject armyGo = Instantiate<GameObject>(prefab, position, Quaternion.identity, gameObject.transform);
+
+            // Replace image with army kind
+            ReplaceImage(armies[i], armyGo);
+
+            // Calculate attacker rendering position based on number of armies
+            armyGo.transform.position = GetArmyPanelPosition(armies, position, i, armyGo);
+
+            armyGo.SetActive(true);
+            armyObject.Add(armies[i], armyGo);
+        }
+
+        return armyObject;
+    }
+
+    private Vector3 GetArmyPanelPosition(List<Army> armies, Vector3 position, int index, GameObject armyGo)
     {        
-        const float xUnitSize = .5f;
+        const float xArmySize = .5f;
         const float xOffset = -.25f;
 
-        index = units.Count - index; // Reverse the order to draw left-to-right
-        float xTotal = xUnitSize * units.Count;
-        float xShifted = (xUnitSize * index) - (xTotal / 2) + xOffset;
+        index = armies.Count - index; // Reverse the order to draw left-to-right
+        float xTotal = xArmySize * armies.Count;
+        float xShifted = (xArmySize * index) - (xTotal / 2) + xOffset;
         return new Vector3(position.x - xShifted, position.y);
     }
 
-    private void ReplaceImage(Unit unit, GameObject unitGo)
+    private void ReplaceImage(Army army, GameObject armyGo)
     {
-        GameObject unitKind = armyFactory.FindGameObjectKind(unit);
-        SpriteRenderer spriteRenderer = unitKind.GetComponent<SpriteRenderer>();
-        Image image = unitGo.GetComponent<Image>();
+        GameObject armyKind = armyFactory.FindGameObjectKind(army);
+        SpriteRenderer spriteRenderer = armyKind.GetComponent<SpriteRenderer>();
+        Image image = armyGo.GetComponent<Image>();
         image.sprite = spriteRenderer.sprite;
     }
 
     public void Teardown()
     {
-        this.WarPanelGo.SetActive(false);
+        this.gameObject.SetActive(false);
 
         foreach (GameObject go in attackerPanelObjects.Values)
         {
@@ -97,34 +110,51 @@ public class WarPanel : MonoBehaviour
         }
     }
 
-    public void UpdateBattle(bool didAttackerWin, Unit losingUnit)
+    public void UpdateBattle(List<Army> attackers, List<Army> defenders)
     {
-        Dictionary<Unit, GameObject> losingUnits = (didAttackerWin) ? defenderPanelObjects : attackerPanelObjects;
-
-        if (losingUnits.Count == 0)
+        var attacker = attackers[currentAttackerIndex];
+        var defender = (defenders.Count > 0) ? defenders[currentDefenderIndex] : null;
+        bool didAttackerWin;
+        Army losingArmy;
+        
+        if (attacker.IsDead)
         {
-            Debug.LogWarning("WarPanel: losing army had no units remaining.", this);
+            didAttackerWin = false;
+            losingArmy = attacker;
+            currentAttackerIndex++;
+        }
+        else
+        {
+            didAttackerWin = true;
+            losingArmy = defender;
+            currentDefenderIndex++;
+        }
+
+        Dictionary<Army, GameObject> losingArmies = (didAttackerWin) ? defenderPanelObjects : attackerPanelObjects;
+
+        if (losingArmies.Count == 0)
+        {
+            Debug.Log("WarPanel: Losing player had no armies.", this);
             return;
         }
 
-        if (!losingUnits.ContainsKey(losingUnit))
+        if (!losingArmies.ContainsKey(losingArmy))
         {
-            Debug.LogWarningFormat("WarPanel: Losing unit not present in the units collection: Unit: {0}", losingUnit.ToString());
+            Debug.LogWarningFormat("WarPanel: Losing army not present in the armies collection: Army: {0}", losingArmy.ToString());
         }
-        GameObject losingUnitPanelObject = losingUnits[losingUnit];        
-        Vector3 position = losingUnitPanelObject.transform.position;
+        GameObject losingArmyPanelObject = losingArmies[losingArmy];        
+        Vector3 position = losingArmyPanelObject.transform.position;
 
-        // Draw killed sprite over defeated unit
+        // Draw killed sprite over defeated army
         KilledPrefab.transform.SetPositionAndRotation(position, Quaternion.identity);
-        GameObject killedPanelObject = Instantiate(KilledPrefab, position, Quaternion.identity, WarPanelGo.transform);
+        GameObject killedPanelObject = Instantiate(KilledPrefab, position, Quaternion.identity, gameObject.transform);
         killedPanelObject.SetActive(true);
         //AudioClip beep = killedPanelObject.GetComponent<AudioClip>();
         ////AudioSource.PlayClipAtPoint(beep, Camera.main.transform.position);
 
-        // Remove killed sprite and unit from panel after an interval
+        // Remove killed sprite and army from panel after an interval
         Destroy(killedPanelObject, GameManager.WarTime);
-        Destroy(losingUnitPanelObject, GameManager.WarTime);
-        losingUnits.Remove(losingUnit);
+        Destroy(losingArmyPanelObject, GameManager.WarTime);
+        losingArmies.Remove(losingArmy);
     }
-    */
 }
