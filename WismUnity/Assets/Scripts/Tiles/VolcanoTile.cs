@@ -1,30 +1,31 @@
-﻿using Assets.Scripts;
-using System.Collections;
-using System.Collections.Generic;
+﻿using Assets.Scripts.Tilemaps;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class VolcanoTile : Tile
-{       
-    public override void RefreshTile(Vector3Int position, ITilemap tilemap)
+namespace Assets.Scripts.Tiles
+{
+    public class VolcanoTile : Tile
     {
-        HasTile hasTile = MountainTile.HasTile;
-        TileUtility.RefreshTile(position, tilemap, hasTile);
-    }
+        public override void RefreshTile(Vector3Int position, ITilemap tilemap)
+        {
+            HasTile hasTile = MountainTile.HasTile;
+            TileUtility.RefreshTile(position, tilemap, hasTile);
+        }
 
 #if UNITY_EDITOR
-    // Add tile type into Unity Editor
+        // Add tile type into Unity Editor
 
-    [MenuItem("Assets/Create/Tiles/VolcanoTile")]
-    public static void CreateVolcanoTile()
-    {
-        string path = EditorUtility.SaveFilePanelInProject("Save Volcano Tile", "New Volcano Tile", "asset", "Assets");
-        if (string.IsNullOrEmpty(path))
-            return;
+        [MenuItem("Assets/Create/Tiles/VolcanoTile")]
+        public static void CreateVolcanoTile()
+        {
+            string path = EditorUtility.SaveFilePanelInProject("Save Volcano Tile", "New Volcano Tile", "asset", "Assets");
+            if (string.IsNullOrEmpty(path))
+                return;
 
-        AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<VolcanoTile>(), path);
-    }
+            AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<VolcanoTile>(), path);
+        }
 
 #endif
+    }
 }

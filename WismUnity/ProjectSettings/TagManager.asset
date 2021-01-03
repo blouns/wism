@@ -9,6 +9,7 @@ TagManager:
   - Killed
   - Minimap
   - Selected
+  - WorldTilemap
   layers:
   - Default
   - TransparentFX

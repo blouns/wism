@@ -8,16 +8,25 @@ namespace Wism.Client.Modules
         public static readonly string FileName = "City.json";
 
         [DataMember]
-        public string DisplayName { get; set; } = "City";
+        public string DisplayName { get; set; }
 
         [DataMember]
-        public string ShortName { get; set; } = "C";
+        public string ShortName { get; set; }
+
+        [DataMember]
+        public int X { get; set; }
+
+        [DataMember]
+        public int Y { get; set; }
 
         [DataMember]
         public int Defense { get; set; }
 
         [DataMember]
         public int Income { get; set; }
+
+        [DataMember]
+        public string ClanName { get; set; }
 
         [DataMember]
         public ProductionInfo[] ProductionInfos { get; set; }

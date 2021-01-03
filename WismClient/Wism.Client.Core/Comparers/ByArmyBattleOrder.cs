@@ -52,19 +52,19 @@ namespace Wism.Client.MapObjects
                 int modifiedStrengthY = y.GetAttackModifier(this.battlefieldTile) + y.Strength;
 
                 // Stack in reverse order of strength
-                compare = modifiedStrengthY.CompareTo(modifiedStrengthX);
+                compare = modifiedStrengthX.CompareTo(modifiedStrengthY);
             }
 
             if (compare == 0)
             {
                 // Differentiate on Moves
-                compare = y.MovesRemaining.CompareTo(x.MovesRemaining);
+                compare = x.MovesRemaining.CompareTo(y.MovesRemaining);
             }
 
             if (compare == 0)
             {
                 // Differentiate on ID for consistency
-                compare = y.Id.CompareTo(x.Id);
+                compare = x.Id.CompareTo(y.Id);
             }
 
             return compare;

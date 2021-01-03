@@ -1,12 +1,6 @@
-﻿Goal: Back to par.
+﻿Goal: Add turns and cities with production to the unity game.
 
-Need to get back to where we were a year ago on the new stack. That means army movement,
-stack selection using the UI picker, and WAR!
-
-Todo:
-* Implement AttackOnce
-* Picker
-* War panel
-
-Backlog:
-* Refactor MoveOnce
+TODO:
+* Add cities
+* Add turns
+* Add production menu

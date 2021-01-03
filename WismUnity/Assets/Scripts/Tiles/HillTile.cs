@@ -1,96 +1,95 @@
-﻿using Assets.Scripts;
-using System.Collections;
-using System.Collections.Generic;
+﻿using Assets.Scripts.Tilemaps;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class HillTile : Tile
+namespace Assets.Scripts.Tiles
 {
-    [SerializeField]
-    private Sprite[] hillSprites;
-
-    [SerializeField]
-    private Sprite preview;
-
-    private const int HillTileDefault = 4;
-    private HasTile hasTile = HasHill;
-
-    public override void RefreshTile(Vector3Int position, ITilemap tilemap)
+    public class HillTile : Tile
     {
-        TileUtility.RefreshTile(position, tilemap, hasTile);
-    }
+        [SerializeField]
+        private Sprite[] hillSprites;
 
-    public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
-    {
-        string composition = string.Empty;
+        [SerializeField]
+        private Sprite preview;
 
-        for (int x = -1; x <= 1; x++)
+        private const int HillTileDefault = 4;
+        private HasTile hasTile = HasHill;
+
+        public override void RefreshTile(Vector3Int position, ITilemap tilemap)
         {
-            for (int y = -1; y <= 1; y++)
+            TileUtility.RefreshTile(position, tilemap, hasTile);
+        }
+
+        public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
+        {
+            string composition = string.Empty;
+
+            for (int x = -1; x <= 1; x++)
             {
-                Vector3Int vector = new Vector3Int(position.x + x, position.y + y, position.z);
-                if (HasHill(tilemap, vector))
+                for (int y = -1; y <= 1; y++)
                 {
-                    composition += 'H';
-                }                
-                else
-                {
-                    composition += 'E';
+                    Vector3Int vector = new Vector3Int(position.x + x, position.y + y, position.z);
+                    if (HasHill(tilemap, vector))
+                    {
+                        composition += 'H';
+                    }
+                    else
+                    {
+                        composition += 'E';
+                    }
                 }
+            }
+
+            tileData.sprite = hillSprites[HillTileDefault];
+
+            // 0) Hill bottom-left
+            if (composition[1] == 'E' && composition[7] == 'H')
+            {
+                tileData.sprite = hillSprites[0];
+            }
+            // 1) Hill bottom-right
+            else if (composition[1] == 'H' && composition[7] == 'E')
+            {
+                tileData.sprite = hillSprites[1];
+            }
+            // 2) Hill middle
+            else if (composition[1] == 'H' && composition[7] == 'H')
+            {
+                tileData.sprite = hillSprites[2];
+            }
+            // 3) Hill top-left
+            else if (composition[3] == 'H' && composition[7] == 'H')
+            {
+                tileData.sprite = hillSprites[3];
+            }
+            // 4) Hill top-right
+            else if (composition[1] == 'H' && composition[3] == 'H')
+            {
+                tileData.sprite = hillSprites[4];
             }
         }
 
-        tileData.sprite = hillSprites[HillTileDefault];
-
-        // 0) Hill bottom-left
-        if (composition[1] == 'E' && composition[7] == 'H')
+        private static bool HasHill(ITilemap tilemap, Vector3Int position)
         {
-            tileData.sprite = hillSprites[0];
+            return ((tilemap.GetTile(position) is HillTile) ||
+                    (tilemap.GetTile(position) is MountainTile));
         }
-        // 1) Hill bottom-right
-        else if (composition[1] == 'H' && composition[7] == 'E')
-        {
-            tileData.sprite = hillSprites[1];
-        }
-        // 2) Hill middle
-        else if (composition[1] == 'H' && composition[7] == 'H')
-        {
-            tileData.sprite = hillSprites[2];
-        }
-        // 3) Hill top-left
-        else if (composition[3] == 'H' && composition[7] == 'H')
-        {
-            tileData.sprite = hillSprites[3];
-        }
-        // 4) Hill top-right
-        else if (composition[1] == 'H' && composition[3] == 'H')
-        {
-            tileData.sprite = hillSprites[4];
-        }
-
-        //Debug.Log("Composition: " + composition);
-    }
-
-    private static bool HasHill(ITilemap tilemap, Vector3Int position)
-    {
-        return ((tilemap.GetTile(position) is HillTile) ||
-                (tilemap.GetTile(position) is MountainTile));
-    }    
 
 #if UNITY_EDITOR
-    // Add tile type into Unity Editor
+        // Add tile type into Unity Editor
 
-    [MenuItem("Assets/Create/Tiles/HillTile")]
-    public static void CreateHillTile()
-    {
-        string path = EditorUtility.SaveFilePanelInProject("Save Hill Tile", "New Hill Tile", "asset", "Assets");
-        if (string.IsNullOrEmpty(path))
-            return;
+        [MenuItem("Assets/Create/Tiles/HillTile")]
+        public static void CreateHillTile()
+        {
+            string path = EditorUtility.SaveFilePanelInProject("Save Hill Tile", "New Hill Tile", "asset", "Assets");
+            if (string.IsNullOrEmpty(path))
+                return;
 
-        AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<HillTile>(), path);
-    }
+            AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<HillTile>(), path);
+        }
 
 #endif
 
+    }
 }

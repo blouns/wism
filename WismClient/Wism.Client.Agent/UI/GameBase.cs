@@ -107,8 +107,7 @@ namespace Wism.Client.Agent
                 enemyTile2);
 
             // Add cities
-            MapBuilder.AddCity(World.Current.Map, 1, 1, "Marthos", "Sirians");
-            MapBuilder.AddCity(World.Current.Map, 3, 3, "BanesCitadel", "LordBane");
+            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, "AsciiWorld");
         }
     }
 }

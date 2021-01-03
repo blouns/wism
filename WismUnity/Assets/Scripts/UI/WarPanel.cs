@@ -113,7 +113,7 @@ public class WarPanel : MonoBehaviour
     public void UpdateBattle(List<Army> attackers, List<Army> defenders)
     {
         var attacker = attackers[currentAttackerIndex];
-        var defender = (defenders.Count > 0) ? defenders[currentDefenderIndex] : null;
+        var defender = (defenders != null && defenders.Count > 0) ? defenders[currentDefenderIndex] : null;
         bool didAttackerWin;
         Army losingArmy;
         
@@ -121,13 +121,17 @@ public class WarPanel : MonoBehaviour
         {
             didAttackerWin = false;
             losingArmy = attacker;
-            currentAttackerIndex++;
+            currentAttackerIndex = (currentAttackerIndex + 1 == attackers.Count) ?
+                currentAttackerIndex :
+                currentAttackerIndex + 1;
         }
         else
         {
             didAttackerWin = true;
             losingArmy = defender;
-            currentDefenderIndex++;
+            currentDefenderIndex = (currentDefenderIndex + 1 == defenders.Count) ?
+                currentDefenderIndex : 
+                currentDefenderIndex + 1;
         }
 
         Dictionary<Army, GameObject> losingArmies = (didAttackerWin) ? defenderPanelObjects : attackerPanelObjects;
@@ -149,8 +153,6 @@ public class WarPanel : MonoBehaviour
         KilledPrefab.transform.SetPositionAndRotation(position, Quaternion.identity);
         GameObject killedPanelObject = Instantiate(KilledPrefab, position, Quaternion.identity, gameObject.transform);
         killedPanelObject.SetActive(true);
-        //AudioClip beep = killedPanelObject.GetComponent<AudioClip>();
-        ////AudioSource.PlayClipAtPoint(beep, Camera.main.transform.position);
 
         // Remove killed sprite and army from panel after an interval
         Destroy(killedPanelObject, GameManager.WarTime);

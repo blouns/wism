@@ -22,7 +22,8 @@ public class GameManager : MonoBehaviour
     public const float StandardTime = 0.25f;
     public const float WarTime = 1.0f;    
     public const int MaxArmysPerArmy = Army.MaxArmies;
-    public static readonly string DefaultModPath = @"Assets\Scripts\Core\mod";
+    public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";
+    public static readonly string DefaultWorld = @"DevWorld";
 
     // Controllers for the WISM Client API
     private ControllerProvider provider;

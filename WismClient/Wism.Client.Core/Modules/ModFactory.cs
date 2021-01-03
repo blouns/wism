@@ -14,7 +14,9 @@ namespace Wism.Client.Modules
     public static class ModFactory
     {
         public static string ModPath = "mod";
+        public static string WorldsPath = "worlds";
 
+        // Module info
         private static IList<ArmyInfo> armyInfos;
         private static IList<TerrainInfo> terrainInfos;
         private static IList<ClanInfo> ClanInfos;
@@ -249,11 +251,8 @@ namespace Wism.Client.Modules
         public static IList<CityInfo> LoadCityInfos(string path)
         {
             string filePath = String.Format(@"{0}\{1}", path, CityInfo.FileName);
-            if (cityInfos == null)
-            {
-                cityInfos = LoadModFiles<CityInfo>(filePath);
-            }
-
+            cityInfos = LoadModFiles<CityInfo>(filePath);
+            
             return cityInfos;
         }
 

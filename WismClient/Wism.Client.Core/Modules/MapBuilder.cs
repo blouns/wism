@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
@@ -30,7 +31,9 @@ namespace Wism.Client.Modules
             LoadTerrainKinds(modPath);
             LoadArmyKinds(modPath);
             LoadClanKinds(modPath);
-            LoadCityKinds(modPath);
+
+            // TODO: This is for testing only
+            LoadCityKinds(modPath + "\\" + ModFactory.WorldsPath + "\\" + "Illuria");
         }
 
         private static void LoadCityKinds(string path)
@@ -106,12 +109,6 @@ namespace Wism.Client.Modules
             return city;
         }
 
-        // Create a copy of the city
-        private static City CloneCity(City city)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// 00^   10^   20^   30^   40^   50^   
         /// 01^   11.   21.   31$   41$   51^   
@@ -147,6 +144,57 @@ namespace Wism.Client.Modules
             AffixMapObjects(map);
 
             return map;
+        }
+
+        public static void AddCitiesToMapFromWorld(Tile[,] map, string worldName)
+        {
+            var worldPath = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
+
+            var cityInfos = ModFactory.LoadCityInfos(worldPath);
+            foreach (var cityInfo in cityInfos)
+            {
+                MapBuilder.AddCity(map, cityInfo);
+            }
+        }
+
+        public static void AddCity(Tile[,] map, CityInfo cityInfo)
+        {
+            if (map is null)
+            {
+                throw new ArgumentNullException(nameof(map));
+            }
+
+            if (cityInfo is null)
+            {
+                throw new ArgumentNullException(nameof(cityInfo));
+            }
+
+            var city = City.Create(cityInfo);
+
+            // Add to map
+            int x = cityInfo.X;
+            int y = cityInfo.Y;
+            city.Tile = map[x, y];
+            var tiles = new Tile[]
+            {
+                map[x,y],
+                map[x,y-1],
+                map[x+1,y],
+                map[x+1,y-1]
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                tiles[i].City = city;
+                tiles[i].Terrain = MapBuilder.TerrainKinds["Castle"];
+            }
+
+            // Claim the city if matching player exists; otherwise Neutral
+            var player = Game.Current.Players.Find(p => p.Clan.ShortName == cityInfo.ClanName);
+            if (player != null)
+            {
+                player.ClaimCity(city, tiles);
+            }
         }
 
         /// <summary>
@@ -187,9 +235,9 @@ namespace Wism.Client.Modules
             var tiles = new Tile[]
             {
                 map[x,y],
-                map[x,y+1],
+                map[x,y-1],
                 map[x+1,y],
-                map[x+1,y+1]
+                map[x+1,y-1]
             };
 
             for (int i = 0; i < 4; i++)

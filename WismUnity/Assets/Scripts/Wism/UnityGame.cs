@@ -1,12 +1,12 @@
 ﻿using Assets.Scripts.CommandProcessors;
 using Assets.Scripts.UI;
+using Assets.Scripts.Tilemaps;
 using Assets.Scripts.Units;
 using System;
 using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
@@ -14,6 +14,7 @@ using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using ILogger = Wism.Client.Common.ILogger;
 using Tile = Wism.Client.Core.Tile;
+using Assets.Scripts.Worlds;
 
 namespace Assets.Scripts.Wism
 {
@@ -32,12 +33,14 @@ namespace Assets.Scripts.Wism
 
         public WorldTilemap WorldTilemap;
         public GameManager GameManager;
+        [SerializeField]
+        private CityManager cityManager;
 
         [SerializeField]
-        private GameObject warPanelPrefab;
+        private GameObject warPanelPrefab;        
+        internal WarPanel WarPanel;
         [SerializeField]
         private GameObject armyPickerPrefab;
-        internal WarPanel WarPanel;
         private ArmyPicker ArmyPickerPanel;
 
         private List<ICommandProcessor> commandProcessors;
@@ -146,6 +149,7 @@ namespace Assets.Scripts.Wism
         {
             DrawSelectedArmiesBox();
             DrawArmyGameObjects();
+            this.cityManager.DrawCities();
         }
 
 
@@ -176,10 +180,11 @@ namespace Assets.Scripts.Wism
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
             this.selectedArmyIndex = -1;
 
-            // Set up game    
+            // Set up default game (for testing purposes only)
             World.CreateWorld(WorldTilemap.CreateWorldFromScene().Map);
             armyFactory = ArmyFactory.Create(ArmyKinds);
-            CreateDefaultArmies();
+            CreateDefaultCities();
+            CreateDefaultArmies();            
             DrawArmyGameObjects();
 
             mouseSingleClickTimer.Interval = 400;
@@ -487,6 +492,7 @@ namespace Assets.Scripts.Wism
 
         private void CenterOnTile(Tile clickedTile)
         {
+            Debug.Log($"Clicked on {World.Current.Map[clickedTile.X, clickedTile.Y]}");
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
@@ -546,8 +552,18 @@ namespace Assets.Scripts.Wism
             Player player2 = Game.Current.Players[1];
             player2.Clan.IsHuman = false;
             player2.HireHero(World.Current.Map[18, 10]);
-            player2.HireHero(World.Current.Map[1, 3]);
+
+            player2.HireHero(World.Current.Map[4, 0]);
+            player2.HireHero(World.Current.Map[4, 0]);
+
+            player2.HireHero(World.Current.Map[4, 1]);
+
             player2.HireHero(World.Current.Map[2, 3]);
+        }
+
+        private void CreateDefaultCities()
+        {
+            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, GameManager.DefaultWorld);
         }
     }
 }

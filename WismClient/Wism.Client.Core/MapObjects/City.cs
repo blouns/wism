@@ -82,10 +82,10 @@ namespace Wism.Client.MapObjects
 
             return new Tile[4]
             {
+                nineGrid[1, 0],
                 nineGrid[1, 1],
-                nineGrid[1, 2],
-                nineGrid[2, 1],
-                nineGrid[2, 2]
+                nineGrid[2, 0],
+                nineGrid[2, 1]
             };
 
         }    
@@ -200,6 +200,19 @@ namespace Wism.Client.MapObjects
             }
 
             return this.Clan == army.Clan;
+        }
+
+        public override bool Equals(object obj)
+        {
+            City other = (City)obj;
+            return
+                (ShortName == other.ShortName) &&
+                (Tile == other.Tile);
+        }
+
+        public override int GetHashCode()
+        {
+            return $"{ShortName}{Tile}".GetHashCode();
         }
     }
 }

@@ -92,13 +92,13 @@ namespace Wism.Client.Agent
                     DoNextArmy();
                     break;
                 case ConsoleKey.UpArrow:
-                    DoMoveArmyOneStep(0, -1);
+                    DoMoveArmyOneStep(0, 1);
                     break;
                 case ConsoleKey.DownArrow:
                     DoMoveArmyOneStep(0, 1);
                     break;
                 case ConsoleKey.LeftArrow:
-                    DoMoveArmyOneStep(-1, 0);
+                    DoMoveArmyOneStep(1, 0);
                     break;
                 case ConsoleKey.RightArrow:
                     DoMoveArmyOneStep(1, 0);

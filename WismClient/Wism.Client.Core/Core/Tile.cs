@@ -342,6 +342,8 @@ namespace Wism.Client.Core
                 }
             }
 
+            allArmies.Sort(new ByArmyBattleOrder(this));
+
             return allArmies;
         }
 
