@@ -196,22 +196,22 @@ namespace Wism.Client.Test.Scenario
         /// 
         /// Start state:
         /// ============================================
-        ///   00^   10^     20^     30^     40^     50^
-        ///   01^   11.H1   21^     31^     41#     51^
-        ///   02^   12.     22$     32$     42.     52^
-        ///   03^   13.     23$     33$     43.     53^
-        ///   04^   14.     24.     34.     44.     54^
         ///   05^   15^     25^     35^     45^     55^
+        ///   04^   14.     24.     34.     44.     54^
+        ///   03^   13.     23$     33$     43.     53^
+        ///   02^   12.     22$     32$     42.     52^
+        ///   01^   11.H1   21^     31^     41#     51^
+        ///   00^   10^     20^     30^     40^     50^
         /// ============================================
         /// 
         /// End State:
         /// ============================================
-        ///   00^   10^     20^     30^     40^     50^
-        ///   01^   11.     21^     31^     41#H1   51^
-        ///   02^   12.     22$     32$     42.     52^
-        ///   03^   13.     23$     33$     43.     53^
-        ///   04^   14.     24.     34.     44.     54^
         ///   05^   15^     25^     35^     45^     55^
+        ///   04^   14.     24^     34^     44.     54^
+        ///   03^   13.     23$     33$     43.     53^
+        ///   02^   12.     22$     32$     42.     52^
+        ///   01^   11.     21.     31.     41#H1   51^
+        ///   00^   10^     20^     30^     40^     50^
         /// ============================================
         /// Legend: 1:X, 2:Y, 3:Terrain, 4:Army 5:ArmyCount
         /// </summary>
@@ -235,7 +235,7 @@ namespace Wism.Client.Test.Scenario
             };
 
             // Add city owned by Lord Bane to route around
-            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+            MapBuilder.AddCity(World.Current.Map, 2, 3, "BanesCitadel", "LordBane");
 
             // Act
             TestUtilities.Select(commandController, armyController,
@@ -398,10 +398,12 @@ namespace Wism.Client.Test.Scenario
             };
 
             // Initial Bane's setup
+            const int x = 2;
+            const int y = 2;
             Player bane = Game.Current.Players[1];
-            Tile tile2 = World.Current.Map[2, 3];
-            Tile tile3 = World.Current.Map[3, 2];
-            Tile tile4 = World.Current.Map[3, 3];
+            Tile tile2 = World.Current.Map[x, y-1];
+            Tile tile3 = World.Current.Map[x+1, y];
+            Tile tile4 = World.Current.Map[x+1, y-1];
             bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2);
             bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3);
             bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4);

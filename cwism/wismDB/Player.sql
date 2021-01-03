@@ -1,7 +1,0 @@
-﻿CREATE TABLE [dbo].[Player]
-(
-	[GUID] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
-    [ID] SMALLINT NULL, 
-    [AffiliationID] SMALLINT NULL, 
-    [SelectedArmyID] SMALLINT NULL
-)

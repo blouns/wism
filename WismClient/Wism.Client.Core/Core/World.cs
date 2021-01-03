@@ -84,14 +84,14 @@ namespace Wism.Client.Core
             int x = tile.X;
             int y = tile.Y;
 
-            // Add to map
+            // Add to map at top-left tile (4x4 grid)
             city.Tile = World.Current.Map[x, y];
             var tiles = new Tile[]
             {
                 World.Current.Map[x,y],
-                World.Current.Map[x,y+1],
+                World.Current.Map[x,y-1],
                 World.Current.Map[x+1,y],
-                World.Current.Map[x+1,y+1]
+                World.Current.Map[x+1,y-1]
             };
 
             for (int i = 0; i < 4; i++)

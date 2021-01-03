@@ -1,0 +1,148 @@
+[
+  {
+    "ShortName": "Marthos",
+    "DisplayName": "Marthos",
+    "Defense": 6,
+    "Income": 32,
+    "X": 1,
+    "Y": 2,
+    "ClanName": "Sirians",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "MovesModifier": 0,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "MovesModifier": -2,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "MovesModifier": 0,
+        "StrengthModifier": 1,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "MovesModifier": 1,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "Stormheim",
+    "DisplayName": "Stormheim",
+    "Defense": 6,
+    "Income": 20,
+    "X": 1,
+    "Y": 14,
+    "ClanName": "StormGiants",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "MovesModifier": 0,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      }
+    ]
+  },
+  {
+    "ShortName": "Khamar",
+    "DisplayName": "Khamar",
+    "Defense": 6,
+    "Income": 32,
+    "X": 9,
+    "Y": 18,
+    "ClanName": "Sirians",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "MovesModifier": 1,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Griffins",
+        "MovesModifier": 2,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 5,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "Kor",
+    "DisplayName": "Kor",
+    "Defense": 6,
+    "Income": 30,
+    "X": 18,
+    "Y": 11,
+    "ClanName": "StormGiants",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "MovesModifier": -2,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 5,
+        "Upkeep": 6
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "MovesModifier": 0,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "MovesModifier": 0,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ]
+  },
+  {
+    "ShortName": "Enmouth",
+    "DisplayName": "Enmouth",
+    "Defense": 6,
+    "Income": 35,
+    "X": 4,
+    "Y": 1,
+    "ClanName": "StormGiants",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "MovesModifier": 0,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "MovesModifier": 0,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "MovesModifier": 5,
+        "StrengthModifier": 0,
+        "TurnsToProduce": 8,
+        "Upkeep": 16
+      }
+    ]
+  }
+]

@@ -45,10 +45,13 @@ namespace Wism.Client.Api.Commands
             }
             else if (result == AttackResult.AttackerWinsBattle)
             {
+                // Refresh defenders
+                this.Defenders = targetTile.MusterArmy();
                 return ActionState.Succeeded;
             }
             else
             {
+                // Refresh defenders
                 this.Defenders = targetTile.MusterArmy();
                 return ActionState.InProgress;
             }

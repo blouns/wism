@@ -1,4 +1,0 @@
-﻿CREATE TABLE [dbo].[Terrain]
-(
-	[GUID] INT NOT NULL PRIMARY KEY
-)

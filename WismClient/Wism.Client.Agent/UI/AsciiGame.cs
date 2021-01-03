@@ -131,7 +131,7 @@ namespace Wism.Client.Agent
             Console.Clear();
             Console.SetCursorPosition(0, 0);
             Console.WriteLine("==========================================");
-            for (int y = 0; y < World.Current.Map.GetLength(1); y++)
+            for (int y = World.Current.Map.GetLength(1) - 1; y >= 0; y--)
             {
                 for (int x = 0; x < World.Current.Map.GetLength(0); x++)
                 {                    

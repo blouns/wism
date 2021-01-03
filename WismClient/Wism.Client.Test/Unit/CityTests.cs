@@ -41,11 +41,6 @@ namespace Wism.Client.Test.Unit
             
             var tiles = city.GetTiles();
             Assert.IsNotNull(tiles);
-            Assert.AreEqual(nineGrid[1, 1], tiles[0]);
-            Assert.AreEqual(nineGrid[1, 2], tiles[1]);
-            Assert.AreEqual(nineGrid[2, 1], tiles[2]);
-            Assert.AreEqual(nineGrid[2, 2], tiles[3]);
-
             for (int i = 0; i < 4; i++)
             {
                 Assert.IsNotNull(tiles[i]);

@@ -23,8 +23,7 @@ namespace Wism.Client.Test.Unit
         [SetUp]
         public void Setup()
         {
-            Game.CreateDefaultGame();
-            Game.Current.Players[0].HireHero(World.Current.Map[2, 2]);
+            Game.CreateDefaultGame();            
             armyController = TestUtilities.CreateArmyController();
         }
 
@@ -181,21 +180,44 @@ namespace Wism.Client.Test.Unit
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
 
-            player1.GetArmies().Sort(new ByArmyBattleOrder(tile));
-            Assert.AreEqual("Pegasus", tile.Armies[5].ShortName, "Pegasus out of order");
-            Assert.AreEqual("Pegasus", tile.Armies[4].ShortName, "Pegasus out of order");
-            Assert.AreEqual("Cavalry", tile.Armies[3].ShortName, "Cavalry out of order");
-            Assert.AreEqual("HeavyInfantry", tile.Armies[2].ShortName, "Heavy infantry out of order");
-            Assert.AreEqual("LightInfantry", tile.Armies[1].ShortName, "Light infantry out of order");
-            Assert.AreEqual("LightInfantry", tile.Armies[0].ShortName, "Light infantry out of order");
+            var battleSortedArmies = player1.GetArmies();
+            battleSortedArmies.Sort(new ByArmyBattleOrder(tile));
+            Assert.AreEqual("Pegasus", battleSortedArmies[5].ShortName, "Pegasus out of order");
+            Assert.AreEqual("Pegasus", battleSortedArmies[4].ShortName, "Pegasus out of order");
+            Assert.AreEqual("Cavalry", battleSortedArmies[3].ShortName, "Cavalry out of order");
+            Assert.AreEqual("HeavyInfantry", battleSortedArmies[2].ShortName, "Heavy infantry out of order");
+            Assert.AreEqual("LightInfantry", battleSortedArmies[1].ShortName, "Light infantry out of order");
+            Assert.AreEqual("LightInfantry", battleSortedArmies[0].ShortName, "Light infantry out of order");
         }
+
+        [Test]
+        public void StackBattleOrder_CavalryAfterInfantryTest()
+        {
+            // Assemble
+            var player1 = Game.Current.Players[0];
+            var tile = World.Current.Map[2, 2]; 
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
+            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
+
+            // Act
+            var battleSortedArmies = player1.GetArmies();
+            battleSortedArmies.Sort(new ByArmyBattleOrder(tile));
+
+            // Assert
+            Assert.AreEqual("Cavalry", battleSortedArmies[3].ShortName, "Cavalry out of order");
+            Assert.AreEqual("Cavalry", battleSortedArmies[2].ShortName, "Cavalry out of order");
+            Assert.AreEqual("HeavyInfantry", battleSortedArmies[1].ShortName, "Heavy infantry out of order");
+            Assert.AreEqual("LightInfantry", battleSortedArmies[0].ShortName, "Light infantry out of order");
+        }
+
 
         /* TODO: Tests to be added
             * - Different terrain, clan, army bonuses, 
             * - Greater strength than hero
             * - Special, 2 specials, special+fly
             * - 2 fliers
-            * - moves
             * - Navy
             */
 
@@ -203,6 +225,7 @@ namespace Wism.Client.Test.Unit
         public void Hero_CannotFlyFloatTest()
         {
             // ASSEMBLE / ACT
+            Game.Current.Players[0].HireHero(World.Current.Map[2, 2]);
             Army army = GetFirstHero();
 
             // ASSERT
@@ -331,6 +354,7 @@ namespace Wism.Client.Test.Unit
             var player1 = Game.Current.Players[0];
             var originalTile = World.Current.Map[2, 2];
 
+            player1.HireHero(World.Current.Map[2, 2]);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), originalTile);
@@ -380,6 +404,7 @@ namespace Wism.Client.Test.Unit
             var player1 = Game.Current.Players[0];
             var originalTile = World.Current.Map[2, 2];
 
+            player1.HireHero(World.Current.Map[2, 2]);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), originalTile);
@@ -544,6 +569,7 @@ namespace Wism.Client.Test.Unit
             var player2 = Game.Current.Players[1];
 
             var originalTile = World.Current.Map[2, 2];
+            player1.HireHero(World.Current.Map[2, 2]);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
             var originalArmies = new List<Army>(originalTile.Armies);
@@ -592,6 +618,7 @@ namespace Wism.Client.Test.Unit
             var player2 = Game.Current.Players[1];
 
             var originalTile = World.Current.Map[2, 2];
+            player1.HireHero(World.Current.Map[2, 2]);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
             var originalArmies = new List<Army>(originalTile.Armies);
             
@@ -636,6 +663,7 @@ namespace Wism.Client.Test.Unit
 
             var originalTile = World.Current.Map[2, 2];
             // Only hero (from setup)
+            player1.HireHero(World.Current.Map[2, 2]);
             var originalArmies = new List<Army>(originalTile.Armies);
 
             var enemyTile = World.Current.Map[2, 3];
@@ -680,6 +708,7 @@ namespace Wism.Client.Test.Unit
             var player2 = Game.Current.Players[1];
 
             var originalTile = World.Current.Map[2, 2];
+            player1.HireHero(World.Current.Map[2, 2]);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
