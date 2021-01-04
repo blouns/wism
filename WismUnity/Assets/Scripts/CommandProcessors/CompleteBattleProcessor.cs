@@ -10,9 +10,9 @@ namespace Assets.Scripts.CommandProcessors
     class CompleteBattleProcessor : ICommandProcessor
     {
         private readonly ILogger logger;
-        private readonly UnityGame unityGame;
+        private readonly UnityManager unityGame;
 
-        public CompleteBattleProcessor(ILoggerFactory loggerFactory, UnityGame unityGame)
+        public CompleteBattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

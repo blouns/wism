@@ -30,7 +30,7 @@ namespace Assets.Scripts.UI
             return this.gameObject.activeSelf;
         }
 
-        internal void Draw(UnityGame unityGame)
+        internal void Draw(UnityManager unityGame)
         {
             if (!Game.Current.ArmiesSelected())
             {

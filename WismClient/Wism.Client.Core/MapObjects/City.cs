@@ -28,7 +28,10 @@ namespace Wism.Client.MapObjects
             get
             {
                 if (this.info == null)
+                {
                     this.info = MapBuilder.FindCityInfo(this.ShortName);
+                }
+
                 return info;
             }
         }

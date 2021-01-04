@@ -14,9 +14,9 @@ namespace Assets.Scripts.CommandProcessors
     public class PrepareForBattleProcessor : ICommandProcessor
     {
         private readonly ILogger logger;
-        private readonly UnityGame unityGame;
+        private readonly UnityManager unityGame;
 
-        public PrepareForBattleProcessor(ILoggerFactory loggerFactory, UnityGame unityGame)
+        public PrepareForBattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

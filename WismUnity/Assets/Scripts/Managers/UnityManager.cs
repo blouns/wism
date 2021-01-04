@@ -21,7 +21,7 @@ namespace Assets.Scripts.Wism
     /// <summary>
     /// Unity game is the primary game loop and bridge to the Unity UI and WISM API via GameManager
     /// </summary>
-    public class UnityGame : MonoBehaviour
+    public class UnityManager : MonoBehaviour
     {
         private int lastCommandId = 0;
         private ILogger logger;

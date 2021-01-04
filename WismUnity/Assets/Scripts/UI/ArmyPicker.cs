@@ -11,7 +11,7 @@ public class ArmyPicker : MonoBehaviour
 {
     public GameObject[] ArmyRows;
 
-    private UnityGame unityGame;
+    private UnityManager unityGame;
     private GameManager gameManager;
     private ArmyFactory armyFactory;
     private List<Army> armies;
@@ -74,7 +74,7 @@ public class ArmyPicker : MonoBehaviour
         throw new ArgumentOutOfRangeException("Could not find the button matching the index.");
     }
 
-    public void Initialize(UnityGame unityGame, List<Army> armies, ArmyFactory armyFactory)
+    public void Initialize(UnityManager unityGame, List<Army> armies, ArmyFactory armyFactory)
     {
         if (unityGame is null)
         {
