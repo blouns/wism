@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Wism;
+﻿using Assets.Scripts.Managers;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
@@ -61,7 +61,7 @@ namespace Assets.Scripts.CommandProcessors
                 $"attacking {defendingPlayer.Clan.DisplayName}!");
 
             // Set up war UI
-            unityGame.WarPanel.Initialize(attackingArmies, defenderingArmies, unityGame.ArmyKinds);
+            unityGame.WarPanel.Initialize(attackingArmies, defenderingArmies);
             unityGame.SetTime(GameManager.WarTime);
         }
 

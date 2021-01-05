@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Wism;
+﻿using Assets.Scripts.Managers;
 using System;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;

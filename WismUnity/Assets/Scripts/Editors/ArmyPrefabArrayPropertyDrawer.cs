@@ -50,8 +50,6 @@ namespace Assets.Scripts.Editors
                 {
                     row.arraySize = armyCount;
                 }
-                //newPosition.width = position.width / armyCount;
-                //newPosition.x = position.x;
                 newPosition.y += DefaultEntryHeight;
                 for (int i = 0; i < armyCount; i++)
                 {
@@ -63,7 +61,6 @@ namespace Assets.Scripts.Editors
                     // Add GameObject entry box
                     EditorGUI.PropertyField(newPosition, row.GetArrayElementAtIndex(i), GUIContent.none);
                     newPosition.y += DefaultEntryHeight;
-                    //newPosition.x += newPosition.width;
                 }
 
                 newPosition.x = position.x;
@@ -73,7 +70,9 @@ namespace Assets.Scripts.Editors
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return DefaultEntryHeight * (clanCount + 1) * ((armyCount + 1) * 2) * 2;
+            return 
+                (DefaultEntryHeight * (clanCount + 1) * 2) + 
+                ((DefaultEntryHeight * (armyCount * 2) * clanCount));
         }
     }
 }

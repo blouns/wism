@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using Wism.Client.Core;
 
-namespace Assets.Scripts.Worlds
+namespace Assets.Scripts.Managers
 {
     public class CityManager : MonoBehaviour
     {

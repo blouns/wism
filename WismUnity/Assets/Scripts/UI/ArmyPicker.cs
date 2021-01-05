@@ -1,5 +1,4 @@
-using Assets.Scripts.Units;
-using Assets.Scripts.Wism;
+using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +12,7 @@ public class ArmyPicker : MonoBehaviour
 
     private UnityManager unityGame;
     private GameManager gameManager;
-    private ArmyFactory armyFactory;
+    private ArmyManager armyManager;
     private List<Army> armies;
         
     private bool[] selected = new bool[GameManager.MaxArmysPerArmy];
@@ -74,7 +73,7 @@ public class ArmyPicker : MonoBehaviour
         throw new ArgumentOutOfRangeException("Could not find the button matching the index.");
     }
 
-    public void Initialize(UnityManager unityGame, List<Army> armies, ArmyFactory armyFactory)
+    public void Initialize(UnityManager unityGame, List<Army> armies)
     {
         if (unityGame is null)
         {
@@ -86,14 +85,10 @@ public class ArmyPicker : MonoBehaviour
             throw new ArgumentNullException(nameof(armies));
         }
 
-        if (armyFactory is null)
-        {
-            throw new ArgumentNullException(nameof(armyFactory));
-        }
-
         this.unityGame = unityGame;
         this.gameManager = unityGame.GameManager;
-        this.armyFactory = armyFactory;
+        this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
+            .GetComponent<ArmyManager>();
 
         this.armies = new List<Army>();        
         this.armies.AddRange(armies);
@@ -185,7 +180,7 @@ public class ArmyPicker : MonoBehaviour
 
     private void ReplaceImage(Army army, GameObject armyGo)
     {
-        GameObject armyKind = armyFactory.FindGameObjectKind(army);
+        GameObject armyKind = armyManager.FindGameObjectKind(army);
         SpriteRenderer spriteRenderer = armyKind.GetComponent<SpriteRenderer>();
         Image image = armyGo.GetComponent<Image>();
         image.sprite = spriteRenderer.sprite;

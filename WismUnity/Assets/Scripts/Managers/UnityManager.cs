@@ -1,7 +1,7 @@
-﻿using Assets.Scripts.CommandProcessors;
-using Assets.Scripts.UI;
+﻿using Assets.Scripts.Armies;
+using Assets.Scripts.CommandProcessors;
 using Assets.Scripts.Tilemaps;
-using Assets.Scripts.Units;
+using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using System.Timers;
@@ -14,9 +14,8 @@ using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using ILogger = Wism.Client.Common.ILogger;
 using Tile = Wism.Client.Core.Tile;
-using Assets.Scripts.Worlds;
 
-namespace Assets.Scripts.Wism
+namespace Assets.Scripts.Managers
 {
     /// <summary>
     /// Unity game is the primary game loop and bridge to the Unity UI and WISM API via GameManager
@@ -27,12 +26,9 @@ namespace Assets.Scripts.Wism
         private ILogger logger;
         private ControllerProvider provider;
 
-        // TODO: automate creation of army prefabs
-        public GameObject[] ArmyKinds;
-        public GameObject ArmyPrefab;
-
         public WorldTilemap WorldTilemap;
         public GameManager GameManager;
+        private ArmyManager armyManager;
         [SerializeField]
         private CityManager cityManager;
 
@@ -46,7 +42,6 @@ namespace Assets.Scripts.Wism
         private List<ICommandProcessor> commandProcessors;
 
         private Camera followCamera;
-        private ArmyFactory armyFactory;
         private readonly Dictionary<int, ArmyGameObject> armyDictionary = new Dictionary<int, ArmyGameObject>();
 
         public GameObject SelectedBoxPrefab;
@@ -180,9 +175,11 @@ namespace Assets.Scripts.Wism
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
             this.selectedArmyIndex = -1;
 
+            this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
+                .GetComponent<ArmyManager>();
+
             // Set up default game (for testing purposes only)
             World.CreateWorld(WorldTilemap.CreateWorldFromScene().Map);
-            armyFactory = ArmyFactory.Create(ArmyKinds);
             CreateDefaultCities();
             CreateDefaultArmies();            
             DrawArmyGameObjects();
@@ -255,7 +252,7 @@ namespace Assets.Scripts.Wism
                 if (Game.Current.GameState == GameState.SelectedArmy)
                 {
                     var armiesToPick = Game.Current.GetSelectedArmies()[0].Tile.GetAllArmies();
-                    ArmyPickerPanel.Initialize(this, armiesToPick, armyFactory);
+                    ArmyPickerPanel.Initialize(this, armiesToPick);
                 }
             }
             else if (Input.GetKeyDown(KeyCode.I))
@@ -379,13 +376,6 @@ namespace Assets.Scripts.Wism
 
         private void DrawArmyGameObjects()
         {
-            // Verify that army kinds were loaded
-            if (ArmyKinds == null || ArmyKinds.Length == 0)
-            {
-                Debug.Log("No army kinds found.");
-                return;
-            }
-
             foreach (Player player in Game.Current.Players)
             {
                 // Create all the objects if not already present
@@ -434,10 +424,12 @@ namespace Assets.Scripts.Wism
 
         private void SelectObject(Tile tile, bool selectAll)
         {
-            // If no armies on selected tile then center screen
+            // If no owned armies on selected tile then center screen
             if ((Game.Current.GameState == GameState.Ready) &&
                 !tile.HasVisitingArmies() &&
-                !tile.HasArmies())
+                (!tile.HasArmies() || 
+                    (tile.HasArmies() && 
+                    tile.Armies[0].Player != Game.Current.GetCurrentPlayer())))
             {                
                 CenterOnTile(tile);
                 return;
@@ -507,18 +499,11 @@ namespace Assets.Scripts.Wism
 
         internal void InstantiateArmy(Army army, Vector3 worldVector)
         {
-            GameObject armyPrefab = armyFactory.FindGameObjectKind(army);
-            if (armyPrefab == null)
-            {
-                Debug.LogFormat($"GameObject not found: {army.ShortName}_{army.Clan.ShortName}");
-                return;
-            }
-
-            GameObject go = Instantiate<GameObject>(armyPrefab, worldVector, Quaternion.identity, WorldTilemap.transform);
-            go.SetActive(false);
+            var armyGO = armyManager.Instantiate(army, worldVector, WorldTilemap.transform);
+            armyGO.SetActive(false);
 
             // Add to the instantiated army to dictionary for tracking
-            ArmyGameObject ago = new ArmyGameObject(army, go);
+            ArmyGameObject ago = new ArmyGameObject(army, armyGO);
             ArmyDictionary.Add(army.Id, ago);
         }
 
@@ -528,37 +513,63 @@ namespace Assets.Scripts.Wism
         private void CreateDefaultArmies()
         {
             // Ready Player One
-            Player player1 = Game.Current.Players[0];
-            player1.HireHero(World.Current.Map[1, 1]);
+            Player sirians = Game.Current.Players[0];
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
 
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
+            sirians.HireHero(World.Current.Map[2, 1]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Devils"), World.Current.Map[2, 1]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Devils"), World.Current.Map[2, 1]);            
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), World.Current.Map[2, 1]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), World.Current.Map[2, 1]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), World.Current.Map[2, 1]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[2, 1]);
 
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), World.Current.Map[2, 1]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), World.Current.Map[2, 1]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), World.Current.Map[2, 1]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[2, 1]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
 
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
-            player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), World.Current.Map[9, 17]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Wizards"), World.Current.Map[9, 18]);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Wizards"), World.Current.Map[9, 18]);
 
             // Ready Player Two
-            Player player2 = Game.Current.Players[1];
-            player2.Clan.IsHuman = false;
-            player2.HireHero(World.Current.Map[18, 10]);
+            Player stormGiants = Game.Current.Players[1];
+            stormGiants.Clan.IsHuman = false;
+            stormGiants.HireHero(World.Current.Map[18, 10]);
+            stormGiants.ConscriptArmy(ModFactory.FindArmyInfo("GiantWarriors"), World.Current.Map[18, 10]);
+            stormGiants.ConscriptArmy(ModFactory.FindArmyInfo("GiantWarriors"), World.Current.Map[18, 10]);
+            stormGiants.ConscriptArmy(ModFactory.FindArmyInfo("GiantWarriors"), World.Current.Map[18, 10]);
 
-            player2.HireHero(World.Current.Map[4, 0]);
-            player2.HireHero(World.Current.Map[4, 0]);
+            stormGiants.HireHero(World.Current.Map[4, 0]);
+            stormGiants.HireHero(World.Current.Map[4, 0]);
 
-            player2.HireHero(World.Current.Map[4, 1]);
+            stormGiants.HireHero(World.Current.Map[4, 1]);
 
-            player2.HireHero(World.Current.Map[2, 3]);
+            stormGiants.HireHero(World.Current.Map[2, 3]);
+
+
+            Player lordBane = Game.Current.Players[2];
+            lordBane.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), World.Current.Map[6, 1]);
+            lordBane.ConscriptArmy(ModFactory.FindArmyInfo("WolfRiders"), World.Current.Map[6, 1]);
+            lordBane.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[6, 1]);
+            lordBane.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[6, 1]);
+
+            Player selentines = Game.Current.Players[3];
+            selentines.HireHero(World.Current.Map[7, 1]);
+            selentines.ConscriptArmy(ModFactory.FindArmyInfo("Demons"), World.Current.Map[7, 1]);
+            selentines.ConscriptArmy(ModFactory.FindArmyInfo("Demons"), World.Current.Map[7, 1]);
+
+            Player elvallie = Game.Current.Players[4];
+            elvallie.ConscriptArmy(ModFactory.FindArmyInfo("ElvenArchers"), World.Current.Map[8, 1]);
+            elvallie.ConscriptArmy(ModFactory.FindArmyInfo("ElvenArchers"), World.Current.Map[8, 1]);
+            elvallie.ConscriptArmy(ModFactory.FindArmyInfo("ElvenArchers"), World.Current.Map[8, 1]);
+            elvallie.ConscriptArmy(ModFactory.FindArmyInfo("ElvenArchers"), World.Current.Map[8, 1]);
+
         }
 
         private void CreateDefaultCities()

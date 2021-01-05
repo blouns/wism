@@ -10,7 +10,7 @@ TagManager:
   - Minimap
   - Selected
   - WorldTilemap
-  - Test
+  - ArmyManager
   layers:
   - Default
   - TransparentFX

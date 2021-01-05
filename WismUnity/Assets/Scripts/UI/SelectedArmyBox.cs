@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Wism;
+﻿using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
