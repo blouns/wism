@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Wism;
+﻿using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,7 +30,7 @@ namespace Assets.Scripts.UI
             return this.gameObject.activeSelf;
         }
 
-        internal void Draw(UnityGame unityGame)
+        internal void Draw(UnityManager unityGame)
         {
             if (!Game.Current.ArmiesSelected())
             {

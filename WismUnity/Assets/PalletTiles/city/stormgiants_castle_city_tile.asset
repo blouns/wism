@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e21c1c0f12ddcfa47b6fb370bc9731ed, type: 3}
   m_Name: stormgiants_castle_city_tile
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: f975e54a48a1e8944af65e869428d833, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e7ac84ced4f82044b80ca9de3176c86c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -35,8 +35,8 @@ MonoBehaviour:
   m_Flags: 1
   m_ColliderType: 1
   citySprites:
-  - {fileID: 21300000, guid: 87113f521e4c19c43b92e40bc8353623, type: 3}
-  - {fileID: 21300000, guid: 67cdcb4e71f7c1544950cea5c4b0ff99, type: 3}
-  - {fileID: 21300000, guid: 45af08da29935e748bbdb35718eb4f09, type: 3}
-  - {fileID: 21300000, guid: f975e54a48a1e8944af65e869428d833, type: 3}
-  preview: {fileID: 21300000, guid: f975e54a48a1e8944af65e869428d833, type: 3}
+  - {fileID: 21300000, guid: 0ecde2a1fde273f4baa9d827d973320e, type: 3}
+  - {fileID: 21300000, guid: 643cf566750d8e046b8b51163ab80648, type: 3}
+  - {fileID: 21300000, guid: ab9b34a46536a8d449ef7ae99a2bbd21, type: 3}
+  - {fileID: 21300000, guid: e7ac84ced4f82044b80ca9de3176c86c, type: 3}
+  preview: {fileID: 21300000, guid: e7ac84ced4f82044b80ca9de3176c86c, type: 3}

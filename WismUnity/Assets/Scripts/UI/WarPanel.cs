@@ -1,4 +1,4 @@
-using Assets.Scripts.Units;
+using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,12 +13,12 @@ public class WarPanel : MonoBehaviour
 
     private Dictionary<Army, GameObject> attackerPanelObjects;
     private Dictionary<Army, GameObject> defenderPanelObjects;
-    private ArmyFactory armyFactory;
+    private ArmyManager armyManager;
 
     private int currentAttackerIndex;
     private int currentDefenderIndex;
     
-    public void Initialize(List<Army> attackers, List<Army> defenders, GameObject[] armyKinds)
+    public void Initialize(List<Army> attackers, List<Army> defenders)
     {
         if (attackers is null)
         {
@@ -30,12 +30,9 @@ public class WarPanel : MonoBehaviour
             throw new ArgumentNullException(nameof(defenders));
         }
 
-        if (armyKinds == null || attackers.Count == 0)
-        {
-            throw new ArgumentNullException(nameof(armyKinds));
-        }
-        
-        this.armyFactory = ArmyFactory.Create(armyKinds);
+        this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
+            .GetComponent<ArmyManager>();
+
         var targetTile = defenders[0].Tile;
 
         currentAttackerIndex = 0;
@@ -89,7 +86,7 @@ public class WarPanel : MonoBehaviour
 
     private void ReplaceImage(Army army, GameObject armyGo)
     {
-        GameObject armyKind = armyFactory.FindGameObjectKind(army);
+        GameObject armyKind = armyManager.FindGameObjectKind(army);
         SpriteRenderer spriteRenderer = armyKind.GetComponent<SpriteRenderer>();
         Image image = armyGo.GetComponent<Image>();
         image.sprite = spriteRenderer.sprite;

@@ -296,7 +296,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &101920827
 GameObject:
@@ -753,9 +753,8 @@ CanvasRenderer:
 --- !u!1 &186682938
 GameObject:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 1040907160267213295, guid: eb0c302ff517aed44a25fbb01e1102c9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1040907160080598997}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
@@ -771,9 +770,8 @@ GameObject:
 --- !u!156049354 &186682939
 Grid:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 1040907160267213294, guid: eb0c302ff517aed44a25fbb01e1102c9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1040907160080598997}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 186682938}
   m_Enabled: 1
@@ -784,9 +782,8 @@ Grid:
 --- !u!4 &186682940
 Transform:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1040907160080598997}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 186682938}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -795,7 +792,7 @@ Transform:
   m_Children:
   - {fileID: 546283580}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &199092231
 GameObject:
@@ -1336,7 +1333,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &336335669
 MonoBehaviour:
@@ -2003,9 +2000,8 @@ CanvasRenderer:
 --- !u!4 &546283580
 Transform:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 1040907160609646569, guid: eb0c302ff517aed44a25fbb01e1102c9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1040907160080598997}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 572604739}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
@@ -2019,9 +2015,8 @@ Transform:
 --- !u!1 &572604739
 GameObject:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 1040907160609646574, guid: eb0c302ff517aed44a25fbb01e1102c9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1040907160080598997}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
@@ -2051,9 +2046,8 @@ MonoBehaviour:
 --- !u!483693784 &572604741
 TilemapRenderer:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 1040907160609646571, guid: eb0c302ff517aed44a25fbb01e1102c9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1040907160080598997}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 572604739}
   m_Enabled: 1
@@ -2090,7 +2084,7 @@ TilemapRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
-  m_ChunkCullingBounds: {x: 0.012499988, y: 0, z: 0}
+  m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 0
@@ -2100,9 +2094,8 @@ TilemapRenderer:
 --- !u!1839735485 &572604742
 Tilemap:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 1040907161590043013, guid: eb0c302ff517aed44a25fbb01e1102c9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1040907160080598997}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 572604739}
   m_Enabled: 1
@@ -2150,8 +2143,8 @@ Tilemap:
   - first: {x: -14, y: -19, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 71
+      m_TileIndex: 17
+      m_TileSpriteIndex: 13
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2160,8 +2153,8 @@ Tilemap:
   - first: {x: -13, y: -19, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 70
+      m_TileIndex: 17
+      m_TileSpriteIndex: 14
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2340,8 +2333,8 @@ Tilemap:
   - first: {x: -17, y: -18, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 71
+      m_TileIndex: 17
+      m_TileSpriteIndex: 13
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2350,8 +2343,8 @@ Tilemap:
   - first: {x: -16, y: -18, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 70
+      m_TileIndex: 17
+      m_TileSpriteIndex: 14
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2370,8 +2363,8 @@ Tilemap:
   - first: {x: -14, y: -18, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 41
+      m_TileIndex: 17
+      m_TileSpriteIndex: 20
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2380,8 +2373,8 @@ Tilemap:
   - first: {x: -13, y: -18, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 27
+      m_TileIndex: 17
+      m_TileSpriteIndex: 15
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2560,8 +2553,8 @@ Tilemap:
   - first: {x: -17, y: -17, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 41
+      m_TileIndex: 17
+      m_TileSpriteIndex: 20
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2570,8 +2563,8 @@ Tilemap:
   - first: {x: -16, y: -17, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 27
+      m_TileIndex: 17
+      m_TileSpriteIndex: 15
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2641,7 +2634,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 1
-      m_TileSpriteIndex: 57
+      m_TileSpriteIndex: 65
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2650,8 +2643,8 @@ Tilemap:
   - first: {x: -8, y: -17, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 11
-      m_TileSpriteIndex: 6
+      m_TileIndex: 18
+      m_TileSpriteIndex: 70
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2981,7 +2974,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 21
-      m_TileSpriteIndex: 35
+      m_TileSpriteIndex: 41
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -3701,7 +3694,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 1
-      m_TileSpriteIndex: 9
+      m_TileSpriteIndex: 22
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -3741,7 +3734,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 1
-      m_TileSpriteIndex: 26
+      m_TileSpriteIndex: 35
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -3901,7 +3894,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 1
-      m_TileSpriteIndex: 9
+      m_TileSpriteIndex: 22
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4401,7 +4394,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 1
-      m_TileSpriteIndex: 31
+      m_TileSpriteIndex: 57
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4490,8 +4483,8 @@ Tilemap:
   - first: {x: 0, y: -9, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 71
+      m_TileIndex: 17
+      m_TileSpriteIndex: 13
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4500,8 +4493,8 @@ Tilemap:
   - first: {x: 1, y: -9, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 70
+      m_TileIndex: 17
+      m_TileSpriteIndex: 14
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4551,7 +4544,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 1
-      m_TileSpriteIndex: 9
+      m_TileSpriteIndex: 22
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4570,8 +4563,8 @@ Tilemap:
   - first: {x: -14, y: -8, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 11
-      m_TileSpriteIndex: 6
+      m_TileIndex: 18
+      m_TileSpriteIndex: 70
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4700,8 +4693,8 @@ Tilemap:
   - first: {x: -1, y: -8, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 11
-      m_TileSpriteIndex: 6
+      m_TileIndex: 18
+      m_TileSpriteIndex: 70
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4710,8 +4703,8 @@ Tilemap:
   - first: {x: 0, y: -8, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 41
+      m_TileIndex: 17
+      m_TileSpriteIndex: 20
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4720,8 +4713,8 @@ Tilemap:
   - first: {x: 1, y: -8, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 27
+      m_TileIndex: 17
+      m_TileSpriteIndex: 15
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4980,8 +4973,8 @@ Tilemap:
   - first: {x: -17, y: -6, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 71
+      m_TileIndex: 17
+      m_TileSpriteIndex: 13
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -4990,8 +4983,8 @@ Tilemap:
   - first: {x: -16, y: -6, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 70
+      m_TileIndex: 17
+      m_TileSpriteIndex: 14
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -5200,8 +5193,8 @@ Tilemap:
   - first: {x: -17, y: -5, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 41
+      m_TileIndex: 17
+      m_TileSpriteIndex: 20
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -5210,8 +5203,8 @@ Tilemap:
   - first: {x: -16, y: -5, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 27
+      m_TileIndex: 17
+      m_TileSpriteIndex: 15
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -5940,8 +5933,8 @@ Tilemap:
   - first: {x: -9, y: -2, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 71
+      m_TileIndex: 17
+      m_TileSpriteIndex: 13
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -5950,8 +5943,8 @@ Tilemap:
   - first: {x: -8, y: -2, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 70
+      m_TileIndex: 17
+      m_TileSpriteIndex: 14
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -6021,7 +6014,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 9
-      m_TileSpriteIndex: 65
+      m_TileSpriteIndex: 71
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -6160,8 +6153,8 @@ Tilemap:
   - first: {x: -9, y: -1, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 41
+      m_TileIndex: 17
+      m_TileSpriteIndex: 20
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -6170,8 +6163,8 @@ Tilemap:
   - first: {x: -8, y: -1, z: 0}
     second:
       serializedVersion: 2
-      m_TileIndex: 19
-      m_TileSpriteIndex: 27
+      m_TileIndex: 17
+      m_TileSpriteIndex: 15
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -6531,8 +6524,8 @@ Tilemap:
     m_Data: {fileID: 11400000, guid: 88b8a8aedc04d284da0722883983499b, type: 2}
   - m_RefCount: 69
     m_Data: {fileID: 11400000, guid: bcbd83b1101f54e46a16218cffc94f8e, type: 2}
-  - m_RefCount: 3
-    m_Data: {fileID: 11400000, guid: f694a03cb97a66d4684858b1a1abaf40, type: 2}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   - m_RefCount: 50
     m_Data: {fileID: 11400000, guid: 32131e1158ef8234ebc967c63c673a49, type: 2}
   - m_RefCount: 2
@@ -6543,12 +6536,12 @@ Tilemap:
     m_Data: {fileID: 11400000, guid: 7cfef0aad81404140ad0f66a341cee18, type: 2}
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
   - m_RefCount: 20
-    m_Data: {fileID: 11400000, guid: f1e16fea80dcf3c41ad8e87de5848d31, type: 2}
+    m_Data: {fileID: 11400000, guid: e258643ebd2888b49b185ccfd2bc7ed6, type: 2}
+  - m_RefCount: 3
+    m_Data: {fileID: 11400000, guid: d6bd64b79c8fd9049912d3c83dcdfc91, type: 2}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   - m_RefCount: 1
     m_Data: {fileID: 11400000, guid: b4a5971f9cc0f7744975e581eacccf17, type: 2}
   - m_RefCount: 1
@@ -6566,26 +6559,26 @@ Tilemap:
     m_Data: {fileID: 21300000, guid: 67d7371f99113a449b12504bbdc45a3c, type: 3}
   - m_RefCount: 23
     m_Data: {fileID: 21300000, guid: 87bfe870244b3cc45afb24b227ee85ee, type: 3}
-  - m_RefCount: 3
-    m_Data: {fileID: 21300000, guid: a271e684a9cf163428e98500c9c33571, type: 3}
   - m_RefCount: 0
     m_Data: {fileID: 0}
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 3
-    m_Data: {fileID: 21300000, guid: ad8fb91789088fa4a942dcfeae67bc11, type: 3}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   - m_RefCount: 2
     m_Data: {fileID: 21300000, guid: cd55dcd1840b30648b1bef90c1baad77, type: 3}
   - m_RefCount: 5
     m_Data: {fileID: 21300000, guid: c45929fd6cedf4849ac7251f1024c87a, type: 3}
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 5
+    m_Data: {fileID: 21300000, guid: d8a6b7911572622429016146678382f2, type: 3}
+  - m_RefCount: 5
+    m_Data: {fileID: 21300000, guid: 20b8933eb6e6d224db1db40cd9064288, type: 3}
+  - m_RefCount: 5
+    m_Data: {fileID: 21300000, guid: ea8fe14da7f80774b9d7b4ee1c1c8cd1, type: 3}
   - m_RefCount: 3
     m_Data: {fileID: 21300000, guid: 00ac7c690f947af4baecc100318ee086, type: 3}
   - m_RefCount: 13
@@ -6594,30 +6587,30 @@ Tilemap:
     m_Data: {fileID: 21300000, guid: f5d32ae4355656341b840a65098274c3, type: 3}
   - m_RefCount: 7
     m_Data: {fileID: 21300000, guid: 16ce13b62e774a549bdfa39b7425e920, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 5
+    m_Data: {fileID: 21300000, guid: 097a2747a81a81849bcf35b8b60e3c8d, type: 3}
   - m_RefCount: 4
     m_Data: {fileID: 21300000, guid: eeeeb153cab4ec74bbf7f5c5a1e4cc4d, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 3
+    m_Data: {fileID: 21300000, guid: b97f993684dd95a4f883b0b345598527, type: 3}
   - m_RefCount: 0
     m_Data: {fileID: 0}
   - m_RefCount: 3
     m_Data: {fileID: 21300000, guid: 017c01625a1573e4da68c4db9b642d4b, type: 3}
   - m_RefCount: 7
     m_Data: {fileID: 21300000, guid: dd26959c954c74c48a597529c025108f, type: 3}
-  - m_RefCount: 1
-    m_Data: {fileID: 21300000, guid: d12a256b1fa27f44997784fa0236afc0, type: 3}
-  - m_RefCount: 5
-    m_Data: {fileID: 21300000, guid: 11934a80982aeaa42968360e6f69ab2c, type: 3}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   - m_RefCount: 4
     m_Data: {fileID: 21300000, guid: de426cc1fc8ba874dafb0ebb46a10154, type: 3}
   - m_RefCount: 2
     m_Data: {fileID: 21300000, guid: ccbd150047486ef40aac69bceb0f6981, type: 3}
   - m_RefCount: 2
     m_Data: {fileID: 21300000, guid: 86cef3f475b9a4646a8fbfd9a55bc66d, type: 3}
-  - m_RefCount: 1
-    m_Data: {fileID: 21300000, guid: 6dacfeec43cba564d89747adc0b973ce, type: 3}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   - m_RefCount: 7
     m_Data: {fileID: 21300000, guid: 306f283ecdb48784d8374a4790895ad2, type: 3}
   - m_RefCount: 6
@@ -6625,7 +6618,7 @@ Tilemap:
   - m_RefCount: 6
     m_Data: {fileID: 21300000, guid: 19499d481b6985b40af0cf51b22513e3, type: 3}
   - m_RefCount: 1
-    m_Data: {fileID: 21300000, guid: 45ffee79b76451a4f8d6c52e6e6ee38d, type: 3}
+    m_Data: {fileID: 21300000, guid: d12a256b1fa27f44997784fa0236afc0, type: 3}
   - m_RefCount: 4
     m_Data: {fileID: 21300000, guid: a7425c22f2bd53b4fbac53738a056005, type: 3}
   - m_RefCount: 3
@@ -6636,8 +6629,8 @@ Tilemap:
     m_Data: {fileID: 21300000, guid: 845a9b0c9e5233c40928eb13eba2ed55, type: 3}
   - m_RefCount: 17
     m_Data: {fileID: 21300000, guid: 4ca15cfe5934a9941a342f06c3c219e3, type: 3}
-  - m_RefCount: 5
-    m_Data: {fileID: 21300000, guid: 22b665d9d61e1394493b05ec514829bf, type: 3}
+  - m_RefCount: 1
+    m_Data: {fileID: 21300000, guid: 45ffee79b76451a4f8d6c52e6e6ee38d, type: 3}
   - m_RefCount: 4
     m_Data: {fileID: 21300000, guid: a5da8d604a9ff5c4b8e543612be3c4db, type: 3}
   - m_RefCount: 3
@@ -6669,7 +6662,7 @@ Tilemap:
   - m_RefCount: 2
     m_Data: {fileID: 21300000, guid: 2c1d2acb561f50349adfdd569506cf6d, type: 3}
   - m_RefCount: 1
-    m_Data: {fileID: 21300000, guid: dd73a660dba11e448af3dc5bfe8e68e8, type: 3}
+    m_Data: {fileID: 21300000, guid: 6dacfeec43cba564d89747adc0b973ce, type: 3}
   - m_RefCount: 1
     m_Data: {fileID: 21300000, guid: fe5eed7112df9234cb22f44045fce473, type: 3}
   - m_RefCount: 1
@@ -6685,7 +6678,7 @@ Tilemap:
   - m_RefCount: 4
     m_Data: {fileID: 21300000, guid: 7385b82b02ae9fb42817e0be4a9d02ff, type: 3}
   - m_RefCount: 1
-    m_Data: {fileID: 21300000, guid: 0ed4e68a3cb638b45a447a07a4b33639, type: 3}
+    m_Data: {fileID: 21300000, guid: dd73a660dba11e448af3dc5bfe8e68e8, type: 3}
   - m_RefCount: 1
     m_Data: {fileID: 21300000, guid: f1d515ac4b03c674eb40a290efc9a501, type: 3}
   - m_RefCount: 1
@@ -6694,10 +6687,10 @@ Tilemap:
     m_Data: {fileID: 21300000, guid: db9a63969b073a1428c5a62c5e4d158f, type: 3}
   - m_RefCount: 1
     m_Data: {fileID: 21300000, guid: fa6f830ef03d813499ea3157f7ed63dc, type: 3}
-  - m_RefCount: 5
-    m_Data: {fileID: 21300000, guid: 97276b9baad260445af8eaeaca645c9b, type: 3}
-  - m_RefCount: 5
-    m_Data: {fileID: 21300000, guid: 323ced83f7fbe2345b04b23c58a81a62, type: 3}
+  - m_RefCount: 3
+    m_Data: {fileID: 21300000, guid: fe9e9cf220a1a88408554acae04b88da, type: 3}
+  - m_RefCount: 1
+    m_Data: {fileID: 21300000, guid: 0ed4e68a3cb638b45a447a07a4b33639, type: 3}
   m_TileMatrixArray:
   - m_RefCount: 440
     m_Data:
@@ -6720,6 +6713,8 @@ Tilemap:
   m_TileColorArray:
   - m_RefCount: 440
     m_Data: {r: 1, g: 1, b: 1, a: 1}
+  - m_RefCount: 0
+    m_Data: {r: 0, g: 0, b: 0, a: 0}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -9928,10 +9923,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cityTiles:
-  - {fileID: 11400000, guid: faceb2b5db20623428bfdf2fe0158d52, type: 2}
+  - {fileID: 11400000, guid: 4a68c4c7af1fdcf40a9fc86363860b4f, type: 2}
+  - {fileID: 11400000, guid: d2e02066a523ab142bd8cbe12f349a4f, type: 2}
+  - {fileID: 11400000, guid: 3233233a3195c9a418bccffb95c3cc2d, type: 2}
   - {fileID: 11400000, guid: f1e16fea80dcf3c41ad8e87de5848d31, type: 2}
+  - {fileID: 11400000, guid: 1f6656e853d9ea34eaa48721c4ae22f6, type: 2}
+  - {fileID: 11400000, guid: 13c83cb202792a847b5ffe96dedfd10a, type: 2}
+  - {fileID: 11400000, guid: faceb2b5db20623428bfdf2fe0158d52, type: 2}
   - {fileID: 11400000, guid: 9f56bfe9d0d02564b96501836e4f7664, type: 2}
-  neutralCityTile: {fileID: 11400000, guid: f1e16fea80dcf3c41ad8e87de5848d31, type: 2}
+  neutralCityTile: {fileID: 11400000, guid: e258643ebd2888b49b185ccfd2bc7ed6, type: 2}
 --- !u!4 &1740043447
 Transform:
   m_ObjectHideFlags: 0
@@ -10869,6 +10869,376 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2003596758}
   m_CullTransparentMesh: 0
+--- !u!1 &2022427045
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2022427047}
+  - component: {fileID: 2022427046}
+  m_Layer: 0
+  m_Name: ArmyManager
+  m_TagString: ArmyManager
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2022427046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2022427045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fe37f4a7600cb744994b3ee565c8333, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  armiesByClan:
+    rows:
+    - name: Sirians
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 1273707560276000075, guid: 5ce156e453a8ff14eac67cbe7b235364, type: 3}
+      - {fileID: 1435010855523549752, guid: 4401117c6e8dee84ca96f12b3ee03eed, type: 3}
+      - {fileID: 3029268752068045786, guid: 316e0b7de169167439e414fc13fc027a, type: 3}
+      - {fileID: 1643634712279723685, guid: 9969cad6113183e4b866cf1eccb2b367, type: 3}
+      - {fileID: 8531268921839915742, guid: f9b744ea8e7219a41953ca3e3bafe8cb, type: 3}
+      - {fileID: 5246947878629779765, guid: 4a34a59f8a3c91f449f20e9731ac825e, type: 3}
+      - {fileID: 2438194319344776805, guid: 36fd6246669132a4b86dda851b6d980d, type: 3}
+      - {fileID: 3971463451778831376, guid: 1edfc8f7a00029f4f8b4a7ecafd666b7, type: 3}
+      - {fileID: 2210591884832540886, guid: 273e6a55b96414c4391bbedb3ce5a341, type: 3}
+      - {fileID: 7702201718560748381, guid: 43c95f08e2602724089824cadd9417c5, type: 3}
+      - {fileID: 3791398231353743854, guid: baddfd80112a012498472e9a26fc1b55, type: 3}
+      - {fileID: 8773764026209649791, guid: 8143b7262e86db1499bb02d202ac14e9, type: 3}
+      - {fileID: 4692960012975581284, guid: a41ccadb07394e54e851af021392f9f5, type: 3}
+      - {fileID: 4107447901922929701, guid: 479f7b5eec0e6a949a2b7e22e3b6b602, type: 3}
+      - {fileID: 551989293670091129, guid: a3904e9d8ec2e42409daa91a728bc53c, type: 3}
+      - {fileID: 2045726192583104083, guid: c5078c997b90f9a4aa77f7cf8eac8d0f, type: 3}
+    - name: StormGiants
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 1945190278726057414, guid: 7f2a0dd8d8526834ab9b5ebeef4d941e, type: 3}
+      - {fileID: 861019484700682511, guid: 01f4b727b8ade5541af5064d92d9325a, type: 3}
+      - {fileID: 1755915076363449232, guid: 8f2793d7ec92bca4895389e0579e06d1, type: 3}
+      - {fileID: 6524571947165685232, guid: 13c5acc4cb99ee0489ec190b1304f4fc, type: 3}
+      - {fileID: 8550668707382242759, guid: 858e05fadf535304fb38babd92052410, type: 3}
+      - {fileID: 4567029556603025108, guid: 38b39b7ede6bdca409f7515991196832, type: 3}
+      - {fileID: 9011780065566272575, guid: a89118cb8cf16e3499e18487331bceec, type: 3}
+      - {fileID: 7412938308306292805, guid: 035fa17c6d73c094fa0ed354209fd034, type: 3}
+      - {fileID: 3879208478318540365, guid: bd636d6e2321bf347b7457d1c3add315, type: 3}
+      - {fileID: 2435224631924558563, guid: 8807f7562f581044bb8e47788dbcf2d7, type: 3}
+      - {fileID: 4806390759528853995, guid: d661cc2d28e5e9544afb778fd44bdcf7, type: 3}
+      - {fileID: 2916915878514696639, guid: 9ad70dce7b867504aa0009573e5c618a, type: 3}
+      - {fileID: 3117724149465392078, guid: 0a2a09b2e4ed9d746858334e015daaa2, type: 3}
+      - {fileID: 6558910598471069678, guid: 10be9c60bc50c024eba5489717e29749, type: 3}
+      - {fileID: 2363053224568117836, guid: 618bfa346acfe9646b2507b64c5dc299, type: 3}
+      - {fileID: 337413531095034319, guid: a9d25b57aaff4b24b97f865cd5017bcf, type: 3}
+    - name: GreyDwarves
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 2522386303648134390, guid: a870fe5f70a207a4884d606d1c4cdd35, type: 3}
+      - {fileID: 6304706604261832654, guid: bd8bedc4bccd8f4409999184e639b005, type: 3}
+      - {fileID: 2685877495058072224, guid: 596452ad4b93a8040be4a273e26d1dda, type: 3}
+      - {fileID: 6076341294367354863, guid: 1a7315a7b01950542be7c1c1dce1f05d, type: 3}
+      - {fileID: 7601932143827905872, guid: 8882244e4c42cc647b8ffadddcb722b7, type: 3}
+      - {fileID: 8091757175654661735, guid: 3fb6f46ad85337a449620b2875ef805e, type: 3}
+      - {fileID: 6806954321310861649, guid: dcb70c35c808f6446a52d96891755e07, type: 3}
+      - {fileID: 7365846366223611772, guid: d06e2f54fb270614db857af6213c33ba, type: 3}
+      - {fileID: 9032482100275495328, guid: cc368c98442a85641bbc64f459f0457c, type: 3}
+      - {fileID: 8987930673296495936, guid: fc9bc1d11eee9d242b9ef27e38dc95ad, type: 3}
+      - {fileID: 7390589524936208414, guid: 32b3d6f494522924fb8f9edd012030f0, type: 3}
+      - {fileID: 7875590885289261841, guid: 1c56f07ca06a9cb4cb11de5e18b11f91, type: 3}
+      - {fileID: 2486124972042327231, guid: 67a97181a2411d04b8be5d03957f51af, type: 3}
+      - {fileID: 5170806172828313335, guid: 0bb2d72c976a9574b991b1f3e4adf7b9, type: 3}
+      - {fileID: 2673881184496698804, guid: 877ef7f2ef7996d4ca75ee496dda41a9, type: 3}
+      - {fileID: 5473398628041121117, guid: 2a3efc17478cd7f43a693c861b4eced2, type: 3}
+    - name: OrcsOfKor
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 7475089007813001878, guid: abea6623c119ea34e8eed48c50bf9afb, type: 3}
+      - {fileID: 1163418821261687660, guid: ff61f330e52afb94a946dace4356d6b5, type: 3}
+      - {fileID: 4284092036012931184, guid: d494a77710d0372488f9f0d50c96f4a3, type: 3}
+      - {fileID: 8525703602698559879, guid: c00f39daeb2fc0245b16b1aee4a48ba2, type: 3}
+      - {fileID: 5275451739031720385, guid: 0e55f5b5ebf78ee4c8b708fb8a4b6a7c, type: 3}
+      - {fileID: 5189842934821790933, guid: 9a8b4c7b2815e3e4b9017b060a53db1e, type: 3}
+      - {fileID: 4284202374247182337, guid: e3cb91d60ccb3f740ab5cd7ce9624a5f, type: 3}
+      - {fileID: 2278178334518023982, guid: 99ea15e18d1bde34985e8579954a1f78, type: 3}
+      - {fileID: 2420817827520632071, guid: 6c71a1c6e198de0499ba16c64dc797ff, type: 3}
+      - {fileID: 4880742350750100199, guid: f5ce603ee4ddb9f4e8a4d3fef7e3ef53, type: 3}
+      - {fileID: 3650711369452049993, guid: 335bd1d5d1b4aad4d9a46fbd0361043b, type: 3}
+      - {fileID: 5721363856603359507, guid: c0d3405996aeae645a61f8cb1073bc67, type: 3}
+      - {fileID: 7591755274215819957, guid: 3b57a9c7dffaae943a0118776714264e, type: 3}
+      - {fileID: 8000445740775436647, guid: dc1055e6bd674074d91dadba7981cda8, type: 3}
+      - {fileID: 2982600723625714608, guid: d12d10c6a388832429538e321e404dd3, type: 3}
+      - {fileID: 3438191674666813259, guid: d56a34d44f2e35b4c929070bb0092549, type: 3}
+    - name: Elvallie
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 2210094403864472111, guid: aa86a191ffb0b414ba8b1fb3b9efc81e, type: 3}
+      - {fileID: 5823509625751598432, guid: a9e10be1b1a2e6f4e806759d8c3a2cbc, type: 3}
+      - {fileID: 2444534053552620981, guid: 6ed80b8b31922a142a859f9cc2c85916, type: 3}
+      - {fileID: 6741473176528912148, guid: 0607447df5f4b8e4aa8df0ae00271c35, type: 3}
+      - {fileID: 5683348584463064181, guid: c6ccf7d487ff19246bcdb61db7dc1cde, type: 3}
+      - {fileID: 3815565535316005874, guid: 8d796694a888aef4292bee1071dc8abe, type: 3}
+      - {fileID: 766946933175178010, guid: ea89c7d05465be7488e8636e2601aeba, type: 3}
+      - {fileID: 5065947329389782480, guid: d12d6c89020831e40be68afc76600c7c, type: 3}
+      - {fileID: 4355605098521247204, guid: e634af150655f2743a7edda960f60c64, type: 3}
+      - {fileID: 640403150334289155, guid: 410e96f38c3ce7549b611ec40391804f, type: 3}
+      - {fileID: 82165577697599348, guid: 9ba3b824b85199343a49059195f8933c, type: 3}
+      - {fileID: 7124267658795378046, guid: dea6ce8a1ed273f47aaf853fb8e93801, type: 3}
+      - {fileID: 2043012555071447757, guid: f684929f449463b499b8c9682c260fe3, type: 3}
+      - {fileID: 637360073325971728, guid: bbb799b4e1d79b14288e1a2198f21f25, type: 3}
+      - {fileID: 155258286605882619, guid: 818ad7f8d00f1df4abb05e8d72c7118b, type: 3}
+      - {fileID: 6241532944591240232, guid: be4e9d346d5e25c41b19b94a78e6e5cb, type: 3}
+    - name: Selentines
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 7999468704934516258, guid: 7a532303db98ffd4e8b9767faf43a6a8, type: 3}
+      - {fileID: 6916954066251725775, guid: 432e3e727a2d3fb46872fe5da67d6611, type: 3}
+      - {fileID: 2266973513281147052, guid: bcf391a4f47669548a5759283d732129, type: 3}
+      - {fileID: 404234786044408228, guid: 93b792c37a096774794c50e1ff10552d, type: 3}
+      - {fileID: 8104270871795678551, guid: 951121937e42a044fbbfea1a2dd18baf, type: 3}
+      - {fileID: 3743905784508256155, guid: 53f26aa8e7b8f0c43a41b8045332de74, type: 3}
+      - {fileID: 4069329895221341663, guid: a9916b5e69fed8147afee7e8ce81b143, type: 3}
+      - {fileID: 6330460681233618382, guid: eac507f2b1d8b554caf202b9bf1b3ae9, type: 3}
+      - {fileID: 2050035147514871242, guid: a380e1be30b9de6459b4acc0c0311648, type: 3}
+      - {fileID: 7398951696116398918, guid: 22cd10a167a8c674680647eb17d7c03d, type: 3}
+      - {fileID: 67440013168964336, guid: 0dbdc66ef06aca44294e7a17790e6374, type: 3}
+      - {fileID: 6087133480468280880, guid: 9d6e8edf65d9e9140bce47ac1475fae9, type: 3}
+      - {fileID: 2657449378042284495, guid: f8343a8b1fbe0b94886d5c365057e0c9, type: 3}
+      - {fileID: 3095536320803497516, guid: c81f7541d4b7ae04bb4a2526c51983ba, type: 3}
+      - {fileID: 8953060193993410931, guid: e831fb014bb3d0a409bc1ac0a004dc41, type: 3}
+      - {fileID: 344639895812216866, guid: 02ce40fb69c6825409617fda053cf376, type: 3}
+    - name: HorseLords
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 2527258769632198547, guid: ca3d74595703b8f479f7cf7ab5968429, type: 3}
+      - {fileID: 3001511862075359083, guid: e6b441f8c525e3443960440a90f6eee8, type: 3}
+      - {fileID: 9024766919856941921, guid: a3daa4a4bd1f4054e9386845f6a5036b, type: 3}
+      - {fileID: 3324080346408673243, guid: fc3b4f2823c7b8f4d93dee11071eb4f8, type: 3}
+      - {fileID: 8119950540760881223, guid: 272360bb6599b5f44a0dd2916ca88336, type: 3}
+      - {fileID: 912645621713063743, guid: d2e83899d34a2724db1052e65473bbe4, type: 3}
+      - {fileID: 425259930136288543, guid: c7a386db21bf9c747b1d9a513510d82a, type: 3}
+      - {fileID: 9136400173222762091, guid: c9a3974f926f77b4ab8500ffeb3c5f6c, type: 3}
+      - {fileID: 7584229264334095688, guid: 05c56a53b0c46e941afb51899fa837ee, type: 3}
+      - {fileID: 4893131050803185686, guid: 9d8c347444aec0d48a06f5cd31c88701, type: 3}
+      - {fileID: 5776804944305112274, guid: 5af6b7e8be50b9b4fa0c32b682e399d3, type: 3}
+      - {fileID: 5652796059887514506, guid: 9fa83761ee3bb264a8245013b8d71e20, type: 3}
+      - {fileID: 5360882522882018780, guid: b32caca479b7cdd4e9e0480c38e20d3c, type: 3}
+      - {fileID: 2027167304836760078, guid: 409607e23506812419b8e80acec8a224, type: 3}
+      - {fileID: 7727629002274348985, guid: 09f81577b3e225e41b427540a16a79c6, type: 3}
+      - {fileID: 652412001902040722, guid: 2cdfb41fa572dc241b3529b09bb006fe, type: 3}
+    - name: LordBane
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 4360260825242922551, guid: 9987b63c706eaac49ae9a99309a91060, type: 3}
+      - {fileID: 6985831704844190172, guid: b6384b454c6d23e4f998c294f6108d42, type: 3}
+      - {fileID: 8760680077781859326, guid: 64318092fd7af0a4f8e87cab616102db, type: 3}
+      - {fileID: 4525430689105652022, guid: 8c2eaca54d19532449a5c0a0db0902ed, type: 3}
+      - {fileID: 3114808069688571086, guid: e287d7ec6e95a304b8b7b69adc9013f3, type: 3}
+      - {fileID: 2950308518337630384, guid: a6e2463e5147d3342978fb0acc02b40e, type: 3}
+      - {fileID: 6978527026998634331, guid: 520eaa1beb385a54db3ec371619eef00, type: 3}
+      - {fileID: 3283960899513143387, guid: 1563260b557d2464bac0198f0e32ff49, type: 3}
+      - {fileID: 7054505751395894185, guid: 0b2554741a4145c48810b068f99a194d, type: 3}
+      - {fileID: 5211443428937663195, guid: ff87e2c31803e3247a32305d8d83b0df, type: 3}
+      - {fileID: 2196914075718121037, guid: 6e75146a02ad013418536ca5fcce2ef7, type: 3}
+      - {fileID: 8100090503957024714, guid: 55edf4437488ead46897be2a4e1d1906, type: 3}
+      - {fileID: 4641731884250188003, guid: 31b9e88cc88a0c04c906b138d09c7bee, type: 3}
+      - {fileID: 6057758944312356237, guid: 569b81338bc7d2342a69b887f95e67a2, type: 3}
+      - {fileID: 3142778991491026747, guid: 3c1f3f8d03934d2408e2038fe158941b, type: 3}
+      - {fileID: 4149404412173307239, guid: 8e92a4a73ed7a1143bce29da215dba09, type: 3}
+    - name: Neutral
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
+      row:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 7145371455530925062, guid: f7c1bbe940debd14ba9ef76fa0a887e7, type: 3}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    count: 9
+--- !u!4 &2022427047
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2022427045}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 11.934496, y: 9.735912, z: -26.110062}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2053934878
 GameObject:
   m_ObjectHideFlags: 0
@@ -10880,7 +11250,7 @@ GameObject:
   - component: {fileID: 2053934880}
   - component: {fileID: 2053934879}
   m_Layer: 0
-  m_Name: UnityGame
+  m_Name: UnityManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10898,15 +11268,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff760bdae5695e84491341162b9e4785, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ArmyKinds:
-  - {fileID: 3222770472658856129, guid: c463593eb2f55c641b1d2e916fbe4e4c, type: 3}
-  - {fileID: 750634420397697891, guid: b070b62641ad5f34f80ad798ab882c55, type: 3}
-  - {fileID: 51485761755149594, guid: 4f9f6342166df48479cbbcd5b5edea12, type: 3}
-  - {fileID: 8908565333520886752, guid: fe7051691dbc9f5478d1408daa2d4b8c, type: 3}
-  - {fileID: 2826584993129197440, guid: 09beb4f13e4059f4bbb7e298bdc310f0, type: 3}
-  - {fileID: 2183263904272045467, guid: 927fdcd1c7fc6044f9f78412cfe16af8, type: 3}
-  ArmyPrefab: {fileID: 3836617278113509933, guid: 904f295cda5ee0e478e5dc5dfd6c91c0,
-    type: 3}
   WorldTilemap: {fileID: 572604740}
   GameManager: {fileID: 430121301}
   cityManager: {fileID: 1740043446}
@@ -11094,7 +11455,7 @@ PrefabInstance:
     - target: {fileID: 315210890008612548, guid: 7e7c9301a3d843845a973598c70e65bc,
         type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 315210890008612548, guid: 7e7c9301a3d843845a973598c70e65bc,
         type: 3}
@@ -11213,83 +11574,3 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7e7c9301a3d843845a973598c70e65bc, type: 3}
---- !u!1001 &1040907160080598997
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 275
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 244
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213289, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160267213295, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_Name
-      value: Grid
-      objectReference: {fileID: 0}
-    - target: {fileID: 1040907160609646568, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: WarPanel
-      value: 
-      objectReference: {fileID: 1127945}
-    - target: {fileID: 1040907160609646574, guid: eb0c302ff517aed44a25fbb01e1102c9,
-        type: 3}
-      propertyPath: m_TagString
-      value: WorldTilemap
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 0}
-  m_SourcePrefab: {fileID: 100100000, guid: eb0c302ff517aed44a25fbb01e1102c9, type: 3}

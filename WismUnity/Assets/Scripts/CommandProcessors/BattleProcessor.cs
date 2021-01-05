@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Wism;
+﻿using Assets.Scripts.Managers;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -9,9 +9,9 @@ namespace Assets.Scripts.CommandProcessors
     public class BattleProcessor : ICommandProcessor
     {
         private readonly ILogger logger;
-        private readonly UnityGame unityGame;
+        private readonly UnityManager unityGame;
 
-        public BattleProcessor(ILoggerFactory loggerFactory, UnityGame unityGame)
+        public BattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

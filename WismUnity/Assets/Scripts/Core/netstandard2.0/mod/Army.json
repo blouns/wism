@@ -1,5 +1,88 @@
 [
-
+  {
+    "DisplayName": "Cavalry",
+    "ShortName": "Cavalry",
+    "Strength": 5,
+    "Moves": 16,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false
+  },
+  {
+    "DisplayName": "Demons",
+    "ShortName": "Demons",
+    "Strength": 8,
+    "Moves": 14,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false,
+    "IsSpecial": true
+  },
+  {
+    "DisplayName": "Devils",
+    "ShortName": "Devils",
+    "Strength": 9,
+    "Moves": 14,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false,
+    "IsSpecial": true
+  },
+  {
+    "DisplayName": "Dragons",
+    "ShortName": "Dragons",
+    "Strength": 8,
+    "Moves": 16,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": true,
+    "IsSpecial": true
+  },
+  {
+    "DisplayName": "Dwarven Legion",
+    "ShortName": "DwarvenLegion",
+    "Strength": 5,
+    "Moves": 9,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false
+  },
+  {
+    "DisplayName": "Elven Archers",
+    "ShortName": "ElvenArchers",
+    "Strength": 4,
+    "Moves": 14,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false
+  },
+  {
+    "DisplayName": "Giant Warriors",
+    "ShortName": "GiantWarriors",
+    "Strength": 6,
+    "Moves": 12,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false
+  },
+  {
+    "DisplayName": "Griffins",
+    "ShortName": "Griffins",
+    "Strength": 4,
+    "Moves": 16,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": true
+  },
+  {
+    "DisplayName": "Heavy Infantry",
+    "ShortName": "HeavyInfantry",
+    "Strength": 5,
+    "Moves": 8,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false
+  },
   {
     "DisplayName": "Hero",
     "ShortName": "Hero",
@@ -19,30 +102,12 @@
     "CanFly": false
   },
   {
-    "DisplayName": "Heavy Infantry",
-    "ShortName": "HeavyInfantry",
+    "DisplayName": "Navy",
+    "ShortName": "Navy",
     "Strength": 5,
-    "Moves": 8,
-    "CanWalk": true,
-    "CanFloat": false,
-    "CanFly": false
-  },
-  {
-    "DisplayName": "Dwarven Legion",
-    "ShortName": "DwarvenLegion",
-    "Strength": 5,
-    "Moves": 9,
-    "CanWalk": true,
-    "CanFloat": false,
-    "CanFly": false
-  },
-  {
-    "DisplayName": "Cavalry",
-    "ShortName": "Cavalry",
-    "Strength": 5,
-    "Moves": 16,
-    "CanWalk": true,
-    "CanFloat": false,
+    "Moves": 18,
+    "CanWalk": false,
+    "CanFloat": true,
     "CanFly": false
   },
   {
@@ -55,13 +120,24 @@
     "CanFly": true
   },
   {
-    "DisplayName": "Giant Warriors",
-    "ShortName": "GiantWarriors",
-    "Strength": 6,
+    "DisplayName": "Undead",
+    "ShortName": "Undead",
+    "Strength": 7,
     "Moves": 12,
     "CanWalk": true,
     "CanFloat": false,
-    "CanFly": false
+    "CanFly": false,
+    "IsSpecial": true
+  },
+  {
+    "DisplayName": "Wizards",
+    "ShortName": "Wizards",
+    "Strength": 6,
+    "Moves": 50,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false,
+    "IsSpecial": true
   },
   {
     "DisplayName": "Wolf Riders",
@@ -72,5 +148,4 @@
     "CanFloat": false,
     "CanFly": false
   }
-
 ]

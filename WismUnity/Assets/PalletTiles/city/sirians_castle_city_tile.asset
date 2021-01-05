@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e21c1c0f12ddcfa47b6fb370bc9731ed, type: 3}
   m_Name: sirians_castle_city_tile
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: 4e322cedf13c0a44c93183d7845f4bdf, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5b5fc7e32e460ab4b96344ccb7cc6edf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -35,8 +35,8 @@ MonoBehaviour:
   m_Flags: 1
   m_ColliderType: 1
   citySprites:
-  - {fileID: 21300000, guid: 8cbd0d8840d99a94a8abdad6eef83351, type: 3}
-  - {fileID: 21300000, guid: 8db623fb240b9554fabb2d368497cee8, type: 3}
-  - {fileID: 21300000, guid: 402c37c1364d67347afe90ada709c83e, type: 3}
-  - {fileID: 21300000, guid: 4e322cedf13c0a44c93183d7845f4bdf, type: 3}
-  preview: {fileID: 21300000, guid: 4e322cedf13c0a44c93183d7845f4bdf, type: 3}
+  - {fileID: 21300000, guid: 7dc3087f1f6853244879189689fac6dd, type: 3}
+  - {fileID: 21300000, guid: 9f09fb7f84991ec40b785ef43d5b4f09, type: 3}
+  - {fileID: 21300000, guid: 9c163ddc19d92784db68c30148e5a569, type: 3}
+  - {fileID: 21300000, guid: 5b5fc7e32e460ab4b96344ccb7cc6edf, type: 3}
+  preview: {fileID: 21300000, guid: 5b5fc7e32e460ab4b96344ccb7cc6edf, type: 3}

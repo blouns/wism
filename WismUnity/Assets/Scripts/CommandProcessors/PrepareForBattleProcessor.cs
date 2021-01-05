@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Wism;
+﻿using Assets.Scripts.Managers;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
@@ -14,9 +14,9 @@ namespace Assets.Scripts.CommandProcessors
     public class PrepareForBattleProcessor : ICommandProcessor
     {
         private readonly ILogger logger;
-        private readonly UnityGame unityGame;
+        private readonly UnityManager unityGame;
 
-        public PrepareForBattleProcessor(ILoggerFactory loggerFactory, UnityGame unityGame)
+        public PrepareForBattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {
@@ -61,7 +61,7 @@ namespace Assets.Scripts.CommandProcessors
                 $"attacking {defendingPlayer.Clan.DisplayName}!");
 
             // Set up war UI
-            unityGame.WarPanel.Initialize(attackingArmies, defenderingArmies, unityGame.ArmyKinds);
+            unityGame.WarPanel.Initialize(attackingArmies, defenderingArmies);
             unityGame.SetTime(GameManager.WarTime);
         }
 
