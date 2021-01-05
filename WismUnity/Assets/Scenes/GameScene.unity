@@ -296,7 +296,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &101920827
 GameObject:
@@ -795,7 +795,7 @@ Transform:
   m_Children:
   - {fileID: 546283580}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &199092231
 GameObject:
@@ -1336,7 +1336,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &336335669
 MonoBehaviour:
@@ -10869,7 +10869,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2003596758}
   m_CullTransparentMesh: 0
---- !u!1 &2046391714
+--- !u!1 &2022427045
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10877,54 +10877,129 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2046391716}
-  - component: {fileID: 2046391715}
+  - component: {fileID: 2022427047}
+  - component: {fileID: 2022427046}
   m_Layer: 0
-  m_Name: TestObject
+  m_Name: ArmyManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2046391715
+--- !u!114 &2022427046
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2046391714}
+  m_GameObject: {fileID: 2022427045}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04de3b8bf81a7f14ba8403e6709650d9, type: 3}
+  m_Script: {fileID: 11500000, guid: 8fe37f4a7600cb744994b3ee565c8333, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ArmiesByClan:
+  armiesByClan:
     rows:
     - name: Sirians
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
+      - {fileID: 1273707560276000075, guid: 5ce156e453a8ff14eac67cbe7b235364, type: 3}
+      - {fileID: 1435010855523549752, guid: 4401117c6e8dee84ca96f12b3ee03eed, type: 3}
+      - {fileID: 3029268752068045786, guid: 316e0b7de169167439e414fc13fc027a, type: 3}
+      - {fileID: 1643634712279723685, guid: 9969cad6113183e4b866cf1eccb2b367, type: 3}
+      - {fileID: 8531268921839915742, guid: f9b744ea8e7219a41953ca3e3bafe8cb, type: 3}
+      - {fileID: 5246947878629779765, guid: 4a34a59f8a3c91f449f20e9731ac825e, type: 3}
+      - {fileID: 2438194319344776805, guid: 36fd6246669132a4b86dda851b6d980d, type: 3}
+      - {fileID: 3971463451778831376, guid: 1edfc8f7a00029f4f8b4a7ecafd666b7, type: 3}
+      - {fileID: 2210591884832540886, guid: 273e6a55b96414c4391bbedb3ce5a341, type: 3}
+      - {fileID: 7702201718560748381, guid: 43c95f08e2602724089824cadd9417c5, type: 3}
+      - {fileID: 3791398231353743854, guid: baddfd80112a012498472e9a26fc1b55, type: 3}
+      - {fileID: 8773764026209649791, guid: 8143b7262e86db1499bb02d202ac14e9, type: 3}
+      - {fileID: 4692960012975581284, guid: a41ccadb07394e54e851af021392f9f5, type: 3}
+      - {fileID: 4107447901922929701, guid: 479f7b5eec0e6a949a2b7e22e3b6b602, type: 3}
+      - {fileID: 551989293670091129, guid: a3904e9d8ec2e42409daa91a728bc53c, type: 3}
+      - {fileID: 2045726192583104083, guid: c5078c997b90f9a4aa77f7cf8eac8d0f, type: 3}
     - name: StormGiants
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
+      - {fileID: 1945190278726057414, guid: 7f2a0dd8d8526834ab9b5ebeef4d941e, type: 3}
+      - {fileID: 861019484700682511, guid: 01f4b727b8ade5541af5064d92d9325a, type: 3}
+      - {fileID: 1755915076363449232, guid: 8f2793d7ec92bca4895389e0579e06d1, type: 3}
+      - {fileID: 6524571947165685232, guid: 13c5acc4cb99ee0489ec190b1304f4fc, type: 3}
+      - {fileID: 8550668707382242759, guid: 858e05fadf535304fb38babd92052410, type: 3}
+      - {fileID: 4567029556603025108, guid: 38b39b7ede6bdca409f7515991196832, type: 3}
+      - {fileID: 9011780065566272575, guid: a89118cb8cf16e3499e18487331bceec, type: 3}
+      - {fileID: 7412938308306292805, guid: 035fa17c6d73c094fa0ed354209fd034, type: 3}
+      - {fileID: 3879208478318540365, guid: bd636d6e2321bf347b7457d1c3add315, type: 3}
+      - {fileID: 2435224631924558563, guid: 8807f7562f581044bb8e47788dbcf2d7, type: 3}
+      - {fileID: 4806390759528853995, guid: d661cc2d28e5e9544afb778fd44bdcf7, type: 3}
+      - {fileID: 2916915878514696639, guid: 9ad70dce7b867504aa0009573e5c618a, type: 3}
+      - {fileID: 3117724149465392078, guid: 0a2a09b2e4ed9d746858334e015daaa2, type: 3}
+      - {fileID: 6558910598471069678, guid: 10be9c60bc50c024eba5489717e29749, type: 3}
+      - {fileID: 2363053224568117836, guid: 618bfa346acfe9646b2507b64c5dc299, type: 3}
+      - {fileID: 337413531095034319, guid: a9d25b57aaff4b24b97f865cd5017bcf, type: 3}
     - name: GreyDwarves
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
@@ -10934,8 +11009,33 @@ MonoBehaviour:
       - {fileID: 0}
       - {fileID: 0}
     - name: OrcsOfKor
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
@@ -10945,8 +11045,33 @@ MonoBehaviour:
       - {fileID: 0}
       - {fileID: 0}
     - name: Elvallie
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
@@ -10956,19 +11081,69 @@ MonoBehaviour:
       - {fileID: 0}
       - {fileID: 0}
     - name: Selentines
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
+      - {fileID: 7999468704934516258, guid: 7a532303db98ffd4e8b9767faf43a6a8, type: 3}
+      - {fileID: 6916954066251725775, guid: 432e3e727a2d3fb46872fe5da67d6611, type: 3}
+      - {fileID: 2266973513281147052, guid: bcf391a4f47669548a5759283d732129, type: 3}
+      - {fileID: 404234786044408228, guid: 93b792c37a096774794c50e1ff10552d, type: 3}
+      - {fileID: 8104270871795678551, guid: 951121937e42a044fbbfea1a2dd18baf, type: 3}
+      - {fileID: 3743905784508256155, guid: 53f26aa8e7b8f0c43a41b8045332de74, type: 3}
+      - {fileID: 4069329895221341663, guid: a9916b5e69fed8147afee7e8ce81b143, type: 3}
+      - {fileID: 6330460681233618382, guid: eac507f2b1d8b554caf202b9bf1b3ae9, type: 3}
+      - {fileID: 2050035147514871242, guid: a380e1be30b9de6459b4acc0c0311648, type: 3}
+      - {fileID: 7398951696116398918, guid: 22cd10a167a8c674680647eb17d7c03d, type: 3}
+      - {fileID: 67440013168964336, guid: 0dbdc66ef06aca44294e7a17790e6374, type: 3}
+      - {fileID: 6087133480468280880, guid: 9d6e8edf65d9e9140bce47ac1475fae9, type: 3}
+      - {fileID: 2657449378042284495, guid: f8343a8b1fbe0b94886d5c365057e0c9, type: 3}
+      - {fileID: 3095536320803497516, guid: c81f7541d4b7ae04bb4a2526c51983ba, type: 3}
+      - {fileID: 8953060193993410931, guid: e831fb014bb3d0a409bc1ac0a004dc41, type: 3}
+      - {fileID: 344639895812216866, guid: 02ce40fb69c6825409617fda053cf376, type: 3}
     - name: HorseLords
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
@@ -10978,19 +11153,69 @@ MonoBehaviour:
       - {fileID: 0}
       - {fileID: 0}
     - name: LordBane
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
+      - {fileID: 4360260825242922551, guid: 9987b63c706eaac49ae9a99309a91060, type: 3}
+      - {fileID: 6985831704844190172, guid: b6384b454c6d23e4f998c294f6108d42, type: 3}
+      - {fileID: 8760680077781859326, guid: 64318092fd7af0a4f8e87cab616102db, type: 3}
+      - {fileID: 4525430689105652022, guid: 8c2eaca54d19532449a5c0a0db0902ed, type: 3}
+      - {fileID: 3114808069688571086, guid: e287d7ec6e95a304b8b7b69adc9013f3, type: 3}
+      - {fileID: 2950308518337630384, guid: a6e2463e5147d3342978fb0acc02b40e, type: 3}
+      - {fileID: 6978527026998634331, guid: 520eaa1beb385a54db3ec371619eef00, type: 3}
+      - {fileID: 3283960899513143387, guid: 1563260b557d2464bac0198f0e32ff49, type: 3}
+      - {fileID: 7054505751395894185, guid: 0b2554741a4145c48810b068f99a194d, type: 3}
+      - {fileID: 5211443428937663195, guid: ff87e2c31803e3247a32305d8d83b0df, type: 3}
+      - {fileID: 2196914075718121037, guid: 6e75146a02ad013418536ca5fcce2ef7, type: 3}
+      - {fileID: 8100090503957024714, guid: 55edf4437488ead46897be2a4e1d1906, type: 3}
+      - {fileID: 4641731884250188003, guid: 31b9e88cc88a0c04c906b138d09c7bee, type: 3}
+      - {fileID: 6057758944312356237, guid: 569b81338bc7d2342a69b887f95e67a2, type: 3}
+      - {fileID: 3142778991491026747, guid: 3c1f3f8d03934d2408e2038fe158941b, type: 3}
+      - {fileID: 4149404412173307239, guid: 8e92a4a73ed7a1143bce29da215dba09, type: 3}
     - name: Neutral
-      count: 8
+      count: 16
+      rowNames:
+      - Cavalry
+      - Demons
+      - Devils
+      - Dragons
+      - DwarvenLegion
+      - ElvenArchers
+      - GiantWarriors
+      - Griffins
+      - HeavyInfantry
+      - Hero
+      - LightInfantry
+      - Navy
+      - Pegasus
+      - Undead
+      - Wizards
+      - WolfRiders
       row:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
@@ -11000,19 +11225,19 @@ MonoBehaviour:
       - {fileID: 0}
       - {fileID: 0}
     count: 9
---- !u!4 &2046391716
+--- !u!4 &2022427047
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2046391714}
+  m_GameObject: {fileID: 2022427045}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 11.934496, y: 9.735912, z: -26.110062}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2053934878
 GameObject:
@@ -11239,7 +11464,7 @@ PrefabInstance:
     - target: {fileID: 315210890008612548, guid: 7e7c9301a3d843845a973598c70e65bc,
         type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 315210890008612548, guid: 7e7c9301a3d843845a973598c70e65bc,
         type: 3}

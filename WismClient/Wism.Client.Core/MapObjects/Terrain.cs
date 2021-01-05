@@ -14,7 +14,9 @@ namespace Wism.Client.MapObjects
             get
             {
                 if (this.info == null)
+                {
                     this.info = MapBuilder.FindTerrainInfo(this.ShortName);
+                }
                 return info;
             }
         }

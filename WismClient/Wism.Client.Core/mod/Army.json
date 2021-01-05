@@ -127,7 +127,17 @@
     "CanWalk": true,
     "CanFloat": false,
     "CanFly": false,
-    "IsSpecial":  true
+    "IsSpecial": true
+  },
+  {
+    "DisplayName": "Wizards",
+    "ShortName": "Wizards",
+    "Strength": 6,
+    "Moves": 50,
+    "CanWalk": true,
+    "CanFloat": false,
+    "CanFly": false,
+    "IsSpecial": true
   },
   {
     "DisplayName": "Wolf Riders",
