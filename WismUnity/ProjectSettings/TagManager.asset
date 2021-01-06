@@ -11,6 +11,7 @@ TagManager:
   - Selected
   - WorldTilemap
   - ArmyManager
+  - NotificationBox
   layers:
   - Default
   - TransparentFX

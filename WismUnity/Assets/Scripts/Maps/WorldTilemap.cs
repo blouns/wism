@@ -84,7 +84,7 @@ namespace Assets.Scripts.Tilemaps
 
         internal (int, int) ConvertUnityToGameCoordinates(Vector3 worldVector)
         {
-            // BUGBUG: This is broken; need to adjust to tilemap coordinates in case
+            // TODO: Add support to adjust to tilemap coordinates in case
             //       the tilemap is translated to another location. 
             return (Mathf.FloorToInt(worldVector.x), Mathf.FloorToInt(worldVector.y));
         }
@@ -106,7 +106,6 @@ namespace Assets.Scripts.Tilemaps
 
         public Tile GetClickedTile(Camera followCamera)
         {
-            // TODO: Clamp to only positions on the world or UI
             Vector3 point = followCamera.ScreenToWorldPoint(Input.mousePosition);
             var gameCoord = ConvertUnityToGameCoordinates(point);
             Tile gameTile = World.Current.Map[gameCoord.Item1, gameCoord.Item2];

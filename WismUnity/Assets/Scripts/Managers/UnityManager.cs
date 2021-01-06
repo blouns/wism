@@ -49,8 +49,10 @@ namespace Assets.Scripts.Managers
         private int selectedArmyIndex;
 
         // Input handling
-        private readonly Timer mouseSingleClickTimer = new Timer();
-        private bool singleClickProcessed;
+        private readonly Timer mouseSingleLeftClickTimer = new Timer();
+        private bool singleLeftClickProcessed;
+        private readonly Timer mouseRightClickHoldTimer = new Timer();
+        private bool holdingRightButton;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
@@ -77,6 +79,7 @@ namespace Assets.Scripts.Managers
                 Draw();
                 DoTasks();
                 CleanupArmies();
+                UpdateCameraState();
             }
             catch (Exception ex)
             {
@@ -85,11 +88,30 @@ namespace Assets.Scripts.Managers
             }
         }
 
-        void SingleClick(object o, System.EventArgs e)
+        private void UpdateCameraState()
         {
-            mouseSingleClickTimer.Stop();
+            var cameraGO = GameObject.FindGameObjectWithTag("MainCamera");
+            var camera = cameraGO.GetComponent<CameraFollow>();
+            if (Game.Current.GameState == GameState.MovingArmy)
+            {                
+                camera.isFollowing = true;
+            }
+            else
+            {
+                camera.isFollowing = false;
+            }
+        }
 
-            singleClickProcessed = true;
+        void SingleLeftClick(object o, System.EventArgs e)
+        {
+            mouseSingleLeftClickTimer.Stop();
+
+            singleLeftClickProcessed = true;
+        }
+
+        void SingleRightClick(object o, System.EventArgs e)
+        {
+            holdingRightButton = true;
         }
 
         /// <summary>
@@ -103,36 +125,53 @@ namespace Assets.Scripts.Managers
                 return;
             }
 
-            if (singleClickProcessed)
+            if (Input.GetMouseButtonDown(1))
             {
-                // Single click performed
+                if (mouseRightClickHoldTimer.Enabled == false)
+                {
+                    mouseRightClickHoldTimer.Start();
+                    // Wait for mouse up
+                    return;
+                }
+            }
+            else if (Input.GetMouseButtonUp(1))
+            {
+                mouseRightClickHoldTimer.Stop();
+
+                if (!holdingRightButton)
+                {
+                    HandleRightClick();
+                    Draw();
+                }
+
+                holdingRightButton = false;
+            }
+
+            if (singleLeftClickProcessed)
+            {
+                // Single left click performed
                 HandleLeftClick();
-                singleClickProcessed = false;
+                singleLeftClickProcessed = false;
                 Draw();
             }
             else if (Input.GetMouseButtonDown(0))
             {
                 // Detect single vs. double-click
-                if (mouseSingleClickTimer.Enabled == false)
+                if (mouseSingleLeftClickTimer.Enabled == false)
                 {
-                    mouseSingleClickTimer.Start();
+                    mouseSingleLeftClickTimer.Start();
                     // Wait for double click
                     return;
                 }
                 else
                 {
                     // Double click performed, so cancel single click
-                    mouseSingleClickTimer.Stop();
+                    mouseSingleLeftClickTimer.Stop();
 
                     HandleLeftClick(true);
                     Draw();
                 }
-            }
-            else if (Input.GetMouseButtonDown(1))
-            {
-                HandleRightClick();
-                Draw();
-            }
+            }            
             else
             {
                 HandleKeyboard();
@@ -184,8 +223,11 @@ namespace Assets.Scripts.Managers
             CreateDefaultArmies();            
             DrawArmyGameObjects();
 
-            mouseSingleClickTimer.Interval = 400;
-            mouseSingleClickTimer.Elapsed += SingleClick;
+            mouseSingleLeftClickTimer.Interval = 400;
+            mouseSingleLeftClickTimer.Elapsed += SingleLeftClick;
+
+            mouseRightClickHoldTimer.Interval = 200;
+            mouseRightClickHoldTimer.Elapsed += SingleRightClick;
         }
 
         
@@ -488,7 +530,6 @@ namespace Assets.Scripts.Managers
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
-            SetCameraTarget(this.selectedArmyBox.transform);
         }
 
         internal void SetCameraTarget(Transform transform)
