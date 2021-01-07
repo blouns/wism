@@ -189,9 +189,9 @@ namespace Wism.Client.Agent
         private void DoEndTurn()
         {
             commandController.AddCommand(
-                    new EndTurnCommand(gameController));
+                    new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
             commandController.AddCommand(
-                    new StartTurnCommand(gameController));
+                    new StartTurnCommand(gameController, Game.Current.GetNextPlayer()));
         }
 
         private void DoMoveArmyOneStep(int xDelta, int yDelta)

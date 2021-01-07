@@ -101,7 +101,7 @@ namespace Wism.Client.Agent
                 ModFactory.FindArmyInfo("Cavalry"),
                 enemyTile1);
 
-            var enemyTile2 = World.Current.Map[3, 4];
+            var enemyTile2 = World.Current.Map[3, 2];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile2);

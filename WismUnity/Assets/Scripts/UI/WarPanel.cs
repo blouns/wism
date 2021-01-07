@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
 public class WarPanel : MonoBehaviour
@@ -11,36 +12,49 @@ public class WarPanel : MonoBehaviour
     public GameObject AttackerPrefab;
     public GameObject DefenderPrefab;
 
-    private Dictionary<Army, GameObject> attackerPanelObjects;
-    private Dictionary<Army, GameObject> defenderPanelObjects;
+    private Dictionary<Army, GameObject> attackerPanelObjects = new Dictionary<Army, GameObject>();
+    private Dictionary<Army, GameObject> defenderPanelObjects = new Dictionary<Army, GameObject>();
     private ArmyManager armyManager;
 
     private int currentAttackerIndex;
     private int currentDefenderIndex;
     
-    public void Initialize(List<Army> attackers, List<Army> defenders)
+    public void Initialize(List<Army> attackers, List<Army> defenders, Tile targetTile)
     {
         if (attackers is null)
         {
             throw new ArgumentNullException(nameof(attackers));
         }
 
-        if (defenders is null || defenders.Count == 0)
+        if (defenders is null)
         {
             throw new ArgumentNullException(nameof(defenders));
         }
 
+        if (targetTile is null)
+        {
+            throw new ArgumentNullException(nameof(targetTile));
+        }
+
+        if (defenders.Count == 0 &&
+            targetTile.HasCity())
+        {
+            // Defenseless city
+            if (defenderPanelObjects != null)
+            {
+                defenderPanelObjects.Clear();
+            }
+        }
+
         this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
             .GetComponent<ArmyManager>();
-
-        var targetTile = defenders[0].Tile;
 
         currentAttackerIndex = 0;
         currentDefenderIndex = 0;
 
         List<Army> attackingArmies = new List<Army>(attackers);
         attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
-        attackerPanelObjects = CreateArmyPanelObjects(attackingArmies, AttackerPrefab, AttackerPrefab.transform.position);        
+        attackerPanelObjects = CreateArmyPanelObjects(attackingArmies, AttackerPrefab, AttackerPrefab.transform.position);
 
         if (defenders.Count > 0)
         {
@@ -75,8 +89,11 @@ public class WarPanel : MonoBehaviour
 
     private Vector3 GetArmyPanelPosition(List<Army> armies, Vector3 position, int index, GameObject armyGo)
     {        
-        const float xArmySize = .5f;
+        const float xArmySize = 1f;
         const float xOffset = -.25f;
+
+        var rectTransform = this.GetComponent<RectTransform>();
+
 
         index = armies.Count - index; // Reverse the order to draw left-to-right
         float xTotal = xArmySize * armies.Count;
@@ -109,10 +126,16 @@ public class WarPanel : MonoBehaviour
 
     public void UpdateBattle(List<Army> attackers, List<Army> defenders)
     {
+        if (defenders.Count == 0)
+        {
+            Debug.Log("The garrison has fled before you!", this);
+            return;
+        }
+
         var attacker = attackers[currentAttackerIndex];
-        var defender = (defenders != null && defenders.Count > 0) ? defenders[currentDefenderIndex] : null;
+        var defender = defenders[currentDefenderIndex];
         bool didAttackerWin;
-        Army losingArmy;
+        Army losingArmy = null;
         
         if (attacker.IsDead)
         {
@@ -127,17 +150,11 @@ public class WarPanel : MonoBehaviour
             didAttackerWin = true;
             losingArmy = defender;
             currentDefenderIndex = (currentDefenderIndex + 1 == defenders.Count) ?
-                currentDefenderIndex : 
+                currentDefenderIndex :
                 currentDefenderIndex + 1;
         }
 
-        Dictionary<Army, GameObject> losingArmies = (didAttackerWin) ? defenderPanelObjects : attackerPanelObjects;
-
-        if (losingArmies.Count == 0)
-        {
-            Debug.Log("WarPanel: Losing player had no armies.", this);
-            return;
-        }
+        Dictionary<Army, GameObject> losingArmies = (didAttackerWin) ? defenderPanelObjects : attackerPanelObjects;        
 
         if (!losingArmies.ContainsKey(losingArmy))
         {

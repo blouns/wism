@@ -1,12 +1,18 @@
 using UnityEngine;
+using Wism.Client.Core;
 
 public class CameraFollow : MonoBehaviour
 {
-    // TODO: Make this dynamic to tilemap
+    // TODO: Make this dynamic to tilemap and screen
     private const float DefaultXMinClamp = 15.5f;
     private const float DefaultXMaxClamp = 69.5f;
     private const float DefaultYMinClamp = 8.8f;
     private const float DefaultYMaxClamp = 72f;
+
+    private const float SurfacePro6XMinClamp = 13.75f;
+    private const float SurfacePro6XMaxClamp = 71f;
+    private const float SurfacePro6YMinClamp = 7.5f;
+    private const float SurfacePro6YMaxClamp = 73f;
 
     public Transform target;
     public float speed;
@@ -31,6 +37,12 @@ public class CameraFollow : MonoBehaviour
     }
 
     public void LateUpdate()
+    {
+        UpdateCameraState();
+        HandleRightClickDrag();
+    }
+
+    private void HandleRightClickDrag()
     {
         if (Input.GetMouseButton(1))
         {
@@ -72,5 +84,17 @@ public class CameraFollow : MonoBehaviour
             lerpPosition.z);
 
         transform.position = newPosition;
+    }
+
+    private void UpdateCameraState()
+    {        
+        if (Game.Current.GameState == GameState.MovingArmy)
+        {
+            isFollowing = true;
+        }
+        else
+        {
+            isFollowing = false;
+        }
     }
 }

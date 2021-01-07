@@ -134,13 +134,14 @@ namespace Assets.Scripts.Managers
         public void StartTurn()
         {
             commandController.AddCommand(
-                new StartTurnCommand(provider.GameController));
+                new StartTurnCommand(provider.GameController, Game.Current.GetNextPlayer()));
         }
 
         public void EndTurn()
         {
             commandController.AddCommand(
-                new EndTurnCommand(provider.GameController));
+                new EndTurnCommand(provider.GameController, Game.Current.GetCurrentPlayer()));
+            StartTurn();    // TODO: For now just start immediately; later, new processor
         }
 
         private List<Player> ReadyPlayers()

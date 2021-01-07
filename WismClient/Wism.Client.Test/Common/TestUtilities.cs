@@ -98,13 +98,13 @@ namespace Wism.Client.Test.Common
         public static ActionState EndTurn(CommandController commandController, GameController gameController)
         {
             return ExecuteCommandUntilDone(commandController,
-                new EndTurnCommand(gameController));
+                new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
         }
 
         public static ActionState StartTurn(CommandController commandController, GameController gameController)
         {
             return ExecuteCommandUntilDone(commandController,
-                new StartTurnCommand(gameController));
+                new StartTurnCommand(gameController, Game.Current.GetNextPlayer()));
         }
 
         public static ActionState ExecuteCommandUntilDone(CommandController commandController, Command command)

@@ -69,36 +69,33 @@ namespace Assets.Scripts.Managers
 
         private void Update()
         {
+            if (!Game.IsInitialized())
+            {
+                return;
+            }
+
             HandleInput();
         }        
 
         public void FixedUpdate()
         {
+            if (!Game.IsInitialized())
+            {
+                Debug.LogError("Game not initialized; initializing new game...");
+                Start();
+                return;
+            }
+
             try
             {
                 Draw();
                 DoTasks();
                 CleanupArmies();
-                UpdateCameraState();
             }
             catch (Exception ex)
             {
                 Debug.LogException(ex);
                 throw;
-            }
-        }
-
-        private void UpdateCameraState()
-        {
-            var cameraGO = GameObject.FindGameObjectWithTag("MainCamera");
-            var camera = cameraGO.GetComponent<CameraFollow>();
-            if (Game.Current.GameState == GameState.MovingArmy)
-            {                
-                camera.isFollowing = true;
-            }
-            else
-            {
-                camera.isFollowing = false;
             }
         }
 
@@ -188,7 +185,7 @@ namespace Assets.Scripts.Managers
 
 
         public void Initialize(ILoggerFactory loggerFactory, ControllerProvider provider)
-        {
+        {            
             this.logger = loggerFactory.CreateLogger();
             this.provider = provider;
 
@@ -304,6 +301,10 @@ namespace Assets.Scripts.Managers
             else if (Input.GetKeyDown(KeyCode.N))
             {
                 GameManager.SelectNextArmy();
+            }
+            else if (Input.GetKeyDown(KeyCode.E))
+            {
+                GameManager.EndTurn();
             }
         }
 

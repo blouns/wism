@@ -30,11 +30,11 @@ namespace Wism.Client.Agent.CommandProcessors
             var result = battleCommand.Execute();
 
             var targetTile = World.Current.Map[battleCommand.X, battleCommand.Y];
-            var attackingPlayer = battleCommand.Armies[0].Player;
+            var attackingPlayer = battleCommand.OriginalAttackingArmies[0].Player;
             var attackingArmies = battleCommand.OriginalAttackingArmies;
             attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
 
-            var defendingPlayer = battleCommand.Defenders[0].Player;
+            var defendingPlayer = battleCommand.OriginalDefendingArmies[0].Player;
             var defendingArmies = battleCommand.OriginalDefendingArmies;
             defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
 

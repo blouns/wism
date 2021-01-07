@@ -8,7 +8,7 @@ namespace Wism.Client.Api.Commands
     {
         private readonly GameController gameController;
 
-        public StartTurnCommand(GameController gameController)
+        public StartTurnCommand(GameController gameController, Player player)
             : base()
         {
             if (gameController is null)
@@ -16,7 +16,13 @@ namespace Wism.Client.Api.Commands
                 throw new ArgumentNullException(nameof(gameController));
             }
 
+            if (player is null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
             this.gameController = gameController;
+            this.Player = player;
         }
 
         protected override ActionState ExecuteInternal()

@@ -1505,10 +1505,10 @@ MonoBehaviour:
   target: {fileID: 418848444}
   speed: 0.1
   scale: 1
-  xMinClamp: 15.5
-  xMaxClamp: 69.5
-  yMinClamp: 8.8
-  yMaxClamp: 72
+  xMinClamp: 13.75
+  xMaxClamp: 71
+  yMinClamp: 7.5
+  yMaxClamp: 73
   isFollowing: 0
 --- !u!1 &366702661
 GameObject:
