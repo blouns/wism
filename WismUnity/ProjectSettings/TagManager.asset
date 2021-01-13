@@ -12,6 +12,8 @@ TagManager:
   - WorldTilemap
   - ArmyManager
   - NotificationBox
+  - CityProductionPanel
+  - Crosshairs
   layers:
   - Default
   - TransparentFX

@@ -4,10 +4,10 @@ using Wism.Client.Core;
 public class CameraFollow : MonoBehaviour
 {
     // TODO: Make this dynamic to tilemap and screen
-    private const float DefaultXMinClamp = 15.5f;
-    private const float DefaultXMaxClamp = 69.5f;
-    private const float DefaultYMinClamp = 8.8f;
-    private const float DefaultYMaxClamp = 72f;
+    private const float FullHDXMinClamp = 19.2f;
+    private const float FullHDXMaxClamp = 65.8f;
+    private const float FullHDYMinClamp = 8.5f;
+    private const float FullHDYMaxClamp = 70.1f;
 
     private const float SurfacePro6XMinClamp = 13.75f;
     private const float SurfacePro6XMaxClamp = 71f;

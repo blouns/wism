@@ -34,15 +34,12 @@ namespace Wism.Client.Agent.CommandProcessors
         {
             var battleCompleteCommand = (CompleteBattleCommand)command;
             var targetTile = World.Current.Map[battleCompleteCommand.X, battleCompleteCommand.Y];
-            var attackingPlayer = battleCompleteCommand.Armies[0].Player;
+            var attackingPlayer = battleCompleteCommand.Player;
             var attackingArmies = new List<Army>(battleCompleteCommand.Armies);
             attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
 
-            var defendingPlayer = battleCompleteCommand.Defenders[0].Player;
             var defendingArmies = targetTile.MusterArmy();
             defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
-
-//            BattleProcessor.DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
 
             var name = attackingPlayer.Clan.DisplayName;
             var presentVerb = name.EndsWith('s') ? "are" : "is";

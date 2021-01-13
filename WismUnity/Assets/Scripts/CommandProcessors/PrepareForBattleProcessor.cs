@@ -37,7 +37,7 @@ namespace Assets.Scripts.CommandProcessors
         {
             var prepForBattleCommand = (PrepareForBattleCommand)command;
             var targetTile = World.Current.Map[prepForBattleCommand.X, prepForBattleCommand.Y];
-            var attackingPlayer = prepForBattleCommand.Armies[0].Player;
+            var attackingPlayer = prepForBattleCommand.Player;
             unityGame.CurrentAttackers = new List<Army>(prepForBattleCommand.Armies);
             unityGame.CurrentAttackers.Sort(new ByArmyBattleOrder(targetTile));
 

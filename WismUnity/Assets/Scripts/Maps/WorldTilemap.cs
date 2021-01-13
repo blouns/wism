@@ -106,11 +106,29 @@ namespace Assets.Scripts.Tilemaps
 
         public Tile GetClickedTile(Camera followCamera)
         {
-            Vector3 point = followCamera.ScreenToWorldPoint(Input.mousePosition);
-            var gameCoord = ConvertUnityToGameCoordinates(point);
+            Vector3 worldPoint = followCamera.ScreenToWorldPoint(Input.mousePosition);
+            var gameCoord = ConvertUnityToGameCoordinates(worldPoint);
             Tile gameTile = World.Current.Map[gameCoord.Item1, gameCoord.Item2];
 
+            MoveCrosshairs(gameCoord);
+
             return gameTile;
+        }
+
+        // TODO: Move to Crosshairs or Minimap
+        private static void MoveCrosshairs((int, int) gameCoord)
+        {
+            var crossGO = UnityUtilities.GameObjectHardFind("Crosshairs");
+            var crossRect = crossGO.GetComponent<RectTransform>();
+            var minimapPanelRect = UnityUtilities.GameObjectHardFind("MinimapPanel").GetComponent<RectTransform>();
+            
+            float newXPercent = ((float)gameCoord.Item1) / ((float)World.Current.Map.GetUpperBound(0));
+            float newYPercent = ((float)gameCoord.Item2) / ((float)World.Current.Map.GetUpperBound(1));
+            float newX = minimapPanelRect.sizeDelta.x * newXPercent - (minimapPanelRect.sizeDelta.x / 2f);
+            float newY = minimapPanelRect.sizeDelta.y * newYPercent - (minimapPanelRect.sizeDelta.y / 2f);
+
+            // TODO: Clamp to minimap
+            crossRect.localPosition = new Vector3(newX, newY, 0f);
         }
     }
 }

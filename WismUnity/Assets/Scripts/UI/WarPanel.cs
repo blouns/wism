@@ -92,9 +92,6 @@ public class WarPanel : MonoBehaviour
         const float xArmySize = 1f;
         const float xOffset = -.25f;
 
-        var rectTransform = this.GetComponent<RectTransform>();
-
-
         index = armies.Count - index; // Reverse the order to draw left-to-right
         float xTotal = xArmySize * armies.Count;
         float xShifted = (xArmySize * index) - (xTotal / 2) + xOffset;
@@ -135,7 +132,7 @@ public class WarPanel : MonoBehaviour
         var attacker = attackers[currentAttackerIndex];
         var defender = defenders[currentDefenderIndex];
         bool didAttackerWin;
-        Army losingArmy = null;
+        Army losingArmy;
         
         if (attacker.IsDead)
         {

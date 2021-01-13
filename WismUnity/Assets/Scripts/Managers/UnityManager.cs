@@ -120,29 +120,7 @@ namespace Assets.Scripts.Managers
             {
                 // Army picker has focus
                 return;
-            }
-
-            if (Input.GetMouseButtonDown(1))
-            {
-                if (mouseRightClickHoldTimer.Enabled == false)
-                {
-                    mouseRightClickHoldTimer.Start();
-                    // Wait for mouse up
-                    return;
-                }
-            }
-            else if (Input.GetMouseButtonUp(1))
-            {
-                mouseRightClickHoldTimer.Stop();
-
-                if (!holdingRightButton)
-                {
-                    HandleRightClick();
-                    Draw();
-                }
-
-                holdingRightButton = false;
-            }
+            }                        
 
             if (singleLeftClickProcessed)
             {
@@ -173,6 +151,29 @@ namespace Assets.Scripts.Managers
             {
                 HandleKeyboard();
                 Draw();
+            }
+
+            // Handle right-click (drag)
+            if (Input.GetMouseButtonDown(1))
+            {
+                if (mouseRightClickHoldTimer.Enabled == false)
+                {
+                    mouseRightClickHoldTimer.Start();
+                    // Wait for mouse up
+                    return;
+                }
+            }
+            else if (Input.GetMouseButtonUp(1))
+            {
+                mouseRightClickHoldTimer.Stop();
+
+                if (!holdingRightButton)
+                {
+                    HandleRightClick();
+                    Draw();
+                }
+
+                holdingRightButton = false;
             }
         }
 
@@ -388,7 +389,7 @@ namespace Assets.Scripts.Managers
 
         private void ToggleMinimap()
         {
-            GameObject map = UnityUtilities.GameObjectHardFind("MinimapBorder");
+            GameObject map = UnityUtilities.GameObjectHardFind("MinimapPanel");
             map.SetActive(!map.activeSelf);
         }        
 
@@ -528,7 +529,7 @@ namespace Assets.Scripts.Managers
         private void CenterOnTile(Tile clickedTile)
         {
             Debug.Log($"Clicked on {World.Current.Map[clickedTile.X, clickedTile.Y]}");
-            Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
+            Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);            
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
         }
