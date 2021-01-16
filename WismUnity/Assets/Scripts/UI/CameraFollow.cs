@@ -58,9 +58,10 @@ public class CameraFollow : MonoBehaviour
             isDragging = false;
             if (target && isFollowing)
             {
-                SetCameraTarget(target);
+                SetCameraTargetLerp(target);
             }
         }
+
         if (isDragging == true)
         {
             Vector3 move = origin - difference;
@@ -72,10 +73,20 @@ public class CameraFollow : MonoBehaviour
         }
     }
 
-    public void SetCameraTarget(Transform newTarget)
+    public void SetCameraTarget(Vector3 vector)
+    {
+        transform.position = vector + new Vector3(0f, 0f, -10f);
+    }
+
+    public void SetCameraTargetLerp(Transform newTarget)
+    {
+        SetCameraTargetLerp(newTarget.position);
+    }
+
+    public void SetCameraTargetLerp(Vector3 vector)
     {
         Vector3 lerpPosition = Vector3.Lerp(
-                            transform.position, newTarget.position, speed) +
+                            transform.position, vector, speed) +
                             new Vector3(0f, 0f, -10f);
 
         Vector3 newPosition = new Vector3(

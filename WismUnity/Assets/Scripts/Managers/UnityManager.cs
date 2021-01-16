@@ -53,6 +53,7 @@ namespace Assets.Scripts.Managers
         private bool singleLeftClickProcessed;
         private readonly Timer mouseRightClickHoldTimer = new Timer();
         private bool holdingRightButton;
+        private bool acceptingInput = true;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
@@ -111,14 +112,19 @@ namespace Assets.Scripts.Managers
             holdingRightButton = true;
         }
 
+        public void SetAcceptingInput(bool acceptingInput)
+        {
+            this.acceptingInput = acceptingInput;
+        }
+
         /// <summary>
         /// Process keyboard and mouse input, including single and double click handling
         /// </summary>
         private void HandleInput()
         {
-            if (SelectingArmies)
+            if (SelectingArmies || !this.acceptingInput)
             {
-                // Army picker has focus
+                // Army picker or another control has focus
                 return;
             }                        
 
@@ -192,16 +198,17 @@ namespace Assets.Scripts.Managers
 
             // Set up game UI
             SetTime(GameManager.StandardTime);
-            SetupCameras();            
+            SetupCameras();
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
             ArmyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
 
             // Create command processors:
-            // Commands are proccessed by processors. All commands can be handled by the
-            // StandardCommand processor, but special behavior or cut-scenes can be driven
-            // by using specialized processors (e.g. battle cut scene).
+            //   Commands are proccessed by processors. All commands can be handled by the
+            //   StandardCommand processor, but special behavior or cut-scenes can be driven
+            //   by using specialized processors (e.g. battle cut scene).
             this.commandProcessors = new List<ICommandProcessor>()
             {
+                new SelectArmyProcessor(loggerFactory, this),
                 new PrepareForBattleProcessor(loggerFactory, this),
                 new BattleProcessor(loggerFactory, this),
                 new CompleteBattleProcessor(loggerFactory, this),
@@ -463,7 +470,6 @@ namespace Assets.Scripts.Managers
                     ago.GameObject.SetActive(true);
                 }
             }
-
         }
 
         private void SelectObject(Tile tile, bool selectAll)
@@ -526,10 +532,20 @@ namespace Assets.Scripts.Managers
             this.selectedArmyIndex = -1;
         }
 
-        private void CenterOnTile(Tile clickedTile)
+        internal void CenterOnTile(Tile clickedTile)
         {
-            Debug.Log($"Clicked on {World.Current.Map[clickedTile.X, clickedTile.Y]}");
-            Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);            
+            if (!this.acceptingInput)
+            {
+                Debug.Log("Control is not on game objects. Not centering tile.");
+                return;
+            }
+
+            Debug.Log(World.Current.Map[clickedTile.X, clickedTile.Y]);
+            Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
+
+            followCamera.GetComponent<CameraFollow>()
+                .SetCameraTarget(worldVector);
+
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
         }
