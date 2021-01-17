@@ -65,17 +65,21 @@ public class CameraFollow : MonoBehaviour
         if (isDragging == true)
         {
             Vector3 move = origin - difference;
-            Vector3 newPosition = new Vector3(
-                        Mathf.Clamp(move.x, xMinClamp, xMaxClamp),
-                        Mathf.Clamp(move.y, yMinClamp, yMaxClamp),
-                        move.z);
-            followCamera.transform.position = newPosition;
+            followCamera.transform.position = ClampVectorToTilemap(move);
         }
+    }
+
+    private Vector3 ClampVectorToTilemap(Vector3 vector)
+    {
+        return new Vector3(
+            Mathf.Clamp(vector.x, xMinClamp, xMaxClamp),
+            Mathf.Clamp(vector.y, yMinClamp, yMaxClamp),
+            vector.z);
     }
 
     public void SetCameraTarget(Vector3 vector)
     {
-        transform.position = vector + new Vector3(0f, 0f, -10f);
+        transform.position = ClampVectorToTilemap(vector + new Vector3(0f, 0f, -10f));
     }
 
     public void SetCameraTargetLerp(Transform newTarget)
@@ -85,16 +89,10 @@ public class CameraFollow : MonoBehaviour
 
     public void SetCameraTargetLerp(Vector3 vector)
     {
-        Vector3 lerpPosition = Vector3.Lerp(
-                            transform.position, vector, speed) +
+        Vector3 lerpPosition = Vector3.Lerp(transform.position, vector, speed) +
                             new Vector3(0f, 0f, -10f);
 
-        Vector3 newPosition = new Vector3(
-            Mathf.Clamp(lerpPosition.x, xMinClamp, xMaxClamp),
-            Mathf.Clamp(lerpPosition.y, yMinClamp, yMaxClamp),
-            lerpPosition.z);
-
-        transform.position = newPosition;
+        transform.position = ClampVectorToTilemap(lerpPosition);
     }
 
     private void UpdateCameraState()

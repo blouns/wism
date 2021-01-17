@@ -55,6 +55,8 @@ namespace Assets.Scripts.Managers
         private bool holdingRightButton;
         private bool acceptingInput = true;
 
+        private bool showDebugError = true;
+
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
 
@@ -70,7 +72,7 @@ namespace Assets.Scripts.Managers
 
         private void Update()
         {
-            if (!Game.IsInitialized())
+            if (!IsInitalized())
             {
                 return;
             }
@@ -80,10 +82,8 @@ namespace Assets.Scripts.Managers
 
         public void FixedUpdate()
         {
-            if (!Game.IsInitialized())
-            {
-                Debug.LogError("Game not initialized; initializing new game...");
-                Start();
+            if (!IsInitalized())
+            {     
                 return;
             }
 
@@ -98,6 +98,24 @@ namespace Assets.Scripts.Managers
                 Debug.LogException(ex);
                 throw;
             }
+        }
+
+        private bool IsInitalized()
+        {
+            bool result = true;
+
+            if (!Game.IsInitialized())
+            {
+                if (this.showDebugError)
+                {
+                    Debug.LogError("Game not initialized");
+                    this.showDebugError = false;
+                }
+
+                result = false;
+            }
+
+            return result;
         }
 
         void SingleLeftClick(object o, System.EventArgs e)
@@ -202,16 +220,14 @@ namespace Assets.Scripts.Managers
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
             ArmyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
 
-            // Create command processors:
-            //   Commands are proccessed by processors. All commands can be handled by the
-            //   StandardCommand processor, but special behavior or cut-scenes can be driven
-            //   by using specialized processors (e.g. battle cut scene).
+            // Create command processors
             this.commandProcessors = new List<ICommandProcessor>()
             {
                 new SelectArmyProcessor(loggerFactory, this),
                 new PrepareForBattleProcessor(loggerFactory, this),
                 new BattleProcessor(loggerFactory, this),
                 new CompleteBattleProcessor(loggerFactory, this),
+                new StartTurnProcessor(loggerFactory, this),
                 new StandardProcessor(loggerFactory)
             };
 
@@ -227,6 +243,7 @@ namespace Assets.Scripts.Managers
             CreateDefaultCities();
             CreateDefaultArmies();            
             DrawArmyGameObjects();
+            SelectObject(World.Current.Map[2, 1], true);
 
             mouseSingleLeftClickTimer.Interval = 400;
             mouseSingleLeftClickTimer.Elapsed += SingleLeftClick;
@@ -373,6 +390,11 @@ namespace Assets.Scripts.Managers
             if (this.selectedArmyBox == null)
             {
                 throw new InvalidOperationException("Selected army box was null.");
+            }
+
+            if (!this.acceptingInput)
+            {
+                return;
             }
 
             this.selectedArmyBox.Draw(this);
