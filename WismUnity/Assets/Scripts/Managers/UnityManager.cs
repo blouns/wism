@@ -49,8 +49,13 @@ namespace Assets.Scripts.Managers
         private int selectedArmyIndex;
 
         // Input handling
-        private readonly Timer mouseSingleClickTimer = new Timer();
-        private bool singleClickProcessed;
+        private readonly Timer mouseSingleLeftClickTimer = new Timer();
+        private bool singleLeftClickProcessed;
+        private readonly Timer mouseRightClickHoldTimer = new Timer();
+        private bool holdingRightButton;
+        private bool acceptingInput = true;
+
+        private bool showDebugError = true;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
@@ -67,11 +72,21 @@ namespace Assets.Scripts.Managers
 
         private void Update()
         {
+            if (!IsInitalized())
+            {
+                return;
+            }
+
             HandleInput();
         }        
 
         public void FixedUpdate()
         {
+            if (!IsInitalized())
+            {     
+                return;
+            }
+
             try
             {
                 Draw();
@@ -85,11 +100,39 @@ namespace Assets.Scripts.Managers
             }
         }
 
-        void SingleClick(object o, System.EventArgs e)
+        private bool IsInitalized()
         {
-            mouseSingleClickTimer.Stop();
+            bool result = true;
 
-            singleClickProcessed = true;
+            if (!Game.IsInitialized())
+            {
+                if (this.showDebugError)
+                {
+                    Debug.LogError("Game not initialized");
+                    this.showDebugError = false;
+                }
+
+                result = false;
+            }
+
+            return result;
+        }
+
+        void SingleLeftClick(object o, System.EventArgs e)
+        {
+            mouseSingleLeftClickTimer.Stop();
+
+            singleLeftClickProcessed = true;
+        }
+
+        void SingleRightClick(object o, System.EventArgs e)
+        {
+            holdingRightButton = true;
+        }
+
+        public void SetAcceptingInput(bool acceptingInput)
+        {
+            this.acceptingInput = acceptingInput;
         }
 
         /// <summary>
@@ -97,46 +140,64 @@ namespace Assets.Scripts.Managers
         /// </summary>
         private void HandleInput()
         {
-            if (SelectingArmies)
+            if (SelectingArmies || !this.acceptingInput)
             {
-                // Army picker has focus
+                // Army picker or another control has focus
                 return;
-            }
+            }                        
 
-            if (singleClickProcessed)
+            if (singleLeftClickProcessed)
             {
-                // Single click performed
+                // Single left click performed
                 HandleLeftClick();
-                singleClickProcessed = false;
+                singleLeftClickProcessed = false;
                 Draw();
             }
             else if (Input.GetMouseButtonDown(0))
             {
                 // Detect single vs. double-click
-                if (mouseSingleClickTimer.Enabled == false)
+                if (mouseSingleLeftClickTimer.Enabled == false)
                 {
-                    mouseSingleClickTimer.Start();
+                    mouseSingleLeftClickTimer.Start();
                     // Wait for double click
                     return;
                 }
                 else
                 {
                     // Double click performed, so cancel single click
-                    mouseSingleClickTimer.Stop();
+                    mouseSingleLeftClickTimer.Stop();
 
                     HandleLeftClick(true);
                     Draw();
                 }
-            }
-            else if (Input.GetMouseButtonDown(1))
-            {
-                HandleRightClick();
-                Draw();
-            }
+            }            
             else
             {
                 HandleKeyboard();
                 Draw();
+            }
+
+            // Handle right-click (drag)
+            if (Input.GetMouseButtonDown(1))
+            {
+                if (mouseRightClickHoldTimer.Enabled == false)
+                {
+                    mouseRightClickHoldTimer.Start();
+                    // Wait for mouse up
+                    return;
+                }
+            }
+            else if (Input.GetMouseButtonUp(1))
+            {
+                mouseRightClickHoldTimer.Stop();
+
+                if (!holdingRightButton)
+                {
+                    HandleRightClick();
+                    Draw();
+                }
+
+                holdingRightButton = false;
             }
         }
 
@@ -149,25 +210,24 @@ namespace Assets.Scripts.Managers
 
 
         public void Initialize(ILoggerFactory loggerFactory, ControllerProvider provider)
-        {
+        {            
             this.logger = loggerFactory.CreateLogger();
             this.provider = provider;
 
             // Set up game UI
             SetTime(GameManager.StandardTime);
-            SetupCameras();            
+            SetupCameras();
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
             ArmyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
 
-            // Create command processors:
-            // Commands are proccessed by processors. All commands can be handled by the
-            // StandardCommand processor, but special behavior or cut-scenes can be driven
-            // by using specialized processors (e.g. battle cut scene).
+            // Create command processors
             this.commandProcessors = new List<ICommandProcessor>()
             {
+                new SelectArmyProcessor(loggerFactory, this),
                 new PrepareForBattleProcessor(loggerFactory, this),
                 new BattleProcessor(loggerFactory, this),
                 new CompleteBattleProcessor(loggerFactory, this),
+                new StartTurnProcessor(loggerFactory, this),
                 new StandardProcessor(loggerFactory)
             };
 
@@ -183,9 +243,13 @@ namespace Assets.Scripts.Managers
             CreateDefaultCities();
             CreateDefaultArmies();            
             DrawArmyGameObjects();
+            SelectObject(World.Current.Map[2, 1], true);
 
-            mouseSingleClickTimer.Interval = 400;
-            mouseSingleClickTimer.Elapsed += SingleClick;
+            mouseSingleLeftClickTimer.Interval = 400;
+            mouseSingleLeftClickTimer.Elapsed += SingleLeftClick;
+
+            mouseRightClickHoldTimer.Interval = 200;
+            mouseRightClickHoldTimer.Elapsed += SingleRightClick;
         }
 
         
@@ -263,6 +327,10 @@ namespace Assets.Scripts.Managers
             {
                 GameManager.SelectNextArmy();
             }
+            else if (Input.GetKeyDown(KeyCode.E))
+            {
+                GameManager.EndTurn();
+            }
         }
 
         private void HandleRightClick()
@@ -324,6 +392,11 @@ namespace Assets.Scripts.Managers
                 throw new InvalidOperationException("Selected army box was null.");
             }
 
+            if (!this.acceptingInput)
+            {
+                return;
+            }
+
             this.selectedArmyBox.Draw(this);
         }        
 
@@ -345,7 +418,7 @@ namespace Assets.Scripts.Managers
 
         private void ToggleMinimap()
         {
-            GameObject map = UnityUtilities.GameObjectHardFind("MinimapBorder");
+            GameObject map = UnityUtilities.GameObjectHardFind("MinimapPanel");
             map.SetActive(!map.activeSelf);
         }        
 
@@ -419,7 +492,6 @@ namespace Assets.Scripts.Managers
                     ago.GameObject.SetActive(true);
                 }
             }
-
         }
 
         private void SelectObject(Tile tile, bool selectAll)
@@ -482,13 +554,22 @@ namespace Assets.Scripts.Managers
             this.selectedArmyIndex = -1;
         }
 
-        private void CenterOnTile(Tile clickedTile)
+        internal void CenterOnTile(Tile clickedTile)
         {
-            Debug.Log($"Clicked on {World.Current.Map[clickedTile.X, clickedTile.Y]}");
+            if (!this.acceptingInput)
+            {
+                Debug.Log("Control is not on game objects. Not centering tile.");
+                return;
+            }
+
+            Debug.Log(World.Current.Map[clickedTile.X, clickedTile.Y]);
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
+
+            followCamera.GetComponent<CameraFollow>()
+                .SetCameraTarget(worldVector);
+
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
-            SetCameraTarget(this.selectedArmyBox.transform);
         }
 
         internal void SetCameraTarget(Transform transform)

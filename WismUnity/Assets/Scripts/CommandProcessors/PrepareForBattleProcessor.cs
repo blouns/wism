@@ -1,5 +1,8 @@
-﻿using Assets.Scripts.Managers;
+﻿using Assets.Scripts.Common;
+using Assets.Scripts.Managers;
+using System;
 using System.Collections.Generic;
+using System.Timers;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
@@ -16,6 +19,10 @@ namespace Assets.Scripts.CommandProcessors
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
 
+        private const double DefaultInterval = 3000d;
+        private Timer timer;
+        private bool timerElapsed;
+
         public PrepareForBattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
@@ -24,7 +31,7 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             this.logger = loggerFactory.CreateLogger();
-            this.unityGame = unityGame ?? throw new System.ArgumentNullException(nameof(unityGame));
+            this.unityGame = unityGame ?? throw new System.ArgumentNullException(nameof(unityGame));            
         }
 
         public bool CanExecute(ICommandAction command)
@@ -36,20 +43,82 @@ namespace Assets.Scripts.CommandProcessors
         {
             var prepForBattleCommand = (PrepareForBattleCommand)command;
             var targetTile = World.Current.Map[prepForBattleCommand.X, prepForBattleCommand.Y];
-            var attackingPlayer = prepForBattleCommand.Armies[0].Player;
+            var attackingPlayer = prepForBattleCommand.Player;
             unityGame.CurrentAttackers = new List<Army>(prepForBattleCommand.Armies);
             unityGame.CurrentAttackers.Sort(new ByArmyBattleOrder(targetTile));
 
-            var defendingPlayer = prepForBattleCommand.Defenders[0].Player;
-            unityGame.CurrentDefenders = targetTile.MusterArmy();
-            unityGame.CurrentDefenders.Sort(new ByArmyBattleOrder(targetTile));
+            Player defendingPlayer;
+            if (prepForBattleCommand.Defenders.Count > 0)
+            {
+                defendingPlayer = prepForBattleCommand.Defenders[0].Player;
+                unityGame.CurrentDefenders = targetTile.MusterArmy();
+                unityGame.CurrentDefenders.Sort(new ByArmyBattleOrder(targetTile));
+            }
+            else
+            {
+                // Defenseless city
+                var tile = World.Current.Map[prepForBattleCommand.X, prepForBattleCommand.Y];
+                if (tile.City == null)
+                {
+                    throw new InvalidOperationException($"Expected a city to be present on {tile}");
+                }
+                defendingPlayer = tile.City.Player;
+                unityGame.CurrentDefenders = new List<Army>();
+            }
 
-            ShowWarPanel(attackingPlayer, unityGame.CurrentAttackers, defendingPlayer, unityGame.CurrentDefenders, targetTile);
+            if (!timerElapsed)
+            {
+                this.unityGame.SetAcceptingInput(false);
+                GameObject.FindGameObjectWithTag("Selected").SetActive(false);
+                StartTimerOnFirstTime();
+                ShowBattleNotification(defendingPlayer);
+                DrawWarScene(targetTile);
 
-            return command.Execute();
+                return ActionState.InProgress;
+            }
+            else
+            {
+                ShowWarPanel(attackingPlayer, unityGame.CurrentAttackers, defendingPlayer, unityGame.CurrentDefenders, targetTile);
+                this.timerElapsed = false;
+                this.timer = null;
+
+                return command.Execute();
+            }
         }
 
-        public void ShowWarPanel(Player attackingPlayer, List<Army> attackingArmies, Player defendingPlayer, List<Army> defenderingArmies, Tile targetTile)
+        private void StartTimerOnFirstTime()
+        {
+            if (this.timer == null)
+            {
+                this.timer = new Timer(DefaultInterval);
+                this.timer.Elapsed += Timer_Elapsed;
+                this.timer.Start();
+            }
+        }
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            this.timer.Stop();
+            this.timerElapsed = true;            
+        }
+
+        private void DrawWarScene(Tile targetTile)
+        {
+            var worldTilemap = unityGame.WorldTilemap;
+            var warGO = UnityUtilities.GameObjectHardFind("War!");
+            warGO.transform.position = worldTilemap.ConvertGameToUnityCoordinates(targetTile.X, targetTile.Y);
+            warGO.SetActive(true);
+        }
+
+        private static void ShowBattleNotification(Player defendingPlayer)
+        {
+            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
+                            .GetComponent<NotificationBox>();
+            string name = defendingPlayer.Clan.DisplayName;
+            messageBox.Notify($"{name} you {TextUtilities.GetPresentVerb(name)} being attacked!");
+        }
+
+        public void ShowWarPanel(Player attackingPlayer, List<Army> attackingArmies, Player defendingPlayer, List<Army> defendingArmies, Tile targetTile)
         {
             if (attackingPlayer == defendingPlayer)
             {
@@ -57,22 +126,12 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             Debug.Log($"{attackingPlayer.Clan.DisplayName} " +
-                $"{GetPresentVerb(attackingPlayer.Clan.DisplayName)} " +
+                $"{TextUtilities.GetPresentVerb(attackingPlayer.Clan.DisplayName)} " +
                 $"attacking {defendingPlayer.Clan.DisplayName}!");
 
             // Set up war UI
-            unityGame.WarPanel.Initialize(attackingArmies, defenderingArmies);
+            unityGame.WarPanel.Initialize(attackingArmies, defendingArmies, targetTile);
             unityGame.SetTime(GameManager.WarTime);
-        }
-
-        private static string GetPresentVerb(string name)
-        {
-            return name.EndsWith("s") ? "are" : "is";
-        }
-
-        private static string GetPastVerb(string name)
-        {
-            return name.EndsWith("s") ? "have" : "has";
         }
     }
 }

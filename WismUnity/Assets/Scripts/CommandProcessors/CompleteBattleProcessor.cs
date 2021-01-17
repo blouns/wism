@@ -47,7 +47,16 @@ namespace Assets.Scripts.CommandProcessors
                     throw new InvalidOperationException("Unexpected ActionState: " + result);
             }
 
+            HideWarScene();
+
             return command.Execute();
+        }
+
+        private void HideWarScene()
+        {
+            var warGO = UnityUtilities.GameObjectHardFind("War!");
+            warGO.SetActive(false);
+            this.unityGame.SetAcceptingInput(true);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿Goal: Add turns and cities with production to the unity game.
 
 TODO:
-* Add cities
 * Add turns
 * Add production menu

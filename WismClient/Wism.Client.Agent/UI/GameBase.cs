@@ -92,16 +92,28 @@ namespace Wism.Client.Agent
             // Set the player's selected army to a default for testing
             armyController.SelectArmy(heroTile.Armies);
 
-            // Create an opponent with a light infantry for testing
+            // Create an opponent for testing
             var enemyTile1 = World.Current.Map[3, 3];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile1);
             Game.Current.Players[1].ConscriptArmy(
-                ModFactory.FindArmyInfo("Cavalry"),
+                ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile1);
+            Game.Current.Players[1].ConscriptArmy(
+                ModFactory.FindArmyInfo("LightInfantry"),
+                enemyTile1);
+            Game.Current.Players[1].ConscriptArmy(
+                ModFactory.FindArmyInfo("LightInfantry"),
+                enemyTile1);
+            Game.Current.Players[1].ConscriptArmy(
+                ModFactory.FindArmyInfo("LightInfantry"),
+                enemyTile1);
+            //Game.Current.Players[1].ConscriptArmy(
+            //    ModFactory.FindArmyInfo("Cavalry"),
+            //    enemyTile1);
 
-            var enemyTile2 = World.Current.Map[3, 4];
+            var enemyTile2 = World.Current.Map[3, 2];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile2);

@@ -41,6 +41,11 @@ namespace Wism.Client.Core
             }
         }
 
+        public static bool IsInitialized()
+        {
+            return Game.current != null;
+        }
+
         public Player GetCurrentPlayer()
         {
             if (Players == null || Players.Count == 0)
@@ -49,6 +54,16 @@ namespace Wism.Client.Core
             }
 
             return Players[currentPlayerIndex];
+        }
+
+        public Player GetNextPlayer()
+        {
+            if (Players == null || Players.Count == 0)
+            {
+                throw new InvalidOperationException("Players have not been initialized.");
+            }
+
+            return Players[(currentPlayerIndex + 1) % Players.Count];
         }
 
         public void Transition(GameState newState)

@@ -50,7 +50,11 @@ namespace Assets.Scripts.Managers
                 Debug.LogFormat($"GameObject not found: {army.Clan.ShortName}_{army.ShortName}");
             }
 
-            return Instantiate<GameObject>(armyPrefab, worldVector, Quaternion.identity, parent);
+            var armyGO = Instantiate<GameObject>(armyPrefab, worldVector, Quaternion.identity, parent);
+            armyGO.GetComponent<SpriteRenderer>()
+                .sortingOrder = 1;
+
+            return armyGO;
         }
 
         internal bool IsInitialized()
