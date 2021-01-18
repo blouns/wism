@@ -54,12 +54,10 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        // TODO: Only on left click!        
-
-        try
+        if (eventData.button == PointerEventData.InputButton.Left)
         {
             var unityManager = GetUnityManager();
-            unityManager.SetAcceptingInput(false);
+            unityManager.SkipInput();
 
             var minimapNormal = GetMinimapNormal();
             var viewportVector = mainCamera.ScreenToViewportPoint(
@@ -71,10 +69,6 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
             float y = miniNormalY * World.Current.Map.GetUpperBound(1);
 
             this.mainCameraFollow.SetCameraTarget(new Vector3(x, y, 0f));
-        }
-        finally
-        {
-            unityManager.SetAcceptingInput(true);
         }
     }
 

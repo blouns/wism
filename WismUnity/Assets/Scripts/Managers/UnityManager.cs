@@ -54,6 +54,7 @@ namespace Assets.Scripts.Managers
         private readonly Timer mouseRightClickHoldTimer = new Timer();
         private bool holdingRightButton;
         private bool acceptingInput = true;
+        private bool skipInput;
 
         private bool showDebugError = true;
 
@@ -135,14 +136,20 @@ namespace Assets.Scripts.Managers
             this.acceptingInput = acceptingInput;
         }
 
+        public void SkipInput()
+        {
+            this.skipInput = true;
+        }
+
         /// <summary>
         /// Process keyboard and mouse input, including single and double click handling
         /// </summary>
         private void HandleInput()
         {
-            if (SelectingArmies || !this.acceptingInput)
+            if (SelectingArmies || !this.acceptingInput || this.skipInput)
             {
                 // Army picker or another control has focus
+                this.skipInput = false;
                 return;
             }                        
 
@@ -556,12 +563,6 @@ namespace Assets.Scripts.Managers
 
         internal void CenterOnTile(Tile clickedTile)
         {
-            if (!this.acceptingInput)
-            {
-                Debug.Log("Control is not on game objects. Not centering tile.");
-                return;
-            }
-
             Debug.Log(World.Current.Map[clickedTile.X, clickedTile.Y]);
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
 
