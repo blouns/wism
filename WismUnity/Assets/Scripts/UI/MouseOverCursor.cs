@@ -30,21 +30,22 @@ namespace Assets.Scripts.UI
 
         public void OnMouseOver()
         {
+            // Order matters
             if (IsProduceable())
             {
                 cursorManager.ProduceCursor();
-            }
-            else if (IsSelectable())
-            {
-                cursorManager.SelectCursor();
-            }
+            }            
             else if (IsAttackable())
             {
                 cursorManager.AttackCursor();
             }
             else if (IsMoveable())
             {
-                cursorManager.MoveCursor();
+                cursorManager.MoveCursor(GetMoveHeading());
+            }
+            else if (IsSelectable())
+            {
+                cursorManager.SelectCursor();
             }
             else if (IsInformational())
             {
@@ -74,7 +75,7 @@ namespace Assets.Scripts.UI
         /// </summary>        
         private bool IsProduceable()
         {
-            if (!unityManager.IsProductionMode())
+            if (unityManager.ProductionMode == ProductionMode.None)
             {
                 return false;
             }
@@ -87,7 +88,7 @@ namespace Assets.Scripts.UI
 
         private bool IsMoveable()
         {
-            return false;
+            return Game.Current.ArmiesSelected();            
         }
 
         private bool IsMagnifyable()
@@ -97,16 +98,31 @@ namespace Assets.Scripts.UI
 
         private bool IsAttackable()
         {
-            return false;
+            if (transform.name != "WorldTilemap")
+            {
+                return false;
+            }
+
+            Tile tile = GetCurrentTile();
+
+            return
+                Game.Current.ArmiesSelected() &&
+                    (tile.HasArmies() && (tile.Armies[0].Clan != Game.Current.GetCurrentPlayer().Clan) ||
+                    (tile.HasCity() && (tile.City.Clan != Game.Current.GetCurrentPlayer().Clan)));
         }
 
         private bool IsInformational()
         {
-            return false;
+            return (transform.name == "WorldTilemap");
         }
 
         private bool IsSelectable()
         {
+            if (transform.name != "WorldTilemap")
+            {
+                return false;
+            }
+
             Tile tile = GetCurrentTile();
 
             // TODO: Check for certain game states
@@ -121,6 +137,17 @@ namespace Assets.Scripts.UI
             var gameCoords = worldTilemap.ConvertUnityToGameCoordinates(worldVector);
             var tile = World.Current.Map[gameCoords.Item1, gameCoords.Item2];
             return tile;
+        }
+
+        private Vector3 GetMoveHeading()
+        {
+            Vector3 targetPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            var tile = Game.Current.GetSelectedArmies()[0].Tile;
+            Vector3 playerPosition = worldTilemap.ConvertGameToUnityCoordinates(tile.X, tile.Y);
+
+            // Gets a vector that points from the player's position to the targets
+            Vector3 heading = targetPosition - playerPosition;
+            return heading;
         }
     }
 }

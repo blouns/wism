@@ -1,7 +1,5 @@
 using Assets.Scripts.Managers;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Wism.Client.Core;
@@ -32,12 +30,12 @@ public class CityProduction : MonoBehaviour
     {
         if (unityManager is null)
         {
-            throw new System.ArgumentNullException(nameof(unityManager));
+            throw new ArgumentNullException(nameof(unityManager));
         }
 
         if (city is null)
         {
-            throw new System.ArgumentNullException(nameof(city));
+            throw new ArgumentNullException(nameof(city));
         }
 
         this.productionCity = city;
@@ -84,14 +82,18 @@ public class CityProduction : MonoBehaviour
 
         // Set image
         var clan = Game.Current.GetCurrentPlayer().Clan;
-        var armyPrefab = armyManager.FindGameObjectKind(clan, armyInfo);                
-        var image = gameObject.GetComponentInChildren<Image>();
-        image.sprite = armyPrefab.GetComponent<Sprite>();
+        var armyPrefab = armyManager.FindGameObjectKind(clan, armyInfo);
+        SpriteRenderer spriteRenderer = armyPrefab.GetComponent<SpriteRenderer>();
+        var image = armyButtons[index].gameObject.transform.Find("ArmyKind")
+            .GetComponent<Image>();
+        image.sprite = spriteRenderer.sprite;
 
         // Set production info
-        Text productionText = armyButtons[index].gameObject.transform.Find("ArmyKind")
+        Text productionText = armyButtons[index].gameObject.transform.Find("ArmyInfo")
             .GetComponent<Text>();
         productionText.text = $"{productionInfos[index].TurnsToProduce}t / {productionInfos[index].Upkeep}gp";
+
+        this.armyButtons[index].gameObject.SetActive(true);
     }
 
     private void ClearProduction()
@@ -139,6 +141,7 @@ public class CityProduction : MonoBehaviour
         Debug.Log($"Starting production of {armyInfo.DisplayName}" +
             $" on {this.productionCity}" +
             $" to {(destinationCity == null ? this.productionCity : destinationCity)}");
+
         this.unityManager.GameManager
             .StartProduction(this.productionCity, armyInfo, destinationCity);
     }

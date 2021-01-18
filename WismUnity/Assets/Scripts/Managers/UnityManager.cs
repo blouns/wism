@@ -17,6 +17,7 @@ using Tile = Wism.Client.Core.Tile;
 
 namespace Assets.Scripts.Managers
 {
+
     /// <summary>
     /// Unity game is the primary game loop and bridge to the Unity UI and WISM API via GameManager
     /// </summary>
@@ -40,6 +41,7 @@ namespace Assets.Scripts.Managers
         [SerializeField]
         private GameObject armyPickerPrefab;
         private ArmyPicker armyPickerPanel;
+        private GameObject productionPanel;
 
         private List<ICommandProcessor> commandProcessors;
 
@@ -59,7 +61,7 @@ namespace Assets.Scripts.Managers
         private bool skipInput;
 
         private bool showDebugError = true;
-        private bool isProductionMode;
+        private ProductionMode productionMode;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
@@ -71,6 +73,7 @@ namespace Assets.Scripts.Managers
         public GameManager GameManager { get => gameManager; set => gameManager = value; }
         public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
         public WarPanel WarPanel { get => warPanel; set => warPanel = value; }
+        public ProductionMode ProductionMode { get => productionMode; set => productionMode = value; }
 
         public void Start()
         {
@@ -237,6 +240,7 @@ namespace Assets.Scripts.Managers
             SetupCameras();
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
             armyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
 
             // Create command processors
             this.commandProcessors = new List<ICommandProcessor>()
@@ -351,40 +355,49 @@ namespace Assets.Scripts.Managers
             }
             else if (Input.GetKeyDown(KeyCode.P))
             {
-                SetProductionMode(true);
+                SetProductionMode(ProductionMode.SelectCity);
             }
         }
 
-        private void SetProductionMode(bool isProductionMode)
-        {
-            this.isProductionMode = isProductionMode;
-        }
-
-        public bool IsProductionMode()
-        {
-            return this.isProductionMode;
-        }
-
-        private void HandleRightClick()
+        private void SetProductionMode(ProductionMode mode)
         {
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
                 DeselectObject();
             }
 
-            if (IsProductionMode())
+            this.ProductionMode = mode;
+        }
+
+        private void HandleRightClick()
+        {
+            // Cancel object selection
+            if (Game.Current.GameState == GameState.SelectedArmy)
             {
-                isProductionMode = false;
+                DeselectObject();
+            }
+
+            // Cancel city production selection
+            if (this.ProductionMode == ProductionMode.SelectCity)
+            {
+                this.ProductionMode = ProductionMode.None;
             }
         }
 
         private void HandleLeftClick(bool isDoubleClick = false)
         {
             Tile clickedTile = WorldTilemap.GetClickedTile(followCamera);
+            HandleArmyClick(isDoubleClick, clickedTile);
+            HandleCityClick(clickedTile);
+            Draw();
+        }
+
+        private void HandleArmyClick(bool isDoubleClick, Tile clickedTile)
+        {
             switch (Game.Current.GameState)
             {
                 case GameState.Ready:
-                    SelectObject(clickedTile, isDoubleClick);                    
+                    SelectObject(clickedTile, isDoubleClick);
                     break;
 
                 case GameState.SelectedArmy:
@@ -418,8 +431,26 @@ namespace Assets.Scripts.Managers
                     }
                     break;
             }
+        }
 
-            Draw();
+        private void HandleCityClick(Tile tile)
+        {
+            switch (this.ProductionMode)
+            {
+                case ProductionMode.SelectCity:
+                    if (tile.HasCity() &&
+                        tile.City.Clan == Game.Current.GetCurrentPlayer().Clan)
+                    {
+                        // Launch production panel
+                        productionPanel.GetComponent<CityProduction>()
+                            .Initialize(this, tile.City);
+                        productionPanel.SetActive(true);
+                    }
+                    break;
+                default:
+                    // Do nothing
+                    break;
+            }
         }
 
         private void DrawSelectedArmiesBox()
@@ -577,6 +608,7 @@ namespace Assets.Scripts.Managers
             {
                 armiesToSelect.Sort(new ByArmyViewingOrder());
                 GameManager.SelectArmies(armiesToSelect);
+                CenterOnTile(tile);
             }
         }
 
