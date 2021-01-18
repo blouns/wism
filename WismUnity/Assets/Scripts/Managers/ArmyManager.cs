@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Wism.Client.Core;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 
 namespace Assets.Scripts.Managers
 {
@@ -42,6 +44,16 @@ namespace Assets.Scripts.Managers
             return armiesByClanMap[$"{army.Clan.ShortName}_{army.ShortName}"];
         }
 
+        public GameObject FindGameObjectKind(Clan clan, ArmyInfo armyInfo)
+        {
+            if (!IsInitialized())
+            {
+                Initialize();
+            }
+
+            return armiesByClanMap[$"{clan.ShortName}_{armyInfo.ShortName}"];
+        }
+
         public GameObject Instantiate(Army army, Vector3 worldVector, Transform parent)
         {
             var armyPrefab = FindGameObjectKind(army);
@@ -60,11 +72,6 @@ namespace Assets.Scripts.Managers
         internal bool IsInitialized()
         {
             return armiesByClanMap != null;
-        }
-
-        internal object FindPrefab(Army army)
-        {
-            throw new NotImplementedException();
         }
     }
 }

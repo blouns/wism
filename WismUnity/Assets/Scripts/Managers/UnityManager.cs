@@ -26,18 +26,20 @@ namespace Assets.Scripts.Managers
         private ILogger logger;
         private ControllerProvider provider;
 
-        public WorldTilemap WorldTilemap;
-        public GameManager GameManager;
-        private ArmyManager armyManager;
+        [SerializeField]
+        private WorldTilemap worldTilemap;        
         [SerializeField]
         private CityManager cityManager;
+        private GameManager gameManager;
+        private ArmyManager armyManager;
 
         [SerializeField]
-        private GameObject warPanelPrefab;        
-        internal WarPanel WarPanel;
+        private GameObject warPanelPrefab;     
+        [SerializeField]
+        private WarPanel warPanel;
         [SerializeField]
         private GameObject armyPickerPrefab;
-        private ArmyPicker ArmyPickerPanel;
+        private ArmyPicker armyPickerPanel;
 
         private List<ICommandProcessor> commandProcessors;
 
@@ -57,6 +59,7 @@ namespace Assets.Scripts.Managers
         private bool skipInput;
 
         private bool showDebugError = true;
+        private bool isProductionMode;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
@@ -65,9 +68,17 @@ namespace Assets.Scripts.Managers
 
         public Dictionary<int, ArmyGameObject> ArmyDictionary => armyDictionary;
 
+        public GameManager GameManager { get => gameManager; set => gameManager = value; }
+        public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
+        public WarPanel WarPanel { get => warPanel; set => warPanel = value; }
+
         public void Start()
         {
-            GameManager.Initialize();
+            // Initialize WISM API
+            this.GameManager = GetComponent<GameManager>();
+            this.GameManager.Initialize();
+
+            // Initialize Unity Game
             Initialize(GameManager.LoggerFactory, GameManager.ControllerProvider);
         }        
 
@@ -225,7 +236,7 @@ namespace Assets.Scripts.Managers
             SetTime(GameManager.StandardTime);
             SetupCameras();
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
-            ArmyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            armyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
 
             // Create command processors
             this.commandProcessors = new List<ICommandProcessor>()
@@ -323,7 +334,7 @@ namespace Assets.Scripts.Managers
                 if (Game.Current.GameState == GameState.SelectedArmy)
                 {
                     var armiesToPick = Game.Current.GetSelectedArmies()[0].Tile.GetAllArmies();
-                    ArmyPickerPanel.Initialize(this, armiesToPick);
+                    armyPickerPanel.Initialize(this, armiesToPick);
                 }
             }
             else if (Input.GetKeyDown(KeyCode.I))
@@ -338,6 +349,20 @@ namespace Assets.Scripts.Managers
             {
                 GameManager.EndTurn();
             }
+            else if (Input.GetKeyDown(KeyCode.P))
+            {
+                SetProductionMode(true);
+            }
+        }
+
+        private void SetProductionMode(bool isProductionMode)
+        {
+            this.isProductionMode = isProductionMode;
+        }
+
+        public bool IsProductionMode()
+        {
+            return this.isProductionMode;
         }
 
         private void HandleRightClick()
@@ -345,6 +370,11 @@ namespace Assets.Scripts.Managers
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
                 DeselectObject();
+            }
+
+            if (IsProductionMode())
+            {
+                isProductionMode = false;
             }
         }
 
