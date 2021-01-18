@@ -22,6 +22,7 @@ public class CityProduction : MonoBehaviour
 
     
     private UnityManager unityManager;
+    private ArmyManager armyManager;
     private int armySelectedIndex;
     private City productionCity;
     private ProductionInfo[] productionInfos;
@@ -40,6 +41,8 @@ public class CityProduction : MonoBehaviour
 
         this.productionCity = city;
         this.unityManager = unityManager;
+        this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
+                .GetComponent<ArmyManager>();
 
         InitializeProduction();
     }
@@ -49,20 +52,56 @@ public class CityProduction : MonoBehaviour
         SetInitialButtonState();
 
         var barracks = productionCity.Barracks;
-        this.productionInfos = barracks.GetProductionKinds().ToArray();
 
         // Unpack the army infos for each production slot
+        this.productionInfos = barracks.GetProductionKinds().ToArray();
         for (int i = 0; i < productionInfos.Length; i++)
         {
             InitializeProductionSlot(i);
         }
+
+        InitializeCurrentProduction();
+    }
+
+    private void InitializeCurrentProduction()
+    {
+        string turnsRemainingString = "None";
+
+        var barracks = this.productionCity.Barracks;
+        if (barracks.ProducingArmy())
+        {
+            // Set image
+            SetArmyImageOnGameObject(
+                Game.Current.GetCurrentPlayer().Clan,
+                barracks.ArmyInTraining.ArmyInfo,
+                "CurrentArmyKind");
+            transform.Find("CurrentArmyKind").gameObject.SetActive(true);
+
+            turnsRemainingString = barracks.ArmyInTraining.TurnsToProduce + "t";
+        }
+        else
+        {
+            transform.Find("CurrentArmyKind").gameObject.SetActive(false);
+        }
+
+        // Set turns remaining text
+        var turnsText = gameObject.transform.Find("TurnsRemainingText").GetComponent<Text>();
+        turnsText.text = turnsRemainingString;
+    }
+
+    private void SetArmyImageOnGameObject(Clan clan, ArmyInfo info, string gameObjectName)
+    {  
+        var armyPrefab = armyManager.FindGameObjectKind(clan, info);
+        SpriteRenderer spriteRenderer = armyPrefab.GetComponent<SpriteRenderer>();
+        var image = gameObject.transform.Find(gameObjectName).GetComponent<Image>();
+        image.sprite = spriteRenderer.sprite;
     }
 
     private void SetInitialButtonState()
     {
         this.prodButton.interactable = false;
         this.locButton.interactable = false;
-        this.stopButton.interactable = false;
+        this.stopButton.interactable = true;
         this.exitButton.interactable = true;
         ClearProduction();
     }
@@ -76,9 +115,6 @@ public class CityProduction : MonoBehaviour
             $"Moves: {armyInfo.Moves + productionInfos[index].MovesModifier}\t" +
             $"Turns: {productionInfos[index].TurnsToProduce}\t" +
             $"Upkeep: {productionInfos[index].Upkeep}");
-
-        ArmyManager armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
-            .GetComponent<ArmyManager>();
 
         // Set image
         var clan = Game.Current.GetCurrentPlayer().Clan;
