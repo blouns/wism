@@ -283,7 +283,6 @@ namespace Assets.Scripts.Managers
             ActionState result = ActionState.NotStarted;
 
             int nextCommand = lastCommandId + 1;
-
             if (!provider.CommandController.CommandExists(nextCommand))
             {
                 // Nothing to do

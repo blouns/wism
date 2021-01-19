@@ -61,6 +61,7 @@ public class CityProduction : MonoBehaviour
         }
 
         InitializeCurrentProduction();
+        this.unityManager.SetAcceptingInput(false);
     }
 
     private void InitializeCurrentProduction()
@@ -167,6 +168,8 @@ public class CityProduction : MonoBehaviour
     public void OnProdClick()
     {
         StartProduction();
+
+        // Close
     }
 
     private void StartProduction(City destinationCity = null)
@@ -196,11 +199,12 @@ public class CityProduction : MonoBehaviour
         this.unityManager.GameManager
             .StopProduction(this.productionCity);
 
-        DisableProduction();
+        DisableProduction();        
     }
 
     public void OnExitClick()
     {
+        this.unityManager.SetAcceptingInput(true);
         this.gameObject.SetActive(false);
     }
 
