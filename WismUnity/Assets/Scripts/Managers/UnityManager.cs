@@ -358,7 +358,7 @@ namespace Assets.Scripts.Managers
             }
         }
 
-        private void SetProductionMode(ProductionMode mode)
+        public void SetProductionMode(ProductionMode mode)
         {
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
@@ -627,11 +627,23 @@ namespace Assets.Scripts.Managers
             Debug.Log(World.Current.Map[clickedTile.X, clickedTile.Y]);
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
 
-            followCamera.GetComponent<CameraFollow>()
-                .SetCameraTarget(worldVector);
-
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
+        }
+
+        internal Tile GetCurrentTile()
+        {
+            Tile returnTile = null;
+
+            // TODO: How / when shall we show the Player info? Maybe call into the Information Panel on click instead?
+            var coords = WorldTilemap.ConvertUnityToGameCoordinates(this.selectedArmyBox.transform.position);            
+            if (coords.Item1 >= 0 && coords.Item1 < World.Current.Map.GetUpperBound(0) &&
+                coords.Item2 >= 0 && coords.Item2 < World.Current.Map.GetUpperBound(1))
+            {
+                returnTile = World.Current.Map[coords.Item1, coords.Item2];
+            }
+
+            return returnTile;
         }
 
         internal void SetCameraTarget(Transform transform)

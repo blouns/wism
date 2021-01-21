@@ -112,6 +112,7 @@ namespace Assets.Scripts.CommandProcessors
 
         private static void ShowBattleNotification(Player defendingPlayer)
         {
+            // TODO: need to change Notification API to show and hide the entire panel
             var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
                             .GetComponent<NotificationBox>();
             string name = defendingPlayer.Clan.DisplayName;

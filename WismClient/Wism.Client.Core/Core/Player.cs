@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Agent.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -52,26 +53,12 @@ namespace Wism.Client.Core
 
         public int GetIncome()
         {
-            int income = 0;
-
-            foreach (City city in myCities)
-            {
-                income += city.Income;
-            }
-
-            return income;
+            return myCities.Sum(city => city.Income);
         }
 
         public int GetUpkeep()
         {
-            int upkeep = 0;
-
-            foreach (Army army in myArmies)
-            {
-                upkeep += army.Upkeep;
-            }
-
-            return upkeep;
+            return myArmies.Sum(army => army.Upkeep);
         }
 
         public Hero HireHero(Tile tile)
