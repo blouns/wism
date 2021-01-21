@@ -110,12 +110,6 @@ public class CityProduction : MonoBehaviour
     private void InitializeProductionSlot(int index)
     {
         ArmyInfo armyInfo = ModFactory.FindArmyInfo(productionInfos[index].ArmyInfoName);
-        Debug.Log($"({index + 1}) " +
-            $"{armyInfo.DisplayName}\t" +
-            $"Strength: {armyInfo.Strength + productionInfos[index].StrengthModifier}\t" +
-            $"Moves: {armyInfo.Moves + productionInfos[index].MovesModifier}\t" +
-            $"Turns: {productionInfos[index].TurnsToProduce}\t" +
-            $"Upkeep: {productionInfos[index].Upkeep}");
 
         // Set image
         var clan = Game.Current.GetCurrentPlayer().Clan;
@@ -170,6 +164,7 @@ public class CityProduction : MonoBehaviour
         StartProduction();
 
         // Close
+        OnExitClick();
     }
 
     private void StartProduction(City destinationCity = null)
