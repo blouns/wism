@@ -17,6 +17,7 @@ using Tile = Wism.Client.Core.Tile;
 
 namespace Assets.Scripts.Managers
 {
+
     /// <summary>
     /// Unity game is the primary game loop and bridge to the Unity UI and WISM API via GameManager
     /// </summary>
@@ -26,18 +27,21 @@ namespace Assets.Scripts.Managers
         private ILogger logger;
         private ControllerProvider provider;
 
-        public WorldTilemap WorldTilemap;
-        public GameManager GameManager;
-        private ArmyManager armyManager;
+        [SerializeField]
+        private WorldTilemap worldTilemap;        
         [SerializeField]
         private CityManager cityManager;
+        private GameManager gameManager;
+        private ArmyManager armyManager;
 
         [SerializeField]
-        private GameObject warPanelPrefab;        
-        internal WarPanel WarPanel;
+        private GameObject warPanelPrefab;     
+        [SerializeField]
+        private WarPanel warPanel;
         [SerializeField]
         private GameObject armyPickerPrefab;
-        private ArmyPicker ArmyPickerPanel;
+        private ArmyPicker armyPickerPanel;
+        private GameObject productionPanel;
 
         private List<ICommandProcessor> commandProcessors;
 
@@ -54,8 +58,10 @@ namespace Assets.Scripts.Managers
         private readonly Timer mouseRightClickHoldTimer = new Timer();
         private bool holdingRightButton;
         private bool acceptingInput = true;
+        private bool skipInput;
 
         private bool showDebugError = true;
+        private ProductionMode productionMode;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
@@ -64,9 +70,18 @@ namespace Assets.Scripts.Managers
 
         public Dictionary<int, ArmyGameObject> ArmyDictionary => armyDictionary;
 
+        public GameManager GameManager { get => gameManager; set => gameManager = value; }
+        public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
+        public WarPanel WarPanel { get => warPanel; set => warPanel = value; }
+        public ProductionMode ProductionMode { get => productionMode; set => productionMode = value; }
+
         public void Start()
         {
-            GameManager.Initialize();
+            // Initialize WISM API
+            this.GameManager = GetComponent<GameManager>();
+            this.GameManager.Initialize();
+
+            // Initialize Unity Game
             Initialize(GameManager.LoggerFactory, GameManager.ControllerProvider);
         }        
 
@@ -135,14 +150,20 @@ namespace Assets.Scripts.Managers
             this.acceptingInput = acceptingInput;
         }
 
+        public void SkipInput()
+        {
+            this.skipInput = true;
+        }
+
         /// <summary>
         /// Process keyboard and mouse input, including single and double click handling
         /// </summary>
         private void HandleInput()
         {
-            if (SelectingArmies || !this.acceptingInput)
+            if (SelectingArmies || !this.acceptingInput || this.skipInput)
             {
                 // Army picker or another control has focus
+                this.skipInput = false;
                 return;
             }                        
 
@@ -218,7 +239,8 @@ namespace Assets.Scripts.Managers
             SetTime(GameManager.StandardTime);
             SetupCameras();
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
-            ArmyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            armyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
 
             // Create command processors
             this.commandProcessors = new List<ICommandProcessor>()
@@ -261,7 +283,6 @@ namespace Assets.Scripts.Managers
             ActionState result = ActionState.NotStarted;
 
             int nextCommand = lastCommandId + 1;
-
             if (!provider.CommandController.CommandExists(nextCommand))
             {
                 // Nothing to do
@@ -316,7 +337,7 @@ namespace Assets.Scripts.Managers
                 if (Game.Current.GameState == GameState.SelectedArmy)
                 {
                     var armiesToPick = Game.Current.GetSelectedArmies()[0].Tile.GetAllArmies();
-                    ArmyPickerPanel.Initialize(this, armiesToPick);
+                    armyPickerPanel.Initialize(this, armiesToPick);
                 }
             }
             else if (Input.GetKeyDown(KeyCode.I))
@@ -331,23 +352,51 @@ namespace Assets.Scripts.Managers
             {
                 GameManager.EndTurn();
             }
+            else if (Input.GetKeyDown(KeyCode.P))
+            {
+                SetProductionMode(ProductionMode.SelectCity);
+            }
         }
 
-        private void HandleRightClick()
+        private void SetProductionMode(ProductionMode mode)
         {
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
                 DeselectObject();
+            }
+
+            this.ProductionMode = mode;
+        }
+
+        private void HandleRightClick()
+        {
+            // Cancel object selection
+            if (Game.Current.GameState == GameState.SelectedArmy)
+            {
+                DeselectObject();
+            }
+
+            // Cancel city production selection
+            if (this.ProductionMode == ProductionMode.SelectCity)
+            {
+                this.ProductionMode = ProductionMode.None;
             }
         }
 
         private void HandleLeftClick(bool isDoubleClick = false)
         {
             Tile clickedTile = WorldTilemap.GetClickedTile(followCamera);
+            HandleArmyClick(isDoubleClick, clickedTile);
+            HandleCityClick(clickedTile);
+            Draw();
+        }
+
+        private void HandleArmyClick(bool isDoubleClick, Tile clickedTile)
+        {
             switch (Game.Current.GameState)
             {
                 case GameState.Ready:
-                    SelectObject(clickedTile, isDoubleClick);                    
+                    SelectObject(clickedTile, isDoubleClick);
                     break;
 
                 case GameState.SelectedArmy:
@@ -381,8 +430,26 @@ namespace Assets.Scripts.Managers
                     }
                     break;
             }
+        }
 
-            Draw();
+        private void HandleCityClick(Tile tile)
+        {
+            switch (this.ProductionMode)
+            {
+                case ProductionMode.SelectCity:
+                    if (tile.HasCity() &&
+                        tile.City.Clan == Game.Current.GetCurrentPlayer().Clan)
+                    {
+                        // Launch production panel
+                        productionPanel.GetComponent<CityProduction>()
+                            .Initialize(this, tile.City);
+                        productionPanel.SetActive(true);
+                    }
+                    break;
+                default:
+                    // Do nothing
+                    break;
+            }
         }
 
         private void DrawSelectedArmiesBox()
@@ -540,6 +607,7 @@ namespace Assets.Scripts.Managers
             {
                 armiesToSelect.Sort(new ByArmyViewingOrder());
                 GameManager.SelectArmies(armiesToSelect);
+                CenterOnTile(tile);
             }
         }
 
@@ -556,12 +624,6 @@ namespace Assets.Scripts.Managers
 
         internal void CenterOnTile(Tile clickedTile)
         {
-            if (!this.acceptingInput)
-            {
-                Debug.Log("Control is not on game objects. Not centering tile.");
-                return;
-            }
-
             Debug.Log(World.Current.Map[clickedTile.X, clickedTile.Y]);
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
 
