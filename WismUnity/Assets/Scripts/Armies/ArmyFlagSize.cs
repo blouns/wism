@@ -8,7 +8,7 @@ public class ArmyFlagSize : MonoBehaviour
     private WorldTilemap worldTilemap;
     private FlagManager flagManager;
 
-    public void Start()
+    public void Awake()
     {
         this.worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
             .GetComponent<WorldTilemap>();
@@ -22,19 +22,10 @@ public class ArmyFlagSize : MonoBehaviour
         var gameCoords = worldTilemap.ConvertUnityToGameCoordinates(gameObject.transform.position);
         var tile = World.Current.Map[gameCoords.Item1, gameCoords.Item2];
 
-        int flagSize;
-        Clan clan;
-        if (tile.HasVisitingArmies())
-        {
-            // Draw moving armies first
-            flagSize = tile.VisitingArmies.Count;
-            clan = tile.VisitingArmies[0].Clan;
-        }
-        else
-        {
-            flagSize = tile.Armies.Count;
-            clan = tile.Armies[0].Clan;
-        }
+        int flagSize = tile.GetAllArmies().Count;
+        Clan clan = (tile.HasVisitingArmies()) ? 
+                        tile.VisitingArmies[0].Clan :
+                        tile.Armies[0].Clan;
 
         UpdateFlagSprite(clan, flagSize);
     }

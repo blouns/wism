@@ -26,7 +26,9 @@ namespace Assets.Scripts.Managers
         private int lastCommandId = 0;
         private ILogger logger;
         private ControllerProvider provider;
+        private List<ICommandProcessor> commandProcessors;
 
+        // Game managers
         [SerializeField]
         private WorldTilemap worldTilemap;        
         [SerializeField]
@@ -34,6 +36,7 @@ namespace Assets.Scripts.Managers
         private GameManager gameManager;
         private ArmyManager armyManager;
 
+        // UI panels
         [SerializeField]
         private GameObject warPanelPrefab;     
         [SerializeField]
@@ -41,13 +44,12 @@ namespace Assets.Scripts.Managers
         [SerializeField]
         private GameObject armyPickerPrefab;
         private ArmyPicker armyPickerPanel;
-        private GameObject productionPanel;
-
-        private List<ICommandProcessor> commandProcessors;
+        private GameObject productionPanel;        
 
         private Camera followCamera;
         private readonly Dictionary<int, ArmyGameObject> armyDictionary = new Dictionary<int, ArmyGameObject>();
 
+        // Selected objects
         public GameObject SelectedBoxPrefab;
         private SelectedArmyBox selectedArmyBox;
         private int selectedArmyIndex;
@@ -61,6 +63,7 @@ namespace Assets.Scripts.Managers
         private bool acceptingInput = true;
         private bool skipInput;
 
+        private bool isInitialized;
         private bool showDebugError = true;
         private ProductionMode productionMode;
 
@@ -120,7 +123,8 @@ namespace Assets.Scripts.Managers
         {
             bool result = true;
 
-            if (!Game.IsInitialized())
+            if (!Game.IsInitialized() || 
+                !this.isInitialized)
             {
                 if (this.showDebugError)
                 {
@@ -264,18 +268,17 @@ namespace Assets.Scripts.Managers
             // Set up default game (for testing purposes only)
             World.CreateWorld(WorldTilemap.CreateWorldFromScene().Map);
             CreateDefaultCities();
-            CreateDefaultArmies();            
-            DrawArmyGameObjects();
-            SelectObject(World.Current.Map[2, 1], true);
+            CreateDefaultArmies();
 
+            // Mouse click timing
             mouseSingleLeftClickTimer.Interval = 400;
             mouseSingleLeftClickTimer.Elapsed += SingleLeftClick;
-
             mouseRightClickHoldTimer.Interval = 200;
             mouseRightClickHoldTimer.Elapsed += SingleRightClick;
+
+            this.isInitialized = true;
         }
 
-        
         /// <summary>
         /// Execute the commands from the UI, AI, or other devices
         /// </summary>
