@@ -26,7 +26,9 @@ namespace Assets.Scripts.Managers
         private int lastCommandId = 0;
         private ILogger logger;
         private ControllerProvider provider;
+        private List<ICommandProcessor> commandProcessors;
 
+        // Game managers
         [SerializeField]
         private WorldTilemap worldTilemap;        
         [SerializeField]
@@ -34,6 +36,7 @@ namespace Assets.Scripts.Managers
         private GameManager gameManager;
         private ArmyManager armyManager;
 
+        // UI panels
         [SerializeField]
         private GameObject warPanelPrefab;     
         [SerializeField]
@@ -41,16 +44,16 @@ namespace Assets.Scripts.Managers
         [SerializeField]
         private GameObject armyPickerPrefab;
         private ArmyPicker armyPickerPanel;
-        private GameObject productionPanel;
-
-        private List<ICommandProcessor> commandProcessors;
+        private GameObject productionPanel;        
 
         private Camera followCamera;
         private readonly Dictionary<int, ArmyGameObject> armyDictionary = new Dictionary<int, ArmyGameObject>();
 
+        // Selected objects
         public GameObject SelectedBoxPrefab;
         private SelectedArmyBox selectedArmyBox;
         private int selectedArmyIndex;
+        private Tile currentTile;
 
         // Input handling
         private readonly Timer mouseSingleLeftClickTimer = new Timer();
@@ -60,6 +63,7 @@ namespace Assets.Scripts.Managers
         private bool acceptingInput = true;
         private bool skipInput;
 
+        private bool isInitialized;
         private bool showDebugError = true;
         private ProductionMode productionMode;
 
@@ -119,7 +123,8 @@ namespace Assets.Scripts.Managers
         {
             bool result = true;
 
-            if (!Game.IsInitialized())
+            if (!Game.IsInitialized() || 
+                !this.isInitialized)
             {
                 if (this.showDebugError)
                 {
@@ -263,18 +268,17 @@ namespace Assets.Scripts.Managers
             // Set up default game (for testing purposes only)
             World.CreateWorld(WorldTilemap.CreateWorldFromScene().Map);
             CreateDefaultCities();
-            CreateDefaultArmies();            
-            DrawArmyGameObjects();
-            SelectObject(World.Current.Map[2, 1], true);
+            CreateDefaultArmies();
 
+            // Mouse click timing
             mouseSingleLeftClickTimer.Interval = 400;
             mouseSingleLeftClickTimer.Elapsed += SingleLeftClick;
-
             mouseRightClickHoldTimer.Interval = 200;
             mouseRightClickHoldTimer.Elapsed += SingleRightClick;
+
+            this.isInitialized = true;
         }
 
-        
         /// <summary>
         /// Execute the commands from the UI, AI, or other devices
         /// </summary>
@@ -358,7 +362,7 @@ namespace Assets.Scripts.Managers
             }
         }
 
-        private void SetProductionMode(ProductionMode mode)
+        public void SetProductionMode(ProductionMode mode)
         {
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
@@ -465,7 +469,7 @@ namespace Assets.Scripts.Managers
             }
 
             this.selectedArmyBox.Draw(this);
-        }        
+        }
 
         private void SetupCameras()
         {
@@ -534,6 +538,7 @@ namespace Assets.Scripts.Managers
                 }
 
                 // Draw only the "top" army for each army stack on the map
+                this.currentTile = null;
                 foreach (Tile tile in World.Current.Map)
                 {
                     int armyId;
@@ -542,6 +547,10 @@ namespace Assets.Scripts.Managers
                     {
                         armyId = tile.VisitingArmies[0].Id;
                         SetCameraTarget(ArmyDictionary[armyId].GameObject.transform);
+
+                        // Update the current tile for info panel
+                        var coords = WorldTilemap.ConvertUnityToGameCoordinates(this.selectedArmyBox.transform.position);
+                        this.currentTile = World.Current.Map[coords.Item1, coords.Item2];
                     }
                     else if (tile.HasArmies() && this.ArmyDictionary.ContainsKey(tile.Armies[0].Id))
                     {
@@ -553,10 +562,12 @@ namespace Assets.Scripts.Managers
                         continue;
                     }
                     
-                    ArmyGameObject ago = this.ArmyDictionary[armyId];
+                    ArmyGameObject ago = this.ArmyDictionary[armyId];                    
                     Vector3 vector = WorldTilemap.ConvertGameToUnityCoordinates(ago.Army.X, ago.Army.Y);
                     ago.GameObject.transform.position = vector;
                     ago.GameObject.SetActive(true);
+                    var flagGO = ago.GameObject.GetComponentInChildren<ArmyFlagSize>();
+                    flagGO.UpdateFlagSize();
                 }
             }
         }
@@ -620,18 +631,27 @@ namespace Assets.Scripts.Managers
 
             this.selectedArmyBox.HideSelectedBox();
             this.selectedArmyIndex = -1;
+            this.currentTile = null;
         }
 
         internal void CenterOnTile(Tile clickedTile)
-        {
-            Debug.Log(World.Current.Map[clickedTile.X, clickedTile.Y]);
+        {            
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
-
-            followCamera.GetComponent<CameraFollow>()
-                .SetCameraTarget(worldVector);
 
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
+
+            if (clickedTile.X >= 0 && clickedTile.X < World.Current.Map.GetUpperBound(0) &&
+                clickedTile.Y >= 0 && clickedTile.Y < World.Current.Map.GetUpperBound(1))
+            {
+                this.currentTile = clickedTile;
+                Debug.Log(this.currentTile);
+            }            
+        }
+
+        internal Tile GetCurrentTile()
+        {
+            return this.currentTile;
         }
 
         internal void SetCameraTarget(Transform transform)

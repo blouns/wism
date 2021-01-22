@@ -1,4 +1,13 @@
-﻿Goal: Add turns and cities with production to the unity game.
+﻿Goal: 2P playable: Actual cities from Warlords with Neutral player
 
 TODO:
+ * Add neutral cities (attack and takeover)
+ * Map editor capable of tagging cities matched to Module JSON (e.g. "Marthos")
+ * Update map to match real positions and ownership
+ * Army flags
 
+Stretch:
+ * User clan picker panel
+
+ Future:
+  * Hero items (search, take, drop, bonuses)

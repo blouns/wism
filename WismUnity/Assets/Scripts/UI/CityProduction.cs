@@ -200,6 +200,7 @@ public class CityProduction : MonoBehaviour
     public void OnExitClick()
     {
         this.unityManager.SetAcceptingInput(true);
+        this.unityManager.SetProductionMode(ProductionMode.None);
         this.gameObject.SetActive(false);
     }
 

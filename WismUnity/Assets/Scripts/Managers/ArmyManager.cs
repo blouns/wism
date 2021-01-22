@@ -14,6 +14,7 @@ namespace Assets.Scripts.Managers
         private ArmyPrefabArrayLayout armiesByClan;
 
         private Dictionary<string, GameObject> armiesByClanMap;
+        private FlagManager flagManager;
 
         public void Initialize()
         {
@@ -32,6 +33,9 @@ namespace Assets.Scripts.Managers
                         armiesByClan.rows[i].row[j]);
                 }
             }
+
+            this.flagManager = gameObject.GetComponent<FlagManager>();
+            this.flagManager.Initialize();
         }
 
         public GameObject FindGameObjectKind(Army army)
@@ -62,9 +66,11 @@ namespace Assets.Scripts.Managers
                 Debug.LogFormat($"GameObject not found: {army.Clan.ShortName}_{army.ShortName}");
             }
 
-            var armyGO = Instantiate<GameObject>(armyPrefab, worldVector, Quaternion.identity, parent);
-            armyGO.GetComponent<SpriteRenderer>()
-                .sortingOrder = 1;
+            var armyGO = Instantiate(armyPrefab, worldVector, Quaternion.identity, parent);
+            armyGO.GetComponent<SpriteRenderer>().sortingOrder = 1;
+
+            // Create flag objects for army GameObjects
+            this.flagManager.Instantiate(army.Clan, 1, armyGO.transform);            
 
             return armyGO;
         }
