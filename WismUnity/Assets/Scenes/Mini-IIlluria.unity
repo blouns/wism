@@ -80080,6 +80080,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2022427047}
   - component: {fileID: 2022427046}
+  - component: {fileID: 2022427048}
   m_Layer: 0
   m_Name: ArmyManager
   m_TagString: ArmyManager
@@ -80440,6 +80441,201 @@ Transform:
   m_Father: {fileID: 2053934880}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2022427048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2022427045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63c3cf8aee31ce14f9cb106c57048d00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flagsByClan:
+    rows:
+    - name: Sirians
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 7216432837109514836, guid: 2f6fbc7df437a1d44b1d1e1d5aef92ed, type: 3}
+      - {fileID: 5547154697629080028, guid: b138789a9b3f22541b2082ec48428753, type: 3}
+      - {fileID: 8650544499234943795, guid: ac854cf7a6a55aa44b5ec90733922daa, type: 3}
+      - {fileID: 5220517444599396439, guid: 3b4fc894da94d674dbaf7dd685d721f9, type: 3}
+      - {fileID: 5675060658375100037, guid: 7e8398d76724c384f8f850c60c39327c, type: 3}
+      - {fileID: 1758864603962582229, guid: fd6e2957e25e22243a485efe0e2570f6, type: 3}
+      - {fileID: 8770736872514836690, guid: bd774b55cea62e243a88ac66d4fb5c79, type: 3}
+      - {fileID: 2963398138906343165, guid: 7e0f462a850f6214cba2e9948a3fc094, type: 3}
+    - name: StormGiants
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 7338038340007403952, guid: e70482ca9173706499e40c0587fe12e4, type: 3}
+      - {fileID: 2278251238401256006, guid: 48fc21423633c7545b41bcd0ddeb3e3c, type: 3}
+      - {fileID: 6450154189277340353, guid: a9b1baa74de66d54eaa1fa7d947992ee, type: 3}
+      - {fileID: 7037793647816598790, guid: c85fe89ac8afc1d48abb260af1a2633d, type: 3}
+      - {fileID: 6123562523952560328, guid: e242ea665e7d1fb438f66a149dd35a82, type: 3}
+      - {fileID: 6435331743382141358, guid: 42f5174eef2c1e840a5112bf713cb3ec, type: 3}
+      - {fileID: 3332857579009647, guid: a3ed951678a529843ab344bf6c08dca9, type: 3}
+      - {fileID: 2478674583060706705, guid: ba4d6b1ac0ca56f4cadf9bb180aec1d4, type: 3}
+    - name: GreyDwarves
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 4508983364073093873, guid: a1a4b4153b764824eab26d0df1376600, type: 3}
+      - {fileID: 7250928531586833376, guid: eaf860037add7b147b81b3f203b801ff, type: 3}
+      - {fileID: 4430290628094975103, guid: f6895c143b3d05040b45a5d729ce0663, type: 3}
+      - {fileID: 2358506549447348105, guid: da85b5cef8f5ab14f911da19bd16e151, type: 3}
+      - {fileID: 7576953734234748819, guid: 50939684e233cbc48a828e9ac528708f, type: 3}
+      - {fileID: 4682243722507394846, guid: 3b1131fa19647c24db4ff54b88f2a643, type: 3}
+      - {fileID: 4609961378271125308, guid: 01bc2aa0a59c5ad4284943cf3c79091f, type: 3}
+      - {fileID: 4328964202561064829, guid: 6c6a3c9086dbd1d47a9f8cab5091c1b2, type: 3}
+    - name: OrcsOfKor
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 5216560567543888474, guid: 81565f22805a9c1448b2d08270282e22, type: 3}
+      - {fileID: 535173433823457565, guid: 07ac56f8c8ee0ad488532c1930690e95, type: 3}
+      - {fileID: 8862475535045864853, guid: 148c5636a7520b04b9ee5b2792decf12, type: 3}
+      - {fileID: 2795891773585316157, guid: 884288fb9dae34a4caef4f096e56876c, type: 3}
+      - {fileID: 5869590764431483776, guid: 58dcfb4d67003574892b2965c749a2c2, type: 3}
+      - {fileID: 6312254861787494941, guid: 2d601b8aa6c29d44981c7b13c6582bbe, type: 3}
+      - {fileID: 2977172899542538758, guid: e1d059c5f911f884e80fe38ec8f647e1, type: 3}
+      - {fileID: 7313131943984329487, guid: 1391a10b029bdb24a9dda2af9b0ad6e4, type: 3}
+    - name: Elvallie
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 3369004771529475715, guid: b58e7ba6cbf6c6a46b4038a1768ed98e, type: 3}
+      - {fileID: 7668893589050725153, guid: 993983effec4c1b4998ed52386ec22c8, type: 3}
+      - {fileID: 5176026019645056744, guid: 20f9b3cceab6f4e4697e216ff8ae8540, type: 3}
+      - {fileID: 647623499261000194, guid: d65cfd081f6c55749a376dcd51811de8, type: 3}
+      - {fileID: 8013522734983433826, guid: 367cfe48e6244ea4891688558b7893fd, type: 3}
+      - {fileID: 4949811083251730220, guid: f185c3834688ed2418f84d60eaeb200c, type: 3}
+      - {fileID: 2000954470600078956, guid: f8596ab60650c6142884dd2eae4f3211, type: 3}
+      - {fileID: 115628790486523828, guid: 4d4120b03c69fdc428dd51d731edec3c, type: 3}
+    - name: Selentines
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 5411379953136580548, guid: 3de85c0b744b25b4b9b8f4e237a15a66, type: 3}
+      - {fileID: 4495063513643756602, guid: 2a204f3ddeac0a84cb88b8cab5e9a08d, type: 3}
+      - {fileID: 6702504947279277857, guid: 65607f905559eb34bb203de6e8d62c9a, type: 3}
+      - {fileID: 8179920290052497015, guid: e373fb054d299bc49815050bf8404b99, type: 3}
+      - {fileID: 7874647326134208087, guid: 9691fa28e968d1d498071521a3c35272, type: 3}
+      - {fileID: 4109129995162164936, guid: 9ade2c27b16ef534bbc6edd3588c0395, type: 3}
+      - {fileID: 1860826406723830311, guid: f707cc7f5cbe07c4191eb692963cdbe2, type: 3}
+      - {fileID: 2864972860438158777, guid: 9dd08926b30e1d84e971b7e3e9a545dd, type: 3}
+    - name: HorseLords
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 2382163311502168058, guid: d329b7f296206b54f862645247ecb93e, type: 3}
+      - {fileID: 2117062885075605671, guid: 3aff0df2f56429d4b88e427a4ed68190, type: 3}
+      - {fileID: 7308475157144311737, guid: 1b882c770dc83eb4d950e42c32c2dbc6, type: 3}
+      - {fileID: 4899398952794201521, guid: fd1503b63c76b5f48a3fd3fa34f10711, type: 3}
+      - {fileID: 6621002263133903196, guid: 3b1740cc93357b64dad96dbe8bc58cce, type: 3}
+      - {fileID: 4858650766274178761, guid: aefdf3d992da4274ea2c67d66b7c1f71, type: 3}
+      - {fileID: 4851751608722014413, guid: f21858591ef890d41a6e8cf2689f294b, type: 3}
+      - {fileID: 4645693067311090474, guid: 3120502ef1d5c724aa75a3a3c1f7b4f0, type: 3}
+    - name: LordBane
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 753176013847609923, guid: b1f0f2e043f9ff34899338480fcb1629, type: 3}
+      - {fileID: 3694229039187028548, guid: 87bf61ecf07a39944a18107d6f946a9c, type: 3}
+      - {fileID: 8340624076268029958, guid: 80a82f5f539f48044892fa44cb04d88e, type: 3}
+      - {fileID: 7054395452741401329, guid: 1199dc9c138190c41ab5adbb3ad576ae, type: 3}
+      - {fileID: 1271603393430461580, guid: 180225074d9bbe642a0eae08708d2d0c, type: 3}
+      - {fileID: 7643310932072934712, guid: d789576ddea046546894e237cf92b6fa, type: 3}
+      - {fileID: 6096147659596779057, guid: 0cc46474ebae0e442b793f78949a1987, type: 3}
+      - {fileID: 1692312115217384923, guid: fe7eaf6663dfaf346959cc1882fca2a4, type: 3}
+    - name: Neutral
+      count: 8
+      rowNames:
+      - 'Flag size: 1'
+      - 'Flag size: 2'
+      - 'Flag size: 3'
+      - 'Flag size: 4'
+      - 'Flag size: 5'
+      - 'Flag size: 6'
+      - 'Flag size: 7'
+      - 'Flag size: 8'
+      row:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    count: 9
 --- !u!1 &2023113838
 GameObject:
   m_ObjectHideFlags: 0

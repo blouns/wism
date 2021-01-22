@@ -559,10 +559,12 @@ namespace Assets.Scripts.Managers
                         continue;
                     }
                     
-                    ArmyGameObject ago = this.ArmyDictionary[armyId];
+                    ArmyGameObject ago = this.ArmyDictionary[armyId];                    
                     Vector3 vector = WorldTilemap.ConvertGameToUnityCoordinates(ago.Army.X, ago.Army.Y);
                     ago.GameObject.transform.position = vector;
                     ago.GameObject.SetActive(true);
+                    var flagGO = ago.GameObject.GetComponentInChildren<ArmyFlagSize>();
+                    flagGO.UpdateFlagSize();
                 }
             }
         }
