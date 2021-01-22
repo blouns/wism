@@ -51,6 +51,7 @@ namespace Assets.Scripts.Managers
         public GameObject SelectedBoxPrefab;
         private SelectedArmyBox selectedArmyBox;
         private int selectedArmyIndex;
+        private Tile currentTile;
 
         // Input handling
         private readonly Timer mouseSingleLeftClickTimer = new Timer();
@@ -465,7 +466,7 @@ namespace Assets.Scripts.Managers
             }
 
             this.selectedArmyBox.Draw(this);
-        }        
+        }
 
         private void SetupCameras()
         {
@@ -534,6 +535,7 @@ namespace Assets.Scripts.Managers
                 }
 
                 // Draw only the "top" army for each army stack on the map
+                this.currentTile = null;
                 foreach (Tile tile in World.Current.Map)
                 {
                     int armyId;
@@ -542,6 +544,10 @@ namespace Assets.Scripts.Managers
                     {
                         armyId = tile.VisitingArmies[0].Id;
                         SetCameraTarget(ArmyDictionary[armyId].GameObject.transform);
+
+                        // Update the current tile for info panel
+                        var coords = WorldTilemap.ConvertUnityToGameCoordinates(this.selectedArmyBox.transform.position);
+                        this.currentTile = World.Current.Map[coords.Item1, coords.Item2];
                     }
                     else if (tile.HasArmies() && this.ArmyDictionary.ContainsKey(tile.Armies[0].Id))
                     {
@@ -620,30 +626,27 @@ namespace Assets.Scripts.Managers
 
             this.selectedArmyBox.HideSelectedBox();
             this.selectedArmyIndex = -1;
+            this.currentTile = null;
         }
 
         internal void CenterOnTile(Tile clickedTile)
-        {
-            Debug.Log(World.Current.Map[clickedTile.X, clickedTile.Y]);
+        {            
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityCoordinates(clickedTile.X, clickedTile.Y);
 
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
+
+            if (clickedTile.X >= 0 && clickedTile.X < World.Current.Map.GetUpperBound(0) &&
+                clickedTile.Y >= 0 && clickedTile.Y < World.Current.Map.GetUpperBound(1))
+            {
+                this.currentTile = clickedTile;
+                Debug.Log(this.currentTile);
+            }            
         }
 
         internal Tile GetCurrentTile()
         {
-            Tile returnTile = null;
-
-            // TODO: How / when shall we show the Player info? Maybe call into the Information Panel on click instead?
-            var coords = WorldTilemap.ConvertUnityToGameCoordinates(this.selectedArmyBox.transform.position);            
-            if (coords.Item1 >= 0 && coords.Item1 < World.Current.Map.GetUpperBound(0) &&
-                coords.Item2 >= 0 && coords.Item2 < World.Current.Map.GetUpperBound(1))
-            {
-                returnTile = World.Current.Map[coords.Item1, coords.Item2];
-            }
-
-            return returnTile;
+            return this.currentTile;
         }
 
         internal void SetCameraTarget(Transform transform)
