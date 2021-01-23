@@ -1,0 +1,57 @@
+﻿[UNITY REFACTORING]
+
+The quality of the Unity UI is at the prototype-level. Given my newness to the platform there are
+several examples of things that were done with cut-corners, hacks, or other "unofficial" solutions.
+This captures a list of some of these known areas that are worth revisiting.
+
+0. Script cohesion
+Many of the scripts have organically grown and cross multiple GameObjects. This reduces cohesion
+making it harder to test and more complex. Splitting these up and making scripts indepenendent 
+and self-sufficient will greatly reduce complexity.
+
+
+1. Canvas - Screen Overlay
+Given how small these assets are (designed for old resolutions), the touch-targets and UI widgets
+must be scaled down extremely small relative to their native size. This has exposed Unity bugs
+and other issues such as font size limitations, which needs to be addressed.
+
+Create a new Screen-Overlay canvas and port the UI elements for each panel. Any new panels should 
+also be created first in this new Canvas which can co-exist with the legacy canvas until the 
+refactoring work is completed. This will allow the elements to exist in a normal size for Unity
+and the eliminate click-target and similar issues.
+
+
+2. Sprite sheets
+Sprites are currently all pre-cut, simple images rather than using sprite sheets. This mean higher
+memory and resource usage and potentially degraded performance. Unclear how significant this problem
+is, but it will be an issue on larger maps and less capable devices.
+
+Adopt sprite sheets and port all assets to using these.
+
+
+3. Unity timers
+Currently I am using a combination of timer types. This has resulted in inconsistent timings, such
+as for the Notifications Panel. 
+
+Move to using delta-time in updates rather than system timers.
+
+
+4. Scaling and resolution support
+
+Many script and UI elements rely on fixed, known sizes. This means it is impossible to choose
+an alternate resolution without significant rework. 
+
+Proper use of anchor points, borders in sliced sprites, unparenting, and screen-based script 
+calculations will allow for dynamic scaling.
+
+
+5. Canvas Alpha
+
+Rather than using the SetActive to hide UI elements, use of Canvas Groups with alpha settings
+provides easier element interaction and management.
+
+
+6. Performance
+
+General use of "HardFind", cache optimization, Update/FixedUpdate, etc. will all contribute to 
+a more efficient and less resource-intensive solution.

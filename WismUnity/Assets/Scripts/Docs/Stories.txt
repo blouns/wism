@@ -4,7 +4,6 @@ TODO:
  * Add neutral cities (attack and takeover)
  * Map editor capable of tagging cities matched to Module JSON (e.g. "Marthos")
  * Update map to match real positions and ownership
- * Army flags
 
 Stretch:
  * User clan picker panel

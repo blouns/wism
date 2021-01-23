@@ -30,8 +30,7 @@ namespace Assets.Scripts.Managers
 
         // Game managers
         [SerializeField]
-        private WorldTilemap worldTilemap;        
-        [SerializeField]
+        private WorldTilemap worldTilemap;
         private CityManager cityManager;
         private GameManager gameManager;
         private ArmyManager armyManager;
@@ -85,9 +84,8 @@ namespace Assets.Scripts.Managers
             this.GameManager = GetComponent<GameManager>();
             this.GameManager.Initialize();
 
-            // Initialize Unity Game
             Initialize(GameManager.LoggerFactory, GameManager.ControllerProvider);
-        }        
+        }
 
         private void Update()
         {
@@ -231,7 +229,7 @@ namespace Assets.Scripts.Managers
         {
             DrawSelectedArmiesBox();
             DrawArmyGameObjects();
-            this.cityManager.DrawCities();
+            cityManager.DrawCities();
         }
 
 
@@ -262,8 +260,8 @@ namespace Assets.Scripts.Managers
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
             this.selectedArmyIndex = -1;
 
-            this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
-                .GetComponent<ArmyManager>();
+            this.armyManager = GetComponent<ArmyManager>();
+            this.cityManager = GetComponent<CityManager>();
 
             // Set up default game (for testing purposes only)
             World.CreateWorld(WorldTilemap.CreateWorldFromScene().Map);

@@ -1,5 +1,7 @@
+using Assets.Scripts.Common;
 using Assets.Scripts.Managers;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Wism.Client.Core;
@@ -63,6 +65,27 @@ namespace Assets.Scripts.Tilemaps
             return World.Current;
         }
 
+        internal List<(int,int)> GetLocationsWithCityTerrain()
+        {
+            var tilemapTiles = GetUnityTiles(out int boundsX, out int boundsY);
+            var tiles = new List<(int,int)>();
+            for (int y = 0; y < boundsY; y++)
+            {
+                for (int x = 0; x < boundsX; x++)
+                {
+                    var unityTile = tilemapTiles[x + y * boundsX];                    
+
+                    if (unityTile != null && 
+                        unityTile.name.ToLowerInvariant().Contains("castle"))
+                    {
+                        tiles.Add((x,y));
+                    }
+                }
+            }
+
+            return tiles;
+        }
+
         internal Tilemap GetTilemap()
         {
             return tileMap;
@@ -80,18 +103,12 @@ namespace Assets.Scripts.Tilemaps
 
         internal Vector3 ConvertGameToUnityCoordinates(int gameX, int gameY)
         {
-            this.tileMap = transform.GetComponent<Tilemap>();
-            Vector3 worldVector = tileMap.CellToWorld(new Vector3Int(gameX + 1, gameY + 1, 0));
-            worldVector.x += tileMap.cellBounds.xMin - tileMap.tileAnchor.x;
-            worldVector.y += tileMap.cellBounds.yMin - tileMap.tileAnchor.y;
-            return worldVector;
+            return MapUtilities.ConvertGameToUnityCoordinates(gameX, gameY, this);            
         }
 
         internal (int, int) ConvertUnityToGameCoordinates(Vector3 worldVector)
         {
-            // TODO: Add support to adjust to tilemap coordinates in case
-            //       the tilemap is translated to another location. 
-            return (Mathf.FloorToInt(worldVector.x), Mathf.FloorToInt(worldVector.y));
+            return MapUtilities.ConvertUnityToGameCoordinates(worldVector);
         }
 
         private TileBase[] GetUnityTiles(out int xSize, out int ySize)

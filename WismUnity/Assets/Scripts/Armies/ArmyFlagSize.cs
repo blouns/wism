@@ -12,8 +12,7 @@ public class ArmyFlagSize : MonoBehaviour
     {
         this.worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
             .GetComponent<WorldTilemap>();
-
-        this.flagManager = GameObject.FindGameObjectWithTag("ArmyManager")
+        this.flagManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<FlagManager>();
     }
 

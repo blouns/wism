@@ -1,4 +1,7 @@
-﻿using Assets.Scripts.Tilemaps;
+﻿using Assets.Scripts.Common;
+using Assets.Scripts.Editors;
+using Assets.Scripts.Tilemaps;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -28,6 +31,8 @@ namespace Assets.Scripts.Tiles
 
         public HasTile hasTile = HasTile;
 
+        private Dictionary<Vector3, GameObject> cityObjects = new Dictionary<Vector3, GameObject>();
+
         public static bool HasTile(ITilemap tilemap, Vector3Int position)
         {
             return tilemap.GetTile(position) is CityTile;
@@ -45,6 +50,10 @@ namespace Assets.Scripts.Tiles
             {
                 case TopLeftAdjacencyIndex:
                     tileData.sprite = citySprites[TopLeftQuadrantIndex];
+
+                    // Create a new city GameObject for each Top-left city
+                    var worldVector = tilemap.GetComponent<Tilemap>().CellToWorld(position);
+                    CreateCityGameObject(new Vector3(worldVector.x + 1, worldVector.y, 0f));
                     break;
                 case TopRightAdjacencyIndex:
                     tileData.sprite = citySprites[TopRightQuadrantIndex];
@@ -59,6 +68,18 @@ namespace Assets.Scripts.Tiles
                     tileData.sprite = citySprites[CityTileDefault];
                     break;
             }            
+        }
+
+        private void CreateCityGameObject(Vector3 worldVector)
+        {
+            if (!cityObjects.ContainsKey(worldVector))
+            {
+                var cityContainer = UnityUtilities.GameObjectHardFind("Cities");
+                var cityPrefab = cityContainer.GetComponent<CityContainer>().CityPrefab;
+                var cityGO = Instantiate(cityPrefab, cityContainer.transform);
+                cityGO.transform.position = worldVector;
+                cityObjects.Add(worldVector, cityGO);
+            }
         }
 
 #if UNITY_EDITOR

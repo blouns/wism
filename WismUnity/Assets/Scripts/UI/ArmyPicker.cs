@@ -87,8 +87,7 @@ public class ArmyPicker : MonoBehaviour
 
         this.unityGame = unityGame;
         this.gameManager = unityGame.GameManager;
-        this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
-            .GetComponent<ArmyManager>();
+        this.armyManager = unityGame.GetComponent<ArmyManager>();
 
         this.armies = new List<Army>();        
         this.armies.AddRange(armies);

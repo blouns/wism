@@ -41,8 +41,7 @@ public class CityProduction : MonoBehaviour
 
         this.productionCity = city;
         this.unityManager = unityManager;
-        this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
-                .GetComponent<ArmyManager>();
+        this.armyManager = unityManager.GetComponent<ArmyManager>();
 
         InitializeProduction();
     }
