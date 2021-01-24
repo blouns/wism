@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Armies;
 using Assets.Scripts.CommandProcessors;
+using Assets.Scripts.Editors;
 using Assets.Scripts.Tilemaps;
 using Assets.Scripts.UI;
 using System;
@@ -265,7 +266,7 @@ namespace Assets.Scripts.Managers
 
             // Set up default game (for testing purposes only)
             World.CreateWorld(WorldTilemap.CreateWorldFromScene().Map);
-            CreateDefaultCities();
+            CreateDefaultCitiesFromScene();
             CreateDefaultArmies();
 
             // Mouse click timing
@@ -535,8 +536,14 @@ namespace Assets.Scripts.Managers
                     }
                 }
 
-                // Draw only the "top" army for each army stack on the map
+                //// Reset the current tile for information panel 
+                //if (Game.Current.GameState == GameState.MovingArmy)
+                //{
+                //    this.currentTile = null;
+                //}
                 this.currentTile = null;
+                // Draw only the "top" army for each army stack on the map
+                // TODO: Iterate through armies rather than every tile for perf
                 foreach (Tile tile in World.Current.Map)
                 {
                     int armyId;
@@ -668,10 +675,25 @@ namespace Assets.Scripts.Managers
             ArmyDictionary.Add(army.Id, ago);
         }
 
+        private void CreateDefaultArmies()
+        {
+            Player sirians = Game.Current.Players[0];
+            var capitolPosition = UnityUtilities.GameObjectHardFind("Marthos")
+                .GetComponent<CityEntry>()
+                .GetGameCoordinates();
+            sirians.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
+
+            Player stormgiants = Game.Current.Players[1];
+            capitolPosition = UnityUtilities.GameObjectHardFind("Stormheim")
+                .GetComponent<CityEntry>()
+                .GetGameCoordinates();
+            stormgiants.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
+        }
+
         /// <summary>
         /// Debug-only game setup
         /// </summary>
-        private void CreateDefaultArmies()
+        private void CreateDefaultArmies2()
         {
             // Ready Player One
             Player sirians = Game.Current.Players[0];
@@ -680,7 +702,7 @@ namespace Assets.Scripts.Managers
 
             sirians.HireHero(World.Current.Map[2, 1]);
             sirians.ConscriptArmy(ModFactory.FindArmyInfo("Devils"), World.Current.Map[2, 1]);
-            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Devils"), World.Current.Map[2, 1]);            
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Devils"), World.Current.Map[2, 1]);
             sirians.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), World.Current.Map[2, 1]);
             sirians.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), World.Current.Map[2, 1]);
             sirians.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), World.Current.Map[2, 1]);
@@ -733,9 +755,44 @@ namespace Assets.Scripts.Managers
 
         }
 
-        private void CreateDefaultCities()
+        private void CreateDefaultCitiesFromScene()
         {
-            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, GameManager.DefaultWorld);
+            Dictionary<string, GameObject> citiesNames = new Dictionary<string, GameObject>();
+
+            // Extract the X,Y coords from City GameObjects from the scene 
+            var cityContainerGO = UnityUtilities.GameObjectHardFind("Cities");
+            int cityCount = cityContainerGO.transform.childCount;
+            for (int i = 0; i < cityCount; i++)
+            {
+                var cityGO = cityContainerGO.transform.GetChild(i).gameObject;
+                var cityEntry = cityGO.GetComponent<CityEntry>();
+
+                if (citiesNames.ContainsKey(cityEntry.cityShortName))
+                {
+                    continue;
+                }
+
+                citiesNames.Add(cityEntry.cityShortName, cityGO);
+                cityGO.name = cityEntry.cityShortName;
+            }
+
+            // Set the coords for the new city on the CityInfos
+            var cityInfos = new List<CityInfo>(
+                ModFactory.LoadCityInfos(GameManager.DefaultCityModPath));
+            var illuriaCities = new List<CityInfo>();
+            foreach (CityInfo ci in cityInfos)
+            {
+                if (citiesNames.ContainsKey(ci.ShortName))
+                {
+                    var go = citiesNames[ci.ShortName];
+                    var coords = worldTilemap.ConvertUnityToGameCoordinates(go.transform.position);
+                    ci.X = coords.Item1 ;    
+                    ci.Y = coords.Item2 + 1;    // +1 Adjustment for city object overlay alignment (anchor)
+                    illuriaCities.Add(ci);
+                }
+            }
+
+            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, illuriaCities);
         }
     }
 }

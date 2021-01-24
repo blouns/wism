@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using Assets.Scripts.Tilemaps;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.Scripts.Editors
@@ -6,6 +7,17 @@ namespace Assets.Scripts.Editors
     public class CityEntry : MonoBehaviour
     {
         public string cityShortName;
+
+        public Vector2Int GetGameCoordinates()
+        {
+            var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
+                .GetComponent<WorldTilemap>();
+
+            var coords = worldTilemap.ConvertUnityToGameCoordinates(gameObject.transform.position);
+
+            // Center on top-left of city
+            return new Vector2Int(coords.Item1, coords.Item2 + 1); 
+        }
 
 #if UNITY_EDITOR
 

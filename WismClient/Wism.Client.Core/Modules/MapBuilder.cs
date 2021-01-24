@@ -146,15 +146,20 @@ namespace Wism.Client.Modules
             return map;
         }
 
-        public static void AddCitiesToMapFromWorld(Tile[,] map, string worldName)
+        public static void AddCitiesToMapFromWorld(Tile[,] map, IList<CityInfo> cityInfos)
         {
-            var worldPath = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
-
-            var cityInfos = ModFactory.LoadCityInfos(worldPath);
             foreach (var cityInfo in cityInfos)
             {
                 MapBuilder.AddCity(map, cityInfo);
             }
+        }
+
+        public static void AddCitiesToMapFromWorld(Tile[,] map, string worldName)
+        {
+            var worldPath = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
+
+            AddCitiesToMapFromWorld(map, ModFactory.LoadCityInfos(worldPath));
+            
         }
 
         public static void AddCity(Tile[,] map, CityInfo cityInfo)

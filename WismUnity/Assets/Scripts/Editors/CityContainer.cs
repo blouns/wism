@@ -7,4 +7,7 @@ public class CityContainer : MonoBehaviour
 
     [SerializeField]
     public GameObject CityPrefab;
+
+    [SerializeField]
+    public int TotalCities;
 }

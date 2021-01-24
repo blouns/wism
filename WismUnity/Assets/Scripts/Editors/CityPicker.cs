@@ -12,11 +12,13 @@ namespace Assets.Scripts.Editors
     public class CityPicker : Editor
     {
         private List<CityInfo> cityInfos;
-        private int cityIndex;        
+        private int cityIndex;
+        private UnityEngine.GameObject citiesGO;
+        private int totalCities;
 
         public override void OnInspectorGUI()
         {
-            // Draw the default inspector
+            // Draw the default inspector 
             DrawDefaultInspector();
             DrawCityDropDownInspector();
         }
@@ -27,25 +29,35 @@ namespace Assets.Scripts.Editors
             string[] cityNames = GetCityNames(cityEntry.cityShortName);
 
             // Set the choice index to the previously selected index
-            cityIndex = Array.IndexOf(cityNames, cityEntry.cityShortName);
-            if (cityIndex < 0)
+            if (cityEntry.cityShortName != "")
             {
-                cityIndex = 0;
+                cityIndex = Array.IndexOf(cityNames, cityEntry.cityShortName);
+                if (cityIndex < 0)
+                {
+                    cityIndex = 0;
+                }
             }
 
             cityIndex = EditorGUILayout.Popup(cityIndex, cityNames);
 
             // Update the selected choice in the underlying object
             cityEntry.cityShortName = cityNames[cityIndex];
-            //cityEntry.gameObject.name = "City";
+
+            SetCitiesCount();
 
             // Save the changes back to the object
             EditorUtility.SetDirty(target);
         }
 
+        private  void SetCitiesCount()
+        {
+            this.citiesGO.GetComponent<CityContainer>()
+                .TotalCities = this.totalCities;
+        }
+
         private string[] GetCityNames(string currentName)
         {
-            if (this.cityInfos == null)
+            if (this.cityInfos == null) 
             {
                 // TODO: Temp code: need to select the world dynamically
                 this.cityInfos = new List<CityInfo>(
@@ -53,26 +65,32 @@ namespace Assets.Scripts.Editors
             }
 
             var takenCityNames = GetTakenCityNames();
-            string[] cityNames = new string[cityInfos.Count];
-            for (int i = 0; i < cityNames.Length; i++)
-            {
+           
+
+            // Add cities from city infos
+            List<string> cityList = new List<string>();
+            cityList.Add("{Unassigned}");
+            for (int i = 0; i < cityInfos.Count; i++)
+            { 
                 // Skip taken names except for the current name
                 if (cityInfos[i].ShortName == currentName ||
                     !takenCityNames.Contains(cityInfos[i].ShortName))
                 {
-                    cityNames[i] = cityInfos[i].ShortName;
+                    cityList.Add(cityInfos[i].ShortName);
                     takenCityNames.Add(cityInfos[i].ShortName);
                 }
             }
+            cityList.Sort();
 
-            return cityNames;
+            return cityList.ToArray(); ;
         }
 
         private HashSet<string> GetTakenCityNames()
         {
             var takenCityNames = new HashSet<string>();
 
-            var citiesGO = UnityUtilities.GameObjectHardFind("Cities");
+            this.citiesGO = UnityUtilities.GameObjectHardFind("Cities");
+            this.totalCities = citiesGO.transform.childCount;
             var count = citiesGO.transform.childCount;
             for (int i = 0; i < count; i++)
             {

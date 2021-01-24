@@ -31,7 +31,13 @@ namespace Assets.Scripts.Tiles
 
         public HasTile hasTile = HasTile;
 
-        private Dictionary<Vector3, GameObject> cityObjects = new Dictionary<Vector3, GameObject>();
+        private static Dictionary<Vector3, GameObject> cityObjects = new Dictionary<Vector3, GameObject>();
+
+        public void OnEnable()
+        {
+            BuildCityGameObjectCache();
+
+        }
 
         public static bool HasTile(ITilemap tilemap, Vector3Int position)
         {
@@ -51,9 +57,11 @@ namespace Assets.Scripts.Tiles
                 case TopLeftAdjacencyIndex:
                     tileData.sprite = citySprites[TopLeftQuadrantIndex];
 
+                    // TODO: Pull this out; cohesion issue 
                     // Create a new city GameObject for each Top-left city
                     var worldVector = tilemap.GetComponent<Tilemap>().CellToWorld(position);
                     CreateCityGameObject(new Vector3(worldVector.x + 1, worldVector.y, 0f));
+                    
                     break;
                 case TopRightAdjacencyIndex:
                     tileData.sprite = citySprites[TopRightQuadrantIndex];
@@ -70,8 +78,29 @@ namespace Assets.Scripts.Tiles
             }            
         }
 
-        private void CreateCityGameObject(Vector3 worldVector)
+        private static void BuildCityGameObjectCache()
         {
+            Debug.Log("Building city game object cache");
+            var cityContainer = UnityUtilities.GameObjectHardFind("Cities");
+            int count = cityContainer.transform.childCount;
+            for (int i = 0; i < count; i++)
+            {
+                var cityGO = cityContainer.transform.GetChild(i).gameObject;
+                if (!cityObjects.ContainsKey(cityGO.transform.position))
+                {
+                    cityObjects.Add(cityGO.transform.position, cityGO);
+                }
+            }
+            Debug.Log($"City game object cache ready: {cityObjects.Count} cities");
+        }
+
+        public static void ClearCityCache()
+        {
+            cityObjects.Clear(); 
+        }
+
+        private void CreateCityGameObject(Vector3 worldVector)
+        {            
             if (!cityObjects.ContainsKey(worldVector))
             {
                 var cityContainer = UnityUtilities.GameObjectHardFind("Cities");
@@ -79,6 +108,7 @@ namespace Assets.Scripts.Tiles
                 var cityGO = Instantiate(cityPrefab, cityContainer.transform);
                 cityGO.transform.position = worldVector;
                 cityObjects.Add(worldVector, cityGO);
+                Debug.Log($"New City game object created");
             }
         }
 
