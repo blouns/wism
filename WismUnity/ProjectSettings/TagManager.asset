@@ -16,6 +16,7 @@ TagManager:
   - Crosshairs
   - MinimapCamera
   - UnityManager
+  - City
   layers:
   - Default
   - TransparentFX

@@ -46,7 +46,7 @@ public class WarPanel : MonoBehaviour
             }
         }
 
-        this.armyManager = GameObject.FindGameObjectWithTag("ArmyManager")
+        this.armyManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<ArmyManager>();
 
         currentAttackerIndex = 0;
