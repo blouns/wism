@@ -1,8 +1,5 @@
 ﻿using Assets.Scripts.Managers;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using Wism.Client.Core;
@@ -17,11 +14,17 @@ namespace Assets.Scripts.UI
         private readonly List<IInformationMapping> informationMappings = new List<IInformationMapping>();
 
         private UnityManager unityManager;
+        private WismInputHandler inputHandler;
 
-        public void Start()
+        public void Awake()
         {
-            this.unityManager = GameObject.FindGameObjectWithTag("UnityManager")
-                .GetComponent<UnityManager>();
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            this.unityManager = UnityUtilities.GameObjectHardFind("UnityManager").GetComponent<UnityManager>();
+            this.inputHandler = this.unityManager.GetComponent<InputManager>().InputHandler;
 
             // Add in order of precendence            
             informationMappings.Add(new ArmyInformationMapping());
@@ -36,7 +39,13 @@ namespace Assets.Scripts.UI
         /// </summary>
         public void LateUpdate()
         {
-            UpdateInformationPanel(this.unityManager.GetCurrentTile());            
+            if (Game.Current.GameState == GameState.MovingArmy)
+            {
+                var gamePosition = this.unityManager.GetSelectedBoxGamePosition();
+                this.inputHandler.SetCurrentTile(World.Current.Map[gamePosition.x, gamePosition.y]);
+            }
+
+            UpdateInformationPanel(this.inputHandler.GetCurrentTile());            
         }
 
         private void UpdateInformationPanel(Tile subject)

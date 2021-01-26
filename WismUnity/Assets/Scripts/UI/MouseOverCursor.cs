@@ -134,8 +134,8 @@ namespace Assets.Scripts.UI
         private Tile GetCurrentTile()
         {
             var worldVector = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-            var gameCoords = worldTilemap.ConvertUnityToGameCoordinates(worldVector);
-            var tile = World.Current.Map[gameCoords.Item1, gameCoords.Item2];
+            var gameCoords = worldTilemap.ConvertUnityToGameVector(worldVector);
+            var tile = World.Current.Map[gameCoords.x, gameCoords.y];
             return tile;
         }
 
@@ -143,7 +143,7 @@ namespace Assets.Scripts.UI
         {
             Vector3 targetPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             var tile = Game.Current.GetSelectedArmies()[0].Tile;
-            Vector3 playerPosition = worldTilemap.ConvertGameToUnityCoordinates(tile.X, tile.Y);
+            Vector3 playerPosition = worldTilemap.ConvertGameToUnityVector(tile.X, tile.Y);
 
             // Gets a vector that points from the player's position to the targets
             Vector3 heading = targetPosition - playerPosition;

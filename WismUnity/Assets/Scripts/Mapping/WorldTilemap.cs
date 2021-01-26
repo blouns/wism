@@ -101,14 +101,14 @@ namespace Assets.Scripts.Tilemaps
             tileMap.SetTile(tileMap.WorldToCell(position), tile);
         }
 
-        internal Vector3 ConvertGameToUnityCoordinates(int gameX, int gameY)
+        internal Vector3 ConvertGameToUnityVector(int gameX, int gameY)
         {
-            return MapUtilities.ConvertGameToUnityCoordinates(gameX, gameY, this);            
+            return MapUtilities.ConvertGameToUnityVector(gameX, gameY, this);            
         }
 
-        internal (int, int) ConvertUnityToGameCoordinates(Vector3 worldVector)
+        internal Vector2Int ConvertUnityToGameVector(Vector3 worldVector)
         {
-            return MapUtilities.ConvertUnityToGameCoordinates(worldVector);
+            return MapUtilities.ConvertUnityToGameVector(worldVector);
         }
 
         private TileBase[] GetUnityTiles(out int xSize, out int ySize)
@@ -129,8 +129,8 @@ namespace Assets.Scripts.Tilemaps
         public Tile GetClickedTile(Camera followCamera)
         {
             Vector3 worldPoint = followCamera.ScreenToWorldPoint(Input.mousePosition);
-            var gameCoord = ConvertUnityToGameCoordinates(worldPoint);
-            Tile gameTile = World.Current.Map[gameCoord.Item1, gameCoord.Item2];
+            var gameCoord = ConvertUnityToGameVector(worldPoint);
+            Tile gameTile = World.Current.Map[gameCoord.x, gameCoord.y];
 
             return gameTile;
         }

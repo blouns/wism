@@ -44,7 +44,7 @@ namespace Assets.Scripts.Managers
 
         internal void SetCityTile(int x, int y, string clanName)
         {
-            var worldVector = worldTilemap.ConvertGameToUnityCoordinates(x, y);
+            var worldVector = worldTilemap.ConvertGameToUnityVector(x, y);
             var cityTile = FindCityTile(clanName);
             worldTilemap.SetTile(worldVector, cityTile);
             worldTilemap.RefreshTile(worldVector);            

@@ -1,9 +1,4 @@
 ﻿using Assets.Scripts.Managers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -16,6 +11,7 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
+        private readonly WismInputHandler inputHandler;
 
         public SelectArmyProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -26,6 +22,7 @@ namespace Assets.Scripts.CommandProcessors
 
             this.logger = loggerFactory.CreateLogger();
             this.unityGame = unityGame ?? throw new System.ArgumentNullException(nameof(unityGame));
+            this.inputHandler = this.unityGame.GetComponent<InputManager>().InputHandler;
         }
 
         public bool CanExecute(ICommandAction command)
@@ -40,7 +37,7 @@ namespace Assets.Scripts.CommandProcessors
 
             if (result == ActionState.Succeeded)
             {
-                unityGame.CenterOnTile(Game.Current.GetSelectedArmies()[0].Tile);
+                inputHandler.CenterOnTile(Game.Current.GetSelectedArmies()[0].Tile);
             }
 
             return result;

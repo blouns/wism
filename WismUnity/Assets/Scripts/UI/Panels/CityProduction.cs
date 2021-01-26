@@ -60,7 +60,7 @@ public class CityProduction : MonoBehaviour
         }
 
         InitializeCurrentProduction();
-        this.unityManager.SetAcceptingInput(false);
+        this.unityManager.InputManager.SetAcceptingInput(false);
     }
 
     private void InitializeCurrentProduction()
@@ -198,7 +198,7 @@ public class CityProduction : MonoBehaviour
 
     public void OnExitClick()
     {
-        this.unityManager.SetAcceptingInput(true);
+        this.unityManager.InputManager.SetAcceptingInput(true);
         this.unityManager.SetProductionMode(ProductionMode.None);
         this.gameObject.SetActive(false);
     }

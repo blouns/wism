@@ -68,7 +68,7 @@ namespace Assets.Scripts.CommandProcessors
 
             if (!timerElapsed)
             {
-                this.unityGame.SetAcceptingInput(false);
+                this.unityGame.InputManager.SetAcceptingInput(false);
                 UnityUtilities.GameObjectHardFind("SelectedBox").SetActive(false);
                 StartTimerOnFirstTime();
                 ShowBattleNotification(defendingPlayer);
@@ -106,7 +106,7 @@ namespace Assets.Scripts.CommandProcessors
         {
             var worldTilemap = unityGame.WorldTilemap;
             var warGO = UnityUtilities.GameObjectHardFind("War!");
-            warGO.transform.position = worldTilemap.ConvertGameToUnityCoordinates(targetTile.X, targetTile.Y);
+            warGO.transform.position = worldTilemap.ConvertGameToUnityVector(targetTile.X, targetTile.Y);
             warGO.SetActive(true);
         }
 

@@ -13,10 +13,10 @@ namespace Assets.Scripts.Editors
             var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
 
-            var coords = worldTilemap.ConvertUnityToGameCoordinates(gameObject.transform.position);
+            var coords = worldTilemap.ConvertUnityToGameVector(gameObject.transform.position);
 
             // Center on top-left of city
-            return new Vector2Int(coords.Item1, coords.Item2 + 1); 
+            return new Vector2Int(coords.x, coords.y + 1); 
         }
 
 #if UNITY_EDITOR

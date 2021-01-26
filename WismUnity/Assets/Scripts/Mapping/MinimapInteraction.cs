@@ -57,7 +57,7 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             var unityManager = GetUnityManager();
-            unityManager.SkipInput();
+            unityManager.InputManager.SkipInput();
 
             var minimapNormal = GetMinimapNormal();
             var viewportVector = mainCamera.ScreenToViewportPoint(
