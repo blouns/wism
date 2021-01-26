@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
@@ -110,12 +111,12 @@ namespace Wism.Client.Modules
         }
 
         /// <summary>
-        /// 00^   10^   20^   30^   40^   50^   
-        /// 01^   11.   21.   31$   41$   51^   
-        /// 02^   12.   22.   32$   42$   52^   
-        /// 03^   13$   23$   33.   43.   53^   
-        /// 04^   14$   24$   34.   44.   54^   
         /// 05^   15^   25^   35^   45^   55^   
+        /// 04^   14.   24.   34.   44.   54^   
+        /// 03^   13.   23.   33.   43.   53^   
+        /// 02^   12.   22.   32.   42.   52^   
+        /// 01^   11.   21.   31.   41.   51^   
+        /// 00^   10^   20^   30^   40^   50^ 
         /// </summary>
         /// <returns>Basic map without armies.</returns>
         /// <remarks>
@@ -200,6 +201,19 @@ namespace Wism.Client.Modules
             {
                 player.ClaimCity(city, tiles);
             }
+            else
+            {
+                AddNeutralCityGarrison(city);
+            }
+        }
+
+        private static void AddNeutralCityGarrison(City city)
+        {
+            Army garrison = ArmyFactory.CreateArmy(
+                                Player.GetNeutralPlayer(),
+                                ModFactory.FindArmyInfo("LightInfantry"));
+            garrison.Strength = city.Defense;
+            city.Tile.AddArmy(garrison);
         }
 
         /// <summary>

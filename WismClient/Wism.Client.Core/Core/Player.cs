@@ -18,7 +18,10 @@ namespace Wism.Client.Core
         public Clan Clan { get; set; }
 
         public int Gold { get; set; }
+
         public int Turn { get; private set; }
+
+        public bool IsDead { get; set; }
 
         private Player()
         {
@@ -39,6 +42,13 @@ namespace Wism.Client.Core
             };
 
             return player;
+        }
+
+        public static Player GetNeutralPlayer()
+        {
+            ClanInfo clanInfo = ClanInfo.GetClanInfo("Neutral");
+            Clan clan = Clan.Create(clanInfo);
+            return Player.Create(clan);
         }
 
         public List<Army> GetArmies()

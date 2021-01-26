@@ -69,7 +69,7 @@ namespace Assets.Scripts.CommandProcessors
             if (!timerElapsed)
             {
                 this.unityGame.SetAcceptingInput(false);
-                UnityUtilities.GameObjectHardFind("Selected").SetActive(false);
+                UnityUtilities.GameObjectHardFind("SelectedBox").SetActive(false);
                 StartTimerOnFirstTime();
                 ShowBattleNotification(defendingPlayer);
                 DrawWarScene(targetTile);

@@ -163,23 +163,11 @@ namespace Assets.Scripts.Managers
             Game.Current.Players.Add(player2);
             player2.Clan.IsHuman = false;
 
-            clanInfo = ClanInfo.GetClanInfo("LordBane");
+            clanInfo = ClanInfo.GetClanInfo("Elvallie");
             clan = Clan.Create(clanInfo);
             Player player3 = Player.Create(clan);
             Game.Current.Players.Add(player3);
             player3.Clan.IsHuman = false;
-
-            clanInfo = ClanInfo.GetClanInfo("Selentines");
-            clan = Clan.Create(clanInfo);
-            Player player4 = Player.Create(clan);
-            Game.Current.Players.Add(player4);
-            player4.Clan.IsHuman = false;
-
-            clanInfo = ClanInfo.GetClanInfo("Elvallie");
-            clan = Clan.Create(clanInfo);
-            Player player5 = Player.Create(clan);
-            Game.Current.Players.Add(player5);
-            player5.Clan.IsHuman = false;
 
             return Game.Current.Players;
         }

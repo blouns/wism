@@ -414,7 +414,7 @@ namespace Assets.Scripts.Managers
                     // Move or attack; can only attack from adjacent tiles
                     var armies = Game.Current.GetSelectedArmies();
                     bool isAttacking = clickedTile.CanAttackHere(armies);
-                    bool isAdjacent = clickedTile.IsNeighbor(armies[0].Tile);
+                    bool isAdjacent = IsAdjacentForAttack(clickedTile, armies);
                     if (isAttacking && isAdjacent)
                     {
                         // War!
@@ -433,6 +433,22 @@ namespace Assets.Scripts.Managers
                     }
                     break;
             }
+        }
+
+        private static bool IsAdjacentForAttack(Tile clickedTile, List<Army> armies)
+        {
+            var isAdjacent = clickedTile.IsNeighbor(armies[0].Tile);
+
+            if (clickedTile.HasCity())
+            {
+                var cityTiles = clickedTile.City.GetTiles();
+                for (int i = 0; i < cityTiles.Length; i++)
+                {
+                    isAdjacent |= cityTiles[i].IsNeighbor(armies[0].Tile);
+                }
+            }
+
+            return isAdjacent;                   
         }
 
         private void HandleCityClick(Tile tile)
@@ -646,8 +662,8 @@ namespace Assets.Scripts.Managers
             this.selectedArmyBox.SetActive(false);
             this.selectedArmyBox.transform.position = worldVector;
 
-            if (clickedTile.X >= 0 && clickedTile.X < World.Current.Map.GetUpperBound(0) &&
-                clickedTile.Y >= 0 && clickedTile.Y < World.Current.Map.GetUpperBound(1))
+            if (clickedTile.X >= 0 && clickedTile.X <= World.Current.Map.GetUpperBound(0) &&
+                clickedTile.Y >= 0 && clickedTile.Y <= World.Current.Map.GetUpperBound(1))
             {
                 this.currentTile = clickedTile;
                 Debug.Log(this.currentTile);

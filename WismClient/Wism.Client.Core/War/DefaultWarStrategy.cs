@@ -5,6 +5,7 @@ using Wism.Client.Agent.Factories;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 
 namespace Wism.Client.War
 {
@@ -93,15 +94,19 @@ namespace Wism.Client.War
 
             PrepareArmiesForAttack(attackers, target, out List<Army> defenders, out int compositeAFCM, out int compositeDFCM);
 
-            // Attacking an empty city always succeeds
+            // Attacking a neutral city
+            //if (target.HasCity() && target.City.Clan.ShortName == "Neutral")
+            //{
+            //    wasSuccessful = AttackNeutralCityOnce(attackers, compositeAFCM, target.City);
+            //}
+            // Attacking an empty city owned by a Player always succeeds
             if (defenders.Count == 0 && target.HasCity())
             {
-                // TODO: Add concept of attacking a Neutral city (which has no armies, but can defend)
                 wasSuccessful = true;
             }
+            // Attacking another army
             else
             {
-                // Attack
                 wasSuccessful = AttackOnceInternal(defenders, attackers, compositeAFCM, compositeDFCM);
             }
             
@@ -118,12 +123,32 @@ namespace Wism.Client.War
             }
         }
 
+        /// <summary>
+        /// Attacks a neutral city
+        /// </summary>
+        /// <param name="attackers">Attackers</param>
+        /// <param name="compositeAFCM">Attacking force combat modifier bonus</param>
+        /// <param name="targetTile">Defending tile</param>
+        private bool AttackNeutralCityOnce(List<Army> attackers, int compositeAFCM, City city)
+        {
+            var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
+            Army garrison = ArmyFactory.CreateArmy(armyInfo);
+            garrison.Strength = city.Defense;
+
+            return AttackOnceInternal(
+                new List<Army>() { garrison },
+                attackers,
+                compositeAFCM,
+                0);                
+        }
+
         public bool BattleContinues(List<Army> defenders, List<Army> attacker)
         {
             return (attacker.Count > 0 && defenders.Count > 0);
         }
 
-        private static void PrepareArmiesForAttack(List<Army> attackers, Tile target, out List<Army> defenders, out int compositeAFCM, out int compositeDFCM)
+        private static void PrepareArmiesForAttack(List<Army> attackers, Tile target, 
+            out List<Army> defenders, out int compositeAFCM, out int compositeDFCM)
         {
             // Muster all armys from composite tile (i.e. city) to defend
             defenders = target.MusterArmy();

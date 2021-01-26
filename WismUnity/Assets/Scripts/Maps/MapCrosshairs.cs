@@ -21,8 +21,8 @@ public class MapCrosshairs : MonoBehaviour
         
         var minimapPanelRect = GetMinimapPanelRect();
 
-        float newXPercent = center.x / (float)World.Current.Map.GetUpperBound(0);
-        float newYPercent = center.y / (float)World.Current.Map.GetUpperBound(1);
+        float newXPercent = center.x / (float)World.Current.Map.GetUpperBound(0) + 1f;
+        float newYPercent = center.y / (float)World.Current.Map.GetUpperBound(1) + 1f;
         float newX = minimapPanelRect.sizeDelta.x * newXPercent - (minimapPanelRect.sizeDelta.x / 2f);
         float newY = minimapPanelRect.sizeDelta.y * newYPercent - (minimapPanelRect.sizeDelta.y / 2f);
 

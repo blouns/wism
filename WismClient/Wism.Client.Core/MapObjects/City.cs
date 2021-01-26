@@ -195,6 +195,16 @@ namespace Wism.Client.MapObjects
             return this.ShortName;
         }
 
+        internal bool CanTraverse(Clan clan)
+        {            
+            if (clan is null)
+            {
+                throw new ArgumentNullException(nameof(clan));
+            }
+
+            return this.Clan == clan;
+        }
+
         internal bool CanTraverse(Army army)
         {
             if (army is null)

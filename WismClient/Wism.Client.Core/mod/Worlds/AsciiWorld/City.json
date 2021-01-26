@@ -76,5 +76,23 @@
         "Upkeep": 8
       }
     ]
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Deserton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "MovesModifier": 10,
+        "StrengthModifier": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Deserton",
+    "X": 1,
+    "Y": 4
   }
 ]

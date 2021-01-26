@@ -118,7 +118,6 @@ namespace Wism.Client.Core
                     Deploy(this.ArmyInTraining);
                 }
 
-                // TODO: Option to renew production?
                 ArmyInTraining = null;
             }
 
@@ -131,8 +130,7 @@ namespace Wism.Client.Core
             {
                 throw new ArgumentNullException(nameof(army));
             }
-
-            // TODO: Need to select the next open tile if tile is full
+            
             Tile targetTile;
             if (army.DestinationCity == null)
             {
@@ -142,10 +140,98 @@ namespace Wism.Client.Core
             {
                 targetTile = army.DestinationCity.Tile;
             }
+            // Select the next open tile if army cannot be placed here (full, navy)
+            targetTile = FindNextOpenTile(army, targetTile);
 
             army.DisplayName = GetArmyDisplayName(army.ArmyInfo);
 
             Player.ConscriptArmy(army, targetTile);
+        }
+
+        private Tile FindNextOpenTile(ArmyInTraining army, Tile targetTile)
+        {
+            HashSet<Tile> tilesSeen = new HashSet<Tile>();
+            Stack<Tile> tileStack = new Stack<Tile>();
+            const int maxAttempts = 10000;
+            int attempts = 0;
+
+            // Try current tile
+            if (CanDeployHere(army, targetTile))
+            {
+                return targetTile;
+            }
+            
+            // Try all city tiles
+            if (targetTile.HasCity() &&
+                targetTile.City.Clan == Player.Clan)
+            {
+                var tiles = targetTile.City.GetTiles();
+                for (int i = 0; i < tiles.Length; i++)
+                {
+                    if (CanDeployHere(army, tiles[i]))
+                    {
+                        return tiles[i];
+                    }
+
+                    // Save tile for future search
+                    tileStack.Push(tiles[i]);
+                    tilesSeen.Add(tiles[i]);
+                }
+            }
+
+            // Place outside city
+            // Search until max attempts reached
+            while (attempts++ < maxAttempts)
+            {
+                // Are there no more options?
+                if (tileStack.Count == 0)
+                {
+                    break;
+                }
+
+                var tile = tileStack.Pop();
+                var tiles = tile.GetNineGrid();
+
+                for (int i = 0; i <= tiles.GetUpperBound(0); i++)
+                {
+                    for (int j = 0; j <= tiles.GetUpperBound(1); j++)
+                    {
+                        if (tilesSeen.Contains(tiles[i, j]) ||
+                            tiles[i, j] == null)
+                        {
+                            // Cannot deploy here
+                            continue;
+                        }
+
+                        if (CanDeployHere(army, tiles[i, j]))
+                        {
+                            // Found a place to deploy
+                            return tiles[i, j];
+                        }
+                        else if (targetTile.CanTraverseHere(Player.Clan, army.ArmyInfo) &&
+                                 IsTileFull(tiles[i, j]))
+                        {
+                            // Add traversable tiles for further area search
+                            tileStack.Push(tiles[i, j]);
+                        }
+
+                        tilesSeen.Add(tiles[i, j]);
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Army cannot be deployed as there are no suitable locations");
+        }
+
+        private bool CanDeployHere(ArmyInTraining army, Tile targetTile)
+        {
+            return (!IsTileFull(targetTile)) &&
+                    targetTile.CanTraverseHere(Player.Clan, army.ArmyInfo);
+        }
+
+        private static bool IsTileFull(Tile targetTile)
+        {
+            return targetTile.GetAllArmies().Count == Army.MaxArmies;
         }
 
         /// <summary>

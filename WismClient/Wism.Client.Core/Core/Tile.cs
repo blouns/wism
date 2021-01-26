@@ -247,28 +247,42 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
+        /// Check if the army info can move onto this tile
+        /// </summary>
+        /// <param name="clan">Clan of the army</param>
+        /// <param name="armyInfo">Army kind</param>
+        /// <returns>True if the army can move here; otherwise, false</returns>
+        public bool CanTraverseHere(Clan clan, ArmyInfo armyInfo)
+        {
+            if (clan is null)
+            {
+                throw new ArgumentNullException(nameof(clan));
+            }
+
+            if (armyInfo is null)
+            {
+                throw new ArgumentNullException(nameof(armyInfo));
+            }
+
+            bool canTraverse = true;
+            if (HasCity())
+            {
+                canTraverse = this.City.CanTraverse(clan);
+            }
+            
+            canTraverse &= this.Terrain.CanTraverse(armyInfo.CanWalk, armyInfo.CanFloat, armyInfo.CanFly);
+
+            return canTraverse;
+        }
+
+        /// <summary>
         /// Check if the given army can move onto this tile
         /// </summary>
         /// <param name="army">Army to test</param>
         /// <returns>True if the army can move here; otherwise, false</returns>
         public bool CanTraverseHere(Army army)
         {
-            if (army is null)
-            {
-                throw new ArgumentNullException(nameof(army));
-            }
-
-            bool canTraverse;
-            if (HasCity())
-            {
-                canTraverse = this.City.CanTraverse(army);
-            }
-            else
-            {
-                canTraverse = this.Terrain.CanTraverse(army.CanWalk, army.CanFloat, army.CanFly);
-            }
-
-            return canTraverse;
+            return CanTraverseHere(army.Clan, army.Info);
         }
 
         public bool HasCity()
@@ -395,7 +409,17 @@ namespace Wism.Client.Core
             {
                 for (int xDelta = -1; xDelta <= 1; xDelta++)
                 {
-                    nineGrid[1 + xDelta, 1 + yDelta] = map[X + xDelta, Y + yDelta];
+                    if (X + xDelta > map.GetUpperBound(0) ||
+                        X + xDelta < map.GetLowerBound(0) ||
+                        Y + yDelta > map.GetUpperBound(1) ||
+                        Y + yDelta < map.GetLowerBound(1))
+                    {
+                        nineGrid[1 + xDelta, 1 + yDelta] = null;
+                    }
+                    else
+                    {
+                        nineGrid[1 + xDelta, 1 + yDelta] = map[X + xDelta, Y + yDelta];
+                    }
                 }
             }
 

@@ -300,5 +300,54 @@ namespace Wism.Client.Test.Unit
             Assert.AreEqual(4, army.Upkeep);
             Assert.AreEqual("Marthos 1st Light Infantry", army.DisplayName);
         }
+
+
+        [Test]
+        public void Production_Deploy_TargetTileFull()
+        {
+            // Assemble
+            const int NumberOfArmiesToProduce = 41;     // City(8 x 4) + Outside City (8 + 1)
+            Game.CreateDefaultGame();
+            var tile = World.Current.Map[1, 2];
+            var city = MapBuilder.FindCity("Marthos");
+            var player = Game.Current.GetCurrentPlayer();
+            var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
+            player.Gold = 1000000;
+            World.Current.AddCity(city, tile);
+            player.ClaimCity(city);
+
+            for (int i = 0; i < NumberOfArmiesToProduce; i++)
+            {
+                TestContext.WriteLine("Starting production " + i);
+                if (!city.Barracks.StartProduction(armyInfo))
+                {
+                    Assert.Fail("Production failed to start");
+                }
+
+                while (!city.Barracks.Produce())
+                {
+                    TestContext.WriteLine("Produced one turn");
+                }
+                TestContext.WriteLine("Produced" + i);
+            }            
+
+            // Assert                         
+            Assert.AreEqual(NumberOfArmiesToProduce, player.GetArmies().Count, "Not all armies were deployed");
+            Assert.IsNotNull(tile.Armies, "Army was not deployed");
+            Assert.AreEqual(8, tile.Armies.Count);
+            
+            // City tiles should be full (8 x 4)
+            var tiles = city.GetTiles();
+            for (int i = 0; i < tiles.Length; i++)
+            {
+                Assert.AreEqual(8, tiles[i].Armies.Count, "Unexpected number of armies deployed to city tile");
+            }
+
+            // Surrounding tiles should have one tile full (8) and one tile with one (1) army
+            Assert.IsNotNull(World.Current.Map[1, 3].Armies.Count);            
+            Assert.AreEqual(8, World.Current.Map[1, 3].Armies.Count);
+            Assert.IsNotNull(World.Current.Map[2, 3].Armies.Count);
+            Assert.AreEqual(1, World.Current.Map[2, 3].Armies.Count);
+        }
     }
 }
