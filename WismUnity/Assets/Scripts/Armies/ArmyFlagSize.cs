@@ -18,8 +18,8 @@ public class ArmyFlagSize : MonoBehaviour
 
     public void UpdateFlagSize()
     {
-        var gameCoords = worldTilemap.ConvertUnityToGameCoordinates(gameObject.transform.position);
-        var tile = World.Current.Map[gameCoords.Item1, gameCoords.Item2];
+        var gameCoords = worldTilemap.ConvertUnityToGameVector(gameObject.transform.position);
+        var tile = World.Current.Map[gameCoords.x, gameCoords.y];
 
         int flagSize = tile.GetAllArmies().Count;
         Clan clan = (tile.HasVisitingArmies()) ? 

@@ -11,6 +11,7 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
+        private readonly WismInputHandler inputHandler;
 
         public CompleteBattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -21,6 +22,7 @@ namespace Assets.Scripts.CommandProcessors
 
             this.logger = loggerFactory.CreateLogger();
             this.unityGame = unityGame ?? throw new System.ArgumentNullException(nameof(unityGame));
+            this.inputHandler = this.unityGame.GetComponent<InputManager>().InputHandler;
         }
 
         public bool CanExecute(ICommandAction command)
@@ -39,7 +41,7 @@ namespace Assets.Scripts.CommandProcessors
                     break;
 
                 case ActionState.Failed:
-                    unityGame.DeselectObject();
+                    inputHandler.DeselectObject();
                     unityGame.WarPanel.Teardown();
                     unityGame.SetTime(GameManager.StandardTime);
                     break;
@@ -56,7 +58,7 @@ namespace Assets.Scripts.CommandProcessors
         {
             var warGO = UnityUtilities.GameObjectHardFind("War!");
             warGO.SetActive(false);
-            this.unityGame.SetAcceptingInput(true);
+            this.unityGame.InputManager.SetAcceptingInput(true);
         }
     }
 }

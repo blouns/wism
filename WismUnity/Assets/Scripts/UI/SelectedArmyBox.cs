@@ -9,6 +9,28 @@ namespace Assets.Scripts.UI
 {
     public class SelectedArmyBox : MonoBehaviour
     {
+        private ArmyManager armyManager;
+        private UnityManager unityManager;
+
+        private bool isInitialized;
+
+        public void Start()
+        {
+            if (!this.isInitialized)
+            {
+                Initialize();
+            }
+        }
+
+        private void Initialize()
+        {
+            var unityManagerGO = GameObject.FindGameObjectWithTag("UnityManager");
+            this.armyManager = unityManagerGO.GetComponent<ArmyManager>();
+            this.unityManager = unityManagerGO.GetComponent<UnityManager>();
+
+            isInitialized = true;
+        }
+
         public void SetActive(bool active)
         {
             this.gameObject.SetActive(active);
@@ -18,6 +40,7 @@ namespace Assets.Scripts.UI
         {
             this.transform.position = worldVector;
             this.SetActive(true);
+            this.unityManager.SetCameraTarget(transform);
         }
 
         public void HideSelectedBox()
@@ -32,6 +55,8 @@ namespace Assets.Scripts.UI
 
         internal void Draw(UnityManager unityGame)
         {
+            Initialize();
+
             if (!Game.Current.ArmiesSelected())
             {
                 // None; so delete bounding box if it exists
@@ -51,9 +76,9 @@ namespace Assets.Scripts.UI
             var worldTilemap = unityGame.WorldTilemap;
             if (IsSelectedBoxActive())
             {
-                var boxGameCoords = worldTilemap.ConvertUnityToGameCoordinates(transform.position);
-                if (boxGameCoords.Item1 == tile.X &&
-                    boxGameCoords.Item2 == tile.Y)
+                var boxGameCoords = worldTilemap.ConvertUnityToGameVector(transform.position);
+                if (boxGameCoords.x == tile.X &&
+                    boxGameCoords.y == tile.Y)
                 {
                     // Do nothing; already rendered
                     return;
@@ -65,15 +90,14 @@ namespace Assets.Scripts.UI
                 }
             }
 
-            if (!unityGame.ArmyDictionary.ContainsKey(army.Id))
+            if (!armyManager.ArmyDictionary.ContainsKey(army.Id))
             {
                 throw new InvalidOperationException("Could not find selected army in game objects.");
             }
 
             // Render the selected box
-            Vector3 worldVector = worldTilemap.ConvertGameToUnityCoordinates(army.X, army.Y);
-            ShowSelectedBox(worldVector);
-            unityGame.SetCameraTarget(transform);
+            Vector3 worldVector = worldTilemap.ConvertGameToUnityVector(army.X, army.Y);
+            ShowSelectedBox(worldVector);            
         }
     }
 }

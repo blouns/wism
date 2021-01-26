@@ -4,17 +4,18 @@ using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
+using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using ILogger = Wism.Client.Common.ILogger;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class StartTurnProcessor : ICommandProcessor
+    public class EndTurnProcessor : ICommandProcessor
     {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
 
-        public StartTurnProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public EndTurnProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {
@@ -32,26 +33,18 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            var startTurn = (StartTurnCommand)command;
-            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
-                .GetComponent<NotificationBox>();           
-            messageBox.Notify($"{startTurn.Player.Clan.DisplayName} your turn is starting!");
+            var endTurn = (EndTurnCommand)command;
 
-            CenterOnCapitol();
+            HandleGameOver(endTurn);
 
             return command.Execute();
         }
 
-        private void CenterOnCapitol()
+        private void HandleGameOver(EndTurnCommand command)
         {
-            // If capitol exists move camera there
-
-
-            // If capitol taken, show next owned city
-
-            // If no cities remaining, show last capitol owned
-
-            
+            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
+                .GetComponent<NotificationBox>();
+            messageBox.Notify($"Wretched {command.Player.Clan.DisplayName}! For you, the war is over!");            
         }
     }
 }

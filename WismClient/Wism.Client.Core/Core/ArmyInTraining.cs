@@ -19,8 +19,8 @@ namespace Wism.Client.Core
         public City DestinationCity { get; set; }
 
         public int Upkeep { get; set; }
-        public int MovesModifier { get; internal set; }
-        public int StrengthModifier { get; internal set; }
+        public int Moves { get; internal set; }
+        public int Strength { get; internal set; }
         public string DisplayName { get; set; }
     }
 }

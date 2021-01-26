@@ -15,9 +15,9 @@ namespace Wism.Client.Modules
         public int Upkeep { get; set; }
 
         [DataMember]
-        public int StrengthModifier { get; set; }
+        public int Strength { get; set; }
 
         [DataMember]
-        public int MovesModifier { get; set; }
+        public int Moves { get; set; }
     }
 }

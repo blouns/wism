@@ -84,12 +84,43 @@ namespace Wism.Client.Core
             // End current players turn
             DeselectArmies();
             nextArmyQueue.Clear();
-            var player = GetCurrentPlayer(); 
-            player.EndTurn();            
+            var player = GetCurrentPlayer();
+            player.EndTurn();
+            if (SelectNextPlayer())
+            {
+                Transition(GameState.StartingTurn);
+            }
+            else
+            {
+                HandleGameOver();
+            }
+        }
 
-            // Set next players turn
-            currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;            
-            Transition(GameState.StartingTurn);
+        private void HandleGameOver()
+        {
+            // TODO: What else is needed at this level for game end?
+            Transition(GameState.GameOver);
+        }
+
+        /// <summary>
+        /// Select the next Player who is still in the fight.
+        /// </summary>
+        /// <returns>True if next player selected; False if there are no other players left</returns>
+        private bool SelectNextPlayer()
+        {            
+            int lastPlayerIndex = currentPlayerIndex;
+
+            // Find next player that is still in the fight
+            currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
+            currentPlayerIndex = Players.FindIndex(currentPlayerIndex, p => !p.IsDead);
+            if (currentPlayerIndex == -1)
+            {
+                // Not found in first pass; look starting from beginning of list                
+                currentPlayerIndex = Players.FindIndex(p => !p.IsDead);
+            }
+
+            // This may roll back to the original player (player wins); so return False in that case
+            return (lastPlayerIndex != currentPlayerIndex);
         }
 
         /// <summary>

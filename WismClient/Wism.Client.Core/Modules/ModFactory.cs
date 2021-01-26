@@ -13,8 +13,9 @@ namespace Wism.Client.Modules
 
     public static class ModFactory
     {
-        public static string ModPath = "mod";
-        public static string WorldsPath = "worlds";
+        private static string modPath = "mod";
+        private static string worldsPath = "worlds";
+        private static string worldPath = "Illuria";
 
         // Module info
         private static IList<ArmyInfo> armyInfos;
@@ -22,6 +23,11 @@ namespace Wism.Client.Modules
         private static IList<ClanInfo> ClanInfos;
         private static IList<ClanTerrainModifierInfo> ClanTerrainMappingInfos;
         private static IList<CityInfo> cityInfos;
+
+        public static string ModPath { get => modPath; set => modPath = value; }
+
+        public static string WorldPath { get => worldPath; set => worldPath = value; }
+        public static string WorldsPath { get => worldsPath; set => worldsPath = value; }
 
         public static IList<T> LoadModFiles<T>(string path)
         {

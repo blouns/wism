@@ -57,7 +57,7 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             var unityManager = GetUnityManager();
-            unityManager.SkipInput();
+            unityManager.InputManager.SkipInput();
 
             var minimapNormal = GetMinimapNormal();
             var viewportVector = mainCamera.ScreenToViewportPoint(
@@ -65,8 +65,8 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
             float miniNormalX = 1 - (1 - viewportVector.x) / minimapNormal.x;
             float miniNormalY = 1 - (1 - viewportVector.y) / minimapNormal.y;
 
-            float x = miniNormalX * World.Current.Map.GetUpperBound(0);
-            float y = miniNormalY * World.Current.Map.GetUpperBound(1);
+            float x = miniNormalX * (World.Current.Map.GetUpperBound(0) + 1);
+            float y = miniNormalY * (World.Current.Map.GetUpperBound(1) + 1);
 
             this.mainCameraFollow.SetCameraTarget(new Vector3(x, y, 0f));
         }

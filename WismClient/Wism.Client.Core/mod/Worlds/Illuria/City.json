@@ -7,15 +7,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -32,15 +32,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -57,29 +57,29 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 6,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 6,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -96,15 +96,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -121,15 +121,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 4,
+        "Moves": 18,
+        "Strength": 4,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -146,8 +146,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 9,
-        "StrengthModifier": 4,
+        "Moves": 9,
+        "Strength": 4,
         "TurnsToProduce": 2,
         "Upkeep": 4
       }
@@ -164,8 +164,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -182,22 +182,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 5,
         "Upkeep": 8
       }
@@ -214,15 +214,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -239,15 +239,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -264,8 +264,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -277,39 +277,39 @@
   {
     "ClanName": "LordBane",
     "Defense": 6,
-    "DisplayName": "Bane's Citiadel",
+    "DisplayName": "Bane's Citadel",
     "Income": 20,
     "ProductionInfos": [
       {
         "ArmyInfoName": "GiantWarriors",
-        "MovesModifier": 10,
-        "StrengthModifier": 6,
+        "Moves": 10,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 6,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
-    "ShortName": "BanesCitiadel",
+    "ShortName": "BanesCitadel",
     "X": 0,
     "Y": 0
   },
@@ -321,8 +321,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -339,22 +339,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "ElvenArchers",
-        "MovesModifier": 12,
-        "StrengthModifier": 4,
+        "Moves": 12,
+        "Strength": 4,
         "TurnsToProduce": 3,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Pegasus",
-        "MovesModifier": 16,
-        "StrengthModifier": 4,
+        "Moves": 16,
+        "Strength": 4,
         "TurnsToProduce": 5,
         "Upkeep": 16
       }
@@ -371,8 +371,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -389,22 +389,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "ElvenArchers",
-        "MovesModifier": 12,
-        "StrengthModifier": 4,
+        "Moves": 12,
+        "Strength": 4,
         "TurnsToProduce": 3,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Pegasus",
-        "MovesModifier": 16,
-        "StrengthModifier": 4,
+        "Moves": 16,
+        "Strength": 4,
         "TurnsToProduce": 7,
         "Upkeep": 16
       }
@@ -421,15 +421,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "ElvenArchers",
-        "MovesModifier": 12,
-        "StrengthModifier": 4,
+        "Moves": 12,
+        "Strength": 4,
         "TurnsToProduce": 3,
         "Upkeep": 4
       }
@@ -446,15 +446,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "ElvenArchers",
-        "MovesModifier": 12,
-        "StrengthModifier": 4,
+        "Moves": 12,
+        "Strength": 4,
         "TurnsToProduce": 3,
         "Upkeep": 4
       }
@@ -471,22 +471,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 15,
-        "StrengthModifier": 5,
+        "Moves": 15,
+        "Strength": 5,
         "TurnsToProduce": 5,
         "Upkeep": 8
       }
@@ -503,22 +503,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 13,
-        "StrengthModifier": 6,
+        "Moves": 13,
+        "Strength": 6,
         "TurnsToProduce": 6,
         "Upkeep": 8
       }
@@ -535,29 +535,29 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 20,
-        "StrengthModifier": 6,
+        "Moves": 20,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 6,
+        "Moves": 18,
+        "Strength": 6,
         "TurnsToProduce": 8,
         "Upkeep": 20
       }
@@ -574,15 +574,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 7,
-        "StrengthModifier": 6,
+        "Moves": 7,
+        "Strength": 6,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -599,15 +599,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -624,22 +624,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 4,
+        "Moves": 8,
+        "Strength": 4,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -656,15 +656,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -681,15 +681,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 5,
         "Upkeep": 8
       }
@@ -706,22 +706,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "DwarvenLegion",
-        "MovesModifier": 9,
-        "StrengthModifier": 5,
+        "Moves": 9,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 4
       }
@@ -738,8 +738,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 2,
         "Upkeep": 4
       }
@@ -756,15 +756,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -781,15 +781,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 18,
-        "StrengthModifier": 6,
+        "Moves": 18,
+        "Strength": 6,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -806,15 +806,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 2,
+        "Moves": 10,
+        "Strength": 2,
         "TurnsToProduce": 3,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 3,
+        "Moves": 18,
+        "Strength": 3,
         "TurnsToProduce": 12,
         "Upkeep": 20
       }
@@ -831,15 +831,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "DwarvenLegion",
-        "MovesModifier": 9,
-        "StrengthModifier": 5,
+        "Moves": 9,
+        "Strength": 5,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Griffins",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 5,
         "Upkeep": 16
       }
@@ -856,15 +856,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "DwarvenLegion",
-        "MovesModifier": 9,
-        "StrengthModifier": 5,
+        "Moves": 9,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Griffins",
-        "MovesModifier": 18,
-        "StrengthModifier": 6,
+        "Moves": 18,
+        "Strength": 6,
         "TurnsToProduce": 5,
         "Upkeep": 16
       }
@@ -881,15 +881,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -906,15 +906,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "DwarvenLegion",
-        "MovesModifier": 9,
-        "StrengthModifier": 5,
+        "Moves": 9,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Griffins",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 7,
         "Upkeep": 16
       }
@@ -931,8 +931,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 2,
         "Upkeep": 4
       }
@@ -949,8 +949,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 12,
-        "StrengthModifier": 5,
+        "Moves": 12,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       }
@@ -967,15 +967,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 19,
-        "StrengthModifier": 6,
+        "Moves": 19,
+        "Strength": 6,
         "TurnsToProduce": 3,
         "Upkeep": 6
       }
@@ -992,15 +992,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 9,
-        "StrengthModifier": 3,
+        "Moves": 9,
+        "Strength": 3,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 18,
-        "StrengthModifier": 6,
+        "Moves": 18,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       }
@@ -1017,15 +1017,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 18,
-        "StrengthModifier": 6,
+        "Moves": 18,
+        "Strength": 6,
         "TurnsToProduce": 3,
         "Upkeep": 6
       }
@@ -1042,22 +1042,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 6,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       }
@@ -1074,22 +1074,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 6,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       }
@@ -1106,22 +1106,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "DwarvenLegion",
-        "MovesModifier": 9,
-        "StrengthModifier": 5,
+        "Moves": 9,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Griffins",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 6,
         "Upkeep": 16
       }
@@ -1138,22 +1138,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1170,22 +1170,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1202,29 +1202,29 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 6,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 5,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 20,
-        "StrengthModifier": 5,
+        "Moves": 20,
+        "Strength": 5,
         "TurnsToProduce": 10,
         "Upkeep": 20
       }
@@ -1241,15 +1241,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1266,22 +1266,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 6,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 8,
         "Upkeep": 10
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1298,22 +1298,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 15,
-        "StrengthModifier": 5,
+        "Moves": 15,
+        "Strength": 5,
         "TurnsToProduce": 13,
         "Upkeep": 20
       }
@@ -1330,8 +1330,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -1348,22 +1348,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 7,
-        "StrengthModifier": 5,
+        "Moves": 7,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 6,
+        "Moves": 18,
+        "Strength": 6,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1380,15 +1380,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -1405,22 +1405,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1437,22 +1437,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "GiantWarriors",
-        "MovesModifier": 10,
-        "StrengthModifier": 6,
+        "Moves": 10,
+        "Strength": 6,
         "TurnsToProduce": 5,
         "Upkeep": 6
       },
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -1469,22 +1469,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1501,15 +1501,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 10,
         "Upkeep": 18
       }
@@ -1526,15 +1526,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 6,
         "Upkeep": 8
       }
@@ -1551,15 +1551,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1576,29 +1576,29 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 15,
-        "StrengthModifier": 6,
+        "Moves": 15,
+        "Strength": 6,
         "TurnsToProduce": 2,
         "Upkeep": 8
       }
@@ -1615,8 +1615,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -1633,15 +1633,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 6,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 5,
         "Upkeep": 8
       }
@@ -1658,8 +1658,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "GiantWarriors",
-        "MovesModifier": 12,
-        "StrengthModifier": 6,
+        "Moves": 12,
+        "Strength": 6,
         "TurnsToProduce": 2,
         "Upkeep": 4
       }
@@ -1676,15 +1676,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 4,
         "Upkeep": 8
       }
@@ -1701,15 +1701,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 4,
         "Upkeep": 8
       }
@@ -1726,15 +1726,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1751,22 +1751,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "ElvenArchers",
-        "MovesModifier": 12,
-        "StrengthModifier": 4,
+        "Moves": 12,
+        "Strength": 4,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Pegasus",
-        "MovesModifier": 16,
-        "StrengthModifier": 4,
+        "Moves": 16,
+        "Strength": 4,
         "TurnsToProduce": 7,
         "Upkeep": 16
       }
@@ -1783,15 +1783,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 15,
-        "StrengthModifier": 6,
+        "Moves": 15,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       }
@@ -1808,15 +1808,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -1833,15 +1833,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1858,22 +1858,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 5,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 11,
         "Upkeep": 20
       }
@@ -1890,8 +1890,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }
@@ -1908,22 +1908,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Navy",
-        "MovesModifier": 18,
-        "StrengthModifier": 5,
+        "Moves": 18,
+        "Strength": 5,
         "TurnsToProduce": 13,
         "Upkeep": 20
       }
@@ -1940,22 +1940,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 5,
+        "Moves": 10,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "ElvenArchers",
-        "MovesModifier": 12,
-        "StrengthModifier": 4,
+        "Moves": 12,
+        "Strength": 4,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Pegasus",
-        "MovesModifier": 16,
-        "StrengthModifier": 4,
+        "Moves": 16,
+        "Strength": 4,
         "TurnsToProduce": 6,
         "Upkeep": 16
       }
@@ -1972,22 +1972,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "ElvenArchers",
-        "MovesModifier": 12,
-        "StrengthModifier": 4,
+        "Moves": 12,
+        "Strength": 4,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Pegasus",
-        "MovesModifier": 16,
-        "StrengthModifier": 4,
+        "Moves": 16,
+        "Strength": 4,
         "TurnsToProduce": 7,
         "Upkeep": 16
       }
@@ -2004,15 +2004,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "DwarvenLegion",
-        "MovesModifier": 9,
-        "StrengthModifier": 5,
+        "Moves": 9,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Griffins",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 8,
         "Upkeep": 16
       }
@@ -2029,22 +2029,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "GiantWarriors",
-        "MovesModifier": 10,
-        "StrengthModifier": 6,
+        "Moves": 10,
+        "Strength": 6,
         "TurnsToProduce": 3,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -2061,22 +2061,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "ElvenArchers",
-        "MovesModifier": 12,
-        "StrengthModifier": 4,
+        "Moves": 12,
+        "Strength": 4,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Pegasus",
-        "MovesModifier": 16,
-        "StrengthModifier": 4,
+        "Moves": 16,
+        "Strength": 4,
         "TurnsToProduce": 7,
         "Upkeep": 16
       }
@@ -2093,22 +2093,22 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "GiantWarriors",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 5,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 14,
-        "StrengthModifier": 5,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -2125,15 +2125,15 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 5,
+        "Moves": 16,
+        "Strength": 5,
         "TurnsToProduce": 5,
         "Upkeep": 8
       }
@@ -2150,29 +2150,29 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 8,
-        "StrengthModifier": 5,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 16,
-        "StrengthModifier": 6,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "Pegasus",
-        "MovesModifier": 15,
-        "StrengthModifier": 5,
+        "Moves": 15,
+        "Strength": 5,
         "TurnsToProduce": 7,
         "Upkeep": 16
       }

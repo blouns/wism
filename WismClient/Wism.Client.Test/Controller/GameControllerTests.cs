@@ -45,5 +45,24 @@ namespace Wism.Client.Test.Controller
             Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(), 
                 "Current player is incorrect.");
         }
+
+        [Test]
+        public void EndTurn_GameOver_Player1Win()
+        {
+            // Assemble
+            GameController gameController = TestUtilities.CreateGameController();
+            Game.CreateDefaultGame();
+            Player player1 = Game.Current.Players[0];
+            Player player2 = Game.Current.Players[1];
+            player2.IsDead = true;
+
+            // Act
+            gameController.EndTurn();
+
+            // Assert
+            Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(), 
+                "Current player is incorrect.");
+            Assert.AreEqual(GameState.GameOver, Game.Current.GameState, "Game should be over after last player dies (one player left).");
+        }
     }
 }

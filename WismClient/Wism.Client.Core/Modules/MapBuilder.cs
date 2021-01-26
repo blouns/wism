@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Modules
 {
     public static class MapBuilder
-    {
+    {       
         private static readonly Dictionary<string, Terrain> terrainKinds = new Dictionary<string, Terrain>();
         private static readonly Dictionary<string, Army> armyKinds = new Dictionary<string, Army>();
         private static readonly Dictionary<string, Clan> clanKinds = new Dictionary<string, Clan>();
@@ -22,10 +23,10 @@ namespace Wism.Client.Modules
 
         public static void Initialize()
         {
-            Initialize(ModFactory.ModPath);
+            Initialize(ModFactory.ModPath, ModFactory.WorldPath);
         }
 
-        public static void Initialize(string modPath)
+        public static void Initialize(string modPath, string world)
         {
             ModFactory.ModPath = modPath;
             LoadTerrainKinds(modPath);
@@ -33,7 +34,7 @@ namespace Wism.Client.Modules
             LoadClanKinds(modPath);
 
             // TODO: This is for testing only
-            LoadCityKinds(modPath + "\\" + ModFactory.WorldsPath + "\\" + "Illuria");
+            LoadCityKinds(modPath + "\\" + ModFactory.WorldsPath + "\\" + world);
         }
 
         private static void LoadCityKinds(string path)
@@ -110,12 +111,12 @@ namespace Wism.Client.Modules
         }
 
         /// <summary>
-        /// 00^   10^   20^   30^   40^   50^   
-        /// 01^   11.   21.   31$   41$   51^   
-        /// 02^   12.   22.   32$   42$   52^   
-        /// 03^   13$   23$   33.   43.   53^   
-        /// 04^   14$   24$   34.   44.   54^   
         /// 05^   15^   25^   35^   45^   55^   
+        /// 04^   14.   24.   34.   44.   54^   
+        /// 03^   13.   23.   33.   43.   53^   
+        /// 02^   12.   22.   32.   42.   52^   
+        /// 01^   11.   21.   31.   41.   51^   
+        /// 00^   10^   20^   30^   40^   50^ 
         /// </summary>
         /// <returns>Basic map without armies.</returns>
         /// <remarks>
@@ -200,6 +201,19 @@ namespace Wism.Client.Modules
             {
                 player.ClaimCity(city, tiles);
             }
+            else
+            {
+                AddNeutralCityGarrison(city);
+            }
+        }
+
+        private static void AddNeutralCityGarrison(City city)
+        {
+            Army garrison = ArmyFactory.CreateArmy(
+                                Player.GetNeutralPlayer(),
+                                ModFactory.FindArmyInfo("LightInfantry"));
+            garrison.Strength = city.Defense;
+            city.Tile.AddArmy(garrison);
         }
 
         /// <summary>

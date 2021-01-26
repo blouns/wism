@@ -1,4 +1,6 @@
-﻿using Assets.Scripts.Editors;
+﻿using Assets.Scripts.Armies;
+using Assets.Scripts.Editors;
+using Assets.Scripts.Tilemaps;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +17,20 @@ namespace Assets.Scripts.Managers
 
         private Dictionary<string, GameObject> armiesByClanMap;
         private FlagManager flagManager;
+        private readonly Dictionary<int, ArmyGameObject> armyDictionary = new Dictionary<int, ArmyGameObject>();
+        private UnityManager unityManager;        
+        private WorldTilemap worldTilemap;
+
+        public Dictionary<int, ArmyGameObject> ArmyDictionary => armyDictionary;
+
+        public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
+        public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
+
+
+        public void Awake()
+        {
+            Initialize();
+        }
 
         public void Initialize()
         {
@@ -36,6 +52,9 @@ namespace Assets.Scripts.Managers
 
             this.flagManager = gameObject.GetComponent<FlagManager>();
             this.flagManager.Initialize();
+            this.unityManager = this.GetComponentInParent<UnityManager>();
+            this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
+                .GetComponent<WorldTilemap>();
         }
 
         public GameObject FindGameObjectKind(Army army)
@@ -78,6 +97,101 @@ namespace Assets.Scripts.Managers
         internal bool IsInitialized()
         {
             return armiesByClanMap != null;
+        }
+
+        public void CleanupArmies()
+        {
+            // Find and cleanup stale game objects
+            var toDelete = new List<int>(ArmyDictionary.Keys);
+            foreach (Player player in Game.Current.Players)
+            {
+                IList<Army> armies = player.GetArmies();
+                foreach (Army army in armies)
+                {
+                    if (ArmyDictionary.ContainsKey(army.Id))
+                    {
+                        // Found the army so don't remove it
+                        toDelete.Remove(army.Id);
+                    }
+                }
+            }
+
+            // Remove objects missing from the game
+            toDelete.ForEach(id =>
+            {
+                Destroy(ArmyDictionary[id].GameObject);
+                ArmyDictionary.Remove(id);
+            });
+        }
+
+        public void DrawArmyGameObjects()
+        {
+            foreach (Player player in Game.Current.Players)
+            {
+                // Create all the objects if not already present
+                foreach (Army army in player.GetArmies())
+                {
+                    // Find or create and set up the GameObject connected to WISM MapObject
+                    if (!ArmyDictionary.ContainsKey(army.Id))
+                    {
+                        Vector3 worldVector = WorldTilemap.ConvertGameToUnityVector(army.X, army.Y);
+                        InstantiateArmy(army, worldVector);
+                    }
+                    else
+                    {
+                        ArmyDictionary[army.Id].GameObject.SetActive(false);
+                    }
+                }
+
+                //// Reset the current tile for information panel 
+                //if (Game.Current.GameState == GameState.MovingArmy)
+                //{
+                //    this.currentTile = null;
+                //}
+                //this.currentTile = null;
+                // Draw only the "top" army for each army stack on the map
+                // TODO: Iterate through armies rather than every tile for perf
+                foreach (Tile tile in World.Current.Map)
+                {
+                    int armyId;
+                    // Draw visiting armies over stationed armies
+                    if (tile.HasVisitingArmies() && ArmyDictionary.ContainsKey(tile.VisitingArmies[0].Id))
+                    {
+                        armyId = tile.VisitingArmies[0].Id;
+                        this.unityManager.SetCameraTarget(ArmyDictionary[armyId].GameObject.transform);
+
+                        // Update the current tile for info panel
+                        //var coords = WorldTilemap.ConvertUnityToGameVector(this.selectedArmyBox.transform.position);
+                        //this.currentTile = World.Current.Map[coords.x, coords.y];
+                    }
+                    else if (tile.HasArmies() && this.ArmyDictionary.ContainsKey(tile.Armies[0].Id))
+                    {
+                        armyId = tile.Armies[0].Id;
+                    }
+                    else
+                    {
+                        // Not a "top" army                        
+                        continue;
+                    }
+
+                    ArmyGameObject ago = this.ArmyDictionary[armyId];
+                    Vector3 vector = WorldTilemap.ConvertGameToUnityVector(ago.Army.X, ago.Army.Y);
+                    ago.GameObject.transform.position = vector;
+                    ago.GameObject.SetActive(true);
+                    var flagGO = ago.GameObject.GetComponentInChildren<ArmyFlagSize>();
+                    flagGO.UpdateFlagSize();
+                }
+            }
+        }
+
+        internal void InstantiateArmy(Army army, Vector3 worldVector)
+        {
+            var armyGO = Instantiate(army, worldVector, WorldTilemap.transform);
+            armyGO.SetActive(false);
+
+            // Add to the instantiated army to dictionary for tracking
+            ArmyGameObject ago = new ArmyGameObject(army, armyGO);
+            ArmyDictionary.Add(army.Id, ago);
         }
     }
 }
