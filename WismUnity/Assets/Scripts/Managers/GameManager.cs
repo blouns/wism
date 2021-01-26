@@ -50,7 +50,7 @@ namespace Assets.Scripts.Managers
             commandController = provider.CommandController;
 
             // Set up the Game
-            MapBuilder.Initialize(DefaultModPath);
+            MapBuilder.Initialize(DefaultModPath, DefaultWorld);
             Game.CreateEmpty();
             Game.Current.Random = new System.Random(DefaultRandom);
             Game.Current.WarStrategy = new DefaultWarStrategy();

@@ -265,7 +265,8 @@ namespace Assets.Scripts.Managers
             this.cityManager = GetComponent<CityManager>();
 
             // Set up default game (for testing purposes only)
-            World.CreateWorld(WorldTilemap.CreateWorldFromScene().Map);
+            World.CreateWorld(
+                WorldTilemap.CreateWorldFromScene(GameManager.DefaultWorld).Map);
             CreateDefaultCitiesFromScene();
             CreateDefaultArmies();
 

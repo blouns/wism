@@ -20,9 +20,9 @@ namespace Assets.Scripts.Tilemaps
             tileMap = transform.GetComponent<Tilemap>();
         }
 
-        public World CreateWorldFromScene()
+        public World CreateWorldFromScene(string worldPath)
         {
-            MapBuilder.Initialize(GameManager.DefaultModPath);
+            MapBuilder.Initialize(GameManager.DefaultModPath, worldPath);
 
             TileBase[] tilemapTiles = GetUnityTiles(out int boundsX, out int boundsY);
             Tile[,] gameMap = new Tile[boundsX, boundsY];
