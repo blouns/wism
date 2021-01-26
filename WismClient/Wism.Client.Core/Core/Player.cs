@@ -87,8 +87,8 @@ namespace Wism.Client.Core
         {
             var army = ConscriptArmy(ait.ArmyInfo, tile);
             army.Upkeep = ait.Upkeep;
-            army.Strength += ait.StrengthModifier;
-            army.Moves += ait.MovesModifier;
+            army.Strength = ait.Strength;
+            army.Moves = ait.Moves;
             army.MovesRemaining = army.Moves;
             army.DisplayName = ait.DisplayName;
 

@@ -10,29 +10,29 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "MovesModifier": 0,
-        "StrengthModifier": 0,
+        "Moves": 0,
+        "Strength": 0,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": -2,
-        "StrengthModifier": 0,
+        "Moves": -2,
+        "Strength": 0,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 0,
-        "StrengthModifier": 1,
+        "Moves": 0,
+        "Strength": 1,
         "TurnsToProduce": 4,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "Pegasus",
-        "MovesModifier": 1,
-        "StrengthModifier": 0,
+        "Moves": 1,
+        "Strength": 0,
         "TurnsToProduce": 7,
         "Upkeep": 16
       }
@@ -49,29 +49,29 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "GiantWarriors",
-        "MovesModifier": -2,
-        "StrengthModifier": 0,
+        "Moves": -2,
+        "Strength": 0,
         "TurnsToProduce": 4,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 0,
-        "StrengthModifier": 0,
+        "Moves": 0,
+        "Strength": 0,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "MovesModifier": 0,
-        "StrengthModifier": 0,
+        "Moves": 0,
+        "Strength": 0,
         "TurnsToProduce": 4,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "MovesModifier": 0,
-        "StrengthModifier": 0,
+        "Moves": 0,
+        "Strength": 0,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -85,8 +85,8 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "MovesModifier": 10,
-        "StrengthModifier": 3,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       }

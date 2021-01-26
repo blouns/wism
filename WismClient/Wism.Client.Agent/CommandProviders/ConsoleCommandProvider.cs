@@ -147,8 +147,8 @@ namespace Wism.Client.Agent
                 armyInfo = ModFactory.FindArmyInfo(production[i].ArmyInfoName);
                 Console.WriteLine($"({i}) " +
                     $"{armyInfo.DisplayName}\t" +
-                    $"Strength: {armyInfo.Strength + production[i].StrengthModifier}\t" +
-                    $"Moves: {armyInfo.Moves + production[i].MovesModifier}\t" +
+                    $"Strength: {armyInfo.Strength + production[i].Strength}\t" +
+                    $"Moves: {armyInfo.Moves + production[i].Moves}\t" +
                     $"Turns: {production[i].TurnsToProduce}\t" +
                     $"Upkeep: {production[i].Upkeep}");
             }

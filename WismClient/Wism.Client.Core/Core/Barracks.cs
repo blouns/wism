@@ -79,8 +79,8 @@ namespace Wism.Client.Core
                 TurnsToProduce = pi.TurnsToProduce,
                 TurnsToDeliver = DefaultTurnsToDeliver,
                 Upkeep = pi.Upkeep,
-                MovesModifier = pi.MovesModifier,
-                StrengthModifier = pi.StrengthModifier
+                Moves = pi.Moves,
+                Strength = pi.Strength
             };
             
 

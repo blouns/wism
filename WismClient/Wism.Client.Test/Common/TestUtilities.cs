@@ -6,11 +6,14 @@ using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 
 namespace Wism.Client.Test.Common
 {
     public static class TestUtilities
     {
+        internal static readonly string DefaultTestWorld = "AsciiWorld";
+
         public static ILoggerFactory CreateLogFactory()
         {
             return new WismLoggerFactory();

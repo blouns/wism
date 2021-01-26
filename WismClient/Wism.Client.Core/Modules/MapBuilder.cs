@@ -8,7 +8,7 @@ using Wism.Client.MapObjects;
 namespace Wism.Client.Modules
 {
     public static class MapBuilder
-    {
+    {       
         private static readonly Dictionary<string, Terrain> terrainKinds = new Dictionary<string, Terrain>();
         private static readonly Dictionary<string, Army> armyKinds = new Dictionary<string, Army>();
         private static readonly Dictionary<string, Clan> clanKinds = new Dictionary<string, Clan>();
@@ -23,10 +23,10 @@ namespace Wism.Client.Modules
 
         public static void Initialize()
         {
-            Initialize(ModFactory.ModPath);
+            Initialize(ModFactory.ModPath, ModFactory.WorldPath);
         }
 
-        public static void Initialize(string modPath)
+        public static void Initialize(string modPath, string world)
         {
             ModFactory.ModPath = modPath;
             LoadTerrainKinds(modPath);
@@ -34,7 +34,7 @@ namespace Wism.Client.Modules
             LoadClanKinds(modPath);
 
             // TODO: This is for testing only
-            LoadCityKinds(modPath + "\\" + ModFactory.WorldsPath + "\\" + "Illuria");
+            LoadCityKinds(modPath + "\\" + ModFactory.WorldsPath + "\\" + world);
         }
 
         private static void LoadCityKinds(string path)

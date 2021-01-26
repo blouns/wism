@@ -161,7 +161,7 @@ namespace Wism.Client.Test.Scenario
             var gameController = TestUtilities.CreateGameController();
 
             Game.CreateDefaultGame();
-            World.Current.AddDefaultCities();
+            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, TestUtilities.DefaultTestWorld);
             Player sirians = Game.Current.Players[0];
             Player lordBane = Game.Current.Players[1];
             const int startingGold = 432;
@@ -287,6 +287,7 @@ namespace Wism.Client.Test.Scenario
             var commandController = TestUtilities.CreateCommandController();
 
             Game.CreateDefaultGame();
+            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, TestUtilities.DefaultTestWorld);
 
             // Initial Sirians setup
             Player sirians = Game.Current.Players[0];
