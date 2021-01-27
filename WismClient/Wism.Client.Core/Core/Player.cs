@@ -23,6 +23,8 @@ namespace Wism.Client.Core
 
         public bool IsDead { get; set; }
 
+        public City Capitol { get; set; }
+
         private Player()
         {
         }
@@ -307,18 +309,28 @@ namespace Wism.Client.Core
             if (city.Clan != Clan && city.Clan != null)
             {                
                 PillageGoldFromClan(city.Clan);
-                city.Clan.Player.RemoveCity(city);
+                city.Clan.Player.RemoveCity(city);                
             }
 
             city.Claim(this, tiles);                        
 
             // Add city to Player for tracking
             this.myCities.Add(city);
+            if (Capitol == null)
+            {
+                Capitol = city;
+            }
         }
 
         private void RemoveCity(City city)
         {
             this.myCities.Remove(city);
+
+            // Move capitol if lost
+            if (this.myCities.Count > 0)
+            {
+                this.Capitol = this.myCities[0];
+            }
         }
 
         /// <summary>

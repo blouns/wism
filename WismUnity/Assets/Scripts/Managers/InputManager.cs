@@ -1,4 +1,5 @@
-﻿using System.Timers;
+﻿using Assets.Scripts.UI;
+using System.Timers;
 using UnityEngine;
 using Wism.Client.Core;
 
@@ -8,7 +9,7 @@ namespace Assets.Scripts.Managers
     {
         private UnityManager unityManager;
         private GameManager gameManager;
-        private WismInputHandler inputHandler;
+        private InputHandler inputHandler;
 
         private readonly Timer mouseSingleLeftClickTimer = new Timer();
         private bool singleLeftClickProcessed;
@@ -19,14 +20,14 @@ namespace Assets.Scripts.Managers
 
         public GameManager GameManager { get => gameManager; set => gameManager = value; }
         public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
-        public WismInputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
+        public InputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
 
         public void Awake()
         {
             this.UnityManager = GameObject.FindGameObjectWithTag("UnityManager")
                 .GetComponent<UnityManager>();
             this.GameManager = UnityManager.GetComponent<GameManager>();
-            this.InputHandler = new WismInputHandler(this.UnityManager);
+            this.InputHandler = new InputHandler(this.UnityManager);
 
             // Mouse click timing
             mouseSingleLeftClickTimer.Interval = 400;

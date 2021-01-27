@@ -199,7 +199,7 @@ namespace Wism.Client.Modules
             var player = Game.Current.Players.Find(p => p.Clan.ShortName == cityInfo.ClanName);
             if (player != null)
             {
-                player.ClaimCity(city, tiles);
+                player.ClaimCity(city, tiles);                
             }
             else
             {

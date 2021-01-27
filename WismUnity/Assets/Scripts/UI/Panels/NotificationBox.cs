@@ -13,38 +13,46 @@ public class Message
 
 public class NotificationBox : MonoBehaviour
 {
-    public const double DefaultInterval = 5000;
+    public const float DefaultInterval = 3f;
 
-    private Text notificationText;
-    private Timer timer;
-    private bool timerElapsed;
+    private Text notificationText;   
     private string message;
+    private CanvasGroup infoPanelGroup;
+    private float timer;
+    private float waitTime = DefaultInterval;
 
     public void Start()
     {
-        this.notificationText = GameObject.FindGameObjectWithTag("NotificationBox")
+        this.notificationText = UnityUtilities.GameObjectHardFind("NotificationBox")
             .GetComponent<Text>();
+
+        this.infoPanelGroup = UnityUtilities.GameObjectHardFind("InformationPanel")
+            .GetComponent<CanvasGroup>();
     }
 
     public void Update()
-    {        
-        if (timerElapsed)
+    {
+        timer += Time.deltaTime;
+        if (timer > waitTime)
         {
             ClearNotification();
-            this.timerElapsed = false;
         }
-
-        ShowNotifications();
+        else
+        {
+            ShowNotifications();
+        }
     }
 
     private void ShowNotifications()
-    {
+    {        
         this.notificationText.text = this.message;
+        infoPanelGroup.alpha = 0f;
     }
 
     public void ClearNotification()
     {
         this.message = "";
+        infoPanelGroup.alpha = 1f;
     }
 
     public void Notify(string message, double interval = DefaultInterval)
@@ -54,14 +62,9 @@ public class NotificationBox : MonoBehaviour
             throw new ArgumentNullException(nameof(message));
         }
 
+        this.infoPanelGroup.alpha = 0f;
         this.message = message;
-        this.timer = new Timer(interval);
-        this.timer.Elapsed += Timer_Elapsed;
-        this.timer.Start();
-    }
-
-    private void Timer_Elapsed(object sender, ElapsedEventArgs e)
-    {
-        this.timerElapsed = true;
+        timer = 0f;
+        ShowNotifications();
     }
 }

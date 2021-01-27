@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Managers;
+using Assets.Scripts.UI;
 using System;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
@@ -11,7 +12,7 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
-        private readonly WismInputHandler inputHandler;
+        private readonly InputHandler inputHandler;
 
         public CompleteBattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {

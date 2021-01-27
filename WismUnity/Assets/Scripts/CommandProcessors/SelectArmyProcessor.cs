@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Managers;
+using Assets.Scripts.UI;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -11,7 +12,7 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
-        private readonly WismInputHandler inputHandler;
+        private readonly InputHandler inputHandler;
 
         public SelectArmyProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -35,10 +36,10 @@ namespace Assets.Scripts.CommandProcessors
         {
             ActionState result = command.Execute();
 
-            if (result == ActionState.Succeeded)
-            {
-                inputHandler.CenterOnTile(Game.Current.GetSelectedArmies()[0].Tile);
-            }
+            //if (result == ActionState.Succeeded)
+            //{
+            //    inputHandler.CenterOnTile(Game.Current.GetSelectedArmies()[0].Tile);
+            //}
 
             return result;
         }

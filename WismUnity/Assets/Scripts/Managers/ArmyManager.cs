@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Armies;
 using Assets.Scripts.Editors;
 using Assets.Scripts.Tilemaps;
+using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,12 +21,13 @@ namespace Assets.Scripts.Managers
         private readonly Dictionary<int, ArmyGameObject> armyDictionary = new Dictionary<int, ArmyGameObject>();
         private UnityManager unityManager;        
         private WorldTilemap worldTilemap;
+        private InputHandler inputHandler;
 
         public Dictionary<int, ArmyGameObject> ArmyDictionary => armyDictionary;
 
         public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
         public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
-
+        public InputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
 
         public void Awake()
         {
@@ -55,6 +57,8 @@ namespace Assets.Scripts.Managers
             this.unityManager = this.GetComponentInParent<UnityManager>();
             this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
                 .GetComponent<WorldTilemap>();
+            this.inputHandler = this.unityManager
+                .GetComponent<InputManager>().InputHandler;
         }
 
         public GameObject FindGameObjectKind(Army army)
@@ -142,13 +146,13 @@ namespace Assets.Scripts.Managers
                         ArmyDictionary[army.Id].GameObject.SetActive(false);
                     }
                 }
-
-                //// Reset the current tile for information panel 
-                //if (Game.Current.GameState == GameState.MovingArmy)
-                //{
-                //    this.currentTile = null;
-                //}
-                //this.currentTile = null;
+                
+                if (Game.Current.GameState == GameState.MovingArmy ||
+                    Game.Current.GameState == GameState.SelectedArmy)
+                {
+                    // Reset the current tile for information panel 
+                    this.InputHandler.SetCurrentTile(null);
+                }
                 // Draw only the "top" army for each army stack on the map
                 // TODO: Iterate through armies rather than every tile for perf
                 foreach (Tile tile in World.Current.Map)

@@ -4,12 +4,6 @@ The quality of the Unity UI is at the prototype-level. Given my newness to the p
 several examples of things that were done with cut-corners, hacks, or other "unofficial" solutions.
 This captures a list of some of these known areas that are worth revisiting.
 
-0. Script cohesion
-Many of the scripts have organically grown and cross multiple GameObjects. This reduces cohesion
-making it harder to test and more complex. Splitting these up and making scripts indepenendent 
-and self-sufficient will greatly reduce complexity.
-
-
 1. Canvas - Screen Overlay
 Given how small these assets are (designed for old resolutions), the touch-targets and UI widgets
 must be scaled down extremely small relative to their native size. This has exposed Unity bugs

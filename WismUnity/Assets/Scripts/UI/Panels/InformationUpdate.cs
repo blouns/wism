@@ -14,7 +14,7 @@ namespace Assets.Scripts.UI
         private readonly List<IInformationMapping> informationMappings = new List<IInformationMapping>();
 
         private UnityManager unityManager;
-        private WismInputHandler inputHandler;
+        private InputHandler inputHandler;
 
         public void Awake()
         {
@@ -39,7 +39,8 @@ namespace Assets.Scripts.UI
         /// </summary>
         public void LateUpdate()
         {
-            if (Game.Current.GameState == GameState.MovingArmy)
+            if (Game.Current.GameState == GameState.MovingArmy ||
+                Game.Current.GameState == GameState.SelectedArmy)
             {
                 var gamePosition = this.unityManager.GetSelectedBoxGamePosition();
                 this.inputHandler.SetCurrentTile(World.Current.Map[gamePosition.x, gamePosition.y]);

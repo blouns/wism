@@ -1,3 +1,6 @@
+using Assets.Scripts.Managers;
+using Assets.Scripts.Tilemaps;
+using Assets.Scripts.UI;
 using UnityEngine;
 using Wism.Client.Core;
 
@@ -9,25 +12,20 @@ public class CameraFollow : MonoBehaviour
     private const float FullHDYMinClamp = 8.5f;
     private const float FullHDYMaxClamp = 70.1f;
 
-    private const float SurfacePro6XMinClamp = 13.75f;
-    private const float SurfacePro6XMaxClamp = 71f;
-    private const float SurfacePro6YMinClamp = 7.5f;
-    private const float SurfacePro6YMaxClamp = 73f;
-
     public Transform target;
     public float speed;
     public float scale;
+
     public float xMinClamp;
     public float xMaxClamp;
     public float yMinClamp;
     public float yMaxClamp;
-    public bool isFollowing;
 
+    private bool isFollowing;
     private Vector3 origin;
     private Vector3 difference;
-    private bool isDragging;    
-
-    Camera followCamera;
+    private bool isDragging;
+    private Camera followCamera;    
 
     // Start is called before the first frame update
     void Start()
@@ -39,10 +37,10 @@ public class CameraFollow : MonoBehaviour
     public void LateUpdate()
     {
         UpdateCameraState();
-        HandleRightClickDrag();
+        HandleCameraMove();
     }
 
-    private void HandleRightClickDrag()
+    private void HandleCameraMove()
     {
         if (Input.GetMouseButton(1))
         {
@@ -59,6 +57,11 @@ public class CameraFollow : MonoBehaviour
             if (target && isFollowing)
             {
                 SetCameraTargetLerp(target);
+            }
+            else if (target)
+            {
+                SetCameraTarget(target.position);
+                target = null;
             }
         }
 
@@ -97,7 +100,8 @@ public class CameraFollow : MonoBehaviour
 
     private void UpdateCameraState()
     {        
-        if (Game.Current.GameState == GameState.MovingArmy)
+        if (Game.Current.GameState == GameState.MovingArmy ||
+            Game.Current.GameState == GameState.SelectedArmy)
         {
             isFollowing = true;
         }

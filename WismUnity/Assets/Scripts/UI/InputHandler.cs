@@ -6,9 +6,9 @@ using UnityEngine;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.UI
 {
-    public class WismInputHandler
+    public class InputHandler
     {
         private UnityManager unityManager;
         private GameManager gameManager;
@@ -18,7 +18,7 @@ namespace Assets.Scripts
         private int selectedArmyIndex;
         private Tile currentTile;
 
-        public WismInputHandler(UnityManager unityManager)
+        public InputHandler(UnityManager unityManager)
         {
             this.unityManager = unityManager;
             this.gameManager = unityManager.GetComponent<GameManager>();
@@ -116,7 +116,7 @@ namespace Assets.Scripts
                     (tile.HasArmies() &&
                     tile.Armies[0].Player != Game.Current.GetCurrentPlayer())))
             {
-                CenterOnTile(tile);
+                DisplayTileInfo(tile);
                 return;
             }
 
@@ -170,6 +170,17 @@ namespace Assets.Scripts
         }
 
         internal void CenterOnTile(Tile clickedTile)
+        {
+            if (clickedTile.X >= 0 && clickedTile.X <= World.Current.Map.GetUpperBound(0) &&
+                clickedTile.Y >= 0 && clickedTile.Y <= World.Current.Map.GetUpperBound(1))
+            {
+                Vector3 worldVector = worldTilemap.ConvertGameToUnityVector(clickedTile.X, clickedTile.Y);
+                this.unityManager.SetSelectedBoxPosition(worldVector, false);
+                this.unityManager.SetCameraToSelectedBox();
+            }
+        }
+
+        internal void DisplayTileInfo(Tile clickedTile)
         {
             Vector3 worldVector = worldTilemap.ConvertGameToUnityVector(clickedTile.X, clickedTile.Y);
             this.unityManager.SetSelectedBoxPosition(worldVector, false);

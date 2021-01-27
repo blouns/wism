@@ -1,20 +1,16 @@
-﻿using Assets.Scripts.Armies;
-using Assets.Scripts.CommandProcessors;
+﻿using Assets.Scripts.CommandProcessors;
 using Assets.Scripts.Editors;
 using Assets.Scripts.Tilemaps;
 using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
-using System.Timers;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using ILogger = Wism.Client.Common.ILogger;
-using Tile = Wism.Client.Core.Tile;
 
 namespace Assets.Scripts.Managers
 {
@@ -50,7 +46,8 @@ namespace Assets.Scripts.Managers
         // UI elements
         public GameObject SelectedBoxPrefab;
         private SelectedArmyBox selectedArmyBox;
-        private Camera followCamera;
+        private Camera mainCamera;
+        private CameraFollow cameraFollow;
         
         private bool isInitialized;
         private bool showDebugError = true;
@@ -70,33 +67,13 @@ namespace Assets.Scripts.Managers
         public void Start()
         {
             Initialize();
-        }        
-
-        public void FixedUpdate()
-        {
-            if (!IsInitalized())
-            {     
-                return;
-            }
-
-            try
-            {
-                Draw();
-                DoTasks();
-                this.armyManager.CleanupArmies();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
-                throw;
-            }
-        }       
+        }
 
         internal bool IsInitalized()
         {
             bool result = true;
 
-            if (!Game.IsInitialized() || 
+            if (!Game.IsInitialized() ||
                 !this.isInitialized)
             {
                 if (this.showDebugError)
@@ -109,17 +86,10 @@ namespace Assets.Scripts.Managers
             }
 
             return result;
-        }        
-
-        internal void Draw()
-        {
-            DrawSelectedArmiesBox();
-            this.armyManager.DrawArmyGameObjects();
-            cityManager.DrawCities();
         }
 
         public void Initialize()
-        {
+        {            
             // Initialize WISM API
             this.GameManager = GetComponent<GameManager>();
             this.GameManager.Initialize();
@@ -144,10 +114,10 @@ namespace Assets.Scripts.Managers
             this.armyManager = GetComponent<ArmyManager>();
             this.cityManager = GetComponent<CityManager>();
             this.inputManager = GetComponent<InputManager>();
-            
+
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
             armyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
-            productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");                        
+            productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
 
             // Set up default game (for testing purposes only)
             World.CreateWorld(
@@ -155,11 +125,41 @@ namespace Assets.Scripts.Managers
             CreateDefaultCitiesFromScene();
             CreateDefaultArmies();
 
-            Vector3 worldVector = WorldTilemap.ConvertGameToUnityVector(1, 1);
+            var startingTile = Game.Current.GetCurrentPlayer().Capitol.Tile;
+            Vector3 worldVector = WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
 
+            GameManager.StartTurn();
+
             this.isInitialized = true;
-        }        
+        }
+
+        public void FixedUpdate()
+        {
+            if (!IsInitalized())
+            {
+                return;
+            }
+
+            try
+            {
+                Draw();
+                DoTasks();
+                this.armyManager.CleanupArmies();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                throw;
+            }
+        }
+
+        internal void Draw()
+        {
+            DrawSelectedArmiesBox();
+            this.armyManager.DrawArmyGameObjects();
+            cityManager.DrawCities();
+        }             
 
         /// <summary>
         /// Execute the commands from the UI, AI, or other devices
@@ -178,7 +178,6 @@ namespace Assets.Scripts.Managers
             // Retrieve next command
             var command = provider.CommandController.GetCommand(nextCommand);
             logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
-            Debug.Log($"Pre-command GameState: {Game.Current.GameState}");
             Debug.Log($"{command}");
 
             // Execute next command
@@ -211,6 +210,11 @@ namespace Assets.Scripts.Managers
             }
         }
 
+        internal void SetCameraToSelectedBox()
+        {
+            SetCameraTarget(this.selectedArmyBox.transform);
+        }
+
         internal void ShowProductionPanel(City city)
         {
             productionPanel.GetComponent<CityProduction>()
@@ -220,7 +224,7 @@ namespace Assets.Scripts.Managers
 
         internal Camera GetMainCamera()
         {
-            return this.followCamera;
+            return this.mainCamera;
         }
 
         internal void HideSelectedBox()
@@ -242,8 +246,7 @@ namespace Assets.Scripts.Managers
         public void SetTime(float time)
         {
             Time.fixedDeltaTime = time;
-        }
-        
+        }        
 
         public void SetProductionMode(ProductionMode mode)
         {
@@ -270,22 +273,7 @@ namespace Assets.Scripts.Managers
 
             this.selectedArmyBox.Draw(this);
         }
-
-        private void SetupCameras()
-        {
-            foreach (Camera camera in Camera.allCameras)
-            {
-                if (camera.name == "MainCamera")
-                {
-                    followCamera = camera;
-                }
-            }
-
-            if (followCamera == null)
-            {
-                throw new InvalidOperationException("Could not find the MainCamera.");
-            }
-        }
+        
         internal void HandleArmyPicker()
         {
             if (Game.Current.GameState == GameState.SelectedArmy)
@@ -299,14 +287,36 @@ namespace Assets.Scripts.Managers
         {
             GameObject map = UnityUtilities.GameObjectHardFind("MinimapPanel");
             map.SetActive(!map.activeSelf);
-        }                      
-
-        internal void SetCameraTarget(Transform transform)
-        {
-            CameraFollow camera = this.followCamera.GetComponent<CameraFollow>();
-            camera.target = transform;
         }
 
+        private void SetupCameras()
+        {
+            this.cameraFollow = UnityUtilities.GameObjectHardFind("MainCamera")
+                .GetComponent<CameraFollow>();
+
+            foreach (Camera camera in Camera.allCameras)
+            {
+                if (camera.name == "MainCamera")
+                {
+                    mainCamera = camera;
+                }
+            }
+
+            if (mainCamera == null)
+            {
+                throw new InvalidOperationException("Could not find the MainCamera.");
+            }
+        }
+
+        internal void SetCameraTarget(Transform transform)
+        {     
+            cameraFollow.target = transform;
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY: Create default armies from scene.
+        /// </summary>
+        /// TODO: Startup sequence to create a new hero in the starting capitol
         private void CreateDefaultArmies()
         {
             Player sirians = Game.Current.Players[0];
@@ -322,6 +332,10 @@ namespace Assets.Scripts.Managers
             stormgiants.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
         }
 
+        /// <summary>
+        /// FOR TESTING ONLY: Create default cities from scene.
+        /// </summary>
+        /// TODO: Pull cities from file or DB rather that directly from Unity scene
         private void CreateDefaultCitiesFromScene()
         {
             Dictionary<string, GameObject> citiesNames = new Dictionary<string, GameObject>();
