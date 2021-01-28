@@ -1,6 +1,7 @@
 "# wism" 
 
 [Overview]
+
 War! Welcome to War in a Senseless Mind (WISM). WISM is an original SSI Warlords 1990 clone, but is designed for modification and reuse/fork into similar projects as a game engine. Additionally, WISM was designed to have all core game logic outside of proprietary platforms like Unity or other game engines. This will allow for easier extension in the future and longevity as platforms evolve. A good example of this is the ASCII WISM app which provides a Console-based UI to the same game engine. 
 
 Why another Warlords clone? Can't we just play the original on DosBox or Warlords Classic Strategy on iOS? Sure you can and you should! However, the original has limited playability on DosBox and old resolutions, it does not allow mods, new maps, armies, or features. The latter is a closed system and only works on iOS. We deserve better and we can do better with inspiration from SSI and all the subsequent great turn-based strategy games. Want to contribute?
@@ -8,6 +9,7 @@ Why another Warlords clone? Can't we just play the original on DosBox or Warlord
 Here is a brief orientation to the projects.
 
 [WISM Client]
+
 This project is for core WISM game logic and is separated roughly into the API (Controller), Core (Model), and Agent (View). 
 
 API:
@@ -22,6 +24,7 @@ Agent:
 The agent contains basic primitives for constructing a game loop and interfacing with the WISM API controller and Core model (read-only). This contains a reference implementation called ASCII WISM to demonstrate extension. It also provides the structure for an agent to push or consume remote Commands. The agent will be the sync mechanism with the cloud or other remote play options to apply or send commands between systems. 
 
 [WISM Unity]
+
 This is the primary UI for the Warlords clone implementation. It is designed to accurately reflect the original SSI Warlords look and feel. It borrows concepts, art, and sound to skin the game with an authentic experience. The desire is to add similar Module capability to the Unity UI to allow for easy extension, similar to WISM Core. At present updates and mods require changes to the Unity environment prefabs and GameObjects, which is not the long-term goal. As mentioned above, game logic is pushed as low as possible in the stack--down towards Core. However, there may be some user experience elements that are best left to the View (ASCII WISM or Unity WISM). Examples include display of combat sequences, army selection, or cut-scenes. 
 
 The choice of using Unity and all .NET Standard 2.0 binaries means that this game is fully portable to all modern gaming environments, including Windows PC, iOS, Android, Xbox, or any of the platforms supported by Unity. Currently, the primary device target is Windows 10 as it most closely honors the original Warlords spirit. 
