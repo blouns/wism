@@ -1,4 +1,6 @@
-﻿using Assets.Scripts.Managers;
+﻿using Assets.Scripts.Common;
+using Assets.Scripts.Managers;
+using System;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
@@ -35,7 +37,9 @@ namespace Assets.Scripts.CommandProcessors
             var startTurn = (StartTurnCommand)command;
             var messageBox = UnityUtilities.GameObjectHardFind("NotificationBox")
                 .GetComponent<NotificationBox>();
-            messageBox.Notify($"{startTurn.Player.Clan.DisplayName} your turn is starting!");            
+
+            string name = TextUtilities.CleanupName(startTurn.Player.Clan.DisplayName);
+            messageBox.Notify($"{name} your turn is starting!");            
 
             var actionState = command.Execute();
 
@@ -46,10 +50,7 @@ namespace Assets.Scripts.CommandProcessors
 
         private void CenterOnCapitol()
         {
-            Player player = Game.Current.GetCurrentPlayer();
-            var inputHanlder = this.unityGame.GetComponent<InputManager>().InputHandler;
-
-            inputHanlder.CenterOnTile(player.Capitol.Tile);
+            unityGame.GoToCapitol();
         }
     }
 }

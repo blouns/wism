@@ -28,7 +28,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public bool CanExecute(ICommandAction command)
         {
-            return command is StartTurnCommand;
+            return command is EndTurnCommand;
         }
 
         public ActionState Execute(ICommandAction command)
@@ -36,15 +36,19 @@ namespace Assets.Scripts.CommandProcessors
             var endTurn = (EndTurnCommand)command;
 
             HandleGameOver(endTurn);
+            this.unityGame.ClearInfoPanel();            
 
             return command.Execute();
         }
 
         private void HandleGameOver(EndTurnCommand command)
         {
-            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
-                .GetComponent<NotificationBox>();
-            messageBox.Notify($"Wretched {command.Player.Clan.DisplayName}! For you, the war is over!");            
+            if (command.Player.GetCities().Count == 0)
+            {
+                var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
+                    .GetComponent<NotificationBox>();
+                messageBox.Notify($"Wretched {command.Player.Clan.DisplayName}! For you, the war is over!");
+            }
         }
     }
 }

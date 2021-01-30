@@ -21,15 +21,14 @@ namespace Assets.Scripts.Managers
         private readonly Dictionary<int, ArmyGameObject> armyDictionary = new Dictionary<int, ArmyGameObject>();
         private UnityManager unityManager;        
         private WorldTilemap worldTilemap;
-        private InputHandler inputHandler;
+        private InputManager inputManager;
 
         public Dictionary<int, ArmyGameObject> ArmyDictionary => armyDictionary;
 
         public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
         public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
-        public InputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
 
-        public void Awake()
+        public void Start()
         {
             Initialize();
         }
@@ -57,8 +56,7 @@ namespace Assets.Scripts.Managers
             this.unityManager = this.GetComponentInParent<UnityManager>();
             this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
                 .GetComponent<WorldTilemap>();
-            this.inputHandler = this.unityManager
-                .GetComponent<InputManager>().InputHandler;
+            this.inputManager = this.unityManager.GetComponent<InputManager>();
         }
 
         public GameObject FindGameObjectKind(Army army)
@@ -151,7 +149,8 @@ namespace Assets.Scripts.Managers
                     Game.Current.GameState == GameState.SelectedArmy)
                 {
                     // Reset the current tile for information panel 
-                    this.InputHandler.SetCurrentTile(null);
+                    var inputHandler = this.inputManager.InputHandler;
+                    inputHandler.SetCurrentTile(null);
                 }
                 // Draw only the "top" army for each army stack on the map
                 // TODO: Iterate through armies rather than every tile for perf

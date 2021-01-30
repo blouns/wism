@@ -12,7 +12,7 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
-        private readonly InputHandler inputHandler;
+        private readonly InputManager inputManager;
 
         public CompleteBattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -22,8 +22,8 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             this.logger = loggerFactory.CreateLogger();
-            this.unityGame = unityGame ?? throw new System.ArgumentNullException(nameof(unityGame));
-            this.inputHandler = this.unityGame.GetComponent<InputManager>().InputHandler;
+            this.unityGame = unityGame ?? throw new ArgumentNullException(nameof(unityGame));
+            this.inputManager = this.unityGame.GetComponent<InputManager>();
         }
 
         public bool CanExecute(ICommandAction command)
@@ -42,7 +42,7 @@ namespace Assets.Scripts.CommandProcessors
                     break;
 
                 case ActionState.Failed:
-                    inputHandler.DeselectObject();
+                    inputManager.InputHandler.DeselectObject();
                     unityGame.WarPanel.Teardown();
                     unityGame.SetTime(GameManager.StandardTime);
                     break;

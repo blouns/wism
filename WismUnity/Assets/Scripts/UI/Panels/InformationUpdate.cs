@@ -14,6 +14,7 @@ namespace Assets.Scripts.UI
         private readonly List<IInformationMapping> informationMappings = new List<IInformationMapping>();
 
         private UnityManager unityManager;
+        private InputManager inputManager;
         private InputHandler inputHandler;
 
         public void Awake()
@@ -23,8 +24,10 @@ namespace Assets.Scripts.UI
 
         private void Initialize()
         {
-            this.unityManager = UnityUtilities.GameObjectHardFind("UnityManager").GetComponent<UnityManager>();
-            this.inputHandler = this.unityManager.GetComponent<InputManager>().InputHandler;
+            this.unityManager = UnityUtilities.GameObjectHardFind("UnityManager")
+                .GetComponent<UnityManager>();
+            this.inputManager = this.unityManager
+                .GetComponent<InputManager>();
 
             // Add in order of precendence            
             informationMappings.Add(new ArmyInformationMapping());
@@ -39,6 +42,11 @@ namespace Assets.Scripts.UI
         /// </summary>
         public void LateUpdate()
         {
+            if (this.inputHandler == null)
+            {
+                this.inputHandler = this.inputManager.InputHandler;
+            }
+
             if (Game.Current.GameState == GameState.MovingArmy ||
                 Game.Current.GameState == GameState.SelectedArmy)
             {

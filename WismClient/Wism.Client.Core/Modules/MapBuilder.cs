@@ -199,13 +199,15 @@ namespace Wism.Client.Modules
             var player = Game.Current.Players.Find(p => p.Clan.ShortName == cityInfo.ClanName);
             if (player != null)
             {
-                player.ClaimCity(city, tiles);                
+                player.ClaimCity(city, tiles);
             }
             else
             {
+                city.Claim(Player.GetNeutralPlayer());
                 AddNeutralCityGarrison(city);
             }
         }
+        
 
         private static void AddNeutralCityGarrison(City city)
         {
@@ -265,12 +267,12 @@ namespace Wism.Client.Modules
                 tiles[i].Terrain = MapBuilder.TerrainKinds["Castle"];
             }
 
-            // Claim the city if matching player exists; otherwise Neutral
+            // Claim the city if matching player exists
             var player = Game.Current.Players.Find(p => p.Clan.ShortName == clanName);
             if (player != null)
             {
                 player.ClaimCity(city, tiles);
-            }
+            }     
              
         }
 

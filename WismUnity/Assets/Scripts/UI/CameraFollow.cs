@@ -21,7 +21,6 @@ public class CameraFollow : MonoBehaviour
     public float yMinClamp;
     public float yMaxClamp;
 
-    private bool isFollowing;
     private Vector3 origin;
     private Vector3 difference;
     private bool isDragging;
@@ -36,7 +35,6 @@ public class CameraFollow : MonoBehaviour
 
     public void LateUpdate()
     {
-        UpdateCameraState();
         HandleCameraMove();
     }
 
@@ -54,12 +52,16 @@ public class CameraFollow : MonoBehaviour
         else
         {
             isDragging = false;
-            if (target && isFollowing)
+            if (target != null && 
+               (Game.Current.GameState == GameState.MovingArmy))
             {
+                // Linearly interpolate
                 SetCameraTargetLerp(target);
             }
-            else if (target)
+            else if (target != null && 
+                    (Game.Current.GameState != GameState.SelectedArmy))
             {
+                // Snap to
                 SetCameraTarget(target.position);
                 target = null;
             }
@@ -96,18 +98,5 @@ public class CameraFollow : MonoBehaviour
                             new Vector3(0f, 0f, -10f);
 
         transform.position = ClampVectorToTilemap(lerpPosition);
-    }
-
-    private void UpdateCameraState()
-    {        
-        if (Game.Current.GameState == GameState.MovingArmy ||
-            Game.Current.GameState == GameState.SelectedArmy)
-        {
-            isFollowing = true;
-        }
-        else
-        {
-            isFollowing = false;
-        }
     }
 }

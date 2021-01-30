@@ -306,10 +306,11 @@ namespace Wism.Client.Core
             }
 
             // Are we claiming from another clan?
-            if (city.Clan != Clan && city.Clan != null)
-            {                
+            if (city.Clan != null &&
+                city.Clan.ShortName != Player.GetNeutralPlayer().Clan.ShortName)
+            {
                 PillageGoldFromClan(city.Clan);
-                city.Clan.Player.RemoveCity(city);                
+                city.Clan.Player.RemoveCity(city);
             }
 
             city.Claim(this, tiles);                        
@@ -376,6 +377,23 @@ namespace Wism.Client.Core
 
             // Remove city from Player tracking
             this.myCities.Remove(city);
+        }
+
+        public override bool Equals(object obj)
+        {
+            Player other = obj as Player;
+
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Clan == this.Clan;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Clan.GetHashCode();
         }
     }
 }

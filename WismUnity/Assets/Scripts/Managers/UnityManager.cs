@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.CommandProcessors;
-using Assets.Scripts.Editors;
 using Assets.Scripts.Tilemaps;
 using Assets.Scripts.UI;
 using System;
@@ -9,12 +8,10 @@ using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
 using ILogger = Wism.Client.Common.ILogger;
 
 namespace Assets.Scripts.Managers
 {
-
     /// <summary>
     /// Unity game is the primary game loop and bridge to the Unity UI and WISM API via GameManager
     /// </summary>
@@ -104,6 +101,7 @@ namespace Assets.Scripts.Managers
                 new BattleProcessor(GameManager.LoggerFactory, this),
                 new CompleteBattleProcessor(GameManager.LoggerFactory, this),
                 new StartTurnProcessor(GameManager.LoggerFactory, this),
+                new EndTurnProcessor(GameManager.LoggerFactory, this),
                 new StandardProcessor(GameManager.LoggerFactory)
             };
 
@@ -120,18 +118,22 @@ namespace Assets.Scripts.Managers
             productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
 
             // Set up default game (for testing purposes only)
-            World.CreateWorld(
-                WorldTilemap.CreateWorldFromScene(GameManager.DefaultWorld).Map);
-            CreateDefaultCitiesFromScene();
-            CreateDefaultArmies();
+            GetComponent<GameFactory>().CreateDefaultGame();
 
             var startingTile = Game.Current.GetCurrentPlayer().Capitol.Tile;
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
 
-            GameManager.StartTurn();
+            GameManager.StartTurn(Game.Current.GetCurrentPlayer());
 
             this.isInitialized = true;
+        }
+
+        internal void GoToCapitol()
+        {
+            Player player = Game.Current.GetCurrentPlayer();
+            var inputHandler = this.GetComponent<InputManager>().InputHandler;
+            inputHandler.CenterOnTile(player.Capitol.Tile);
         }
 
         public void FixedUpdate()
@@ -257,7 +259,15 @@ namespace Assets.Scripts.Managers
             }
 
             this.ProductionMode = mode;
-        }        
+        }
+
+        internal void ClearInfoPanel()
+        {
+            this.inputManager.InputHandler.SetCurrentTile(null);
+            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
+                   .GetComponent<NotificationBox>();
+            messageBox.Notify("");
+        }
 
         private void DrawSelectedArmiesBox()
         {
@@ -311,70 +321,6 @@ namespace Assets.Scripts.Managers
         internal void SetCameraTarget(Transform transform)
         {     
             cameraFollow.target = transform;
-        }
-
-        /// <summary>
-        /// FOR TESTING ONLY: Create default armies from scene.
-        /// </summary>
-        /// TODO: Startup sequence to create a new hero in the starting capitol
-        private void CreateDefaultArmies()
-        {
-            Player sirians = Game.Current.Players[0];
-            var capitolPosition = UnityUtilities.GameObjectHardFind("Marthos")
-                .GetComponent<CityEntry>()
-                .GetGameCoordinates();
-            sirians.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
-
-            Player stormgiants = Game.Current.Players[1];
-            capitolPosition = UnityUtilities.GameObjectHardFind("Stormheim")
-                .GetComponent<CityEntry>()
-                .GetGameCoordinates();
-            stormgiants.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
-        }
-
-        /// <summary>
-        /// FOR TESTING ONLY: Create default cities from scene.
-        /// </summary>
-        /// TODO: Pull cities from file or DB rather that directly from Unity scene
-        private void CreateDefaultCitiesFromScene()
-        {
-            Dictionary<string, GameObject> citiesNames = new Dictionary<string, GameObject>();
-
-            // Extract the X,Y coords from City GameObjects from the scene 
-            var cityContainerGO = UnityUtilities.GameObjectHardFind("Cities");
-            int cityCount = cityContainerGO.transform.childCount;
-            for (int i = 0; i < cityCount; i++)
-            {
-                var cityGO = cityContainerGO.transform.GetChild(i).gameObject;
-                var cityEntry = cityGO.GetComponent<CityEntry>();
-
-                if (citiesNames.ContainsKey(cityEntry.cityShortName))
-                {
-                    continue;
-                }
-
-                citiesNames.Add(cityEntry.cityShortName, cityGO);
-                cityGO.name = cityEntry.cityShortName;
-            }
-
-            // Set the coords for the new city on the CityInfos
-            var cityInfos = new List<CityInfo>(
-                ModFactory.LoadCityInfos(GameManager.DefaultCityModPath));
-            var illuriaCities = new List<CityInfo>();
-            foreach (CityInfo ci in cityInfos)
-            {
-                if (citiesNames.ContainsKey(ci.ShortName))
-                {
-                    var go = citiesNames[ci.ShortName];
-                    var coords = worldTilemap.ConvertUnityToGameVector(go.transform.position);
-                    ci.X = coords.x ;    
-                    ci.Y = coords.y + 1;    // +1 Adjustment for city object overlay alignment (anchor)
-                    illuriaCities.Add(ci);
-                }
-            }
-
-            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, illuriaCities);
-        }
-
+        }        
      }
 }

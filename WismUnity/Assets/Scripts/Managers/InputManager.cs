@@ -22,9 +22,9 @@ namespace Assets.Scripts.Managers
         public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
         public InputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
 
-        public void Awake()
+        public void Start()
         {
-            this.UnityManager = GameObject.FindGameObjectWithTag("UnityManager")
+            this.UnityManager = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
             this.GameManager = UnityManager.GetComponent<GameManager>();
             this.InputHandler = new InputHandler(this.UnityManager);
@@ -154,6 +154,10 @@ namespace Assets.Scripts.Managers
             else if (Input.GetKeyDown(KeyCode.P))
             {
                 UnityManager.SetProductionMode(ProductionMode.SelectCity);
+            }
+            else if (Input.GetKeyDown(KeyCode.C))
+            {
+                UnityManager.GoToCapitol();
             }
         }
 

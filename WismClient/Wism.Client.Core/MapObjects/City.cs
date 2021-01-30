@@ -150,6 +150,7 @@ namespace Wism.Client.MapObjects
 
             // Claim the city
             this.Player = player;
+            this.Clan = player.Clan;
             for (int i = 0; i < 4; i++)
             {
                 if (tiles[i].City == null)

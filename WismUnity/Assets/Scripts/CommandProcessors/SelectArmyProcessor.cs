@@ -12,7 +12,6 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
-        private readonly InputHandler inputHandler;
 
         public SelectArmyProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -23,7 +22,6 @@ namespace Assets.Scripts.CommandProcessors
 
             this.logger = loggerFactory.CreateLogger();
             this.unityGame = unityGame ?? throw new System.ArgumentNullException(nameof(unityGame));
-            this.inputHandler = this.unityGame.GetComponent<InputManager>().InputHandler;
         }
 
         public bool CanExecute(ICommandAction command)
@@ -34,14 +32,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            ActionState result = command.Execute();
-
-            //if (result == ActionState.Succeeded)
-            //{
-            //    inputHandler.CenterOnTile(Game.Current.GetSelectedArmies()[0].Tile);
-            //}
-
-            return result;
+            return command.Execute();
         }
     }
 }
