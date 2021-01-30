@@ -10,8 +10,8 @@ namespace Wism.Client.MapObjects
 
     public class Sage : Location
     {
-        const int maxGold = 5000;
-        const int minGold = 3000;
+        public const int MaxGold = 5000;
+        public const int MinGold = 3000;
         private bool searched;
 
         public Sage(LocationInfo info)
@@ -36,7 +36,7 @@ namespace Wism.Client.MapObjects
             if (!searched &&
                 armies.Any(a => a is Hero))
             {
-                result = Game.Current.Random.Next(minGold, maxGold + 1);
+                result = Game.Current.Random.Next(MinGold, MaxGold + 1);
                 searched = true;
             }
 
