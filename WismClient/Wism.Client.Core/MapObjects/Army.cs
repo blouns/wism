@@ -26,7 +26,7 @@ namespace Wism.Client.MapObjects
 
         public override string ShortName => Info.ShortName;
 
-        public List<Temple> BlessedAt { get; set; } = new List<Temple>();
+        public List<SearchTemple> BlessedAt { get; set; } = new List<SearchTemple>();
 
         // Traversal info
         public virtual bool CanWalk { get => Info.CanWalk; }

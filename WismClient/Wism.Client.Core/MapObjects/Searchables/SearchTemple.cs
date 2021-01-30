@@ -3,24 +3,14 @@ using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
 {
-    public class Temple : Location
+    public class SearchTemple : ISearchable
     {
-        public Temple(LocationInfo info)
-            : base(info)
-        {
-        }
-
-        public override bool CanSearchKind(string kind)
+        public bool CanSearchKind(string kind)
         {
             return kind == "Temple";
         }
 
-        public override SearchStatus GetStatus()
-        {
-            return SearchStatus.None;
-        }
-
-        public override bool Search(List<Army> armies, out object result)
+        public bool Search(List<Army> armies, bool searched, out object result)
         {
             int blessed = 0;
          

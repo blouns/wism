@@ -8,28 +8,17 @@ using Wism.Client.Modules;
 namespace Wism.Client.MapObjects
 {
 
-    public class Sage : Location
+    public class SearchSage : ISearchable
     {
         public const int MaxGold = 5000;
         public const int MinGold = 3000;
-        private bool searched;
 
-        public Sage(LocationInfo info)
-            : base(info)
-        {
-        }
-
-        public override bool CanSearchKind(string kind)
+        public bool CanSearchKind(string kind)
         {
             return kind == "Sage";
         }
 
-        public override SearchStatus GetStatus()
-        {
-            return (searched) ? SearchStatus.Explored : SearchStatus.Unexplored;
-        }
-
-        public override bool Search(List<Army> armies, out object result)
+        public bool Search(List<Army> armies, bool searched, out object result)
         {
             result = null;
 

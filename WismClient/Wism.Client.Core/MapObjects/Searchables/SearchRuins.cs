@@ -6,26 +6,14 @@ using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
 {
-    public class Ruins : Location
+    public class SearchRuins : ISearchable
     {
-        private bool searched;
-
-        public Ruins(LocationInfo info)
-            : base(info)
-        {
-        }
-
-        public override bool CanSearchKind(string kind)
+        public bool CanSearchKind(string kind)
         {
             return kind == "Ruins" || kind == "Tomb";
         }
 
-        public override SearchStatus GetStatus()
-        {
-            return (searched) ? SearchStatus.Explored : SearchStatus.Unexplored;
-        }
-
-        public override bool Search(List<Army> armies, out object result)
+        public bool Search(List<Army> armies, bool searched, out object result)
         {
             result = null;
 

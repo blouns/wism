@@ -175,7 +175,7 @@ namespace Wism.Client.Test.Unit
             // Assert
             var gold = result as int?;
             Assert.IsTrue(success, "Failed to search the location.");
-            Assert.IsTrue(gold >= Sage.MinGold && gold <= Sage.MaxGold, "Did not find the expected item.");
+            Assert.IsTrue(gold >= SearchSage.MinGold && gold <= SearchSage.MaxGold, "Did not find the expected item.");
         }
 
         [Test]

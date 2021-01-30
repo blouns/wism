@@ -5,12 +5,16 @@ using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
 {
-    public abstract class Location : MapObject, ISearchable
+    public class Location : MapObject
     {
         protected LocationInfo info;
         protected Terrain terrain;
+        ISearchable[] searchStrategies;
+        bool searched;
 
         public override string ShortName { get => Info.ShortName; }
+
+        public bool Searched { get => this.searched; }
 
         public Terrain Terrain
         {
@@ -46,24 +50,16 @@ namespace Wism.Client.MapObjects
 
         public static Location Create(LocationInfo info)
         {
-            // TODO: Simplify; favor composition over inheritance
-            Location[] locations = new Location[]
+            var location = new Location(info);
+            location.searchStrategies = new ISearchable[]
             {
-                new Temple(info),
-                new Ruins(info),
-                new Sage(info),
-                new Library(info)
+                new SearchTemple(),
+                new SearchRuins(),
+                new SearchSage(),
+                new SearchLibrary()
             };
 
-            foreach (var location in locations)
-            {
-                if (location.CanSearchKind(info.Kind))
-                {
-                    return location;
-                }
-            }
-
-            throw new ArgumentException("No searchable location kind found for: " + info.Kind);
+            return location;
         }
 
         public Location Clone()
@@ -71,13 +67,27 @@ namespace Wism.Client.MapObjects
             return Create(this.Info);
         }
 
-        public abstract bool Search(List<Army> armies, out object result);
+        public bool Search(List<Army> armies, out object result)
+        {
+            foreach (var searchable in searchStrategies)
+            {
+                if (searchable.CanSearchKind(Kind))
+                {
+                    var success = searchable.Search(armies, searched, out result);
+                    if (success)
+                    {
+                        searched = true;
+                    }
+                    return success;
+                }
+            }
 
-        public abstract SearchStatus GetStatus();
+            throw new InvalidOperationException("No searchable strategies for this location kind: " + Kind);
+        }
 
         public override bool Equals(object obj)
         {
-            var other = obj as Temple;
+            var other = obj as Location;
             if (other == null)
             {
                 return false;
@@ -90,7 +100,5 @@ namespace Wism.Client.MapObjects
         {
             return this.ShortName.GetHashCode();
         }
-
-        public abstract bool CanSearchKind(string kind);
     }
 }
