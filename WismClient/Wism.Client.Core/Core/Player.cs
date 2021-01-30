@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Wism.Client.Agent.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 

@@ -1,10 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
-using Wism.Client.MapObjects;
 using Wism.Client.Modules;
-using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Unit
 {
@@ -24,7 +21,7 @@ namespace Wism.Client.Test.Unit
         }
 
         [Test]
-        public void AddCity_City()
+        public void Add_City()
         {
             // Assemble
             var tile = World.Current.Map[1, 1];

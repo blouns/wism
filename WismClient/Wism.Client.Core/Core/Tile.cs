@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -28,9 +27,14 @@ namespace Wism.Client.Core
         public Terrain Terrain { get; set; }
 
         /// <summary>
-        /// May have zero or one buildings (e.g. City, Tower, Ruins, Temple)
+        /// May have zero or one city
         /// </summary>
         public City City { get; set; }
+
+        /// <summary>
+        /// May have zero or one location (e.g. Sage, Tower, Ruins, Temple)
+        /// </summary>
+        public Location Location { get; set; }
 
         public bool IsNeighbor(Tile other)
         {
@@ -86,7 +90,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Raze the any structure on the tile
+        /// Raze any buildable structure on the tile
         /// </summary>
         /// <remarks>Internal only; call Raze on IBuildable (tower, city)</remarks>
         internal void RazeInternal()
@@ -285,9 +289,18 @@ namespace Wism.Client.Core
             return CanTraverseHere(army.Clan, army.Info);
         }
 
+        /// <summary>
+        /// Check if the tile has a city
+        /// </summary>
+        /// <returns></returns>
         public bool HasCity()
         {
             return (this.City != null);
+        }
+
+        public bool HasLocation()
+        {
+            return (this.Location != null);
         }
 
         /// <summary>

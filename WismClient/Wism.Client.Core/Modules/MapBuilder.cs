@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
@@ -11,15 +9,17 @@ namespace Wism.Client.Modules
     {       
         private static readonly Dictionary<string, Terrain> terrainKinds = new Dictionary<string, Terrain>();
         private static readonly Dictionary<string, Army> armyKinds = new Dictionary<string, Army>();
-        private static readonly Dictionary<string, Clan> clanKinds = new Dictionary<string, Clan>();
+        private static readonly Dictionary<string, Clan> clanKinds = new Dictionary<string, Clan>();        
         private static readonly Dictionary<string, City> cityKinds = new Dictionary<string, City>();
+        private static readonly Dictionary<string, Location> locationKinds = new Dictionary<string, Location>();
 
         public static Dictionary<string, Terrain> TerrainKinds { get => terrainKinds; }
         public static Dictionary<string, Army> ArmyKinds { get => armyKinds; }
         public static Dictionary<string, Clan> ClanKinds { get => clanKinds; }
         
-        // Cities are mutable so do not expose directly; use FindCity
+        // Mutable objects; do not expose directly; use Find
         private static Dictionary<string, City> CityKinds { get => cityKinds; }
+        private static Dictionary<string, Location> LocationKinds { get => locationKinds; }
 
         public static void Initialize()
         {
@@ -33,8 +33,19 @@ namespace Wism.Client.Modules
             LoadArmyKinds(modPath);
             LoadClanKinds(modPath);
 
-            // TODO: This is for testing only
+            // Load mutable objects
             LoadCityKinds(modPath + "\\" + ModFactory.WorldsPath + "\\" + world);
+            LoadLocationKinds(modPath + "\\" + ModFactory.WorldsPath + "\\" + world);
+        }
+
+        private static void LoadLocationKinds(string path)
+        {
+            LocationKinds.Clear();
+            IList<Location> cities = ModFactory.LoadLocations(path);
+            foreach (Location location in cities)
+            {
+                LocationKinds.Add(location.ShortName, location);
+            }
         }
 
         private static void LoadCityKinds(string path)
@@ -93,6 +104,11 @@ namespace Wism.Client.Modules
             return MapBuilder.CityKinds[key].Info;
         }
 
+        internal static LocationInfo FindLocationInfo(string key)
+        {
+            return MapBuilder.LocationKinds[key].Info;
+        }
+
         /// <summary>
         /// Find a city matching the shortName given
         /// </summary>
@@ -108,6 +124,23 @@ namespace Wism.Client.Modules
             }
 
             return city;
+        }
+
+        /// <summary>
+        /// Find a location matching the shortName given
+        /// </summary>
+        /// <param name="shortName">Name to match</param>
+        /// <returns>Location matching the name; otherwise, null</returns>
+        public static Location FindLocation(string shortName)
+        {
+            Location location = null;
+            if (LocationKinds.ContainsKey(shortName))
+            {
+                // Locations are mutable so return a clone of original
+                location = LocationKinds[shortName].Clone();
+            }
+
+            return location;
         }
 
         /// <summary>

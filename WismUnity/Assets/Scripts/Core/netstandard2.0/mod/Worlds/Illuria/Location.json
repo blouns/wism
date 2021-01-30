@@ -1,0 +1,32 @@
+[
+  {
+    "ShortName": "Stonehenge",
+    "DisplayName": "Stonehenge",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "CryptKeeper",
+    "DisplayName": "Crypt Keeper's Lair",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "SageHut",
+    "DisplayName": "Sage's Hut",
+    "Kind": "Sage",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "Suzzallo",
+    "DisplayName": "Suzzallo",
+    "Kind": "Library",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "TempleDog",
+    "DisplayName": "Temple of the Dog",
+    "Kind": "Temple",
+    "Terrain": "Temple"
+  }
+]

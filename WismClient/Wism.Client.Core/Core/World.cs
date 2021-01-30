@@ -9,6 +9,7 @@ namespace Wism.Client.Core
     public class World
     {
         private List<City> cities = new List<City>();
+        private List<Location> locations = new List<Location>();
 
         public Tile[,] Map { get; protected set; }
 
@@ -101,6 +102,28 @@ namespace Wism.Client.Core
             }
         }
 
+        public void AddLocation(Location location, Tile tile)
+        {
+            if (location is null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
+            if (tile is null)
+            {
+                throw new ArgumentNullException(nameof(tile));
+            }
+
+            if (this.locations.Contains(location))
+            {
+                throw new ArgumentException($"{location} already exists in the world.");
+            }
+
+            location.Tile = tile;
+            tile.Location = location;
+            tile.Terrain = location.Terrain;            
+        }
+
         public List<City> GetCities()
         {
             return new List<City>(this.cities);
@@ -121,54 +144,54 @@ namespace Wism.Client.Core
 
         public void Reset(Tile[,] map)
         {
-            //Validate(map);
+            Validate(map);
             this.Map = map;
         }
 
-        //private void Validate(Tile[,] map)
-        //{
-        //    if (map == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(map));
-        //    }
+        private void Validate(Tile[,] map)
+        {
+            if (map == null)
+            {
+                throw new ArgumentNullException(nameof(map));
+            }
 
-        //    for (int x = 0; x < map.GetLength(0); x++)
-        //    {
-        //        for (int y = 0; y < map.GetLength(1); y++)
-        //        {
-        //            if (map[x, y] == null)
-        //            {
-        //                throw new ArgumentException(
-        //                    String.Format("Map tile is null at ({0}, {1})", x, y));
-        //            }
+            for (int x = 0; x < map.GetLength(0); x++)
+            {
+                for (int y = 0; y < map.GetLength(1); y++)
+                {
+                    if (map[x, y] == null)
+                    {
+                        throw new ArgumentException(
+                            String.Format("Map tile is null at ({0}, {1})", x, y));
+                    }
 
-        //            if (!(map[x, y] is Tile))
-        //            {
-        //                throw new ArgumentException(
-        //                    String.Format("Map contains element not of type Tile at ({0}, {1})", x, y));
-        //            }
+                    if (!(map[x, y] is Tile))
+                    {
+                        throw new ArgumentException(
+                            String.Format("Map contains element not of type Tile at ({0}, {1})", x, y));
+                    }
 
-        //            if (map[x, y].Terrain == null)
-        //            {
-        //                throw new ArgumentException(
-        //                    String.Format("Map contains null Terrain at ({0}, {1})", x, y));
-        //            }
+                    if (map[x, y].Terrain == null)
+                    {
+                        throw new ArgumentException(
+                            String.Format("Map contains null Terrain at ({0}, {1})", x, y));
+                    }
 
-        //            if (!MapBuilder.TerrainKinds.ContainsKey(map[x, y].Terrain.ID))
-        //            {
-        //                throw new ArgumentException(
-        //                    String.Format("Map contains unknown Terrain '{2}' at ({0}, {1})", x, y, map[x, y].Terrain.ID));
-        //            }
+                    if (!MapBuilder.TerrainKinds.ContainsKey(map[x, y].Terrain.ShortName))
+                    {
+                        throw new ArgumentException(
+                            String.Format("Map contains unknown Terrain '{2}' at ({0}, {1})", x, y, map[x, y].Terrain.ShortName));
+                    }
 
-        //            // Valid units; units are optional
-        //            if ((map[x, y].Army != null) &&
-        //                (!MapBuilder.ArmyKinds.ContainsKey(map[x, y].Army)))
-        //            {
-        //                throw new ArgumentException(
-        //                    String.Format("Map tile contains unknown Army type '{2}' at ({0}, {1})", x, y, map[x, y].Army.ID));
-        //            }
-        //        }
-        //    }
-        //}
+                    // Valid units; units are optional
+                    if ((map[x, y].HasArmies()) &&
+                        (!MapBuilder.ArmyKinds.ContainsKey(map[x, y].Armies[0].ShortName)))
+                    {
+                        throw new ArgumentException(
+                            String.Format("Map tile contains unknown Army type '{2}' at ({0}, {1})", x, y, map[x, y].Armies[0].ShortName));
+                    }
+                }
+            }
+        }
     }
 }
