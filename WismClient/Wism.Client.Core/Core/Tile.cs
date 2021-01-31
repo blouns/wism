@@ -326,6 +326,10 @@ namespace Wism.Client.Core
             {
                 sb.Append($"[{Armies.Count}:{Armies[0]}]");
             }
+            if (HasLocation())
+            {
+                sb.Append($"[{Location}]");
+            }
 
             return sb.ToString();
         }

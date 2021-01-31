@@ -100,5 +100,10 @@ namespace Wism.Client.MapObjects
         {
             return this.ShortName.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return $"{ShortName}-{Kind}({Id})";
+        }
     }
 }

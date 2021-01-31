@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
@@ -60,6 +61,11 @@ namespace Wism.Client.Test.Common
         public static CityController CreateCityController()
         {
             return new CityController(CreateLogFactory());
+        }
+
+        public static LocationController CreateLocationController()
+        {
+            return new LocationController(CreateLogFactory());
         }
 
         public static ActionState Select(CommandController commandController, ArmyController armyController, List<Army> armies)

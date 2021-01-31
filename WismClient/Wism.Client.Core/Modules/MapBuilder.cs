@@ -241,7 +241,6 @@ namespace Wism.Client.Modules
             }
         }
         
-
         private static void AddNeutralCityGarrison(City city)
         {
             Army garrison = ArmyFactory.CreateArmy(
@@ -307,6 +306,31 @@ namespace Wism.Client.Modules
                 player.ClaimCity(city, tiles);
             }     
              
+        }
+
+        public static void AddLocation(Tile[,] map, int x, int y, string shortName)
+        {
+            if (map is null)
+            {
+                throw new ArgumentNullException(nameof(map));
+            }
+
+            if (string.IsNullOrEmpty(shortName))
+            {
+                throw new ArgumentException($"'{nameof(shortName)}' cannot be null or empty", nameof(shortName));
+            }
+
+            var location = MapBuilder.LocationKinds[shortName];
+            if (location == null)
+            {
+                throw new ArgumentException($"{shortName} not found in location modules.");
+            }
+            location = location.Clone();
+
+            // Add to map
+            location.Tile = map[x, y];
+            map[x, y].Location = location;
+            map[x, y].Terrain = location.Terrain;
         }
 
         /// <summary>
