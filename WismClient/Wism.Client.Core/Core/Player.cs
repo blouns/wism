@@ -354,10 +354,10 @@ namespace Wism.Client.Core
             }
 
             // Assume player-to-pillage's cities will be > 0 as we haven't claimed it yet
-
             int cityCoffers = playerToPillage.Gold / playerToPillage.GetCities().Count;
-            Gold += (playerToPillage.Gold / playerToPillage.GetCities().Count) / 2;
-            
+            int goldToPillage = (playerToPillage.Gold / playerToPillage.GetCities().Count) / 2;
+            Gold += goldToPillage;
+
             playerToPillage.Gold -= cityCoffers;
             if (playerToPillage.Gold < 0)
             {

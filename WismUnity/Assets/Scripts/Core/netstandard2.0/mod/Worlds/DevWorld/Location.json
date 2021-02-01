@@ -28,5 +28,11 @@
     "DisplayName": "Temple of the Dog",
     "Kind": "Temple",
     "Terrain": "Temple"
+  },
+  {
+    "ShortName": "TempleCat",
+    "DisplayName": "Temple of the Cat",
+    "Kind": "Temple",
+    "Terrain": "Temple"
   }
 ]

@@ -33,10 +33,20 @@ namespace Wism.Client.Core
 
         public static void CreateDefaultWorld()
         {
+            CreateWorld(ModFactory.WorldPath);
+        }
+
+        public static void CreateWorld(string worldName)
+        {
+            if (string.IsNullOrWhiteSpace(worldName))
+            {
+                throw new ArgumentException($"'{nameof(worldName)}' cannot be null or whitespace", nameof(worldName));
+            }
+
             World oldWorld = World.current;
             try
             {
-                MapBuilder.Initialize();
+                MapBuilder.Initialize(ModFactory.ModPath, worldName);
                 World.current = new World();
                 World.current.Reset();
             }

@@ -1,0 +1,86 @@
+[
+  {
+    "ShortName": "Firesword",
+    "DisplayName": "Firesword",
+    "CommandBonus": 0,
+    "BattleBonus": 1
+  },
+  {
+    "ShortName": "Icesword",
+    "DisplayName": "Icesword",
+    "CommandBonus": 0,
+    "BattleBonus": 1
+  },
+  {
+    "ShortName": "Lightsword",
+    "DisplayName": "Lightsword",
+    "CommandBonus": 0,
+    "BattleBonus": 2
+  },
+  {
+    "ShortName": "Darksword",
+    "DisplayName": "Darksword",
+    "CommandBonus": 0,
+    "BattleBonus": 2
+  },
+  {
+    "ShortName": "StaffOfMight",
+    "DisplayName": "Staff of Might",
+    "CommandBonus": 0,
+    "BattleBonus": 3
+  },
+  {
+    "ShortName": "CrownOfLoriel",
+    "DisplayName": "Crown of Loriel",
+    "CommandBonus": 1,
+    "BattleBonus": 0
+  },
+  {
+    "ShortName": "SceptreOfLoriel",
+    "DisplayName": "Sceptre of Loriel",
+    "CommandBonus": 1,
+    "BattleBonus": 0
+  },
+  {
+    "ShortName": "OrbOfLoriel",
+    "DisplayName": "Orb of Loriel",
+    "CommandBonus": 1,
+    "BattleBonus": 0
+  },
+  {
+    "ShortName": "RingOfPower",
+    "DisplayName": "Ring of Power",
+    "CommandBonus": 2,
+    "BattleBonus": 0
+  },
+  {
+    "ShortName": "StaffOfRuling",
+    "DisplayName": "Staff of Ruling",
+    "CommandBonus": 3,
+    "BattleBonus": 0
+  },
+  {
+    "ShortName": "SpearOfAnk",
+    "DisplayName": "Spear of Ank",
+    "CommandBonus": 0,
+    "BattleBonus": 1
+  },
+  {
+    "ShortName": "BowOfEldros",
+    "DisplayName": "Bow of Eldros",
+    "CommandBonus": 0,
+    "BattleBonus": 2
+  },
+  {
+    "ShortName": "HornOfAges",
+    "DisplayName": "Horn of Ages",
+    "CommandBonus": 2,
+    "BattleBonus": 0
+  },
+  {
+    "ShortName": "CrimsonBanner",
+    "DisplayName": "Crimson Banner",
+    "CommandBonus": 1,
+    "BattleBonus": 0
+  }
+]

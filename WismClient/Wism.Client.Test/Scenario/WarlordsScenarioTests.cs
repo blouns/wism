@@ -160,7 +160,7 @@ namespace Wism.Client.Test.Scenario
             var commandController = TestUtilities.CreateCommandController();
             var gameController = TestUtilities.CreateGameController();
 
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
             MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, TestUtilities.DefaultTestWorld);
             Player sirians = Game.Current.Players[0];
             Player lordBane = Game.Current.Players[1];

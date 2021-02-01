@@ -19,6 +19,12 @@ namespace Wism.Client.Modules
         public string ShortName { get; set; } = "OldRuins";
 
         [DataMember]
+        public int X { get; set; }
+
+        [DataMember]
+        public int Y { get; set; }
+
+        [DataMember]
         public string Kind { get; set; } = "Ruins";
 
         [DataMember]
