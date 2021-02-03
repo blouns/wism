@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Wism.Client.Core;
 using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
@@ -9,12 +10,8 @@ namespace Wism.Client.MapObjects
     {
         protected LocationInfo info;
         protected Terrain terrain;
-        ISearchable[] searchStrategies;
+        ISearchable searchStrategy;
         bool searched;
-
-        public override string ShortName { get => Info.ShortName; }
-
-        public bool Searched { get => this.searched; }
 
         public Terrain Terrain
         {
@@ -40,7 +37,11 @@ namespace Wism.Client.MapObjects
             }
         }
 
+        public override string ShortName { get => Info.ShortName; }
         public string Kind { get => Info.Kind; }
+        public IBoon Boon { get; internal set; }
+        public string Monster { get; internal set; }
+        public bool Searched { get => searched; set => searched = value; }
 
         protected Location(LocationInfo info)
         {
@@ -51,13 +52,24 @@ namespace Wism.Client.MapObjects
         public static Location Create(LocationInfo info)
         {
             var location = new Location(info);
-            location.searchStrategies = new ISearchable[]
+            switch (info.Kind)
             {
-                new SearchTemple(),
-                new SearchRuins(),
-                new SearchSage(),
-                new SearchLibrary()
-            };
+                case "Temple":
+                    location.searchStrategy = SearchTemple.Instance;
+                    break;
+                case "Ruins":
+                case "Tomb":
+                    location.searchStrategy = SearchRuins.Instance;
+                    break;
+                case "Sage":
+                    location.searchStrategy = SearchSage.Instance;
+                    break;
+                case "Library":
+                    location.searchStrategy = SearchLibrary.Instance;
+                    break;
+                default:
+                    throw new ArgumentException("Location kind does is not recognized: " + info.Kind);
+            }
 
             return location;
         }
@@ -69,20 +81,38 @@ namespace Wism.Client.MapObjects
 
         public bool Search(List<Army> armies, out object result)
         {
-            foreach (var searchable in searchStrategies)
+            if (!searchStrategy.CanSearchKind(Kind))
             {
-                if (searchable.CanSearchKind(Kind))
+                throw new InvalidOperationException("Search strategy cannot be used with this location: " + searchStrategy);
+            }
+
+            var success = searchStrategy.Search(armies, this, out result);            
+            if (success)
+            {
+                Searched = true;
+                
+                if (this.HasBoon())
                 {
-                    var success = searchable.Search(armies, searched, out result);
-                    if (success)
-                    {
-                        searched = true;
-                    }
-                    return success;
+                    this.Boon = null;
+                }
+
+                if (this.HasMonster())
+                {
+                    this.Monster = null;
                 }
             }
 
-            throw new InvalidOperationException("No searchable strategies for this location kind: " + Kind);
+            return success;
+        }
+
+        public bool HasBoon()
+        {
+            return Boon != null;
+        }
+
+        public bool HasMonster()
+        {
+            return Monster != null;
         }
 
         public override bool Equals(object obj)

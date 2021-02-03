@@ -18,7 +18,7 @@ namespace Wism.Client.Test.Controller
         {
             // Assemble
             LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
             Player player1 = Game.Current.Players[0];
             Location location = MapBuilder.FindLocation("TempleDog");
             Tile tile = World.Current.Map[1, 1];
@@ -40,7 +40,7 @@ namespace Wism.Client.Test.Controller
         {
             // Assemble
             LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
             Player player1 = Game.Current.Players[0];
             Location location = MapBuilder.FindLocation("SagesHut");
             Tile tile = World.Current.Map[1, 1];
@@ -64,7 +64,7 @@ namespace Wism.Client.Test.Controller
         {
             // Assemble
             LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
             Player player1 = Game.Current.Players[0];
             Location location = MapBuilder.FindLocation("Suzzallo");
             Tile tile = World.Current.Map[1, 1];
@@ -86,21 +86,24 @@ namespace Wism.Client.Test.Controller
         {
             // Assemble
             LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
             Player player1 = Game.Current.Players[0];
-            Location location = MapBuilder.FindLocation("CryptKeeper");
+            Location location = MapBuilder.FindLocation("CryptKeeper");           
             Tile tile = World.Current.Map[1, 1];
             World.Current.AddLocation(location, tile);
+            TestUtilities.AllocateBoons();
             Army army = player1.HireHero(tile);
             List<Army> armies = new List<Army>() { army };
 
             // Act
-            var success = locationController.SearchTomb(armies, location, out string item);
+            var success = locationController.SearchTomb(armies, location, out IBoon boon);
 
             // Assert
             Assert.IsTrue(success);
-            Assert.AreEqual("item", item);
+            Assert.IsNotNull(boon);
             Assert.IsTrue(location.Searched);
+            Assert.IsFalse(location.HasMonster());
+            Assert.IsFalse(location.HasBoon());
         }
 
         [Test]
@@ -108,7 +111,7 @@ namespace Wism.Client.Test.Controller
         {
             // Assemble
             LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
             Player player1 = Game.Current.Players[0];           
             Location location = MapBuilder.FindLocation("SagesHut");
             Tile tile = World.Current.Map[1, 1];

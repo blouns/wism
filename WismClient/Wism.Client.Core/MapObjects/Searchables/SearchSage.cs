@@ -10,23 +10,31 @@ namespace Wism.Client.MapObjects
 
     public class SearchSage : ISearchable
     {
-        public const int MaxGold = 5000;
-        public const int MinGold = 3000;
+        private static readonly SearchSage instance = new SearchSage();
+
+        public static SearchSage Instance => instance;
+
+        private SearchSage()
+        {
+        }
+
+        public const int MaxGold = 4000;
+        public const int MinGold = 2000;
 
         public bool CanSearchKind(string kind)
         {
             return kind == "Sage";
         }
 
-        public bool Search(List<Army> armies, bool searched, out object result)
+        public bool Search(List<Army> armies, Location location, out object result)
         {
             result = null;
 
-            if (!searched &&
+            if (!location.Searched &&
                 armies.Any(a => a is Hero))
             {
                 result = Game.Current.Random.Next(MinGold, MaxGold + 1);
-                searched = true;
+                location.Searched = true;
             }
 
             return result != null;

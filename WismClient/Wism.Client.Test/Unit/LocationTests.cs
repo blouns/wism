@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Unit
 {
@@ -19,7 +20,7 @@ namespace Wism.Client.Test.Unit
         [SetUp]
         public void Setup()
         {
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
         }
 
         [Test]
@@ -111,14 +112,16 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             var player1 = Game.Current.Players[0];
             var hero = player1.HireHero(tile);
+            BoonAllocator boonAllocator = new BoonAllocator();
+            boonAllocator.Allocate(World.Current.GetLocations());
 
             // Act
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
 
             // Assert
-            var item = result as string;
+            var boon = result as IBoon;
             Assert.IsTrue(success, "Failed to search the location.");
-            Assert.AreEqual(item, "item", "Did not find the expected item.");
+            Assert.IsNotNull(boon, "Did not get a boon.");
         }
 
         [Test]
@@ -130,14 +133,16 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             var player1 = Game.Current.Players[0];
             var hero = player1.HireHero(tile);
+            BoonAllocator boonAllocator = new BoonAllocator();
+            boonAllocator.Allocate(World.Current.GetLocations());
 
             // Act
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
 
             // Assert
-            var item = result as string;
+            var boon = result as IBoon;
             Assert.IsTrue(success, "Failed to search the location.");
-            Assert.AreEqual("item", item, "Did not find the expected item.");
+            Assert.IsNotNull(boon, "Did not get a boon.");
         }
 
         [Test]
@@ -208,6 +213,9 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             var player1 = Game.Current.Players[0];
             var hero = player1.HireHero(tile);
+            BoonAllocator boonAllocator = new BoonAllocator();
+            boonAllocator.Allocate(World.Current.GetLocations());
+
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
             Assert.IsTrue(success, "Setup failed");
             
@@ -228,6 +236,9 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             var player1 = Game.Current.Players[0];
             var hero = player1.HireHero(tile);
+            BoonAllocator boonAllocator = new BoonAllocator();
+            boonAllocator.Allocate(World.Current.GetLocations());
+
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
             Assert.IsTrue(success, "Setup failed");
 

@@ -340,8 +340,9 @@ namespace Wism.Client.Core
             current.Players = new List<Player>();
             CreateDefaultPlayers();
 
-            // Setup default world for testing.
             World.CreateWorld(worldName);
+            //MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, worldName);
+            //MapBuilder.AddLocationsToMapFromWorld(World.Current.Map, worldName);
         }
 
         public static void CreateEmpty()

@@ -23,6 +23,7 @@ namespace Wism.Client.Modules
         private static IList<ClanTerrainModifierInfo> clanTerrainMappingInfos;
         private static IList<CityInfo> cityInfos;
         private static IList<LocationInfo> locationInfos;
+        private static IList<ArtifactInfo> artifactInfos;
 
         public static string ModPath { get => modPath; set => modPath = value; }
         public static string WorldPath { get => worldPath; set => worldPath = value; }
@@ -60,6 +61,19 @@ namespace Wism.Client.Modules
             }
 
             return null; // ID not found
+        }
+
+        internal static IList<Artifact> LoadArtifacts(string path)
+        {
+            IList<Artifact> locations = new List<Artifact>();
+
+            IList<ArtifactInfo> infos = LoadArtifactInfos(path);
+            foreach (ArtifactInfo info in infos)
+            {
+                locations.Add(Artifact.Create(info));
+            }
+
+            return locations;
         }
 
         internal static IList<Location> LoadLocations(string path)
@@ -260,6 +274,14 @@ namespace Wism.Client.Modules
             locationInfos = LoadModFiles<LocationInfo>(filePath);
 
             return locationInfos;
+        }
+
+        private static IList<ArtifactInfo> LoadArtifactInfos(string path)
+        {
+            string filePath = String.Format(@"{0}\{1}", path, ArtifactInfo.FileName);
+            artifactInfos = LoadModFiles<ArtifactInfo>(filePath);
+
+            return artifactInfos;
         }
     }
 }

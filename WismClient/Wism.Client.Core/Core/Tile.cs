@@ -36,6 +36,18 @@ namespace Wism.Client.Core
         /// </summary>
         public Location Location { get; set; }
 
+        public List<IItem> Items { get; internal set; }
+
+        public bool ContainsItem(IItem item)
+        {
+            return HasItems() && Items.Contains(item);
+        }
+
+        public bool HasItems()
+        {
+            return this.Items != null && this.Items.Count > 0;
+        }
+
         public bool IsNeighbor(Tile other)
         {
             return (((other.X == this.X - 1) && (other.Y == this.Y - 1)) ||

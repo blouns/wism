@@ -154,11 +154,6 @@ namespace Wism.Client.Modules
             cityBuilder.AddCity(map, x, y, shortName);
         }
 
-        public static void AddLocation(Tile[,] map, int x, int y, string shortName)
-        {
-            locationBuilder.AddLocation(map, x, y, shortName);
-        }
-
         /// <summary>
         /// Affix all map objects with there initial locations.
         /// </summary>
@@ -193,6 +188,11 @@ namespace Wism.Client.Modules
         public static void AddCitiesToMapFromWorld(Tile[,] map, string world)
         {
             cityBuilder.AddCitiesToMapFromWorld(map, world);
+        }
+
+        public static void AddLocationsToMapFromWorld(Tile[,] map, string world)
+        {
+            locationBuilder.AddLocationsToMapFromWorld(map, world);
         }
     }    
 }

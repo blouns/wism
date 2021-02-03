@@ -77,7 +77,7 @@ namespace Wism.Client.Agent
         /// </summary>
         private void CreateTestGame()
         {
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame("AsciiWorld");
 
             // Create a default hero for testing
             var heroTile = World.Current.Map[1, 1];
@@ -109,9 +109,6 @@ namespace Wism.Client.Agent
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile1);
-            //Game.Current.Players[1].ConscriptArmy(
-            //    ModFactory.FindArmyInfo("Cavalry"),
-            //    enemyTile1);
 
             var enemyTile2 = World.Current.Map[3, 2];
             Game.Current.Players[1].ConscriptArmy(

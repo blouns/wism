@@ -6,6 +6,6 @@ namespace Wism.Client.MapObjects
     {
         bool CanSearchKind(string kind);
 
-        bool Search(List<Army> armies, bool searched, out object result);
+        bool Search(List<Army> armies, Location location, out object result);
     }
 }

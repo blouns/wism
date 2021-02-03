@@ -1,10 +1,12 @@
-﻿using Wism.Client.Core;
+﻿using System.Collections.Generic;
 using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
 {
     public class Hero : Army
     {
+        public List<IItem> Items { get; internal set; }
+
         internal Hero()
         {
             this.Info = ArmyInfo.GetHeroInfo();
@@ -13,14 +15,53 @@ namespace Wism.Client.MapObjects
 
         public int GetCommandBonus()
         {
-            // TODO: Implement items
-            return 0;
+            int bonus = 0;
+
+            if (!HasItems())
+            {
+                return bonus;
+            }
+            
+            foreach (var item in Items)
+            {
+                Artifact artifact = item as Artifact;
+                if (artifact == null)
+                {
+                    continue;
+                }    
+
+                bonus += artifact.CommandBonus;
+            }
+            
+            return bonus;
         }
 
         public int GetCombatBonus()
         {
-            // TODO: Implement items
-            return 0;
+            int bonus = 0;
+
+            if (!HasItems())
+            {
+                return bonus;
+            }
+
+            foreach (var item in Items)
+            {
+                Artifact artifact = item as Artifact;
+                if (artifact == null)
+                {
+                    continue;
+                }
+
+                bonus += artifact.CombatBonus;
+            }
+
+            return bonus;
+        }
+
+        public bool HasItems()
+        {
+            return this.Items != null && this.Items.Count > 0;
         }
     }
 }

@@ -344,7 +344,7 @@ namespace Wism.Client.Test.Scenario
             var armyController = TestUtilities.CreateArmyController();
             var locationController = TestUtilities.CreateLocationController();
             var gameController = TestUtilities.CreateGameController();
-            Game.CreateDefaultGame();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
             Player player1 = Game.Current.Players[0];
             Tile originalTile1 = World.Current.Map[1, 1];
             player1.HireHero(originalTile1);
@@ -361,14 +361,15 @@ namespace Wism.Client.Test.Scenario
             int gold2 = player2.Gold;
             int strength2 = armiesToMove2[0].Strength;
 
-            var map = World.Current.Map;            
-            MapBuilder.AddLocation(map, 2, 1, "Stonehenge");
-            MapBuilder.AddLocation(map, 2, 2, "CryptKeeper");
-            MapBuilder.AddLocation(map, 2, 3, "TempleDog");
-            MapBuilder.AddLocation(map, 2, 4, "TempleCat");
-            MapBuilder.AddLocation(map, 3, 1, "Suzzallo");
-            MapBuilder.AddLocation(map, 3, 2, "SagesHut");
+            TestUtilities.AddLocation(2, 1, "Stonehenge");
+            TestUtilities.AddLocation(2, 2, "CryptKeeper");
+            TestUtilities.AddLocation(2, 3, "TempleDog");
+            TestUtilities.AddLocation(2, 4, "TempleCat");
+            TestUtilities.AddLocation(3, 1, "Suzzallo");
+            TestUtilities.AddLocation(3, 2, "SagesHut");
+            TestUtilities.AllocateBoons();
 
+            var map = World.Current.Map;
             var commandController = TestUtilities.CreateCommandController();
             List<Command> commandsToAdd = new List<Command>()
             {
@@ -432,7 +433,6 @@ namespace Wism.Client.Test.Scenario
             }
 
             // Assert
-            // TODO: Validate items
             Assert.IsTrue(gold1 < player1.Gold, "No money from the seer.");
             Assert.AreEqual(strength1 + 2, armiesToMove1[0].Strength, "Too weak.");
 

@@ -80,7 +80,7 @@ namespace Wism.Client.Core.Controllers
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
-        /// <param name="result">Search result or null if search failed</param>
+        /// <param name="armiesBlessed">Search result or null if search failed</param>
         /// <returns>True if search successful; else false</returns>
         public bool SearchTemple(List<Army> armies, Location location, out int armiesBlessed)
         {
@@ -92,7 +92,7 @@ namespace Wism.Client.Core.Controllers
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
-        /// <param name="result">Search result or null if search failed</param>
+        /// <param name="gold">Search result or null if search failed</param>
         /// <returns>True if search successful; else false</returns>
         public bool SearchSage(List<Army> armies, Location location, out int gold)
         {
@@ -108,7 +108,7 @@ namespace Wism.Client.Core.Controllers
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
-        /// <param name="result">Search result or null if search failed</param>
+        /// <param name="knowledge">Search result or null if search failed</param>
         /// <returns>True if search successful; else false</returns>
         public bool SearchLibrary(List<Army> armies, Location location, out string knowledge)
         {
@@ -120,11 +120,11 @@ namespace Wism.Client.Core.Controllers
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
-        /// <param name="result">Search result or null if search failed</param>
+        /// <param name="boon">Search result or null if search failed</param>
         /// <returns>True if search successful; else false</returns>
-        public bool SearchRuins(List<Army> armies, Location location, out string item)
+        public bool SearchRuins(List<Army> armies, Location location, out IBoon boon)
         {
-            return SearchLocation<string>(armies, location, out item);
+            return SearchLocation<IBoon>(armies, location, out boon);
         }
 
         /// <summary>
@@ -132,11 +132,11 @@ namespace Wism.Client.Core.Controllers
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
-        /// <param name="result">Search result or null if search failed</param>
+        /// <param name="boon">Search result or null if search failed</param>
         /// <returns>True if search successful; else false</returns>
-        public bool SearchTomb(List<Army> armies, Location location, out string item)
+        public bool SearchTomb(List<Army> armies, Location location, out IBoon boon)
         {
-            return SearchLocation<string>(armies, location, out item);
+            return SearchLocation<IBoon>(armies, location, out boon);
         }
     }
 }

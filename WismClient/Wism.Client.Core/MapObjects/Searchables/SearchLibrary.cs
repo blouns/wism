@@ -4,13 +4,21 @@ using System.Linq;
 namespace Wism.Client.MapObjects
 {
     public class SearchLibrary : ISearchable
-    {        
+    {
+        private static readonly SearchLibrary instance = new SearchLibrary();
+
+        public static SearchLibrary Instance => instance;
+
+        private SearchLibrary()
+        {
+        }
+
         public bool CanSearchKind(string kind)
         {
             return kind == "Library";
         }
 
-        public bool Search(List<Army> armies, bool searched, out object result)
+        public bool Search(List<Army> armies, Location location, out object result)
         {
             result = null;
 

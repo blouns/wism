@@ -14,7 +14,7 @@ namespace Wism.Client.Core
         public Tile[,] Map { get; protected set; }
 
         // Navigation associations
-        public Game Game { get; }        
+        public Game Game { get; }
 
         private static World current;
 
@@ -131,12 +131,20 @@ namespace Wism.Client.Core
 
             location.Tile = tile;
             tile.Location = location;
-            tile.Terrain = location.Terrain;            
+            tile.Terrain = location.Terrain;      
+            
+            // Add location for tracking
+            locations.Add(location);
         }
 
         public List<City> GetCities()
         {
             return new List<City>(this.cities);
+        }
+
+        public List<Location> GetLocations()
+        {
+            return new List<Location>(this.locations);
         }
 
         public void Reset()

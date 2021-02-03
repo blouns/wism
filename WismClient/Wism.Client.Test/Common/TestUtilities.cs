@@ -150,5 +150,18 @@ namespace Wism.Client.Test.Common
                 TestContext.WriteLine();
             }
         }
+
+        public static void AllocateBoons()
+        {
+            BoonAllocator boonAllocator = new BoonAllocator();
+            boonAllocator.Allocate(World.Current.GetLocations());
+        }
+
+        internal static void AddLocation(int x, int y, string shortName)
+        {
+            Location location = MapBuilder.FindLocation(shortName);
+            Tile tile = World.Current.Map[x, y];
+            World.Current.AddLocation(location, tile);
+        }
     }
 }

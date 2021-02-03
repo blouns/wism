@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
@@ -12,7 +13,7 @@ namespace Wism.Client.Api.Commands
         public List<Army> Armies { get; }
         public Location Location { get; }
 
-        public string Item { get; private set; }
+        public IBoon Boon { get; private set; }
 
         public SearchTombCommand(LocationController locationController, List<Army> armies, Location location)
         {
@@ -23,9 +24,9 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            bool success = LocationController.SearchTomb(Armies, Location, out string item);
+            bool success = LocationController.SearchTomb(Armies, Location, out IBoon boon);
 
-            Item = item;
+            Boon = boon;
             return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
 
