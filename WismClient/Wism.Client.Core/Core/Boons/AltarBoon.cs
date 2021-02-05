@@ -6,6 +6,8 @@ namespace Wism.Client.Core
     {
         public bool IsDefended => false;
 
+        public object Result { get; set; }
+
         public object Redeem(Tile target)
         {
             if (target is null)
@@ -38,6 +40,7 @@ namespace Wism.Client.Core
 
             target.VisitingArmies[0].Strength += strengthBoon;
 
+            Result = strengthBoon;
             return strengthBoon;
         }
     }

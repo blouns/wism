@@ -23,7 +23,8 @@ namespace Wism.Client.MapObjects
          
             foreach (var army in armies)
             {
-                if (!army.BlessedAt.Contains(location))
+                if (!army.BlessedAt.Contains(location) &&
+                    army.MovesRemaining > 0)
                 {
                     army.Strength += (army.Strength == Army.MaxStrength) ? 0 : 1;
                     army.BlessedAt.Add(location);
@@ -32,7 +33,6 @@ namespace Wism.Client.MapObjects
             }
 
             result = blessed;
-
             return blessed > 0;
         }
     }

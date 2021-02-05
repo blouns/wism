@@ -17,6 +17,7 @@ namespace Wism.Client.Agent
         private readonly ArmyController armyController;
         private readonly GameController gameController;
         private readonly CityController cityController;
+        private readonly LocationController locationController;
         private readonly ILogger logger;
 
         public ConsoleCommandProvider(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
@@ -36,6 +37,7 @@ namespace Wism.Client.Agent
             this.armyController = controllerProvider.ArmyController;
             this.gameController = controllerProvider.GameController;
             this.cityController = controllerProvider.CityController;
+            this.locationController = controllerProvider.LocationController;
         }
 
         public void GenerateCommands()
@@ -79,6 +81,12 @@ namespace Wism.Client.Agent
                 case ConsoleKey.A:
                     DoAttackOnce();
                     break;
+                case ConsoleKey.Z:
+                    DoSearch();
+                    break;
+                case ConsoleKey.T:
+                    DoTake();
+                    break;
                 case ConsoleKey.E:
                     DoEndTurn();
                     break;
@@ -104,6 +112,53 @@ namespace Wism.Client.Agent
                     DoMoveArmyOneStep(1, 0);
                     break;
             }
+        }
+
+        private void DoTake()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DoSearch()
+        {   
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var tile = armies[0].Tile;
+            if (!tile.HasLocation())
+            {
+                Console.WriteLine("You find nothing.");
+            }
+            else
+            { 
+                Command command;
+                switch (tile.Location.Kind)
+                {
+                    case "Library":
+                        command = new SearchLibraryCommand(locationController, armies, tile.Location);
+                        break;
+                    case "Ruins":
+                        command = new SearchRuinsCommand(locationController, armies, tile.Location);
+                        break;
+                    case "Sage":
+                        command = new SearchSageCommand(locationController, armies, tile.Location);
+                        break;
+                    case "Temple":
+                        command = new SearchTempleCommand(locationController, armies, tile.Location);
+                        break;
+                    case "Tomb":
+                        command = new SearchTombCommand(locationController, armies, tile.Location);
+                        break;
+                    default:
+                        throw new InvalidOperationException("No location to search.");
+                }
+                commandController.AddCommand(command);
+            }
+
+            
         }
 
         private void DoDefendArmy()

@@ -15,6 +15,8 @@ namespace Wism.Client.Core
 
         public bool IsDefended => false;
 
+        public object Result { get; set; }
+
         /// <summary>
         /// Generates allies for the player in the target tile.
         /// </summary>
@@ -41,6 +43,7 @@ namespace Wism.Client.Core
                 armies[i] = player.ConscriptArmy(this.armyInfo, target);                
             }
 
+            Result = armies;
             return armies;
         }
     }

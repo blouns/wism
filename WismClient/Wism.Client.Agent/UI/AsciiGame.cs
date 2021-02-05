@@ -45,6 +45,10 @@ namespace Wism.Client.Agent
                 new PrepareForBattleProcessor(logFactory, this),
                 new BattleProcessor(logFactory),
                 new CompleteBattleProcessor(logFactory, this),
+                new SearchRuinsProcessor(logFactory, this),                
+                new SearchTempleProcessor(logFactory, this),                
+                new SearchSageProcessor(logFactory, this),
+                new SearchLibraryProcessor(logFactory, this),
                 new StandardProcessor(logFactory)
             };
         }

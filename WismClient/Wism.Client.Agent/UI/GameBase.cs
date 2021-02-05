@@ -117,6 +117,7 @@ namespace Wism.Client.Agent
 
             // Add cities
             MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, "AsciiWorld");
+            MapBuilder.AddLocationsToMapFromWorld(World.Current.Map, "AsciiWorld");
         }
     }
 }

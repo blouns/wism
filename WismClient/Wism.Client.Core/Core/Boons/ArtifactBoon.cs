@@ -15,6 +15,8 @@ namespace Wism.Client.Core
 
         public Artifact Artifact { get; }
 
+        public object Result { get; set; }
+
         public object Redeem(Tile target)
         {
             if (target is null)
@@ -29,6 +31,7 @@ namespace Wism.Client.Core
 
             target.Items.Add(Artifact);
 
+            Result = Artifact;
             return Artifact;
         }
     }

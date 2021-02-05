@@ -13,5 +13,7 @@ namespace Wism.Client.Core.Controllers
         public ArmyController ArmyController { get; set; }
 
         public CityController CityController { get; set; }
+
+        public LocationController LocationController { get; set; }
     }
 }

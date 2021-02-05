@@ -24,31 +24,42 @@ namespace Wism.Client.MapObjects
         public bool Search(List<Army> armies, Location location, out object result)
         {
             result = null;
+            Army hero = armies.Find(a =>
+                a is Hero &&
+                a.Tile == location.Tile &&
+                a.MovesRemaining > 0);
 
-            if (!location.Searched &&
-                armies.Any(a => a is Hero))
+            if (hero == null)
+            {
+                return false;
+            }
+
+            if (!location.Searched)
             {
                 if (location.HasMonster() &&
                    !DefeatedMonster())
                 {
-                    Army hero = armies.Find(a => a is Hero);
+                    // Hero was slain!
                     hero.Player.KillArmy(hero);
+                    return false;
                 }
 
                 if (location.HasBoon())
                 {
-                    result = location.Boon;
-                }                
+                    result = location.Boon.Redeem(location.Tile);
+                }
 
+                hero.MovesRemaining = 0;
                 location.Searched = true;
             }
 
-            return result != null;
+            return location.Searched;
         }
 
         /// <summary>
-        /// 
+        /// Fights the monster inhabiting the location
         /// </summary>
+        /// <returns>True if monster is defeated; otherwise False</returns>
         private bool DefeatedMonster()
         {
             return (Game.Current.Random.Next(0, 10) / 10) < oddsToDefeatMonster;

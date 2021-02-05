@@ -9,6 +9,8 @@ namespace Wism.Client.Core
 
         public bool IsDefended => true;
 
+        public object Result { get; set; }
+
         public object Redeem(Tile target)
         {
             if (target is null)
@@ -25,6 +27,7 @@ namespace Wism.Client.Core
 
             target.VisitingArmies[0].Player.Gold += goldBoon;
 
+            Result = goldBoon;
             return goldBoon;
         }
     }

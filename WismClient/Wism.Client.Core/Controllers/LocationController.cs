@@ -84,7 +84,10 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if search successful; else false</returns>
         public bool SearchTemple(List<Army> armies, Location location, out int armiesBlessed)
         {
-            return SearchLocation<int>(armies, location, out armiesBlessed);
+            var success = SearchLocation<int>(armies, location, out armiesBlessed);
+            logger.LogInformation($"Blessed {armiesBlessed} armies");
+
+            return success;
         }
 
         /// <summary>
@@ -97,8 +100,10 @@ namespace Wism.Client.Core.Controllers
         public bool SearchSage(List<Army> armies, Location location, out int gold)
         {
             var success = SearchLocation<int>(armies, location, out gold);
-            logger.LogInformation($"Seer's gem worth {gold} gp");
-            armies[0].Player.Gold += gold;
+            if (gold > 0)
+            {
+                logger.LogInformation($"Seer's gem worth {gold} gp");
+            }
 
             return success;
         }
@@ -124,7 +129,13 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if search successful; else false</returns>
         public bool SearchRuins(List<Army> armies, Location location, out IBoon boon)
         {
-            return SearchLocation<IBoon>(armies, location, out boon);
+            var success = SearchLocation<IBoon>(armies, location, out boon);
+            if (boon != null)
+            {
+                logger.LogInformation($"Found {boon.Result}");
+            }
+
+            return success;
         }
 
         /// <summary>
