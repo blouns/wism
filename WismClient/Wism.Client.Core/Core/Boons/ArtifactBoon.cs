@@ -29,7 +29,7 @@ namespace Wism.Client.Core
                 target.Items = new List<IItem>();
             }
 
-            target.Items.Add(Artifact);
+            target.AddItem(Artifact);
 
             Result = Artifact;
             return Artifact;

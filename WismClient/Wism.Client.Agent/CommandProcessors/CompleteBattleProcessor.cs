@@ -49,17 +49,16 @@ namespace Wism.Client.Agent.CommandProcessors
             var battleResult = battleCompleteCommand.AttackCommand.Result;
             if (battleResult == ActionState.Succeeded)
             {
-                Console.WriteLine($"{name} {presentVerb} victorious!");
+                Notify.DisplayAndWait($"{name} {presentVerb} victorious!");
             }
             else if (battleResult == ActionState.Failed)
             {
-                Console.WriteLine($"{name} {pastVerb} been defeated!");
+                Notify.DisplayAndWait($"{name} {pastVerb} been defeated!");
             }
             else
             {
-                Console.WriteLine("Error: Unexpected game state" + battleResult);
+                Notify.Alert("Error: Unexpected game state" + battleResult);
             }
-            Console.ReadKey();
 
             asciiGame.GameSpeed = AsciiGame.DefaultGameSpeed;
 

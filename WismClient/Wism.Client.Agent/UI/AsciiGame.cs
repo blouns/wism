@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using Wism.Client.Agent.CommandProcessors;
 using Wism.Client.Agent.UI;
-using Wism.Client.Api;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
@@ -123,7 +123,7 @@ namespace Wism.Client.Agent
             else if (currentPlayerArmies.Count == 0)
             {
                 // Game over
-                Console.WriteLine($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
+                Notify.Alert($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
                 System.Environment.Exit(1);
             }
 
@@ -193,6 +193,12 @@ namespace Wism.Client.Agent
                     // Army Count
                     Console.Write($"{GetArmyCount(tile)}");
 
+                    // Items
+                    if (tile.HasItems())
+                    {
+                        Console.Write($"{AsciiMapper.GetItemSymbol()}");
+                    }
+
                     // Buffer
                     Console.Write("\t");
                 }
@@ -202,7 +208,7 @@ namespace Wism.Client.Agent
 
             if (selectedTile != null)
             {
-                Console.Write($"Info: ");
+                Console.Write($"Location: ");
                 if (selectedTile.HasLocation())
                 {
                     Console.Write($"{selectedTile.Location.Kind} ");
@@ -219,13 +225,18 @@ namespace Wism.Client.Agent
                 {                    
                     Console.Write($" | Loc: {selectedTile.Location.DisplayName}");
                 }
+                
+                if (selectedTile.HasAnyArmies())
+                {
+                    Console.WriteLine();
+                }
                 if (selectedTile.HasArmies())
                 {
-                    Console.Write($" | Armies: {ArmiesToString(selectedTile.Armies)}");
+                    Console.Write($"Armies: {ArmiesToString(selectedTile.Armies)} ");
                 }
                 if (selectedTile.HasVisitingArmies())
                 {
-                    Console.Write($" | Selected: {ArmiesToString(selectedTile.VisitingArmies)}");
+                    Console.Write($"Selected: {ArmiesToString(selectedTile.VisitingArmies)}");
                 }
                 Console.WriteLine();
             }
@@ -242,7 +253,12 @@ namespace Wism.Client.Agent
             sb.Append("{");
             foreach (var army in armies)
             {
-                sb.Append($" '{army.KindName}'");
+                int count = 0;
+                sb.Append($" '{army.KindName}':S{army.Strength};M{army.MovesRemaining}");
+                if (count++ == 4)
+                {
+                    sb.Append("\n");
+                }
             }
             sb.Append(" }");
 

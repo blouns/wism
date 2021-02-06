@@ -21,36 +21,6 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Add a location to the map from the modules
-        /// </summary>
-        /// <param name="x">Top-left X coordinate of tile for the location</param>
-        /// <param name="y">Top-left Y coordinate of tile for the location</param>    
-        private static void AddLocationFromModules(int x, int y, string locationName)
-        {
-            if (string.IsNullOrEmpty(locationName))
-            {
-                throw new ArgumentException($"'{nameof(locationName)}' cannot be null or empty", nameof(locationName));
-            }
-
-            // Ensure x,y is within the map
-            if (x < World.Current.Map.GetLowerBound(0) || x > World.Current.Map.GetUpperBound(0) ||
-                y < World.Current.Map.GetLowerBound(1) || y > World.Current.Map.GetUpperBound(1))
-            {
-                throw new ArgumentOutOfRangeException($"X and Y coordinates ({x},{y}) must be within the map.");
-            }
-
-            // Find a matching location from the MapBuilder
-            var location = MapBuilder.FindLocation(locationName);
-            if (location == null)
-            {
-                throw new ArgumentException($"Location {locationName} not found in MapBuilder.");
-            }
-            
-            // Add it to the world
-            World.Current.AddLocation(location, World.Current.Map[x, y]);            
-        }
-
-        /// <summary>
         /// Search a location
         /// </summary>
         /// <param name="armies">Armies who will search location</param>

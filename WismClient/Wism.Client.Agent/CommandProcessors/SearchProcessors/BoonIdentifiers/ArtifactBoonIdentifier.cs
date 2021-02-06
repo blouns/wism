@@ -19,7 +19,7 @@ namespace Wism.Client.Agent.CommandProcessors
             }
 
             var artifact = (Artifact)boon.Result;
-            Console.WriteLine($"You have found the {artifact.DisplayName}!");
+            Notify.DisplayAndWait($"You have found the {artifact.DisplayName}!");
         }
     }
 }

@@ -24,17 +24,15 @@ namespace Wism.Client.Agent.CommandProcessors
 
         public bool CanExecute(ICommandAction command)
         {
-            return command is SearchLibraryProcessor;
+            return command is SearchLibraryCommand;
         }
 
         public ActionState Execute(ICommandAction command)
         {
             var searchCommand = (SearchLibraryCommand)command;
 
-            Console.WriteLine("You enter a great Library...");
-            Console.ReadKey();
-            Console.WriteLine("Searching through the books, you find...");
-            Console.ReadKey();
+            Notify.DisplayAndWait("You enter a great Library...");
+            Notify.DisplayAndWait("Searching through the books, you find...");
 
             var result = searchCommand.Execute();
 
@@ -44,8 +42,7 @@ namespace Wism.Client.Agent.CommandProcessors
                 knowledge = searchCommand.Knowledge;
             }
 
-            Console.WriteLine(knowledge);
-            Console.ReadKey();
+            Notify.DisplayAndWait(knowledge);
 
             return result;
         }

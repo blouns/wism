@@ -81,5 +81,10 @@ namespace Wism.Client.Agent.UI
         {
             return (armyMap.Keys.Contains(army)) ? armyMap[army] : ' ';
         }
+
+        internal static char GetItemSymbol()
+        {
+            return '!';
+        }
     }
 }

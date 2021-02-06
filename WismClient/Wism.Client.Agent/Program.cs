@@ -100,6 +100,8 @@ namespace Wism.Client.Agent
                             CityController = new CityController(
                                 provider.GetService<ILoggerFactory>()),
                             LocationController = new LocationController(
+                                provider.GetService<ILoggerFactory>()),
+                            HeroController = new HeroController(
                                 provider.GetService<ILoggerFactory>())
                         });
 

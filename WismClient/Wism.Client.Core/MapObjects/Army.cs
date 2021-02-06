@@ -47,7 +47,7 @@ namespace Wism.Client.MapObjects
             this.IsDefending = true;
         }
 
-        public void Kill()
+        public virtual void Kill()
         {
             this.IsDead = true;
             Player.KillArmy(this);

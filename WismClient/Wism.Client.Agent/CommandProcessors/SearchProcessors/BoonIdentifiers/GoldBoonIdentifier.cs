@@ -18,7 +18,7 @@ namespace Wism.Client.Agent.CommandProcessors
             }
 
             var gold = (int)boon.Result;
-            Console.WriteLine($"You have found {gold} gp!");
+            Notify.DisplayAndWait($"You have found {gold} gp!");
         }
     }
 }

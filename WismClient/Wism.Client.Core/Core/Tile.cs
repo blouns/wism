@@ -26,6 +26,26 @@ namespace Wism.Client.Core
         /// </summary>
         public Terrain Terrain { get; set; }
 
+        public void AddItem(Artifact artifact)
+        {
+            if (Items == null)
+            {
+                Items = new List<IItem>();
+            }
+            Items.Add(artifact);
+            artifact.Tile = this;
+        }
+
+        public void RemoveItem(Artifact artifact)
+        {
+            if (Items == null)
+            {
+                Items = new List<IItem>();
+            }
+            Items.Remove(artifact);
+            artifact.Tile = null;
+        }
+
         /// <summary>
         /// May have zero or one city
         /// </summary>

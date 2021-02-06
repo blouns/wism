@@ -18,6 +18,7 @@ namespace Wism.Client.Agent
         private readonly GameController gameController;
         private readonly CityController cityController;
         private readonly LocationController locationController;
+        private readonly HeroController heroController;
         private readonly ILogger logger;
 
         public ConsoleCommandProvider(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
@@ -38,6 +39,7 @@ namespace Wism.Client.Agent
             this.gameController = controllerProvider.GameController;
             this.cityController = controllerProvider.CityController;
             this.locationController = controllerProvider.LocationController;
+            this.heroController = controllerProvider.HeroController;
         }
 
         public void GenerateCommands()
@@ -52,14 +54,14 @@ namespace Wism.Client.Agent
                 return;
             }
 
-            Console.WriteLine("(Esc) Deselect");
-            Console.WriteLine("(S)elect");            
-            Console.WriteLine("(M)ove");
-            Console.WriteLine("(A)ttack");
-            Console.WriteLine("(P)roduce");
-            Console.WriteLine("(N)ext");
-            Console.WriteLine("(D)efend");
-            Console.WriteLine("(E)nd turn");
+            Console.WriteLine("+------------+----------------+---------+");
+            Console.WriteLine("| (S)elect   | Deselect (Esc) |         |");
+            Console.WriteLine("| (M)ove     | (A)ttack       |         |");
+            Console.WriteLine("| (N)ext     | (D)efend       |         |");
+            Console.WriteLine("| (Z)earch   | (T)ake         | Dr(o)p  |");
+            Console.WriteLine("| (P)roduce  |                |         |");
+            Console.WriteLine("| (E)nd turn | (Q)uit to DOS  |         |");
+            Console.WriteLine("+------------+----------------+---------+");
             Console.Write("Enter a command: ");
             var keyInfo = Console.ReadKey();
             Console.WriteLine();
@@ -86,6 +88,9 @@ namespace Wism.Client.Agent
                     break;
                 case ConsoleKey.T:
                     DoTake();
+                    break;
+                case ConsoleKey.O:
+                    DoDrop();
                     break;
                 case ConsoleKey.E:
                     DoEndTurn();
@@ -116,7 +121,38 @@ namespace Wism.Client.Agent
 
         private void DoTake()
         {
-            throw new NotImplementedException();
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            Hero hero = Game.Current.GetSelectedArmies()
+                .Find(army => army is Hero) as Hero;
+            if (hero == null)
+            {
+                return;
+            }
+
+            commandController.AddCommand
+                (new TakeItemsCommand(heroController, hero));
+        }
+
+        private void DoDrop()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            Hero hero = Game.Current.GetSelectedArmies()
+                .Find(army => army is Hero) as Hero;
+            if (hero == null)
+            {
+                return;
+            }
+
+            commandController.AddCommand
+                (new DropItemsCommand(heroController, hero));
         }
 
         private void DoSearch()
@@ -130,7 +166,7 @@ namespace Wism.Client.Agent
             var tile = armies[0].Tile;
             if (!tile.HasLocation())
             {
-                Console.WriteLine("You find nothing.");
+                Notify.DisplayAndWait("You find nothing.");
             }
             else
             { 
@@ -141,6 +177,7 @@ namespace Wism.Client.Agent
                         command = new SearchLibraryCommand(locationController, armies, tile.Location);
                         break;
                     case "Ruins":
+                    case "Tomb":
                         command = new SearchRuinsCommand(locationController, armies, tile.Location);
                         break;
                     case "Sage":
@@ -148,9 +185,6 @@ namespace Wism.Client.Agent
                         break;
                     case "Temple":
                         command = new SearchTempleCommand(locationController, armies, tile.Location);
-                        break;
-                    case "Tomb":
-                        command = new SearchTombCommand(locationController, armies, tile.Location);
                         break;
                     default:
                         throw new InvalidOperationException("No location to search.");
@@ -189,7 +223,7 @@ namespace Wism.Client.Agent
             Tile tile = World.Current.Map[x, y];
             if (!tile.HasCity())
             {
-                NotifyUser("Must select a tile with a city.");
+                Notify.Alert("Must select a tile with a city.");
                 return;
             }
             productionCity = tile.City;
@@ -253,7 +287,7 @@ namespace Wism.Client.Agent
         {
             if (Game.Current.GameState == GameState.Ready)
             {
-                NotifyUser("You need to select an army.");
+                Notify.Alert("You need to select an army.");
                 return;
             }
 
@@ -308,7 +342,7 @@ namespace Wism.Client.Agent
             Tile tile = World.Current.Map[x, y];
             if (!tile.CanAttackHere(armies))
             {
-                NotifyUser("Can only attack an enemy controlled location.");
+                Notify.Alert("Can only attack an enemy controlled location.");
                 return;
             }
 
@@ -319,7 +353,7 @@ namespace Wism.Client.Agent
         {
             if (!Game.Current.ArmiesSelected())
             {
-                NotifyUser("You must first select an army.");
+                Notify.Alert("You must first select an army.");
                 return;
             }
 
@@ -337,7 +371,7 @@ namespace Wism.Client.Agent
             Tile tile = World.Current.Map[x, y];
             if (!tile.CanAttackHere(armies))
             {
-                NotifyUser("Can only attack an enemy controlled location.");
+                Notify.Alert("Can only attack an enemy controlled location.");
                 return;
             }
 
@@ -347,18 +381,11 @@ namespace Wism.Client.Agent
                     new AttackOnceCommand(armyController, armies, x, y));
         }
 
-        private static void NotifyUser(string message)
-        {
-            Console.Beep(1000, 500);
-            Console.WriteLine(message);
-            Thread.Sleep(2000);
-        }
-
         private void DoDeselectArmy()
         {
             if (Game.Current.GameState == GameState.Ready)
             {
-                NotifyUser("Error: You must first select an army.");
+                Notify.Alert("Error: You must first select an army.");
                 return;
             }
 
@@ -376,7 +403,7 @@ namespace Wism.Client.Agent
         {
             if (Game.Current.GameState != GameState.SelectedArmy)
             {
-                NotifyUser("You must first select an army.");
+                Notify.Alert("You must first select an army.");
                 return;
             }
 
@@ -394,7 +421,7 @@ namespace Wism.Client.Agent
 
             if (tile.CanAttackHere(armies))
             {
-                NotifyUser("Cannot move onto an enemy controlled location.");
+                Notify.Alert("Cannot move onto an enemy controlled location.");
                 return;
             }
 
@@ -406,7 +433,7 @@ namespace Wism.Client.Agent
         {
             if (Game.Current.GameState == GameState.GameOver)
             {
-                NotifyUser("The game is over.");
+                Notify.Alert("The game is over.");
                 System.Environment.Exit(1);
             }
         }
@@ -422,7 +449,7 @@ namespace Wism.Client.Agent
             Tile tile = World.Current.Map[x, y];
             if (!tile.HasArmies())
             {
-                NotifyUser("Tile must have armies to select.");
+                Notify.Alert("Tile must have armies to select.");
                 return;
             }
 
@@ -450,7 +477,7 @@ namespace Wism.Client.Agent
                     if (!Int32.TryParse(numbers[i], out int index) &&
                         index < 0 || index > Army.MaxArmies)
                     {
-                        Console.WriteLine("Must enter a valid number or a number list (e.g. 1,2,3");
+                        Notify.Alert("Must enter a valid number or a number list (e.g. 1,2,3");
                         return;
                     }
 
@@ -459,7 +486,7 @@ namespace Wism.Client.Agent
 
                 if (specificArmies.Count == 0)
                 {
-                    NotifyUser("Must select at least one army.");
+                    Notify.Alert("Must select at least one army.");
                     return;
                 }
 
@@ -478,7 +505,7 @@ namespace Wism.Client.Agent
             if (value > World.Current.Map.GetUpperBound(dimension) ||
                 value < World.Current.Map.GetLowerBound(dimension))
             {
-                NotifyUser("Value must be within the bounds of the map.");
+                Notify.Alert("Value must be within the bounds of the map.");
             }
 
             return value;

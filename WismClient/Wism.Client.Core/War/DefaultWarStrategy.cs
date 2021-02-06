@@ -122,25 +122,6 @@ namespace Wism.Client.War
             }
         }
 
-        /// <summary>
-        /// Attacks a neutral city
-        /// </summary>
-        /// <param name="attackers">Attackers</param>
-        /// <param name="compositeAFCM">Attacking force combat modifier bonus</param>
-        /// <param name="targetTile">Defending tile</param>
-        private bool AttackNeutralCityOnce(List<Army> attackers, int compositeAFCM, City city)
-        {
-            var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
-            Army garrison = ArmyFactory.CreateArmy(armyInfo);
-            garrison.Strength = city.Defense;
-
-            return AttackOnceInternal(
-                new List<Army>() { garrison },
-                attackers,
-                compositeAFCM,
-                0);                
-        }
-
         public bool BattleContinues(List<Army> defenders, List<Army> attacker)
         {
             return (attacker.Count > 0 && defenders.Count > 0);

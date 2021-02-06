@@ -20,15 +20,15 @@ namespace Wism.Client.Agent.CommandProcessors
             var strengthBoon = (int)boon.Result;
             if (strengthBoon == 0)
             {
-                Console.WriteLine($"The gods ignore you!");
+                Notify.DisplayAndWait($"The gods ignore you!");
             }
             else if (strengthBoon > 0)
             {
-                Console.WriteLine($"Your strength has increased by {strengthBoon}!");
+                Notify.DisplayAndWait($"Your strength has increased by {strengthBoon}!");
             }
             else
             {
-                Console.WriteLine($"Your strength decreased by {strengthBoon}");
+                Notify.DisplayAndWait($"Your strength decreased by {strengthBoon}");
             }
         }
     }

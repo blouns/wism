@@ -11,7 +11,7 @@ namespace Wism.Client.MapObjects
             Info = info ?? throw new ArgumentNullException(nameof(info));
         }
 
-        public override string ShortName => Info.ShortName;
+        public override string ShortName => Info.ShortName;        
 
         public ArtifactInfo Info { get; set; }
 
@@ -26,12 +26,7 @@ namespace Wism.Client.MapObjects
                 throw new ArgumentNullException(nameof(hero));
             }
 
-            if (!this.Tile.HasItems())
-            {
-                this.Tile.Items = new List<IItem>();
-            }
-
-            this.Tile.Items.Add(this);
+            hero.Tile.AddItem(this);
         }
 
         public void Take(Hero hero)
@@ -43,20 +38,22 @@ namespace Wism.Client.MapObjects
 
             if (hero.Tile.HasItems() &&
                 hero.Tile.ContainsItem(this))
-            {
-                this.Tile.Items.Remove(this);
-
+            {                
                 if (!hero.HasItems())
                 {
                     hero.Items = new List<IItem>();
                 }
                 hero.Items.Add(this);
+                hero.Tile.RemoveItem(this);
             }
         }
 
         public static Artifact Create(ArtifactInfo info)
         {
-            return new Artifact(info);
+            var artifact = new Artifact(info);
+            artifact.DisplayName = info.DisplayName;
+
+            return artifact;
         }
     }
 }

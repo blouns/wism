@@ -24,23 +24,20 @@ namespace Wism.Client.Agent.CommandProcessors
 
         public bool CanExecute(ICommandAction command)
         {
-            return command is SearchLibraryProcessor;
+            return command is SearchSageCommand;
         }
 
         public ActionState Execute(ICommandAction command)
         {
             var searchCommand = (SearchSageCommand)command;
 
-            Console.WriteLine("You are greeted warmly...");
-            Console.ReadKey();
+            Notify.DisplayAndWait("You are greeted warmly...");
 
             var result = searchCommand.Execute();
             if (searchCommand.Gold > 0)
             {
-                Console.WriteLine("...the Seer gives you a gem...");
-                Console.ReadKey();
-                Console.WriteLine($"...worth {searchCommand.Gold} gp!");
-                Console.ReadKey();
+                Notify.DisplayAndWait("...the Seer gives you a gem...");
+                Notify.DisplayAndWait($"...worth {searchCommand.Gold} gp!");
             }
 
             if (result == ActionState.Succeeded)
@@ -48,8 +45,7 @@ namespace Wism.Client.Agent.CommandProcessors
                 // TODO: Implement UI for Sage advice
             }
 
-            Console.WriteLine("A sign says: \"Go away.\"");
-            Console.ReadKey();
+            Notify.DisplayAndWait("A sign says: \"Go away.\"");
 
             return result;
         }

@@ -22,11 +22,11 @@ namespace Wism.Client.Agent.CommandProcessors
             var armies = (List<Army>)boon.Result;
             if (armies.Count > 1)
             {
-                Console.WriteLine($"A {armies[0].DisplayName} has offered to join your party!");
+                Notify.DisplayAndWait($"A {armies[0].DisplayName} has offered to join your party!");
             }
             else if (armies.Count > 0)
             {
-                Console.WriteLine($"{armies.Count} {armies[0].DisplayName} have offered to join your party!");
+                Notify.DisplayAndWait($"{armies.Count} {armies[0].DisplayName} have offered to join your party!");
             }
             else
             {

@@ -24,15 +24,14 @@ namespace Wism.Client.Agent.CommandProcessors
 
         public bool CanExecute(ICommandAction command)
         {
-            return command is SearchTempleProcessor;
+            return command is SearchTempleCommand;
         }
 
         public ActionState Execute(ICommandAction command)
         {
             var templeCommand = (SearchTempleCommand)command;
 
-            Console.WriteLine($"You have found a templ...");
-            Console.ReadKey();
+            Notify.DisplayAndWait($"You have found a temple...");
 
             var result = templeCommand.Execute();
 
@@ -40,20 +39,19 @@ namespace Wism.Client.Agent.CommandProcessors
             {
                 if (templeCommand.NumberOfArmiesBlessed == 1)
                 {
-                    Console.WriteLine("You have been blessed! Seek more blessings in far temples!");
+                    Notify.DisplayAndWait("You have been blessed! Seek more blessings in far temples!");
                 }
                 else
                 {
-                    Console.WriteLine("{0} Armies have been blessed! Seek more blessings in far temples!",
+                    Notify.DisplayAndWait("{0} Armies have been blessed! Seek more blessings in far temples!",
                         templeCommand.NumberOfArmiesBlessed);
                 }
             }
             else
             {
-                Console.WriteLine("You have already received our blessing! Try another temple!");
+                Notify.DisplayAndWait("You have already received our blessing! Try another temple!");
             }
-            
-            Console.ReadKey();
+
 
             return result;
         }

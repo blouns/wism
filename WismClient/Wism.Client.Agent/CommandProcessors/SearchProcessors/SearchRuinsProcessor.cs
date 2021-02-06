@@ -35,12 +35,14 @@ namespace Wism.Client.Agent.CommandProcessors
 
         public bool CanExecute(ICommandAction command)
         {
-            return command is SearchRuinsProcessor;
+            // Ruins and tombs are interchangable
+            return command is SearchRuinsCommand;
         }
 
         public ActionState Execute(ICommandAction command)
         {
-            var ruinsCommand = (SearchRuinsCommand)command;
+            var ruinsCommand = command as SearchRuinsCommand;
+
             var targetTile = World.Current.Map[ruinsCommand.Location.X, ruinsCommand.Location.Y];
             var searchingPlayer = ruinsCommand.Armies[0].Player;
             var searchingArmies = new List<Army>(ruinsCommand.Armies);
@@ -58,38 +60,36 @@ namespace Wism.Client.Agent.CommandProcessors
 
             if (hero == null)
             {
-                Console.WriteLine("You have found nothing!");
-                Console.ReadKey();
+                Notify.DisplayAndWait("You have found nothing!");
                 return ActionState.Failed;
             }
 
-            if (location.HasMonster())
+            var monster = location.Monster;
+            if (monster != null)
             {
-                Console.WriteLine($"{0} encounters a {1}...");
-                Console.ReadKey();
+                Notify.DisplayAndWait($"{hero.DisplayName} encounters a {monster}...");
             }            
 
             // Search the ruins
             var result = ruinsCommand.Execute();
-
             if (result == ActionState.Succeeded)
             {
-                Console.WriteLine("...and is victorious!");
-                Console.ReadKey();
+                if (monster != null)
+                {
+                    Notify.DisplayAndWait("...and is victorious!");
+                }
 
                 DisplayBoon(ruinsCommand.Boon);
             }
             else if (result == ActionState.Failed &&
                      hero.IsDead)
             {
-                Console.WriteLine("...and is slain!");                
+                Notify.DisplayAndWait("...and is slain!");                
             }
             else
             {
-                Console.WriteLine("You have found nothing!");                
+                Notify.DisplayAndWait("You have found nothing!");                
             }
-
-            Console.ReadKey();
 
             return result;
         }
@@ -101,10 +101,11 @@ namespace Wism.Client.Agent.CommandProcessors
                 if (identifier.CanIdentify(boon))
                 {
                     identifier.Identify(boon);
+                    return;
                 }
             }
 
-            throw new ArgumentException("Cannot find a BoonProcessor to match boon: " + boon);
+            throw new ArgumentException("Cannot identify boon: " + boon);
         }
     }
 }
