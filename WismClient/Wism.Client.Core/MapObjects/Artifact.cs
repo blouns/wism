@@ -55,5 +55,21 @@ namespace Wism.Client.MapObjects
 
             return artifact;
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as Artifact;
+            if (other == null)
+            {
+                return false;
+            }
+
+            return this.ShortName == other.ShortName;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ShortName.GetHashCode();
+        }
     }
 }

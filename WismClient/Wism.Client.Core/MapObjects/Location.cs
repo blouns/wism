@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Runtime.CompilerServices;
 using Wism.Client.Core;
 using Wism.Client.Modules;
+
+[assembly: InternalsVisibleTo("Wism.Client.Test")]
 
 namespace Wism.Client.MapObjects
 {

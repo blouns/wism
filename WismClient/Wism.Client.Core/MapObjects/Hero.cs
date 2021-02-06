@@ -22,16 +22,23 @@ namespace Wism.Client.MapObjects
             }
         }
 
-        public void Take(List<IItem> items)
+        public void Take(IItem item)
         {
-            if (items is null)
+            if (item == null)
             {
-                throw new System.ArgumentNullException(nameof(items));
+                return;
             }
 
-            if (!Tile.HasItems())
+            item.Take(this);
+            ApplyBonuses(item);
+        }
+
+        public void Take(List<IItem> items)
+        {
+            if (items is null ||
+                !Tile.HasItems())
             {
-                throw new ArgumentException("Items are not available on current tile");
+                return;
             }
 
             foreach (var item in new List<IItem>(items))
@@ -41,8 +48,7 @@ namespace Wism.Client.MapObjects
                     throw new ArgumentException("Item was not found on current tile: " + item);
                 }
 
-                item.Take(this);
-                ApplyBonuses(item);
+                Take(item);
             }
         }
 
@@ -81,6 +87,7 @@ namespace Wism.Client.MapObjects
                 Items.Contains(item))
             {
                 item.Drop(this);
+                Items.Remove(item);
                 RemoveBonsuses(item);
             }
         }
