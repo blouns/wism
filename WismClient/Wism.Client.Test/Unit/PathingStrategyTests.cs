@@ -202,7 +202,7 @@ namespace Wism.Client.Test.Unit
             // TODO: Coupling issue: need to create a world; consider mocking
             World.CreateWorld(map);
             map = World.Current.Map;
-            MapBuilder.AddCity(map, 3, 2, "Marthos");
+            MapBuilder.AddCity(World.Current, 3, 2, "Marthos");
 
             // Act
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);

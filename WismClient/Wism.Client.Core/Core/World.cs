@@ -110,6 +110,9 @@ namespace Wism.Client.Core
                 tiles[i].City = city;
                 tiles[i].Terrain = MapBuilder.TerrainKinds["Castle"];
             }
+
+            // Add city for tracking
+            this.cities.Add(city);
         }
 
         public void AddLocation(Location location, Tile tile)
@@ -156,8 +159,8 @@ namespace Wism.Client.Core
         public void AddDefaultCities()
         {
             // Add cities
-            MapBuilder.AddCity(Map, 1, 3, "Marthos", "Sirians");
-            MapBuilder.AddCity(Map, 3, 1, "BanesCitadel", "LordBane");
+            MapBuilder.AddCity(this, 1, 3, "Marthos", "Sirians");
+            MapBuilder.AddCity(this, 3, 1, "BanesCitadel", "LordBane");
         }
 
         public void Reset(Tile[,] map)

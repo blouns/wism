@@ -24,36 +24,36 @@ namespace Wism.Client.Modules
 
         private readonly Dictionary<string, Location> locationKinds = new Dictionary<string, Location>();
 
-        public void AddLocationsToMapFromWorld(Tile[,] map, string world)
+        public void AddLocationsFromWorldPath(World world, string worldPath)
         {
-            var worldPath = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world}";
+            var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldPath}";
 
-            AddLocationsToMapFromWorld(map, LoadLocationInfos(worldPath));
+            AddLocationsFromLocationInfos(world, LoadLocationInfos(path));
         }
 
-        public void AddLocationsToMapFromWorld(Tile[,] map, IList<LocationInfo> locationInfos)
+        public void AddLocationsFromLocationInfos(World world, IList<LocationInfo> locationInfos)
         {
             foreach (var locationInfo in locationInfos)
             {
-                AddLocation(map, locationInfo);
+                AddLocation(world, locationInfo);
             }
         }
 
-        public void AddLocation(Tile[,] map, LocationInfo info)
+        public void AddLocation(World world, LocationInfo info)
         {
             if (info is null)
             {
                 throw new ArgumentNullException(nameof(info));
             }
 
-            AddLocation(map, info.X, info.Y, info.ShortName);
+            AddLocation(world, info.X, info.Y, info.ShortName);
         }
 
-        public void AddLocation(Tile[,] map, int x, int y, string shortName)
+        public void AddLocation(World world, int x, int y, string shortName)
         {
-            if (map is null)
+            if (world is null)
             {
-                throw new ArgumentNullException(nameof(map));
+                throw new ArgumentNullException(nameof(world));
             }
 
             if (string.IsNullOrEmpty(shortName))
@@ -69,9 +69,7 @@ namespace Wism.Client.Modules
             location = location.Clone();
 
             // Add to map
-            location.Tile = map[x, y];
-            map[x, y].Location = location;
-            map[x, y].Terrain = location.Terrain;
+            world.AddLocation(location, world.Map[x, y]);
         }
 
         internal LocationInfo FindLocationInfo(string key)
@@ -107,8 +105,8 @@ namespace Wism.Client.Modules
         private void LoadLocationKinds(string path)
         {
             LocationKinds.Clear();
-            IList<Location> cities = ModFactory.LoadLocations(path);
-            foreach (Location location in cities)
+            IList<Location> locations = ModFactory.LoadLocations(path);
+            foreach (Location location in locations)
             {
                 LocationKinds.Add(location.ShortName, location);
             }

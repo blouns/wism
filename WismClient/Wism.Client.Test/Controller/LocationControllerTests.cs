@@ -94,6 +94,7 @@ namespace Wism.Client.Test.Controller
             TestUtilities.AllocateBoons();
             Army army = player1.HireHero(tile);
             List<Army> armies = new List<Army>() { army };
+            Game.Current.SelectArmies(armies);
 
             // Act
             var success = locationController.SearchTomb(armies, location, out IBoon boon);
@@ -126,7 +127,8 @@ namespace Wism.Client.Test.Controller
             success = locationController.SearchSage(armies, location, out gold);
 
             // Assert
-            Assert.IsFalse(success);
+            // Sage can always be searched
+            Assert.IsTrue(success);     
             Assert.AreEqual(0, gold);
             Assert.AreEqual(expectedGold, player1.Gold);
             Assert.IsTrue(location.Searched);

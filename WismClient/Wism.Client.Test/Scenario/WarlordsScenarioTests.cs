@@ -161,7 +161,7 @@ namespace Wism.Client.Test.Scenario
             var gameController = TestUtilities.CreateGameController();
 
             Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
-            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, TestUtilities.DefaultTestWorld);
+            MapBuilder.AddCitiesFromWorldPath(World.Current, TestUtilities.DefaultTestWorld);
             Player sirians = Game.Current.Players[0];
             Player lordBane = Game.Current.Players[1];
             const int startingGold = 432;
@@ -235,7 +235,7 @@ namespace Wism.Client.Test.Scenario
             };
 
             // Add city owned by Lord Bane to route around
-            MapBuilder.AddCity(World.Current.Map, 2, 3, "BanesCitadel", "LordBane");
+            MapBuilder.AddCity(World.Current, 2, 3, "BanesCitadel", "LordBane");
 
             // Act
             TestUtilities.Select(commandController, armyController,
@@ -287,7 +287,7 @@ namespace Wism.Client.Test.Scenario
             var commandController = TestUtilities.CreateCommandController();
 
             Game.CreateDefaultGame();
-            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, TestUtilities.DefaultTestWorld);
+            MapBuilder.AddCitiesFromWorldPath(World.Current, TestUtilities.DefaultTestWorld);
 
             // Initial Sirians setup
             Player sirians = Game.Current.Players[0];
@@ -337,7 +337,7 @@ namespace Wism.Client.Test.Scenario
             };
 
             // Add city owned by Lord Bane full of troops (but not in (2,2); attack the 'empty' tile)
-            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+            MapBuilder.AddCity(World.Current, 2, 2, "BanesCitadel", "LordBane");
 
             // Act
             TestUtilities.Select(commandController, armyController,
@@ -410,7 +410,7 @@ namespace Wism.Client.Test.Scenario
             bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4);
 
             // Add city owned by Lord Bane full of troops (but not in (2,2))
-            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+            MapBuilder.AddCity(World.Current, 2, 2, "BanesCitadel", "LordBane");
 
             // Act
             TestUtilities.Select(commandController, armyController,
@@ -474,7 +474,7 @@ namespace Wism.Client.Test.Scenario
             Player bane = Game.Current.Players[1];
             
             // Add city owned by Lord Bane full of troops (but not in (2,2))
-            MapBuilder.AddCity(World.Current.Map, 2, 2, "BanesCitadel", "LordBane");
+            MapBuilder.AddCity(World.Current, 2, 2, "BanesCitadel", "LordBane");
 
             // Act
             TestUtilities.Select(commandController, armyController,

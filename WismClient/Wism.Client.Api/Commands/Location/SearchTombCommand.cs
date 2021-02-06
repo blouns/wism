@@ -14,6 +14,8 @@ namespace Wism.Client.Api.Commands
 
         public IBoon Boon { get; private set; }
 
+        public object BoonResult { get; set; }
+
         public SearchTombCommand(LocationController locationController, List<Army> armies, Location location)
         {
             LocationController = locationController ?? throw new ArgumentNullException(nameof(locationController));
@@ -24,8 +26,11 @@ namespace Wism.Client.Api.Commands
         protected override ActionState ExecuteInternal()
         {
             bool success = LocationController.SearchTomb(Armies, Location, out IBoon boon);
-
-            Boon = boon;
+            if (success)
+            {
+                Boon = boon;
+                BoonResult = boon.Result;
+            }
             return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
 

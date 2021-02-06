@@ -23,10 +23,13 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            bool success = LocationController.SearchRuins(Armies, Location, out IBoon boon);
+            bool success = LocationController.SearchRuins(Armies, Location, out IBoon boon);            
+            if (success)
+            {
+                Boon = boon;
+                BoonResult = boon.Result;
+            }
 
-            Boon = boon;
-            BoonResult = boon.Result;
             return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
 

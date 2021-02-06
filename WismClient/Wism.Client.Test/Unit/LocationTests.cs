@@ -110,18 +110,19 @@ namespace Wism.Client.Test.Unit
             var tile = World.Current.Map[2, 2];
             var location = MapBuilder.FindLocation("CryptKeeper");
             World.Current.AddLocation(location, tile);
+            MapBuilder.AllocateBoons(World.Current.GetLocations());
             var player1 = Game.Current.Players[0];
-            var hero = player1.HireHero(tile);
-            BoonAllocator boonAllocator = new BoonAllocator();
-            boonAllocator.Allocate(World.Current.GetLocations());
+            var hero = player1.HireHero(tile);            
+            Game.Current.SelectArmies(new List<Army>() { hero });
+            IBoon boon = tile.Location.Boon;
 
             // Act
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
 
             // Assert
-            var boon = result as IBoon;
             Assert.IsTrue(success, "Failed to search the location.");
-            Assert.IsNotNull(boon, "Did not get a boon.");
+            Assert.IsNull(tile.Location.Boon, "Boon not redeemed.");
+            Assert.IsNotNull(boon.Result, "Did not get a boon.");
         }
 
         [Test]
@@ -131,18 +132,19 @@ namespace Wism.Client.Test.Unit
             var tile = World.Current.Map[2, 2];
             var location = MapBuilder.FindLocation("Stonehenge");
             World.Current.AddLocation(location, tile);
+            MapBuilder.AllocateBoons(World.Current.GetLocations());
             var player1 = Game.Current.Players[0];
             var hero = player1.HireHero(tile);
-            BoonAllocator boonAllocator = new BoonAllocator();
-            boonAllocator.Allocate(World.Current.GetLocations());
+            Game.Current.SelectArmies(new List<Army>() { hero });
+            IBoon boon = tile.Location.Boon;
 
             // Act
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
 
-            // Assert
-            var boon = result as IBoon;
+            // Assert            
             Assert.IsTrue(success, "Failed to search the location.");
-            Assert.IsNotNull(boon, "Did not get a boon.");
+            Assert.IsNull(tile.Location.Boon, "Boon not redeemed.");
+            Assert.IsNotNull(boon.Result, "Did not get a boon.");
         }
 
         [Test]
@@ -211,10 +213,10 @@ namespace Wism.Client.Test.Unit
             var tile = World.Current.Map[2, 2];
             var location = MapBuilder.FindLocation("CryptKeeper");
             World.Current.AddLocation(location, tile);
+            MapBuilder.AllocateBoons(World.Current.GetLocations());
             var player1 = Game.Current.Players[0];
-            var hero = player1.HireHero(tile);
-            BoonAllocator boonAllocator = new BoonAllocator();
-            boonAllocator.Allocate(World.Current.GetLocations());
+            var hero = player1.HireHero(tile);           
+            Game.Current.SelectArmies(new List<Army>() { hero });
 
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
             Assert.IsTrue(success, "Setup failed");
@@ -234,10 +236,10 @@ namespace Wism.Client.Test.Unit
             var tile = World.Current.Map[2, 2];
             var location = MapBuilder.FindLocation("Stonehenge");
             World.Current.AddLocation(location, tile);
+            MapBuilder.AllocateBoons(World.Current.GetLocations());
             var player1 = Game.Current.Players[0];
             var hero = player1.HireHero(tile);
-            BoonAllocator boonAllocator = new BoonAllocator();
-            boonAllocator.Allocate(World.Current.GetLocations());
+            Game.Current.SelectArmies(new List<Army>() { hero });
 
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
             Assert.IsTrue(success, "Setup failed");
@@ -278,17 +280,19 @@ namespace Wism.Client.Test.Unit
             var tile = World.Current.Map[2, 2];
             var location = MapBuilder.FindLocation("SagesHut");
             World.Current.AddLocation(location, tile);
-            var player1 = Game.Current.Players[0];
+            var player1 = Game.Current.Players[0];            
             var hero = player1.HireHero(tile);
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
+            int originalGold = player1.Gold;
             Assert.IsTrue(success, "Setup failed");
 
             // Act
             success = tile.Location.Search(new List<Army>() { hero }, out result);
 
             // Assert
-            Assert.IsFalse(success, "Successfully searched an explored location.");
+            Assert.IsTrue(success, "Sages can always be explored.");
             Assert.IsNull(result, "Found an item in explored location.");
+            Assert.AreEqual(originalGold, player1.Gold, "Should not receive a second gem.");
         }
 
         [Test]
@@ -323,6 +327,7 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             var player1 = Game.Current.Players[0];
             var lightInfantry = player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
+            MapBuilder.AllocateBoons(World.Current.GetLocations());
 
             // Act
             var success = tile.Location.Search(new List<Army>() { lightInfantry }, out var result);
@@ -341,6 +346,7 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             var player1 = Game.Current.Players[0];
             var lightInfantry = player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
+            MapBuilder.AllocateBoons(World.Current.GetLocations());
 
             // Act
             var success = tile.Location.Search(new List<Army>() { lightInfantry }, out var result);

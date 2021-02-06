@@ -361,12 +361,11 @@ namespace Wism.Client.Test.Scenario
             int gold2 = player2.Gold;
             int strength2 = armiesToMove2[0].Strength;
 
-            TestUtilities.AddLocation(2, 1, "Stonehenge");
-            TestUtilities.AddLocation(2, 2, "CryptKeeper");
-            TestUtilities.AddLocation(2, 3, "TempleDog");
-            TestUtilities.AddLocation(2, 4, "TempleCat");
-            TestUtilities.AddLocation(3, 1, "Suzzallo");
-            TestUtilities.AddLocation(3, 2, "SagesHut");
+            TestUtilities.AddLocation(2, 1, "TempleDog");
+            TestUtilities.AddLocation(2, 2, "TempleCat");
+            TestUtilities.AddLocation(2, 3, "Suzzallo");
+            TestUtilities.AddLocation(2, 4, "SagesHut");
+            TestUtilities.AddLocation(3, 1, "Stonehenge");
             TestUtilities.AllocateBoons();
 
             var map = World.Current.Map;
@@ -376,29 +375,33 @@ namespace Wism.Client.Test.Scenario
                 // HERO 1 //////////////////////////////////////////////////////////////////////
                 // Gets the first run at all the goods
                 ////////////////////////////////////////////////////////////////////////////////
-                // Ruins
+                // Temple 1
                 new SelectArmyCommand(armyController, armiesToMove1),
                 new MoveOnceCommand(armyController, armiesToMove1, 2, 1),
-                new SearchRuinsCommand(locationController, armiesToMove1, map[2, 1].Location),
-                // Tomb
-                new MoveOnceCommand(armyController, armiesToMove1, 2, 2),
-                new SearchTombCommand(locationController, armiesToMove1, map[2, 2].Location),
-                // Temple 1
-                new MoveOnceCommand(armyController, armiesToMove1, 2, 3),
-                new SearchTempleCommand(locationController, armiesToMove1, map[2, 3].Location),
+                new SearchTempleCommand(locationController, armiesToMove1, map[2, 1].Location),
                 // Temple 2
-                new MoveOnceCommand(armyController, armiesToMove1, 2, 4),
-                new SearchTempleCommand(locationController, armiesToMove1, map[2, 4].Location),
+                new MoveOnceCommand(armyController, armiesToMove1, 2, 2),
+                new SearchTempleCommand(locationController, armiesToMove1, map[2, 2].Location),
                 // Library
-                new MoveOnceCommand(armyController, armiesToMove1, 3, 1),
-                new SearchLibraryCommand(locationController, armiesToMove1, map[3, 1].Location),
+                new MoveOnceCommand(armyController, armiesToMove1, 2, 3),
+                new SearchLibraryCommand(locationController, armiesToMove1, map[2, 3].Location),
                 // Sage
+                new MoveOnceCommand(armyController, armiesToMove1, 2, 4),
+                new SearchSageCommand(locationController, armiesToMove1, map[2, 4].Location),
+                // Ruins
+                new MoveOnceCommand(armyController, armiesToMove1, 3, 1),
+                new SearchRuinsCommand(locationController, armiesToMove1, map[3, 1].Location),               
+
+                // Hero out of moves (search ruins) so cycle turns
+                new EndTurnCommand(gameController, player1),
+                new StartTurnCommand(gameController, player2),
+                new EndTurnCommand(gameController, player2),
+                new StartTurnCommand(gameController, player1),
+
+                // Move away for hero 2 to be able to move here
                 new MoveOnceCommand(armyController, armiesToMove1, 3, 2),
-                new SearchSageCommand(locationController, armiesToMove1, map[3, 2].Location),
-                // Move away for hero 2
-                new MoveOnceCommand(armyController, armiesToMove1, 3, 3),
                 new DeselectArmyCommand(armyController, armiesToMove1),
-                new EndTurnCommand(gameController, player1)
+                new EndTurnCommand(gameController, player1),
             };
 
             foreach (var command in commandsToAdd)
@@ -407,7 +410,6 @@ namespace Wism.Client.Test.Scenario
             }
 
             // Act
-
             var commandsToExecute = commandController.GetCommandsAfterId(0);
             int lastId = 0;
             foreach (var command in commandsToExecute)
@@ -434,7 +436,8 @@ namespace Wism.Client.Test.Scenario
 
             // Assert
             Assert.IsTrue(gold1 < player1.Gold, "No money from the seer.");
-            Assert.AreEqual(strength1 + 2, armiesToMove1[0].Strength, "Too weak.");
+            // Strength should be +3 thanks to 2 temples and one successful altar boon
+            Assert.AreEqual(strength1 + 3, armiesToMove1[0].Strength, "Too weak or too strong.");
 
 
             // Assemble 2
@@ -444,32 +447,22 @@ namespace Wism.Client.Test.Scenario
                 // HERO 2 //////////////////////////////////////////////////////////////////////
                 // Sad seconds for this hero
                 ////////////////////////////////////////////////////////////////////////////////
-                // Ruins
+                // Temple 1
                 new StartTurnCommand(gameController, player2),
                 new MoveOnceCommand(armyController, armiesToMove2, 2, 1),
-                new SearchRuinsCommand(locationController, armiesToMove2, map[2, 1].Location),
-                new SearchRuinsCommand(locationController, armiesToMove2, map[2, 1].Location),
-                // Tomb
-                new MoveOnceCommand(armyController, armiesToMove2, 2, 2),
-                new SearchTombCommand(locationController, armiesToMove2, map[2, 2].Location),
-                new SearchTombCommand(locationController, armiesToMove2, map[2, 2].Location),
-                // Temple 1
-                new MoveOnceCommand(armyController, armiesToMove2, 2, 3),
-                new SearchTempleCommand(locationController, armiesToMove2, map[2, 3].Location),
-                new SearchTempleCommand(locationController, armiesToMove2, map[2, 3].Location),
+                new SearchTempleCommand(locationController, armiesToMove2, map[2, 1].Location),
                 // Temple 2
-                new MoveOnceCommand(armyController, armiesToMove2, 2, 4),
-                new SearchTempleCommand(locationController, armiesToMove2, map[2, 4].Location),
-                new SearchTempleCommand(locationController, armiesToMove2, map[2, 4].Location),
+                new MoveOnceCommand(armyController, armiesToMove2, 2, 2),
+                new SearchTempleCommand(locationController, armiesToMove2, map[2, 2].Location),
                 // Library
-                new MoveOnceCommand(armyController, armiesToMove2, 3, 1),
-                new SearchLibraryCommand(locationController, armiesToMove2, map[3, 1].Location),
-                new SearchLibraryCommand(locationController, armiesToMove2, map[3, 1].Location),
+                new MoveOnceCommand(armyController, armiesToMove2, 2, 3),
+                new SearchLibraryCommand(locationController, armiesToMove2, map[2, 3].Location),
                 // Sage
-                new MoveOnceCommand(armyController, armiesToMove2, 3, 2),
-                new SearchSageCommand(locationController, armiesToMove2, map[3, 2].Location),
-                new SearchSageCommand(locationController, armiesToMove2, map[3, 2].Location),
-
+                new MoveOnceCommand(armyController, armiesToMove2, 2, 4),
+                new SearchSageCommand(locationController, armiesToMove2, map[2, 4].Location),
+                // Ruins
+                new MoveOnceCommand(armyController, armiesToMove2, 3, 1),
+                new SearchRuinsCommand(locationController, armiesToMove2, map[3, 1].Location),                
                 new DeselectArmyCommand(armyController, armiesToMove2),
                 new EndTurnCommand(gameController, player2),
             };

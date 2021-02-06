@@ -284,24 +284,24 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(city));
             }
 
-            ClaimCity(city, city.GetTiles());            
+            ClaimCity(city, city.Tile);            
         }
 
         /// <summary>
         /// Stake a claim for a city; Internal-only used by MapBuilder
         /// </summary>
         /// <param name="city">City to claim</param>
-        /// <param name="tiles">Tiles for the city</param>
-        internal void ClaimCity(City city, Tile[] tiles)
+        /// <param name="tile">Upper-left tile for the city</param>
+        internal void ClaimCity(City city, Tile tile)
         {
             if (city is null)
             {
                 throw new ArgumentNullException(nameof(city));
             }
 
-            if (tiles is null)
+            if (tile is null)
             {
-                throw new ArgumentNullException(nameof(tiles));
+                throw new ArgumentNullException(nameof(tile));
             }
 
             // Are we claiming from another clan?
@@ -312,7 +312,7 @@ namespace Wism.Client.Core
                 city.Clan.Player.RemoveCity(city);
             }
 
-            city.Claim(this, tiles);                        
+            city.Claim(this, tile);                        
 
             // Add city to Player for tracking
             this.myCities.Add(city);

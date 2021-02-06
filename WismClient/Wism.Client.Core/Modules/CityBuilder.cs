@@ -24,29 +24,29 @@ namespace Wism.Client.Modules
 
         private readonly Dictionary<string, City> cityKinds = new Dictionary<string, City>();
 
-        public void AddCitiesToMapFromWorld(Tile[,] map, string world)
+        public void AddCitiesFromWorldPath(World world, string worldName)
         {
-            var worldPath = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world}";
+            var worldPath = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
 
-            AddCitiesToMapFromWorld(map, LoadCityInfos(worldPath));
+            AddCities(world, LoadCityInfos(worldPath));
         }
 
-        public void AddCitiesToMapFromWorld(Tile[,] map, IList<CityInfo> cityInfos)
+        public void AddCities(World world, IList<CityInfo> cityInfos)
         {
             foreach (var cityInfo in cityInfos)
             {
-                AddCity(map, cityInfo);
+                AddCity(world, cityInfo);
             }
         }
 
-        public void AddCity(Tile[,] map, CityInfo info)
+        public void AddCity(World world, CityInfo info)
         {
             if (info is null)
             {
                 throw new ArgumentNullException(nameof(info));
             }
 
-            AddCity(map, info.X, info.Y, info.ShortName, info.ClanName);
+            AddCity(world, info.X, info.Y, info.ShortName, info.ClanName);
         }
 
         /// <summary>
@@ -58,11 +58,11 @@ namespace Wism.Client.Modules
         /// <param name="shortName">Name of city</param>
         /// <param name="clanName">Name of clan or Neutral</param>
         /// <remarks>Cities are four tiles and mutable so add clone to each.</remarks>
-        public void AddCity(Tile[,] map, int x, int y, string shortName, string clanName = "Neutral")
+        public void AddCity(World world, int x, int y, string shortName, string clanName = "Neutral")
         {
-            if (map is null)
+            if (world is null)
             {
-                throw new ArgumentNullException(nameof(map));
+                throw new ArgumentNullException(nameof(world));
             }
 
             if (string.IsNullOrEmpty(shortName))
@@ -76,35 +76,20 @@ namespace Wism.Client.Modules
                 throw new ArgumentException($"{shortName} not found in city modules.");
             }
             city = city.Clone();
-
-            // Add to map
-            city.Tile = map[x, y];
-            var tiles = new Tile[]
-            {
-                map[x,y],
-                map[x,y-1],
-                map[x+1,y],
-                map[x+1,y-1]
-            };
-
-            for (int i = 0; i < 4; i++)
-            {
-                tiles[i].City = city;
-                tiles[i].Terrain = MapBuilder.TerrainKinds["Castle"];
-            }
+            world.AddCity(city, world.Map[x, y]);
 
             // Claim the city if matching player exists; otherwise Neutral
             var player = Game.Current.Players.Find(p => p.Clan.ShortName == clanName);
             if (player != null)
             {
-                player.ClaimCity(city, tiles);
+                player.ClaimCity(city);
             }
             else
             {
                 // Neutral player
                 city.Claim(Player.GetNeutralPlayer());
                 AddNeutralCityGarrison(city);
-            }
+            }            
         }
 
         private static void AddNeutralCityGarrison(City city)

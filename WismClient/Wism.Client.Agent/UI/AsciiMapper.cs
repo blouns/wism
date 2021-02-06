@@ -13,10 +13,16 @@ namespace Wism.Client.Agent.UI
             { "LightInfantry", 'i' },
             { "HeavyInfantry", 'I' },
             { "Cavalry", 'c' },
-            { "Pegasus", 'P' },
-            { "WolfRiders", 'R' },
-            { "GiantWarriors", 'W' },
-            { "Archers", 'a' }
+            { "Pegasus", 'p' },
+            { "WolfRiders", 'r' },
+            { "GiantWarriors", 'w' },
+            { "DwarvenLegions", 'a' },
+            { "Griffins", 'g' },
+            { "ElvenArchers", 'a' },
+            { "Wizards", 'Z' },
+            { "Undead", 'U' },
+            { "Demons", 'd' },
+            { "Devils", 'D' },
         };
 
         private static readonly IDictionary<string, char> terrainMap = new Dictionary<string, char>
@@ -25,16 +31,16 @@ namespace Wism.Client.Agent.UI
             { "Mountain", '^' },
             { "Grass", '.' },
             { "Water", '~' },
-            { "Hill", 'h' },
+            { "Hill", 'n' },
             { "Marsh", '%' },
             { "Road", '=' },
             { "Bridge", '=' },
             { "Castle", '$' },
             { "Ruins", '¥' },
             { "Temple", '†' },
-            { "Tomb", '€' },
+            { "Tomb", '&' },
             { "Tower", '#' },
-            { "Void", 'v' }
+            { "Void", '*' }
         };
 
         private static readonly IDictionary<string, ConsoleColor> clanColorsMap = new Dictionary<string, ConsoleColor>

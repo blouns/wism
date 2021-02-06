@@ -129,12 +129,22 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if search successful; else false</returns>
         public bool SearchRuins(List<Army> armies, Location location, out IBoon boon)
         {
-            var success = SearchLocation<IBoon>(armies, location, out boon);
-            if (boon != null)
+            boon = null;
+            IBoon myBoon = null;
+
+            if (location.HasBoon())
             {
-                logger.LogInformation($"Found {boon.Result}");
+                myBoon = location.Boon;
             }
 
+            // Ruins and Tombs have Boons (variable type); ignore out param
+            var success = location.Search(armies, out _);
+            if (success && myBoon != null)
+            {
+                logger.LogInformation($"Found {myBoon.Result}");
+            }
+
+            boon = myBoon;
             return success;
         }
 
@@ -147,7 +157,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if search successful; else false</returns>
         public bool SearchTomb(List<Army> armies, Location location, out IBoon boon)
         {
-            return SearchLocation<IBoon>(armies, location, out boon);
+            return SearchRuins(armies, location, out boon);
         }
     }
 }

@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Wism.Client.Agent.CommandProcessors;
 using Wism.Client.Agent.UI;
+using Wism.Client.Api;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
+using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent
 {
@@ -196,6 +199,54 @@ namespace Wism.Client.Agent
                 Console.WriteLine();                
             }
             Console.WriteLine("==========================================");
+
+            if (selectedTile != null)
+            {
+                Console.Write($"Info: ");
+                if (selectedTile.HasLocation())
+                {
+                    Console.Write($"{selectedTile.Location.Kind} ");
+                }
+                else
+                {
+                    Console.Write($"{selectedTile.Terrain.DisplayName} ");
+                }
+                if (selectedTile.HasCity())
+                {
+                    Console.Write($" | City: {selectedTile.City.DisplayName}");
+                }
+                if (selectedTile.HasLocation())
+                {                    
+                    Console.Write($" | Loc: {selectedTile.Location.DisplayName}");
+                }
+                if (selectedTile.HasArmies())
+                {
+                    Console.Write($" | Armies: {ArmiesToString(selectedTile.Armies)}");
+                }
+                if (selectedTile.HasVisitingArmies())
+                {
+                    Console.Write($" | Selected: {ArmiesToString(selectedTile.VisitingArmies)}");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        private string ArmiesToString(List<Army> armies)
+        {            
+            if (armies.Count == 0)
+            {
+                return "";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("{");
+            foreach (var army in armies)
+            {
+                sb.Append($" '{army.KindName}'");
+            }
+            sb.Append(" }");
+
+            return sb.ToString();
         }
 
         private static string GetArmyCount(Tile tile)

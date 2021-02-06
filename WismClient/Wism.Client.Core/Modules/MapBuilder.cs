@@ -107,6 +107,17 @@ namespace Wism.Client.Modules
             return MapBuilder.ClanKinds[key].Info;
         }
 
+        public static void AllocateBoons(List<Location> locations)
+        {
+            if (locations is null)
+            {
+                throw new ArgumentNullException(nameof(locations));
+            }
+
+            var boonAllocator = new BoonAllocator();
+            boonAllocator.Allocate(locations);
+        }
+
         /// <summary>
         /// 05^   15^   25^   35^   45^   55^   
         /// 04^   14.   24.   34.   44.   54^   
@@ -144,14 +155,14 @@ namespace Wism.Client.Modules
             return map;
         }
 
-        public static void AddCity(Tile[,] map, int x, int y, string shortName, string clanName)
+        public static void AddCity(World world, int x, int y, string shortName, string clanName)
         {
-            cityBuilder.AddCity(map, x, y, shortName, clanName);
+            cityBuilder.AddCity(world, x, y, shortName, clanName);
         }
 
-        public static void AddCity(Tile[,] map, int x, int y, string shortName)
+        public static void AddCity(World world, int x, int y, string shortName)
         {
-            cityBuilder.AddCity(map, x, y, shortName);
+            cityBuilder.AddCity(world, x, y, shortName);
         }
 
         /// <summary>
@@ -185,14 +196,14 @@ namespace Wism.Client.Modules
             }
         }
 
-        public static void AddCitiesToMapFromWorld(Tile[,] map, string world)
+        public static void AddCitiesFromWorldPath(World world, string worldName)
         {
-            cityBuilder.AddCitiesToMapFromWorld(map, world);
+            cityBuilder.AddCitiesFromWorldPath(world, worldName);
         }
 
-        public static void AddLocationsToMapFromWorld(Tile[,] map, string world)
+        public static void AddLocationsFromWorldPath(World world, string worldName)
         {
-            locationBuilder.AddLocationsToMapFromWorld(map, world);
+            locationBuilder.AddLocationsFromWorldPath(world, worldName);
         }
     }    
 }
