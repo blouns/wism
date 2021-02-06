@@ -127,20 +127,21 @@ namespace Wism.Client.MapObjects
         /// <param name="player">Player to stake claim</param>
         public void Claim(Player player)
         {
-            Claim(player, GetTiles());
+            Claim(player, Tile);
         }
 
-        internal void Claim(Player player, Tile[] tiles)
+        internal void Claim(Player player, Tile tile)
         {
             if (player is null)
             {
                 throw new ArgumentNullException(nameof(player));
             }
 
-            if (tiles is null)
+            if (tile is null)
             {
-                throw new ArgumentNullException(nameof(tiles));
+                throw new ArgumentNullException(nameof(tile));
             }
+
             // Ensure all armies are friendly in the city
             var cityArmies = MusterArmies();
             if (!cityArmies.TrueForAll(a => a.Clan == player.Clan))
@@ -150,6 +151,9 @@ namespace Wism.Client.MapObjects
 
             // Claim the city
             this.Player = player;
+            this.Clan = player.Clan;
+            this.Tile = tile;
+            var tiles = GetTiles();
             for (int i = 0; i < 4; i++)
             {
                 if (tiles[i].City == null)

@@ -82,5 +82,22 @@ namespace Wism.Client.Core
         {
             return ShortName;
         }
+
+        public override bool Equals(object obj)
+        {
+            Clan other = obj as Clan;
+
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.ShortName == this.ShortName;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ShortName.GetHashCode();
+        }
     }
 }

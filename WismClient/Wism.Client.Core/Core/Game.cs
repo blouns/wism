@@ -327,6 +327,11 @@ namespace Wism.Client.Core
 
         public static void CreateDefaultGame()
         {
+            CreateDefaultGame(ModFactory.WorldPath);
+        }
+
+        public static void CreateDefaultGame(string worldName)
+        {
             current = new Game();
             current.Random = new Random(Game.DefaultRandomSeed);
             current.WarStrategy = new DefaultWarStrategy();
@@ -335,8 +340,9 @@ namespace Wism.Client.Core
             current.Players = new List<Player>();
             CreateDefaultPlayers();
 
-            // Setup default world for testing.
-            World.CreateDefaultWorld();
+            World.CreateWorld(worldName);
+            //MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, worldName);
+            //MapBuilder.AddLocationsToMapFromWorld(World.Current.Map, worldName);
         }
 
         public static void CreateEmpty()

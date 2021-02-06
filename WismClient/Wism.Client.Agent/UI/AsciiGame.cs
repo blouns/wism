@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 using Wism.Client.Agent.CommandProcessors;
 using Wism.Client.Agent.UI;
 using Wism.Client.Api.CommandProcessors;
@@ -8,6 +10,7 @@ using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
+using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent
 {
@@ -45,6 +48,10 @@ namespace Wism.Client.Agent
                 new PrepareForBattleProcessor(logFactory, this),
                 new BattleProcessor(logFactory),
                 new CompleteBattleProcessor(logFactory, this),
+                new SearchRuinsProcessor(logFactory, this),                
+                new SearchTempleProcessor(logFactory, this),                
+                new SearchSageProcessor(logFactory, this),
+                new SearchLibraryProcessor(logFactory, this),
                 new StandardProcessor(logFactory)
             };
         }
@@ -116,7 +123,7 @@ namespace Wism.Client.Agent
             else if (currentPlayerArmies.Count == 0)
             {
                 // Game over
-                Console.WriteLine($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
+                Notify.Alert($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
                 System.Environment.Exit(1);
             }
 
@@ -186,12 +193,76 @@ namespace Wism.Client.Agent
                     // Army Count
                     Console.Write($"{GetArmyCount(tile)}");
 
+                    // Items
+                    if (tile.HasItems())
+                    {
+                        Console.Write($"{AsciiMapper.GetItemSymbol()}");
+                    }
+
                     // Buffer
                     Console.Write("\t");
                 }
                 Console.WriteLine();                
             }
             Console.WriteLine("==========================================");
+
+            if (selectedTile != null)
+            {
+                Console.Write($"Location: ");
+                if (selectedTile.HasLocation())
+                {
+                    Console.Write($"{selectedTile.Location.Kind} ");
+                }
+                else
+                {
+                    Console.Write($"{selectedTile.Terrain.DisplayName} ");
+                }
+                if (selectedTile.HasCity())
+                {
+                    Console.Write($" | City: {selectedTile.City.DisplayName}");
+                }
+                if (selectedTile.HasLocation())
+                {                    
+                    Console.Write($" | Loc: {selectedTile.Location.DisplayName}");
+                }
+                
+                if (selectedTile.HasAnyArmies())
+                {
+                    Console.WriteLine();
+                }
+                if (selectedTile.HasArmies())
+                {
+                    Console.Write($"Armies: {ArmiesToString(selectedTile.Armies)} ");
+                }
+                if (selectedTile.HasVisitingArmies())
+                {
+                    Console.Write($"Selected: {ArmiesToString(selectedTile.VisitingArmies)}");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        private string ArmiesToString(List<Army> armies)
+        {            
+            if (armies.Count == 0)
+            {
+                return "";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("{");
+            foreach (var army in armies)
+            {
+                int count = 0;
+                sb.Append($" '{army.KindName}':S{army.Strength};M{army.MovesRemaining}");
+                if (count++ == 4)
+                {
+                    sb.Append("\n");
+                }
+            }
+            sb.Append(" }");
+
+            return sb.ToString();
         }
 
         private static string GetArmyCount(Tile tile)

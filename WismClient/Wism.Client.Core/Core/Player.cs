@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Wism.Client.Agent.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -22,6 +21,8 @@ namespace Wism.Client.Core
         public int Turn { get; private set; }
 
         public bool IsDead { get; set; }
+
+        public City Capitol { get; set; }
 
         private Player()
         {
@@ -283,42 +284,53 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(city));
             }
 
-            ClaimCity(city, city.GetTiles());            
+            ClaimCity(city, city.Tile);            
         }
 
         /// <summary>
         /// Stake a claim for a city; Internal-only used by MapBuilder
         /// </summary>
         /// <param name="city">City to claim</param>
-        /// <param name="tiles">Tiles for the city</param>
-        internal void ClaimCity(City city, Tile[] tiles)
+        /// <param name="tile">Upper-left tile for the city</param>
+        internal void ClaimCity(City city, Tile tile)
         {
             if (city is null)
             {
                 throw new ArgumentNullException(nameof(city));
             }
 
-            if (tiles is null)
+            if (tile is null)
             {
-                throw new ArgumentNullException(nameof(tiles));
+                throw new ArgumentNullException(nameof(tile));
             }
 
             // Are we claiming from another clan?
-            if (city.Clan != Clan && city.Clan != null)
-            {                
+            if (city.Clan != null &&
+                city.Clan.ShortName != Player.GetNeutralPlayer().Clan.ShortName)
+            {
                 PillageGoldFromClan(city.Clan);
                 city.Clan.Player.RemoveCity(city);
             }
 
-            city.Claim(this, tiles);                        
+            city.Claim(this, tile);                        
 
             // Add city to Player for tracking
             this.myCities.Add(city);
+            if (Capitol == null)
+            {
+                Capitol = city;
+            }
         }
 
         private void RemoveCity(City city)
         {
             this.myCities.Remove(city);
+
+            // Move capitol if lost
+            if (this.myCities.Count > 0)
+            {
+                this.Capitol = this.myCities[0];
+            }
         }
 
         /// <summary>
@@ -342,10 +354,10 @@ namespace Wism.Client.Core
             }
 
             // Assume player-to-pillage's cities will be > 0 as we haven't claimed it yet
-
             int cityCoffers = playerToPillage.Gold / playerToPillage.GetCities().Count;
-            Gold += (playerToPillage.Gold / playerToPillage.GetCities().Count) / 2;
-            
+            int goldToPillage = (playerToPillage.Gold / playerToPillage.GetCities().Count) / 2;
+            Gold += goldToPillage;
+
             playerToPillage.Gold -= cityCoffers;
             if (playerToPillage.Gold < 0)
             {
@@ -364,6 +376,23 @@ namespace Wism.Client.Core
 
             // Remove city from Player tracking
             this.myCities.Remove(city);
+        }
+
+        public override bool Equals(object obj)
+        {
+            Player other = obj as Player;
+
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Clan == this.Clan;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Clan.GetHashCode();
         }
     }
 }

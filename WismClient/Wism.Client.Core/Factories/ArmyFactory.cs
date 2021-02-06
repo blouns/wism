@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
-namespace Wism.Client.Agent.Factories
+namespace Wism.Client.Core
 {
     public static class ArmyFactory
     {

@@ -14,7 +14,8 @@ namespace Assets.Scripts.UI
         private readonly List<IInformationMapping> informationMappings = new List<IInformationMapping>();
 
         private UnityManager unityManager;
-        private WismInputHandler inputHandler;
+        private InputManager inputManager;
+        private InputHandler inputHandler;
 
         public void Awake()
         {
@@ -23,8 +24,10 @@ namespace Assets.Scripts.UI
 
         private void Initialize()
         {
-            this.unityManager = UnityUtilities.GameObjectHardFind("UnityManager").GetComponent<UnityManager>();
-            this.inputHandler = this.unityManager.GetComponent<InputManager>().InputHandler;
+            this.unityManager = UnityUtilities.GameObjectHardFind("UnityManager")
+                .GetComponent<UnityManager>();
+            this.inputManager = this.unityManager
+                .GetComponent<InputManager>();
 
             // Add in order of precendence            
             informationMappings.Add(new ArmyInformationMapping());
@@ -39,7 +42,13 @@ namespace Assets.Scripts.UI
         /// </summary>
         public void LateUpdate()
         {
-            if (Game.Current.GameState == GameState.MovingArmy)
+            if (this.inputHandler == null)
+            {
+                this.inputHandler = this.inputManager.InputHandler;
+            }
+
+            if (Game.Current.GameState == GameState.MovingArmy ||
+                Game.Current.GameState == GameState.SelectedArmy)
             {
                 var gamePosition = this.unityManager.GetSelectedBoxGamePosition();
                 this.inputHandler.SetCurrentTile(World.Current.Map[gamePosition.x, gamePosition.y]);

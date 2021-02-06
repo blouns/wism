@@ -77,10 +77,14 @@ namespace Wism.Client.Agent
         /// </summary>
         private void CreateTestGame()
         {
-            Game.CreateDefaultGame();
+            string worldName = "SearchWorld";
+
+            Game.CreateDefaultGame(worldName);
+            var world = World.Current;
+            var map = world.Map;
 
             // Create a default hero for testing
-            var heroTile = World.Current.Map[1, 1];
+            var heroTile = map[1, 1];
             Game.Current.Players[0].HireHero(heroTile);
             Game.Current.Players[0].ConscriptArmy(
                 ModFactory.FindArmyInfo("HeavyInfantry"),
@@ -93,7 +97,7 @@ namespace Wism.Client.Agent
             armyController.SelectArmy(heroTile.Armies);
 
             // Create an opponent for testing
-            var enemyTile1 = World.Current.Map[3, 3];
+            var enemyTile1 = map[3, 3];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile1);
@@ -109,17 +113,17 @@ namespace Wism.Client.Agent
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile1);
-            //Game.Current.Players[1].ConscriptArmy(
-            //    ModFactory.FindArmyInfo("Cavalry"),
-            //    enemyTile1);
 
-            var enemyTile2 = World.Current.Map[3, 2];
+            var enemyTile2 = map[3, 2];
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile2);
 
-            // Add cities
-            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, "AsciiWorld");
+            // Add cities and locations
+            MapBuilder.AddCitiesFromWorldPath(world, worldName);
+            MapBuilder.AddLocationsFromWorldPath(world, worldName);
+            MapBuilder.AllocateBoons(world.GetLocations());
+
         }
     }
 }

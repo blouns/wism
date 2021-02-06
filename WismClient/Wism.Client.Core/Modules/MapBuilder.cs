@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
@@ -11,15 +9,14 @@ namespace Wism.Client.Modules
     {       
         private static readonly Dictionary<string, Terrain> terrainKinds = new Dictionary<string, Terrain>();
         private static readonly Dictionary<string, Army> armyKinds = new Dictionary<string, Army>();
-        private static readonly Dictionary<string, Clan> clanKinds = new Dictionary<string, Clan>();
-        private static readonly Dictionary<string, City> cityKinds = new Dictionary<string, City>();
+        private static readonly Dictionary<string, Clan> clanKinds = new Dictionary<string, Clan>();                
+        private static LocationBuilder locationBuilder;
+        private static CityBuilder cityBuilder;
 
         public static Dictionary<string, Terrain> TerrainKinds { get => terrainKinds; }
         public static Dictionary<string, Army> ArmyKinds { get => armyKinds; }
-        public static Dictionary<string, Clan> ClanKinds { get => clanKinds; }
-        
-        // Cities are mutable so do not expose directly; use FindCity
-        private static Dictionary<string, City> CityKinds { get => cityKinds; }
+
+        public static Dictionary<string, Clan> ClanKinds { get => clanKinds; }  
 
         public static void Initialize()
         {
@@ -33,18 +30,40 @@ namespace Wism.Client.Modules
             LoadArmyKinds(modPath);
             LoadClanKinds(modPath);
 
-            // TODO: This is for testing only
-            LoadCityKinds(modPath + "\\" + ModFactory.WorldsPath + "\\" + world);
+            // Load mutable world objects
+            var worldPath = modPath + "\\" + ModFactory.WorldsPath + "\\" + world;
+            cityBuilder = new CityBuilder(worldPath);
+            locationBuilder = new LocationBuilder(worldPath);
         }
 
-        private static void LoadCityKinds(string path)
+        /// <summary>
+        /// Find a location matching the shortName given
+        /// </summary>
+        /// <param name="shortName">Name to match</param>
+        /// <returns>Location matching the name; otherwise, null</returns>
+        public static Location FindLocation(string shortName)
         {
-            CityKinds.Clear();
-            IList<City> cities = ModFactory.LoadCities(path);
-            foreach (City city in cities)
-            {
-                CityKinds.Add(city.ShortName, city);
-            }
+            return locationBuilder.FindLocation(shortName);
+        }
+
+        internal static LocationInfo FindLocationInfo(string shortName)
+        {
+            return locationBuilder.FindLocationInfo(shortName);
+        }
+
+        /// <summary>
+        /// Find a city matching the shortName given
+        /// </summary>
+        /// <param name="shortName">Name to match</param>
+        /// <returns>City matching the name; otherwise, null</returns>
+        public static City FindCity(string shortName)
+        {
+            return cityBuilder.FindCity(shortName);
+        }
+
+        internal static CityInfo FindCityInfo(string shortName)
+        {
+            return cityBuilder.FindCityInfo(shortName);
         }
 
         private static void LoadArmyKinds(string path)
@@ -88,26 +107,15 @@ namespace Wism.Client.Modules
             return MapBuilder.ClanKinds[key].Info;
         }
 
-        internal static CityInfo FindCityInfo(string key)
+        public static void AllocateBoons(List<Location> locations)
         {
-            return MapBuilder.CityKinds[key].Info;
-        }
-
-        /// <summary>
-        /// Find a city matching the shortName given
-        /// </summary>
-        /// <param name="shortName">Name to match</param>
-        /// <returns>City matching the name; otherwise, null</returns>
-        public static City FindCity(string shortName)
-        {
-            City city = null;
-            if (CityKinds.ContainsKey(shortName))
+            if (locations is null)
             {
-                // Cities are mutable so return a clone of original
-                city = CityKinds[shortName].Clone();
+                throw new ArgumentNullException(nameof(locations));
             }
 
-            return city;
+            var boonAllocator = new BoonAllocator();
+            boonAllocator.Allocate(locations);
         }
 
         /// <summary>
@@ -147,131 +155,14 @@ namespace Wism.Client.Modules
             return map;
         }
 
-        public static void AddCitiesToMapFromWorld(Tile[,] map, IList<CityInfo> cityInfos)
+        public static void AddCity(World world, int x, int y, string shortName, string clanName)
         {
-            foreach (var cityInfo in cityInfos)
-            {
-                MapBuilder.AddCity(map, cityInfo);
-            }
+            cityBuilder.AddCity(world, x, y, shortName, clanName);
         }
 
-        public static void AddCitiesToMapFromWorld(Tile[,] map, string worldName)
+        public static void AddCity(World world, int x, int y, string shortName)
         {
-            var worldPath = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
-
-            AddCitiesToMapFromWorld(map, ModFactory.LoadCityInfos(worldPath));
-            
-        }
-
-        public static void AddCity(Tile[,] map, CityInfo cityInfo)
-        {
-            if (map is null)
-            {
-                throw new ArgumentNullException(nameof(map));
-            }
-
-            if (cityInfo is null)
-            {
-                throw new ArgumentNullException(nameof(cityInfo));
-            }
-
-            var city = City.Create(cityInfo);
-
-            // Add to map
-            int x = cityInfo.X;
-            int y = cityInfo.Y;
-            city.Tile = map[x, y];
-            var tiles = new Tile[]
-            {
-                map[x,y],
-                map[x,y-1],
-                map[x+1,y],
-                map[x+1,y-1]
-            };
-
-            for (int i = 0; i < 4; i++)
-            {
-                tiles[i].City = city;
-                tiles[i].Terrain = MapBuilder.TerrainKinds["Castle"];
-            }
-
-            // Claim the city if matching player exists; otherwise Neutral
-            var player = Game.Current.Players.Find(p => p.Clan.ShortName == cityInfo.ClanName);
-            if (player != null)
-            {
-                player.ClaimCity(city, tiles);
-            }
-            else
-            {
-                AddNeutralCityGarrison(city);
-            }
-        }
-
-        private static void AddNeutralCityGarrison(City city)
-        {
-            Army garrison = ArmyFactory.CreateArmy(
-                                Player.GetNeutralPlayer(),
-                                ModFactory.FindArmyInfo("LightInfantry"));
-            garrison.Strength = city.Defense;
-            city.Tile.AddArmy(garrison);
-        }
-
-        /// <summary>
-        /// Add a city to the map
-        /// </summary>
-        /// <param name="map">World map to add the city to</param>
-        /// <param name="x">Top-left X coordinate of tile for the city</param>
-        /// <param name="y">Top-left Y coordinate of tile for the city</param>
-        /// <param name="shortName">Name of city</param>
-        /// <param name="clanName">Name of clan or Neutral</param>
-        /// <remarks>Cities are four tiles and mutable so add clone to each.</remarks>
-        public static void AddCity(Tile[,] map, int x, int y, string shortName, string clanName = "Neutral")
-        {
-            if (map is null)
-            {
-                throw new ArgumentNullException(nameof(map));
-            }
-
-            if (string.IsNullOrEmpty(shortName))
-            {
-                throw new ArgumentException($"'{nameof(shortName)}' cannot be null or empty", nameof(shortName));
-            }
-
-            if (string.IsNullOrEmpty(clanName))
-            {
-                throw new ArgumentException($"'{nameof(clanName)}' cannot be null or empty", nameof(clanName));
-            }
-
-            var city = MapBuilder.CityKinds[shortName];
-            if (city == null)
-            {
-                throw new ArgumentException($"{shortName} not found in city modules.");
-            }
-            city = city.Clone();
-
-            // Add to map            
-            city.Tile = map[x, y];
-            var tiles = new Tile[]
-            {
-                map[x,y],
-                map[x,y-1],
-                map[x+1,y],
-                map[x+1,y-1]
-            };
-
-            for (int i = 0; i < 4; i++)
-            {
-                tiles[i].City = city;
-                tiles[i].Terrain = MapBuilder.TerrainKinds["Castle"];
-            }
-
-            // Claim the city if matching player exists; otherwise Neutral
-            var player = Game.Current.Players.Find(p => p.Clan.ShortName == clanName);
-            if (player != null)
-            {
-                player.ClaimCity(city, tiles);
-            }
-             
+            cityBuilder.AddCity(world, x, y, shortName);
         }
 
         /// <summary>
@@ -303,6 +194,16 @@ namespace Wism.Client.Modules
                     }
                 }
             }
+        }
+
+        public static void AddCitiesFromWorldPath(World world, string worldName)
+        {
+            cityBuilder.AddCitiesFromWorldPath(world, worldName);
+        }
+
+        public static void AddLocationsFromWorldPath(World world, string worldName)
+        {
+            locationBuilder.AddLocationsFromWorldPath(world, worldName);
         }
     }    
 }

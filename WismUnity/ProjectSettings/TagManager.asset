@@ -17,6 +17,7 @@ TagManager:
   - MinimapCamera
   - UnityManager
   - City
+  - InformationPanel
   layers:
   - Default
   - TransparentFX

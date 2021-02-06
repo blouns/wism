@@ -4,7 +4,7 @@ using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
 {
-    public abstract class MapObject : ICustomizable
+    public abstract class MapObject
     {
         public int Id { get; set; }
         public string DisplayName { get; set; }

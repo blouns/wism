@@ -1,9 +1,11 @@
-﻿using Assets.Scripts.Managers;
+﻿using Assets.Scripts.Common;
+using Assets.Scripts.Managers;
 using System;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
+using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using ILogger = Wism.Client.Common.ILogger;
 
@@ -33,25 +35,22 @@ namespace Assets.Scripts.CommandProcessors
         public ActionState Execute(ICommandAction command)
         {
             var startTurn = (StartTurnCommand)command;
-            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
-                .GetComponent<NotificationBox>();           
-            messageBox.Notify($"{startTurn.Player.Clan.DisplayName} your turn is starting!");
+            var messageBox = UnityUtilities.GameObjectHardFind("NotificationBox")
+                .GetComponent<NotificationBox>();
+
+            string name = TextUtilities.CleanupName(startTurn.Player.Clan.DisplayName);
+            messageBox.Notify($"{name} your turn is starting!");            
+
+            var actionState = command.Execute();
 
             CenterOnCapitol();
 
-            return command.Execute();
+            return actionState;
         }
 
         private void CenterOnCapitol()
         {
-            // If capitol exists move camera there
-
-
-            // If capitol taken, show next owned city
-
-            // If no cities remaining, show last capitol owned
-
-            
+            unityGame.GoToCapitol();
         }
     }
 }

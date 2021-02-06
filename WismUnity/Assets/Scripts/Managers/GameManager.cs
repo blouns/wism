@@ -19,7 +19,7 @@ namespace Assets.Scripts.Managers
     public class GameManager : MonoBehaviour
     {
         // Game setup defaults
-        private const int DefaultRandom = 1990;
+        public const int DefaultRandom = 1990;
         public const float StandardTime = 0.25f;
         public const float WarTime = 1.0f;
         public const int MaxArmysPerArmy = Army.MaxArmies;
@@ -47,14 +47,7 @@ namespace Assets.Scripts.Managers
                 CommandController = new CommandController(LoggerFactory, repo),
                 GameController = new GameController(LoggerFactory)
             };
-            commandController = provider.CommandController;
-
-            // Set up the Game
-            MapBuilder.Initialize(DefaultModPath, DefaultWorld);
-            Game.CreateEmpty();
-            Game.Current.Random = new System.Random(DefaultRandom);
-            Game.Current.WarStrategy = new DefaultWarStrategy();
-            Game.Current.Players = ReadyPlayers();
+            commandController = provider.CommandController;            
         }
 
         public void SelectArmies(List<Army> armies)
@@ -134,42 +127,20 @@ namespace Assets.Scripts.Managers
 
         public void StartTurn()
         {
+            StartTurn(Game.Current.GetNextPlayer());
+        }
+
+        public void StartTurn(Player player)
+        {
             commandController.AddCommand(
-                new StartTurnCommand(provider.GameController, Game.Current.GetNextPlayer()));
+                new StartTurnCommand(provider.GameController, player));
         }
 
         public void EndTurn()
         {
             commandController.AddCommand(
                 new EndTurnCommand(provider.GameController, Game.Current.GetCurrentPlayer()));
-            StartTurn();    // TODO: For now just start immediately; later, new processor
-        }
-
-        private List<Player> ReadyPlayers()
-        {
-            Game.Current.Players = new List<Player>();
-
-            // Ready Player One
-            ClanInfo clanInfo = ClanInfo.GetClanInfo("Sirians");
-            Clan clan = Clan.Create(clanInfo);
-            Player player1 = Player.Create(clan);
-            Game.Current.Players.Add(player1);
-            player1.Clan.IsHuman = true;
-
-            // Ready Player Two
-            clanInfo = ClanInfo.GetClanInfo("StormGiants");
-            clan = Clan.Create(clanInfo);
-            Player player2 = Player.Create(clan);
-            Game.Current.Players.Add(player2);
-            player2.Clan.IsHuman = false;
-
-            clanInfo = ClanInfo.GetClanInfo("Elvallie");
-            clan = Clan.Create(clanInfo);
-            Player player3 = Player.Create(clan);
-            Game.Current.Players.Add(player3);
-            player3.Clan.IsHuman = false;
-
-            return Game.Current.Players;
+            StartTurn();
         }
     }
 }

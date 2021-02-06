@@ -164,7 +164,7 @@ namespace Wism.Client.Core.Controllers
             if (NoPathYet(myPath))
             {
                 myPath = FindPath(armiesToMove, targetTile, ref myDistance);
-                if (myPath == null)
+                if (myPath == null || myPath.Count == 0)
                 {
                     // Impossible route
                     distance = myDistance;

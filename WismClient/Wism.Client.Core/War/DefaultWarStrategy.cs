@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Wism.Client.Agent.Factories;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
@@ -121,25 +120,6 @@ namespace Wism.Client.War
                 ResetHitPoints(defenders, attackers);
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Attacks a neutral city
-        /// </summary>
-        /// <param name="attackers">Attackers</param>
-        /// <param name="compositeAFCM">Attacking force combat modifier bonus</param>
-        /// <param name="targetTile">Defending tile</param>
-        private bool AttackNeutralCityOnce(List<Army> attackers, int compositeAFCM, City city)
-        {
-            var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
-            Army garrison = ArmyFactory.CreateArmy(armyInfo);
-            garrison.Strength = city.Defense;
-
-            return AttackOnceInternal(
-                new List<Army>() { garrison },
-                attackers,
-                compositeAFCM,
-                0);                
         }
 
         public bool BattleContinues(List<Army> defenders, List<Army> attacker)

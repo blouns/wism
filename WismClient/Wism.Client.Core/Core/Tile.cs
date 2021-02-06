@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -27,10 +26,47 @@ namespace Wism.Client.Core
         /// </summary>
         public Terrain Terrain { get; set; }
 
+        public void AddItem(Artifact artifact)
+        {
+            if (Items == null)
+            {
+                Items = new List<IItem>();
+            }
+            Items.Add(artifact);
+            artifact.Tile = this;
+        }
+
+        public void RemoveItem(Artifact artifact)
+        {
+            if (Items == null)
+            {
+                Items = new List<IItem>();
+            }
+            Items.Remove(artifact);
+            artifact.Tile = null;
+        }
+
         /// <summary>
-        /// May have zero or one buildings (e.g. City, Tower, Ruins, Temple)
+        /// May have zero or one city
         /// </summary>
         public City City { get; set; }
+
+        /// <summary>
+        /// May have zero or one location (e.g. Sage, Tower, Ruins, Temple)
+        /// </summary>
+        public Location Location { get; set; }
+
+        public List<IItem> Items { get; internal set; }
+
+        public bool ContainsItem(IItem item)
+        {
+            return HasItems() && Items.Contains(item);
+        }
+
+        public bool HasItems()
+        {
+            return this.Items != null && this.Items.Count > 0;
+        }
 
         public bool IsNeighbor(Tile other)
         {
@@ -86,7 +122,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Raze the any structure on the tile
+        /// Raze any buildable structure on the tile
         /// </summary>
         /// <remarks>Internal only; call Raze on IBuildable (tower, city)</remarks>
         internal void RazeInternal()
@@ -285,9 +321,18 @@ namespace Wism.Client.Core
             return CanTraverseHere(army.Clan, army.Info);
         }
 
+        /// <summary>
+        /// Check if the tile has a city
+        /// </summary>
+        /// <returns></returns>
         public bool HasCity()
         {
             return (this.City != null);
+        }
+
+        public bool HasLocation()
+        {
+            return (this.Location != null);
         }
 
         /// <summary>
@@ -312,6 +357,10 @@ namespace Wism.Client.Core
             if (HasArmies())
             {
                 sb.Append($"[{Armies.Count}:{Armies[0]}]");
+            }
+            if (HasLocation())
+            {
+                sb.Append($"[{Location}]");
             }
 
             return sb.ToString();

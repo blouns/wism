@@ -5,6 +5,7 @@ using Wism.Client.Api.Commands;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Scenario
@@ -331,6 +332,173 @@ namespace Wism.Client.Test.Scenario
             Assert.AreEqual(8, player1.GetArmies().Count, "Incorrect army count for player 1.");
             Assert.AreEqual(0, player2.GetArmies().Count, "Incorrect army count for player 2.");
             Assert.IsNull(enemyTile.Armies, "Incorrect army count at enemy tile.");
+        }
+
+        /// <summary>
+        /// Move hero to multiple locations searching each. Follow with sad hero who gets seconds.
+        /// </summary>
+        [Test]
+        public void MoveArmy_SearchLocations()
+        {
+            // Assemble
+            var armyController = TestUtilities.CreateArmyController();
+            var locationController = TestUtilities.CreateLocationController();
+            var gameController = TestUtilities.CreateGameController();
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+            Player player1 = Game.Current.Players[0];
+            Tile originalTile1 = World.Current.Map[1, 1];
+            player1.HireHero(originalTile1);
+            var armiesToMove1 = new List<Army>(originalTile1.Armies);
+            armiesToMove1[0].MovesRemaining = 50;
+            int gold1 = player1.Gold;
+            int strength1 = armiesToMove1[0].Strength;
+
+            Player player2 = Game.Current.Players[1];
+            Tile originalTile2 = World.Current.Map[1, 2];
+            player2.HireHero(originalTile2);
+            var armiesToMove2 = new List<Army>(originalTile2.Armies);
+            armiesToMove2[0].MovesRemaining = 50;
+            int gold2 = player2.Gold;
+            int strength2 = armiesToMove2[0].Strength;
+
+            TestUtilities.AddLocation(2, 1, "TempleDog");
+            TestUtilities.AddLocation(2, 2, "TempleCat");
+            TestUtilities.AddLocation(2, 3, "Suzzallo");
+            TestUtilities.AddLocation(2, 4, "SagesHut");
+            TestUtilities.AddLocation(3, 1, "Stonehenge");
+            TestUtilities.AllocateBoons();
+
+            var map = World.Current.Map;
+            var commandController = TestUtilities.CreateCommandController();
+            List<Command> commandsToAdd = new List<Command>()
+            {
+                // HERO 1 //////////////////////////////////////////////////////////////////////
+                // Gets the first run at all the goods
+                ////////////////////////////////////////////////////////////////////////////////
+                // Temple 1
+                new SelectArmyCommand(armyController, armiesToMove1),
+                new MoveOnceCommand(armyController, armiesToMove1, 2, 1),
+                new SearchTempleCommand(locationController, armiesToMove1, map[2, 1].Location),
+                // Temple 2
+                new MoveOnceCommand(armyController, armiesToMove1, 2, 2),
+                new SearchTempleCommand(locationController, armiesToMove1, map[2, 2].Location),
+                // Library
+                new MoveOnceCommand(armyController, armiesToMove1, 2, 3),
+                new SearchLibraryCommand(locationController, armiesToMove1, map[2, 3].Location),
+                // Sage
+                new MoveOnceCommand(armyController, armiesToMove1, 2, 4),
+                new SearchSageCommand(locationController, armiesToMove1, map[2, 4].Location),
+                // Ruins
+                new MoveOnceCommand(armyController, armiesToMove1, 3, 1),
+                new SearchRuinsCommand(locationController, armiesToMove1, map[3, 1].Location),               
+
+                // Hero out of moves (search ruins) so cycle turns
+                new EndTurnCommand(gameController, player1),
+                new StartTurnCommand(gameController, player2),
+                new EndTurnCommand(gameController, player2),
+                new StartTurnCommand(gameController, player1),
+
+                // Move away for hero 2 to be able to move here
+                new MoveOnceCommand(armyController, armiesToMove1, 3, 2),
+                new DeselectArmyCommand(armyController, armiesToMove1),
+                new EndTurnCommand(gameController, player1),
+            };
+
+            foreach (var command in commandsToAdd)
+            {
+                commandController.AddCommand(command);
+            }
+
+            // Act
+            var commandsToExecute = commandController.GetCommandsAfterId(0);
+            int lastId = 0;
+            foreach (var command in commandsToExecute)
+            {
+                var result = ActionState.NotStarted;
+                do
+                {
+                    result = command.Execute();
+                    switch (result)
+                    {
+                        case ActionState.Succeeded:
+                            lastId = command.Id;
+                            break;
+                        case ActionState.Failed:
+                            lastId = command.Id;
+                            Assert.Fail($"Command failed to execute: {command.GetType()}");
+                            break;
+                        case ActionState.InProgress:
+                            // Do not advance the command (in-progress)
+                            break;
+                    }
+                } while (result == ActionState.InProgress);
+            }
+
+            // Assert
+            Assert.IsTrue(gold1 < player1.Gold, "No money from the seer.");
+            // Strength should be +3 thanks to 2 temples and one successful altar boon
+            Assert.AreEqual(strength1 + 3, armiesToMove1[0].Strength, "Too weak or too strong.");
+
+
+            // Assemble 2
+
+            commandsToAdd = new List<Command>()
+            {
+                // HERO 2 //////////////////////////////////////////////////////////////////////
+                // Sad seconds for this hero
+                ////////////////////////////////////////////////////////////////////////////////
+                // Temple 1
+                new StartTurnCommand(gameController, player2),
+                new MoveOnceCommand(armyController, armiesToMove2, 2, 1),
+                new SearchTempleCommand(locationController, armiesToMove2, map[2, 1].Location),
+                // Temple 2
+                new MoveOnceCommand(armyController, armiesToMove2, 2, 2),
+                new SearchTempleCommand(locationController, armiesToMove2, map[2, 2].Location),
+                // Library
+                new MoveOnceCommand(armyController, armiesToMove2, 2, 3),
+                new SearchLibraryCommand(locationController, armiesToMove2, map[2, 3].Location),
+                // Sage
+                new MoveOnceCommand(armyController, armiesToMove2, 2, 4),
+                new SearchSageCommand(locationController, armiesToMove2, map[2, 4].Location),
+                // Ruins
+                new MoveOnceCommand(armyController, armiesToMove2, 3, 1),
+                new SearchRuinsCommand(locationController, armiesToMove2, map[3, 1].Location),                
+                new DeselectArmyCommand(armyController, armiesToMove2),
+                new EndTurnCommand(gameController, player2),
+            };
+
+            foreach (var command in commandsToAdd)
+            {
+                commandController.AddCommand(command);
+            }
+
+            // Act 2
+            commandsToExecute = commandController.GetCommandsAfterId(lastId);
+            foreach (var command in commandsToExecute)
+            {
+                var result = ActionState.NotStarted;
+                do
+                {
+                    result = command.Execute();
+                    switch (result)
+                    {
+                        case ActionState.Succeeded:
+                            lastId = command.Id;
+                            break;
+                        case ActionState.Failed:
+                            lastId = command.Id;
+                            break;
+                        case ActionState.InProgress:
+                            // Do not advance the command (in-progress)
+                            break;
+                    }
+                } while (result == ActionState.InProgress);
+            }            
+
+            // Assert 2
+            // TODO: Verify items
+            Assert.AreEqual(gold2, player2.Gold, "Seer was generous.");
+            Assert.AreEqual(strength2 + 2, armiesToMove2[0].Strength, "Too weak.");
         }
     }
 }

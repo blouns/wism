@@ -1,0 +1,41 @@
+[
+  {
+    "ShortName": "Marthos",
+    "DisplayName": "Marthos",
+    "Defense": 6,
+    "Income": 32,
+    "X": 1,
+    "Y": 2,
+    "ClanName": "Sirians",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": -2,
+        "Strength": 0,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 0,
+        "Strength": 1,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 1,
+        "Strength": 0,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  }
+]

@@ -54,8 +54,8 @@ namespace Wism.Client.Agent.CommandProcessors
         private static void DrawBattleSetupSequence(Player attacker, Player defender)
         {
             Console.Clear();
-            Console.WriteLine("War! ...in a senseless mind.");
-            Console.WriteLine($"{attacker.Clan.DisplayName} is attacking {defender.Clan.DisplayName}!");
+            Notify.Information("War! ...in a senseless mind.");
+            Notify.Display($"{attacker.Clan.DisplayName} is attacking {defender.Clan.DisplayName}!");
             for (int i = 0; i < 3; i++)
             {
                 Console.Beep();

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
-using Wism.Client.Agent.Factories;
 using Wism.Client.Core;
 using Wism.Client.Modules;
 using Wism.Client.War;
@@ -11,6 +9,7 @@ namespace Wism.Client.MapObjects
     public class Army : MapObject
     {
         public const int MaxArmies = 8;
+        public const int MaxStrength = 9;
 
         private ArmyInfo info;
 
@@ -26,6 +25,8 @@ namespace Wism.Client.MapObjects
         public string KindName { get => Info.DisplayName; }
 
         public override string ShortName => Info.ShortName;
+
+        public List<Location> BlessedAt { get; set; } = new List<Location>();
 
         // Traversal info
         public virtual bool CanWalk { get => Info.CanWalk; }
@@ -46,7 +47,7 @@ namespace Wism.Client.MapObjects
             this.IsDefending = true;
         }
 
-        public void Kill()
+        public virtual void Kill()
         {
             this.IsDead = true;
             Player.KillArmy(this);
