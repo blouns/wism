@@ -62,12 +62,9 @@ namespace Wism.Client.Test.Unit
         public void Take_Artifact_HeroTwoCombatItems()
         {
             // Assemble
-            // Set up location            
             var tile = World.Current.Map[2, 2];
-            var location = MapBuilder.FindLocation("CryptKeeper");
-            World.Current.AddLocation(location, tile);
 
-            // Set up boon
+            // Set up artifacts
             var artifact1 = FindArtifact("Firesword");
             tile.AddItem(artifact1);
             var artifact2 = FindArtifact("Icesword");
