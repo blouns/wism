@@ -173,7 +173,8 @@ namespace Wism.Client.Test.Unit
             var tile = World.Current.Map[2, 2];
 
             // Set up artifact
-            var artifact = FindArtifact("Firesword");
+            var artifact = new Artifact(
+                ModFactory.FindArtifactInfo("Firesword"));
             var boon = new ArtifactBoon(artifact);
 
             // Act            
@@ -215,17 +216,5 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(result is int);
             Assert.IsTrue(initialGold < player1.Gold);
         }
-
-
-        #region Helper methods
-
-        private static Artifact FindArtifact(string artifactName)
-        {
-            var artifactInfos = new List<Artifact>(
-                            ModFactory.LoadArtifacts(ModFactory.ModPath));
-            return artifactInfos.Find(a => a.ShortName == artifactName);
-        }
-
-        #endregion
     }
 }

@@ -11,8 +11,7 @@ namespace Wism.Client.Core
         private const float DefaultArtifactPercent = 0.6f;
         private const float DefaultAltarPercent = 0.05f;
         private const float DefaultGoldPercent = 0.05f;
-        
-        List<IBoon> boonLibrary = new List<IBoon>();
+        readonly List<IBoon> boonLibrary = new List<IBoon>();
         int[] boonOrder;
 
         public float AlliesPercent { get; set; }

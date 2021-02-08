@@ -9,25 +9,50 @@ namespace Wism.Client.Core
 {
     public class Game
     {
-        private static Game current;
+        // Default random seed (the year Warlords was born!)
+        public const int DefaultRandomSeed = 1990;  
 
-        public const int DefaultRandomSeed = 1990;
+        // Singleton instance
+        private static Game current;        
 
         private int currentPlayerIndex;
         private GameState gameState;
         private List<Army> selectedArmies;
         private Queue<Tile> nextArmyQueue = new Queue<Tile>();
 
+        /// <summary>
+        /// Active world
+        /// </summary>
         public World World { get; set; }
 
+        /// <summary>
+        /// Active game players
+        /// </summary>
         public List<Player> Players { get; set; }
 
+        /// <summary>
+        /// Gets or sets the randomization generator used for the game
+        /// </summary>
+        /// <remarks>
+        /// IMPORTANT: *ALL* use of randomization that affects game state *MUST* use
+        /// this and only this for randomization. Otherwise, remote players will be 
+        /// out of sync with the game state.
+        /// </remarks>
         public Random Random { get; set; }
 
+        /// <summary>
+        /// Gets or sets the strategy used for battles
+        /// </summary>
         public IWarStrategy WarStrategy { get; set; }
 
+        /// <summary>
+        /// Current GameState
+        /// </summary>
         public GameState GameState { get => gameState; }
 
+        /// <summary>
+        /// Returns the current game instance as a Singleton
+        /// </summary>
         public static Game Current
         {
             get 
@@ -41,11 +66,34 @@ namespace Wism.Client.Core
             }
         }
 
+        /// <summary>
+        /// Test if the game has been initialized.
+        /// </summary>
+        /// <returns>True if so; otherwise False</returns>
         public static bool IsInitialized()
         {
             return Game.current != null;
         }
 
+        /// <summary>
+        /// Gets all armies in the world for each player
+        /// </summary>
+        /// <returns></returns>
+        public List<Army> GetAllArmies()
+        {
+            var armies = new List<Army>();
+            foreach (var player in Players)
+            {
+                armies.AddRange(player.GetArmies());
+            }
+
+            return armies;
+        }
+
+        /// <summary>
+        /// Gets the current player based on their turn
+        /// </summary>
+        /// <returns>Player whose turn it is now</returns>
         public Player GetCurrentPlayer()
         {
             if (Players == null || Players.Count == 0)
@@ -56,6 +104,10 @@ namespace Wism.Client.Core
             return Players[currentPlayerIndex];
         }
 
+        /// <summary>
+        /// Gets the player based on the next turn
+        /// </summary>
+        /// <returns>Player whose turn is next</returns>
         public Player GetNextPlayer()
         {
             if (Players == null || Players.Count == 0)
@@ -66,6 +118,10 @@ namespace Wism.Client.Core
             return Players[(currentPlayerIndex + 1) % Players.Count];
         }
 
+        /// <summary>
+        /// Transition to a new game state
+        /// </summary>
+        /// <param name="newState">State to transition to</param>
         public void Transition(GameState newState)
         {
             // For now just set it; later we can validate and manage the state machine
@@ -94,12 +150,6 @@ namespace Wism.Client.Core
             {
                 HandleGameOver();
             }
-        }
-
-        private void HandleGameOver()
-        {
-            // TODO: What else is needed at this level for game end?
-            Transition(GameState.GameOver);
         }
 
         /// <summary>
@@ -165,24 +215,12 @@ namespace Wism.Client.Core
             SelectArmies(tileWithArmies.Armies);            
 
             return true;
-        }
+        }        
 
-        private Queue<Tile> GetTilesWithArmiesWithMoves(Player player)
-        {
-            var tiles = new HashSet<Tile>();
-            var armies = player.GetArmies();
-
-            foreach (var army in armies)
-            {
-                if (!army.IsDefending && army.MovesRemaining > 0)
-                {
-                    tiles.Add(army.Tile);
-                }
-            }
-
-            return new Queue<Tile>(tiles);
-        }
-
+        /// <summary>
+        /// Get the current selected armies
+        /// </summary>
+        /// <returns>Armies that are selected</returns>
         public List<Army> GetSelectedArmies()
         {
             if (!ArmiesSelected())
@@ -194,6 +232,13 @@ namespace Wism.Client.Core
             return new List<Army>(selectedArmies);
         }
 
+        /// <summary>
+        /// Sets the given armies as currently selected
+        /// </summary>
+        /// <param name="armies">Armies to select</param>
+        /// <remarks>
+        /// Selecting an army moves its state on its Tile from Armies to VisitingArmies.
+        /// </remarks>
         public void SelectArmies(List<Army> armies)
         {
             if (armies is null)
@@ -267,6 +312,10 @@ namespace Wism.Client.Core
             armies.ForEach(a => selectedArmies.Remove(a));
         }
 
+        /// <summary>
+        /// Test if there are any armies currently selected.
+        /// </summary>
+        /// <returns>True if armies are selected; otherwise False</returns>
         public bool ArmiesSelected()
         {
             return (GameState == GameState.SelectedArmy || 
@@ -309,6 +358,9 @@ namespace Wism.Client.Core
             DeselectArmies();
         }
 
+        /// <summary>
+        /// Create test-only default players for the game
+        /// </summary>
         public static void CreateDefaultPlayers()
         {
             // Default two players for now
@@ -325,11 +377,18 @@ namespace Wism.Client.Core
             Game.Current.currentPlayerIndex = 0;
         }
 
+        /// <summary>
+        /// Create test-only defaults for the game
+        /// </summary>
         public static void CreateDefaultGame()
         {
             CreateDefaultGame(ModFactory.WorldPath);
         }
 
+        /// <summary>
+        /// /// Create test-only defaults for the game
+        /// </summary>
+        /// <param name="worldName">World to use</param>
         public static void CreateDefaultGame(string worldName)
         {
             current = new Game();
@@ -345,6 +404,9 @@ namespace Wism.Client.Core
             //MapBuilder.AddLocationsToMapFromWorld(World.Current.Map, worldName);
         }
 
+        /// <summary>
+        /// Create an empty game
+        /// </summary>
         public static void CreateEmpty()
         {
             current = new Game();
@@ -352,6 +414,21 @@ namespace Wism.Client.Core
 
         #region Helper methods
 
+        private Queue<Tile> GetTilesWithArmiesWithMoves(Player player)
+        {
+            var tiles = new HashSet<Tile>();
+            var armies = player.GetArmies();
+
+            foreach (var army in armies)
+            {
+                if (!army.IsDefending && army.MovesRemaining > 0)
+                {
+                    tiles.Add(army.Tile);
+                }
+            }
+
+            return new Queue<Tile>(tiles);
+        }
         private static List<Army> RemoveDeadArmies(List<Army> armies)
         {
             var armiesToReturn = new List<Army>(armies);
@@ -369,6 +446,11 @@ namespace Wism.Client.Core
         private static string ArmiesToString(List<Army> armies)
         {
             return $"Armies[{armies.Count}:{armies[0]}]";
+        }
+
+        private void HandleGameOver()
+        {
+            Transition(GameState.GameOver);
         }
 
         #endregion
