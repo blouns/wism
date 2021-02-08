@@ -173,6 +173,18 @@ namespace Wism.Client.Modules
             return null; // ID not found
         }
 
+        public static ArtifactInfo FindArtifactInfo(string shortName)
+        {
+            IList<ArtifactInfo> infos = LoadArtifactInfos(ModPath);
+            foreach (ArtifactInfo info in infos)
+            {
+                if (info.ShortName == shortName)
+                    return info;
+            }
+
+            return null; // ID not found
+        }
+
         public static IList<ClanTerrainModifierInfo> FindClanTerrainMappingInfos(string clanName)
         {
             IList<ClanTerrainModifierInfo> terrainModifiers = new List<ClanTerrainModifierInfo>();

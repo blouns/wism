@@ -470,7 +470,7 @@ namespace Wism.Client.Agent
                         $"Moves: {armies[i].MovesRemaining}");
                 }
                 
-                Console.WriteLine("Select which? [#[,#,...]]: ");
+                Console.WriteLine("Select which [#[,#,...]]: ");
                 string[] numbers = Console.ReadLine().Split(new char[] { ',' });
                 for (int i = 0; i < numbers.Length; i++)
                 {

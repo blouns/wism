@@ -156,14 +156,15 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             var player1 = Game.Current.Players[0];
             var hero = player1.HireHero(tile);
+            string expectedKnowledge = "Lord Lowenbrau will return!";
 
             // Act
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
 
             // Assert
-            var item = result as string;
+            var knowledge = result as string;
             Assert.IsTrue(success, "Failed to search the location.");
-            Assert.AreEqual(item, "knowledge", "Did not find the expected item.");
+            Assert.AreEqual(expectedKnowledge, knowledge, "Did not find the expected knowledge.");
         }
 
         [Test]
@@ -263,14 +264,15 @@ namespace Wism.Client.Test.Unit
             var hero = player1.HireHero(tile);
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
             Assert.IsTrue(success, "Setup failed");
+            string expectedKnowledge = "Branally the Fist is the great creator!";
 
             // Act            
             success = tile.Location.Search(new List<Army>() { hero }, out result);
 
             // Assert
-            var item = result as string;
+            var knowledge = result as string;
             Assert.IsTrue(success, "Failed to search the location.");
-            Assert.AreEqual(item, "knowledge", "Did not find the expected item.");
+            Assert.AreEqual(expectedKnowledge, knowledge, "Did not find the expected knowledge.");
         }
 
         [Test]
