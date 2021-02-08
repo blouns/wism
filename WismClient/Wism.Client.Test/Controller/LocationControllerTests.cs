@@ -70,14 +70,15 @@ namespace Wism.Client.Test.Controller
             Tile tile = World.Current.Map[1, 1];
             World.Current.AddLocation(location, tile);
             Army army = player1.HireHero(tile);
-            List<Army> armies = new List<Army>() { army };            
+            List<Army> armies = new List<Army>() { army };
+            string expectedKnowledge = "Lord Lowenbrau will return!";
 
             // Act
             var success = locationController.SearchLibrary(armies, location, out string knowledge);
 
             // Assert
             Assert.IsTrue(success);
-            Assert.AreEqual("knowledge", knowledge);
+            Assert.AreEqual(expectedKnowledge, knowledge);
             Assert.IsTrue(location.Searched);
         }
 

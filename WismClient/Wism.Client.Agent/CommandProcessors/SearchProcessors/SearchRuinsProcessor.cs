@@ -64,6 +64,17 @@ namespace Wism.Client.Agent.CommandProcessors
                 return ActionState.Failed;
             }
 
+            if (location.Boon is AltarBoon)
+            {
+                Notify.Information("An altar stands before you. Do you wish to approach?");
+                var key = Console.ReadKey();
+                if (key.Key != ConsoleKey.Y)
+                {
+                    return ActionState.Failed;
+                }
+                Console.WriteLine();
+            }
+
             var monster = location.Monster;
             if (monster != null)
             {

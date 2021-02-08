@@ -28,7 +28,7 @@ namespace Wism.Client.Agent
         public static void DisplayAndWait(string message, params object[] args)
         {
             Console.WriteLine(String.Format(message, args));
-            Console.ReadKey();
+            Console.ReadKey(true);
         }
     }
 }

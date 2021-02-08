@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Wism.Client.Core;
 
 namespace Wism.Client.MapObjects
 {
@@ -10,6 +11,8 @@ namespace Wism.Client.MapObjects
         private static readonly SearchLibrary instance = new SearchLibrary();
 
         public static SearchLibrary Instance => instance;
+
+        private readonly Librarian librarian = new Librarian();
 
         private SearchLibrary()
         {
@@ -36,8 +39,7 @@ namespace Wism.Client.MapObjects
             // Lose 4 moves for searching
             hero.MovesRemaining -= MovesToSearch;
 
-            // TODO: Implement library of items and knowledge
-            result = "knowledge";
+            result = librarian.GetRandomKnowledge(hero.Player);
             return true;
         }
     }
