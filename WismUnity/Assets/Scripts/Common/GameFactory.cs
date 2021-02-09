@@ -12,11 +12,17 @@ namespace Assets.Scripts
     public class GameFactory : MonoBehaviour
     {
         private WorldTilemap worldTilemap;
+        private bool isInitialized;
 
         public void Start()
         {
-            this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
-                .GetComponent<WorldTilemap>();
+            if (!isInitialized)
+            {
+                this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
+                    .GetComponent<WorldTilemap>();
+
+                this.isInitialized = true;
+            }            
         }
 
         public void CreateDefaultGame()
@@ -28,8 +34,12 @@ namespace Assets.Scripts
             Game.Current.WarStrategy = new DefaultWarStrategy();
 
             ReadyPlayers();
+            if (!isInitialized)
+            {
+                Start();
+            }
             World.CreateWorld(
-                worldTilemap.CreateWorldFromScene(GameManager.DefaultWorld).Map);            
+                worldTilemap.CreateWorldFromScene(GameManager.DefaultWorld).Map);
             CreateDefaultCitiesFromScene();
             CreateDefaultArmies();
         }
@@ -125,7 +135,7 @@ namespace Assets.Scripts
                 }
             }
 
-            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, illuriaCities);
+            MapBuilder.AddCitiesFromInfos(World.Current, illuriaCities);
         }
     }
 }

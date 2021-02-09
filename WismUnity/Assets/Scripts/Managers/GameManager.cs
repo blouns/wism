@@ -23,9 +23,9 @@ namespace Assets.Scripts.Managers
         public const float StandardTime = 0.25f;
         public const float WarTime = 1.0f;
         public const int MaxArmysPerArmy = Army.MaxArmies;
-        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";
-        public static readonly string DefaultCityModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\Illuria";
-        public static readonly string DefaultWorld = @"DevWorld";
+        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";        
+        public static readonly string DefaultWorld = @"Illuria";
+        public static readonly string DefaultCityModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
 
         // Controllers for the WISM Client API
         private ControllerProvider provider;
@@ -45,7 +45,9 @@ namespace Assets.Scripts.Managers
                 ArmyController = new ArmyController(LoggerFactory),
                 CityController = new CityController(LoggerFactory),
                 CommandController = new CommandController(LoggerFactory, repo),
-                GameController = new GameController(LoggerFactory)
+                GameController = new GameController(LoggerFactory),
+                LocationController = new LocationController(LoggerFactory),
+                HeroController = new HeroController(LoggerFactory)
             };
             commandController = provider.CommandController;            
         }
