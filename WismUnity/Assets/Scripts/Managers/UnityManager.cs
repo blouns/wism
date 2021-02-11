@@ -102,10 +102,14 @@ namespace Assets.Scripts.Managers
                 new CompleteBattleProcessor(GameManager.LoggerFactory, this),
                 new StartTurnProcessor(GameManager.LoggerFactory, this),
                 new EndTurnProcessor(GameManager.LoggerFactory, this),
+                new SearchTempleProcessor(GameManager.LoggerFactory, this),
+                new SearchRuinsProcessor(GameManager.LoggerFactory, this),
+                new SearchLibraryProcessor(GameManager.LoggerFactory, this),               
+                new SearchSageProcessor(GameManager.LoggerFactory, this),                
                 new StandardProcessor(GameManager.LoggerFactory)
             };
 
-            // Set up game UI
+            // Set up game UI            
             SetTime(GameManager.StandardTime);
             SetupCameras();
 
@@ -159,7 +163,7 @@ namespace Assets.Scripts.Managers
         internal void Draw()
         {
             DrawSelectedArmiesBox();
-            this.armyManager.DrawArmyGameObjects();
+            armyManager.DrawArmyGameObjects();
             cityManager.DrawCities();
         }             
 

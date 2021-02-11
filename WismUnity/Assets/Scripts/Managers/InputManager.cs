@@ -159,6 +159,10 @@ namespace Assets.Scripts.Managers
             {
                 UnityManager.GoToCapitol();
             }
+            else if (Input.GetKeyDown(KeyCode.Z))
+            {
+                GameManager.SearchLocationWithSelectedArmies();
+            }
         }
 
         private void HandleRightClick()

@@ -210,5 +210,10 @@ namespace Wism.Client.Modules
         {
             locationBuilder.AddLocationsFromWorldPath(world, worldName);
         }
+
+        public static void AddLocationsFromInfos(World world, List<LocationInfo> locationInfos)
+        {
+            locationBuilder.AddLocations(world, locationInfos);
+        }
     }    
 }

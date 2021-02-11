@@ -1,11 +1,8 @@
 ﻿using Assets.Scripts.Common;
 using Assets.Scripts.Managers;
-using System;
-using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
-using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using ILogger = Wism.Client.Common.ILogger;
 

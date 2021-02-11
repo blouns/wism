@@ -13,11 +13,15 @@ public class ResetCities : Editor
         DrawDefaultInspector();
 
         var container = target as CityContainer;
-        if (container != null && container.Reset == true)
+        if (container != null)
         {
-            ClearCities(container);
-            container.Reset = false;
-        }
+            if (container.Reset == true)
+
+            {
+                ClearCities(container);
+                container.Reset = false;
+            }
+        }        
     }
 
     private void ClearCities(CityContainer cities)

@@ -26,8 +26,6 @@ namespace Assets.Scripts.Managers
             worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
 
-            // TODO: Add neutral cities
-
             // Draw player-owned cities
             foreach (var player in Game.Current.Players)
             {

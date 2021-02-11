@@ -28,10 +28,10 @@ namespace Wism.Client.Modules
         {
             var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldPath}";
 
-            AddLocationsFromLocationInfos(world, LoadLocationInfos(path));
+            AddLocations(world, LoadLocationInfos(path));
         }
 
-        public void AddLocationsFromLocationInfos(World world, IList<LocationInfo> locationInfos)
+        public void AddLocations(World world, IList<LocationInfo> locationInfos)
         {
             foreach (var locationInfo in locationInfos)
             {
