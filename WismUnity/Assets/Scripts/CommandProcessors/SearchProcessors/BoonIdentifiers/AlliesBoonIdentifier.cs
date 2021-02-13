@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Assets.Scripts.Managers
+namespace Assets.Scripts.CommandProcessors
 {
     public class AlliesBoonIdentifier : IBoonIdentfier
     {

@@ -7,7 +7,7 @@ using Wism.Client.Common;
 using Wism.Client.Core.Controllers;
 using ILogger = Wism.Client.Common.ILogger;
 
-namespace Assets.Scripts.Managers
+namespace Assets.Scripts.CommandProcessors
 {
     public class SearchTempleProcessor : ICommandProcessor
     {

@@ -14,6 +14,7 @@ namespace Assets.Scripts.Tilemaps
     public class WorldTilemap : MonoBehaviour
     {
         private Tilemap tileMap;
+        private GameObject searchGO;
 
         public void Start()
         {
@@ -84,6 +85,21 @@ namespace Assets.Scripts.Tilemaps
             }
 
             return tiles;
+        }
+
+        public void ShowSearchIcon(int x, int y)
+        {
+            this.searchGO = UnityUtilities.GameObjectHardFind("Search");
+            searchGO.transform.position = ConvertGameToUnityVector(x, y);
+            searchGO.SetActive(true);
+        }
+
+        public void HideSearchIcon()
+        {
+            if (this.searchGO)
+            {
+                this.searchGO.SetActive(false);
+            }
         }
 
         internal Tilemap GetTilemap()

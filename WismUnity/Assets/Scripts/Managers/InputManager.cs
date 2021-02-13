@@ -135,6 +135,7 @@ namespace Assets.Scripts.Managers
 
         private void HandleKeyboard()
         {
+            // Army actions
             if (Input.GetKeyDown(KeyCode.M))
             {
                 UnityManager.HandleArmyPicker();
@@ -147,22 +148,54 @@ namespace Assets.Scripts.Managers
             {
                 GameManager.SelectNextArmy();
             }
-            else if (Input.GetKeyDown(KeyCode.E))
+            else if (Input.GetKeyDown(KeyCode.D))
             {
-                GameManager.EndTurn();
-            }
-            else if (Input.GetKeyDown(KeyCode.P))
-            {
-                UnityManager.SetProductionMode(ProductionMode.SelectCity);
-            }
-            else if (Input.GetKeyDown(KeyCode.C))
-            {
-                UnityManager.GoToCapitol();
-            }
+                GameManager.DefendSelectedArmies();
+            }            
             else if (Input.GetKeyDown(KeyCode.Z))
             {
                 GameManager.SearchLocationWithSelectedArmies();
             }
+            // TODO: Add Quit action for armies
+            // TODO: Add Disband action for armies
+            // TODO: Add Find armies action
+
+            // Hero actions
+            else if (Input.GetKeyDown(KeyCode.T))
+            {
+                UnityManager.HandleItemPicker(true);
+            }
+            else if (Input.GetKeyDown(KeyCode.O))
+            {
+                UnityManager.HandleItemPicker(false);
+            }
+            // TODO: Add Inventory action
+            // TODO: Add Find heros (k) action
+
+            // City actions
+            else if (Input.GetKeyDown(KeyCode.P))
+            {
+                UnityManager.SetProductionMode(ProductionMode.SelectCity);
+            }
+            // TODO: Add build (b) actions
+            // TODO: Add raze (r) action
+
+            // Game actions
+            else if (Input.GetKeyDown(KeyCode.E))
+            {
+                GameManager.EndTurn();
+            }
+            // TODO: Add save (or auto-save) and load game actions 
+            // TODO: Add resign action
+            // TODO: Add change control action (human, AI)
+            // TODO: Add reports actions (winning, cities, gold, etc.)
+
+            // Navigation actions
+            else if (Input.GetKeyDown(KeyCode.C))
+            {
+                UnityManager.GoToCapitol();
+            }
+            // TODO: Add center-on-selected (space?) action
         }
 
         private void HandleRightClick()

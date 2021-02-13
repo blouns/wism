@@ -28,9 +28,21 @@ namespace Assets.Scripts.Managers
         public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
         public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
 
+        private bool isInitialized;
+
         public void Start()
         {
             Initialize();
+        }
+
+        public void FixedUpdate()
+        {
+            if (!IsInitialized())
+            { 
+                return;
+            }
+
+            DrawArmyGameObjects();
         }
 
         public void Initialize()
@@ -57,6 +69,8 @@ namespace Assets.Scripts.Managers
             this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
                 .GetComponent<WorldTilemap>();
             this.inputManager = this.unityManager.GetComponent<InputManager>();
+
+            this.isInitialized = true;
         }
 
         public GameObject FindGameObjectKind(Army army)
@@ -98,7 +112,7 @@ namespace Assets.Scripts.Managers
 
         internal bool IsInitialized()
         {
-            return armiesByClanMap != null;
+            return isInitialized;
         }
 
         public void CleanupArmies()

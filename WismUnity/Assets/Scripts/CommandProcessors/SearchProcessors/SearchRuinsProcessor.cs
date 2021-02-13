@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Managers;
+using Assets.Scripts.Tilemaps;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,7 @@ using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using ILogger = Wism.Client.Common.ILogger;
 
-namespace Assets.Scripts.Managers
+namespace Assets.Scripts.CommandProcessors
 {
     public class SearchRuinsProcessor : ICommandProcessor
     {
@@ -67,15 +68,19 @@ namespace Assets.Scripts.Managers
                 return ActionState.Failed;
             }
 
+            var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
+                .GetComponent<WorldTilemap>();
+            worldTilemap.ShowSearchIcon(hero.X, hero.Y);            
+
             if (location.Boon is AltarBoon)
             {
                 ShowNotification("An altar stands before you. Do you wish to approach?");
-                var key = Console.ReadKey();
-                if (key.Key != ConsoleKey.Y)
-                {
-                    return ActionState.Failed;
-                }
-                Console.WriteLine();
+                //var key = Console.ReadKey();
+                //if (key.Key != ConsoleKey.Y)
+                //{
+                //    return ActionState.Failed;
+                //}
+                //Console.WriteLine();
             }
 
             var monster = location.Monster;

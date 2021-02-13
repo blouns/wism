@@ -2,7 +2,7 @@
 using UnityEngine;
 using Wism.Client.Core;
 
-namespace Assets.Scripts.Managers
+namespace Assets.Scripts.CommandProcessors
 {
     public class GoldBoonIdentifier : IBoonIdentfier
     {

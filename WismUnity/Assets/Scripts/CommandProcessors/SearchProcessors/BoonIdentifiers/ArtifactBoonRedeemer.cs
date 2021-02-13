@@ -5,18 +5,18 @@ using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class ArtifactBoonIdentifier : IBoonIdentfier
+    public class ArtifactBoonRedeemer
     {
-        public bool CanIdentify(IBoon boon)
+        public bool CanRedeem(IBoon boon)
         {
             return boon is ArtifactBoon;
         }
 
         public void Identify(IBoon boon)
         {
-            if (!CanIdentify(boon))
+            if (!CanRedeem(boon))
             {
-                throw new ArgumentException("Cannot identify " + boon);
+                throw new ArgumentException("Cannot redeem " + boon);
             }
 
             var artifact = (Artifact)boon.Result;
@@ -30,4 +30,5 @@ namespace Assets.Scripts.CommandProcessors
             messageBox.Notify(message);
         }
     }
+
 }

@@ -1,15 +1,6 @@
 using System;
-using System.Timers;
 using UnityEngine;
 using UnityEngine.UI;
-
-
-public class Message
-{
-    public string Text { get; set; }
-
-    public int MyProperty { get; set; }
-}
 
 public class NotificationBox : MonoBehaviour
 {

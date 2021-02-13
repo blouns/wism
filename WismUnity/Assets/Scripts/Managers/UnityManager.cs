@@ -13,7 +13,7 @@ using ILogger = Wism.Client.Common.ILogger;
 namespace Assets.Scripts.Managers
 {
     /// <summary>
-    /// Unity game is the primary game loop and bridge to the Unity UI and WISM API via GameManager
+    /// Unity game is the primary GameObject and bridge to the Unity UI and WISM API via GameManager
     /// </summary>
     public class UnityManager : MonoBehaviour
     {
@@ -25,7 +25,6 @@ namespace Assets.Scripts.Managers
         // Game managers
         [SerializeField]
         private WorldTilemap worldTilemap;
-        private CityManager cityManager;
         private InputManager inputManager;
         private GameManager gameManager;
         private ArmyManager armyManager;
@@ -114,7 +113,6 @@ namespace Assets.Scripts.Managers
             SetupCameras();
 
             this.armyManager = GetComponent<ArmyManager>();
-            this.cityManager = GetComponent<CityManager>();
             this.inputManager = GetComponent<InputManager>();
 
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
@@ -163,8 +161,6 @@ namespace Assets.Scripts.Managers
         internal void Draw()
         {
             DrawSelectedArmiesBox();
-            armyManager.DrawArmyGameObjects();
-            cityManager.DrawCities();
         }             
 
         /// <summary>
@@ -273,6 +269,13 @@ namespace Assets.Scripts.Managers
             messageBox.Notify("");
         }
 
+        private void NotifyUser(string message, params object[] args)
+        {
+            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
+                   .GetComponent<NotificationBox>();
+            messageBox.Notify(String.Format(message, args));
+        }
+
         private void DrawSelectedArmiesBox()
         {
             if (this.selectedArmyBox == null)
@@ -294,6 +297,35 @@ namespace Assets.Scripts.Managers
             {
                 var armiesToPick = Game.Current.GetSelectedArmies()[0].Tile.GetAllArmies();
                 armyPickerPanel.Initialize(this, armiesToPick);
+            }
+        }
+
+
+        internal void HandleItemPicker(bool takingItems)
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                NotifyUser("You must have a hero selected for that!");
+                return;
+            }
+
+            Army army = Game.Current.GetSelectedArmies()
+                .Find(army => army is Hero);
+            if (army == null)
+            {
+                NotifyUser("You must have a hero selected for that!");
+                return;
+            }
+
+            // TODO: Add item picker; for now take or drop all
+            Hero hero = (Hero)army;
+            if (takingItems)
+            {
+                GameManager.TakeItems(hero, hero.Tile.Items);
+            }
+            else
+            {
+                GameManager.DropItems(hero, hero.Items);
             }
         }
 
