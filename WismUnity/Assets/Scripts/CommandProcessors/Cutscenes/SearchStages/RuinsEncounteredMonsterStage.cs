@@ -1,24 +1,24 @@
 ﻿using Wism.Client.Api.Commands;
-using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class EncounteredMonsterStage : RedemptionStage
+    public class RuinsEncounteredMonsterStage : CutsceneStage
     {
-        public EncounteredMonsterStage(SearchRuinsCommand command)
+        public RuinsEncounteredMonsterStage(SearchRuinsCommand command)
             : base(command)
-        {
+        {            
         }
 
-        public override SearchResult Execute()
+        public override SceneResult Action()
         {
             var monster = Location.Monster;
             if (monster != null)
             {
                 Notify($"{Hero.DisplayName} encounters a {monster}...");
+                return ContinueOnKeyPress();
             }
 
-            return SearchResult.Continue;
+            return SceneResult.Continue;
         }
     }
 }

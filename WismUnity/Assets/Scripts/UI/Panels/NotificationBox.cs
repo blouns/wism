@@ -7,7 +7,6 @@ public class NotificationBox : MonoBehaviour
     public const float DefaultInterval = 3f;
 
     private Text notificationText;   
-    private string message;
     private CanvasGroup infoPanelGroup;
     private float timer;
     private float waitTime = DefaultInterval;
@@ -36,13 +35,12 @@ public class NotificationBox : MonoBehaviour
 
     private void ShowNotifications()
     {        
-        this.notificationText.text = this.message;
         infoPanelGroup.alpha = 0f;
     }
 
     public void ClearNotification()
     {
-        this.message = "";
+        this.notificationText.text = "";
         infoPanelGroup.alpha = 1f;
     }
 
@@ -54,7 +52,7 @@ public class NotificationBox : MonoBehaviour
         }
 
         this.infoPanelGroup.alpha = 0f;
-        this.message = message;
+        this.notificationText.text = message;
         timer = 0f;
         ShowNotifications();
     }

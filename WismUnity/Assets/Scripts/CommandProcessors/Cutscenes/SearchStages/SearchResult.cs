@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.CommandProcessors
 {
-    public enum SearchResult
+    public enum SceneResult
     {
         Start,
         Continue,

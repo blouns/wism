@@ -1,24 +1,24 @@
-﻿using Assets.Scripts.Tilemaps;
+﻿using Assets.Scripts.Managers;
+using Assets.Scripts.Tilemaps;
 using UnityEngine;
 using Wism.Client.Api.Commands;
-using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class HeroRuinsIntroStage : RedemptionStage
+    public class RuinsIntroStage : CutsceneStage
     {
-        public HeroRuinsIntroStage(SearchRuinsCommand command)
+        public RuinsIntroStage(SearchRuinsCommand command)
             : base(command)
         {
         }
 
-        public override SearchResult Execute()
+        public override SceneResult Action()
         {
             var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
             worldTilemap.ShowSearchIcon(Hero.X, Hero.Y);
 
-            return SearchResult.Continue;
+            return SceneResult.Continue;
         }
     }
 }

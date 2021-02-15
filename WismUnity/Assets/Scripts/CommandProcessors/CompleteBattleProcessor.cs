@@ -59,7 +59,7 @@ namespace Assets.Scripts.CommandProcessors
         {
             var warGO = UnityUtilities.GameObjectHardFind("War!");
             warGO.SetActive(false);
-            this.unityGame.InputManager.SetAcceptingInput(true);
+            this.unityGame.InputManager.SetInputMode(InputMode.Game);
         }
     }
 }

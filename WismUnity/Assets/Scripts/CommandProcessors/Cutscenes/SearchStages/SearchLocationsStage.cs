@@ -3,26 +3,26 @@ using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class SearchRuinsStage : RedemptionStage
+    public class SearchLocationStage : CutsceneStage
     {
-        public SearchRuinsStage(SearchRuinsCommand command)
+        public SearchLocationStage(SearchLocationCommand command)
             : base(command)
         {
         }
 
-        public override SearchResult Execute()
+        public override SceneResult Action()
         {
             // This will change game state
             var result = Command.Execute();
-            
+
             switch (result)
             {
                 case ActionState.InProgress:
-                    return SearchResult.Wait;
+                    return ContinueOnKeyPress();
                 case ActionState.Succeeded:
-                    return SearchResult.Success;
+                    return SceneResult.Continue;
                 default:
-                    return SearchResult.Failure;
+                    return SceneResult.Failure;
             }
         }
     }

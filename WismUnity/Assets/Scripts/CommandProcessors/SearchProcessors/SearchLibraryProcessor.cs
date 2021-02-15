@@ -12,6 +12,7 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
+        private CutsceneStager stager;
 
         public SearchLibraryProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -33,28 +34,24 @@ namespace Assets.Scripts.CommandProcessors
         {
             var searchCommand = (SearchLibraryCommand)command;
 
-            ShowNotification("You enter a great Library...");
-            ShowNotification("Searching through the books, you find...");
-
-            var result = searchCommand.Execute();
-
-            string knowledge = "Nothing!";
-            if (result == ActionState.Succeeded)
+            if (stager == null)
             {
-                knowledge = searchCommand.Knowledge;
+                stager = CutsceneStager.CreateDefault(searchCommand, unityGame.InputManager);
+                unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
+                unityGame.HideSelectedBox();
             }
 
-            ShowNotification(knowledge);
+            var result = stager.Action();
+
+            if (result == ActionState.Failed ||
+                result == ActionState.Succeeded)
+            {
+                unityGame.InputManager.SetInputMode(InputMode.Game);
+                unityGame.GameManager.DeselectArmies();
+                stager = null;
+            }
 
             return result;
         }
-
-        private static void ShowNotification(string message)
-        {          
-            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
-                .GetComponent<NotificationBox>();
-            messageBox.Notify(message);
-        }
-
     }
 }

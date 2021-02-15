@@ -46,7 +46,7 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(items));
             }
 
-            foreach (var item in items)
+            foreach (var item in new List<IItem>(items))
             {
                 hero.Drop(item);
             }

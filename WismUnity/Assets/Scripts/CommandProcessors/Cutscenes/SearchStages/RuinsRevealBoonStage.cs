@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.Managers;
+using System.Collections.Generic;
 using Wism.Client.Api.Commands;
-using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class RevealBoonStage : RedemptionStage
+    public class RuinsRevealBoonStage : CutsceneStage
     {
         private List<IBoonIdentfier> boonIdentifiers;
 
-        public RevealBoonStage(SearchRuinsCommand command)
+        public RuinsRevealBoonStage(SearchLocationCommand command)
             : base(command)
         {
             this.boonIdentifiers = new List<IBoonIdentfier>()
@@ -20,20 +20,21 @@ namespace Assets.Scripts.CommandProcessors
             };
         }
 
-        public override SearchResult Execute()
+        public override SceneResult Action()
         {
+            var searchRuinsCommand = (SearchRuinsCommand)Command;
             foreach (var identifier in boonIdentifiers)
             {
-                if (identifier.CanIdentify(Command.Boon))
+                if (identifier.CanIdentify(searchRuinsCommand.Boon))
                 {
-                    identifier.Identify(Command.Boon);
-                    return SearchResult.Continue;
+                    identifier.Identify(searchRuinsCommand.Boon);
+                    return ContinueOnKeyPress();
                 }
             }
 
             // Continue even though the boon wasn't found to better support mods.
-            Notify("Your boon is a mysetery!");
-            return SearchResult.Continue;
+            Notify("Your boon is a mystery!");
+            return ContinueOnKeyPress();
         }
     }
 }

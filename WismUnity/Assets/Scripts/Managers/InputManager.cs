@@ -1,10 +1,17 @@
 ﻿using Assets.Scripts.UI;
+using System;
 using System.Timers;
 using UnityEngine;
 using Wism.Client.Core;
 
 namespace Assets.Scripts.Managers
 {
+    public enum InputMode
+    {
+        Game,
+        UI,
+        WaitForKey
+    }
     public class InputManager : MonoBehaviour
     {
         private UnityManager unityManager;
@@ -14,13 +21,17 @@ namespace Assets.Scripts.Managers
         private readonly Timer mouseSingleLeftClickTimer = new Timer();
         private bool singleLeftClickProcessed;
         private readonly Timer mouseRightClickHoldTimer = new Timer();
-        private bool holdingRightButton;
-        private bool acceptingInput = true;
+        private bool holdingRightButton;        
+        private InputMode inputMode = InputMode.Game;
         private bool skipInput;
 
         public GameManager GameManager { get => gameManager; set => gameManager = value; }
         public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
         public InputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
+
+        public delegate void AnyKeyPressed();
+
+        public AnyKeyPressed KeyPressed;
 
         public void Start()
         {
@@ -53,14 +64,19 @@ namespace Assets.Scripts.Managers
             singleLeftClickProcessed = true;
         }
 
-        void SingleRightClick(object o, System.EventArgs e)
+        void SingleRightClick(object o, EventArgs e)
         {
             holdingRightButton = true;
         }
 
-        public void SetAcceptingInput(bool acceptingInput)
+        internal void Clear()
         {
-            this.acceptingInput = acceptingInput;
+            throw new NotImplementedException();
+        }
+
+        public void SetInputMode(InputMode mode)
+        {
+            this.inputMode = mode;
         }
 
         public void SkipInput()
@@ -73,10 +89,35 @@ namespace Assets.Scripts.Managers
         /// </summary>
         private void HandleInput()
         {
-            if (UnityManager.SelectingArmies || !this.acceptingInput || this.skipInput)
+            switch (this.inputMode)
             {
-                // Army picker or another control has focus
-                this.skipInput = false;
+                case InputMode.Game:
+                    HandleGameInput();
+                    break;
+                case InputMode.WaitForKey:
+                    HandleWaitForKey();
+                    break;
+                case InputMode.UI:
+                    // Handled by Event System
+                default:
+                    break;
+            }
+        }
+
+        private void HandleWaitForKey()
+        {
+            if (KeyPressed != null && 
+                Input.anyKeyDown)
+            {
+                KeyPressed();
+            }
+        }
+
+        private void HandleGameInput()
+        {
+            if (skipInput)
+            {
+                skipInput = false;
                 return;
             }
 
@@ -222,9 +263,9 @@ namespace Assets.Scripts.Managers
             InputHandler.HandleCityClick(clickedTile);
         }
 
-        internal bool IsAcceptingInput()
+        public InputMode GetInputMode()
         {
-            return this.acceptingInput;
+            return this.inputMode;
         }
     }
 }

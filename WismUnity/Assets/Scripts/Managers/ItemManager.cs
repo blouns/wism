@@ -35,7 +35,7 @@ namespace Assets.Scripts.Managers
 
         private void RefreshItemGameObjects()
         {
-            var originalItems = itemGameObjects.Keys;
+            var originalItems = new Dictionary<Artifact, GameObject>.KeyCollection(itemGameObjects);
 
             // Find items sitting on the ground (not in Locations or with Heros)
             var items = GetItemsOnTiles();
@@ -49,7 +49,7 @@ namespace Assets.Scripts.Managers
                 }
             }
 
-            CleanupItems(originalItems, itemGameObjects.Keys);
+            CleanupItems(originalItems, items);
         }
 
         /// <summary>
@@ -59,9 +59,9 @@ namespace Assets.Scripts.Managers
         /// <param name="updatedItems">Updated list</param>
         private void CleanupItems(
             Dictionary<Artifact, GameObject>.KeyCollection originalItems, 
-            Dictionary<Artifact, GameObject>.KeyCollection updatedItems)
+            List<Artifact> itemsOnTiles)
         {
-            var obsoleteItems = originalItems.Except(updatedItems);
+            var obsoleteItems = originalItems.Except(itemsOnTiles);
             foreach (var itemToRemove in obsoleteItems)
             {
                 Destroy(itemGameObjects[itemToRemove]);

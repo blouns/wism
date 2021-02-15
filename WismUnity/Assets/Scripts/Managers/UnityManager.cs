@@ -283,7 +283,7 @@ namespace Assets.Scripts.Managers
                 throw new InvalidOperationException("Selected army box was null.");
             }
 
-            if (!this.InputManager.IsAcceptingInput())
+            if (this.InputManager.GetInputMode() != InputMode.Game)
             {
                 return;
             }

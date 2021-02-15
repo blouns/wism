@@ -15,6 +15,7 @@ namespace Assets.Scripts.CommandProcessors
         private ILogger logger;
         private readonly UnityManager unityGame;
         private Librarian librarian = new Librarian();
+        private CutsceneStager stager;
 
         public SearchSageProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -34,33 +35,26 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            var searchCommand = (SearchSageCommand)command;            
+            var searchCommand = (SearchSageCommand)command;
 
-            var result = searchCommand.Execute();
-            if (searchCommand.Gold > 0)
+            if (stager == null)
             {
-                ShowNotification("You are greeted warmly...");
-                ShowNotification("...the Seer gives you a gem...");
-                ShowNotification($"...worth {searchCommand.Gold} gp!");
+                stager = CutsceneStager.CreateDefault(searchCommand, unityGame.InputManager);
+                unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
+                unityGame.HideSelectedBox();
             }
 
-            if (result == ActionState.Succeeded)
+            var result = stager.Action();
+
+            if (result == ActionState.Failed ||
+                result == ActionState.Succeeded)
             {
-                ShowNotification("A sign says, \"Go away\"");
-            }
-            else
-            {
-                ShowNotification("You have found nothing!");
+                unityGame.InputManager.SetInputMode(InputMode.Game);
+                unityGame.GameManager.DeselectArmies();
+                stager = null;
             }
 
             return result;
-        }
-
-        private static void ShowNotification(string message)
-        {
-            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
-                .GetComponent<NotificationBox>();
-            messageBox.Notify(message);
         }
     }
 }
