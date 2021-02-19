@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Common;
+﻿using Assets.Scripts.UI;
+using Assets.Scripts.Common;
 using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
@@ -68,7 +69,7 @@ namespace Assets.Scripts.CommandProcessors
 
             if (!timerElapsed)
             {
-                this.unityGame.InputManager.SetAcceptingInput(false);
+                this.unityGame.InputManager.SetInputMode(InputMode.UI);
                 UnityUtilities.GameObjectHardFind("SelectedBox").SetActive(false);
                 StartTimerOnFirstTime();
                 ShowBattleNotification(defendingPlayer);

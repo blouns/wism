@@ -280,7 +280,7 @@ namespace Wism.Client.Modules
             return cityInfos;
         }
 
-        private static IList<LocationInfo> LoadLocationInfos(string path)
+        public static IList<LocationInfo> LoadLocationInfos(string path)
         {
             string filePath = String.Format(@"{0}\{1}", path, LocationInfo.FileName);
             locationInfos = LoadModFiles<LocationInfo>(filePath);

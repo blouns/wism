@@ -13,7 +13,7 @@ using ILogger = Wism.Client.Common.ILogger;
 namespace Assets.Scripts.Managers
 {
     /// <summary>
-    /// Unity game is the primary game loop and bridge to the Unity UI and WISM API via GameManager
+    /// Unity game is the primary GameObject and bridge to the Unity UI and WISM API via GameManager
     /// </summary>
     public class UnityManager : MonoBehaviour
     {
@@ -25,7 +25,6 @@ namespace Assets.Scripts.Managers
         // Game managers
         [SerializeField]
         private WorldTilemap worldTilemap;
-        private CityManager cityManager;
         private InputManager inputManager;
         private GameManager gameManager;
         private ArmyManager armyManager;
@@ -37,7 +36,10 @@ namespace Assets.Scripts.Managers
         private WarPanel warPanel;
         [SerializeField]
         private GameObject armyPickerPrefab;
-        private ArmyPicker armyPickerPanel;
+        private ArmyPicker armyPicker;
+        [SerializeField]
+        private GameObject itemPickerPrefab;
+        private ItemPicker itemPicker;
         private GameObject productionPanel;
 
         // UI elements
@@ -51,15 +53,14 @@ namespace Assets.Scripts.Managers
         private ProductionMode productionMode;
 
         public List<Army> CurrentAttackers { get; set; }
-        public List<Army> CurrentDefenders { get; set; }
-
-        public bool SelectingArmies { get; set; }        
+        public List<Army> CurrentDefenders { get; set; }        
 
         public GameManager GameManager { get => gameManager; set => gameManager = value; }
         public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
         public WarPanel WarPanel { get => warPanel; set => warPanel = value; }
         public ProductionMode ProductionMode { get => productionMode; set => productionMode = value; }
         public InputManager InputManager { get => inputManager; set => inputManager = value; }
+        public ItemPicker ItemPicker { get => itemPicker; set => itemPicker = value; }
 
         public void Start()
         {
@@ -102,19 +103,23 @@ namespace Assets.Scripts.Managers
                 new CompleteBattleProcessor(GameManager.LoggerFactory, this),
                 new StartTurnProcessor(GameManager.LoggerFactory, this),
                 new EndTurnProcessor(GameManager.LoggerFactory, this),
+                new SearchTempleProcessor(GameManager.LoggerFactory, this),
+                new SearchRuinsProcessor(GameManager.LoggerFactory, this),
+                new SearchLibraryProcessor(GameManager.LoggerFactory, this),               
+                new SearchSageProcessor(GameManager.LoggerFactory, this),                
                 new StandardProcessor(GameManager.LoggerFactory)
             };
 
-            // Set up game UI
+            // Set up game UI            
             SetTime(GameManager.StandardTime);
             SetupCameras();
 
             this.armyManager = GetComponent<ArmyManager>();
-            this.cityManager = GetComponent<CityManager>();
             this.inputManager = GetComponent<InputManager>();
 
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
-            armyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            armyPicker = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            ItemPicker = this.itemPickerPrefab.GetComponent<ItemPicker>();
             productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
 
             // Set up default game (for testing purposes only)
@@ -134,6 +139,11 @@ namespace Assets.Scripts.Managers
             Player player = Game.Current.GetCurrentPlayer();
             var inputHandler = this.GetComponent<InputManager>().InputHandler;
             inputHandler.CenterOnTile(player.Capitol.Tile);
+        }
+
+        internal void GoToLocation()
+        {
+            this.inputManager.SetInputMode(InputMode.LocationPicker);
         }
 
         public void FixedUpdate()
@@ -159,8 +169,6 @@ namespace Assets.Scripts.Managers
         internal void Draw()
         {
             DrawSelectedArmiesBox();
-            this.armyManager.DrawArmyGameObjects();
-            cityManager.DrawCities();
         }             
 
         /// <summary>
@@ -269,6 +277,13 @@ namespace Assets.Scripts.Managers
             messageBox.Notify("");
         }
 
+        public void NotifyUser(string message, params object[] args)
+        {
+            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
+                   .GetComponent<NotificationBox>();
+            messageBox.Notify(String.Format(message, args));
+        }
+
         private void DrawSelectedArmiesBox()
         {
             if (this.selectedArmyBox == null)
@@ -276,7 +291,7 @@ namespace Assets.Scripts.Managers
                 throw new InvalidOperationException("Selected army box was null.");
             }
 
-            if (!this.InputManager.IsAcceptingInput())
+            if (this.InputManager.GetInputMode() != InputMode.Game)
             {
                 return;
             }
@@ -289,8 +304,14 @@ namespace Assets.Scripts.Managers
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
                 var armiesToPick = Game.Current.GetSelectedArmies()[0].Tile.GetAllArmies();
-                armyPickerPanel.Initialize(this, armiesToPick);
+                armyPicker.Initialize(this, armiesToPick);
             }
+        }
+
+        internal void HandleItemPicker(bool takingItems)
+        {
+            var mode = (takingItems) ? InputMode.ItemTakePicker : InputMode.ItemDropPicker;
+            this.InputManager.SetInputMode(mode);
         }
 
         internal void ToggleMinimap()

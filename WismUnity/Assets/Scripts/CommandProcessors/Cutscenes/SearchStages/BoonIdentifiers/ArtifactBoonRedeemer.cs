@@ -1,0 +1,35 @@
+﻿using Assets.Scripts.UI;
+using System;
+using UnityEngine;
+using Wism.Client.Core;
+using Wism.Client.MapObjects;
+
+namespace Assets.Scripts.CommandProcessors
+{
+    public class ArtifactBoonRedeemer
+    {
+        public bool CanRedeem(IBoon boon)
+        {
+            return boon is ArtifactBoon;
+        }
+
+        public void Identify(IBoon boon)
+        {
+            if (!CanRedeem(boon))
+            {
+                throw new ArgumentException("Cannot redeem " + boon);
+            }
+
+            var artifact = (Artifact)boon.Result;
+            ShowNotification($"You have found the {artifact.DisplayName}!");
+        }
+
+        private static void ShowNotification(string message)
+        {
+            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
+                .GetComponent<NotificationBox>();
+            messageBox.Notify(message);
+        }
+    }
+
+}

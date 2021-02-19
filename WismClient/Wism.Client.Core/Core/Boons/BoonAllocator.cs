@@ -37,7 +37,7 @@ namespace Wism.Client.Core
         /// </remarks>
         public void Allocate(List<Location> worldLocations)
         {
-            ValidateAllocationPercentages();
+            //ValidateAllocationPercentages();
 
             List<Location> locations = GetLocationsToAllocate(worldLocations);
             BuildBoonLibrary(ModFactory.ModPath, locations.Count);
@@ -65,7 +65,7 @@ namespace Wism.Client.Core
             {
                 throw new InvalidOperationException(String.Format(
                     "Allocations must equal 100%: Allies: {0}%, Artifact: {1}%, Altar: {2}%, Gold: {3}%",
-                    AltarPercent * 100f,
+                    AlliesPercent * 100f,
                     ArtifactPercent * 100f,
                     AltarPercent * 100f,
                     GoldPercent * 100f));
@@ -102,7 +102,7 @@ namespace Wism.Client.Core
             AddArtifacts(artifacts, boonCount, artifactActual);
             AddAllies(boonCount, alliesActual);
             AddGold(boonCount, goldActual);
-            AddAltar(boonCount, altarActual);
+            AddAltar(boonCount, altarActual); 
         }
 
         /// <summary>
@@ -117,11 +117,26 @@ namespace Wism.Client.Core
         /// <param name="goldActual">Actual % of gold boons</param>
         private void CalculateActualAllocationPercent(int boonCount, IList<Artifact> artifacts, out float artifactActual, out float alliesActual, out float altarActual, out float goldActual)
         {
-            float artifactsPerBoon = (artifacts.Count / boonCount);
+            float artifactsPerBoon = ((float)artifacts.Count) / ((float)boonCount);
             artifactActual = (artifactsPerBoon > ArtifactPercent) ? ArtifactPercent : artifactsPerBoon;
-            alliesActual = (artifactActual < ArtifactPercent) ? AlliesPercent / (1 - artifactActual) : AlliesPercent;
-            altarActual = (artifactActual < ArtifactPercent) ? AltarPercent / (1 - artifactActual) : AltarPercent;
-            goldActual = (artifactActual < ArtifactPercent) ? GoldPercent / (1 - artifactActual) : GoldPercent;
+            
+            if (artifactActual < ArtifactPercent)
+            {
+                float artifactPercentDelta = (ArtifactPercent - artifactActual) / artifactActual;
+                alliesActual = (artifactPercentDelta * AlliesPercent) + AlliesPercent;
+                altarActual = (artifactPercentDelta * AltarPercent) + AltarPercent;
+                goldActual = (artifactPercentDelta * GoldPercent) + GoldPercent;
+            }
+            else
+            {
+                alliesActual = AlliesPercent;
+                altarActual = AltarPercent;
+                goldActual = GoldPercent;
+                goldActual += 1f - (artifactActual + alliesActual + goldActual); // Remainder goes to gold
+            }
+            //alliesActual = (artifactActual < ArtifactPercent) ? (AlliesPercent * (ArtifactPercent - artifactActual)) + AlliesPercent : AlliesPercent;
+            //altarActual = (artifactActual < ArtifactPercent) ? (AltarPercent * (ArtifactPercent - artifactActual)) + AltarPercent : AltarPercent;
+            //goldActual = (artifactActual < ArtifactPercent) ? (GoldPercent * (ArtifactPercent - artifactActual)) + GoldPercent : GoldPercent;
         }
 
         /// <summary>

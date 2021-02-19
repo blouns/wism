@@ -1,6 +1,5 @@
-﻿using Assets.Scripts.Common;
-using Assets.Scripts.Editors;
-using Assets.Scripts.Tilemaps;
+﻿using Assets.Scripts.Tilemaps;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -32,11 +31,12 @@ namespace Assets.Scripts.Tiles
         public HasTile hasTile = HasTile;
 
         private static Dictionary<Vector3, GameObject> cityObjects = new Dictionary<Vector3, GameObject>();
+        private bool isInitialized;
 
         public void OnEnable()
         {
             BuildCityGameObjectCache();
-
+            isInitialized = true;
         }
 
         public static bool HasTile(ITilemap tilemap, Vector3Int position)
@@ -78,6 +78,43 @@ namespace Assets.Scripts.Tiles
             }            
         }
 
+        public static void ClearCityCache()
+        {
+            cityObjects.Clear(); 
+        }
+
+        private void CreateCityGameObject(Vector3 worldVector)
+        {            
+            if (!cityObjects.ContainsKey(worldVector) && 
+                this.isInitialized &&
+                ShouldImportCitiesFromTilemap())
+            {
+                var cityContainer = UnityUtilities.GameObjectHardFind("Cities");
+                var cityPrefab = cityContainer.GetComponent<CityContainer>().CityPrefab;
+                var cityGO = Instantiate(cityPrefab, cityContainer.transform);
+                cityGO.transform.position = worldVector;
+                cityObjects.Add(worldVector, cityGO);
+                Debug.Log($"New City game object created");
+            }
+        }
+
+        private bool ShouldImportCitiesFromTilemap()
+        {
+            bool shouldImport = false;
+
+            var editorObjs = GameObject.FindGameObjectsWithTag("EditorOnly");
+            for (int i = 0; i < editorObjs.Length; i++)
+            {
+                if (editorObjs[i].name == "Cities")
+                {
+                    var citiesContainer = editorObjs[i].GetComponent<CityContainer>();
+                    shouldImport = citiesContainer.ImportCitesFromTilemap;
+                }
+            }
+
+            return shouldImport;
+        }
+
         private static void BuildCityGameObjectCache()
         {
             Debug.Log("Building city game object cache");
@@ -94,27 +131,8 @@ namespace Assets.Scripts.Tiles
             Debug.Log($"City game object cache ready: {cityObjects.Count} cities");
         }
 
-        public static void ClearCityCache()
-        {
-            cityObjects.Clear(); 
-        }
-
-        private void CreateCityGameObject(Vector3 worldVector)
-        {            
-            if (!cityObjects.ContainsKey(worldVector))
-            {
-                var cityContainer = UnityUtilities.GameObjectHardFind("Cities");
-                var cityPrefab = cityContainer.GetComponent<CityContainer>().CityPrefab;
-                var cityGO = Instantiate(cityPrefab, cityContainer.transform);
-                cityGO.transform.position = worldVector;
-                cityObjects.Add(worldVector, cityGO);
-                Debug.Log($"New City game object created");
-            }
-        }
-
-#if UNITY_EDITOR
+#if UNITY_EDITOR        
         // Add tile type into Unity Editor
-
         [MenuItem("Assets/Create/Tiles/CityTile")]
         public static void CreateCityTile()
         {

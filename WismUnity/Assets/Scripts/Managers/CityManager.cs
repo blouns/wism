@@ -1,13 +1,8 @@
-﻿using Assets.Scripts.Editors;
-using Assets.Scripts.Tilemaps;
+﻿using Assets.Scripts.Tilemaps;
 using Assets.Scripts.Tiles;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using Wism.Client.Core;
-using Wism.Client.MapObjects;
-using Tile = Wism.Client.Core.Tile;
 
 namespace Assets.Scripts.Managers
 {
@@ -20,13 +15,37 @@ namespace Assets.Scripts.Managers
         private CityTile neutralCityTile;
 
         private WorldTilemap worldTilemap;
+        private bool isInitialized;
+
+        public void Start()
+        {
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            this.isInitialized = true;
+        }
+
+        public void FixedUpdate()
+        {
+            if (!IsInitialized())
+            {
+                return;
+            }
+
+            DrawCities();
+        }
+
+        private bool IsInitialized()
+        {
+            return this.isInitialized;
+        }
 
         public void DrawCities()
         {
             worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
-
-            // TODO: Add neutral cities
 
             // Draw player-owned cities
             foreach (var player in Game.Current.Players)

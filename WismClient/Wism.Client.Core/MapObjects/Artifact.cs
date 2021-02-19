@@ -4,7 +4,7 @@ using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
 {
-    public class Artifact : MapObject, IItem
+    public class Artifact : MapObject
     {
         public Artifact(ArtifactInfo info)
         {
@@ -41,7 +41,7 @@ namespace Wism.Client.MapObjects
             {                
                 if (!hero.HasItems())
                 {
-                    hero.Items = new List<IItem>();
+                    hero.Items = new List<Artifact>();
                 }
                 hero.Items.Add(this);
                 hero.Tile.RemoveItem(this);

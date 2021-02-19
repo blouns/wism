@@ -1,10 +1,23 @@
 ﻿using Assets.Scripts.UI;
+using System;
+using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.Managers
 {
+    public enum InputMode
+    {
+        Game,
+        ItemDropPicker,
+        ItemTakePicker,
+        LocationPicker,
+        UI,        
+        WaitForKey
+    }
+
     public class InputManager : MonoBehaviour
     {
         private UnityManager unityManager;
@@ -14,13 +27,17 @@ namespace Assets.Scripts.Managers
         private readonly Timer mouseSingleLeftClickTimer = new Timer();
         private bool singleLeftClickProcessed;
         private readonly Timer mouseRightClickHoldTimer = new Timer();
-        private bool holdingRightButton;
-        private bool acceptingInput = true;
+        private bool holdingRightButton;        
+        private InputMode inputMode = InputMode.Game;
         private bool skipInput;
 
         public GameManager GameManager { get => gameManager; set => gameManager = value; }
         public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
         public InputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
+
+        public delegate void AnyKeyPressed();
+
+        public AnyKeyPressed KeyPressed;
 
         public void Start()
         {
@@ -53,14 +70,19 @@ namespace Assets.Scripts.Managers
             singleLeftClickProcessed = true;
         }
 
-        void SingleRightClick(object o, System.EventArgs e)
+        void SingleRightClick(object o, EventArgs e)
         {
             holdingRightButton = true;
         }
 
-        public void SetAcceptingInput(bool acceptingInput)
+        internal void Clear()
         {
-            this.acceptingInput = acceptingInput;
+            throw new NotImplementedException();
+        }
+
+        public void SetInputMode(InputMode mode)
+        {
+            this.inputMode = mode;
         }
 
         public void SkipInput()
@@ -73,10 +95,44 @@ namespace Assets.Scripts.Managers
         /// </summary>
         private void HandleInput()
         {
-            if (UnityManager.SelectingArmies || !this.acceptingInput || this.skipInput)
+            switch (this.inputMode)
             {
-                // Army picker or another control has focus
-                this.skipInput = false;
+                case InputMode.Game:
+                    HandleGameInput();
+                    break;
+                case InputMode.LocationPicker:
+                    HandleLocationPicker();
+                    break;
+                case InputMode.ItemDropPicker:
+                    HandleItemPicker(false);
+                    break;
+                case InputMode.ItemTakePicker:
+                    HandleItemPicker(true);
+                    break;
+                case InputMode.WaitForKey:
+                    HandleWaitForKey();
+                    break;
+                case InputMode.UI:
+                    // Handled by Event System
+                default:
+                    break;
+            }
+        }
+
+        private void HandleWaitForKey()
+        {
+            if (KeyPressed != null && 
+                Input.anyKeyDown)
+            {
+                KeyPressed();
+            }
+        }
+
+        private void HandleGameInput()
+        {
+            if (skipInput)
+            {
+                skipInput = false;
                 return;
             }
 
@@ -135,11 +191,13 @@ namespace Assets.Scripts.Managers
 
         private void HandleKeyboard()
         {
+            // Army actions
             if (Input.GetKeyDown(KeyCode.M))
             {
                 UnityManager.HandleArmyPicker();
             }
-            else if (Input.GetKeyDown(KeyCode.I))
+            else if (Input.GetKeyDown(KeyCode.Period) ||
+                     Input.GetKeyDown(KeyCode.KeypadPeriod))
             {
                 UnityManager.ToggleMinimap();
             }
@@ -147,17 +205,59 @@ namespace Assets.Scripts.Managers
             {
                 GameManager.SelectNextArmy();
             }
-            else if (Input.GetKeyDown(KeyCode.E))
+            else if (Input.GetKeyDown(KeyCode.D))
             {
-                GameManager.EndTurn();
+                GameManager.DefendSelectedArmies();
+            }            
+            else if (Input.GetKeyDown(KeyCode.Z))
+            {
+                GameManager.SearchLocationWithSelectedArmies();
             }
+            // TODO: Add Quit action for armies
+            // TODO: Add Disband action for armies
+            // TODO: Add Find armies action
+
+            // Hero actions
+            else if (Input.GetKeyDown(KeyCode.T))
+            {
+                UnityManager.HandleItemPicker(true);
+            }
+            else if (Input.GetKeyDown(KeyCode.O))
+            {
+                UnityManager.HandleItemPicker(false);
+            }
+            // TODO: Add Inventory action
+            // TODO: Add Find heros (k) action
+
+            // City actions
             else if (Input.GetKeyDown(KeyCode.P))
             {
                 UnityManager.SetProductionMode(ProductionMode.SelectCity);
             }
+            // TODO: Add build (b) actions
+            // TODO: Add raze (r) action
+
+            // Game actions
+            else if (Input.GetKeyDown(KeyCode.E))
+            {
+                GameManager.EndTurn();
+            }
+            // TODO: Add save (or auto-save) and load game actions 
+            // TODO: Add resign action
+            // TODO: Add change control action (human, AI)
+            // TODO: Add reports actions (winning, cities, gold, etc.)
+
+            // Navigation actions
             else if (Input.GetKeyDown(KeyCode.C))
             {
                 UnityManager.GoToCapitol();
+            }
+            // TODO: Add center-on-selected (space?) action
+
+            // TODO: Remove these Debug-only actions
+            else if (Input.GetKeyDown(KeyCode.Comma))
+            {
+                UnityManager.GoToLocation();
             }
         }
 
@@ -185,9 +285,120 @@ namespace Assets.Scripts.Managers
             InputHandler.HandleCityClick(clickedTile);
         }
 
-        internal bool IsAcceptingInput()
+        public InputMode GetInputMode()
         {
-            return this.acceptingInput;
+            return this.inputMode;
+        }
+
+        private void HandleItemPicker(bool takingItems)
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                this.unityManager.NotifyUser("You must have a hero selected for that!");
+                return;
+            }
+
+            Army army = Game.Current.GetSelectedArmies()
+                .Find(army => army is Hero);
+            if (army == null)
+            {
+                this.unityManager.NotifyUser("You must have a hero selected for that!");
+                return;
+            }
+
+            Hero hero = (Hero)army;
+            var itemPicker = this.unityManager.ItemPicker;
+            List<MapObject> itemsToPick;
+            if (takingItems)
+            {
+                // Launch the item picker
+                if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+                {
+                    this.unityManager.NotifyUser("Taking an item...");
+                    itemsToPick = new List<MapObject>(hero.Tile.Items);
+                    itemPicker.Initialize(this.unityManager, itemsToPick);
+                }
+                // Cancelled
+                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+                {
+                    itemPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+                // Take the items
+                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+                {
+                    var item = itemPicker.GetSelectedItem();
+                    var items = new List<Artifact> { (Artifact)item };
+                    GameManager.TakeItems(hero, items);
+                    itemPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+            }
+            else
+            {
+                // Launch the item picker
+                if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+                {
+                    this.unityManager.NotifyUser("Dropping an item...");
+                    itemsToPick = new List<MapObject>(hero.Items);
+                    itemPicker.Initialize(this.unityManager, itemsToPick);
+                }
+                // Cancelled
+                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+                {
+                    itemPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+                // Drop the items
+                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+                {
+                    var item = itemPicker.GetSelectedItem();
+                    var items = new List<Artifact> { (Artifact)item };
+                    GameManager.DropItems(hero, items);
+                    itemPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+            }
+        }
+
+        private void HandleLocationPicker()
+        {
+            var itemPicker = this.unityManager.ItemPicker;
+            List<MapObject> itemsToPick;
+
+            // Launch the location picker
+            if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+            {
+                if (Game.Current.ArmiesSelected())
+                {
+                    this.gameManager.DeselectArmies();
+                }
+                this.unityManager.NotifyUser("Goto location...");
+                itemsToPick = new List<MapObject>(World.Current.GetLocations());
+                itemPicker.Initialize(this.unityManager, itemsToPick);
+            }
+            // Cancelled
+            else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+            {
+                itemPicker.Clear();
+                this.SetInputMode(InputMode.Game);
+            }
+            // Center on the location chosen
+            else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+            {
+                var item = itemPicker.GetSelectedItem();
+                itemPicker.Clear();
+
+                this.unityManager.NotifyUser("Going to " + item.DisplayName);
+                InputHandler.CenterOnTile(((Location)item).Tile);                
+                this.SetInputMode(InputMode.Game);
+            }
+            // User is still selecting the item
+            else
+            {
+                // Do nothing
+            }
+            
         }
     }
 }

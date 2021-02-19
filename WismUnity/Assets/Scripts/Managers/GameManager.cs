@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Api;
@@ -7,7 +8,6 @@ using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
-using Wism.Client.War;
 using Command = Wism.Client.Api.Commands.Command;
 
 namespace Assets.Scripts.Managers
@@ -23,9 +23,9 @@ namespace Assets.Scripts.Managers
         public const float StandardTime = 0.25f;
         public const float WarTime = 1.0f;
         public const int MaxArmysPerArmy = Army.MaxArmies;
-        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";
-        public static readonly string DefaultCityModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\Illuria";
-        public static readonly string DefaultWorld = @"DevWorld";
+        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";        
+        public static readonly string DefaultWorld = @"Illuria";
+        public static readonly string DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
 
         // Controllers for the WISM Client API
         private ControllerProvider provider;
@@ -45,7 +45,9 @@ namespace Assets.Scripts.Managers
                 ArmyController = new ArmyController(LoggerFactory),
                 CityController = new CityController(LoggerFactory),
                 CommandController = new CommandController(LoggerFactory, repo),
-                GameController = new GameController(LoggerFactory)
+                GameController = new GameController(LoggerFactory),
+                LocationController = new LocationController(LoggerFactory),
+                HeroController = new HeroController(LoggerFactory)
             };
             commandController = provider.CommandController;            
         }
@@ -141,6 +143,55 @@ namespace Assets.Scripts.Managers
             commandController.AddCommand(
                 new EndTurnCommand(provider.GameController, Game.Current.GetCurrentPlayer()));
             StartTurn();
+        }
+
+        public void SearchLocationWithSelectedArmies()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var location = armies[0].Tile.Location;
+            if (location == null)
+            {
+                // TODO: Perhaps say "you found nothing"?
+                Debug.Log("No location on this tile.");
+            }
+
+            Command command;
+            switch (location.Kind)
+            {
+                case "Library":
+                    command = new SearchLibraryCommand(provider.LocationController, armies, location);
+                    break;
+                case "Ruins":
+                case "Tomb":
+                    command = new SearchRuinsCommand(provider.LocationController, armies, location);
+                    break;
+                case "Sage":
+                    command = new SearchSageCommand(provider.LocationController, armies, location);
+                    break;
+                case "Temple":
+                    command = new SearchTempleCommand(provider.LocationController, armies, location);
+                    break;
+                default:
+                    throw new InvalidOperationException("No location to search.");
+            }
+            commandController.AddCommand(command);
+        }
+
+        public void TakeItems(Hero hero, List<Artifact> items)
+        {
+            commandController.AddCommand
+                (new TakeItemsCommand(provider.HeroController, hero, items));
+        }
+
+        public void DropItems(Hero hero, List<Artifact> items)
+        {
+            commandController.AddCommand
+                (new DropItemsCommand(provider.HeroController, hero, items));
         }
     }
 }

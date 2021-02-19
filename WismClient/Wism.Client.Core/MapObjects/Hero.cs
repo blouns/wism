@@ -6,7 +6,7 @@ namespace Wism.Client.MapObjects
 {
     public class Hero : Army
     {
-        public List<IItem> Items { get; internal set; }
+        public List<Artifact> Items { get; internal set; }
 
         internal Hero()
         {
@@ -22,7 +22,7 @@ namespace Wism.Client.MapObjects
             }
         }
 
-        public void Take(IItem item)
+        public void Take(Artifact item)
         {
             if (item == null)
             {
@@ -33,7 +33,7 @@ namespace Wism.Client.MapObjects
             ApplyBonuses(item);
         }
 
-        public void Take(List<IItem> items)
+        public void Take(List<Artifact> items)
         {
             if (items is null ||
                 !Tile.HasItems())
@@ -41,7 +41,7 @@ namespace Wism.Client.MapObjects
                 return;
             }
 
-            foreach (var item in new List<IItem>(items))
+            foreach (var item in new List<Artifact>(items))
             {
                 if (!Tile.Items.Contains(item))
                 {
@@ -52,7 +52,7 @@ namespace Wism.Client.MapObjects
             }
         }
 
-        private void ApplyBonuses(IItem item)
+        private void ApplyBonuses(Artifact item)
         {
             var artifact = item as Artifact;
             if (artifact == null)
@@ -70,13 +70,13 @@ namespace Wism.Client.MapObjects
                 return;
             }
 
-            foreach (var item in new List<IItem>(Items))
+            foreach (var item in new List<Artifact>(Items))
             {
                 Drop(item);
             }
         }
 
-        public void Drop(IItem item)
+        public void Drop(Artifact item)
         {
             if (item is null)
             {
@@ -92,7 +92,7 @@ namespace Wism.Client.MapObjects
             }
         }
 
-        private void RemoveBonsuses(IItem item)
+        private void RemoveBonsuses(Artifact item)
         {
             var artifact = item as Artifact;
             if (artifact == null)

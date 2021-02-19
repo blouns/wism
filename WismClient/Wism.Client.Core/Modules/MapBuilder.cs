@@ -46,7 +46,7 @@ namespace Wism.Client.Modules
             return locationBuilder.FindLocation(shortName);
         }
 
-        internal static LocationInfo FindLocationInfo(string shortName)
+        public static LocationInfo FindLocationInfo(string shortName)
         {
             return locationBuilder.FindLocationInfo(shortName);
         }
@@ -201,9 +201,19 @@ namespace Wism.Client.Modules
             cityBuilder.AddCitiesFromWorldPath(world, worldName);
         }
 
+        public static void AddCitiesFromInfos(World world, List<CityInfo> cityInfos)
+        {
+            cityBuilder.AddCities(world, cityInfos);
+        }
+
         public static void AddLocationsFromWorldPath(World world, string worldName)
         {
             locationBuilder.AddLocationsFromWorldPath(world, worldName);
+        }
+
+        public static void AddLocationsFromInfos(World world, List<LocationInfo> locationInfos)
+        {
+            locationBuilder.AddLocations(world, locationInfos);
         }
     }    
 }

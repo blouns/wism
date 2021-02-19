@@ -6,17 +6,24 @@ using UnityEngine;
 using Wism.Client.Core;
 using Wism.Client.Modules;
 using Wism.Client.War;
+using LocationInfo = Wism.Client.Modules.LocationInfo;
 
 namespace Assets.Scripts
 {
     public class GameFactory : MonoBehaviour
     {
         private WorldTilemap worldTilemap;
+        private bool isInitialized;
 
         public void Start()
         {
-            this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
-                .GetComponent<WorldTilemap>();
+            if (!isInitialized)
+            {
+                this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
+                    .GetComponent<WorldTilemap>();
+
+                this.isInitialized = true;
+            }            
         }
 
         public void CreateDefaultGame()
@@ -28,9 +35,14 @@ namespace Assets.Scripts
             Game.Current.WarStrategy = new DefaultWarStrategy();
 
             ReadyPlayers();
+            if (!isInitialized)
+            {
+                Start();
+            }
             World.CreateWorld(
-                worldTilemap.CreateWorldFromScene(GameManager.DefaultWorld).Map);            
+                worldTilemap.CreateWorldFromScene(GameManager.DefaultWorld).Map);
             CreateDefaultCitiesFromScene();
+            CreateDefaultLocationsFromScene();
             CreateDefaultArmies();
         }
 
@@ -71,6 +83,7 @@ namespace Assets.Scripts
                 .GetComponent<CityEntry>()
                 .GetGameCoordinates();
             sirians.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
+            sirians.HireHero(World.Current.Map[63, 20]);    // Testing search
 
             Player stormgiants = Game.Current.Players[1];
             capitolPosition = UnityUtilities.GameObjectHardFind("Stormheim")
@@ -109,9 +122,9 @@ namespace Assets.Scripts
                 cityGO.name = cityEntry.cityShortName;
             }
 
-            // Set the coords for the new city on the CityInfos
+            // Set the coordinates for the cities
             var cityInfos = new List<CityInfo>(
-                ModFactory.LoadCityInfos(GameManager.DefaultCityModPath));
+                ModFactory.LoadCityInfos(GameManager.DefaultWorldModPath));
             var illuriaCities = new List<CityInfo>();
             foreach (CityInfo ci in cityInfos)
             {
@@ -124,8 +137,50 @@ namespace Assets.Scripts
                     illuriaCities.Add(ci);
                 }
             }
+            MapBuilder.AddCitiesFromInfos(World.Current, illuriaCities);
+        }
 
-            MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, illuriaCities);
+        /// <summary>
+        /// FOR TESTING ONLY: Create default locations from scene.
+        /// </summary>
+        private void CreateDefaultLocationsFromScene()
+        {
+            Dictionary<string, GameObject> locationsNames = new Dictionary<string, GameObject>();
+
+            // Extract the X,Y coords from Location GameObjects from the scene 
+            var locationContainerGO = UnityUtilities.GameObjectHardFind("Locations");
+            int locationCount = locationContainerGO.transform.childCount;
+            for (int i = 0; i < locationCount; i++)
+            {
+                var locationGO = locationContainerGO.transform.GetChild(i).gameObject;
+                var locationEntry = locationGO.GetComponent<LocationEntry>();
+
+                if (locationsNames.ContainsKey(locationEntry.locationShortName))
+                {
+                    continue;
+                }
+
+                locationsNames.Add(locationEntry.locationShortName, locationGO);
+                locationGO.name = locationEntry.locationShortName;
+            }
+
+            // Set the coordinates for the locations
+            var locationInfos = new List<LocationInfo>(
+                ModFactory.LoadLocationInfos(GameManager.DefaultWorldModPath));
+            var illuriaLocations = new List<LocationInfo>();
+            foreach (LocationInfo ci in locationInfos)
+            {
+                if (locationsNames.ContainsKey(ci.ShortName))
+                {
+                    var go = locationsNames[ci.ShortName];
+                    var coords = worldTilemap.ConvertUnityToGameVector(go.transform.position);
+                    ci.X = coords.x;
+                    ci.Y = coords.y;
+                    illuriaLocations.Add(ci);
+                }
+            }
+            MapBuilder.AddLocationsFromInfos(World.Current, illuriaLocations);
+            MapBuilder.AllocateBoons(World.Current.GetLocations());
         }
     }
 }

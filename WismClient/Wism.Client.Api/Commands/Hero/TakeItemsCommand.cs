@@ -9,7 +9,7 @@ namespace Wism.Client.Api.Commands
     {
         protected readonly HeroController heroController;
         public Hero Hero { get; set; }
-        public List<IItem> Items { get; }
+        public List<Artifact> Items { get; }
 
         /// <summary>
         /// Take items
@@ -17,7 +17,7 @@ namespace Wism.Client.Api.Commands
         /// <param name="heroController">Hero controller</param>
         /// <param name="hero">Hero to take items</param>
         /// <param name="items">Items to take</param>
-        public TakeItemsCommand(HeroController heroController, Hero hero, List<IItem> items)
+        public TakeItemsCommand(HeroController heroController, Hero hero, List<Artifact> items)
         {
             this.heroController = heroController ?? throw new System.ArgumentNullException(nameof(heroController));
             Hero = hero ?? throw new System.ArgumentNullException(nameof(hero));

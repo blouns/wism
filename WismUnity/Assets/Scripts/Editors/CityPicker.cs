@@ -61,7 +61,7 @@ namespace Assets.Scripts.Editors
             {
                 // TODO: Temp code: need to select the world dynamically
                 this.cityInfos = new List<CityInfo>(
-                    ModFactory.LoadCityInfos(GameManager.DefaultCityModPath));
+                    ModFactory.LoadCityInfos(GameManager.DefaultWorldModPath));
             }
 
             var takenCityNames = GetTakenCityNames();

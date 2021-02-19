@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.UI
 {
-    // TODO: Implement locations (ruins, tombs, libraries, temples, sages)
     public class LocationInformationMapping : IInformationMapping
     {
         string[] labels = new string[]
@@ -23,12 +20,74 @@ namespace Assets.Scripts.UI
 
         public bool CanMapSubject(Tile subject)
         {
-            return false;
+            return (subject != null) && subject.HasLocation();
         }
 
         public void GetLabelValuePair(int index, Tile subject, out string label, out string value)
         {
-            throw new NotImplementedException();
+            if (index >= labels.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            label = labels[index];
+            value = GetLabelValuePair(index, subject);
+        }
+
+        private string GetLabelValuePair(int index, Tile subject)
+        {
+            string value;
+            Player player = Game.Current.GetCurrentPlayer();
+            Location location = subject.Location;
+
+            switch (index)
+            {
+                case 0: // Name
+                    value = player.Clan.DisplayName;
+                    break;
+                case 1: // Location
+                    value = location.DisplayName;
+                    break;
+                case 2: // Lands
+                    value = "Illuria";
+                    break;
+                case 5: // Command
+                    value = "Info";
+                    break;
+                case 6: // Status
+                    value = GetStatus(location);
+                    break;
+                default:
+                    value = "";
+                    break;
+            }
+
+            return value;
+        }
+
+        private string GetStatus(Location location)
+        {
+            string status;
+
+            switch (location.Kind)
+            {
+                case "Library":
+                    status = "Library";
+                    break;
+                case "Sage":
+                    status = "Sage";
+                    break;
+                case "Temple":
+                    status = "Healers";
+                    break;
+                case "Ruins":
+                case "Tomb":
+                default:
+                    status = (location.Searched) ? "Explored" : "Unexplored";
+                    break;
+            }
+
+            return status;
         }
     }
 }

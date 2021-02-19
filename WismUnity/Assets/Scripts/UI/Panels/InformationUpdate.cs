@@ -6,7 +6,6 @@ using Wism.Client.Core;
 
 namespace Assets.Scripts.UI
 {
-
     public class InformationUpdate : MonoBehaviour
     {
         private const int NumberOfControls = 8;

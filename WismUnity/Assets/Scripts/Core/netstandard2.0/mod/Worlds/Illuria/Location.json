@@ -232,5 +232,11 @@
     "DisplayName": "Monolyth",
     "Kind": "Ruins",
     "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "RuinsKabor",
+    "DisplayName": "Ruins of Kabor",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
   }
 ]

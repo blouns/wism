@@ -30,7 +30,7 @@ namespace Wism.Client.Core
         {
             if (Items == null)
             {
-                Items = new List<IItem>();
+                Items = new List<Artifact>();
             }
             Items.Add(artifact);
             artifact.Tile = this;
@@ -40,7 +40,7 @@ namespace Wism.Client.Core
         {
             if (Items == null)
             {
-                Items = new List<IItem>();
+                Items = new List<Artifact>();
             }
             Items.Remove(artifact);
             artifact.Tile = null;
@@ -56,9 +56,9 @@ namespace Wism.Client.Core
         /// </summary>
         public Location Location { get; set; }
 
-        public List<IItem> Items { get; internal set; }
+        public List<Artifact> Items { get; internal set; }
 
-        public bool ContainsItem(IItem item)
+        public bool ContainsItem(Artifact item)
         {
             return HasItems() && Items.Contains(item);
         }

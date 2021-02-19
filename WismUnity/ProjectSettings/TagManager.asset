@@ -18,6 +18,8 @@ TagManager:
   - UnityManager
   - City
   - InformationPanel
+  - Location
+  - YesNoBox
   layers:
   - Default
   - TransparentFX
