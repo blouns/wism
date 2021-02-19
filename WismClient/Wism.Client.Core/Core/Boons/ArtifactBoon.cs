@@ -26,7 +26,7 @@ namespace Wism.Client.Core
 
             if (!target.HasItems())
             {
-                target.Items = new List<IItem>();
+                target.Items = new List<Artifact>();
             }
 
             target.AddItem(Artifact);

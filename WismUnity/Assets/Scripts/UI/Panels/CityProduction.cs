@@ -6,217 +6,220 @@ using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
-public class CityProduction : MonoBehaviour
+namespace Assets.Scripts.UI
 {
-    [SerializeField]
-    private Button[] armyButtons;    
-
-    [SerializeField] 
-    private Button prodButton;
-    [SerializeField] 
-    private Button locButton;
-    [SerializeField] 
-    private Button stopButton;
-    [SerializeField]
-    private Button exitButton;
-
-    
-    private UnityManager unityManager;
-    private ArmyManager armyManager;
-    private int armySelectedIndex;
-    private City productionCity;
-    private ProductionInfo[] productionInfos;
-    
-    public void Initialize(UnityManager unityManager, City city)
+    public class CityProduction : MonoBehaviour
     {
-        if (unityManager is null)
+        [SerializeField]
+        private Button[] armyButtons;
+
+        [SerializeField]
+        private Button prodButton;
+        [SerializeField]
+        private Button locButton;
+        [SerializeField]
+        private Button stopButton;
+        [SerializeField]
+        private Button exitButton;
+
+
+        private UnityManager unityManager;
+        private ArmyManager armyManager;
+        private int armySelectedIndex;
+        private City productionCity;
+        private ProductionInfo[] productionInfos;
+
+        public void Initialize(UnityManager unityManager, City city)
         {
-            throw new ArgumentNullException(nameof(unityManager));
+            if (unityManager is null)
+            {
+                throw new ArgumentNullException(nameof(unityManager));
+            }
+
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            this.productionCity = city;
+            this.unityManager = unityManager;
+            this.armyManager = unityManager.GetComponent<ArmyManager>();
+
+            InitializeProduction();
         }
 
-        if (city is null)
+        private void InitializeProduction()
         {
-            throw new ArgumentNullException(nameof(city));
+            SetInitialButtonState();
+
+            var barracks = productionCity.Barracks;
+
+            // Unpack the army infos for each production slot
+            this.productionInfos = barracks.GetProductionKinds().ToArray();
+            for (int i = 0; i < productionInfos.Length; i++)
+            {
+                InitializeProductionSlot(i);
+            }
+
+            InitializeCurrentProduction();
+            this.unityManager.InputManager.SetInputMode(InputMode.UI);
         }
 
-        this.productionCity = city;
-        this.unityManager = unityManager;
-        this.armyManager = unityManager.GetComponent<ArmyManager>();
-
-        InitializeProduction();
-    }
-
-    private void InitializeProduction()
-    {
-        SetInitialButtonState();
-
-        var barracks = productionCity.Barracks;
-
-        // Unpack the army infos for each production slot
-        this.productionInfos = barracks.GetProductionKinds().ToArray();
-        for (int i = 0; i < productionInfos.Length; i++)
+        private void InitializeCurrentProduction()
         {
-            InitializeProductionSlot(i);
+            string turnsRemainingString = "None";
+
+            var barracks = this.productionCity.Barracks;
+            if (barracks.ProducingArmy())
+            {
+                // Set image
+                SetArmyImageOnGameObject(
+                    Game.Current.GetCurrentPlayer().Clan,
+                    barracks.ArmyInTraining.ArmyInfo,
+                    "CurrentArmyKind");
+                transform.Find("CurrentArmyKind").gameObject.SetActive(true);
+
+                turnsRemainingString = barracks.ArmyInTraining.TurnsToProduce + "t";
+            }
+            else
+            {
+                transform.Find("CurrentArmyKind").gameObject.SetActive(false);
+            }
+
+            // Set turns remaining text
+            var turnsText = gameObject.transform.Find("TurnsRemainingText").GetComponent<Text>();
+            turnsText.text = turnsRemainingString;
         }
 
-        InitializeCurrentProduction();
-        this.unityManager.InputManager.SetInputMode(InputMode.UI);
-    }
-
-    private void InitializeCurrentProduction()
-    {
-        string turnsRemainingString = "None";
-
-        var barracks = this.productionCity.Barracks;
-        if (barracks.ProducingArmy())
+        private void SetArmyImageOnGameObject(Clan clan, ArmyInfo info, string gameObjectName)
         {
+            var armyPrefab = armyManager.FindGameObjectKind(clan, info);
+            SpriteRenderer spriteRenderer = armyPrefab.GetComponent<SpriteRenderer>();
+            var image = gameObject.transform.Find(gameObjectName).GetComponent<Image>();
+            image.sprite = spriteRenderer.sprite;
+        }
+
+        private void SetInitialButtonState()
+        {
+            this.prodButton.interactable = false;
+            this.locButton.interactable = false;
+            this.stopButton.interactable = true;
+            this.exitButton.interactable = true;
+            ClearProduction();
+        }
+
+        private void InitializeProductionSlot(int index)
+        {
+            ArmyInfo armyInfo = ModFactory.FindArmyInfo(productionInfos[index].ArmyInfoName);
+
             // Set image
-            SetArmyImageOnGameObject(
-                Game.Current.GetCurrentPlayer().Clan,
-                barracks.ArmyInTraining.ArmyInfo,
-                "CurrentArmyKind");
-            transform.Find("CurrentArmyKind").gameObject.SetActive(true);
+            var clan = Game.Current.GetCurrentPlayer().Clan;
+            var armyPrefab = armyManager.FindGameObjectKind(clan, armyInfo);
+            SpriteRenderer spriteRenderer = armyPrefab.GetComponent<SpriteRenderer>();
+            var image = armyButtons[index].gameObject.transform.Find("ArmyKind")
+                .GetComponent<Image>();
+            image.sprite = spriteRenderer.sprite;
 
-            turnsRemainingString = barracks.ArmyInTraining.TurnsToProduce + "t";
+            // Set production info
+            Text productionText = armyButtons[index].gameObject.transform.Find("ArmyInfo")
+                .GetComponent<Text>();
+            productionText.text = $"{productionInfos[index].TurnsToProduce}t / {productionInfos[index].Upkeep}gp";
+
+            this.armyButtons[index].gameObject.SetActive(true);
         }
-        else
+
+        private void ClearProduction()
         {
-            transform.Find("CurrentArmyKind").gameObject.SetActive(false);
+            for (int i = 0; i < armyButtons.Length; i++)
+            {
+                this.armyButtons[i].gameObject.SetActive(false);
+            }
         }
 
-        // Set turns remaining text
-        var turnsText = gameObject.transform.Find("TurnsRemainingText").GetComponent<Text>();
-        turnsText.text = turnsRemainingString;
-    }
-
-    private void SetArmyImageOnGameObject(Clan clan, ArmyInfo info, string gameObjectName)
-    {  
-        var armyPrefab = armyManager.FindGameObjectKind(clan, info);
-        SpriteRenderer spriteRenderer = armyPrefab.GetComponent<SpriteRenderer>();
-        var image = gameObject.transform.Find(gameObjectName).GetComponent<Image>();
-        image.sprite = spriteRenderer.sprite;
-    }
-
-    private void SetInitialButtonState()
-    {
-        this.prodButton.interactable = false;
-        this.locButton.interactable = false;
-        this.stopButton.interactable = true;
-        this.exitButton.interactable = true;
-        ClearProduction();
-    }
-
-    private void InitializeProductionSlot(int index)
-    {
-        ArmyInfo armyInfo = ModFactory.FindArmyInfo(productionInfos[index].ArmyInfoName);
-
-        // Set image
-        var clan = Game.Current.GetCurrentPlayer().Clan;
-        var armyPrefab = armyManager.FindGameObjectKind(clan, armyInfo);
-        SpriteRenderer spriteRenderer = armyPrefab.GetComponent<SpriteRenderer>();
-        var image = armyButtons[index].gameObject.transform.Find("ArmyKind")
-            .GetComponent<Image>();
-        image.sprite = spriteRenderer.sprite;
-
-        // Set production info
-        Text productionText = armyButtons[index].gameObject.transform.Find("ArmyInfo")
-            .GetComponent<Text>();
-        productionText.text = $"{productionInfos[index].TurnsToProduce}t / {productionInfos[index].Upkeep}gp";
-
-        this.armyButtons[index].gameObject.SetActive(true);
-    }
-
-    private void ClearProduction()
-    {
-        for (int i = 0; i < armyButtons.Length; i++)
+        public void OnArmy1Click()
         {
-            this.armyButtons[i].gameObject.SetActive(false);
+            armySelectedIndex = 0;
+            EnableProduction();
         }
-    }
 
-    public void OnArmy1Click()
-    {
-        armySelectedIndex = 0;
-        EnableProduction();
-    }
-
-    public void OnArmy2Click()
-    {
-        armySelectedIndex = 1;
-        EnableProduction();
-    }
-
-    public void OnArmy3Click()
-    {
-        armySelectedIndex = 2;
-        EnableProduction();
-    }
-
-    public void OnArmy4Click()
-    {
-        armySelectedIndex = 3;
-        EnableProduction();
-    }
-
-    public void OnProdClick()
-    {
-        StartProduction();
-
-        // Close
-        OnExitClick();
-    }
-
-    private void StartProduction(City destinationCity = null)
-    {
-        var armyName = productionInfos[armySelectedIndex].ArmyInfoName;
-        var armyInfo = ModFactory.FindArmyInfo(armyName);
-
-        Debug.Log($"Starting production of {armyInfo.DisplayName}" +
-            $" on {this.productionCity}" +
-            $" to {(destinationCity == null ? this.productionCity : destinationCity)}");
-
-        this.unityManager.GameManager
-            .StartProduction(this.productionCity, armyInfo, destinationCity);
-    }
-
-    public void OnLocClick()
-    {
-        // TODO: Need a way to pick the destination city
-        City destinationCity = null;
-
-        StartProduction(destinationCity);
-    }
-
-    public void OnStopClick()
-    {
-        Debug.Log($"Stopping production on {this.productionCity}");
-        this.unityManager.GameManager
-            .StopProduction(this.productionCity);
-
-        DisableProduction();        
-    }
-
-    public void OnExitClick()
-    {
-        this.unityManager.InputManager.SetInputMode(InputMode.Game);
-        this.unityManager.SetProductionMode(ProductionMode.None);
-        this.gameObject.SetActive(false);
-    }
-
-    private void EnableProduction()
-    {
-        this.prodButton.interactable = true;
-
-        if (Game.Current.GetCurrentPlayer()
-            .GetCities().Count > 1)
+        public void OnArmy2Click()
         {
-            this.locButton.interactable = true;
+            armySelectedIndex = 1;
+            EnableProduction();
         }
-    }
 
-    private void DisableProduction()
-    {
-        this.prodButton.interactable = false;
-        this.locButton.interactable = false;
+        public void OnArmy3Click()
+        {
+            armySelectedIndex = 2;
+            EnableProduction();
+        }
+
+        public void OnArmy4Click()
+        {
+            armySelectedIndex = 3;
+            EnableProduction();
+        }
+
+        public void OnProdClick()
+        {
+            StartProduction();
+
+            // Close
+            OnExitClick();
+        }
+
+        private void StartProduction(City destinationCity = null)
+        {
+            var armyName = productionInfos[armySelectedIndex].ArmyInfoName;
+            var armyInfo = ModFactory.FindArmyInfo(armyName);
+
+            Debug.Log($"Starting production of {armyInfo.DisplayName}" +
+                $" on {this.productionCity}" +
+                $" to {(destinationCity == null ? this.productionCity : destinationCity)}");
+
+            this.unityManager.GameManager
+                .StartProduction(this.productionCity, armyInfo, destinationCity);
+        }
+
+        public void OnLocClick()
+        {
+            // TODO: Need a way to pick the destination city
+            City destinationCity = null;
+
+            StartProduction(destinationCity);
+        }
+
+        public void OnStopClick()
+        {
+            Debug.Log($"Stopping production on {this.productionCity}");
+            this.unityManager.GameManager
+                .StopProduction(this.productionCity);
+
+            DisableProduction();
+        }
+
+        public void OnExitClick()
+        {
+            this.unityManager.InputManager.SetInputMode(InputMode.Game);
+            this.unityManager.SetProductionMode(ProductionMode.None);
+            this.gameObject.SetActive(false);
+        }
+
+        private void EnableProduction()
+        {
+            this.prodButton.interactable = true;
+
+            if (Game.Current.GetCurrentPlayer()
+                .GetCities().Count > 1)
+            {
+                this.locButton.interactable = true;
+            }
+        }
+
+        private void DisableProduction()
+        {
+            this.prodButton.interactable = false;
+            this.locButton.interactable = false;
+        }
     }
 }

@@ -97,21 +97,13 @@ namespace Assets.Scripts.Managers
                 {
                     if (map[i, j].HasItems())
                     {
-                        // TODO: Consider swapping Tile from IItem to Artifact to avoid this
                         items.AddRange(map[i, j].Items
-                            .FindAll(item => item is Artifact)
-                            .ConvertAll<Artifact>(
-                                new Converter<IItem, Artifact>(ItemToArtifact)));
+                            .FindAll(item => item is Artifact));
                     }
                 }
             }
 
             return items;
-        }
-
-        private Artifact ItemToArtifact(IItem input)
-        {
-            return (Artifact)input;
         }
     }
 }

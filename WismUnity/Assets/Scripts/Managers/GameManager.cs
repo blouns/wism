@@ -182,13 +182,13 @@ namespace Assets.Scripts.Managers
             commandController.AddCommand(command);
         }
 
-        public void TakeItems(Hero hero, List<IItem> items)
+        public void TakeItems(Hero hero, List<Artifact> items)
         {
             commandController.AddCommand
                 (new TakeItemsCommand(provider.HeroController, hero, items));
         }
 
-        public void DropItems(Hero hero, List<IItem> items)
+        public void DropItems(Hero hero, List<Artifact> items)
         {
             commandController.AddCommand
                 (new DropItemsCommand(provider.HeroController, hero, items));

@@ -105,7 +105,7 @@ namespace Wism.Client.Test.Unit
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
-            hero1.Items = new List<IItem>();
+            hero1.Items = new List<Artifact>();
             hero1.Items.Add(artifact);
             var librarian = new Librarian();
 
@@ -184,7 +184,7 @@ namespace Wism.Client.Test.Unit
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
-            hero1.Items = new List<IItem>();
+            hero1.Items = new List<Artifact>();
             hero1.Items.Add(artifact);
 
             // Tiles
@@ -241,7 +241,7 @@ namespace Wism.Client.Test.Unit
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
-            hero1.Items = new List<IItem>();
+            hero1.Items = new List<Artifact>();
             hero1.Items.Add(artifact);
             var librarian = new Librarian();
 
@@ -294,7 +294,7 @@ namespace Wism.Client.Test.Unit
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
-            hero1.Items = new List<IItem>();
+            hero1.Items = new List<Artifact>();
             hero1.Items.Add(artifact);
 
             // Tiles
@@ -386,7 +386,7 @@ namespace Wism.Client.Test.Unit
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
-            hero1.Items = new List<IItem>();
+            hero1.Items = new List<Artifact>();
             hero1.Items.Add(artifact);            
 
             // Items
@@ -429,7 +429,7 @@ namespace Wism.Client.Test.Unit
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
-            hero1.Items = new List<IItem>();
+            hero1.Items = new List<Artifact>();
             hero1.Items.Add(artifact);
 
             // Items
@@ -472,7 +472,7 @@ namespace Wism.Client.Test.Unit
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
-            hero1.Items = new List<IItem>();
+            hero1.Items = new List<Artifact>();
             hero1.Items.Add(artifact);
 
             // Items
@@ -515,7 +515,7 @@ namespace Wism.Client.Test.Unit
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
-            hero1.Items = new List<IItem>();
+            hero1.Items = new List<Artifact>();
             hero1.Items.Add(artifact);
 
             // Items

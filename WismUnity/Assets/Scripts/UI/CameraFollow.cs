@@ -58,6 +58,8 @@ public class CameraFollow : MonoBehaviour
                 // Linearly interpolate
                 SetCameraTargetLerp(target);
             }
+            // Snap to a location
+            // Note: Selected Army results in snap-back
             else if (target != null && 
                     (Game.Current.GameState != GameState.SelectedArmy))
             {

@@ -19,7 +19,7 @@ namespace Wism.Client.Core.Controllers
             this.logger = loggerFactory.CreateLogger();
         }
 
-        public void TakeItems(Hero hero, List<IItem> items)
+        public void TakeItems(Hero hero, List<Artifact> items)
         {
             if (hero is null)
             {
@@ -34,7 +34,7 @@ namespace Wism.Client.Core.Controllers
             hero.Take(items);
         }
 
-        public void DropItems(Hero hero, List<IItem> items)
+        public void DropItems(Hero hero, List<Artifact> items)
         {
             if (hero is null)
             {
@@ -46,7 +46,7 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(items));
             }
 
-            foreach (var item in new List<IItem>(items))
+            foreach (var item in new List<Artifact>(items))
             {
                 hero.Drop(item);
             }

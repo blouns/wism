@@ -1,17 +1,23 @@
 ﻿using Assets.Scripts.UI;
 using System;
+using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.Managers
 {
     public enum InputMode
     {
         Game,
-        UI,
+        ItemDropPicker,
+        ItemTakePicker,
+        LocationPicker,
+        UI,        
         WaitForKey
     }
+
     public class InputManager : MonoBehaviour
     {
         private UnityManager unityManager;
@@ -93,6 +99,15 @@ namespace Assets.Scripts.Managers
             {
                 case InputMode.Game:
                     HandleGameInput();
+                    break;
+                case InputMode.LocationPicker:
+                    HandleLocationPicker();
+                    break;
+                case InputMode.ItemDropPicker:
+                    HandleItemPicker(false);
+                    break;
+                case InputMode.ItemTakePicker:
+                    HandleItemPicker(true);
                     break;
                 case InputMode.WaitForKey:
                     HandleWaitForKey();
@@ -181,7 +196,8 @@ namespace Assets.Scripts.Managers
             {
                 UnityManager.HandleArmyPicker();
             }
-            else if (Input.GetKeyDown(KeyCode.I))
+            else if (Input.GetKeyDown(KeyCode.Period) ||
+                     Input.GetKeyDown(KeyCode.KeypadPeriod))
             {
                 UnityManager.ToggleMinimap();
             }
@@ -237,6 +253,12 @@ namespace Assets.Scripts.Managers
                 UnityManager.GoToCapitol();
             }
             // TODO: Add center-on-selected (space?) action
+
+            // TODO: Remove these Debug-only actions
+            else if (Input.GetKeyDown(KeyCode.Comma))
+            {
+                UnityManager.GoToLocation();
+            }
         }
 
         private void HandleRightClick()
@@ -266,6 +288,117 @@ namespace Assets.Scripts.Managers
         public InputMode GetInputMode()
         {
             return this.inputMode;
+        }
+
+        private void HandleItemPicker(bool takingItems)
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                this.unityManager.NotifyUser("You must have a hero selected for that!");
+                return;
+            }
+
+            Army army = Game.Current.GetSelectedArmies()
+                .Find(army => army is Hero);
+            if (army == null)
+            {
+                this.unityManager.NotifyUser("You must have a hero selected for that!");
+                return;
+            }
+
+            Hero hero = (Hero)army;
+            var itemPicker = this.unityManager.ItemPicker;
+            List<MapObject> itemsToPick;
+            if (takingItems)
+            {
+                // Launch the item picker
+                if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+                {
+                    this.unityManager.NotifyUser("Taking an item...");
+                    itemsToPick = new List<MapObject>(hero.Tile.Items);
+                    itemPicker.Initialize(this.unityManager, itemsToPick);
+                }
+                // Cancelled
+                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+                {
+                    itemPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+                // Take the items
+                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+                {
+                    var item = itemPicker.GetSelectedItem();
+                    var items = new List<Artifact> { (Artifact)item };
+                    GameManager.TakeItems(hero, items);
+                    itemPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+            }
+            else
+            {
+                // Launch the item picker
+                if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+                {
+                    this.unityManager.NotifyUser("Dropping an item...");
+                    itemsToPick = new List<MapObject>(hero.Items);
+                    itemPicker.Initialize(this.unityManager, itemsToPick);
+                }
+                // Cancelled
+                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+                {
+                    itemPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+                // Drop the items
+                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+                {
+                    var item = itemPicker.GetSelectedItem();
+                    var items = new List<Artifact> { (Artifact)item };
+                    GameManager.DropItems(hero, items);
+                    itemPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+            }
+        }
+
+        private void HandleLocationPicker()
+        {
+            var itemPicker = this.unityManager.ItemPicker;
+            List<MapObject> itemsToPick;
+
+            // Launch the location picker
+            if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+            {
+                if (Game.Current.ArmiesSelected())
+                {
+                    this.gameManager.DeselectArmies();
+                }
+                this.unityManager.NotifyUser("Goto location...");
+                itemsToPick = new List<MapObject>(World.Current.GetLocations());
+                itemPicker.Initialize(this.unityManager, itemsToPick);
+            }
+            // Cancelled
+            else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+            {
+                itemPicker.Clear();
+                this.SetInputMode(InputMode.Game);
+            }
+            // Center on the location chosen
+            else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+            {
+                var item = itemPicker.GetSelectedItem();
+                itemPicker.Clear();
+
+                this.unityManager.NotifyUser("Going to " + item.DisplayName);
+                InputHandler.CenterOnTile(((Location)item).Tile);                
+                this.SetInputMode(InputMode.Game);
+            }
+            // User is still selecting the item
+            else
+            {
+                // Do nothing
+            }
+            
         }
     }
 }

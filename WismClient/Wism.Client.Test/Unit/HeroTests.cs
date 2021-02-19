@@ -53,7 +53,7 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(hero.Items[0] is Artifact);
             Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
-            var actualArtifactName = ((Artifact)hero.Items[0]).ShortName;
+            var actualArtifactName = (hero.Items[0]).ShortName;
             Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
             Assert.AreEqual(5+1, hero.Strength, "Hero did not get the correct Combat Bonus.");
         }
@@ -86,8 +86,8 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(hero.Items[1] is Artifact);
             Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
-            var actualArtifactName1 = ((Artifact)hero.Items[0]).ShortName;
-            var actualArtifactName2 = ((Artifact)hero.Items[1]).ShortName;
+            var actualArtifactName1 = (hero.Items[0]).ShortName;
+            var actualArtifactName2 = (hero.Items[1]).ShortName;
             Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not take the correct object.");
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not take the correct object.");
             Assert.AreEqual(5+1+1, hero.Strength, "Hero did not get the correct Combat Bonus.");
@@ -123,7 +123,7 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(hero.Items[0] is Artifact);
             Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
-            var actualArtifactName = ((Artifact)hero.Items[0]).ShortName;
+            var actualArtifactName = (hero.Items[0]).ShortName;
             Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
             Assert.AreEqual(3, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
         }
@@ -158,8 +158,8 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(hero.Items[1] is Artifact);
             Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
-            var actualArtifactName1 = ((Artifact)hero.Items[0]).ShortName;
-            var actualArtifactName2 = ((Artifact)hero.Items[1]).ShortName;
+            var actualArtifactName1 = (hero.Items[0]).ShortName;
+            var actualArtifactName2 = (hero.Items[1]).ShortName;
             Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not take the correct object.");
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not take the correct object.");
             Assert.AreEqual(3+2, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
@@ -195,8 +195,8 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(hero.Items[1] is Artifact);
             Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
-            var actualArtifactName1 = ((Artifact)hero.Items[0]).ShortName;
-            var actualArtifactName2 = ((Artifact)hero.Items[1]).ShortName;
+            var actualArtifactName1 = (hero.Items[0]).ShortName;
+            var actualArtifactName2 = (hero.Items[1]).ShortName;
             Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not take the correct object.");
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not take the correct object.");
             Assert.AreEqual(3, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
@@ -249,7 +249,7 @@ namespace Wism.Client.Test.Unit
             Assert.AreEqual(0, hero.Items.Count, "Hero does not have correct items.");
             Assert.IsTrue(tile.HasItems(), "Tile did not get the item.");
             Assert.IsTrue(tile.Items[0] is Artifact);
-            var actualArtifactName = ((Artifact)tile.Items[0]).ShortName;
+            var actualArtifactName = (tile.Items[0]).ShortName;
             Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not drop the correct object.");
             Assert.AreEqual(5 + 0, hero.Strength, "Hero did not get the correct Combat Bonus.");
         }
@@ -283,8 +283,8 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(tile.Items[0] is Artifact);
             Assert.IsTrue(tile.Items[1] is Artifact);
 
-            var actualArtifactName1 = ((Artifact)tile.Items[0]).ShortName;
-            var actualArtifactName2 = ((Artifact)tile.Items[1]).ShortName;
+            var actualArtifactName1 = (tile.Items[0]).ShortName;
+            var actualArtifactName2 = (tile.Items[1]).ShortName;
             Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not drop the correct object.");
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not drop the correct object.");
             Assert.AreEqual(0, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
@@ -330,13 +330,13 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(tile.Items[0] is Artifact);
             Assert.IsTrue(tile.Items[1] is Artifact);
 
-            var actualArtifactName2 = ((Artifact)hero.Items[0]).ShortName;
-            var actualArtifactName4 = ((Artifact)hero.Items[1]).ShortName;
+            var actualArtifactName2 = (hero.Items[0]).ShortName;
+            var actualArtifactName4 = (hero.Items[1]).ShortName;
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not drop the correct object.");
             Assert.AreEqual(artifact4.ShortName, actualArtifactName4, "Did not drop the correct object.");
 
-            var actualArtifactName1 = ((Artifact)tile.Items[0]).ShortName;
-            var actualArtifactName3 = ((Artifact)tile.Items[1]).ShortName;
+            var actualArtifactName1 = (tile.Items[0]).ShortName;
+            var actualArtifactName3 = (tile.Items[1]).ShortName;
             Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not drop the correct object.");
             Assert.AreEqual(artifact3.ShortName, actualArtifactName3, "Did not drop the correct object.");
 
@@ -371,8 +371,8 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(tile.Items[0] is Artifact);
             Assert.IsTrue(tile.Items[1] is Artifact);
 
-            var actualArtifactName1 = ((Artifact)tile.Items[0]).ShortName;
-            var actualArtifactName2 = ((Artifact)tile.Items[1]).ShortName;
+            var actualArtifactName1 = (tile.Items[0]).ShortName;
+            var actualArtifactName2 = (tile.Items[1]).ShortName;
             Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not drop the correct object.");
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not drop the correct object.");
             Assert.AreEqual(0, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");

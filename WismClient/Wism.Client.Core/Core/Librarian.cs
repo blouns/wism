@@ -370,7 +370,7 @@ namespace Wism.Client.Core
                 Hero hero = (Hero)army;
                 foreach (var item in hero.Items)
                 {
-                    artifactDictionary.Add((Artifact)item, hero);
+                    artifactDictionary.Add(item, hero);
                 }
             }
 
@@ -385,7 +385,7 @@ namespace Wism.Client.Core
             {
                 foreach (var item in tile.Items)
                 {
-                    artifactDictionary.Add((Artifact)item, tile);
+                    artifactDictionary.Add(item, tile);
                 }
             }
 

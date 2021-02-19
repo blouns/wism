@@ -1,8 +1,6 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.Tilemaps;
-using System;
 using UnityEngine;
-using UnityEngine.UI;
 using Wism.Client.Core;
 
 namespace Assets.Scripts.UI
@@ -31,7 +29,11 @@ namespace Assets.Scripts.UI
         public void OnMouseOver()
         {
             // Order matters
-            if (IsProduceable())
+            if (IsPanel())
+            {
+                cursorManager.PointCursor();
+            }
+            else if (IsProduceable())
             {
                 cursorManager.ProduceCursor();
             }            
@@ -125,10 +127,18 @@ namespace Assets.Scripts.UI
 
             Tile tile = GetCurrentTile();
 
-            // TODO: Check for certain game states
             return 
                 (tile.HasAnyArmies() &&
                 (tile.GetAllArmies()[0].Clan == Game.Current.GetCurrentPlayer().Clan));
+        }
+
+        private bool IsPanel()
+        {
+            var mode = unityManager.InputManager.GetInputMode();
+            return (mode == InputMode.ItemDropPicker ||
+                    mode == InputMode.ItemTakePicker ||
+                    mode == InputMode.LocationPicker ||
+                    mode == InputMode.UI);
         }
 
         private Tile GetCurrentTile()

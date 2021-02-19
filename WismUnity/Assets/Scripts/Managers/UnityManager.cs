@@ -36,7 +36,10 @@ namespace Assets.Scripts.Managers
         private WarPanel warPanel;
         [SerializeField]
         private GameObject armyPickerPrefab;
-        private ArmyPicker armyPickerPanel;
+        private ArmyPicker armyPicker;
+        [SerializeField]
+        private GameObject itemPickerPrefab;
+        private ItemPicker itemPicker;
         private GameObject productionPanel;
 
         // UI elements
@@ -50,15 +53,14 @@ namespace Assets.Scripts.Managers
         private ProductionMode productionMode;
 
         public List<Army> CurrentAttackers { get; set; }
-        public List<Army> CurrentDefenders { get; set; }
-
-        public bool SelectingArmies { get; set; }        
+        public List<Army> CurrentDefenders { get; set; }        
 
         public GameManager GameManager { get => gameManager; set => gameManager = value; }
         public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
         public WarPanel WarPanel { get => warPanel; set => warPanel = value; }
         public ProductionMode ProductionMode { get => productionMode; set => productionMode = value; }
         public InputManager InputManager { get => inputManager; set => inputManager = value; }
+        public ItemPicker ItemPicker { get => itemPicker; set => itemPicker = value; }
 
         public void Start()
         {
@@ -116,7 +118,8 @@ namespace Assets.Scripts.Managers
             this.inputManager = GetComponent<InputManager>();
 
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
-            armyPickerPanel = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            armyPicker = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            ItemPicker = this.itemPickerPrefab.GetComponent<ItemPicker>();
             productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
 
             // Set up default game (for testing purposes only)
@@ -136,6 +139,11 @@ namespace Assets.Scripts.Managers
             Player player = Game.Current.GetCurrentPlayer();
             var inputHandler = this.GetComponent<InputManager>().InputHandler;
             inputHandler.CenterOnTile(player.Capitol.Tile);
+        }
+
+        internal void GoToLocation()
+        {
+            this.inputManager.SetInputMode(InputMode.LocationPicker);
         }
 
         public void FixedUpdate()
@@ -269,7 +277,7 @@ namespace Assets.Scripts.Managers
             messageBox.Notify("");
         }
 
-        private void NotifyUser(string message, params object[] args)
+        public void NotifyUser(string message, params object[] args)
         {
             var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
                    .GetComponent<NotificationBox>();
@@ -296,37 +304,14 @@ namespace Assets.Scripts.Managers
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
                 var armiesToPick = Game.Current.GetSelectedArmies()[0].Tile.GetAllArmies();
-                armyPickerPanel.Initialize(this, armiesToPick);
+                armyPicker.Initialize(this, armiesToPick);
             }
         }
 
-
         internal void HandleItemPicker(bool takingItems)
         {
-            if (!Game.Current.ArmiesSelected())
-            {
-                NotifyUser("You must have a hero selected for that!");
-                return;
-            }
-
-            Army army = Game.Current.GetSelectedArmies()
-                .Find(army => army is Hero);
-            if (army == null)
-            {
-                NotifyUser("You must have a hero selected for that!");
-                return;
-            }
-
-            // TODO: Add item picker; for now take or drop all
-            Hero hero = (Hero)army;
-            if (takingItems)
-            {
-                GameManager.TakeItems(hero, hero.Tile.Items);
-            }
-            else
-            {
-                GameManager.DropItems(hero, hero.Items);
-            }
+            var mode = (takingItems) ? InputMode.ItemTakePicker : InputMode.ItemDropPicker;
+            this.InputManager.SetInputMode(mode);
         }
 
         internal void ToggleMinimap()
