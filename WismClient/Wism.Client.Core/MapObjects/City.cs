@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Wism.Client.Core;
-using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
-{ 
+{
     public class City : MapObject, IBuildable
     {
         public const int MaxDefense = 9; 

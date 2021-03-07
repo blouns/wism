@@ -26,6 +26,18 @@ namespace Wism.Client.Core
         /// </summary>
         public Terrain Terrain { get; set; }
 
+        /// <summary>
+        /// May have zero or one city
+        /// </summary>
+        public City City { get; set; }
+
+        /// <summary>
+        /// May have zero or one location (e.g. Sage, Tower, Ruins, Temple)
+        /// </summary>
+        public Location Location { get; set; }
+
+        public List<Artifact> Items { get; internal set; }
+
         public void AddItem(Artifact artifact)
         {
             if (Items == null)
@@ -45,18 +57,6 @@ namespace Wism.Client.Core
             Items.Remove(artifact);
             artifact.Tile = null;
         }
-
-        /// <summary>
-        /// May have zero or one city
-        /// </summary>
-        public City City { get; set; }
-
-        /// <summary>
-        /// May have zero or one location (e.g. Sage, Tower, Ruins, Temple)
-        /// </summary>
-        public Location Location { get; set; }
-
-        public List<Artifact> Items { get; internal set; }
 
         public bool ContainsItem(Artifact item)
         {
@@ -182,6 +182,26 @@ namespace Wism.Client.Core
 
             this.Armies.AddRange(newArmies);
             newArmies.ForEach(a => a.Tile = this);
+        }
+
+        /// <summary>
+        /// Adds a set of visiting armies to the tile
+        /// </summary>
+        /// <param name="newVisitingArmies">Armies to add</param>
+        internal void AddVisitingArmies(List<Army> newVisitingArmies)
+        {
+            if (!HasRoom(newVisitingArmies.Count))
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            if (!HasVisitingArmies())
+            {
+                this.VisitingArmies = new List<Army>();
+            }
+
+            this.VisitingArmies.AddRange(newVisitingArmies);
+            newVisitingArmies.ForEach(a => a.Tile = this);
         }
 
         public bool HasAnyArmies()

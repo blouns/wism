@@ -19,14 +19,12 @@ namespace Wism.Client.MapObjects
         public int Strength { get; set; }
         public int MovesRemaining { get; set; }
         public Clan Clan { get => Player.Clan; }
-        public string MyProperty { get; set; }
         public bool IsDead { get; set; }
         public int Moves { get; internal set; }
-        public string KindName { get => Info.DisplayName; }
-
-        public override string ShortName => Info.ShortName;
-
         public List<Location> BlessedAt { get; set; } = new List<Location>();
+
+        public string KindName { get => Info.DisplayName; }
+        public override string ShortName => Info.ShortName;        
 
         // Traversal info
         public virtual bool CanWalk { get => Info.CanWalk; }

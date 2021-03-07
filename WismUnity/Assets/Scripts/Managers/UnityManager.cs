@@ -4,6 +4,7 @@ using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
@@ -40,6 +41,9 @@ namespace Assets.Scripts.Managers
         [SerializeField]
         private GameObject itemPickerPrefab;
         private ItemPicker itemPicker;
+        [SerializeField]
+        private GameObject saveLoadPickerPrefab;
+        private SaveLoadPicker saveLoadPicker;
         private GameObject productionPanel;
 
         // UI elements
@@ -61,6 +65,8 @@ namespace Assets.Scripts.Managers
         public ProductionMode ProductionMode { get => productionMode; set => productionMode = value; }
         public InputManager InputManager { get => inputManager; set => inputManager = value; }
         public ItemPicker ItemPicker { get => itemPicker; set => itemPicker = value; }
+        public SaveLoadPicker SaveLoadPicker { get => saveLoadPicker; set => saveLoadPicker = value; }
+        public int LastCommandId { get => lastCommandId; set => lastCommandId = value; }
 
         public void Start()
         {
@@ -120,6 +126,7 @@ namespace Assets.Scripts.Managers
             WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
             armyPicker = this.armyPickerPrefab.GetComponent<ArmyPicker>();
             ItemPicker = this.itemPickerPrefab.GetComponent<ItemPicker>();
+            SaveLoadPicker = this.saveLoadPickerPrefab.GetComponent<SaveLoadPicker>();
             productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
 
             // Set up default game (for testing purposes only)
@@ -178,7 +185,7 @@ namespace Assets.Scripts.Managers
         {
             ActionState result = ActionState.NotStarted;
 
-            int nextCommand = lastCommandId + 1;
+            int nextCommand = LastCommandId + 1;
             if (!provider.CommandController.CommandExists(nextCommand))
             {
                 // Nothing to do
@@ -206,12 +213,12 @@ namespace Assets.Scripts.Managers
             if (result == ActionState.Succeeded)
             {
                 logger.LogInformation($"Task successful");
-                lastCommandId = command.Id;
+                LastCommandId = command.Id;
             }
             else if (result == ActionState.Failed)
             {
                 logger.LogInformation($"Task failed");
-                lastCommandId = command.Id;
+                LastCommandId = command.Id;
             }
             else if (result == ActionState.InProgress)
             {
@@ -311,6 +318,12 @@ namespace Assets.Scripts.Managers
         internal void HandleItemPicker(bool takingItems)
         {
             var mode = (takingItems) ? InputMode.ItemTakePicker : InputMode.ItemDropPicker;
+            this.InputManager.SetInputMode(mode);
+        }
+
+        internal void HandleSaveLoadPicker(bool saving)
+        {
+            var mode = (saving) ? InputMode.SaveGamePicker : InputMode.LoadGamePicker;
             this.InputManager.SetInputMode(mode);
         }
 

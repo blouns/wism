@@ -4,7 +4,6 @@ using System.Linq;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
 
 namespace Wism.Client.War
 {

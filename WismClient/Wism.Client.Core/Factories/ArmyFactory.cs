@@ -1,4 +1,5 @@
 ﻿using System;
+using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -9,6 +10,7 @@ namespace Wism.Client.Core
         public const int DefaultHitPoints = 2;
 
         // TODO: Pull last ID from database for game loads and remotes
+        // TODO: On Load Game need to restore last ID
         private static int lastId = 0;
 
         public static Army CreateArmy(Player player, ArmyInfo info)
@@ -34,6 +36,33 @@ namespace Wism.Client.Core
         public static Army CreateArmy(ArmyInfo info)
         {
             return CreateArmy(null, info);
+        }
+
+        public static Army Load(Player player, ArmyEntity armyEntity)
+        {
+            if (player is null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
+            if (armyEntity is null)
+            {
+                throw new ArgumentNullException(nameof(armyEntity));
+            }
+
+            var info = ModFactory.FindArmyInfo(armyEntity.ArmyShortName);
+            var army = CreateArmy(player, info);            
+            army.Id = armyEntity.Id;
+            army.IsDead = armyEntity.IsDead;
+            army.DisplayName = armyEntity.DisplayName;
+            army.MovesRemaining = armyEntity.MovesRemaining;
+            army.Strength = armyEntity.Strength;
+            foreach (var templeName in armyEntity.BlessedAtShortNames)
+            {
+                army.BlessedAt.Add(World.Current.GetLocations().Find(l => l.ShortName == templeName));
+            }
+
+            return army;
         }
     }
 }

@@ -9,11 +9,7 @@ namespace Wism.Client.Core
         private ClanInfo info;
         private IList<ClanTerrainModifierInfo> terrainModifiers = new List<ClanTerrainModifierInfo>();
 
-        private bool isHuman = false;
-
         public string DisplayName { get => info.DisplayName; set => info.DisplayName = value; }
-
-        public bool IsHuman { get => isHuman; set => isHuman = value; }
 
         public string ShortName { get => info.ShortName; }
 

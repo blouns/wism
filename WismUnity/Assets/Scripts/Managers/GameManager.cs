@@ -23,9 +23,10 @@ namespace Assets.Scripts.Managers
         public const float StandardTime = 0.25f;
         public const float WarTime = 1.0f;
         public const int MaxArmysPerArmy = Army.MaxArmies;
-        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";        
+        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";
         public static readonly string DefaultWorld = @"Illuria";
         public static readonly string DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
+        public static readonly string DefaultSavePath = @"Save";
 
         // Controllers for the WISM Client API
         private ControllerProvider provider;
@@ -192,6 +193,25 @@ namespace Assets.Scripts.Managers
         {
             commandController.AddCommand
                 (new DropItemsCommand(provider.HeroController, hero, items));
+        }
+
+        internal void LoadGame(string filename)
+        {
+            // TODO: 
+            // 1. Create a load game command object
+            // 2. Create a load game command processor
+            // 3. Call PeristenceManager.Load from processor
+
+            var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
+                .GetComponent<UnityManager>();
+            PersistanceManager.Load(filename, unityGame);
+        }
+
+        internal void SaveGame(string filename, string saveGameName)
+        {
+            var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
+                .GetComponent<UnityManager>();
+            PersistanceManager.Save(filename, saveGameName, unityGame);
         }
     }
 }

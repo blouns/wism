@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Common;
 using Wism.Client.MapObjects;
@@ -400,8 +400,6 @@ namespace Wism.Client.Core
             CreateDefaultPlayers();
 
             World.CreateWorld(worldName);
-            //MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, worldName);
-            //MapBuilder.AddLocationsToMapFromWorld(World.Current.Map, worldName);
         }
 
         /// <summary>

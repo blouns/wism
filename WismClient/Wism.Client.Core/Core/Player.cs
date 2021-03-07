@@ -18,7 +18,7 @@ namespace Wism.Client.Core
 
         public int Gold { get; set; }
 
-        public int Turn { get; private set; }
+        public int Turn { get; internal set; }
 
         public bool IsDead { get; set; }
 
@@ -75,6 +75,21 @@ namespace Wism.Client.Core
         public Hero HireHero(Tile tile)
         {
             return (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+        }
+
+        internal void AddCity(City city)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            if (myCities.Contains(city))
+            {
+                return;
+            }
+
+            myCities.Add(city);
         }
 
         /// <summary>

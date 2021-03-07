@@ -138,6 +138,8 @@ namespace Assets.Scripts.UI
             return (mode == InputMode.ItemDropPicker ||
                     mode == InputMode.ItemTakePicker ||
                     mode == InputMode.LocationPicker ||
+                    mode == InputMode.LoadGamePicker ||
+                    mode == InputMode.SaveGamePicker ||
                     mode == InputMode.UI);
         }
 

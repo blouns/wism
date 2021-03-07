@@ -15,6 +15,8 @@ namespace Assets.Scripts
         private WorldTilemap worldTilemap;
         private bool isInitialized;
 
+        public string WorldName { get; set; }
+
         public void Start()
         {
             if (!isInitialized)
@@ -26,12 +28,19 @@ namespace Assets.Scripts
             }            
         }
 
-        public void CreateDefaultGame()
+        public void CreateGame(string worldName, int randomSeed = GameManager.DefaultRandom)
         {
+            if (string.IsNullOrWhiteSpace(worldName))
+            {
+                throw new System.ArgumentException($"'{nameof(worldName)}' cannot be null or whitespace", nameof(worldName));
+            }
+
+            this.WorldName = worldName;
+
             // Set up the Game
-            MapBuilder.Initialize(GameManager.DefaultModPath, GameManager.DefaultWorld);
+            MapBuilder.Initialize(GameManager.DefaultModPath, worldName);
             Game.CreateEmpty();
-            Game.Current.Random = new System.Random(GameManager.DefaultRandom);
+            Game.Current.Random = new System.Random(randomSeed);
             Game.Current.WarStrategy = new DefaultWarStrategy();
 
             ReadyPlayers();
@@ -44,6 +53,11 @@ namespace Assets.Scripts
             CreateDefaultCitiesFromScene();
             CreateDefaultLocationsFromScene();
             CreateDefaultArmies();
+        }
+
+        public void CreateDefaultGame()
+        {
+            CreateGame(GameManager.DefaultWorld);
         }
 
         private static List<Player> ReadyPlayers()
