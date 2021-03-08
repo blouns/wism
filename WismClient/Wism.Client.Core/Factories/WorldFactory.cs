@@ -28,7 +28,7 @@ namespace Wism.Client.Factories
             {
                 for (int x = 0; x < xMax; x++)
                 {
-                    var tileEntity = snapshot.Tiles[x, y];
+                    var tileEntity = snapshot.Tiles[x + y * xMax];
 
                     // Tile details
                     Tile tile = new Tile();                    
@@ -70,13 +70,13 @@ namespace Wism.Client.Factories
                         visitingNameTileDict.Add(visitingName, tile);
                     }
 
-
                     map[x, y] = tile;
                 }
             }
 
             World.CreateWorld(map);
             var world = World.Current;
+            world.Name = snapshot.Name;
 
             // Load late-bound Locations           
             foreach (var locationEntity in snapshot.Locations)

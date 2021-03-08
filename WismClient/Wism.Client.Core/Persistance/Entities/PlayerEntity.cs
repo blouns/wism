@@ -12,7 +12,7 @@ namespace Wism.Client.Entities
         public int Gold { get; set; }
 
         [DataMember]
-        public int Turn { get; private set; }
+        public int Turn { get; set; }
 
         [DataMember]
         public bool IsDead { get; set; }

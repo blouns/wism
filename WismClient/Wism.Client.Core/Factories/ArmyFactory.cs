@@ -9,9 +9,10 @@ namespace Wism.Client.Core
     {
         public const int DefaultHitPoints = 2;
 
-        // TODO: Pull last ID from database for game loads and remotes
         // TODO: On Load Game need to restore last ID
         private static int lastId = 0;
+
+        public static int LastId { get => lastId; set => lastId = value; }
 
         public static Army CreateArmy(Player player, ArmyInfo info)
         {
@@ -21,7 +22,7 @@ namespace Wism.Client.Core
             }
 
             Army newArmy = (info.ShortName == "Hero") ? new Hero() : new Army();
-            newArmy.Id = ++lastId;
+            newArmy.Id = ++LastId;
             newArmy.Info = info;
             newArmy.Strength = info.Strength;
             newArmy.MovesRemaining = info.Moves;

@@ -1,14 +1,16 @@
 ﻿using Assets.Scripts.Persistance.Entities;
 using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using UnityEngine;
+using System.Runtime.Serialization.Json;
 using Wism.Client.Core;
+using UnityEngine;
 
 namespace Assets.Scripts.Managers
 {
     public static class PersistanceManager
     {
+        private static UnityGameEntity snapshot;
+
         public static void Save(string filename, string saveGameName, UnityManager unityGame)
         {
             if (string.IsNullOrWhiteSpace(filename))
@@ -21,20 +23,37 @@ namespace Assets.Scripts.Managers
                 throw new ArgumentException($"'{nameof(saveGameName)}' cannot be null or whitespace", nameof(saveGameName));
             }
 
-            // Persist WISM game state
+            // Persist Unity game state
             var snapshot = new UnityGameEntity(saveGameName, unityGame);
-            var snapshot.WismGameEntity = Game.Current.Snapshot();
 
-            BinaryFormatter binaryFormatter = new BinaryFormatter();            
-            using (FileStream stream = new FileStream(filename, FileMode.Create))
+            // Persist WISM game state
+            snapshot.WismGameEntity = Game.Current.Snapshot();
+
+            // Write to disk
+            string path = Application.persistentDataPath + "/" + filename;
+            using (FileStream stream = File.OpenWrite(path))
             {
-                binaryFormatter.Serialize(stream, snapshot);                
+                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(UnityGameEntity));
+                serializer.WriteObject(stream, snapshot);
             }
-
-           
         }
 
-        public static void Load(string filename, UnityManager unityGame)
+        /// <summary>
+        /// Loads the last snapshot.
+        /// </summary>
+        /// <param name="unityGame">Current unity manager</param>
+        internal static void LoadLastSnapshot(UnityManager unityGame)
+        {
+            var snapshot = GetLastSnapshot();
+            unityGame.GetMainCamera().transform.position = new Vector3(
+                snapshot.CameraPosition[0],
+                snapshot.CameraPosition[1],
+                snapshot.CameraPosition[2]);
+            unityGame.LastCommandId = snapshot.LastCommandId;
+            unityGame.GetComponent<GameFactory>().WorldName = snapshot.WorldName;
+        }
+
+        public static UnityGameEntity LoadEntities(string filename, UnityManager unityGame)
         {
             if (string.IsNullOrWhiteSpace(filename))
             {
@@ -51,28 +70,31 @@ namespace Assets.Scripts.Managers
                 throw new ArgumentException("File could not be loaded because the file was not found: " + filename);
             }
 
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (FileStream stream = new FileStream(filename, FileMode.Open))
+            object obj;
+            string path = Application.persistentDataPath + "/" + filename;
+            using (FileStream stream = File.OpenRead(path))
             {
-                var unityGameEntity = binaryFormatter.Deserialize(stream) as UnityGameEntity;
-                if (unityGameEntity == null)
-                {
-                    throw new ArgumentException("File could not be loaded because the file was not found: " + filename);
-                }
-
-                // Load Unity game state
-                unityGameEntity.WorldName = unityGame.GetComponent<GameFactory>().WorldName;
-                unityGameEntity.LastCommandId = unityGame.LastCommandId;
-                var positionArray = unityGameEntity.CameraPosition;
-                unityGame.GetMainCamera().transform.position = new Vector3(
-                    positionArray[0], positionArray[1], positionArray[2]);
-
-                // Load WISM game state
-
-
-                // TODO: Need a Load Game CommandProcessor to handle calling this function at the right time
-                // Implies adding a new Command for Load since it will change game state for remote players.
+                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(UnityGameEntity));
+                obj = serializer.ReadObject(stream);
             }
+
+            var snapshot = obj as UnityGameEntity;
+            if (snapshot == null)
+            {
+                throw new ArgumentException("File could not be loaded because the file was not found: " + filename);
+            }
+
+            return snapshot;
+        }
+
+        internal static void SetLastSnapshot(UnityGameEntity unityGameEntity)
+        {
+            snapshot = unityGameEntity;
+        }
+
+        public static UnityGameEntity GetLastSnapshot()
+        {
+            return snapshot;
         }
     }
 }

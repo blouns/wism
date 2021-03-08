@@ -22,41 +22,32 @@ namespace Wism.Client.Factories
             var current = Game.Current;
 
             // Game settings
-            current.Random = new Random(snapshot.RandomSeed);            
+            current.Random = LoadRandom(snapshot.Random);
             var warEntity = snapshot.WarStrategy;
             var warAssembly = Assembly.Load(warEntity.AssemblyName);
             current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
             current.Transition(snapshot.GameState);
 
-            // Players
             LoadPlayers(snapshot, current,
                 out Dictionary<string, Player> cityToPlayer,
                 out Dictionary<string, Player> capitolToPlayer);
 
-            // Load world
-            current.World = WorldFactory.Load(snapshot.World,
+            var world = WorldFactory.Load(snapshot.World,
                 out Dictionary<string, Tile> cityToTile,
                 out Dictionary<string, Tile> armiesToTile,
                 out Dictionary<string, Tile> visitingToTile);
 
-            // Load late-bound cities
-            foreach (var cityName in cityToTile.Keys)
-            {
-                MapBuilder.AddCity(current.World, cityToTile[cityName].X, cityToTile[cityName].Y, cityName);
-                var city = current.World.Map[cityToTile[cityName].X, cityToTile[cityName].Y].City;
+            LoadCities(snapshot, world, cityToPlayer, capitolToPlayer, cityToTile);
+            LoadArmies(snapshot, armiesToTile, visitingToTile);
 
-                if (cityToPlayer.ContainsKey(cityName))
-                {
-                    cityToPlayer[cityName].AddCity(city);
-                }
+            // Factory state
+            ArmyFactory.LastId = snapshot.LastArmyId;
 
-                if (capitolToPlayer.ContainsKey(cityName))
-                {
-                    capitolToPlayer[cityName].Capitol = city;
-                }
-            }
+            return current;
+        }
 
-            // Load late-bound army properties
+        private static void LoadArmies(GameEntity snapshot, Dictionary<string, Tile> armiesToTile, Dictionary<string, Tile> visitingToTile)
+        {
             var selectedArmies = new List<Army>();
             var allArmies = Game.Current.GetAllArmies();
             foreach (var army in allArmies)
@@ -86,8 +77,58 @@ namespace Wism.Client.Factories
                     }
                 }
             }
+        }
 
-            return current;
+        private static void LoadCities(GameEntity snapshot, World world,
+            Dictionary<string, Player> cityToPlayer, 
+            Dictionary<string, Player> capitolToPlayer, 
+            Dictionary<string, Tile> cityToTile)
+        {
+            foreach (var citySnapshot in snapshot.World.Cities)
+            {
+                var city = CityFactory.Load(citySnapshot, world);
+
+                // Add late-bound properties
+                if (cityToPlayer.ContainsKey(city.ShortName))
+                {
+                    cityToPlayer[city.ShortName].AddCity(city);
+                }
+
+                if (capitolToPlayer.ContainsKey(city.ShortName))
+                {
+                    capitolToPlayer[city.ShortName].Capitol = city;
+                }
+            }
+        
+            
+            
+            foreach (var cityName in cityToTile.Keys)
+            {
+                //MapBuilder.AddCity(game.World, cityToTile[cityName].X, cityToTile[cityName].Y, cityName);
+                //var city = current.World.Map[cityToTile[cityName].X, cityToTile[cityName].Y].City;                
+
+                
+            }
+        }
+
+        /// <summary>
+        /// Loads the random seed array into a new Random instance
+        /// </summary>
+        /// <param name="snapshot">RandomEntity to load</param>
+        /// <returns>New Random based on the snapshot</returns>
+        /// <remarks>
+        /// This method overwrites the private seed array from Random. The seed in this 
+        /// case is actually unused, but it is set for consistency.
+        /// </remarks>
+        private static Random LoadRandom(RandomEntity snapshot)
+        {            
+            var random = new Random(snapshot.Seed);
+            var seedArrayCopy = (int[])snapshot.SeedArray.Clone();
+
+            var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            seedArrayInfo.SetValue(random, seedArrayCopy);
+
+            return random;
         }
 
         private static void LoadPlayers(GameEntity snapshot, Game current,

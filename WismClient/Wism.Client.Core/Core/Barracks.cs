@@ -35,6 +35,42 @@ namespace Wism.Client.Core
             }
         }
 
+        public int GetProductionNumber(string armyInfoName)
+        {
+            if (string.IsNullOrWhiteSpace(armyInfoName))
+            {
+                throw new ArgumentException($"'{nameof(armyInfoName)}' cannot be null or whitespace", nameof(armyInfoName));
+            }
+
+            foreach (var pi in productionInfoDictionary.Keys)
+            {
+                if (pi.ArmyInfoName.ToLowerInvariant() == armyInfoName.ToLowerInvariant())
+                {
+                    return productionInfoDictionary[pi];
+                }
+            }
+
+            throw new ArgumentOutOfRangeException("armyInfo", "Could not find a matching production info.");
+        }
+
+        public void SetProductionNumber(string armyInfoName, int productionNumber)
+        {
+            if (string.IsNullOrWhiteSpace(armyInfoName))
+            {
+                throw new ArgumentException($"'{nameof(armyInfoName)}' cannot be null or whitespace", nameof(armyInfoName));
+            }
+
+            foreach (var pi in productionInfoDictionary.Keys)
+            {
+                if (pi.ArmyInfoName.ToLowerInvariant() == armyInfoName.ToLowerInvariant())
+                {
+                    productionInfoDictionary[pi] = productionNumber;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException("armyInfo", "Could not find a matching production info.");
+        }
+
         public List<ProductionInfo> GetProductionKinds()
         {
             return new List<ProductionInfo>(this.productionInfoDictionary.Keys);

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 using Wism.Client.Core;
 
 namespace Wism.Client.Entities
@@ -10,7 +8,10 @@ namespace Wism.Client.Entities
     public class GameEntity
     {
         [DataMember]
-        public int RandomSeed { get; set; }
+        public DateTime Timestamp { get; set; }
+
+        [DataMember]
+        public RandomEntity Random { get; set; }
 
         [DataMember]
         public int CurrentPlayerIndex { get; set; }
@@ -29,5 +30,9 @@ namespace Wism.Client.Entities
 
         [DataMember]
         public WarStrategyEntity WarStrategy { get; set; }
+
+        // Other fields
+        [DataMember]
+        public int LastArmyId { get; set; }
     }
 }

@@ -69,20 +69,17 @@ namespace Assets.Scripts
             Clan clan = Clan.Create(clanInfo);
             Player player1 = Player.Create(clan);
             Game.Current.Players.Add(player1);
-            player1.Clan.IsHuman = true;
 
             // Ready Player Two
             clanInfo = ClanInfo.GetClanInfo("StormGiants");
             clan = Clan.Create(clanInfo);
             Player player2 = Player.Create(clan);
             Game.Current.Players.Add(player2);
-            player2.Clan.IsHuman = false;
 
             clanInfo = ClanInfo.GetClanInfo("Elvallie");
             clan = Clan.Create(clanInfo);
             Player player3 = Player.Create(clan);
             Game.Current.Players.Add(player3);
-            player3.Clan.IsHuman = false;
 
             return Game.Current.Players;
         }

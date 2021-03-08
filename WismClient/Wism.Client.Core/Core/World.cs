@@ -13,6 +13,8 @@ namespace Wism.Client.Core
 
         public Tile[,] Map { get; protected set; }
 
+        public string Name { get; set; }
+
         // Navigation associations
         public Game Game { get; }
 
@@ -143,6 +145,16 @@ namespace Wism.Client.Core
         public List<City> GetCities()
         {
             return new List<City>(this.cities);
+        }
+
+        public City FindCity(string shortName)
+        {
+            if (string.IsNullOrWhiteSpace(shortName))
+            {
+                throw new ArgumentException($"'{nameof(shortName)}' cannot be null or whitespace", nameof(shortName));
+            }
+
+            return this.cities.Find(c => c.ShortName == shortName);
         }
 
         public List<Location> GetLocations()

@@ -15,6 +15,9 @@ namespace Wism.Client.Entities
         public int Y { get; set; }
 
         [DataMember]
+        public string CityShortName { get; set; }
+
+        [DataMember]
         public int Defense { get; set; }
 
         [DataMember]
@@ -25,5 +28,8 @@ namespace Wism.Client.Entities
 
         [DataMember]
         public ArmyInTrainingEntity[] ArmiesToDeliver { get; set; }
+
+        [DataMember]
+        public ProductionEntity[] ProductionSlots { get; set; }
     }
 }

@@ -14,7 +14,10 @@ namespace Wism.Client.Entities
         [DataMember]
         public CityEntity[] Cities { get; set; }
 
+        /// <summary>
+        /// Tiles is a flattened 2D array (x + y * xBounds) == (x, y)
+        /// </summary>
         [DataMember]
-        public TileEntity[,] Tiles { get; set; }
+        public TileEntity[] Tiles { get; set; }
     }
 }

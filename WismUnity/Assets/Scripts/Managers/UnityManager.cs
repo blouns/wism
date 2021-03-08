@@ -112,7 +112,8 @@ namespace Assets.Scripts.Managers
                 new SearchTempleProcessor(GameManager.LoggerFactory, this),
                 new SearchRuinsProcessor(GameManager.LoggerFactory, this),
                 new SearchLibraryProcessor(GameManager.LoggerFactory, this),               
-                new SearchSageProcessor(GameManager.LoggerFactory, this),                
+                new SearchSageProcessor(GameManager.LoggerFactory, this),
+                new LoadGameProcessor(GameManager.LoggerFactory, this),
                 new StandardProcessor(GameManager.LoggerFactory)
             };
 

@@ -185,26 +185,27 @@ namespace Assets.Scripts.Managers
 
         public void TakeItems(Hero hero, List<Artifact> items)
         {
-            commandController.AddCommand
-                (new TakeItemsCommand(provider.HeroController, hero, items));
+            commandController.AddCommand(
+                new TakeItemsCommand(provider.HeroController, hero, items));
         }
 
         public void DropItems(Hero hero, List<Artifact> items)
         {
-            commandController.AddCommand
-                (new DropItemsCommand(provider.HeroController, hero, items));
+            commandController.AddCommand(
+                new DropItemsCommand(provider.HeroController, hero, items));
         }
 
         internal void LoadGame(string filename)
         {
-            // TODO: 
-            // 1. Create a load game command object
-            // 2. Create a load game command processor
-            // 3. Call PeristenceManager.Load from processor
-
             var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
-            PersistanceManager.Load(filename, unityGame);
+            var snapshot = PersistanceManager.LoadEntities(filename, unityGame);
+
+            commandController.AddCommand(
+                new LoadGameCommand(provider.GameController, snapshot.WismGameEntity));
+
+            // TODO: Ensure the Unity and Wism snapshots do not get out of sync
+            PersistanceManager.SetLastSnapshot(snapshot);
         }
 
         internal void SaveGame(string filename, string saveGameName)
