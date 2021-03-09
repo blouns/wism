@@ -2,6 +2,7 @@
 using System.Reflection;
 using Wism.Client.Core;
 using Wism.Client.Entities;
+using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
 namespace Wism.Client.Factories
@@ -27,8 +28,9 @@ namespace Wism.Client.Factories
             else if (!String.IsNullOrWhiteSpace(snapshot.ArtifactShortName))
             {
                 var artifactInfo = ModFactory.FindArtifactInfo(snapshot.ArtifactShortName);
+                var artifact = Artifact.Create(artifactInfo);
                 boon = (IBoon)Activator.CreateInstance(
-                    assembly.GetType(snapshot.BoonTypeName), artifactInfo);
+                    assembly.GetType(snapshot.BoonTypeName), artifact);
             }
             else
             {

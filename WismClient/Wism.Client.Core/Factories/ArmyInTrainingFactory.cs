@@ -9,6 +9,16 @@ namespace Wism.Client.Factories
     {
         public static ArmyInTraining Load(ArmyInTrainingEntity snapshot, World world)
         {
+            if (snapshot == null)
+            {
+                return null;
+            }
+
+            if (world is null)
+            {
+                throw new ArgumentNullException(nameof(world));
+            }
+
             var ait = new ArmyInTraining()
             {
 

@@ -50,6 +50,7 @@ namespace Wism.Client.Core
             {
                 MapBuilder.Initialize(ModFactory.ModPath, worldName);
                 World.current = new World();
+                World.current.Name = worldName;
                 World.current.Reset();
             }
             catch

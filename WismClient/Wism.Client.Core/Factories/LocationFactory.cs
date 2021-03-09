@@ -6,17 +6,20 @@ using Wism.Client.Modules;
 
 namespace Wism.Client.Factories
 {
-    internal class LocationFactory
+    public class LocationFactory
     {
-        internal static Location Load(LocationEntity locationEntity)
+        internal static Location Load(LocationEntity locationEntity, World world)
         {
             if (locationEntity is null)
             {
                 throw new ArgumentNullException(nameof(locationEntity));
             }
 
-            var info = ModFactory.FindLocationInfo(locationEntity.LocationShortName);
-            var location = Location.Create(info);
+            var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world.Name}";
+            LocationBuilder builder = new LocationBuilder(path);
+            builder.AddLocation(world, locationEntity.X, locationEntity.Y, locationEntity.LocationShortName);
+            
+            Location location = world.Map[locationEntity.X, locationEntity.Y].Location;
             location.Id = locationEntity.Id;
             if (locationEntity.Boon != null)
             {

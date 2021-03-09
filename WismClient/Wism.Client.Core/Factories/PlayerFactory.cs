@@ -10,7 +10,7 @@ namespace Wism.Client.Factories
 {
     public static class PlayerFactory
     {
-        public static Player Load(PlayerEntity playerEntity, 
+        public static Player Load(PlayerEntity playerEntity,
             out Dictionary<string, Player> cityToPlayer,
             out Dictionary<string, Player> capitolToPlayer)
         {
@@ -22,29 +22,43 @@ namespace Wism.Client.Factories
                 ModFactory.FindClanInfo(playerEntity.ClanShortName));
             var player = Player.Create(clan);
 
-            // Capitol (circular reference; add later)            
-            capitolToPlayer.Add(playerEntity.CapitolShortName, player);
+            // Capitol (circular reference; add later)
+            if (playerEntity.CapitolShortName != null)
+            {
+                capitolToPlayer.Add(playerEntity.CapitolShortName, player);
+            }
 
             // My armies
-            foreach (var armyEntity in playerEntity.Armies)
+            if (playerEntity.Armies != null)
             {
-                var army = ArmyFactory.Load(player, armyEntity);
-                if (armyEntity.IsHero)
+                foreach (var armyEntity in playerEntity.Armies)
                 {
-                    var hero = (Hero)army;
-                    // Load items
-                    foreach (var artifactEntity in armyEntity.Artifacts)
+                    var army = ArmyFactory.Load(player, armyEntity);
+                    if (armyEntity.IsHero)
                     {
-                        hero.Items = new List<Artifact>();
-                        hero.Items.Add(ArtifactFactory.Load(artifactEntity));
+                        var hero = (Hero)army;
+                        // Load items
+                        if (armyEntity.Artifacts != null)
+                        {
+                            foreach (var artifactEntity in armyEntity.Artifacts)
+                            {
+                                hero.Items = new List<Artifact>();
+                                hero.Items.Add(ArtifactFactory.Load(artifactEntity));
+                            }
+                        }
                     }
+
+                    player.AddArmy(army);
                 }
             }
 
             // My cities (circular reference; add later)
-            foreach (var cityName in playerEntity.MyCitiesShortNames)
+            if (playerEntity.MyCitiesShortNames != null)
             {
-                cityToPlayer.Add(cityName, player);
+                foreach (var cityName in playerEntity.MyCitiesShortNames)
+                {
+                    cityToPlayer.Add(cityName, player);
+                }
             }
 
             // Player Details

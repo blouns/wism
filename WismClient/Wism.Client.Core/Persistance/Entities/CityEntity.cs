@@ -30,6 +30,6 @@ namespace Wism.Client.Entities
         public ArmyInTrainingEntity[] ArmiesToDeliver { get; set; }
 
         [DataMember]
-        public ProductionEntity[] ProductionSlots { get; set; }
+        public ProductionEntity ProductionInfo { get; set; }
     }
 }

@@ -57,12 +57,16 @@ namespace Wism.Client.Persistance
                 throw new ArgumentNullException(nameof(world));
             }
 
+            int xBound = world.Map.GetUpperBound(0) + 1;
+            int yBound = world.Map.GetUpperBound(1) + 1;
             var snapshot = new WorldEntity()
             {
                 Name = world.Name,
                 Cities = SnapshotCities(world),
-                Locations = SnapshotLocations(world),                
-                Tiles = SnapshotTiles(world)
+                Locations = SnapshotLocations(world),
+                MapXUpperBound = xBound,
+                MapYUpperBound = yBound,
+                Tiles = SnapshotTiles(world, xBound, yBound)
             };
 
             return snapshot;
@@ -112,26 +116,24 @@ namespace Wism.Client.Persistance
             return snapshot;
         }
 
-        private static TileEntity[] SnapshotTiles(World world)
+        private static TileEntity[] SnapshotTiles(World world, int xUpperBound, int yUpperBound)
         {
             var map = world.Map;
-            int maxX = map.GetUpperBound(0) + 1;
-            int maxY = map.GetUpperBound(1) + 1;
-            var snapshot = new TileEntity[maxX * maxY];            
+            var snapshot = new TileEntity[xUpperBound * yUpperBound];            
 
-            for (int y = 0; y < maxY; y++)
+            for (int y = 0; y < yUpperBound; y++)
             {
-                for (int x = 0; x < maxX; x++)
+                for (int x = 0; x < xUpperBound; x++)
                 {
                     var tile = map[x, y];
-                    snapshot[x + y * maxX] = new TileEntity()
+                    snapshot[x + y * xUpperBound] = new TileEntity()
                     {
-                        ArmyShortNames = ConvertToArmyShortNames(tile.Armies),
+                        ArmyIds = ConvertToArmyIds(tile.Armies),
                         CityShortName = tile.HasCity() ? tile.City.ShortName : null,
                         Items = SnapshotItems(tile.Items),
                         LocationShortName = tile.HasLocation() ? tile.Location.ShortName : null,
                         TerrainShortName = tile.Terrain.ShortName,
-                        VisitingArmyShortNames = ConvertToArmyShortNames(tile.VisitingArmies),
+                        VisitingArmyIds = ConvertToArmyIds(tile.VisitingArmies),
                         X = tile.X,
                         Y = tile.Y
                     };
@@ -177,14 +179,14 @@ namespace Wism.Client.Persistance
             return -1;
         }
 
-        private static string[] ConvertToArmyShortNames(List<Army> armies)
+        private static int[] ConvertToArmyIds(List<Army> armies)
         {
             if (armies == null || armies.Count == 0)
             {
                 return null;
             }
 
-            return armies.ConvertAll<string>(a => a.ShortName).ToArray();
+            return armies.ConvertAll<int>(a => a.Id).ToArray();
         }
 
         private static CityEntity[] SnapshotCities(World world)
@@ -204,7 +206,7 @@ namespace Wism.Client.Persistance
                     ArmyInTraining = SnapshotArmyInTraining(cities[i].Barracks.ArmyInTraining),
                     ClanShortName = (cities[i].Clan == null) ? null : cities[i].Clan.ShortName,
                     CityShortName = cities[i].ShortName,
-                    ProductionSlots = SnapshotProductionSlots(cities[i].Barracks),
+                    ProductionInfo = SnapshotProductionSlots(cities[i].Barracks),
                     Defense = cities[i].Defense,
                     Id = cities[i].Id,
                     X = cities[i].X,
@@ -215,7 +217,7 @@ namespace Wism.Client.Persistance
             return snapshot;
         }
 
-        private static ProductionEntity[] SnapshotProductionSlots(Barracks barracks)
+        private static ProductionEntity SnapshotProductionSlots(Barracks barracks)
         {
             var productionSlots = barracks.GetProductionKinds();
             if (productionSlots == null || productionSlots.Count == 0)
@@ -223,15 +225,11 @@ namespace Wism.Client.Persistance
                 return null;
             }
 
-            var snapshot = new ProductionEntity[productionSlots.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            var snapshot = new ProductionEntity()           
             {
-                snapshot[i] = new ProductionEntity()
-                {
-                    ArmyNames = ConvertToArmyShortNames(productionSlots),
-                    ProductionNumbers = ConvertToProductionNumbers(barracks, productionSlots)
-                };
-            }
+                ArmyNames = ConvertToArmyShortNames(productionSlots),
+                ProductionNumbers = ConvertToProductionNumbers(barracks, productionSlots)
+            };
 
             return snapshot;
         }
@@ -407,10 +405,14 @@ namespace Wism.Client.Persistance
         {
             var snapshot = new RandomEntity();
 
+            snapshot.Seed = game.RandomSeed;
+
             // Gain access to private seed array of Random
             var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            snapshot.SeedArray = seedArrayInfo.GetValue(random) as int[];
-            snapshot.Seed = game.RandomSeed;
+            if (seedArrayInfo != null)
+            {
+                snapshot.SeedArray = seedArrayInfo.GetValue(random) as int[];
+            }            
 
             return snapshot;
         }

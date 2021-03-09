@@ -58,9 +58,12 @@ namespace Wism.Client.Core
             army.DisplayName = armyEntity.DisplayName;
             army.MovesRemaining = armyEntity.MovesRemaining;
             army.Strength = armyEntity.Strength;
-            foreach (var templeName in armyEntity.BlessedAtShortNames)
+            if (armyEntity.BlessedAtShortNames != null)
             {
-                army.BlessedAt.Add(World.Current.GetLocations().Find(l => l.ShortName == templeName));
+                foreach (var templeName in armyEntity.BlessedAtShortNames)
+                {
+                    army.BlessedAt.Add(World.Current.GetLocations().Find(l => l.ShortName == templeName));
+                }
             }
 
             return army;

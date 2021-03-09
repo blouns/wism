@@ -45,11 +45,36 @@ namespace Wism.Client.Factories
                 {
                     var ait = ArmyInTrainingFactory.Load(aitEntity, world);
                     barracks.ArmiesToDeliver.Enqueue(ait);
-                    // TODO: Check to see if this is queued in the same order
                 }
             }
 
+            // Army in training
             barracks.ArmyInTraining = ArmyInTrainingFactory.Load(snapshot.ArmyInTraining, world);
+
+            // Barracks details
+            LoadProductionDetails(snapshot.ProductionInfo, barracks);
+        }
+
+        private static void LoadProductionDetails(ProductionEntity productionInfo, Barracks barracks)
+        {
+            if (productionInfo == null || 
+                productionInfo.ArmyNames == null || productionInfo.ArmyNames.Length == 0 ||
+                productionInfo.ProductionNumbers == null || productionInfo.ProductionNumbers.Length == 0)
+            {
+                return;
+            }
+
+            var productionKinds = barracks.GetProductionKinds();
+            if (productionKinds.Count != productionInfo.ArmyNames.Length ||
+                productionKinds.Count != productionInfo.ProductionNumbers.Length)
+            {
+                throw new InvalidOperationException("Production slots do not match");
+            }
+
+            for (int i = 0; i < productionKinds.Count; i++)
+            {
+                barracks.SetProductionNumber(productionInfo.ArmyNames[i], productionInfo.ProductionNumbers[i]);
+            }
         }
     }
 }

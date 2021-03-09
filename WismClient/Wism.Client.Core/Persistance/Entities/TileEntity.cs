@@ -24,9 +24,9 @@ namespace Wism.Client.Entities
         public string LocationShortName { get; set; }
 
         [DataMember]
-        public string[] ArmyShortNames { get; set; }
+        public int[] ArmyIds { get; set; }
 
         [DataMember]
-        public string[] VisitingArmyShortNames { get; set; }
+        public int[] VisitingArmyIds { get; set; }
     }
 }

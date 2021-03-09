@@ -77,6 +77,20 @@ namespace Wism.Client.Core
             return (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
         }
 
+        /// <summary>
+        /// Side-load an army for loading only.
+        /// </summary>
+        /// <param name="army">Army to add</param>
+        internal void AddArmy(Army army)
+        {
+            if (army is null)
+            {
+                throw new ArgumentNullException(nameof(army));
+            }
+
+            this.myArmies.Add(army);
+        }
+
         internal void AddCity(City city)
         {
             if (city is null)

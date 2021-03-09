@@ -19,5 +19,12 @@ namespace Wism.Client.Entities
         /// </summary>
         [DataMember]
         public TileEntity[] Tiles { get; set; }
+
+        [DataMember]
+        public int MapXUpperBound { get; set; }
+
+        [DataMember]
+        public int MapYUpperBound { get; set; }
+
     }
 }

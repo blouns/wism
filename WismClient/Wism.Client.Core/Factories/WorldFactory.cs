@@ -10,18 +10,16 @@ namespace Wism.Client.Factories
     public static class WorldFactory
     {
         public static World Load(WorldEntity snapshot, 
-            out Dictionary<string, Tile> cityNameTileDict, 
-            out Dictionary<string, Tile> armiesNameTileDict, 
-            out Dictionary<string, Tile> visitingNameTileDict)
+            out Dictionary<int, Tile> armiesNameTileDict, 
+            out Dictionary<int, Tile> visitingNameTileDict)
         {
             // Load Tiles            
-            int xMax = snapshot.Tiles.GetUpperBound(0) + 1;
-            int yMax = snapshot.Tiles.GetUpperBound(1) + 1;            
+            int xMax = snapshot.MapXUpperBound;
+            int yMax = snapshot.MapYUpperBound;
             Tile[,] map = new Tile[xMax, yMax];
 
-            cityNameTileDict = new Dictionary<string, Tile>();
-            armiesNameTileDict = new Dictionary<string, Tile>();
-            visitingNameTileDict = new Dictionary<string, Tile>();
+            armiesNameTileDict = new Dictionary<int, Tile>();
+            visitingNameTileDict = new Dictionary<int, Tile>();
             var locationNameTileDict = new Dictionary<string, Tile>();
 
             for (int y = 0; y < yMax; y++)
@@ -46,28 +44,26 @@ namespace Wism.Client.Factories
                         }
                     }
 
-                    // Locations
-                    if (!String.IsNullOrWhiteSpace(tileEntity.LocationShortName))
+                    // Locations (circular reference; added to Tile during Location creation)
+
+                    // City no-op (circular reference; added to Tile during City creation)                    
+
+                    // Armies (circular reference; add after army creation)
+                    if (tileEntity.ArmyIds != null)
                     {
-                        locationNameTileDict.Add(tileEntity.LocationShortName, tile);
+                        foreach (var armyName in tileEntity.ArmyIds)
+                        {
+                            armiesNameTileDict.Add(armyName, tile);
+                        }
                     }
 
-                    // City (circular reference; add later)
-                    if (!String.IsNullOrWhiteSpace(tileEntity.CityShortName))
+                    // Visiting Armies (circular reference; add after army creation)
+                    if (tileEntity.VisitingArmyIds != null)
                     {
-                        cityNameTileDict.Add(tileEntity.CityShortName, tile);
-                    }
-
-                    // Armies (circular reference; add later)
-                    foreach (var armyName in tileEntity.ArmyShortNames)
-                    {
-                        armiesNameTileDict.Add(armyName, tile);
-                    }
-
-                    // Visiting Armies (circular reference; add later)
-                    foreach (var visitingName in tileEntity.VisitingArmyShortNames)
-                    {
-                        visitingNameTileDict.Add(visitingName, tile);
+                        foreach (var visitingName in tileEntity.VisitingArmyIds)
+                        {
+                            visitingNameTileDict.Add(visitingName, tile);
+                        }
                     }
 
                     map[x, y] = tile;
@@ -78,12 +74,10 @@ namespace Wism.Client.Factories
             var world = World.Current;
             world.Name = snapshot.Name;
 
-            // Load late-bound Locations           
+            // Load late-bound Locations (after world creation)          
             foreach (var locationEntity in snapshot.Locations)
             {
-                world.AddLocation(
-                    LocationFactory.Load(locationEntity),
-                    locationNameTileDict[locationEntity.LocationShortName]);
+                _ = LocationFactory.Load(locationEntity, world);
             }
 
             return world;

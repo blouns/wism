@@ -60,15 +60,21 @@ namespace Wism.Client.Core
                 throw new ArgumentException($"'{nameof(armyInfoName)}' cannot be null or whitespace", nameof(armyInfoName));
             }
 
+            ProductionInfo slot = null;
             foreach (var pi in productionInfoDictionary.Keys)
             {
                 if (pi.ArmyInfoName.ToLowerInvariant() == armyInfoName.ToLowerInvariant())
                 {
-                    productionInfoDictionary[pi] = productionNumber;
+                    slot = pi;
                 }
             }
 
-            throw new ArgumentOutOfRangeException("armyInfo", "Could not find a matching production info.");
+            if (slot == null)
+            {
+                throw new ArgumentOutOfRangeException("armyInfo", "Could not find a matching production info.");
+            }
+
+            productionInfoDictionary[slot] = productionNumber;
         }
 
         public List<ProductionInfo> GetProductionKinds()

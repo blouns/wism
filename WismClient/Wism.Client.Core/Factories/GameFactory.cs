@@ -4,7 +4,6 @@ using System.Reflection;
 using Wism.Client.Core;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
 using Wism.Client.War;
 
 namespace Wism.Client.Factories
@@ -33,11 +32,10 @@ namespace Wism.Client.Factories
                 out Dictionary<string, Player> capitolToPlayer);
 
             var world = WorldFactory.Load(snapshot.World,
-                out Dictionary<string, Tile> cityToTile,
-                out Dictionary<string, Tile> armiesToTile,
-                out Dictionary<string, Tile> visitingToTile);
+                out Dictionary<int, Tile> armiesToTile,
+                out Dictionary<int, Tile> visitingToTile);
 
-            LoadCities(snapshot, world, cityToPlayer, capitolToPlayer, cityToTile);
+            LoadCities(snapshot, world, cityToPlayer, capitolToPlayer);
             LoadArmies(snapshot, armiesToTile, visitingToTile);
 
             // Factory state
@@ -46,21 +44,21 @@ namespace Wism.Client.Factories
             return current;
         }
 
-        private static void LoadArmies(GameEntity snapshot, Dictionary<string, Tile> armiesToTile, Dictionary<string, Tile> visitingToTile)
+        private static void LoadArmies(GameEntity snapshot, Dictionary<int, Tile> armiesToTile, Dictionary<int, Tile> visitingToTile)
         {
             var selectedArmies = new List<Army>();
             var allArmies = Game.Current.GetAllArmies();
             foreach (var army in allArmies)
             {
                 // Tiles for armies and visiting armies
-                if (armiesToTile.ContainsKey(army.ShortName))
+                if (armiesToTile.ContainsKey(army.Id))
                 {
-                    var tile = armiesToTile[army.ShortName];
+                    var tile = armiesToTile[army.Id];
                     tile.AddArmies(new List<Army>() { army });
                 }
-                else if (visitingToTile.ContainsKey(army.ShortName))
+                else if (visitingToTile.ContainsKey(army.Id))
                 {
-                    var tile = visitingToTile[army.ShortName];
+                    var tile = visitingToTile[army.Id];
                     tile.AddVisitingArmies(new List<Army>() { army });
                 }
 
@@ -81,8 +79,7 @@ namespace Wism.Client.Factories
 
         private static void LoadCities(GameEntity snapshot, World world,
             Dictionary<string, Player> cityToPlayer, 
-            Dictionary<string, Player> capitolToPlayer, 
-            Dictionary<string, Tile> cityToTile)
+            Dictionary<string, Player> capitolToPlayer)
         {
             foreach (var citySnapshot in snapshot.World.Cities)
             {
@@ -99,16 +96,6 @@ namespace Wism.Client.Factories
                     capitolToPlayer[city.ShortName].Capitol = city;
                 }
             }
-        
-            
-            
-            foreach (var cityName in cityToTile.Keys)
-            {
-                //MapBuilder.AddCity(game.World, cityToTile[cityName].X, cityToTile[cityName].Y, cityName);
-                //var city = current.World.Map[cityToTile[cityName].X, cityToTile[cityName].Y].City;                
-
-                
-            }
         }
 
         /// <summary>
@@ -123,10 +110,12 @@ namespace Wism.Client.Factories
         private static Random LoadRandom(RandomEntity snapshot)
         {            
             var random = new Random(snapshot.Seed);
-            var seedArrayCopy = (int[])snapshot.SeedArray.Clone();
-
-            var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            seedArrayInfo.SetValue(random, seedArrayCopy);
+            if (snapshot.SeedArray != null)
+            {
+                var seedArrayCopy = (int[])snapshot.SeedArray.Clone();
+                var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                seedArrayInfo.SetValue(random, seedArrayCopy);
+            }            
 
             return random;
         }

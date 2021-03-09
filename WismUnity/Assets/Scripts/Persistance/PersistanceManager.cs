@@ -31,7 +31,7 @@ namespace Assets.Scripts.Managers
 
             // Write to disk
             string path = Application.persistentDataPath + "/" + filename;
-            using (FileStream stream = File.OpenWrite(path))
+            using (Stream stream = File.Open(path, FileMode.Create))
             {
                 DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(UnityGameEntity));
                 serializer.WriteObject(stream, snapshot);

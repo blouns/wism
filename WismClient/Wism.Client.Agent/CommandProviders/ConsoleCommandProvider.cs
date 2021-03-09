@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Json;
 using System.Threading;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
+using Wism.Client.Entities;
+using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -13,6 +17,7 @@ namespace Wism.Client.Agent
 {
     public class ConsoleCommandProvider : ICommandProvider
     {
+        private const string SaveFilePath = @"CWISM1.SAV";
         private readonly CommandController commandController;
         private readonly ArmyController armyController;
         private readonly GameController gameController;
@@ -104,6 +109,12 @@ namespace Wism.Client.Agent
                 case ConsoleKey.N:
                     DoNextArmy();
                     break;
+                case ConsoleKey.V:
+                    DoSave();
+                    break;
+                case ConsoleKey.L:
+                    DoLoad();
+                    break;
                 case ConsoleKey.UpArrow:
                     DoMoveArmyOneStep(0, 1);
                     break;
@@ -117,6 +128,42 @@ namespace Wism.Client.Agent
                     DoMoveArmyOneStep(1, 0);
                     break;
             }
+        }
+
+        private void DoLoad()
+        {
+            GameEntity snapshot;
+
+            Notify.Display("Loading game...");
+            using (FileStream stream = File.OpenRead(SaveFilePath))
+            {
+                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
+                snapshot = serializer.ReadObject(stream) as GameEntity;
+            }
+
+            if (snapshot == null)
+            {
+                Notify.Alert("Failed to load the game.");
+            }
+            else
+            {
+                _ = GameFactory.Load(snapshot);
+                Notify.Display("Game loaded successfully.");
+            }
+
+        }
+
+        private void DoSave()
+        {
+            Notify.Display("Saving game...");
+            var snapshot = Game.Current.Snapshot();
+            using (Stream stream = File.Open(SaveFilePath, FileMode.Create))
+            {
+                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
+                serializer.WriteObject(stream, snapshot);
+            }
+
+            Notify.Display("Game saved successfully.");
         }
 
         private void DoTake()
@@ -347,39 +394,7 @@ namespace Wism.Client.Agent
             }
 
             AddAttackCommands(armies, x, y);
-        }
-
-        private void DoAttackArmy()
-        {
-            if (!Game.Current.ArmiesSelected())
-            {
-                Notify.Alert("You must first select an army.");
-                return;
-            }
-
-            var armies = Game.Current.GetSelectedArmies();
-            if (armies == null)
-            {
-                throw new InvalidOperationException("Selected armies were not set.");
-            }
-
-            Console.Write("X location? : ");
-            int x = ReadLocationInput(0);
-            Console.Write("Y location? : ");
-            int y = ReadLocationInput(1);
-
-            Tile tile = World.Current.Map[x, y];
-            if (!tile.CanAttackHere(armies))
-            {
-                Notify.Alert("Can only attack an enemy controlled location.");
-                return;
-            }
-
-            commandController.AddCommand(
-                new PrepareForBattleCommand(armyController, armies, x, y));
-            commandController.AddCommand(
-                    new AttackOnceCommand(armyController, armies, x, y));
-        }
+        }    
 
         private void DoDeselectArmy()
         {
