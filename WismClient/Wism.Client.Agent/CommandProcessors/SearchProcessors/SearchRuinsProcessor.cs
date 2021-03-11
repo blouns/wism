@@ -58,7 +58,8 @@ namespace Wism.Client.Agent.CommandProcessors
                 a.Tile == targetTile &&
                 a.MovesRemaining > 0);
 
-            if (hero == null)
+            if (hero == null || 
+                ruinsCommand.Location.Searched)
             {
                 Notify.DisplayAndWait("You have found nothing!");
                 return ActionState.Failed;

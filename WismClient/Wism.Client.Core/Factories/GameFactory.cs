@@ -69,10 +69,13 @@ namespace Wism.Client.Factories
                     {
                         if (army.Id == snapshot.SelectedArmyIds[i])
                         {
-                            selectedArmies.Add(army);
+                            selectedArmies.Add(army);                            
                             break;
                         }
                     }
+
+                    // Select armies: need to side-load since they were saved as Visiting Armies
+                    Game.Current.SelectArmiesInternal(selectedArmies);
                 }
             }
         }

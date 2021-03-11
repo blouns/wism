@@ -305,10 +305,14 @@ namespace Wism.Client.Core
                 tile.Armies = null;
             }
 
-            this.selectedArmies = new List<Army>(tile.VisitingArmies);
-            this.selectedArmies.ForEach(a => a.IsDefending = false);
-            
+            SelectArmiesInternal(tile.VisitingArmies);
             Transition(GameState.SelectedArmy);
+        }
+
+        internal void SelectArmiesInternal(List<Army> armies)
+        {
+            this.selectedArmies = new List<Army>(armies);
+            this.selectedArmies.ForEach(a => a.IsDefending = false);
         }
 
         /// <summary>
