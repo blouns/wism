@@ -7,7 +7,7 @@ using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.War;
 
-namespace Wism.Client.Persistance
+namespace Wism.Client.Data
 {
     public static class GamePersistance
     {
@@ -98,7 +98,7 @@ namespace Wism.Client.Persistance
             return snapshot;
         }
 
-        private static BoonEntity SnapshotBoon(IBoon boon)
+        public static BoonEntity SnapshotBoon(IBoon boon)
         {
             if (boon == null)
             {
@@ -170,9 +170,12 @@ namespace Wism.Client.Persistance
         {
             for (int i = 0; i < Game.Current.Players.Count; i++)
             {
-                if (Game.Current.Players[i].Clan == artifact.Player.Clan)
+                if (artifact.Player != null)
                 {
-                    return i;
+                    if (Game.Current.Players[i].Clan == artifact.Player.Clan)
+                    {
+                        return i;
+                    }
                 }
             }
 
@@ -349,7 +352,7 @@ namespace Wism.Client.Persistance
                 snapshot[i] = new ArmyEntity()
                 {
                     ArmyShortName = armies[i].ShortName,
-                    Artifacts = SnapshotArtificats(armies[i]),
+                    Artifacts = SnapshotArtifacts(armies[i]),
                     BlessedAtShortNames = ConvertToLocationShortNames(armies[i].BlessedAt),
                     DisplayName = armies[i].DisplayName,
                     Id = armies[i].Id,
@@ -377,7 +380,7 @@ namespace Wism.Client.Persistance
             return blessedAt.ConvertAll<string>(l => l.ShortName).ToArray();
         }
 
-        private static ArtifactEntity[] SnapshotArtificats(Army army)
+        private static ArtifactEntity[] SnapshotArtifacts(Army army)
         {
             var hero = army as Hero;
             if (hero == null || !hero.HasItems())
@@ -392,9 +395,7 @@ namespace Wism.Client.Persistance
                 {
                     ArtifactShortName = hero.Items[i].ShortName,
                     Id = hero.Items[i].Id,
-                    PlayerIndex = GetPlayerIndex(hero.Items[i]),
-                    X = hero.Items[i].X,
-                    Y = hero.Items[i].Y
+                    PlayerIndex = GetPlayerIndex(hero.Items[i])
                 };
             }
 

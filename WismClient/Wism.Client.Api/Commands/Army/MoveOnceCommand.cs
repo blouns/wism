@@ -10,6 +10,7 @@ namespace Wism.Client.Api.Commands
         private IList<Tile> path;
         public int X { get; set; }
         public int Y { get; set; }
+        public IList<Tile> Path { get => path; set => path = value; }
 
         public MoveOnceCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armyController, armies)

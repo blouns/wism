@@ -11,8 +11,8 @@ namespace Wism.Client.MapObjects
         public abstract string ShortName { get; }
         public Tile Tile { get; set; }
         public Player Player { get; set; }
-        public int X { get => Tile.X; }
-        public int Y { get => Tile.Y; }
+        public int X { get => (Tile == null) ? 0 : Tile.X; }
+        public int Y { get => (Tile == null) ? 0 : Tile.Y; }
 
         public override bool Equals(object obj)
         {

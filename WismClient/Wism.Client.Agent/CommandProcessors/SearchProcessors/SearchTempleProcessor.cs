@@ -37,14 +37,14 @@ namespace Wism.Client.Agent.CommandProcessors
 
             if (result == ActionState.Succeeded)
             {
-                if (templeCommand.NumberOfArmiesBlessed == 1)
+                if (templeCommand.BlessedArmyCount == 1)
                 {
                     Notify.DisplayAndWait("You have been blessed! Seek more blessings in far temples!");
                 }
                 else
                 {
                     Notify.DisplayAndWait("{0} Armies have been blessed! Seek more blessings in far temples!",
-                        templeCommand.NumberOfArmiesBlessed);
+                        templeCommand.BlessedArmyCount);
                 }
             }
             else

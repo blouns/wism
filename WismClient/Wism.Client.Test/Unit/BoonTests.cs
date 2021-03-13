@@ -25,12 +25,12 @@ namespace Wism.Client.Test.Unit
         }
 
         [Test]
-        public void Redeem_Altar_GodsListen()
+        public void Redeem_Throne_GodsListen()
         {
             // Assemble
             Game.Current.Random.Next();         // Cycle random to get to Listen roll (lazy) - 50% chance
             var tile = World.Current.Map[2, 2];
-            var boon = new AltarBoon();            
+            var boon = new ThroneBoon();            
 
             // Set up hero
             var player1 = Game.Current.Players[0];
@@ -50,7 +50,7 @@ namespace Wism.Client.Test.Unit
         }
 
         [Test]
-        public void Redeem_Altar_GodsIgnore()
+        public void Redeem_Throne_GodsIgnore()
         {
             // Assemble
             for (int i = 0; i < 8; i++)
@@ -59,7 +59,7 @@ namespace Wism.Client.Test.Unit
             }            
             
             var tile = World.Current.Map[2, 2];
-            var boon = new AltarBoon();
+            var boon = new ThroneBoon();
 
             // Set up hero
             var player1 = Game.Current.Players[0];
@@ -79,11 +79,11 @@ namespace Wism.Client.Test.Unit
         }
 
         [Test]
-        public void Redeem_Altar_GodsAngry()
+        public void Redeem_Throne_GodsAngry()
         {
             // Assemble            
             var tile = World.Current.Map[2, 2];
-            var boon = new AltarBoon();
+            var boon = new ThroneBoon();
 
             // Set up hero
             var player1 = Game.Current.Players[0];

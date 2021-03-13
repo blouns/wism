@@ -7,7 +7,13 @@ namespace Wism.Client.Api.Commands
 {
     public class StartProductionCommand : Command
     {
-        public StartProductionCommand(CityController cityController, City productionCity, ArmyInfo armyInfo, City destinationCity = null)
+        public CityController CityController { get; }
+        public City ProductionCity { get; }
+        public ArmyInfo ArmyInfo { get; }
+        public City DestinationCity { get; }
+
+        public StartProductionCommand(CityController cityController, 
+            City productionCity, ArmyInfo armyInfo, City destinationCity = null)
             : base()
         {
             CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
@@ -15,11 +21,6 @@ namespace Wism.Client.Api.Commands
             ArmyInfo = armyInfo ?? throw new ArgumentNullException(nameof(armyInfo));
             DestinationCity = destinationCity;
         }
-
-        public CityController CityController { get; }
-        public City ProductionCity { get; }
-        public ArmyInfo ArmyInfo { get; }
-        public City DestinationCity { get; }
 
         protected override ActionState ExecuteInternal()
         {

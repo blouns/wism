@@ -2,7 +2,7 @@
 
 namespace Wism.Client.Core
 {
-    public class AltarBoon : IBoon
+    public class ThroneBoon : IBoon
     {
         public bool IsDefended => false;
 

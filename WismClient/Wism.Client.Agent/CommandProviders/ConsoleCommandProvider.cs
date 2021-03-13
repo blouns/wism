@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Json;
-using System.Threading;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -17,7 +17,8 @@ namespace Wism.Client.Agent
 {
     public class ConsoleCommandProvider : ICommandProvider
     {
-        private const string SaveFilePath = @"CWISM1.SAV";
+        private const string SaveFilePath = @"WISM_Snapshot.SAV";
+        private const string CommandsFilePath = @"WISM_Commands.SAV";
         private readonly CommandController commandController;
         private readonly ArmyController armyController;
         private readonly GameController gameController;
@@ -162,6 +163,14 @@ namespace Wism.Client.Agent
                 DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
                 serializer.WriteObject(stream, snapshot);
             }
+
+            var commands = commandController.GetCommandsJSON();
+            File.WriteAllText(CommandsFilePath, commands);
+            //using (StreamWriter writer = File.CreateText(CommandsFilePath))
+            //{
+            //    JsonSerializer serializer = new JsonSerializer();
+            //    serializer.Serialize(writer, commands);
+            //}
 
             Notify.Display("Game saved successfully.");
         }

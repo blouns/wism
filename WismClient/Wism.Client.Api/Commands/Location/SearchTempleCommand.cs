@@ -8,7 +8,7 @@ namespace Wism.Client.Api.Commands
 {
     public class SearchTempleCommand : SearchLocationCommand
     {
-        public int NumberOfArmiesBlessed { get; private set; }
+        public int BlessedArmyCount { get; private set; }
 
         public SearchTempleCommand(LocationController locationController, List<Army> armies, Location location)
             : base(locationController, armies, location)
@@ -19,7 +19,7 @@ namespace Wism.Client.Api.Commands
         {
             bool success = LocationController.SearchTemple(Armies, Location, out int result);
 
-            NumberOfArmiesBlessed = result;
+            BlessedArmyCount = result;
             return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
     }

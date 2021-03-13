@@ -4,7 +4,7 @@ using Wism.Client.Common;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
-using Wism.Client.Persistance;
+using Wism.Client.Data;
 using Wism.Client.War;
 
 namespace Wism.Client.Core

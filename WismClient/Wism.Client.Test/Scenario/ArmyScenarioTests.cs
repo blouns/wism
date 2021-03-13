@@ -436,7 +436,7 @@ namespace Wism.Client.Test.Scenario
 
             // Assert
             Assert.IsTrue(gold1 < player1.Gold, "No money from the seer.");
-            // Strength should be +3 thanks to 2 temples and one successful altar boon
+            // Strength should be +3 thanks to 2 temples and one successful throne boon
             Assert.AreEqual(strength1 + 3, armiesToMove1[0].Strength, "Too weak or too strong.");
 
 

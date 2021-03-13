@@ -9,14 +9,14 @@ namespace Wism.Client.Core
     {
         private const float DefaultAlliesPercent = 0.3f;
         private const float DefaultArtifactPercent = 0.6f;
-        private const float DefaultAltarPercent = 0.05f;
+        private const float DefaultThronePercent = 0.05f;
         private const float DefaultGoldPercent = 0.05f;
         readonly List<IBoon> boonLibrary = new List<IBoon>();
         int[] boonOrder;
 
         public float AlliesPercent { get; set; }
         public float ArtifactPercent { get; set; }
-        public float AltarPercent { get; set; }
+        public float ThronePercent { get; set; }
         public float GoldPercent { get; set; }
 
         public BoonAllocator()
@@ -24,7 +24,7 @@ namespace Wism.Client.Core
             // Default percentages must add up to 100%
             AlliesPercent = DefaultAlliesPercent;
             ArtifactPercent = DefaultArtifactPercent;
-            AltarPercent = DefaultAltarPercent;
+            ThronePercent = DefaultThronePercent;
             GoldPercent = DefaultGoldPercent;            
         }
 
@@ -61,13 +61,13 @@ namespace Wism.Client.Core
         /// </summary>
         private void ValidateAllocationPercentages()
         {
-            if ((AlliesPercent + ArtifactPercent + AltarPercent + GoldPercent) > 1f)
+            if ((AlliesPercent + ArtifactPercent + ThronePercent + GoldPercent) > 1f)
             {
                 throw new InvalidOperationException(String.Format(
-                    "Allocations must equal 100%: Allies: {0}%, Artifact: {1}%, Altar: {2}%, Gold: {3}%",
+                    "Allocations must equal 100%: Allies: {0}%, Artifact: {1}%, Throne: {2}%, Gold: {3}%",
                     AlliesPercent * 100f,
                     ArtifactPercent * 100f,
-                    AltarPercent * 100f,
+                    ThronePercent * 100f,
                     GoldPercent * 100f));
             }
         }
@@ -96,13 +96,13 @@ namespace Wism.Client.Core
         private void BuildBoonLibrary(string modPath, int boonCount)
         {
             var artifacts = ModFactory.LoadArtifacts(modPath);            
-            float artifactActual, alliesActual, altarActual, goldActual;
-            CalculateActualAllocationPercent(boonCount, artifacts, out artifactActual, out alliesActual, out altarActual, out goldActual);
+            float artifactActual, alliesActual, throneActual, goldActual;
+            CalculateActualAllocationPercent(boonCount, artifacts, out artifactActual, out alliesActual, out throneActual, out goldActual);
 
             AddArtifacts(artifacts, boonCount, artifactActual);
             AddAllies(boonCount, alliesActual);
             AddGold(boonCount, goldActual);
-            AddAltar(boonCount, altarActual); 
+            AddThrone(boonCount, throneActual); 
         }
 
         /// <summary>
@@ -113,9 +113,9 @@ namespace Wism.Client.Core
         /// <param name="artifacts">Artifacts available</param>
         /// <param name="artifactActual">Actual % of artifact boons</param>
         /// <param name="alliesActual">Actual % of allies boons</param>
-        /// <param name="altarActual">Actual % of altar boons</param>
+        /// <param name="throneActual">Actual % of throne boons</param>
         /// <param name="goldActual">Actual % of gold boons</param>
-        private void CalculateActualAllocationPercent(int boonCount, IList<Artifact> artifacts, out float artifactActual, out float alliesActual, out float altarActual, out float goldActual)
+        private void CalculateActualAllocationPercent(int boonCount, IList<Artifact> artifacts, out float artifactActual, out float alliesActual, out float throneActual, out float goldActual)
         {
             float artifactsPerBoon = ((float)artifacts.Count) / ((float)boonCount);
             artifactActual = (artifactsPerBoon > ArtifactPercent) ? ArtifactPercent : artifactsPerBoon;
@@ -124,31 +124,28 @@ namespace Wism.Client.Core
             {
                 float artifactPercentDelta = (ArtifactPercent - artifactActual) / artifactActual;
                 alliesActual = (artifactPercentDelta * AlliesPercent) + AlliesPercent;
-                altarActual = (artifactPercentDelta * AltarPercent) + AltarPercent;
+                throneActual = (artifactPercentDelta * ThronePercent) + ThronePercent;
                 goldActual = (artifactPercentDelta * GoldPercent) + GoldPercent;
             }
             else
             {
                 alliesActual = AlliesPercent;
-                altarActual = AltarPercent;
+                throneActual = ThronePercent;
                 goldActual = GoldPercent;
                 goldActual += 1f - (artifactActual + alliesActual + goldActual); // Remainder goes to gold
             }
-            //alliesActual = (artifactActual < ArtifactPercent) ? (AlliesPercent * (ArtifactPercent - artifactActual)) + AlliesPercent : AlliesPercent;
-            //altarActual = (artifactActual < ArtifactPercent) ? (AltarPercent * (ArtifactPercent - artifactActual)) + AltarPercent : AltarPercent;
-            //goldActual = (artifactActual < ArtifactPercent) ? (GoldPercent * (ArtifactPercent - artifactActual)) + GoldPercent : GoldPercent;
         }
 
         /// <summary>
-        /// Add % of Altar boons
+        /// Add % of Throne boons
         /// </summary>
         /// <param name="boonCount">Total boons</param>
-        /// <param name="altarActual">% of Altar boons desired</param>
-        private void AddAltar(int boonCount, float altarActual)
+        /// <param name="throneActual">% of Throne boons desired</param>
+        private void AddThrone(int boonCount, float throneActual)
         {
-            for (int i = 0; i < boonCount * altarActual; i++)
+            for (int i = 0; i < boonCount * throneActual; i++)
             {
-                boonLibrary.Add(new AltarBoon());
+                boonLibrary.Add(new ThroneBoon());
             }
         }
 

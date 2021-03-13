@@ -27,7 +27,7 @@ namespace Wism.Client.Agent.CommandProcessors
             this.boonIdentifiers = new List<IBoonIdentfier>()
             {
                 new AlliesBoonIdentifier(),
-                new AltarBoonIdentifier(),
+                new ThroneBoonIdentifier(),
                 new ArtifactBoonIdentifier(),
                 new GoldBoonIdentifier(),
             };
@@ -65,9 +65,9 @@ namespace Wism.Client.Agent.CommandProcessors
                 return ActionState.Failed;
             }
 
-            if (location.Boon is AltarBoon)
+            if (location.Boon is ThroneBoon)
             {
-                Notify.Information("An altar stands before you. Do you wish to approach?");
+                Notify.Information("An throne stands before you. Will you sit in the throne?");
                 var key = Console.ReadKey();
                 if (key.Key != ConsoleKey.Y)
                 {

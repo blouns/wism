@@ -6,6 +6,10 @@ namespace Wism.Client.Api.Commands
 {
     public class LoadGameCommand : Command
     {
+        public GameController GameController { get; }
+
+        public GameEntity Snapshot { get; }
+
         public LoadGameCommand(GameController gameController, GameEntity snapshot)
         {
             if (gameController is null)
@@ -16,9 +20,6 @@ namespace Wism.Client.Api.Commands
             GameController = gameController;
             Snapshot = snapshot ?? throw new ArgumentNullException(nameof(snapshot));
         }
-
-        public GameController GameController { get; }
-        public GameEntity Snapshot { get; }
 
         protected override ActionState ExecuteInternal()
         {
