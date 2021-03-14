@@ -1,8 +1,10 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Common;
+using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Data;
 using Wism.Client.War;
 
 namespace Wism.Client.Core
@@ -21,11 +23,6 @@ namespace Wism.Client.Core
         private Queue<Tile> nextArmyQueue = new Queue<Tile>();
 
         /// <summary>
-        /// Active world
-        /// </summary>
-        public World World { get; set; }
-
-        /// <summary>
         /// Active game players
         /// </summary>
         public List<Player> Players { get; set; }
@@ -39,6 +36,11 @@ namespace Wism.Client.Core
         /// out of sync with the game state.
         /// </remarks>
         public Random Random { get; set; }
+
+        /// <summary>
+        /// Random number seed
+        /// </summary>
+        public int RandomSeed { get; set; }
 
         /// <summary>
         /// Gets or sets the strategy used for battles
@@ -66,6 +68,8 @@ namespace Wism.Client.Core
             }
         }
 
+        internal int CurrentPlayerIndex { get => currentPlayerIndex; set => currentPlayerIndex = value; }
+
         /// <summary>
         /// Test if the game has been initialized.
         /// </summary>
@@ -73,6 +77,19 @@ namespace Wism.Client.Core
         public static bool IsInitialized()
         {
             return Game.current != null;
+        }
+
+        /// <summary>
+        /// Take a gave snapshot with all game state.
+        /// </summary>
+        /// <returns>Game snapshot</returns>
+        /// <remarks>
+        /// Creates a graph of entities comprising the entire game state 
+        /// to be persisted, saved, or shared.
+        /// </remarks>
+        public GameEntity Snapshot()
+        {
+            return GamePersistance.SnapshotGame(this);
         }
 
         /// <summary>
@@ -101,7 +118,7 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Players have not been initialized.");
             }
 
-            return Players[currentPlayerIndex];
+            return Players[CurrentPlayerIndex];
         }
 
         /// <summary>
@@ -115,7 +132,7 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Players have not been initialized.");
             }
 
-            return Players[(currentPlayerIndex + 1) % Players.Count];
+            return Players[(CurrentPlayerIndex + 1) % Players.Count];
         }
 
         /// <summary>
@@ -158,19 +175,19 @@ namespace Wism.Client.Core
         /// <returns>True if next player selected; False if there are no other players left</returns>
         private bool SelectNextPlayer()
         {            
-            int lastPlayerIndex = currentPlayerIndex;
+            int lastPlayerIndex = CurrentPlayerIndex;
 
             // Find next player that is still in the fight
-            currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
-            currentPlayerIndex = Players.FindIndex(currentPlayerIndex, p => !p.IsDead);
-            if (currentPlayerIndex == -1)
+            CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
+            CurrentPlayerIndex = Players.FindIndex(CurrentPlayerIndex, p => !p.IsDead);
+            if (CurrentPlayerIndex == -1)
             {
                 // Not found in first pass; look starting from beginning of list                
-                currentPlayerIndex = Players.FindIndex(p => !p.IsDead);
+                CurrentPlayerIndex = Players.FindIndex(p => !p.IsDead);
             }
 
             // This may roll back to the original player (player wins); so return False in that case
-            return (lastPlayerIndex != currentPlayerIndex);
+            return (lastPlayerIndex != CurrentPlayerIndex);
         }
 
         /// <summary>
@@ -252,7 +269,7 @@ namespace Wism.Client.Core
                 return;
             }
 
-            if (!armies.TrueForAll(army => GetCurrentPlayer() == army.Player))
+            if (!armies.TrueForAll(army => GetCurrentPlayer().Clan.ShortName == army.Player.Clan.ShortName))
             {
                 throw new InvalidOperationException("Only the current player can select an army.");
             }
@@ -288,10 +305,14 @@ namespace Wism.Client.Core
                 tile.Armies = null;
             }
 
-            this.selectedArmies = new List<Army>(tile.VisitingArmies);
-            this.selectedArmies.ForEach(a => a.IsDefending = false);
-            
+            SelectArmiesInternal(tile.VisitingArmies);
             Transition(GameState.SelectedArmy);
+        }
+
+        internal void SelectArmiesInternal(List<Army> armies)
+        {
+            this.selectedArmies = new List<Army>(armies);
+            this.selectedArmies.ForEach(a => a.IsDefending = false);
         }
 
         /// <summary>
@@ -374,7 +395,7 @@ namespace Wism.Client.Core
             Player player2 = Player.Create(clan);
             Current.Players.Add(player2);
 
-            Game.Current.currentPlayerIndex = 0;
+            Game.Current.CurrentPlayerIndex = 0;
         }
 
         /// <summary>
@@ -392,6 +413,7 @@ namespace Wism.Client.Core
         public static void CreateDefaultGame(string worldName)
         {
             current = new Game();
+            current.RandomSeed = Game.DefaultRandomSeed;
             current.Random = new Random(Game.DefaultRandomSeed);
             current.WarStrategy = new DefaultWarStrategy();
 
@@ -400,8 +422,6 @@ namespace Wism.Client.Core
             CreateDefaultPlayers();
 
             World.CreateWorld(worldName);
-            //MapBuilder.AddCitiesToMapFromWorld(World.Current.Map, worldName);
-            //MapBuilder.AddLocationsToMapFromWorld(World.Current.Map, worldName);
         }
 
         /// <summary>

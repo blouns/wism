@@ -89,7 +89,7 @@ namespace Wism.Client.Modules
                 // Neutral player
                 city.Claim(Player.GetNeutralPlayer());
                 AddNeutralCityGarrison(city);
-            }            
+            }
         }
 
         private static void AddNeutralCityGarrison(City city)

@@ -1,9 +1,9 @@
 ﻿Goal: 2P playable: Actual cities from Warlords with Neutral player
 
 TODO:
+ * New heros
 
  Future:
-  * Hero items (search, take, drop, bonuses)
   * User clan picker panel
   * Startup splash screen
   * Clan and army balance and attribute details (e.g. terrain bonuses)

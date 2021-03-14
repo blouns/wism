@@ -1,11 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.IO;
+using System.Runtime.Serialization.Json;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
+using Wism.Client.Data;
+using Wism.Client.Entities;
+using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -13,6 +18,8 @@ namespace Wism.Client.Agent
 {
     public class ConsoleCommandProvider : ICommandProvider
     {
+        private const string SaveFilePath = @"WISM_Snapshot.SAV";
+        private const string CommandsFilePath = @"WISM_Commands.SAV";
         private readonly CommandController commandController;
         private readonly ArmyController armyController;
         private readonly GameController gameController;
@@ -104,6 +111,12 @@ namespace Wism.Client.Agent
                 case ConsoleKey.N:
                     DoNextArmy();
                     break;
+                case ConsoleKey.V:
+                    DoSave();
+                    break;
+                case ConsoleKey.L:
+                    DoLoad();
+                    break;
                 case ConsoleKey.UpArrow:
                     DoMoveArmyOneStep(0, 1);
                     break;
@@ -117,6 +130,45 @@ namespace Wism.Client.Agent
                     DoMoveArmyOneStep(1, 0);
                     break;
             }
+        }
+
+        private void DoLoad()
+        {
+            GameEntity snapshot;
+
+            Notify.Display("Loading game...");
+            var json = File.ReadAllText(SaveFilePath);
+
+            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            snapshot = JsonConvert.DeserializeObject<GameEntity>(json, settings);
+
+            if (snapshot == null)
+            {
+                Notify.Alert("Failed to load the game.");
+            }
+            else
+            {
+                _ = GameFactory.Load(snapshot);
+                Notify.Display("Game loaded successfully.");
+            }
+
+        }
+
+        private void DoSave()
+        {
+            Notify.Display("Saving game...");
+            var snapshot = Game.Current.Snapshot();
+
+            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            var json = JsonConvert.SerializeObject(snapshot, settings);
+            using (StreamWriter writer = new StreamWriter(SaveFilePath, false))
+            {
+                writer.Write(json);
+            }
+
+            var commands = commandController.GetCommandsJSON();
+            File.WriteAllText(CommandsFilePath, commands);
+            Notify.Display("Game saved successfully.");
         }
 
         private void DoTake()
@@ -347,39 +399,7 @@ namespace Wism.Client.Agent
             }
 
             AddAttackCommands(armies, x, y);
-        }
-
-        private void DoAttackArmy()
-        {
-            if (!Game.Current.ArmiesSelected())
-            {
-                Notify.Alert("You must first select an army.");
-                return;
-            }
-
-            var armies = Game.Current.GetSelectedArmies();
-            if (armies == null)
-            {
-                throw new InvalidOperationException("Selected armies were not set.");
-            }
-
-            Console.Write("X location? : ");
-            int x = ReadLocationInput(0);
-            Console.Write("Y location? : ");
-            int y = ReadLocationInput(1);
-
-            Tile tile = World.Current.Map[x, y];
-            if (!tile.CanAttackHere(armies))
-            {
-                Notify.Alert("Can only attack an enemy controlled location.");
-                return;
-            }
-
-            commandController.AddCommand(
-                new PrepareForBattleCommand(armyController, armies, x, y));
-            commandController.AddCommand(
-                    new AttackOnceCommand(armyController, armies, x, y));
-        }
+        }    
 
         private void DoDeselectArmy()
         {

@@ -14,6 +14,8 @@ also be created first in this new Canvas which can co-exist with the legacy canv
 refactoring work is completed. This will allow the elements to exist in a normal size for Unity
 and the eliminate click-target and similar issues.
 
+STATUS: In progress
+
 
 2. Sprite sheets
 Sprites are currently all pre-cut, simple images rather than using sprite sheets. This mean higher
@@ -23,14 +25,7 @@ is, but it will be an issue on larger maps and less capable devices.
 Adopt sprite sheets and port all assets to using these.
 
 
-3. Unity timers
-Currently I am using a combination of timer types. This has resulted in inconsistent timings, such
-as for the Notifications Panel. 
-
-Move to using delta-time in updates rather than system timers.
-
-
-4. Scaling and resolution support
+3. Scaling and resolution support
 
 Many script and UI elements rely on fixed, known sizes. This means it is impossible to choose
 an alternate resolution without significant rework. 
@@ -38,14 +33,7 @@ an alternate resolution without significant rework.
 Proper use of anchor points, borders in sliced sprites, unparenting, and screen-based script 
 calculations will allow for dynamic scaling.
 
-
-5. Canvas Alpha
-
-Rather than using the SetActive to hide UI elements, use of Canvas Groups with alpha settings
-provides easier element interaction and management.
-
-
-6. Performance
+4. Performance
 
 General use of "HardFind", cache optimization, Update/FixedUpdate, etc. will all contribute to 
 a more efficient and less resource-intensive solution.

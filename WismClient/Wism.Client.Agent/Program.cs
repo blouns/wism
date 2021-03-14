@@ -8,6 +8,8 @@ using Wism.Client.Api;
 using Wism.Client.Api.Commands;
 using Wism.Client.Core.Controllers;
 using Wism.Client.Common;
+using Newtonsoft.Json;
+using System.Configuration;
 
 namespace Wism.Client.Agent
 {

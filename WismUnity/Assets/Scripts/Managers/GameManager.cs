@@ -23,7 +23,7 @@ namespace Assets.Scripts.Managers
         public const float StandardTime = 0.25f;
         public const float WarTime = 1.0f;
         public const int MaxArmysPerArmy = Army.MaxArmies;
-        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";        
+        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";
         public static readonly string DefaultWorld = @"Illuria";
         public static readonly string DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
 
@@ -184,14 +184,34 @@ namespace Assets.Scripts.Managers
 
         public void TakeItems(Hero hero, List<Artifact> items)
         {
-            commandController.AddCommand
-                (new TakeItemsCommand(provider.HeroController, hero, items));
+            commandController.AddCommand(
+                new TakeItemsCommand(provider.HeroController, hero, items));
         }
 
         public void DropItems(Hero hero, List<Artifact> items)
         {
-            commandController.AddCommand
-                (new DropItemsCommand(provider.HeroController, hero, items));
+            commandController.AddCommand(
+                new DropItemsCommand(provider.HeroController, hero, items));
+        }
+
+        internal void LoadGame(string filename)
+        {
+            var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
+                .GetComponent<UnityManager>();
+            var snapshot = PersistanceManager.LoadEntities(filename, unityGame);
+
+            commandController.AddCommand(
+                new LoadGameCommand(provider.GameController, snapshot.WismGameEntity));
+
+            // TODO: Ensure the Unity and Wism snapshots do not get out of sync
+            PersistanceManager.SetLastSnapshot(snapshot);
+        }
+
+        internal void SaveGame(string filename, string saveGameName)
+        {
+            var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
+                .GetComponent<UnityManager>();
+            PersistanceManager.Save(filename, saveGameName, unityGame);
         }
     }
 }

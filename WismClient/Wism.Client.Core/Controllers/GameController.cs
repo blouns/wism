@@ -1,5 +1,7 @@
 ﻿using System;
 using Wism.Client.Common;
+using Wism.Client.Entities;
+using Wism.Client.Factories;
 
 namespace Wism.Client.Core.Controllers
 {
@@ -33,6 +35,25 @@ namespace Wism.Client.Core.Controllers
         public void StartTurn()
         {
             StartTurn(Game.Current);
+        }
+
+        public ActionState LoadSnapshot(GameEntity snapshot)
+        {
+            logger.LogInformation("Loading game snapshot...");
+            try
+            {
+                // Load into current game
+                _ = GameFactory.Load(snapshot);                
+            }
+            catch
+            {
+                logger.LogError("Snapshot load failed.");
+                throw;
+            }
+
+            logger.LogInformation("Snapshot successfully loaded.");
+
+            return ActionState.Succeeded;
         }
 
         public void StartTurn(Game game)

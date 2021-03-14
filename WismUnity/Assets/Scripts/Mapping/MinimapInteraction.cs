@@ -26,7 +26,7 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
     {
         if (this.minimapNormalVector == null)
         {
-            RectTransform canvasRect = UnityUtilities.GameObjectHardFind("Canvas").
+            RectTransform canvasRect = UnityUtilities.GameObjectHardFind("CameraCanvas").
                         GetComponent<RectTransform>();
             RectTransform panelRect = UnityUtilities.GameObjectHardFind("Minimap").
                 GetComponent<RectTransform>();

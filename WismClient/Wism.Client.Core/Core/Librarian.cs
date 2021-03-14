@@ -22,7 +22,7 @@ namespace Wism.Client.Core
         private readonly string locationSeerKnowledgeUninhabited = "Nothing evil lives here!";
         private readonly string locationSeerKnowledgeInhabited = "...it is inhabited by a {0}";
         private readonly string locationSeerKnowledgeAllies = "Friendship is possible!";
-        private readonly string locationSeerKnowledgeAltar = "Hope the gods will favor you!";
+        private readonly string locationSeerKnowledgeThrone = "Hope the gods will favor you!";
         private readonly string locationSeerKnowledgeArtifactIntro = "An ancient artifact lives there!";
         private readonly string locationSeerKnowledgeArtifact = "The {0}!";
         private readonly string locationSeerKnowledgeGold = "An valuable gold treasure is there!";
@@ -218,9 +218,9 @@ namespace Wism.Client.Core
                 {
                     knowledge.Add(locationSeerKnowledgeAllies);
                 }
-                else if (location.Boon is AltarBoon)
+                else if (location.Boon is ThroneBoon)
                 {
-                    knowledge.Add(locationSeerKnowledgeAltar);
+                    knowledge.Add(locationSeerKnowledgeThrone);
                 }
                 else if (location.Boon is ArtifactBoon)
                 {

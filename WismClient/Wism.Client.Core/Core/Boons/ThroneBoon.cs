@@ -1,8 +1,9 @@
 ﻿using System;
+using Wism.Client.MapObjects;
 
 namespace Wism.Client.Core
 {
-    public class AltarBoon : IBoon
+    public class ThroneBoon : IBoon
     {
         public bool IsDefended => false;
 
@@ -39,6 +40,14 @@ namespace Wism.Client.Core
             }
 
             target.VisitingArmies[0].Strength += strengthBoon;
+            if (target.VisitingArmies[0].Strength > Army.MaxStrength)
+            {
+                target.VisitingArmies[0].Strength = Army.MaxStrength;
+            }
+            else if (target.VisitingArmies[0].Strength < 1)
+            {
+                target.VisitingArmies[0].Strength = 1;
+            }
 
             Result = strengthBoon;
             return strengthBoon;

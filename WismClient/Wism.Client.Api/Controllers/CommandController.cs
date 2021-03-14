@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
+using Wism.Client.Api.Data;
 using Wism.Client.Common;
 
 namespace Wism.Client.Core.Controllers
@@ -75,6 +77,32 @@ namespace Wism.Client.Core.Controllers
         public bool CommandExists(int commandId)
         {
             return wismClientRepository.CommandExists(commandId);
+        }
+
+        /// <summary>
+        /// Gets all commands serialized as JSON
+        /// </summary>
+        /// <returns></returns>
+        public string GetCommandsJSON()
+        {
+            if (wismClientRepository.GetCount() == 0)
+            {
+                return "{}";
+            }
+
+            var settings = new JsonSerializerSettings()
+            {
+                //PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                TypeNameHandling = TypeNameHandling.All
+            };
+
+            // TODO: Do we only need to persist unexecuted commands?
+            //       What about 'observers' or remotes? Perhaps need only
+            //       to persist back to oldest 'last command ID' across all
+            //       remotes.
+            var commands = CommandPersistance.SnapshotCommands(wismClientRepository.GetCommands());            
+
+            return JsonConvert.SerializeObject(commands, settings);
         }
     }
 }

@@ -490,5 +490,218 @@ namespace Wism.Client.Test.Scenario
             Assert.AreEqual(1, sirians.GetCities().Count, "Unexpected number of cities.");
             Assert.AreEqual(0, bane.GetCities().Count, "Unexpected number of cities.");
         }
+
+        /// <summary>
+        /// Hero and his minstrels will search every last ruin, tomb, temple, and sage!
+        /// Who needs to read?
+        /// 
+        /// Start state:
+        /// ==========================================
+        /// 05^     15^     25^     35^     45^     55^
+        /// 04^     14+     24+     34+     44+     54^
+        /// 03^     13=     23¥     33.     43.     53^
+        /// 02^     12$     22$     32.     42&     52^
+        /// 01^     11$H3   21$     31.     41L     51^
+        /// 00^     10^     20^     30^     40^     50^
+        /// ==========================================  
+        /// 
+        /// End state:
+        /// ==========================================
+        /// 05^     15^     25^     35^     45^     55^
+        /// 04^     14+     24+     34+     44+     54^
+        /// 03^     13=     23¥H3   33.     43.     53^
+        /// 02^     12$     22$     32.     42&     52^
+        /// 01^     11$     21$     31.     41L     51^
+        /// 00^     10^     20^     30^     40^     50^
+        /// ========================================== 
+        /// Legend: 1:X, 2:Y, 3:Terrain, 4:Army 5:ArmyCount
+        ///  = Sage, + Temple, & Tomb, ¥ Ruins, L Library 
+        /// </summary>
+        [Test]
+        public void HeroOnAQuest()
+        {
+            // Assemble
+            var armyController = TestUtilities.CreateArmyController();
+            var commandController = TestUtilities.CreateCommandController();
+            var gameController = TestUtilities.CreateGameController();
+            var locationController = TestUtilities.CreateLocationController();
+            var heroController = TestUtilities.CreateHeroController();
+
+            // Scenario setup
+            // ==========================================
+            // 05^     15^     25^     35^     45^     55^
+            // 04^     14+     24+     34+     44+     54^
+            // 03^     13=     23¥     33.     43.     53^
+            // 02^     12$     22$     32.     42&     52^
+            // 01^     11$H3   21$     31.     41L     51^
+            // 00^     10^     20^     30^     40^     50^
+            // ==========================================           
+            Game.CreateDefaultGame("SearchWorld");
+
+            // Initial Sirians setup
+            Player sirians = Game.Current.Players[0];
+            Tile tile1 = World.Current.Map[1, 1];
+            sirians.HireHero(tile1);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("Griffins"), tile1);
+            sirians.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile1);
+            var siriansHero1 = new List<Army>(tile1.Armies);
+
+            // Add cities and locations
+            MapBuilder.AddCitiesFromWorldPath(World.Current, World.Current.Name);
+            MapBuilder.AddLocationsFromWorldPath(World.Current, World.Current.Name);
+            MapBuilder.AllocateBoons(World.Current.GetLocations());
+
+            // Act
+
+            // Turn 1: Sirians: Let's get blessed!
+            TestUtilities.Select(commandController, armyController, 
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                siriansHero1, 1, 4);
+            TestUtilities.SearchTemple(commandController, locationController,
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                siriansHero1, 2, 4);
+            TestUtilities.SearchTemple(commandController, locationController,
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                siriansHero1, 3, 4);
+            TestUtilities.SearchTemple(commandController, locationController,
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                siriansHero1, 4, 4);
+            TestUtilities.SearchTemple(commandController, locationController,
+                siriansHero1);
+            TestUtilities.Deselect(commandController, armyController,
+                siriansHero1);
+
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Turn 1: Lord Bane: Skip 
+            TestUtilities.StartTurn(commandController, gameController);
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Turn 2: Sirians: Search the tomb!
+            // ==========================================
+            // 05^     15^     25^     35^     45^     55^
+            // 04^     14x     24x     34x     44xH3   54^
+            // 03^     13=     23¥     33.     43.     53^
+            // 02^     12$     22$     32.     42&     52^
+            // 01^     11$     21$     31.     41L     51^
+            // 00^     10^     20^     30^     40^     50^
+            // ========================================== 
+            // Legend: x = Searched
+            TestUtilities.StartTurn(commandController, gameController);
+
+            TestUtilities.Select(commandController, armyController,
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                Game.Current.GetSelectedArmies(), 4, 2);
+            TestUtilities.SearchRuins(commandController, locationController,
+                siriansHero1);
+            TestUtilities.Deselect(commandController, armyController,
+                Game.Current.GetSelectedArmies());
+
+            // Pick up the staff of might (found in tomb)
+            TestUtilities.TakeItems(commandController, heroController,
+                (Hero)siriansHero1[0]);
+
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Turn 2: Lord Bane: Skip 
+            TestUtilities.StartTurn(commandController, gameController);
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Turn 3: Sirians: Search the library!
+            // ==========================================
+            // 05^     15^     25^     35^     45^     55^
+            // 04^     14x     24x     34x     44x     54^
+            // 03^     13=     23¥     33.     43.     53^
+            // 02^     12$     22$     32.     42&H3   52^
+            // 01^     11$     21$     31.     41L     51^
+            // 00^     10^     20^     30^     40^     50^
+            // ========================================== 
+            // Legend: x = Searched  
+            TestUtilities.StartTurn(commandController, gameController);
+
+            TestUtilities.Select(commandController, armyController,
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                Game.Current.GetSelectedArmies(), 4, 1);
+            TestUtilities.SearchLibrary(commandController, locationController,
+                siriansHero1);
+            TestUtilities.SearchLibrary(commandController, locationController,
+                siriansHero1);
+            TestUtilities.SearchLibrary(commandController, locationController,
+                siriansHero1);
+            TestUtilities.Deselect(commandController, armyController,
+                Game.Current.GetSelectedArmies());
+
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Turn 3: Lord Bane: Skip 
+            TestUtilities.StartTurn(commandController, gameController);
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Turn 4: Sirians: Search the ruins!
+            // ==========================================
+            // 05^     15^     25^     35^     45^     55^
+            // 04^     14x     24x     34x     44x     54^
+            // 03^     13=     23¥     33.     43.     53^
+            // 02^     12$     22$     32.     42&     52^
+            // 01^     11$     21$     31.     41LH3   51^
+            // 00^     10^     20^     30^     40^     50^
+            // ========================================== 
+            // Legend: x = Searched  
+            TestUtilities.StartTurn(commandController, gameController);
+
+            TestUtilities.Select(commandController, armyController,
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                Game.Current.GetSelectedArmies(), 2, 3);
+            TestUtilities.SearchRuins(commandController, locationController,
+                siriansHero1);
+            TestUtilities.Deselect(commandController, armyController,
+                Game.Current.GetSelectedArmies());
+
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Turn 4: Lord Bane: Skip 
+            TestUtilities.StartTurn(commandController, gameController);
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Turn 5: Sirians: Search the sage!
+            // ==========================================
+            // 05^     15^     25^     35^     45^     55^
+            // 04^     14x     24x     34x     44x     54^
+            // 03^     13=     23¥H3   33.     43.     53^
+            // 02^     12$     22$     32.     42&     52^
+            // 01^     11$     21$     31.     41L     51^
+            // 00^     10^     20^     30^     40^     50^
+            // ========================================== 
+            // Legend: x = Searched  
+            TestUtilities.StartTurn(commandController, gameController);
+
+            TestUtilities.Select(commandController, armyController,
+                siriansHero1);
+            TestUtilities.MoveUntilDone(commandController, armyController,
+                Game.Current.GetSelectedArmies(), 1, 3);
+            TestUtilities.SearchSage(commandController, locationController,
+                siriansHero1);
+            TestUtilities.Deselect(commandController, armyController,
+                Game.Current.GetSelectedArmies());
+
+            TestUtilities.EndTurn(commandController, gameController);
+
+            // Assert
+            Assert.IsTrue(((Hero)siriansHero1[0]).HasItems(), "Hero had a hole in his pocket!");
+            Assert.AreEqual("StaffOfMight", ((Hero)siriansHero1[0]).Items[0].ShortName, "Hero had a hole in his pocket!");
+            Assert.AreEqual(9, siriansHero1[0].Strength, "Hero was not pias enough!");
+            Assert.AreEqual(9, siriansHero1[1].Strength, "Griffins were not pias enough!");
+            Assert.AreEqual(7, siriansHero1[2].Strength, "Light infantry was not pias enough!");
+            Assert.IsTrue(Game.Current.Players[0].Gold > 1000, "Sage was super cheap!");
+            Assert.AreEqual(6, sirians.Turn, "Unexpected player's turn");
+            Assert.AreEqual("LordBane", Game.Current.GetCurrentPlayer().Clan.ShortName, "Unexpected player's turn");
+        }
     }
 }

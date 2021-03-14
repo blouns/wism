@@ -3,11 +3,11 @@ using Wism.Client.Core;
 
 namespace Wism.Client.Agent.CommandProcessors
 {
-    public class AltarBoonIdentifier : IBoonIdentfier
+    public class ThroneBoonIdentifier : IBoonIdentfier
     {
         public bool CanIdentify(IBoon boon)
         {
-            return boon is AltarBoon;
+            return boon is ThroneBoon;
         }
 
         public void Identify(IBoon boon)

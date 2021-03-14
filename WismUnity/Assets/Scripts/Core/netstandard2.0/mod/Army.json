@@ -68,7 +68,7 @@
   {
     "DisplayName": "Griffins",
     "ShortName": "Griffins",
-    "Strength": 4,
+    "Strength": 5,
     "Moves": 16,
     "CanWalk": true,
     "CanFloat": false,

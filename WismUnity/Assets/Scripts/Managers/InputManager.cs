@@ -14,6 +14,8 @@ namespace Assets.Scripts.Managers
         ItemDropPicker,
         ItemTakePicker,
         LocationPicker,
+        LoadGamePicker,
+        SaveGamePicker,
         UI,        
         WaitForKey
     }
@@ -75,11 +77,6 @@ namespace Assets.Scripts.Managers
             holdingRightButton = true;
         }
 
-        internal void Clear()
-        {
-            throw new NotImplementedException();
-        }
-
         public void SetInputMode(InputMode mode)
         {
             this.inputMode = mode;
@@ -108,6 +105,12 @@ namespace Assets.Scripts.Managers
                     break;
                 case InputMode.ItemTakePicker:
                     HandleItemPicker(true);
+                    break;
+                case InputMode.SaveGamePicker:
+                    HandleSaveLoadPicker(true);
+                    break;
+                case InputMode.LoadGamePicker:
+                    HandleSaveLoadPicker(false);
                     break;
                 case InputMode.WaitForKey:
                     HandleWaitForKey();
@@ -242,7 +245,14 @@ namespace Assets.Scripts.Managers
             {
                 GameManager.EndTurn();
             }
-            // TODO: Add save (or auto-save) and load game actions 
+            else if (Input.GetKeyDown(KeyCode.S))
+            {
+                UnityManager.HandleSaveLoadPicker(true);
+            }
+            else if (Input.GetKeyDown(KeyCode.L))
+            {
+                UnityManager.HandleSaveLoadPicker(false);
+            }
             // TODO: Add resign action
             // TODO: Add change control action (human, AI)
             // TODO: Add reports actions (winning, cities, gold, etc.)
@@ -290,6 +300,60 @@ namespace Assets.Scripts.Managers
             return this.inputMode;
         }
 
+        private void HandleSaveLoadPicker(bool isSaving)
+        {
+            var saveLoadPicker = this.unityManager.SaveLoadPicker;
+            if (isSaving)
+            {
+                // Launch the SaveLoad picker
+                if (saveLoadPicker.OkCancelResult == OkCancel.None)
+                {
+                    this.unityManager.NotifyUser("Saving the game...");
+                    saveLoadPicker.Initialize(this.unityManager, true);
+                    this.SetInputMode(InputMode.SaveGamePicker);
+                }
+                // Cancelled
+                else if (saveLoadPicker.OkCancelResult == OkCancel.Cancel)
+                {
+                    saveLoadPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+                // Save the game
+                else if (saveLoadPicker.OkCancelResult == OkCancel.Ok)
+                {
+                    var fileName = String.Format(saveLoadPicker.DefaultFilenameFormat, saveLoadPicker.SelectedIndex + 1);
+                    var saveName = saveLoadPicker.GetCurrentSaveName();
+                    GameManager.SaveGame(fileName, saveName);
+                    saveLoadPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+            }
+            else
+            {
+                // Launch the SaveLoad picker
+                if (saveLoadPicker.OkCancelResult == OkCancel.None)
+                {
+                    this.unityManager.NotifyUser("Loading the game...");
+                    saveLoadPicker.Initialize(this.unityManager, false);
+                    this.SetInputMode(InputMode.LoadGamePicker);
+                }
+                // Cancelled
+                else if (saveLoadPicker.OkCancelResult == OkCancel.Cancel)
+                {
+                    saveLoadPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+                // Load the game
+                else if (saveLoadPicker.OkCancelResult == OkCancel.Ok)
+                {
+                    var filename = saveLoadPicker.GetCurrentFilename();
+                    GameManager.LoadGame(filename);
+                    saveLoadPicker.Clear();
+                    this.SetInputMode(InputMode.Game);
+                }
+            }
+        }
+
         private void HandleItemPicker(bool takingItems)
         {
             if (!Game.Current.ArmiesSelected())
@@ -312,20 +376,20 @@ namespace Assets.Scripts.Managers
             if (takingItems)
             {
                 // Launch the item picker
-                if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+                if (itemPicker.OkCancelResult == OkCancel.None)
                 {
                     this.unityManager.NotifyUser("Taking an item...");
                     itemsToPick = new List<MapObject>(hero.Tile.Items);
                     itemPicker.Initialize(this.unityManager, itemsToPick);
                 }
                 // Cancelled
-                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+                else if (itemPicker.OkCancelResult == OkCancel.Cancel)
                 {
                     itemPicker.Clear();
                     this.SetInputMode(InputMode.Game);
                 }
                 // Take the items
-                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+                else if (itemPicker.OkCancelResult == OkCancel.Ok)
                 {
                     var item = itemPicker.GetSelectedItem();
                     var items = new List<Artifact> { (Artifact)item };
@@ -337,20 +401,25 @@ namespace Assets.Scripts.Managers
             else
             {
                 // Launch the item picker
-                if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+                if (itemPicker.OkCancelResult == OkCancel.None)
                 {
+                    if (hero.Items == null || hero.Items.Count == 0)
+                    {
+                        this.unityManager.NotifyUser("No items to drop!");
+                        return;
+                    }
                     this.unityManager.NotifyUser("Dropping an item...");
                     itemsToPick = new List<MapObject>(hero.Items);
                     itemPicker.Initialize(this.unityManager, itemsToPick);
                 }
                 // Cancelled
-                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+                else if (itemPicker.OkCancelResult == OkCancel.Cancel)
                 {
                     itemPicker.Clear();
                     this.SetInputMode(InputMode.Game);
                 }
                 // Drop the items
-                else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+                else if (itemPicker.OkCancelResult == OkCancel.Ok)
                 {
                     var item = itemPicker.GetSelectedItem();
                     var items = new List<Artifact> { (Artifact)item };
@@ -367,7 +436,7 @@ namespace Assets.Scripts.Managers
             List<MapObject> itemsToPick;
 
             // Launch the location picker
-            if (itemPicker.OkCancelResult == ItemPicker.OkCancel.None)
+            if (itemPicker.OkCancelResult == OkCancel.None)
             {
                 if (Game.Current.ArmiesSelected())
                 {
@@ -378,13 +447,13 @@ namespace Assets.Scripts.Managers
                 itemPicker.Initialize(this.unityManager, itemsToPick);
             }
             // Cancelled
-            else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Cancel)
+            else if (itemPicker.OkCancelResult == OkCancel.Cancel)
             {
                 itemPicker.Clear();
                 this.SetInputMode(InputMode.Game);
             }
             // Center on the location chosen
-            else if (itemPicker.OkCancelResult == ItemPicker.OkCancel.Ok)
+            else if (itemPicker.OkCancelResult == OkCancel.Ok)
             {
                 var item = itemPicker.GetSelectedItem();
                 itemPicker.Clear();

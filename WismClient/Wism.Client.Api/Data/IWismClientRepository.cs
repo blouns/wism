@@ -28,5 +28,7 @@ namespace Wism.Client.Api
         bool CommandExists(int commandId);
 
         Task<bool> CommandExistsAsync(int commandId);
+
+        int GetCount();
     }
 }

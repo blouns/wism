@@ -162,5 +162,13 @@ namespace Wism.Client.Api
             // Do nothing
             return command;
         }
+
+        public int GetCount()
+        {
+            lock (sync)
+            {
+                return this.commands.Count;
+            }
+        }
     }
 }

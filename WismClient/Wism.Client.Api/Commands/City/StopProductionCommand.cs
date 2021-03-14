@@ -8,14 +8,15 @@ namespace Wism.Client.Api.Commands
 {
     public class StopProductionCommand : Command
     {
+        public CityController CityController { get; }
+
+        public City ProductionCity { get; }
+
         public StopProductionCommand(CityController cityController, City productionCity)
         {
             CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
             ProductionCity = productionCity ?? throw new ArgumentNullException(nameof(productionCity));
         }
-
-        public CityController CityController { get; }
-        public City ProductionCity { get; }
 
         protected override ActionState ExecuteInternal()
         {

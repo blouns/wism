@@ -14,7 +14,7 @@ namespace Assets.Scripts.CommandProcessors
             this.boonIdentifiers = new List<IBoonIdentfier>()
             {
                 new AlliesBoonIdentifier(),
-                new AltarBoonIdentifier(),
+                new ThroneBoonIdentifier(),
                 new ArtifactBoonIdentifier(),
                 new GoldBoonIdentifier(),
             };

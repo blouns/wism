@@ -73,6 +73,15 @@ namespace Assets.Scripts.Managers
             this.isInitialized = true;
         }
 
+        public void Reset()
+        {
+            foreach (var ago in armyDictionary.Values)
+            {
+                Destroy(ago.GameObject);
+            }
+            this.armyDictionary.Clear();            
+        }
+
         public GameObject FindGameObjectKind(Army army)
         {
             if (!IsInitialized())

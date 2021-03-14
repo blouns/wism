@@ -27,7 +27,7 @@ namespace Wism.Client.Agent.CommandProcessors
             this.boonIdentifiers = new List<IBoonIdentfier>()
             {
                 new AlliesBoonIdentifier(),
-                new AltarBoonIdentifier(),
+                new ThroneBoonIdentifier(),
                 new ArtifactBoonIdentifier(),
                 new GoldBoonIdentifier(),
             };
@@ -58,15 +58,16 @@ namespace Wism.Client.Agent.CommandProcessors
                 a.Tile == targetTile &&
                 a.MovesRemaining > 0);
 
-            if (hero == null)
+            if (hero == null || 
+                ruinsCommand.Location.Searched)
             {
                 Notify.DisplayAndWait("You have found nothing!");
                 return ActionState.Failed;
             }
 
-            if (location.Boon is AltarBoon)
+            if (location.Boon is ThroneBoon)
             {
-                Notify.Information("An altar stands before you. Do you wish to approach?");
+                Notify.Information("An throne stands before you. Will you sit in the throne?");
                 var key = Console.ReadKey();
                 if (key.Key != ConsoleKey.Y)
                 {

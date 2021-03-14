@@ -13,15 +13,15 @@ namespace Assets.Scripts.CommandProcessors
         {
             var templeCommand = (SearchTempleCommand)Command;
 
-            if (templeCommand.NumberOfArmiesBlessed == 1)
+            if (templeCommand.BlessedArmyCount == 1)
             {
                 Notify("You have been blessed! Seek more blessings in far temples!");
                 return SceneResult.Success;
             }
-            else if (templeCommand.NumberOfArmiesBlessed > 1)
+            else if (templeCommand.BlessedArmyCount > 1)
             {
                 Notify("{0} Armies have been blessed! Seek more blessings in far temples!",
-                    templeCommand.NumberOfArmiesBlessed);
+                    templeCommand.BlessedArmyCount);
                 return SceneResult.Success;
             }
             else

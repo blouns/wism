@@ -9,22 +9,12 @@ namespace Assets.Scripts.UI
 {
     public class ItemPicker : MonoBehaviour
     {
-        public enum OkCancel
-        {
-            None,
-            Picking,
-            Ok,
-            Cancel
-        }
-
-        private UnityManager unityGame;
         private List<MapObject> items;
         private int selectedIndex;
-        private OkCancel okCancel;
         private bool isInitialized;
         private const int MaxItems = 1000;
 
-        public OkCancel OkCancelResult { get => okCancel; private set => okCancel = value; }
+        public OkCancel OkCancelResult { get; private set; }
 
         public void Initialize(UnityManager unityGame, List<MapObject> items)
         {
@@ -38,7 +28,6 @@ namespace Assets.Scripts.UI
                 throw new ArgumentNullException(nameof(items));
             }
 
-            this.unityGame = unityGame;
             this.Clear();
             this.gameObject.SetActive(true);
             this.items = items;

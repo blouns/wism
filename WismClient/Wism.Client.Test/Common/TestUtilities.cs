@@ -32,8 +32,16 @@ namespace Wism.Client.Test.Common
             {
                 ArmyController = CreateArmyController(),
                 CommandController = CreateCommandController(),
-                GameController = CreateGameController()
+                GameController = CreateGameController(),
+                CityController = CreateCityController(),
+                HeroController = CreateHeroController(),
+                LocationController = CreateLocationController()
             };
+        }
+
+        public static HeroController CreateHeroController()
+        {
+            return new HeroController(CreateLogFactory());
         }
 
         public static CommandController CreateCommandController(IWismClientRepository repo = null)
@@ -114,6 +122,45 @@ namespace Wism.Client.Test.Common
         {
             return ExecuteCommandUntilDone(commandController,
                 new StartTurnCommand(gameController, Game.Current.GetNextPlayer()));
+        }
+
+        public static ActionState SearchLibrary(CommandController commandController, LocationController locationController, 
+            List<Army> armies)
+        {
+            var location = armies[0].Tile.Location;
+            return ExecuteCommandUntilDone(commandController,
+                new SearchLibraryCommand(locationController, armies, location));
+        }
+
+        public static ActionState SearchRuins(CommandController commandController, LocationController locationController,
+            List<Army> armies)
+        {
+            var location = armies[0].Tile.Location;
+            return ExecuteCommandUntilDone(commandController,
+                new SearchRuinsCommand(locationController, armies, location));
+        }
+
+        public static ActionState SearchSage(CommandController commandController, LocationController locationController,
+            List<Army> armies)
+        {
+            var location = armies[0].Tile.Location;
+            return ExecuteCommandUntilDone(commandController,
+                new SearchSageCommand(locationController, armies, location));
+        }
+
+        public static ActionState SearchTemple(CommandController commandController, LocationController locationController,
+            List<Army> armies)
+        {
+            var location = armies[0].Tile.Location;
+            return ExecuteCommandUntilDone(commandController,
+                new SearchTempleCommand(locationController, armies, location));
+        }
+
+        public static ActionState TakeItems(CommandController commandController, HeroController heroController, 
+            Hero hero)
+        {
+            return ExecuteCommandUntilDone(commandController,
+                new TakeItemsCommand(heroController, hero));
         }
 
         public static ActionState ExecuteCommandUntilDone(CommandController commandController, Command command)

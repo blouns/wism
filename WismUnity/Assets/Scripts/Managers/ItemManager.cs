@@ -62,10 +62,11 @@ namespace Assets.Scripts.Managers
             List<Artifact> itemsOnTiles)
         {
             var obsoleteItems = originalItems.Except(itemsOnTiles);
-            foreach (var itemToRemove in obsoleteItems)
+            var items = new List<Artifact>(obsoleteItems);
+            for (int i = 0; i < items.Count; i++)
             {
-                Destroy(itemGameObjects[itemToRemove]);
-                itemGameObjects.Remove(itemToRemove);
+                Destroy(itemGameObjects[items[i]]);
+                itemGameObjects.Remove(items[i]);
             }
         }
 
@@ -80,6 +81,11 @@ namespace Assets.Scripts.Managers
             this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
                 .GetComponent<WorldTilemap>();
             this.isInitialized = true;
+        }
+
+        public void Reset()
+        {
+            itemGameObjects.Clear();
         }
 
         private bool IsInitalized()

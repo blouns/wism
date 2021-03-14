@@ -13,6 +13,8 @@ namespace Wism.Client.Core
 
         public Tile[,] Map { get; protected set; }
 
+        public string Name { get; set; }
+
         // Navigation associations
         public Game Game { get; }
 
@@ -48,6 +50,7 @@ namespace Wism.Client.Core
             {
                 MapBuilder.Initialize(ModFactory.ModPath, worldName);
                 World.current = new World();
+                World.current.Name = worldName;
                 World.current.Reset();
             }
             catch
@@ -145,6 +148,16 @@ namespace Wism.Client.Core
             return new List<City>(this.cities);
         }
 
+        public City FindCity(string shortName)
+        {
+            if (string.IsNullOrWhiteSpace(shortName))
+            {
+                throw new ArgumentException($"'{nameof(shortName)}' cannot be null or whitespace", nameof(shortName));
+            }
+
+            return this.cities.Find(c => c.ShortName == shortName);
+        }
+
         public List<Location> GetLocations()
         {
             return new List<Location>(this.locations);
@@ -152,6 +165,9 @@ namespace Wism.Client.Core
 
         public void Reset()
         {
+            // Factory reset
+            ArmyFactory.LastId = 0;
+
             Tile[,] map = MapBuilder.CreateDefaultMap();
             Reset(map);
         }
