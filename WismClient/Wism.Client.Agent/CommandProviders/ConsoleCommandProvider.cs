@@ -137,12 +137,6 @@ namespace Wism.Client.Agent
             GameEntity snapshot;
 
             Notify.Display("Loading game...");
-            //using (FileStream stream = File.OpenRead(SaveFilePath))
-            //{
-            //    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
-            //    snapshot = serializer.ReadObject(stream) as GameEntity;
-            //}
-
             var json = File.ReadAllText(SaveFilePath);
 
             var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
@@ -171,20 +165,9 @@ namespace Wism.Client.Agent
             {
                 writer.Write(json);
             }
-            //using (Stream stream = File.Open(SaveFilePath, FileMode.Create))
-            //{
-            //    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
-            //    serializer.WriteObject(stream, snapshot);
-            //}
 
             var commands = commandController.GetCommandsJSON();
             File.WriteAllText(CommandsFilePath, commands);
-            //using (StreamWriter writer = File.CreateText(CommandsFilePath))
-            //{
-            //    JsonSerializer serializer = new JsonSerializer();
-            //    serializer.Serialize(writer, commands);
-            //}
-
             Notify.Display("Game saved successfully.");
         }
 

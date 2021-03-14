@@ -12,7 +12,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public override SceneResult Action()
         {
-            bool? result = AskYesNo("An altar stands before you. Do you wish to approach?");
+            bool? result = AskYesNo("An giant throne stands before you. Will you sit at the throne?");
 
             if (!result.HasValue)
             {

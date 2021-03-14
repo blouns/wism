@@ -34,7 +34,7 @@ namespace Assets.Scripts.CommandProcessors
                 stages.Add(new RuinsEncounteredMonsterStage(command));
                 stages.Add(new RuinsFightMonsterStage(command));
             }
-            else if (command.Location.Boon is AltarBoon)
+            else if (command.Location.Boon is ThroneBoon)
             {
                 stages.Add(new RuinsFoundThroneStage(command));
                 stages.Add(new RuinsSitAtThroneStage(command));

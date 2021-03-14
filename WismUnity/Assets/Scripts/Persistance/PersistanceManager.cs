@@ -1,9 +1,10 @@
 ﻿using Assets.Scripts.Persistance.Entities;
+using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Runtime.Serialization.Json;
-using Wism.Client.Core;
 using UnityEngine;
+using Wism.Client.Core;
+using Wism.Client.Data;
 
 namespace Assets.Scripts.Managers
 {
@@ -31,10 +32,11 @@ namespace Assets.Scripts.Managers
 
             // Write to disk
             string path = Application.persistentDataPath + "/" + filename;
-            using (Stream stream = File.Open(path, FileMode.Create))
+            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            var json = JsonConvert.SerializeObject(snapshot, settings);
+            using (StreamWriter writer = new StreamWriter(path, false))
             {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(UnityGameEntity));
-                serializer.WriteObject(stream, snapshot);
+                writer.Write(json);
             }
         }
 
@@ -70,20 +72,11 @@ namespace Assets.Scripts.Managers
                 throw new ArgumentException("File could not be loaded because the file was not found: " + filename);
             }
 
-            object obj;
             string path = Application.persistentDataPath + "/" + filename;
-            using (FileStream stream = File.OpenRead(path))
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(UnityGameEntity));
-                obj = serializer.ReadObject(stream);
-            }
+            var json = File.ReadAllText(path);
 
-            var snapshot = obj as UnityGameEntity;
-            if (snapshot == null)
-            {
-                throw new ArgumentException("File could not be loaded because the file was not found: " + filename);
-            }
-
+            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            snapshot = JsonConvert.DeserializeObject<UnityGameEntity>(json, settings);
             return snapshot;
         }
 
