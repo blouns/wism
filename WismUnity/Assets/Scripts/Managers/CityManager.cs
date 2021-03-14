@@ -27,6 +27,34 @@ namespace Assets.Scripts.Managers
             this.isInitialized = true;
         }
 
+        public void Reset()
+        {           
+            worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
+                .GetComponent<WorldTilemap>();
+
+            // Reset all cities to neutral
+            foreach (var city in World.Current.GetCities())
+            {                
+                SetNeutralCityTile(city.Tile.X, city.Tile.Y);
+                SetNeutralCityTile(city.Tile.X + 1, city.Tile.Y);
+                SetNeutralCityTile(city.Tile.X, city.Tile.Y - 1);
+                SetNeutralCityTile(city.Tile.X + 1, city.Tile.Y - 1);
+            }
+
+            // Set ownership for Player-owned cities
+            foreach (var player in Game.Current.Players)
+            {
+                foreach (var city in player.GetCities())
+                {
+                    // Draw city from top-left
+                    SetCityTile(city.Tile.X, city.Tile.Y, player.Clan.ShortName);
+                    SetCityTile(city.Tile.X + 1, city.Tile.Y, player.Clan.ShortName);
+                    SetCityTile(city.Tile.X, city.Tile.Y - 1, player.Clan.ShortName);
+                    SetCityTile(city.Tile.X + 1, city.Tile.Y - 1, player.Clan.ShortName);
+                }
+            }
+        }
+
         public void FixedUpdate()
         {
             if (!IsInitialized())
@@ -67,7 +95,14 @@ namespace Assets.Scripts.Managers
             var cityTile = FindCityTile(clanName);
             worldTilemap.SetTile(worldVector, cityTile);
             worldTilemap.RefreshTile(worldVector);            
-        }        
+        }
+
+        private void SetNeutralCityTile(int x, int y)
+        {
+            var worldVector = worldTilemap.ConvertGameToUnityVector(x, y);
+            worldTilemap.SetTile(worldVector, neutralCityTile);
+            worldTilemap.RefreshTile(worldVector);
+        }
 
         /// <summary>
         /// Assign city by clan

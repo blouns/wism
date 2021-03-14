@@ -142,6 +142,18 @@ namespace Assets.Scripts.Managers
             this.isInitialized = true;
         }
 
+        /// <summary>
+        /// Resets the game state for new games, game loads.
+        /// </summary>
+        public void Reset()
+        {
+            InputManager.SetInputMode(InputMode.Game);
+            this.armyManager.Reset();
+            GetComponent<CityManager>().Reset();
+            GetComponent<ItemManager>().Reset();
+            NotifyUser("Game loaded successfully!");
+        }
+
         internal void GoToCapitol()
         {
             Player player = Game.Current.GetCurrentPlayer();

@@ -403,6 +403,11 @@ namespace Assets.Scripts.Managers
                 // Launch the item picker
                 if (itemPicker.OkCancelResult == OkCancel.None)
                 {
+                    if (hero.Items == null || hero.Items.Count == 0)
+                    {
+                        this.unityManager.NotifyUser("No items to drop!");
+                        return;
+                    }
                     this.unityManager.NotifyUser("Dropping an item...");
                     itemsToPick = new List<MapObject>(hero.Items);
                     itemPicker.Initialize(this.unityManager, itemsToPick);

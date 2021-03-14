@@ -26,7 +26,6 @@ namespace Assets.Scripts.Managers
         public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";
         public static readonly string DefaultWorld = @"Illuria";
         public static readonly string DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
-        public static readonly string DefaultSavePath = @"Save";
 
         // Controllers for the WISM Client API
         private ControllerProvider provider;

@@ -83,6 +83,11 @@ namespace Assets.Scripts.Managers
             this.isInitialized = true;
         }
 
+        public void Reset()
+        {
+            itemGameObjects.Clear();
+        }
+
         private bool IsInitalized()
         {
             return isInitialized;

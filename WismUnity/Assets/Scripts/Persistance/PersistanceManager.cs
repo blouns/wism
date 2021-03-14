@@ -29,6 +29,7 @@ namespace Assets.Scripts.Managers
 
             // Persist WISM game state
             snapshot.WismGameEntity = Game.Current.Snapshot();
+            snapshot.WismGameEntity.World.Name = snapshot.WorldName;
 
             // Write to disk
             string path = Application.persistentDataPath + "/" + filename;
@@ -38,6 +39,8 @@ namespace Assets.Scripts.Managers
             {
                 writer.Write(json);
             }
+
+            Debug.Log($"Saved game successfully to '{path}'.");
         }
 
         /// <summary>
@@ -55,11 +58,11 @@ namespace Assets.Scripts.Managers
             unityGame.GetComponent<GameFactory>().WorldName = snapshot.WorldName;
         }
 
-        public static UnityGameEntity LoadEntities(string filename, UnityManager unityGame)
+        public static UnityGameEntity LoadEntities(string path, UnityManager unityGame)
         {
-            if (string.IsNullOrWhiteSpace(filename))
+            if (string.IsNullOrWhiteSpace(path))
             {
-                throw new ArgumentException($"'{nameof(filename)}' cannot be null or whitespace", nameof(filename));
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace", nameof(path));
             }
 
             if (unityGame is null)
@@ -67,12 +70,11 @@ namespace Assets.Scripts.Managers
                 throw new ArgumentNullException(nameof(unityGame));
             }
 
-            if (!File.Exists(filename))
+            if (!File.Exists(path))
             {
-                throw new ArgumentException("File could not be loaded because the file was not found: " + filename);
+                throw new ArgumentException("File could not be loaded because the file was not found: " + path);
             }
 
-            string path = Application.persistentDataPath + "/" + filename;
             var json = File.ReadAllText(path);
 
             var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };

@@ -1,8 +1,10 @@
 ﻿using Assets.Scripts.Managers;
+using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core.Controllers;
+using ILogger = Wism.Client.Common.ILogger;
 
 namespace Assets.Scripts.CommandProcessors
 {
@@ -37,6 +39,12 @@ namespace Assets.Scripts.CommandProcessors
                 // TODO: Ensure this cannot be out of sync w/ game state
                 //       Currently rapid saves would get out of sync.
                 PersistanceManager.LoadLastSnapshot(unityGame);
+
+                // Reset Unity managers
+                unityGame.Reset();
+
+                var loadGameCommand = (LoadGameCommand)command;
+                Debug.Log($"Game loaded successfully '{loadGameCommand.Snapshot.World.Name}'.");
             }
 
             return actionState;

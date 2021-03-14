@@ -62,6 +62,7 @@ namespace Assets.Scripts.Tilemaps
 
             MapBuilder.AffixMapObjects(gameMap);
             World.CreateWorld(gameMap);
+            World.Current.Name = GameManager.DefaultWorld;
 
             return World.Current;
         }
