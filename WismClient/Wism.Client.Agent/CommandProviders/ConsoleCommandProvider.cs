@@ -8,6 +8,7 @@ using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
+using Wism.Client.Data;
 using Wism.Client.Entities;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
@@ -136,11 +137,16 @@ namespace Wism.Client.Agent
             GameEntity snapshot;
 
             Notify.Display("Loading game...");
-            using (FileStream stream = File.OpenRead(SaveFilePath))
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
-                snapshot = serializer.ReadObject(stream) as GameEntity;
-            }
+            //using (FileStream stream = File.OpenRead(SaveFilePath))
+            //{
+            //    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
+            //    snapshot = serializer.ReadObject(stream) as GameEntity;
+            //}
+
+            var json = File.ReadAllText(SaveFilePath);
+
+            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            snapshot = JsonConvert.DeserializeObject<GameEntity>(json, settings);
 
             if (snapshot == null)
             {
@@ -158,11 +164,18 @@ namespace Wism.Client.Agent
         {
             Notify.Display("Saving game...");
             var snapshot = Game.Current.Snapshot();
-            using (Stream stream = File.Open(SaveFilePath, FileMode.Create))
+
+            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            var json = JsonConvert.SerializeObject(snapshot, settings);
+            using (StreamWriter writer = new StreamWriter(SaveFilePath, false))
             {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
-                serializer.WriteObject(stream, snapshot);
+                writer.Write(json);
             }
+            //using (Stream stream = File.Open(SaveFilePath, FileMode.Create))
+            //{
+            //    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GameEntity));
+            //    serializer.WriteObject(stream, snapshot);
+            //}
 
             var commands = commandController.GetCommandsJSON();
             File.WriteAllText(CommandsFilePath, commands);

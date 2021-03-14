@@ -407,13 +407,7 @@ namespace Wism.Client.Data
             var snapshot = new RandomEntity();
 
             snapshot.Seed = game.RandomSeed;
-
-            // Gain access to private seed array of Random
-            var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (seedArrayInfo != null)
-            {
-                snapshot.SeedArray = seedArrayInfo.GetValue(random) as int[];
-            }            
+            snapshot.Random = Cloner.Clone<Random>(random);
 
             return snapshot;
         }

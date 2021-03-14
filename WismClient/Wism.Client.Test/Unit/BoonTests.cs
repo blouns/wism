@@ -106,7 +106,6 @@ namespace Wism.Client.Test.Unit
         public void Redeem_Allies_OneAlly()
         {
             // Assemble
-            //Game.Current.Random.Next();         // Cycle random to get to Listen roll (lazy) - 50% chance
             var tile = World.Current.Map[2, 2];
             var boon = new AlliesBoon(ModFactory.FindArmyInfo("Devils"));
 

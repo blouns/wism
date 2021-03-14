@@ -30,7 +30,7 @@ namespace Wism.Client.MapObjects
             }
 
             item.Take(this);
-            ApplyBonuses(item);
+            RecalculateCombatBonsuses();
         }
 
         public void Take(List<Artifact> items)
@@ -50,17 +50,6 @@ namespace Wism.Client.MapObjects
 
                 Take(item);
             }
-        }
-
-        private void ApplyBonuses(Artifact item)
-        {
-            var artifact = item as Artifact;
-            if (artifact == null)
-            {
-                return;
-            }
-
-            this.Strength += artifact.CombatBonus;
         }
 
         public void DropAll()
@@ -88,19 +77,24 @@ namespace Wism.Client.MapObjects
             {
                 item.Drop(this);
                 Items.Remove(item);
-                RemoveBonsuses(item);
+                RecalculateCombatBonsuses();
             }
         }
 
-        private void RemoveBonsuses(Artifact item)
+        private void RecalculateCombatBonsuses()
         {
-            var artifact = item as Artifact;
-            if (artifact == null)
+            int totalStrength = Info.Strength + BlessedAt.Count;
+            foreach (var item in Items)
             {
-                return;
+                totalStrength += item.CombatBonus;
             }
 
-            this.Strength -= artifact.CombatBonus;
+            if (totalStrength > MaxStrength)
+            {
+                totalStrength = MaxStrength;
+            }
+
+            this.Strength = totalStrength;
         }
 
         /// <summary>

@@ -165,6 +165,9 @@ namespace Wism.Client.Core
 
         public void Reset()
         {
+            // Factory reset
+            ArmyFactory.LastId = 0;
+
             Tile[,] map = MapBuilder.CreateDefaultMap();
             Reset(map);
         }

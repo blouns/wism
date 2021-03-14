@@ -7,11 +7,11 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "Wism.Client.Api/1.0.0": {
+      "Wism.Client.Api/0.1": {
         "dependencies": {
           "NETStandard.Library": "2.0.3",
           "Newtonsoft.Json": "12.0.3",
-          "Wism.Client.Core": "1.0.0"
+          "Wism.Client.Core": "0.1.0"
         },
         "runtime": {
           "Wism.Client.Api.dll": {}
@@ -31,7 +31,10 @@
           }
         }
       },
-      "Wism.Client.Core/1.0.0": {
+      "Wism.Client.Core/0.1.0": {
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3"
+        },
         "runtime": {
           "Wism.Client.Core.dll": {}
         }
@@ -39,7 +42,7 @@
     }
   },
   "libraries": {
-    "Wism.Client.Api/1.0.0": {
+    "Wism.Client.Api/0.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -65,7 +68,7 @@
       "path": "newtonsoft.json/12.0.3",
       "hashPath": "newtonsoft.json.12.0.3.nupkg.sha512"
     },
-    "Wism.Client.Core/1.0.0": {
+    "Wism.Client.Core/0.1.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

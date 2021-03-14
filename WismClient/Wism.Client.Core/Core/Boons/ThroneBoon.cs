@@ -1,4 +1,5 @@
 ﻿using System;
+using Wism.Client.MapObjects;
 
 namespace Wism.Client.Core
 {
@@ -39,6 +40,14 @@ namespace Wism.Client.Core
             }
 
             target.VisitingArmies[0].Strength += strengthBoon;
+            if (target.VisitingArmies[0].Strength > Army.MaxStrength)
+            {
+                target.VisitingArmies[0].Strength = Army.MaxStrength;
+            }
+            else if (target.VisitingArmies[0].Strength < 1)
+            {
+                target.VisitingArmies[0].Strength = 1;
+            }
 
             Result = strengthBoon;
             return strengthBoon;

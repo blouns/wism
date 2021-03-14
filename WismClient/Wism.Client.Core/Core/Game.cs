@@ -269,7 +269,7 @@ namespace Wism.Client.Core
                 return;
             }
 
-            if (!armies.TrueForAll(army => GetCurrentPlayer() == army.Player))
+            if (!armies.TrueForAll(army => GetCurrentPlayer().Clan.ShortName == army.Player.Clan.ShortName))
             {
                 throw new InvalidOperationException("Only the current player can select an army.");
             }
@@ -413,6 +413,7 @@ namespace Wism.Client.Core
         public static void CreateDefaultGame(string worldName)
         {
             current = new Game();
+            current.RandomSeed = Game.DefaultRandomSeed;
             current.Random = new Random(Game.DefaultRandomSeed);
             current.WarStrategy = new DefaultWarStrategy();
 

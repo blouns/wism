@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace Wism.Client.Entities
 {
@@ -10,5 +11,8 @@ namespace Wism.Client.Entities
 
         [DataMember]
         public int Seed { get; set; }
+
+        [DataMember]
+        public Random Random { get; set; }
     }
 }

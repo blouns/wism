@@ -74,10 +74,13 @@ namespace Wism.Client.Factories
             var world = World.Current;
             world.Name = snapshot.Name;
 
-            // Load late-bound Locations (after world creation)          
-            foreach (var locationEntity in snapshot.Locations)
+            // Load late-bound Locations (after world creation) 
+            if (snapshot.Locations != null)
             {
-                _ = LocationFactory.Load(locationEntity, world);
+                foreach (var locationEntity in snapshot.Locations)
+                {
+                    _ = LocationFactory.Load(locationEntity, world);
+                }
             }
 
             return world;

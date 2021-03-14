@@ -18,16 +18,15 @@ namespace Wism.Client.Factories
             }
 
             Game.CreateEmpty();
-            var current = Game.Current;
 
             // Game settings
-            current.Random = LoadRandom(snapshot.Random);
+            Game.Current.Random = LoadRandom(snapshot.Random);
             var warEntity = snapshot.WarStrategy;
             var warAssembly = Assembly.Load(warEntity.AssemblyName);
-            current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
-            current.Transition(snapshot.GameState);
+            Game.Current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
+            Game.Current.Transition(snapshot.GameState);
 
-            LoadPlayers(snapshot, current,
+            LoadPlayers(snapshot, Game.Current,
                 out Dictionary<string, Player> cityToPlayer,
                 out Dictionary<string, Player> capitolToPlayer);
 
@@ -41,7 +40,7 @@ namespace Wism.Client.Factories
             // Factory state
             ArmyFactory.LastId = snapshot.LastArmyId;
 
-            return current;
+            return Game.Current;
         }
 
         private static void LoadArmies(GameEntity snapshot, Dictionary<int, Tile> armiesToTile, Dictionary<int, Tile> visitingToTile)
@@ -84,19 +83,22 @@ namespace Wism.Client.Factories
             Dictionary<string, Player> cityToPlayer, 
             Dictionary<string, Player> capitolToPlayer)
         {
-            foreach (var citySnapshot in snapshot.World.Cities)
+            if (snapshot.World.Cities != null)
             {
-                var city = CityFactory.Load(citySnapshot, world);
-
-                // Add late-bound properties
-                if (cityToPlayer.ContainsKey(city.ShortName))
+                foreach (var citySnapshot in snapshot.World.Cities)
                 {
-                    cityToPlayer[city.ShortName].AddCity(city);
-                }
+                    var city = CityFactory.Load(citySnapshot, world);
 
-                if (capitolToPlayer.ContainsKey(city.ShortName))
-                {
-                    capitolToPlayer[city.ShortName].Capitol = city;
+                    // Add late-bound properties
+                    if (cityToPlayer.ContainsKey(city.ShortName))
+                    {
+                        cityToPlayer[city.ShortName].AddCity(city);
+                    }
+
+                    if (capitolToPlayer.ContainsKey(city.ShortName))
+                    {
+                        capitolToPlayer[city.ShortName].Capitol = city;
+                    }
                 }
             }
         }
@@ -111,16 +113,9 @@ namespace Wism.Client.Factories
         /// case is actually unused, but it is set for consistency.
         /// </remarks>
         private static Random LoadRandom(RandomEntity snapshot)
-        {            
-            var random = new Random(snapshot.Seed);
-            if (snapshot.SeedArray != null)
-            {
-                var seedArrayCopy = (int[])snapshot.SeedArray.Clone();
-                var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                seedArrayInfo.SetValue(random, seedArrayCopy);
-            }            
-
-            return random;
+        {
+            Game.Current.RandomSeed = snapshot.Seed;
+            return snapshot.Random;
         }
 
         private static void LoadPlayers(GameEntity snapshot, Game current,

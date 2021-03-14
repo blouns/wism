@@ -96,7 +96,7 @@ namespace Wism.Client.Api.Data
         {
             CommandEntity snapshot = null;
 
-            if (command.GetType().IsAssignableFrom(typeof(SearchLocationCommand)))
+            if (command.GetType().IsSubclassOf(typeof(SearchLocationCommand)))
             {
                 if (command is SearchLibraryCommand)
                 {
@@ -220,7 +220,7 @@ namespace Wism.Client.Api.Data
         private static CommandEntity SnapshotArmyCommand(Command command)
         {
             CommandEntity snapshot = null;
-            if (command.GetType().IsAssignableFrom(typeof(ArmyCommand)))
+            if (command.GetType().IsSubclassOf(typeof(ArmyCommand)))
             {
                 // Create appriate army command entity
                 if (command is AttackOnceCommand)
