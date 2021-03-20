@@ -12,7 +12,9 @@ namespace Wism.Client.Core
         private const int StartingGold = 100;
 
         private List<Army> myArmies = new List<Army>();
+        private List<Hero> myHeros = new List<Hero>();
         private List<City> myCities = new List<City>();
+        private int lastHeroTurn;
 
         public Clan Clan { get; set; }
 
@@ -23,6 +25,10 @@ namespace Wism.Client.Core
         public bool IsDead { get; set; }
 
         public City Capitol { get; set; }
+
+        public int NewHeroPrice { get; internal set; }
+
+        public int LastHeroTurn { get => lastHeroTurn; internal set => lastHeroTurn = value; }
 
         private Player()
         {
@@ -62,6 +68,18 @@ namespace Wism.Client.Core
             return new List<City>(this.myCities);
         }
 
+        public List<Hero> GetHeros()
+        {
+            var herosAsArmyList = this.myArmies.FindAll(a => a is Hero);
+            var heros = new List<Hero>();
+            foreach (var hero in herosAsArmyList)
+            {
+                heros.Add((Hero)hero);
+            }
+
+            return heros;
+        }
+
         public int GetIncome()
         {
             return myCities.Sum(city => city.Income);
@@ -72,9 +90,41 @@ namespace Wism.Client.Core
             return myArmies.Sum(army => army.Upkeep);
         }
 
-        public Hero HireHero(Tile tile)
+        /// <summary>
+        /// Hires a new hero if Gold >= NewHeroPrice.
+        /// </summary>
+        /// <param name="tile">Tile to deploy the new hero to.</param>
+        /// <param name="heroIsFree">Override hero cost (for testing only)</param>
+        /// <returns>New hero deployed to tile</returns>
+        public Hero HireHero(Tile tile, bool heroIsFree = false)
         {
-            return (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            if (this.myHeros.Count >= Hero.MaxHeros)
+            {
+                throw new InvalidOperationException("Reached max hero limit.");
+            }            
+
+            // Override for testing only
+            if (heroIsFree)
+            {
+                NewHeroPrice = 0;
+            }
+
+            if (Gold < NewHeroPrice)
+            {
+                throw new InvalidOperationException("Cannot afford a new hero!");
+            }
+
+            // Pay the hero and reset the price
+            Gold -= NewHeroPrice;
+            NewHeroPrice = int.MaxValue;
+
+            // Get him a uniform!
+            var hero = (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            this.myHeros.Add(hero);
+
+            this.lastHeroTurn = Turn;
+
+            return hero;
         }
 
         /// <summary>
@@ -89,6 +139,24 @@ namespace Wism.Client.Core
             }
 
             this.myArmies.Add(army);
+        }
+
+        /// <summary>
+        /// Side-load a hero for loading only.
+        /// </summary>
+        /// <param name="hero">Hero to add</param>
+        /// <remarks>
+        /// This is a tracking list only. All Heros should be added to both 
+        /// <c>myArmies</c> and <c>myHeros</c>.
+        /// </remarks>
+        internal void AddHero(Hero hero)
+        {
+            if (hero is null)
+            {
+                throw new ArgumentNullException(nameof(hero));
+            }
+
+            this.myHeros.Add(hero);
         }
 
         internal void AddCity(City city)
@@ -204,7 +272,55 @@ namespace Wism.Client.Core
 
             DoTheBooks();
             ProduceArmies();
-            DeliverArmies();            
+            DeliverArmies();
+            RecruitHeros();
+        }
+
+        /// <summary>
+        /// Check if there are any heros for hire; if so, set IsHeroForHire.
+        /// </summary>
+        /// <remarks>
+        /// Based on both available Gold, number of heros, and how long since the 
+        /// last hero was available.
+        /// </remarks>
+        private void RecruitHeros()
+        {
+            // Must have at least one city to attract a hero
+            if (this.myCities.Count == 0)
+            {
+                return;
+            }
+
+            // Chance goes down based on number of current heros
+            var heros = myArmies.FindAll(a => a is Hero);
+            double heroCountChance = 1 - Math.Log10(heros.Count + 1);
+            if (heroCountChance < 0)
+            {
+                heroCountChance = 0;
+            }
+
+            // Chance goes up based on number of turns without a new hero
+            int turnsSinceLastHero = Turn - this.lastHeroTurn;
+            double turnsSinceLastHeroChance = Math.Log10(turnsSinceLastHero);
+            if (turnsSinceLastHeroChance > 1)
+            {
+                turnsSinceLastHeroChance = 1;
+            }
+
+            // Calculate if hero is available
+            double chance = Game.Current.Random.NextDouble();
+            bool isHeroForHire = ((heroCountChance * turnsSinceLastHeroChance) < chance);
+            int goldToHire = Game.Current.Random.Next(Hero.MinGoldToHire, Hero.MinGoldToHire);
+
+            // Set the hero's price
+            if (isHeroForHire && Gold >= goldToHire)
+            {
+                this.NewHeroPrice = goldToHire;
+            }
+            else
+            {
+                this.NewHeroPrice = int.MaxValue;
+            }
         }
 
         internal void DeliverArmies()
@@ -269,6 +385,11 @@ namespace Wism.Client.Core
 
             // Remove from player armies for tracking
             myArmies.Remove(army);
+            var hero = army as Hero;
+            if (hero != null)
+            {
+                myHeros.Remove(hero);
+            }
         }
 
         private void DeployArmies(Tile tile, List<Army> newArmies)

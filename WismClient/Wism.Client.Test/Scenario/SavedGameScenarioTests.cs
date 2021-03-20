@@ -39,13 +39,14 @@ namespace Wism.Client.Test.Scenario
             // (0, 5):[M,]     (1, 5):[M,]     (2, 5):[M,]     (3, 5):[M,]     (4, 5):[M,]     (5, 5):[M,]
             //  =========================================================================================            
             Game.CreateDefaultGame();
+            Game.Current.IgnoreGameOver = true;
 
             // Initial Sirians setup
             Player sirians = Game.Current.Players[0];
             Tile tile1 = World.Current.Map[1, 1];
             Tile tile2 = World.Current.Map[1, 2];
-            sirians.HireHero(tile1);
-            sirians.HireHero(tile2);
+            sirians.HireHero(tile1, true);
+            sirians.HireHero(tile2, true);
             var siriansHero1 = new List<Army>(tile1.Armies);
             var siriansHero2 = new List<Army>(tile2.Armies);
 
@@ -53,8 +54,8 @@ namespace Wism.Client.Test.Scenario
             Player lordBane = Game.Current.Players[1];
             var tile3 = World.Current.Map[4, 3];
             var tile4 = World.Current.Map[4, 4];
-            lordBane.HireHero(tile3);
-            lordBane.HireHero(tile4);
+            lordBane.HireHero(tile3, true);
+            lordBane.HireHero(tile4, true);
             var lordBaneHero1 = new List<Army>(tile3.Armies);
             var lordBaneHero2 = new List<Army>(tile4.Armies);
 
@@ -68,6 +69,7 @@ namespace Wism.Client.Test.Scenario
                 {
                     // Load the game from saved snapshot on second run
                     _ = GameFactory.Load(snapshot);
+                    Game.Current.IgnoreGameOver = true;
 
                     // Refresh references
                     sirians = Game.Current.Players[0];
@@ -191,6 +193,8 @@ namespace Wism.Client.Test.Scenario
             var gameController = TestUtilities.CreateGameController();
 
             Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+            Game.Current.IgnoreGameOver = true;
+
             MapBuilder.AddCitiesFromWorldPath(World.Current, TestUtilities.DefaultTestWorld);
             Player sirians = Game.Current.Players[0];
             Player lordBane = Game.Current.Players[1];
@@ -208,6 +212,7 @@ namespace Wism.Client.Test.Scenario
                 {
                     // Load the game from saved snapshot on second run
                     _ = GameFactory.Load(snapshot);
+                    Game.Current.IgnoreGameOver = true;
 
                     // Refresh references
                     sirians = Game.Current.Players[0];
@@ -275,20 +280,21 @@ namespace Wism.Client.Test.Scenario
             var commandController = TestUtilities.CreateCommandController();
 
             Game.CreateDefaultGame();
+            Game.Current.IgnoreGameOver = true;
 
             // Initial Sirians setup
             Player sirians = Game.Current.Players[0];
             Tile tile1 = World.Current.Map[1, 1];
             var siriansHero1 = new List<Army>()
             {
-                sirians.HireHero(tile1),
-                sirians.HireHero(tile1),
-                sirians.HireHero(tile1),
-                sirians.HireHero(tile1),
-                sirians.HireHero(tile1),
-                sirians.HireHero(tile1),
-                sirians.HireHero(tile1),
-                sirians.HireHero(tile1)
+                sirians.HireHero(tile1, true),
+                sirians.HireHero(tile1, true),
+                sirians.HireHero(tile1, true),
+                sirians.HireHero(tile1, true),
+                sirians.HireHero(tile1, true),
+                sirians.HireHero(tile1, true),
+                sirians.HireHero(tile1, true),
+                sirians.HireHero(tile1, true)
             };
 
             // Initial Bane's setup
@@ -315,6 +321,7 @@ namespace Wism.Client.Test.Scenario
                 {
                     // Load the game from saved snapshot on second run
                     _ = GameFactory.Load(snapshot);
+                    Game.Current.IgnoreGameOver = true;
 
                     // Refresh references
                     sirians = Game.Current.Players[0];
@@ -391,11 +398,12 @@ namespace Wism.Client.Test.Scenario
             // 00^     10^     20^     30^     40^     50^
             // ==========================================           
             Game.CreateDefaultGame("SearchWorld");
+            Game.Current.IgnoreGameOver = true;
 
             // Initial Sirians setup
             Player sirians = Game.Current.Players[0];
             Tile tile1 = World.Current.Map[1, 1];
-            sirians.HireHero(tile1);
+            sirians.HireHero(tile1, true);
             sirians.ConscriptArmy(ModFactory.FindArmyInfo("Griffins"), tile1);
             sirians.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile1);
             var siriansHero1 = new List<Army>(tile1.Armies);
@@ -415,6 +423,7 @@ namespace Wism.Client.Test.Scenario
                 {
                     // Load the game from saved snapshot on second run
                     _ = GameFactory.Load(snapshot);
+                    Game.Current.IgnoreGameOver = true;
 
                     // Refresh references
                     sirians = Game.Current.Players[0];

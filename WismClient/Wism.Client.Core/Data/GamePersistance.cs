@@ -23,7 +23,7 @@ namespace Wism.Client.Data
                 SelectedArmyIds = SnapshotSelectedArmies(game.GetSelectedArmies()),
                 WarStrategy = SnapshotWarStrategy(game.WarStrategy),
                 World = SnapshotWorld(World.Current),
-                LastArmyId = ArmyFactory.LastId
+                LastArmyId = ArmyFactory.LastId                
             };
 
             return snapshot;
@@ -192,6 +192,16 @@ namespace Wism.Client.Data
             return armies.ConvertAll<int>(a => a.Id).ToArray();
         }
 
+        private static int[] ConvertToHeroIds(List<Hero> heroes)
+        {
+            if (heroes == null || heroes.Count == 0)
+            {
+                return null;
+            }
+
+            return heroes.ConvertAll<int>(a => a.Id).ToArray();
+        }
+
         private static CityEntity[] SnapshotCities(World world)
         {
             var cities = world.GetCities();
@@ -327,7 +337,10 @@ namespace Wism.Client.Data
                     Gold = players[i].Gold,
                     IsDead = players[i].IsDead,
                     MyCitiesShortNames = ConvertToCityShortNames(players[i].GetCities()),
-                    Turn = players[i].Turn
+                    Turn = players[i].Turn,
+                    LastHeroTurn = players[i].LastHeroTurn,
+                    NewHeroPrice = players[i].NewHeroPrice,
+                    MyHeroIds = ConvertToHeroIds(players[i].GetHeros())
                 };
             }
 

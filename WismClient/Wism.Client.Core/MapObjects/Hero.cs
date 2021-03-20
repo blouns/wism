@@ -6,7 +6,11 @@ namespace Wism.Client.MapObjects
 {
     public class Hero : Army
     {
-        public List<Artifact> Items { get; internal set; }
+        public const int MaxHeros = 10;
+        public const int MinGoldToHire = 800;
+        public const int MaxGoldToHire = 2000;
+
+        public List<Artifact> Items { get; internal set; }        
 
         internal Hero()
         {

@@ -52,6 +52,8 @@ namespace Wism.Client.Core
         /// </summary>
         public GameState GameState { get => gameState; }
 
+        public bool IgnoreGameOver { get; set; }
+
         /// <summary>
         /// Returns the current game instance as a Singleton
         /// </summary>
@@ -195,13 +197,24 @@ namespace Wism.Client.Core
         /// </summary>
         public void StartTurn()
         {
-            // TODO: New heros, evaluate if player is alive, etc.
             var player = GetCurrentPlayer();
+
+            if (player.GetCities().Count == 0 &&
+                !IgnoreGameOver)
+            {
+                // You are no longer in the fight!
+                player.IsDead = true;
+                Transition(GameState.Ready);
+                return;
+            }
+
             player.StartTurn();
+
+            // Select the next army if one is available
             if (!SelectNextArmy())
             {
                 Transition(GameState.Ready);
-            }
+            }            
         }
 
         /// <summary>
