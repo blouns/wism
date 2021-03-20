@@ -1,4 +1,4 @@
-﻿Goal: 2P playable: Actual cities from Warlords with Neutral player
+﻿Goal: 2P playable: Actual cities from Warlords with human players
 
 TODO:
  * New heros
