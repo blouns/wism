@@ -94,7 +94,7 @@ namespace Assets.Scripts
                 .GetComponent<CityEntry>()
                 .GetGameCoordinates();
             sirians.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
-            sirians.HireHero(World.Current.Map[63, 20]);    // Testing search
+            sirians.HireHero(World.Current.Map[63, 20], true);    // Testing search
 
             Player stormgiants = Game.Current.Players[1];
             capitolPosition = UnityUtilities.GameObjectHardFind("Stormheim")
