@@ -53,7 +53,7 @@ namespace Wism.Client.Test.Unit
             Game.Current.Random = new Random(1990);
             Player player1 = Game.Current.Players[0];
             Tile tile = World.Current.Map[2, 2];
-            player1.HireHero(tile, true);
+            player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
@@ -98,7 +98,7 @@ namespace Wism.Client.Test.Unit
             Game.Current.Random = new Random(1990);
             Player player1 = Game.Current.Players[0];
             Tile tile = World.Current.Map[2, 2];
-            player1.HireHero(tile, true);
+            player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
@@ -136,13 +136,13 @@ namespace Wism.Client.Test.Unit
             Game.Current.Random = new Random(1990);
             Player player1 = Game.Current.Players[0];
             Tile tile = World.Current.Map[2, 2];
-            player1.HireHero(tile, true);
+            player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
 
             Player player2 = Game.Current.Players[1];
             tile = World.Current.Map[3, 2];
-            player2.HireHero(tile, true);
+            player2.HireHero(tile, 0);
             player2.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player2.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player2.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);

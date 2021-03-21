@@ -45,6 +45,7 @@ namespace Wism.Client.Agent
             };
             this.commandProcessors = new List<ICommandProcessor>()
             {
+                new StartTurnProcessor(logFactory, this),
                 new PrepareForBattleProcessor(logFactory, this),
                 new BattleProcessor(logFactory),
                 new CompleteBattleProcessor(logFactory, this),

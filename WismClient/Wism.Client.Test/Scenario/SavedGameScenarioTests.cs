@@ -45,8 +45,8 @@ namespace Wism.Client.Test.Scenario
             Player sirians = Game.Current.Players[0];
             Tile tile1 = World.Current.Map[1, 1];
             Tile tile2 = World.Current.Map[1, 2];
-            sirians.HireHero(tile1, true);
-            sirians.HireHero(tile2, true);
+            sirians.HireHero(tile1, 0);
+            sirians.HireHero(tile2, 0);
             var siriansHero1 = new List<Army>(tile1.Armies);
             var siriansHero2 = new List<Army>(tile2.Armies);
 
@@ -54,8 +54,8 @@ namespace Wism.Client.Test.Scenario
             Player lordBane = Game.Current.Players[1];
             var tile3 = World.Current.Map[4, 3];
             var tile4 = World.Current.Map[4, 4];
-            lordBane.HireHero(tile3, true);
-            lordBane.HireHero(tile4, true);
+            lordBane.HireHero(tile3, 0);
+            lordBane.HireHero(tile4, 0);
             var lordBaneHero1 = new List<Army>(tile3.Armies);
             var lordBaneHero2 = new List<Army>(tile4.Armies);
 
@@ -287,14 +287,14 @@ namespace Wism.Client.Test.Scenario
             Tile tile1 = World.Current.Map[1, 1];
             var siriansHero1 = new List<Army>()
             {
-                sirians.HireHero(tile1, true),
-                sirians.HireHero(tile1, true),
-                sirians.HireHero(tile1, true),
-                sirians.HireHero(tile1, true),
-                sirians.HireHero(tile1, true),
-                sirians.HireHero(tile1, true),
-                sirians.HireHero(tile1, true),
-                sirians.HireHero(tile1, true)
+                sirians.HireHero(tile1, 0),
+                sirians.HireHero(tile1, 0),
+                sirians.HireHero(tile1, 0),
+                sirians.HireHero(tile1, 0),
+                sirians.HireHero(tile1, 0),
+                sirians.HireHero(tile1, 0),
+                sirians.HireHero(tile1, 0),
+                sirians.HireHero(tile1, 0)
             };
 
             // Initial Bane's setup
@@ -403,7 +403,7 @@ namespace Wism.Client.Test.Scenario
             // Initial Sirians setup
             Player sirians = Game.Current.Players[0];
             Tile tile1 = World.Current.Map[1, 1];
-            sirians.HireHero(tile1, true);
+            sirians.HireHero(tile1, 0);
             sirians.ConscriptArmy(ModFactory.FindArmyInfo("Griffins"), tile1);
             sirians.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile1);
             var siriansHero1 = new List<Army>(tile1.Armies);

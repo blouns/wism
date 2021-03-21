@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Wism.Client.Core.Armies;
+using Wism.Client.Core.Heros;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -16,6 +18,9 @@ namespace Wism.Client.Core
         private List<City> myCities = new List<City>();
         private int lastHeroTurn;
 
+        private readonly IRecruitHeroStrategy recruitHeroStrategy;
+        private readonly IDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
+
         public Clan Clan { get; set; }
 
         public int Gold { get; set; }
@@ -30,8 +35,14 @@ namespace Wism.Client.Core
 
         public int LastHeroTurn { get => lastHeroTurn; internal set => lastHeroTurn = value; }
 
-        private Player()
+        private Player(IRecruitHeroStrategy recruitingStrategy)
         {
+            if (recruitingStrategy == null)
+            {
+                recruitingStrategy = new DefaultRecruitHeroStrategy();
+            }
+
+            this.recruitHeroStrategy = recruitingStrategy;
         }
 
         public static Player Create(Clan clan)
@@ -41,11 +52,14 @@ namespace Wism.Client.Core
                 throw new System.ArgumentNullException(nameof(clan));
             }
 
-            Player player = new Player()
+            var heroPath = ModFactory.ModPath + "\\" + ModFactory.HeroPath;
+            var recruitingStrategy = ModFactory.LoadRecruitHeroStrategy(heroPath);
+            Player player = new Player(recruitingStrategy)
             {
                 Clan = clan,
                 Gold = StartingGold,
-                Turn = 1
+                Turn = 1,
+                NewHeroPrice = Int32.MaxValue
             };
 
             return player;
@@ -91,37 +105,34 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Hires a new hero if Gold >= NewHeroPrice.
+        /// Hires a new hero if there is sufficient gold
         /// </summary>
         /// <param name="tile">Tile to deploy the new hero to.</param>
-        /// <param name="heroIsFree">Override hero cost (for testing only)</param>
+        /// <param name="price">Cost of the new hero in gp.</param>
         /// <returns>New hero deployed to tile</returns>
-        public Hero HireHero(Tile tile, bool heroIsFree = false)
+        public Hero HireHero(Tile tile, int price = 0)
         {
             if (this.myHeros.Count >= Hero.MaxHeros)
             {
                 throw new InvalidOperationException("Reached max hero limit.");
             }            
 
-            // Override for testing only
-            if (heroIsFree)
-            {
-                NewHeroPrice = 0;
-            }
-
-            if (Gold < NewHeroPrice)
+            if (Gold < price)
             {
                 throw new InvalidOperationException("Cannot afford a new hero!");
             }
 
             // Pay the hero and reset the price
-            Gold -= NewHeroPrice;
-            NewHeroPrice = int.MaxValue;
+            Gold -= price;
+            this.NewHeroPrice = Int32.MaxValue;
 
             // Get him a uniform!
             var hero = (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
-            this.myHeros.Add(hero);
+            
+            // Get a random name
+            hero.DisplayName = recruitHeroStrategy.GetHeroName();
 
+            this.myHeros.Add(hero);
             this.lastHeroTurn = Turn;
 
             return hero;
@@ -209,16 +220,12 @@ namespace Wism.Client.Core
             if (tile == null)
             {
                 throw new ArgumentNullException(nameof(tile));
-            }
-
-            if (!CanDeploy(armyInfo, tile))
-                throw new ArgumentException(
-                    String.Format("Army type '{0}' cannot be deployed to '{1}'.", armyInfo.DisplayName, tile.Terrain.DisplayName));
+            }            
 
             Army newArmy = ArmyFactory.CreateArmy(this, armyInfo);
             var newArmies = new List<Army>() { newArmy };
-
-            DeployArmies(tile, newArmies);
+            var targetTile = this.deploymentStrategy.FindNextOpenTile(this, armyInfo, tile);
+            DeployArmies(targetTile, newArmies);
 
             return newArmy;
         }
@@ -277,7 +284,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Check if there are any heros for hire; if so, set IsHeroForHire.
+        /// Check if there are any heros for hire and set the new hero price.
         /// </summary>
         /// <remarks>
         /// Based on both available Gold, number of heros, and how long since the 
@@ -285,42 +292,14 @@ namespace Wism.Client.Core
         /// </remarks>
         private void RecruitHeros()
         {
-            // Must have at least one city to attract a hero
-            if (this.myCities.Count == 0)
+            if (this.recruitHeroStrategy.IsHeroAvailable(this))
             {
-                return;
-            }
-
-            // Chance goes down based on number of current heros
-            var heros = myArmies.FindAll(a => a is Hero);
-            double heroCountChance = 1 - Math.Log10(heros.Count + 1);
-            if (heroCountChance < 0)
-            {
-                heroCountChance = 0;
-            }
-
-            // Chance goes up based on number of turns without a new hero
-            int turnsSinceLastHero = Turn - this.lastHeroTurn;
-            double turnsSinceLastHeroChance = Math.Log10(turnsSinceLastHero);
-            if (turnsSinceLastHeroChance > 1)
-            {
-                turnsSinceLastHeroChance = 1;
-            }
-
-            // Calculate if hero is available
-            double chance = Game.Current.Random.NextDouble();
-            bool isHeroForHire = ((heroCountChance * turnsSinceLastHeroChance) < chance);
-            int goldToHire = Game.Current.Random.Next(Hero.MinGoldToHire, Hero.MinGoldToHire);
-
-            // Set the hero's price
-            if (isHeroForHire && Gold >= goldToHire)
-            {
-                this.NewHeroPrice = goldToHire;
+                this.NewHeroPrice = this.recruitHeroStrategy.GetHeroPrice(this);               
             }
             else
             {
                 this.NewHeroPrice = int.MaxValue;
-            }
+            }                        
         }
 
         internal void DeliverArmies()
@@ -399,23 +378,6 @@ namespace Wism.Client.Core
 
             // Add to player armies for tracking            
             this.myArmies.AddRange(newArmies);
-        }
-
-        private bool CanDeploy(ArmyInfo armyInfo, Tile tile)
-        {
-            if (armyInfo == null)
-            {
-                throw new ArgumentNullException(nameof(armyInfo));
-            }
-
-            if (tile == null)
-            {
-                throw new ArgumentNullException(nameof(tile));
-            }
-
-            Terrain terrain = tile.Terrain;
-            return ((terrain.CanTraverse(armyInfo.CanWalk, armyInfo.CanFloat, armyInfo.CanFly)) &&
-                    (!tile.HasArmies() || (tile.Armies.Count < Army.MaxArmies)));
         }
 
         public override string ToString()
