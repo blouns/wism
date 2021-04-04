@@ -103,17 +103,31 @@ namespace Assets.Scripts.Managers
             // Create command processors
             this.commandProcessors = new List<ICommandProcessor>()
             {
+                // General processors
                 new SelectArmyProcessor(GameManager.LoggerFactory, this),
+                
+                // Battle processors
                 new PrepareForBattleProcessor(GameManager.LoggerFactory, this),
                 new BattleProcessor(GameManager.LoggerFactory, this),
                 new CompleteBattleProcessor(GameManager.LoggerFactory, this),
+                
+                // Turn processors
                 new StartTurnProcessor(GameManager.LoggerFactory, this),
+                new RecruitHeroProcessor(GameManager.LoggerFactory, this),
+                new HireHeroProcessor(GameManager.LoggerFactory, this),
+                //new RenewProductionProcessor(GameManager.LoggerFactory, this),
                 new EndTurnProcessor(GameManager.LoggerFactory, this),
+
+                // Search processors
                 new SearchTempleProcessor(GameManager.LoggerFactory, this),
                 new SearchRuinsProcessor(GameManager.LoggerFactory, this),
                 new SearchLibraryProcessor(GameManager.LoggerFactory, this),               
                 new SearchSageProcessor(GameManager.LoggerFactory, this),
+
+                // Game processors
                 new LoadGameProcessor(GameManager.LoggerFactory, this),
+
+                // Default processor
                 new StandardProcessor(GameManager.LoggerFactory)
             };
 
@@ -154,9 +168,8 @@ namespace Assets.Scripts.Managers
             NotifyUser("Game loaded successfully!");
         }
 
-        internal void GoToCapitol()
+        internal void GoToCapitol(Player player)
         {
-            Player player = Game.Current.GetCurrentPlayer();
             var inputHandler = this.GetComponent<InputManager>().InputHandler;
             inputHandler.CenterOnTile(player.Capitol.Tile);
         }

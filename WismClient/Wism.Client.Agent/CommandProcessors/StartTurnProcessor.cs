@@ -2,8 +2,8 @@
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
+using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
-using Wism.Client.Core.Heros;
 
 namespace Wism.Client.Agent.CommandProcessors
 {
@@ -11,7 +11,6 @@ namespace Wism.Client.Agent.CommandProcessors
     {
         private ILogger logger;
         private readonly AsciiGame asciiGame;
-        private readonly IRecruitHeroStrategy recruitingStrategy = new DefaultRecruitHeroStrategy();
 
         public StartTurnProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
         {
@@ -31,59 +30,22 @@ namespace Wism.Client.Agent.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            var state = command.Execute();
-
             var startTurnCommand = (StartTurnCommand)command;
             var player = startTurnCommand.Player;
-            Notify.DisplayAndWait($"{player.Clan.DisplayName} turn is starting...");
-            
-            if (player.Gold >= player.NewHeroPrice)
+            if (startTurnCommand.Player.GetCities().Count == 0)
             {
-                OfferHeroToPlayer(player);
+                // Player has died                
+                Notify.DisplayAndWait($"Wretched {player.Clan.DisplayName}, for you the war is over...");
             }
+            else
+            {
+                // Start the turn
+                Notify.DisplayAndWait($"{player.Clan.DisplayName} your turn is starting...");
+            }
+
+            var state = command.Execute();
 
             return state;
-        }
-
-        private ActionState OfferHeroToPlayer(Core.Player player)
-        {
-            var city = recruitingStrategy.GetTargetCity(player);
-            var gold = player.NewHeroPrice;
-
-            Notify.Information($"A hero in {city.DisplayName} offers to join you for {gold} gp!");
-            Notify.Information($"You have {player.Gold} gp.");
-            Notify.Information($"[A]ccept or [r]eject?");
-            var key = Console.ReadKey();
-            if (key.Key != ConsoleKey.A)
-            {
-                Console.WriteLine();
-                return ActionState.Failed;
-            }
-            Console.WriteLine();
-            
-            // You're hired!
-            var hero = player.HireHero(city.Tile, player.NewHeroPrice);
-
-            // Name the hero
-            Notify.Information($"Enter a name [Default: {hero.DisplayName}]:");
-            string name = Console.ReadLine();
-            if (!String.IsNullOrWhiteSpace(name))
-            {
-                hero.DisplayName = name;
-            }
-
-            // Check for any allies the hero brought with them
-            var allies = recruitingStrategy.GetAllies(player);
-            if (allies.Count > 0)
-            {
-                Notify.DisplayAndWait($"And the hero brings {allies.Count} allies!");
-                foreach (var armyInfo in allies)
-                {
-                    player.ConscriptArmy(armyInfo, city.Tile);
-                }
-            }            
-
-            return ActionState.Succeeded;
         }
     }
 }

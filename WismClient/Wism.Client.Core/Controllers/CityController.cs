@@ -20,6 +20,21 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
+        /// Renew all completed production projects.
+        /// </summary>
+        /// <param name="player">Player to renew production for</param>
+        /// <returns>Success state</returns>
+        public ActionState RenewAllProduction(Player player)
+        {
+            if (player is null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Add a neutral city to the map from the modules
         /// </summary>
         /// <param name="x">Top-left X coordinate of tile for the city</param>
@@ -140,38 +155,7 @@ namespace Wism.Client.Core.Controllers
             }
             
             return city.Barracks.StartProduction(armyInfo, destinationCity);
-        }
-
-        /// <summary>
-        /// Advance production for all cities for one turn for current player.
-        /// </summary>
-        /// <returns>True if an army was produced.</returns>
-        public bool ProcessProductionForTurn()
-        {
-            bool result = false;
-            foreach(City city in Game.Current.GetCurrentPlayer().GetCities())
-            {
-                result |= city.Barracks.Produce();
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Advance deliveries for armies pending for all cities for one turn
-        /// for current player.
-        /// </summary>
-        /// <returns>True if an army was delivered.</returns>
-        public bool DeliverArmiesForTurn()
-        {
-            bool result = false;
-            foreach (City city in Game.Current.GetCurrentPlayer().GetCities())
-            {
-                result |= city.Barracks.Deliver();
-            }
-
-            return result;
-        }
+        }        
 
         public void StopProduction(City city)
         {

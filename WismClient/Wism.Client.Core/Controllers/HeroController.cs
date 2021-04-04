@@ -19,6 +19,11 @@ namespace Wism.Client.Core.Controllers
             this.logger = loggerFactory.CreateLogger();
         }
 
+        public Hero HireHero(Player player, Tile tile)
+        {
+            return player.HireHero(tile);
+        }
+
         public void TakeItems(Hero hero, List<Artifact> items)
         {
             if (hero is null)

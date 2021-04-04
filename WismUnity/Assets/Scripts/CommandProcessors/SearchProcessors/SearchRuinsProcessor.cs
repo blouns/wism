@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Managers;
+﻿using Assets.Scripts.CommandProcessors.Cutscenes;
+using Assets.Scripts.Managers;
 using System;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
@@ -36,7 +37,8 @@ namespace Assets.Scripts.CommandProcessors
             var ruinsCommand = command as SearchRuinsCommand;
             if (stager == null)
             {
-                stager = CutsceneStager.CreateDefault(ruinsCommand, unityGame.InputManager);
+                stager = new CutsceneStagerFactory(unityGame)
+                    .CreateRuinsStager(ruinsCommand);
                 unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
                 unityGame.HideSelectedBox();
             }

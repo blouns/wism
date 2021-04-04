@@ -39,10 +39,20 @@ namespace Wism.Client.Agent.CommandProcessors
             var attackingArmies = new List<Army>(battleCommand.Armies);
             attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
 
-            var defendingPlayer = battleCommand.Defenders[0].Player;
-            var defendingArmies = targetTile.MusterArmy();
-            defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
-
+            Player defendingPlayer;
+            List<Army> defendingArmies;
+            if (battleCommand.Defenders != null && battleCommand.Defenders.Count > 0)
+            {
+                defendingPlayer = battleCommand.Defenders[0].Player;
+                defendingArmies = targetTile.MusterArmy();
+                defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
+            }
+            else
+            {
+                // Attacking an empty city
+                defendingPlayer = targetTile.City.Player;
+                defendingArmies = new List<Army>();
+            }
             DrawBattleSetupSequence(attackingPlayer, defendingPlayer);
             BattleProcessor.DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
 

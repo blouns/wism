@@ -1,9 +1,10 @@
-﻿using Assets.Scripts.UI;
-using Assets.Scripts.Common;
+﻿using Assets.Scripts.Common;
 using Assets.Scripts.Managers;
+using Assets.Scripts.UI;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
+using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using ILogger = Wism.Client.Common.ILogger;
 
@@ -33,22 +34,30 @@ namespace Assets.Scripts.CommandProcessors
         public ActionState Execute(ICommandAction command)
         {
             var startTurn = (StartTurnCommand)command;
+
+            //this.unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
+            CenterOnCapitol(startTurn.Player);
+
             var messageBox = UnityUtilities.GameObjectHardFind("NotificationBox")
                 .GetComponent<NotificationBox>();
 
             string name = TextUtilities.CleanupName(startTurn.Player.Clan.DisplayName);
-            messageBox.Notify($"{name} your turn is starting!");            
-
-            var actionState = command.Execute();
-
-            CenterOnCapitol();
-
-            return actionState;
+            if (startTurn.Player.GetCities().Count == 0)
+            {
+                // Player has died                
+                messageBox.Notify($"Wretched {name}, for you the war is over...");
+            }
+            else
+            {
+                messageBox.Notify($"{name} your turn is starting!");
+            }            
+            
+            return command.Execute();
         }
 
-        private void CenterOnCapitol()
+        private void CenterOnCapitol(Player player)
         {
-            unityGame.GoToCapitol();
-        }
+            unityGame.GoToCapitol(player);
+        }       
     }
 }

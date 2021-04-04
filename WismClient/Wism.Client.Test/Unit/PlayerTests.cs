@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Wism.Client.Core;
+using Wism.Client.Core.Heros;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -23,7 +24,6 @@ namespace Wism.Client.Test.Unit
 
             // Assert
             Assert.AreEqual(0, player1.LastHeroTurn);
-            Assert.AreEqual(Int32.MaxValue, player1.NewHeroPrice);
         }
 
         [Test]
@@ -43,7 +43,6 @@ namespace Wism.Client.Test.Unit
 
             // Assert
             Assert.AreEqual(0, player1.LastHeroTurn);
-            Assert.AreEqual(0, player1.NewHeroPrice);
         }
 
         [Test]
@@ -66,7 +65,6 @@ namespace Wism.Client.Test.Unit
 
             // Assert
             Assert.AreEqual(1, player1.LastHeroTurn, "Last hero turn not set");
-            Assert.AreEqual(Int32.MaxValue, player1.NewHeroPrice, "Hero should not be available");
         }
 
         [Test]
@@ -75,7 +73,7 @@ namespace Wism.Client.Test.Unit
             // Assemble            
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
-            player1.Turn = 10;
+            player1.Turn = 10;            
 
             var tile = World.Current.Map[1, 1];
             var city = MapBuilder.FindCity("Marthos");
@@ -84,11 +82,18 @@ namespace Wism.Client.Test.Unit
 
             // Act
             player1.StartTurn();
+            var success = player1.RecruitHeroStrategy.IsHeroAvailable(player1);
+            var name = player1.RecruitHeroStrategy.GetHeroName();
+            var actualCity = player1.RecruitHeroStrategy.GetTargetCity(player1);
+            var price = player1.RecruitHeroStrategy.GetHeroPrice(player1);
 
             // Assert
+            Assert.IsTrue(success, "No hero was available");
+            Assert.IsNotEmpty(name, "No hero name");
+            Assert.AreEqual(city.ShortName, actualCity.ShortName);
+            Assert.IsTrue(price > 0, "Price too low");
+            Assert.IsTrue(price < int.MaxValue, "Price too high");           
             Assert.AreEqual(0, player1.LastHeroTurn, "Last hero should be never (zero)");
-            Assert.IsTrue(player1.NewHeroPrice >= Hero.MinGoldToHire, "Hero costs too little.");
-            Assert.IsTrue(player1.NewHeroPrice < Hero.MaxGoldToHire, "Hero costs too much.");
         }
 
         [Test]
@@ -118,7 +123,6 @@ namespace Wism.Client.Test.Unit
 
             // Assert
             Assert.AreEqual(10, player1.LastHeroTurn, "Last hero should be 10");
-            Assert.AreEqual(Int32.MaxValue, player1.NewHeroPrice, "Hero should not be available");
         }
 
         [Test]
@@ -128,6 +132,7 @@ namespace Wism.Client.Test.Unit
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
             player1.Turn = 10;
+            player1.Gold = 10000;
 
             var tile = World.Current.Map[1, 1];
             var city = MapBuilder.FindCity("Marthos");
@@ -141,7 +146,7 @@ namespace Wism.Client.Test.Unit
             Game.Current.StartTurn();
             Game.Current.EndTurn();
 
-            player1.Turn = 20;
+            player1.Turn = 19;
 
             // Skip a turn (back to Sirians)
             Game.Current.EndTurn();
@@ -150,11 +155,21 @@ namespace Wism.Client.Test.Unit
 
             // Act
             player1.StartTurn();
+            var success = player1.RecruitHeroStrategy.IsHeroAvailable(player1);
+            var name = player1.RecruitHeroStrategy.GetHeroName();
+            var actualCity = player1.RecruitHeroStrategy.GetTargetCity(player1);
+            var price = player1.RecruitHeroStrategy.GetHeroPrice(player1);
+            var hired = player1.TryHireHero(tile, price, name, out Hero hero);
 
             // Assert
-            Assert.AreEqual(10, player1.LastHeroTurn, "Last hero should be 10");
-            Assert.IsTrue(player1.NewHeroPrice >= Hero.MinGoldToHire, "Hero costs too little.");
-            Assert.IsTrue(player1.NewHeroPrice < Hero.MaxGoldToHire, "Hero costs too much.");
+            Assert.AreEqual(21, player1.LastHeroTurn, "Last hero should be 10");
+            Assert.IsTrue(hired, "Did not hire the hero");
+            Assert.IsNotNull(hero, "Here was null");
+            Assert.IsTrue(success, "No hero was available");
+            Assert.IsNotEmpty(name, "No hero name");
+            Assert.AreEqual(city.ShortName, actualCity.ShortName);
+            Assert.IsTrue(price > 0, "Price too low");
+            Assert.IsTrue(price < int.MaxValue, "Price too high");
         }
 
         [Test]
@@ -185,7 +200,16 @@ namespace Wism.Client.Test.Unit
 
             // Assert
             Assert.AreEqual(1, player1.LastHeroTurn, "Last hero turn not set");
-            Assert.AreEqual(Int32.MaxValue, player1.NewHeroPrice, "Hero should not be available");
-        }        
+        }
+
+        #region Helper methods
+
+        private static IRecruitHeroStrategy GetRecruitHeroStrategy()
+        {
+            string path = ModFactory.ModPath + "\\" + ModFactory.HeroPath;
+            return ModFactory.LoadRecruitHeroStrategy(path);
+        }
+
+        #endregion
     }
 }

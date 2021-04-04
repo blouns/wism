@@ -34,9 +34,21 @@ namespace Wism.Client.Agent.CommandProcessors
             var attackingArmies = battleCommand.OriginalAttackingArmies;
             attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
 
-            var defendingPlayer = battleCommand.OriginalDefendingArmies[0].Player;
-            var defendingArmies = battleCommand.OriginalDefendingArmies;
-            defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
+            Player defendingPlayer;
+            List<Army> defendingArmies;
+            if (battleCommand.OriginalDefendingArmies == null ||
+                battleCommand.OriginalDefendingArmies.Count == 0)
+            {
+                // Attacking empty city
+                Notify.DisplayAndWait("Press any key to continue...");
+                return ActionState.Succeeded;
+            }
+            else
+            {
+                defendingPlayer = battleCommand.OriginalDefendingArmies[0].Player;
+                defendingArmies = battleCommand.OriginalDefendingArmies;
+                defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
+            }
 
             DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
 
@@ -66,17 +78,24 @@ namespace Wism.Client.Agent.CommandProcessors
         {
             var originalColor = Console.ForegroundColor;
 
-            foreach (var army in armies)
+            if (armies == null || armies.Count == 0)
             {
-                Console.ForegroundColor = AsciiMapper.GetColorForClan(army.Clan);
-
-                Console.Write(army.DisplayName);
-                if (army.IsDead)
+                Console.WriteLine("The garrison has fled before you!");                
+            }
+            else
+            {
+                foreach (var army in armies)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write(" [X]");
+                    Console.ForegroundColor = AsciiMapper.GetColorForClan(army.Clan);
+
+                    Console.Write(army.DisplayName);
+                    if (army.IsDead)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write(" [X]");
+                    }
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
             }
 
             Console.ForegroundColor = originalColor;

@@ -260,7 +260,7 @@ namespace Assets.Scripts.Managers
             // Navigation actions
             else if (Input.GetKeyDown(KeyCode.C))
             {
-                UnityManager.GoToCapitol();
+                UnityManager.GoToCapitol(Game.Current.GetCurrentPlayer());
             }
             // TODO: Add center-on-selected (space?) action
 

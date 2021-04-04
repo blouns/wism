@@ -62,7 +62,7 @@ namespace Wism.Client.Modules
         /// Load the hero recruiting strategy.
         /// </summary>
         /// <returns>Recruiting strategy for heros</returns>
-        internal static IRecruitHeroStrategy LoadRecruitHeroStrategy(string path)
+        public static IRecruitHeroStrategy LoadRecruitHeroStrategy(string path)
         {
             if (recruitHeroStrategy == null)
             {
@@ -87,7 +87,7 @@ namespace Wism.Client.Modules
         /// Load the hero names.
         /// </summary>
         /// <returns>List of hero names</returns>
-        internal static IList<string> LoadHeroNames(string path)
+        public static IList<string> LoadHeroNames(string path)
         {
             if (heroNames == null)
             {

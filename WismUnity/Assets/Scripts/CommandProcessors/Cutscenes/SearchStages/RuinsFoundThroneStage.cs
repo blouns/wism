@@ -3,7 +3,7 @@ using Wism.Client.Api.Commands;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class RuinsFoundThroneStage : CutsceneStage
+    public class RuinsFoundThroneStage : LocationCutsceneStage
     {
         public RuinsFoundThroneStage(SearchRuinsCommand command)
             : base(command)

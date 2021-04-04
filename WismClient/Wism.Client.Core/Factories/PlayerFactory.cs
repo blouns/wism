@@ -68,7 +68,6 @@ namespace Wism.Client.Factories
             player.IsDead = playerEntity.IsDead;
             player.Turn = playerEntity.Turn;
             player.LastHeroTurn = playerEntity.LastHeroTurn;
-            player.NewHeroPrice = playerEntity.NewHeroPrice;
 
             return player;
         }        

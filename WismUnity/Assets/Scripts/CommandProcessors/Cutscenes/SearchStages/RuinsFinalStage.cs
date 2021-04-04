@@ -6,7 +6,7 @@ using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class RuinsFinalStage : CutsceneStage
+    public class RuinsFinalStage : LocationCutsceneStage
     {
         public RuinsFinalStage(SearchLocationCommand command)
             : base(command)

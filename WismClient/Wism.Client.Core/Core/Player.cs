@@ -31,9 +31,13 @@ namespace Wism.Client.Core
 
         public City Capitol { get; set; }
 
-        public int NewHeroPrice { get; internal set; }
-
         public int LastHeroTurn { get => lastHeroTurn; internal set => lastHeroTurn = value; }
+
+        public bool AnyArmiesProduced { get; private set; }
+        
+        public bool AnyArmiesDelivered { get; private set; }
+
+        public IRecruitHeroStrategy RecruitHeroStrategy => recruitHeroStrategy;
 
         private Player(IRecruitHeroStrategy recruitingStrategy)
         {
@@ -58,8 +62,7 @@ namespace Wism.Client.Core
             {
                 Clan = clan,
                 Gold = StartingGold,
-                Turn = 1,
-                NewHeroPrice = Int32.MaxValue
+                Turn = 1
             };
 
             return player;
@@ -105,6 +108,41 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
+        /// Attempts to hire a new hero.
+        /// </summary>
+        /// <param name="tile">Tile to deploy the new hero to</param>
+        /// <param name="price">Cost of the new hero in gp</param>
+        /// <param name="displayName">Display name for the new hero</param>
+        /// <param name="hero">Hero who was hired, if available</param>
+        /// <returns>True if hero was hired; otherwise False</returns>
+        public bool TryHireHero(Tile tile, int price, string displayName, out Hero hero)
+        {
+            hero = null;
+
+            if (this.myHeros.Count >= Hero.MaxHeros)
+            {
+                return false;
+            }
+
+            if (Gold < price)
+            {
+                return false;
+            }
+
+            // Pay the hero and reset the price
+            Gold -= price;
+
+            // Get him a uniform!
+            hero = (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            hero.DisplayName = displayName;
+
+            this.myHeros.Add(hero);
+            this.lastHeroTurn = Turn;
+
+            return true;
+        }
+
+        /// <summary>
         /// Hires a new hero if there is sufficient gold
         /// </summary>
         /// <param name="tile">Tile to deploy the new hero to.</param>
@@ -124,13 +162,12 @@ namespace Wism.Client.Core
 
             // Pay the hero and reset the price
             Gold -= price;
-            this.NewHeroPrice = Int32.MaxValue;
 
             // Get him a uniform!
             var hero = (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
             
             // Get a random name
-            hero.DisplayName = recruitHeroStrategy.GetHeroName();
+            hero.DisplayName = RecruitHeroStrategy.GetHeroName();
 
             this.myHeros.Add(hero);
             this.lastHeroTurn = Turn;
@@ -277,45 +314,38 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot start turn; it's not my turn!");
             }
 
+            if (this.IsDead)
+            {
+                return;
+            }
+
             DoTheBooks();
             ProduceArmies();
             DeliverArmies();
-            RecruitHeros();
-        }
-
-        /// <summary>
-        /// Check if there are any heros for hire and set the new hero price.
-        /// </summary>
-        /// <remarks>
-        /// Based on both available Gold, number of heros, and how long since the 
-        /// last hero was available.
-        /// </remarks>
-        private void RecruitHeros()
-        {
-            if (this.recruitHeroStrategy.IsHeroAvailable(this))
-            {
-                this.NewHeroPrice = this.recruitHeroStrategy.GetHeroPrice(this);               
-            }
-            else
-            {
-                this.NewHeroPrice = int.MaxValue;
-            }                        
         }
 
         internal void DeliverArmies()
         {
+            bool anyArmiesDelivered = false;
+
             foreach (var city in myCities)
             {
-                city.Barracks.Deliver();
+                anyArmiesDelivered |= city.Barracks.Deliver();
             }
+
+            
         }
 
         internal void ProduceArmies()
         {
+            bool anyNewArmy = false;
+
             foreach (var city in myCities)
             {
-                city.Barracks.Produce();
+                anyNewArmy |= city.Barracks.Produce();
             }
+
+            this.AnyArmiesProduced = anyNewArmy;
         }
 
         /// <summary>

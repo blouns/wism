@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Managers;
+﻿using Assets.Scripts.CommandProcessors.Cutscenes;
+using Assets.Scripts.Managers;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
@@ -36,7 +37,8 @@ namespace Assets.Scripts.CommandProcessors
 
             if (stager == null)
             {
-                stager = CutsceneStager.CreateDefault(searchCommand, unityGame.InputManager);
+                stager = new CutsceneStagerFactory(unityGame)
+                    .CreateLibraryStager(searchCommand);
                 unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
                 unityGame.HideSelectedBox();
             }

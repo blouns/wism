@@ -3,32 +3,28 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Api.Commands;
-using Wism.Client.Core;
-using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.CommandProcessors
 {
 
     public abstract class CutsceneStage
     {
-        public Tile TargetTile { get; private set; }
-        public Player Player { get; private set; }
-        public Location Location { get; private set; }
-        public List<Army> Armies { get; private set;  }
-        public Army Hero { get; private set; }
         public Command Command { get; }
+
+        public List<CutsceneStage> Children { get; set; }
+
+        public CutsceneStage Next { get; set; }        
 
         private bool keyPressed;
 
-        public CutsceneStage(SearchLocationCommand command)
+        public CutsceneStage(Command command)
         {
             Command = command;
-            UnpackCommand(command);
         }
 
         public abstract SceneResult Action();
 
-        public void OnAnyKeyPressed()
+        internal void OnAnyKeyPressed()
         {
             keyPressed = true;
         }
@@ -64,9 +60,20 @@ namespace Assets.Scripts.CommandProcessors
             messageBox.Notify(String.Format(message, args));            
         }
 
+        protected static bool? AskAcceptReject(string message, params object[] args)
+        {
+            // TODO: Refactor to use same panel for Yes/No
+            return AskYesNo("AcceptRejectPanel", message, args);
+        }
+
         protected static bool? AskYesNo(string message, params object[] args)
         {
-            var yesNoBox = GameObject.FindGameObjectWithTag("YesNoBox")
+            return AskYesNo("YesNoBox", message, args);
+        }
+
+        protected static bool? AskYesNo(string panelName, string message, params object[] args)
+        {
+            var yesNoBox = GameObject.FindGameObjectWithTag(panelName)
                .GetComponent<YesNoBox>();
 
             if (!yesNoBox.Answer.HasValue)
@@ -75,18 +82,6 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             return yesNoBox.Answer;
-        }
-
-        private void UnpackCommand(SearchLocationCommand command)
-        {
-            TargetTile = World.Current.Map[command.Location.X, command.Location.Y];
-            Player = command.Armies[0].Player;
-            Location = TargetTile.Location;
-            Armies = command.Armies;
-            Hero = command.Armies.Find(a =>
-                a is Hero &&
-                a.Tile == TargetTile &&
-                a.MovesRemaining > 0);
         }
     }
 }

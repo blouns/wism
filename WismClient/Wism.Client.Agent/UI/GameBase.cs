@@ -14,6 +14,7 @@ namespace Wism.Client.Agent
     {
         private ILogger logger;
         private readonly ArmyController armyController;
+        private readonly PlayerController playerController;
         private int lastId;
 
         public const int DefaultGameSpeed = 100;
@@ -22,6 +23,8 @@ namespace Wism.Client.Agent
         public int GameSpeed { get; set; }
 
         public int LastId { get => lastId; set => lastId = value; }
+
+        public PlayerController PlayerController => playerController;
 
         public GameBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
         {
@@ -37,6 +40,7 @@ namespace Wism.Client.Agent
 
             logger = loggerFactory.CreateLogger();
             this.armyController = controllerProvider.ArmyController;
+            this.playerController = controllerProvider.PlayerController;
             this.GameSpeed = DefaultGameSpeed;
         }
 

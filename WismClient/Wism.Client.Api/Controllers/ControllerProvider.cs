@@ -17,5 +17,7 @@ namespace Wism.Client.Core.Controllers
         public LocationController LocationController { get; set; }
 
         public HeroController HeroController { get; set; }
+
+        public PlayerController PlayerController { get; set; }
     }
 }

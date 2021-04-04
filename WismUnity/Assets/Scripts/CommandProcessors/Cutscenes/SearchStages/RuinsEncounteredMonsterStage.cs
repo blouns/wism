@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class RuinsEncounteredMonsterStage : CutsceneStage
+    public class RuinsEncounteredMonsterStage : LocationCutsceneStage
     {
         public RuinsEncounteredMonsterStage(SearchRuinsCommand command)
             : base(command)

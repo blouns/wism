@@ -5,7 +5,7 @@ using Wism.Client.Api.Commands;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class RuinsIntroStage : CutsceneStage
+    public class RuinsIntroStage : LocationCutsceneStage
     {
         public RuinsIntroStage(SearchRuinsCommand command)
             : base(command)

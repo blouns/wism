@@ -12,7 +12,7 @@ public class YesNoBox : MonoBehaviour
 
     public void Start()
     {
-        var yesNoGO = UnityUtilities.GameObjectHardFind("YesNoBox");
+        var yesNoGO = gameObject;
 
         this.notificationText = yesNoGO.transform.Find("Message").GetComponent<Text>();
         this.canvasGroup = yesNoGO.GetComponent<CanvasGroup>();
@@ -24,11 +24,6 @@ public class YesNoBox : MonoBehaviour
         {
             Hide();
         }
-    }
-
-    private void Hide()
-    {
-        canvasGroup.alpha = 0f;
     }
 
     public void Ask(string message, params object[] args)
@@ -43,9 +38,23 @@ public class YesNoBox : MonoBehaviour
         Show();
     }
 
+    public bool IsActive()
+    {
+        return canvasGroup.alpha == 1f;
+    }
+
     private void Show()
     {
         canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+    }
+
+    private void Hide()
+    {
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
     }
 
     public void Clear()

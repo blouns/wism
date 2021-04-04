@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class SageEnterStage : CutsceneStage
+    public class SageEnterStage : LocationCutsceneStage
     {
         public SageEnterStage(SearchLocationCommand command)
             : base(command)

@@ -339,7 +339,6 @@ namespace Wism.Client.Data
                     MyCitiesShortNames = ConvertToCityShortNames(players[i].GetCities()),
                     Turn = players[i].Turn,
                     LastHeroTurn = players[i].LastHeroTurn,
-                    NewHeroPrice = players[i].NewHeroPrice,
                     MyHeroIds = ConvertToHeroIds(players[i].GetHeros())
                 };
             }
