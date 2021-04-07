@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
@@ -13,7 +12,7 @@ namespace Wism.Client.Test.Common
 {
     public static class TestUtilities
     {
-        internal static readonly string DefaultTestWorld = "AsciiWorld";
+        internal static readonly string DefaultTestWorld = "TestWorld";
 
         public static ILoggerFactory CreateLogFactory()
         {

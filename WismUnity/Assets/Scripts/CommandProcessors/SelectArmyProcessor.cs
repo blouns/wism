@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Managers;
-using Assets.Scripts.UI;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -26,13 +25,24 @@ namespace Assets.Scripts.CommandProcessors
 
         public bool CanExecute(ICommandAction command)
         {
-            return command is SelectNextArmyCommand || 
-                   command is SelectArmyCommand;
+            return command is SelectNextArmyCommand;
         }
 
         public ActionState Execute(ICommandAction command)
         {
-            return command.Execute();
+            var selectNext = (SelectNextArmyCommand)command;
+
+            var state = selectNext.Execute();
+            if (state == ActionState.Succeeded)
+            {
+                var armies = Game.Current.GetSelectedArmies();
+                if (armies != null && armies.Count > 0)
+                {
+                    this.unityGame.SetCameraToSelectedBox();
+                }
+            }
+
+            return state;
         }
     }
 }

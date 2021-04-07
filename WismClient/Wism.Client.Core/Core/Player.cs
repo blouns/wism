@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Wism.Client.Core.Armies;
+using Wism.Client.Core.Heros;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -12,7 +14,15 @@ namespace Wism.Client.Core
         private const int StartingGold = 100;
 
         private List<Army> myArmies = new List<Army>();
+        private List<Hero> myHeros = new List<Hero>();
         private List<City> myCities = new List<City>();
+
+        private int lastHeroTurn;
+        private List<ArmyInTraining> armiesProduced = new List<ArmyInTraining>();
+        private List<ArmyInTraining> armiesDelivered = new List<ArmyInTraining>();
+
+        private readonly IRecruitHeroStrategy recruitHeroStrategy;
+        private readonly IDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
 
         public Clan Clan { get; set; }
 
@@ -24,8 +34,18 @@ namespace Wism.Client.Core
 
         public City Capitol { get; set; }
 
-        private Player()
+        public int LastHeroTurn { get => lastHeroTurn; internal set => lastHeroTurn = value; }
+
+        public IRecruitHeroStrategy RecruitHeroStrategy => recruitHeroStrategy;
+
+        private Player(IRecruitHeroStrategy recruitingStrategy)
         {
+            if (recruitingStrategy == null)
+            {
+                recruitingStrategy = new DefaultRecruitHeroStrategy();
+            }
+
+            this.recruitHeroStrategy = recruitingStrategy;
         }
 
         public static Player Create(Clan clan)
@@ -35,7 +55,9 @@ namespace Wism.Client.Core
                 throw new System.ArgumentNullException(nameof(clan));
             }
 
-            Player player = new Player()
+            var heroPath = ModFactory.ModPath + "\\" + ModFactory.HeroPath;
+            var recruitingStrategy = ModFactory.LoadRecruitHeroStrategy(heroPath);
+            Player player = new Player(recruitingStrategy)
             {
                 Clan = clan,
                 Gold = StartingGold,
@@ -62,6 +84,18 @@ namespace Wism.Client.Core
             return new List<City>(this.myCities);
         }
 
+        public List<Hero> GetHeros()
+        {
+            var herosAsArmyList = this.myArmies.FindAll(a => a is Hero);
+            var heros = new List<Hero>();
+            foreach (var hero in herosAsArmyList)
+            {
+                heros.Add((Hero)hero);
+            }
+
+            return heros;
+        }
+
         public int GetIncome()
         {
             return myCities.Sum(city => city.Income);
@@ -72,9 +106,72 @@ namespace Wism.Client.Core
             return myArmies.Sum(army => army.Upkeep);
         }
 
-        public Hero HireHero(Tile tile)
+        /// <summary>
+        /// Attempts to hire a new hero.
+        /// </summary>
+        /// <param name="tile">Tile to deploy the new hero to</param>
+        /// <param name="price">Cost of the new hero in gp</param>
+        /// <param name="displayName">Display name for the new hero</param>
+        /// <param name="hero">Hero who was hired, if available</param>
+        /// <returns>True if hero was hired; otherwise False</returns>
+        public bool TryHireHero(Tile tile, int price, string displayName, out Hero hero)
         {
-            return (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            hero = null;
+
+            if (this.myHeros.Count >= Hero.MaxHeros)
+            {
+                return false;
+            }
+
+            if (Gold < price)
+            {
+                return false;
+            }
+
+            // Pay the hero and reset the price
+            Gold -= price;
+
+            // Get him a uniform!
+            hero = (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            hero.DisplayName = displayName;
+
+            this.myHeros.Add(hero);
+            this.lastHeroTurn = Turn;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Hires a new hero if there is sufficient gold
+        /// </summary>
+        /// <param name="tile">Tile to deploy the new hero to.</param>
+        /// <param name="price">Cost of the new hero in gp.</param>
+        /// <returns>New hero deployed to tile</returns>
+        public Hero HireHero(Tile tile, int price = 0)
+        {
+            if (this.myHeros.Count >= Hero.MaxHeros)
+            {
+                throw new InvalidOperationException("Reached max hero limit.");
+            }            
+
+            if (Gold < price)
+            {
+                throw new InvalidOperationException("Cannot afford a new hero!");
+            }
+
+            // Pay the hero and reset the price
+            Gold -= price;
+
+            // Get him a uniform!
+            var hero = (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            
+            // Get a random name
+            hero.DisplayName = RecruitHeroStrategy.GetHeroName();
+
+            this.myHeros.Add(hero);
+            this.lastHeroTurn = Turn;
+
+            return hero;
         }
 
         /// <summary>
@@ -89,6 +186,24 @@ namespace Wism.Client.Core
             }
 
             this.myArmies.Add(army);
+        }
+
+        /// <summary>
+        /// Side-load a hero for loading only.
+        /// </summary>
+        /// <param name="hero">Hero to add</param>
+        /// <remarks>
+        /// This is a tracking list only. All Heros should be added to both 
+        /// <c>myArmies</c> and <c>myHeros</c>.
+        /// </remarks>
+        internal void AddHero(Hero hero)
+        {
+            if (hero is null)
+            {
+                throw new ArgumentNullException(nameof(hero));
+            }
+
+            this.myHeros.Add(hero);
         }
 
         internal void AddCity(City city)
@@ -141,16 +256,12 @@ namespace Wism.Client.Core
             if (tile == null)
             {
                 throw new ArgumentNullException(nameof(tile));
-            }
-
-            if (!CanDeploy(armyInfo, tile))
-                throw new ArgumentException(
-                    String.Format("Army type '{0}' cannot be deployed to '{1}'.", armyInfo.DisplayName, tile.Terrain.DisplayName));
+            }            
 
             Army newArmy = ArmyFactory.CreateArmy(this, armyInfo);
             var newArmies = new List<Army>() { newArmy };
-
-            DeployArmies(tile, newArmies);
+            var targetTile = this.deploymentStrategy.FindNextOpenTile(this, armyInfo, tile);
+            DeployArmies(targetTile, newArmies);
 
             return newArmy;
         }
@@ -178,12 +289,8 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// End the players turn.
+        /// End the player's turn.
         /// </summary>
-        /// <remarks>
-        /// Resets moves, triggers production, and allows for other clans 
-        /// to complete their turns.
-        /// </remarks>
         internal void EndTurn()
         {
             if (Game.Current.GetCurrentPlayer() != this)
@@ -193,8 +300,13 @@ namespace Wism.Client.Core
 
             Turn++;
             ResetArmies();
+            this.armiesProduced.Clear();
+            this.armiesDelivered.Clear();
         }
 
+        /// <summary>
+        /// Start the player's turn
+        /// </summary>
         internal void StartTurn()
         {
             if (Game.Current.GetCurrentPlayer() != this)
@@ -202,25 +314,66 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot start turn; it's not my turn!");
             }
 
+            if (this.IsDead)
+            {
+                return;
+            }
+
             DoTheBooks();
             ProduceArmies();
-            DeliverArmies();            
+            DeliverArmies();
         }
 
         internal void DeliverArmies()
         {
             foreach (var city in myCities)
             {
-                city.Barracks.Deliver();
+                if (city.Barracks.Deliver(out ArmyInTraining newArmy))
+                {
+                    this.armiesDelivered.Add(newArmy);
+                }
             }
+        }
+
+        internal bool AnyArmiesDelivered()
+        {
+            return this.armiesDelivered.Count > 0;
+        }
+
+        internal void ClearDeliveredArmies()
+        {
+            this.armiesDelivered.Clear();
+        }
+
+        internal IEnumerable<ArmyInTraining> GetDeliveredArmies()
+        {
+            return this.armiesDelivered;
         }
 
         internal void ProduceArmies()
         {
             foreach (var city in myCities)
             {
-                city.Barracks.Produce();
+                if (city.Barracks.Produce(out ArmyInTraining newArmy))
+                {
+                    this.armiesProduced.Add(newArmy);
+                }
             }
+        }
+
+        internal bool AnyArmiesProduced()
+        {
+            return this.armiesProduced.Count > 0;
+        }
+
+        internal void ClearProducedArmies()
+        {
+            this.armiesProduced.Clear();
+        }
+
+        internal IEnumerable<ArmyInTraining> GetProducedArmies()
+        {
+            return this.armiesProduced;
         }
 
         /// <summary>
@@ -269,6 +422,11 @@ namespace Wism.Client.Core
 
             // Remove from player armies for tracking
             myArmies.Remove(army);
+            var hero = army as Hero;
+            if (hero != null)
+            {
+                myHeros.Remove(hero);
+            }
         }
 
         private void DeployArmies(Tile tile, List<Army> newArmies)
@@ -278,23 +436,6 @@ namespace Wism.Client.Core
 
             // Add to player armies for tracking            
             this.myArmies.AddRange(newArmies);
-        }
-
-        private bool CanDeploy(ArmyInfo armyInfo, Tile tile)
-        {
-            if (armyInfo == null)
-            {
-                throw new ArgumentNullException(nameof(armyInfo));
-            }
-
-            if (tile == null)
-            {
-                throw new ArgumentNullException(nameof(tile));
-            }
-
-            Terrain terrain = tile.Terrain;
-            return ((terrain.CanTraverse(armyInfo.CanWalk, armyInfo.CanFloat, armyInfo.CanFly)) &&
-                    (!tile.HasArmies() || (tile.Armies.Count < Army.MaxArmies)));
         }
 
         public override string ToString()

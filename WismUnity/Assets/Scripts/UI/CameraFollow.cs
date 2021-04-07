@@ -24,7 +24,8 @@ public class CameraFollow : MonoBehaviour
     private Vector3 origin;
     private Vector3 difference;
     private bool isDragging;
-    private Camera followCamera;    
+    private bool centered;
+    private Camera followCamera; 
 
     // Start is called before the first frame update
     void Start()
@@ -38,8 +39,15 @@ public class CameraFollow : MonoBehaviour
         HandleCameraMove();
     }
 
+    public void ResetCamera()
+    {
+        this.centered = false;
+        this.isDragging = false;
+    }
+
     private void HandleCameraMove()
     {
+        // Right mouse button drags the screen
         if (Input.GetMouseButton(1))
         {
             difference = (followCamera.ScreenToWorldPoint(Input.mousePosition)) - followCamera.transform.position;
@@ -48,7 +56,7 @@ public class CameraFollow : MonoBehaviour
                 isDragging = true;
                 origin = followCamera.ScreenToWorldPoint(Input.mousePosition);
             }
-        }
+        }       
         else
         {
             isDragging = false;
@@ -59,13 +67,20 @@ public class CameraFollow : MonoBehaviour
                 SetCameraTargetLerp(target);
             }
             // Snap to a location
-            // Note: Selected Army results in snap-back
             else if (target != null && 
                     (Game.Current.GameState != GameState.SelectedArmy))
             {
-                // Snap to
+                // Snap to target
                 SetCameraTarget(target.position);
                 target = null;
+            }
+            //  Snap to selected army, but only once to avoid "snap-back"
+            else if (target != null && 
+                    (Game.Current.GameState == GameState.SelectedArmy) && 
+                    !centered)
+            {
+                SetCameraTarget(target.position);
+                centered = true;
             }
         }
 

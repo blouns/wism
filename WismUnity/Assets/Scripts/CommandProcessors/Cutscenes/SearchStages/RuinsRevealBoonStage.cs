@@ -4,7 +4,7 @@ using Wism.Client.Api.Commands;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class RuinsRevealBoonStage : CutsceneStage
+    public class RuinsRevealBoonStage : LocationCutsceneStage
     {
         private List<IBoonIdentfier> boonIdentifiers;
 

@@ -1,7 +1,10 @@
-﻿Goal: 2P playable: Actual cities from Warlords with Neutral player
+﻿Goal: 2P playable: Actual cities from Warlords with human players
 
 TODO:
- * New heros
+    * Initiate production view when claiming a city
+	* Renew production command
+	 - Ack deliveries
+	 - Renew production (one or all)
 
  Future:
   * User clan picker panel

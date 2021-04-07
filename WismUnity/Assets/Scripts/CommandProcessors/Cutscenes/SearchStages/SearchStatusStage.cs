@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class SearchStatusStage : CutsceneStage
+    public class SearchStatusStage : LocationCutsceneStage
     {
         public SearchStatusStage(SearchRuinsCommand command)
             : base(command)

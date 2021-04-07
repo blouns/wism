@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using Wism.Client.Agent.CommandProcessors;
 using Wism.Client.Agent.UI;
 using Wism.Client.Api.CommandProcessors;
@@ -24,6 +23,8 @@ namespace Wism.Client.Agent
         private readonly List<ICommandProvider> commandProviders;
         private readonly List<ICommandProcessor> commandProcessors;
 
+        public CommandController CommandController => commandController;
+
         public AsciiGame(ILoggerFactory logFactory, ControllerProvider controllerProvider)
             : base(logFactory, controllerProvider)
         {
@@ -45,13 +46,23 @@ namespace Wism.Client.Agent
             };
             this.commandProcessors = new List<ICommandProcessor>()
             {
+                // Player processors
+                new StartTurnProcessor(logFactory, this),
+                new RecruitHeroProcessor(logFactory, this),
+                new HireHeroProcessor(logFactory, this),
+                
+                // Battle processors
                 new PrepareForBattleProcessor(logFactory, this),
                 new BattleProcessor(logFactory),
                 new CompleteBattleProcessor(logFactory, this),
+                
+                // Search processors
                 new SearchRuinsProcessor(logFactory, this),                
                 new SearchTempleProcessor(logFactory, this),                
                 new SearchSageProcessor(logFactory, this),
                 new SearchLibraryProcessor(logFactory, this),
+
+                // Default processor
                 new StandardProcessor(logFactory)
             };
         }

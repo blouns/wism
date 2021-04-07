@@ -3,7 +3,7 @@ using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class SearchLocationStage : CutsceneStage
+    public class SearchLocationStage : LocationCutsceneStage
     {
         public SearchLocationStage(SearchLocationCommand command)
             : base(command)

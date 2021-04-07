@@ -97,11 +97,11 @@ namespace Wism.Client.Test.Unit
             // Assemble
             var map = World.Current.Map;
             var player1 = Game.Current.Players[0];
-            var hero1 = player1.HireHero(map[1, 1]);
-            _ = player1.HireHero(map[1, 2]);
-            _ = player1.HireHero(map[1, 3]);
+            var hero1 = player1.HireHero(map[1, 1], 0);
+            _ = player1.HireHero(map[1, 2], 0);
+            _ = player1.HireHero(map[1, 3], 0);
             var player2 = Game.Current.Players[1];
-            _ = player2.HireHero(map[2, 2]);
+            _ = player2.HireHero(map[2, 2], 0);
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
@@ -176,11 +176,11 @@ namespace Wism.Client.Test.Unit
 
             // Heros
             var player1 = Game.Current.Players[0];
-            var hero1 = player1.HireHero(map[1, 1]);
-            _ = player1.HireHero(map[1, 2]);
-            _ = player1.HireHero(map[1, 3]);
+            var hero1 = player1.HireHero(map[1, 1], 0);
+            _ = player1.HireHero(map[1, 2], 0);
+            _ = player1.HireHero(map[1, 3], 0);
             var player2 = Game.Current.Players[1];
-            _ = player2.HireHero(map[2, 2]);
+            _ = player2.HireHero(map[2, 2], 0);
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
@@ -233,11 +233,11 @@ namespace Wism.Client.Test.Unit
 
             // Heros
             var player1 = Game.Current.Players[0];
-            var hero1 = player1.HireHero(map[4, 1]);
-            _ = player1.HireHero(map[1, 2]);
-            _ = player1.HireHero(map[1, 3]);
+            var hero1 = player1.HireHero(map[4, 1], 0);
+            _ = player1.HireHero(map[1, 2], 0);
+            _ = player1.HireHero(map[1, 3], 0);
             var player2 = Game.Current.Players[1];
-            _ = player2.HireHero(map[2, 2]);
+            _ = player2.HireHero(map[2, 2], 0);
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
@@ -286,11 +286,11 @@ namespace Wism.Client.Test.Unit
 
             // Heros
             var player1 = Game.Current.Players[0];
-            var hero1 = player1.HireHero(map[4, 1]);
-            _ = player1.HireHero(map[1, 2]);
-            _ = player1.HireHero(map[1, 3]);
+            var hero1 = player1.HireHero(map[4, 1], 0);
+            _ = player1.HireHero(map[1, 2], 0);
+            _ = player1.HireHero(map[1, 3], 0);
             var player2 = Game.Current.Players[1];
-            _ = player2.HireHero(map[2, 2]);
+            _ = player2.HireHero(map[2, 2], 0);
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
@@ -378,11 +378,11 @@ namespace Wism.Client.Test.Unit
 
             // Heros
             var player1 = Game.Current.Players[0];
-            var hero1 = player1.HireHero(map[4, 1]);
-            _ = player1.HireHero(map[1, 2]);
-            _ = player1.HireHero(map[1, 3]);
+            var hero1 = player1.HireHero(map[4, 1], 0);
+            _ = player1.HireHero(map[1, 2], 0);
+            _ = player1.HireHero(map[1, 3], 0);
             var player2 = Game.Current.Players[1];
-            _ = player2.HireHero(map[2, 2]);
+            _ = player2.HireHero(map[2, 2], 0);
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
@@ -421,11 +421,11 @@ namespace Wism.Client.Test.Unit
 
             // Heros
             var player1 = Game.Current.Players[0];
-            var hero1 = player1.HireHero(map[4, 1]);
-            _ = player1.HireHero(map[1, 2]);
-            _ = player1.HireHero(map[1, 3]);
+            var hero1 = player1.HireHero(map[4, 1], 0);
+            _ = player1.HireHero(map[1, 2], 0);
+            _ = player1.HireHero(map[1, 3], 0);
             var player2 = Game.Current.Players[1];
-            _ = player2.HireHero(map[2, 2]);
+            _ = player2.HireHero(map[2, 2], 0);
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
@@ -464,11 +464,11 @@ namespace Wism.Client.Test.Unit
 
             // Heros
             var player1 = Game.Current.Players[0];
-            var hero1 = player1.HireHero(map[4, 1]);
-            _ = player1.HireHero(map[1, 2]);
-            _ = player1.HireHero(map[1, 3]);
+            var hero1 = player1.HireHero(map[4, 1], 0);
+            _ = player1.HireHero(map[1, 2], 0);
+            _ = player1.HireHero(map[1, 3], 0);
             var player2 = Game.Current.Players[1];
-            _ = player2.HireHero(map[2, 2]);
+            _ = player2.HireHero(map[2, 2], 0);
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
@@ -507,11 +507,11 @@ namespace Wism.Client.Test.Unit
 
             // Heros
             var player1 = Game.Current.Players[0];
-            var hero1 = player1.HireHero(map[4, 1]);
-            _ = player1.HireHero(map[1, 2]);
-            _ = player1.HireHero(map[1, 3]);
+            var hero1 = player1.HireHero(map[4, 1], 0);
+            _ = player1.HireHero(map[1, 2], 0);
+            _ = player1.HireHero(map[1, 3], 0);
             var player2 = Game.Current.Players[1];
-            _ = player2.HireHero(map[2, 2]);
+            _ = player2.HireHero(map[2, 2], 0);
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";

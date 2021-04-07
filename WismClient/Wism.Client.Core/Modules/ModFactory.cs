@@ -1,10 +1,14 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using Wism.Client.Common;
 using Wism.Client.Core;
+using Wism.Client.Core.Heros;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Modules
@@ -15,6 +19,7 @@ namespace Wism.Client.Modules
         private static string modPath = "mod";
         private static string worldsPath = "worlds";
         private static string worldPath = "Illuria";
+        private static string herosPath = "hero.json";
 
         // Module info
         private static IList<ArmyInfo> armyInfos;
@@ -25,14 +30,16 @@ namespace Wism.Client.Modules
         private static IList<LocationInfo> locationInfos;
         private static IList<ArtifactInfo> artifactInfos;
 
+        private static IList<string> heroNames;
+        private static IRecruitHeroStrategy recruitHeroStrategy;
+
         public static string ModPath { get => modPath; set => modPath = value; }
         public static string WorldPath { get => worldPath; set => worldPath = value; }
         public static string WorldsPath { get => worldsPath; set => worldsPath = value; }
+        public static string HeroPath { get => herosPath; set => herosPath = value; }
 
         public static IList<T> LoadModFiles<T>(string path)
         {
-            IList<T> objects = new List<T>();
-
             // Load JSON file containing mod object array
             object obj;
             using (FileStream ms = File.OpenRead(path))
@@ -49,6 +56,51 @@ namespace Wism.Client.Modules
             }
 
             return infos.ToList<T>();
+        }
+
+        /// <summary>
+        /// Load the hero recruiting strategy.
+        /// </summary>
+        /// <returns>Recruiting strategy for heros</returns>
+        public static IRecruitHeroStrategy LoadRecruitHeroStrategy(string path)
+        {
+            if (recruitHeroStrategy == null)
+            {
+                // Load JSON file containing strategy info
+                string assemblyName;
+                string typeName;
+                using (StreamReader reader = File.OpenText(path))
+                {
+                    JObject jObj = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+                    assemblyName = (string)jObj["RecruitingStrategy"]["AssemblyName"];
+                    typeName = (string)jObj["RecruitingStrategy"]["TypeName"];
+                }
+
+                var recruitAssembly = Assembly.Load(assemblyName);
+                recruitHeroStrategy =(IRecruitHeroStrategy)recruitAssembly.CreateInstance(typeName);
+            }
+
+            return recruitHeroStrategy;
+        }
+
+        /// <summary>
+        /// Load the hero names.
+        /// </summary>
+        /// <returns>List of hero names</returns>
+        public static IList<string> LoadHeroNames(string path)
+        {
+            if (heroNames == null)
+            {
+                // Load JSON file containing hero names
+                using (StreamReader reader = File.OpenText(path))
+                {
+                    JObject jObj = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+                    var names = (JArray)jObj["HeroNames"];
+                    heroNames = names.Select(name => (string)name).ToList();
+                }
+            }
+
+            return heroNames;
         }
 
         public static ClanInfo FindClanInfo(string shortName)
@@ -123,6 +175,11 @@ namespace Wism.Client.Modules
             }
 
             return Clans;
+        }
+
+        public static List<ArmyInfo> FindSpecialArmyInfos()
+        {
+            return ((List<ArmyInfo>)armyInfos).FindAll(ai => ai.IsSpecial);
         }
 
         public static ArmyInfo FindArmyInfo(string shortName)

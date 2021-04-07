@@ -299,7 +299,7 @@ namespace Wism.Client.Test.Unit
 
                                 // TODO: Coupling issue: need a player for an army; consider mock
                                 var player = Game.Current.GetCurrentPlayer();
-                                armies = new List<Army>() { player.HireHero(tile) };
+                                armies = new List<Army>() { player.HireHero(tile, 0) };
                             }
                             else
                             {

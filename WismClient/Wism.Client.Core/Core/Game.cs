@@ -52,6 +52,8 @@ namespace Wism.Client.Core
         /// </summary>
         public GameState GameState { get => gameState; }
 
+        public bool IgnoreGameOver { get; set; }
+
         /// <summary>
         /// Returns the current game instance as a Singleton
         /// </summary>
@@ -122,9 +124,9 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Gets the player based on the next turn
+        /// Gets the next alive player
         /// </summary>
-        /// <returns>Player whose turn is next</returns>
+        /// <returns>Player whose turn is next, or null if no players are alive</returns>
         public Player GetNextPlayer()
         {
             if (Players == null || Players.Count == 0)
@@ -132,7 +134,22 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Players have not been initialized.");
             }
 
-            return Players[(CurrentPlayerIndex + 1) % Players.Count];
+            var currentPlayer = GetCurrentPlayer();
+
+            // Find the next alive player
+            var nextPlayer = Players[(CurrentPlayerIndex + 1) % Players.Count];
+            while (nextPlayer.IsDead)
+            {
+                nextPlayer = Players[(CurrentPlayerIndex + 1) % Players.Count];
+                if (nextPlayer == currentPlayer)
+                {
+                    // No players are alive
+                    nextPlayer = null;
+                    break;
+                }
+            }
+
+            return nextPlayer;
         }
 
         /// <summary>
@@ -195,13 +212,24 @@ namespace Wism.Client.Core
         /// </summary>
         public void StartTurn()
         {
-            // TODO: New heros, evaluate if player is alive, etc.
             var player = GetCurrentPlayer();
+
+            if (player.GetCities().Count == 0 &&
+                !IgnoreGameOver)
+            {
+                // You are no longer in the fight!
+                player.IsDead = true;
+                Transition(GameState.Ready);
+                return;
+            }
+
             player.StartTurn();
+
+            // Select the next army if one is available
             if (!SelectNextArmy())
             {
                 Transition(GameState.Ready);
-            }
+            }            
         }
 
         /// <summary>

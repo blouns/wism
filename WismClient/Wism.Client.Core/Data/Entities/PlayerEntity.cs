@@ -25,5 +25,14 @@ namespace Wism.Client.Entities
 
         [DataMember]
         public string[] MyCitiesShortNames { get; set; }
+
+        [DataMember]
+        public int[] MyHeroIds { get; set; }
+
+        [DataMember]
+        public int LastHeroTurn { get; set; }
+
+        [DataMember]
+        public int NewHeroPrice { get; set; }
     }
 }

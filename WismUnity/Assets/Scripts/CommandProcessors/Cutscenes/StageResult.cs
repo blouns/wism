@@ -5,6 +5,8 @@
         Start,
         Continue,
         Wait,
+        Yes,
+        No,
         Success,
         Failure
     }

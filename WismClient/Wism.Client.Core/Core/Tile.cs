@@ -299,7 +299,8 @@ namespace Wism.Client.Core
             }
 
             return (this.HasArmies() && (this.Armies[0].Clan != armies[0].Clan)) ||
-                   (this.HasCity() && (this.City.Clan != armies[0].Clan));            
+                   (this.HasCity() && (this.City.Clan != armies[0].Clan)) &&
+                   armies.TrueForAll(a => a.MovesRemaining > this.Terrain.MovementCost);            
         }
 
         /// <summary>

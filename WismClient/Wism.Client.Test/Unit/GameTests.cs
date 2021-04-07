@@ -1,0 +1,46 @@
+﻿using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Wism.Client.Core;
+
+namespace Wism.Client.Test.Unit
+{
+    [TestFixture]
+    public class GameTests
+    {
+        [Test]
+        public void EndTurn_Multiplayer_NextPlayersTurn()
+        {
+            // Assemble            
+            Game.CreateDefaultGame();
+            Player player1 = Game.Current.Players[0];
+            Player player2 = Game.Current.Players[1];
+
+            // Act
+            Game.Current.EndTurn();
+
+            // Assert
+            Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
+                "Current player is incorrect.");
+        }
+
+        [Test]
+        public void StartTurn_NoCities_Gameover()
+        {
+            // Assemble            
+            Game.CreateDefaultGame();
+            Player player1 = Game.Current.Players[0];
+            Player player2 = Game.Current.Players[1];
+            Game.Current.EndTurn();
+
+            // Act
+            Game.Current.StartTurn();
+
+            // Assert
+            Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
+                "Current player is incorrect.");
+            Assert.IsTrue(player2.IsDead, "Player should be dead.");
+        }
+    }
+}

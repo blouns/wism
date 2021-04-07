@@ -14,6 +14,7 @@ namespace Wism.Client.Agent
     {
         private ILogger logger;
         private readonly ArmyController armyController;
+        private readonly PlayerController playerController;
         private int lastId;
 
         public const int DefaultGameSpeed = 100;
@@ -22,6 +23,8 @@ namespace Wism.Client.Agent
         public int GameSpeed { get; set; }
 
         public int LastId { get => lastId; set => lastId = value; }
+
+        public PlayerController PlayerController => playerController;
 
         public GameBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
         {
@@ -37,6 +40,7 @@ namespace Wism.Client.Agent
 
             logger = loggerFactory.CreateLogger();
             this.armyController = controllerProvider.ArmyController;
+            this.playerController = controllerProvider.PlayerController;
             this.GameSpeed = DefaultGameSpeed;
         }
 
@@ -77,15 +81,18 @@ namespace Wism.Client.Agent
         /// </summary>
         private void CreateTestGame()
         {
-            string worldName = "SearchWorld";
+            string worldName = "AsciiWorld";
 
             Game.CreateDefaultGame(worldName);
             var world = World.Current;
             var map = world.Map;
 
+            // Some walking around money
+            Game.Current.Players[0].Gold = 2000;
+
             // Create a default hero for testing
             var heroTile = map[1, 1];
-            Game.Current.Players[0].HireHero(heroTile);
+            Game.Current.Players[0].HireHero(heroTile, 0);
             Game.Current.Players[0].ConscriptArmy(
                 ModFactory.FindArmyInfo("HeavyInfantry"),
                 heroTile);
@@ -98,9 +105,7 @@ namespace Wism.Client.Agent
 
             // Create an opponent for testing
             var enemyTile1 = map[3, 3];
-            Game.Current.Players[1].ConscriptArmy(
-                ModFactory.FindArmyInfo("LightInfantry"),
-                enemyTile1);
+            Game.Current.Players[1].HireHero(enemyTile1, 0);
             Game.Current.Players[1].ConscriptArmy(
                 ModFactory.FindArmyInfo("LightInfantry"),
                 enemyTile1);

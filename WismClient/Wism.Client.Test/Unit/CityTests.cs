@@ -222,7 +222,7 @@ namespace Wism.Client.Test.Unit
             // Act
             TestContext.WriteLine("Starting production.");
             var result = city.Barracks.StartProduction(armyInfo);
-            while(!city.Barracks.Produce())
+            while(!city.Barracks.Produce(out _))
             {
                 TestContext.WriteLine("Produced one turn.");
             }
@@ -269,13 +269,13 @@ namespace Wism.Client.Test.Unit
             {
                 TestContext.WriteLine("Produced one turn.");
                 turnsToProduce++;
-            } while (!marthos.Barracks.Produce());
+            } while (!marthos.Barracks.Produce(out _));
 
             do
             {
                 TestContext.WriteLine("Delivered one turn.");
                 turnsToDeliver++;
-            } while (!marthos.Barracks.Deliver());
+            } while (!marthos.Barracks.Deliver(out _));
 
             // Assert    
             Assert.IsTrue(result, "Production failed to start.");
@@ -321,7 +321,7 @@ namespace Wism.Client.Test.Unit
                     Assert.Fail("Production failed to start");
                 }
 
-                while (!city.Barracks.Produce())
+                while (!city.Barracks.Produce(out _))
                 {
                     TestContext.WriteLine("Produced one turn");
                 }

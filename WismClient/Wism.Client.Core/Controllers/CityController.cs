@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Wism.Client.Common;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -20,34 +21,81 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Add a neutral city to the map from the modules
+        /// Renew production projects
         /// </summary>
-        /// <param name="x">Top-left X coordinate of tile for the city</param>
-        /// <param name="y">Top-left Y coordinate of tile for the city</param>    
-        /// <remarks>Cities are four tiles starting at top-left (X,Y).</remarks>
-        private static void AddCityFromModules(int x, int y, string cityName)
+        /// <param name="player">Player to renew production</param>
+        /// <param name="productionToRenew">Armies that have been renewed for production</param>
+        /// <returns>Success if all production renewed; otherwise False</returns>
+        public ActionState RenewProduction(Player player, List<ArmyInTraining> productionToRenew)
         {
-            if (string.IsNullOrEmpty(cityName))
+            if (player is null)
             {
-                throw new ArgumentException($"'{nameof(cityName)}' cannot be null or empty", nameof(cityName));
+                throw new ArgumentNullException(nameof(player));
             }
 
-            // Ensure x,y is within the map
-            if (x < World.Current.Map.GetLowerBound(0) || x > World.Current.Map.GetUpperBound(0) ||
-                y < World.Current.Map.GetLowerBound(1) || y > World.Current.Map.GetUpperBound(1))
+            if (productionToRenew is null || productionToRenew.Count == 0)
             {
-                throw new ArgumentOutOfRangeException($"X and Y coordinates ({x},{y}) must be within the map.");
+                throw new ArgumentNullException(nameof(productionToRenew));
             }
 
-            // Find a matching city from the MapBuilder
-            var city = MapBuilder.FindCity(cityName);
-            if (city == null)
+            ActionState state = ActionState.Failed;
+
+            if (player.AnyArmiesProduced())
             {
-                throw new ArgumentException($"City {cityName} not found in MapBuilder.");
+                bool success = true;
+                foreach (var armyToRenew in productionToRenew)
+                {
+                    if (armyToRenew.DestinationCity != null)
+                    {
+                        success &= TryStartingProductionToDestination(
+                            armyToRenew.ProductionCity, 
+                            armyToRenew.ArmyInfo, 
+                            armyToRenew.DestinationCity);
+                    }
+                    else
+                    {
+                        success &= TryStartingProduction(
+                            armyToRenew.ProductionCity, 
+                            armyToRenew.ArmyInfo);
+                    }
+                }
+
+                if (success)
+                {
+                    state = ActionState.Succeeded;
+                }
             }
-            
-            // Add it to the world
-            World.Current.AddCity(city, World.Current.Map[x, y]);            
+
+            return state;
+        }
+
+        /// <summary>
+        /// Renew all completed production projects.
+        /// </summary>
+        /// <param name="player">Player to renew production for</param>
+        /// <param name="armiesProduced">Armies produced or empty</param>
+        /// <param name="armiesDelivered">Armies delivered or empty</param>
+        /// <returns>True if any armies are returned (produced or delivered); otherwise False</returns>
+        public bool TryGetProducedArmies(Player player, out List<ArmyInTraining> armiesProduced, out List<ArmyInTraining> armiesDelivered)
+        {
+            if (player is null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
+            armiesProduced = new List<ArmyInTraining>();
+            if (player.AnyArmiesProduced())
+            {
+                armiesProduced.AddRange(player.GetProducedArmies());
+            }
+
+            armiesDelivered = new List<ArmyInTraining>();
+            if (player.AnyArmiesDelivered())
+            {
+                armiesDelivered.AddRange(player.GetDeliveredArmies());
+            }
+
+            return (armiesDelivered.Count > 0) || (armiesProduced.Count > 0);
         }
 
         /// <summary>
@@ -140,38 +188,7 @@ namespace Wism.Client.Core.Controllers
             }
             
             return city.Barracks.StartProduction(armyInfo, destinationCity);
-        }
-
-        /// <summary>
-        /// Advance production for all cities for one turn for current player.
-        /// </summary>
-        /// <returns>True if an army was produced.</returns>
-        public bool ProcessProductionForTurn()
-        {
-            bool result = false;
-            foreach(City city in Game.Current.GetCurrentPlayer().GetCities())
-            {
-                result |= city.Barracks.Produce();
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Advance deliveries for armies pending for all cities for one turn
-        /// for current player.
-        /// </summary>
-        /// <returns>True if an army was delivered.</returns>
-        public bool DeliverArmiesForTurn()
-        {
-            bool result = false;
-            foreach (City city in Game.Current.GetCurrentPlayer().GetCities())
-            {
-                result |= city.Barracks.Deliver();
-            }
-
-            return result;
-        }
+        }        
 
         public void StopProduction(City city)
         {

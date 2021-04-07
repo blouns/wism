@@ -33,18 +33,22 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            var result = ((CompleteBattleCommand)command).AttackCommand.Result;
+            var attackCommand = ((CompleteBattleCommand)command).AttackCommand;
+            var result = attackCommand.Result;
             switch (result)
             {
                 case ActionState.Succeeded:
                     unityGame.WarPanel.Teardown();
                     unityGame.SetTime(GameManager.StandardTime);
+                    OpenProductionPanelIfClaimingCity(attackCommand);
+                    this.unityGame.InputManager.SetInputMode(InputMode.UI);
                     break;
 
                 case ActionState.Failed:
                     inputManager.InputHandler.DeselectObject();
                     unityGame.WarPanel.Teardown();
                     unityGame.SetTime(GameManager.StandardTime);
+                    this.unityGame.InputManager.SetInputMode(InputMode.Game);
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected ActionState: " + result);
@@ -55,11 +59,23 @@ namespace Assets.Scripts.CommandProcessors
             return command.Execute();
         }
 
+        private void OpenProductionPanelIfClaimingCity(AttackOnceCommand attackCommand)
+        {            
+            var defender = attackCommand.OriginalDefendingArmies[0];
+            var tile = defender.Tile;
+            if (tile.HasCity())
+            {
+                // Transition state to production
+                unityGame.InputManager.InputHandler.DeselectObject();
+                unityGame.SetProductionMode(ProductionMode.SelectCity);
+                unityGame.ShowProductionPanel(tile.City);
+            }
+        }
+
         private void HideWarScene()
         {
             var warGO = UnityUtilities.GameObjectHardFind("War!");
-            warGO.SetActive(false);
-            this.unityGame.InputManager.SetInputMode(InputMode.Game);
+            warGO.SetActive(false);            
         }
     }
 }

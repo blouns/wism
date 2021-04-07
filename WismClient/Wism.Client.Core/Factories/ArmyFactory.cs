@@ -9,7 +9,6 @@ namespace Wism.Client.Core
     {
         public const int DefaultHitPoints = 2;
 
-        // TODO: On Load Game need to restore last ID
         private static int lastId = 0;
 
         public static int LastId { get => lastId; set => lastId = value; }

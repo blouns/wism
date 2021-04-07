@@ -47,7 +47,8 @@ namespace Assets.Scripts.Managers
                 CommandController = new CommandController(LoggerFactory, repo),
                 GameController = new GameController(LoggerFactory),
                 LocationController = new LocationController(LoggerFactory),
-                HeroController = new HeroController(LoggerFactory)
+                HeroController = new HeroController(LoggerFactory),
+                PlayerController = new PlayerController(LoggerFactory)
             };
             commandController = provider.CommandController;            
         }
@@ -67,6 +68,12 @@ namespace Assets.Scripts.Managers
         {
             commandController.AddCommand(
                 new DeselectArmyCommand(provider.ArmyController, Game.Current.GetSelectedArmies()));
+        }
+
+        public void ConscriptArmies(Player player, Tile tile, List<ArmyInfo> armyKinds)
+        {
+            commandController.AddCommand(
+                new ConscriptArmiesCommand(provider.PlayerController, player, tile, armyKinds));
         }
 
         public void PrepareForBattle(int x, int y)
@@ -132,16 +139,43 @@ namespace Assets.Scripts.Managers
             StartTurn(Game.Current.GetNextPlayer());
         }
 
+        /// <summary>
+        /// Start the given player's turn
+        /// </summary>
+        /// <param name="player">Player whose turn it is</param>
+        /// <remarks>
+        /// Starting a turn is comprised of:
+        ///  1. Start turn
+        ///  2. Recruit new heros
+        ///  3. Hire new heros
+        ///  4. Renew production
+        /// </remarks>
         public void StartTurn(Player player)
         {
             commandController.AddCommand(
                 new StartTurnCommand(provider.GameController, player));
+
+            // Check for and hire any new heros
+            var recruitHeroCommand = new RecruitHeroCommand(provider.PlayerController, player);
+            commandController.AddCommand(
+                recruitHeroCommand);
+            commandController.AddCommand(
+                new HireHeroCommand(provider.PlayerController, recruitHeroCommand));
+
+            // Renew production
+            var reviewProductionCommand = new ReviewProductionCommand(provider.CityController, player);
+            commandController.AddCommand(
+                reviewProductionCommand);
+            commandController.AddCommand(
+                new RenewProductionCommand(provider.CityController, player, reviewProductionCommand));
         }
 
         public void EndTurn()
         {
             commandController.AddCommand(
                 new EndTurnCommand(provider.GameController, Game.Current.GetCurrentPlayer()));
+            
+            // Start the next turn
             StartTurn();
         }
 

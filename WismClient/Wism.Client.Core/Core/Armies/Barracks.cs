@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Wism.Client.Core.Armies;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -12,6 +13,7 @@ namespace Wism.Client.Core
 
         private readonly City city;
         private readonly Dictionary<ProductionInfo, int> productionInfoDictionary;
+        private readonly IDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
 
         public ArmyInTraining ArmyInTraining { get; set; }
 
@@ -133,8 +135,10 @@ namespace Wism.Client.Core
         /// Perform beginning-of-turn production
         /// </summary>
         /// <returns>True if a new army has been produced; otherwise false</returns>
-        public bool Produce()
+        public bool Produce(out ArmyInTraining armyProduced)
         {
+            armyProduced = null;
+
             if (!ProducingArmy())
             {
                 return false;
@@ -146,6 +150,8 @@ namespace Wism.Client.Core
             // Is production complete?
             if (this.ArmyInTraining.TurnsToProduce == 0)
             {
+                armyProduced = this.ArmyInTraining;
+
                 // Do we need to deliver this to another city?
                 if (this.ArmyInTraining.DestinationCity != null)
                 {
@@ -157,13 +163,13 @@ namespace Wism.Client.Core
                 }
                 else
                 {
-                    Deploy(this.ArmyInTraining);
+                    Deploy(this.ArmyInTraining);                    
                 }
 
-                ArmyInTraining = null;
+                this.ArmyInTraining = null;
             }
 
-            return !ProducingArmy();
+            return armyProduced != null;
         }
 
         private void Deploy(ArmyInTraining army)
@@ -183,98 +189,12 @@ namespace Wism.Client.Core
                 targetTile = army.DestinationCity.Tile;
             }
             // Select the next open tile if army cannot be placed here (full, navy)
-            targetTile = FindNextOpenTile(army, targetTile);
+            targetTile = deploymentStrategy.FindNextOpenTile(Player, army.ArmyInfo, targetTile);
 
             army.DisplayName = GetArmyDisplayName(army.ArmyInfo);
 
             Player.ConscriptArmy(army, targetTile);
-        }
-
-        private Tile FindNextOpenTile(ArmyInTraining army, Tile targetTile)
-        {
-            HashSet<Tile> tilesSeen = new HashSet<Tile>();
-            Stack<Tile> tileStack = new Stack<Tile>();
-            const int maxAttempts = 10000;
-            int attempts = 0;
-
-            // Try current tile
-            if (CanDeployHere(army, targetTile))
-            {
-                return targetTile;
-            }
-            
-            // Try all city tiles
-            if (targetTile.HasCity() &&
-                targetTile.City.Clan == Player.Clan)
-            {
-                var tiles = targetTile.City.GetTiles();
-                for (int i = 0; i < tiles.Length; i++)
-                {
-                    if (CanDeployHere(army, tiles[i]))
-                    {
-                        return tiles[i];
-                    }
-
-                    // Save tile for future search
-                    tileStack.Push(tiles[i]);
-                    tilesSeen.Add(tiles[i]);
-                }
-            }
-
-            // Place outside city
-            // Search until max attempts reached
-            while (attempts++ < maxAttempts)
-            {
-                // Are there no more options?
-                if (tileStack.Count == 0)
-                {
-                    break;
-                }
-
-                var tile = tileStack.Pop();
-                var tiles = tile.GetNineGrid();
-
-                for (int i = 0; i <= tiles.GetUpperBound(0); i++)
-                {
-                    for (int j = 0; j <= tiles.GetUpperBound(1); j++)
-                    {
-                        if (tilesSeen.Contains(tiles[i, j]) ||
-                            tiles[i, j] == null)
-                        {
-                            // Cannot deploy here
-                            continue;
-                        }
-
-                        if (CanDeployHere(army, tiles[i, j]))
-                        {
-                            // Found a place to deploy
-                            return tiles[i, j];
-                        }
-                        else if (targetTile.CanTraverseHere(Player.Clan, army.ArmyInfo) &&
-                                 IsTileFull(tiles[i, j]))
-                        {
-                            // Add traversable tiles for further area search
-                            tileStack.Push(tiles[i, j]);
-                        }
-
-                        tilesSeen.Add(tiles[i, j]);
-                    }
-                }
-            }
-
-            throw new InvalidOperationException("Army cannot be deployed as there are no suitable locations");
-        }
-
-        private bool CanDeployHere(ArmyInTraining army, Tile targetTile)
-        {
-            return (!IsTileFull(targetTile)) &&
-                    targetTile.CanTraverseHere(Player.Clan, army.ArmyInfo);
-        }
-
-        private static bool IsTileFull(Tile targetTile)
-        {
-            return targetTile.GetAllArmies().Count == Army.MaxArmies;
-        }
+        }        
 
         /// <summary>
         /// Display name is a combo of army type and city of origin.
@@ -311,8 +231,9 @@ namespace Wism.Client.Core
         /// Delivers armies to their destination.
         /// </summary>
         /// <returns>True if an army has been delivered; otherwise, False</returns>
-        public bool Deliver()
+        public bool Deliver(out ArmyInTraining armyDelivered)
         {
+            armyDelivered = null;
             bool delivered = false;
 
             if (!HasDeliveries())
@@ -332,6 +253,7 @@ namespace Wism.Client.Core
             {
                 var armyInTraining = ArmiesToDeliver.Dequeue();
                 Deploy(armyInTraining);
+                armyDelivered = armyInTraining;
                 delivered = true;
             }
 

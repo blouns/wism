@@ -5,7 +5,6 @@ using Wism.Client.Api.Commands;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Scenario
@@ -21,7 +20,7 @@ namespace Wism.Client.Test.Scenario
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
             Tile originalTile = World.Current.Map[2, 2];
-            player1.HireHero(originalTile);
+            player1.HireHero(originalTile, 0);
             var armiesToMove = new List<Army>(originalTile.Armies);
             
             int expectedX = 4;
@@ -76,7 +75,7 @@ namespace Wism.Client.Test.Scenario
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
             Tile originalTile = World.Current.Map[2, 2];
-            player1.HireHero(originalTile);
+            player1.HireHero(originalTile, 0);
             var armiesToMove = new List<Army>(originalTile.Armies);
             var hero = player1.GetArmies()[0];
 
@@ -133,8 +132,8 @@ namespace Wism.Client.Test.Scenario
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
             Tile originalTile = World.Current.Map[2, 2];
-            player1.HireHero(originalTile);
-            player1.HireHero(World.Current.Map[2, 3]);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(World.Current.Map[2, 3], 0);
             var armiesToMove = new List<Army>(originalTile.Armies);
 
             int expectedX = 2;
@@ -194,10 +193,10 @@ namespace Wism.Client.Test.Scenario
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
             Tile originalTile = World.Current.Map[2, 2];
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
             var armiesToMove = new List<Army>(originalTile.Armies);
 
             Player player2 = Game.Current.Players[1];
@@ -263,21 +262,21 @@ namespace Wism.Client.Test.Scenario
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
             Tile originalTile = World.Current.Map[2, 2];
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
-            player1.HireHero(originalTile);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
+            player1.HireHero(originalTile, 0);
             var armiesToMove = new List<Army>(originalTile.Armies);
 
             Player player2 = Game.Current.Players[1];
             var enemyTile = World.Current.Map[2, 3];
-            player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);
+            player2.HireHero(enemyTile, 0);
+            player2.HireHero(enemyTile, 0);
+            player2.HireHero(enemyTile, 0);
 
             int expectedX = 2;
             int expectedY = 2;
@@ -345,9 +344,11 @@ namespace Wism.Client.Test.Scenario
             var locationController = TestUtilities.CreateLocationController();
             var gameController = TestUtilities.CreateGameController();
             Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+            Game.Current.IgnoreGameOver = true;
+
             Player player1 = Game.Current.Players[0];
             Tile originalTile1 = World.Current.Map[1, 1];
-            player1.HireHero(originalTile1);
+            player1.HireHero(originalTile1, 0);
             var armiesToMove1 = new List<Army>(originalTile1.Armies);
             armiesToMove1[0].MovesRemaining = 50;
             int gold1 = player1.Gold;
@@ -355,7 +356,7 @@ namespace Wism.Client.Test.Scenario
 
             Player player2 = Game.Current.Players[1];
             Tile originalTile2 = World.Current.Map[1, 2];
-            player2.HireHero(originalTile2);
+            player2.HireHero(originalTile2, 0);
             var armiesToMove2 = new List<Army>(originalTile2.Armies);
             armiesToMove2[0].MovesRemaining = 50;
             int gold2 = player2.Gold;
@@ -439,9 +440,7 @@ namespace Wism.Client.Test.Scenario
             // Strength should be +3 thanks to 2 temples and one successful throne boon
             Assert.AreEqual(strength1 + 3, armiesToMove1[0].Strength, "Too weak or too strong.");
 
-
             // Assemble 2
-
             commandsToAdd = new List<Command>()
             {
                 // HERO 2 //////////////////////////////////////////////////////////////////////

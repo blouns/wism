@@ -1,18 +1,24 @@
-﻿using Assets.Scripts.Managers;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
-using Wism.Client.Api.Commands;
-using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {
+    /// <summary>
+    /// Orchestrates a simple list of staged scenes
+    /// </summary>
     public class CutsceneStager
     {
-        public CutsceneStager(List<CutsceneStage> stages)
+        internal CutsceneStager(List<CutsceneStage> stages)
         {
-            Stages = stages;
+            Stages = stages ?? throw new ArgumentNullException(nameof(stages));
+
+            if (Stages.Count == 0)
+            {
+                throw new ArgumentException("Must include at least one CutsceneStage", nameof(stages));
+            }
+
+            Final = stages[stages.Count - 1];
         }
 
         public List<CutsceneStage> Stages { get; }
@@ -20,98 +26,8 @@ namespace Assets.Scripts.CommandProcessors
         public CutsceneStage Final { get; set; }
 
         public int SceneIndex { get; set; }
-
-        // TODO: Create cutscenes from JSON
-        public static CutsceneStager CreateDefault(SearchRuinsCommand command, InputManager inputManager)
-        {
-            List<CutsceneStage> stages = new List<CutsceneStage>();
-
-            stages.Add(new SearchStatusStage(command));
-            stages.Add(new RuinsIntroStage(command));
-
-            if (command.Location.Boon is ArtifactBoon)
-            {
-                stages.Add(new RuinsEncounteredMonsterStage(command));
-                stages.Add(new RuinsFightMonsterStage(command));
-            }
-            else if (command.Location.Boon is ThroneBoon)
-            {
-                stages.Add(new RuinsFoundThroneStage(command));
-                stages.Add(new RuinsSitAtThroneStage(command));
-            }
-            
-            stages.Add(new SearchLocationStage(command));
-            stages.Add(new RuinsRevealBoonStage(command));
-
-            var stager = new CutsceneStager(stages)
-            {
-                Final = new RuinsFinalStage(command),
-            };
-
-            // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
-
-            return stager;
-        }
-
-        public static CutsceneStager CreateDefault(SearchLibraryCommand command, InputManager inputManager)
-        {
-            List<CutsceneStage> stages = new List<CutsceneStage>();
-
-            stages.Add(new LibraryEnterStage(command));
-            stages.Add(new LibrarySearchingStage(command));
-            stages.Add(new SearchLocationStage(command));            
-
-            var stager = new CutsceneStager(stages)
-            {
-                Final = new LibraryFinalStage(command),
-            };
-
-            // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
-
-            return stager;
-        }
-
-        public static CutsceneStager CreateDefault(SearchSageCommand command, InputManager inputManager)
-        {
-            List<CutsceneStage> stages = new List<CutsceneStage>();
-
-            stages.Add(new SageEnterStage(command));
-            stages.Add(new SageGemStage(command));            
-            stages.Add(new SearchLocationStage(command));
-            stages.Add(new SageGoldStage(command));
-
-            var stager = new CutsceneStager(stages)
-            {
-                Final = new SageFinalStage(command),
-            };
-
-            // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
-
-            return stager;
-        }
-
-        public static CutsceneStager CreateDefault(SearchTempleCommand command, InputManager inputManager)
-        {
-            List<CutsceneStage> stages = new List<CutsceneStage>();
-
-            stages.Add(new TempleEnterStage(command));            
-            stages.Add(new SearchLocationStage(command));
-
-            var stager = new CutsceneStager(stages)
-            {
-                Final = new TempleFinalStage(command),
-            };
-
-            // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
-
-            return stager;
-        }
-
-        private void OnAnyKeyPressed()
+        
+        internal void OnAnyKeyPressed()
         {
             if (SceneIndex < Stages.Count)
             {
@@ -147,8 +63,6 @@ namespace Assets.Scripts.CommandProcessors
 
             return MapToActionState(result);
         }
-
-
 
         private ActionState MapToActionState(SceneResult result)
         {

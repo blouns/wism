@@ -1,15 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Common;
-using Newtonsoft.Json;
-using System.Configuration;
+using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.Agent
 {
@@ -17,12 +14,6 @@ namespace Wism.Client.Agent
     {
         public static int Main(string[] args)
         {
-            //Serilog.Log.Logger = new LoggerConfiguration()
-            //     .WriteTo.Console(Serilog.Events.LogEventLevel.Debug).MinimumLevel
-            //     .Debug().Enrich
-            //     .FromLogContext()
-            //     .CreateLogger();
-
             try
             {
                 MainAsync(args).Wait();
@@ -34,7 +25,9 @@ namespace Wism.Client.Agent
             }
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public static async Task MainAsync(string[] args)
+#pragma warning restore CS1998
         {
             var host = CreateHostBuilder(args).Build();
 
@@ -47,28 +40,15 @@ namespace Wism.Client.Agent
 
         private static void RunServices(IHost host, IServiceScope scope)
         {
-            try
+            Task[] tasks = new Task[]
             {
-                //Log.Information("Starting services");
-                Task[] tasks = new Task[]
-                {
-                        // Start the host
-                        host.RunAsync(),
+                    // Start the host
+                    host.RunAsync(),
 
-                        // Start the UI
-                        scope.ServiceProvider.GetService<GameBase>().RunAsync()
-                };
-                Task.WaitAny(tasks);
-                //Log.Information("Ending services");
-            }
-            catch (Exception ex)
-            {
-                //Log.Fatal(ex, "Error running service");
-            }
-            finally
-            {
-                //Log.CloseAndFlush();
-            }
+                    // Start the UI
+                    scope.ServiceProvider.GetService<GameBase>().RunAsync()
+            };
+            Task.WaitAny(tasks);
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -104,6 +84,8 @@ namespace Wism.Client.Agent
                             LocationController = new LocationController(
                                 provider.GetService<ILoggerFactory>()),
                             HeroController = new HeroController(
+                                provider.GetService<ILoggerFactory>()),
+                            PlayerController = new PlayerController(
                                 provider.GetService<ILoggerFactory>())
                         });
 
@@ -119,8 +101,5 @@ namespace Wism.Client.Agent
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<ControllerProvider>()));
                 });
-                //.UseSerilog((hostingContext, loggerConfig) =>
-                //    loggerConfig.ReadFrom.Configuration(hostingContext.Configuration)
-                //);
     }
 }

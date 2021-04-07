@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class LibraryEnterStage : CutsceneStage
+    public class LibraryEnterStage : LocationCutsceneStage
     {
         public LibraryEnterStage(SearchLocationCommand command)
             : base(command)

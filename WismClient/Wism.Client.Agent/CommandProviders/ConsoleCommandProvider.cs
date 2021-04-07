@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Json;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -26,6 +25,7 @@ namespace Wism.Client.Agent
         private readonly CityController cityController;
         private readonly LocationController locationController;
         private readonly HeroController heroController;
+        private readonly PlayerController playerController;
         private readonly ILogger logger;
 
         public ConsoleCommandProvider(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
@@ -47,6 +47,7 @@ namespace Wism.Client.Agent
             this.cityController = controllerProvider.CityController;
             this.locationController = controllerProvider.LocationController;
             this.heroController = controllerProvider.HeroController;
+            this.playerController = controllerProvider.PlayerController;
         }
 
         public void GenerateCommands()
@@ -54,7 +55,7 @@ namespace Wism.Client.Agent
             Player currentPlayer = Game.Current.GetCurrentPlayer();
 
             // End game?
-            if (currentPlayer.GetArmies().Count == 0)
+            if (Game.Current.Players.FindAll(p => !p.IsDead).Count < 2)
             {
                 DoGameOver();
                 logger.LogInformation("No commands. We have lost.");
@@ -331,8 +332,33 @@ namespace Wism.Client.Agent
         {
             commandController.AddCommand(
                     new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
+
+            var nextPlayer = Game.Current.GetNextPlayer();
+            if (nextPlayer == null)
+            {
+                Console.WriteLine("No players are alive!");
+                System.Environment.Exit(1);
+                
+            }
+
+            DoStartTurn(nextPlayer);
+        }
+
+        private void DoStartTurn(Player player)
+        {
             commandController.AddCommand(
-                    new StartTurnCommand(gameController, Game.Current.GetNextPlayer()));
+                    new StartTurnCommand(gameController, player));
+
+            // Check for and hire any new heros
+            var recruitHeroCommand = new RecruitHeroCommand(playerController, player);
+            commandController.AddCommand(
+                recruitHeroCommand);
+            commandController.AddCommand(
+                new HireHeroCommand(playerController, recruitHeroCommand));
+
+            // Renew production
+            //commandController.AddCommand(
+            //    new RenewAllProductionCommand(provider.CityController, player));
         }
 
         private void DoMoveArmyOneStep(int xDelta, int yDelta)
@@ -451,11 +477,8 @@ namespace Wism.Client.Agent
 
         private void DoGameOver()
         {
-            if (Game.Current.GameState == GameState.GameOver)
-            {
-                Notify.Alert("The game is over.");
-                System.Environment.Exit(1);
-            }
+            Notify.Alert("The game is over.");
+            System.Environment.Exit(1);
         }
 
         private void DoSelectArmy()

@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Editors;
 using Assets.Scripts.Managers;
 using Assets.Scripts.Tilemaps;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Core;
@@ -64,24 +65,24 @@ namespace Assets.Scripts
         {
             Game.Current.Players = new List<Player>();
 
-            // Ready Player One
-            ClanInfo clanInfo = ClanInfo.GetClanInfo("Sirians");
-            Clan clan = Clan.Create(clanInfo);
-            Player player1 = Player.Create(clan);
-            Game.Current.Players.Add(player1);
-
-            // Ready Player Two
-            clanInfo = ClanInfo.GetClanInfo("StormGiants");
-            clan = Clan.Create(clanInfo);
-            Player player2 = Player.Create(clan);
-            Game.Current.Players.Add(player2);
-
-            clanInfo = ClanInfo.GetClanInfo("Elvallie");
-            clan = Clan.Create(clanInfo);
-            Player player3 = Player.Create(clan);
-            Game.Current.Players.Add(player3);
+            ReadyPlayer("Sirians");
+            ReadyPlayer("StormGiants");
+            ReadyPlayer("Elvallie");
+            ReadyPlayer("OrcsOfKor");
+            ReadyPlayer("Selentines");
+            ReadyPlayer("HorseLords");
+            ReadyPlayer("LordBane");
+            ReadyPlayer("GreyDwarves");
 
             return Game.Current.Players;
+        }
+
+        private static void ReadyPlayer(string clanShortName)
+        {
+            ClanInfo clanInfo = ClanInfo.GetClanInfo(clanShortName);
+            Clan clan = Clan.Create(clanInfo);
+            Player player = Player.Create(clan);
+            Game.Current.Players.Add(player);
         }
 
         /// <summary>
@@ -89,24 +90,25 @@ namespace Assets.Scripts
         /// </summary>        
         private static void CreateDefaultArmies()
         {
-            Player sirians = Game.Current.Players[0];
-            var capitolPosition = UnityUtilities.GameObjectHardFind("Marthos")
-                .GetComponent<CityEntry>()
-                .GetGameCoordinates();
-            sirians.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
-            sirians.HireHero(World.Current.Map[63, 20]);    // Testing search
+            // No default armies!
 
-            Player stormgiants = Game.Current.Players[1];
-            capitolPosition = UnityUtilities.GameObjectHardFind("Stormheim")
-                .GetComponent<CityEntry>()
-                .GetGameCoordinates();
-            stormgiants.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
+            //Player sirians = Game.Current.Players[0];
+            //var capitolPosition = UnityUtilities.GameObjectHardFind("Marthos")
+            //    .GetComponent<CityEntry>()
+            //    .GetGameCoordinates();
+            //sirians.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
+            //sirians.HireHero(World.Current.Map[63, 20]);
 
-            Player elvallie = Game.Current.Players[2];
-            capitolPosition = UnityUtilities.GameObjectHardFind("Elvallie")
-                .GetComponent<CityEntry>()
-                .GetGameCoordinates();
-            elvallie.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
+            //Player stormgiants = Game.Current.Players[1];
+            //capitolPosition = UnityUtilities.GameObjectHardFind("Stormheim")
+            //    .GetComponent<CityEntry>()
+            //    .GetGameCoordinates();
+            //stormgiants.HireHero(World.Current.Map[capitolPosition.x, capitolPosition.y]);
+
+            //Player elvallie = Game.Current.Players[2];
+            //capitolPosition = UnityUtilities.GameObjectHardFind("Elvallie")
+            //    .GetComponent<CityEntry>()
+            //    .GetGameCoordinates();
         }
 
         /// <summary>

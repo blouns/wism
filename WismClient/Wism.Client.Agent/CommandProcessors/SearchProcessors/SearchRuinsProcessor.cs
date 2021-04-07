@@ -67,7 +67,7 @@ namespace Wism.Client.Agent.CommandProcessors
 
             if (location.Boon is ThroneBoon)
             {
-                Notify.Information("An throne stands before you. Will you sit in the throne?");
+                Notify.Information("A throne stands before you. Will you sit in the throne?");
                 var key = Console.ReadKey();
                 if (key.Key != ConsoleKey.Y)
                 {

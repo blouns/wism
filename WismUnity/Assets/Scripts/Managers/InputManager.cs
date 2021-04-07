@@ -260,7 +260,7 @@ namespace Assets.Scripts.Managers
             // Navigation actions
             else if (Input.GetKeyDown(KeyCode.C))
             {
-                UnityManager.GoToCapitol();
+                UnityManager.GoToCapitol(Game.Current.GetCurrentPlayer());
             }
             // TODO: Add center-on-selected (space?) action
 
@@ -359,6 +359,7 @@ namespace Assets.Scripts.Managers
             if (!Game.Current.ArmiesSelected())
             {
                 this.unityManager.NotifyUser("You must have a hero selected for that!");
+                this.SetInputMode(InputMode.Game);
                 return;
             }
 
@@ -367,6 +368,7 @@ namespace Assets.Scripts.Managers
             if (army == null)
             {
                 this.unityManager.NotifyUser("You must have a hero selected for that!");
+                this.SetInputMode(InputMode.Game);
                 return;
             }
 

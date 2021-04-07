@@ -28,5 +28,10 @@ namespace Wism.Client.Api.Commands
         }
 
         protected abstract ActionState ExecuteInternal();
+
+        protected bool PlayerIsAlive()
+        {
+            return (Player == null || Player.IsDead);
+        }
     }
 }

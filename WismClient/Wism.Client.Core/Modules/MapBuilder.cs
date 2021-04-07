@@ -15,7 +15,6 @@ namespace Wism.Client.Modules
 
         public static Dictionary<string, Terrain> TerrainKinds { get => terrainKinds; }
         public static Dictionary<string, Army> ArmyKinds { get => armyKinds; }
-
         public static Dictionary<string, Clan> ClanKinds { get => clanKinds; }  
 
         public static void Initialize()

@@ -33,7 +33,7 @@ namespace Wism.Client.Test.Unit
             // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
-            player1.HireHero(tile);
+            player1.HireHero(tile, 0);
 
             // Act
             tile.Armies.Sort(new ByArmyViewingOrder());
@@ -48,7 +48,7 @@ namespace Wism.Client.Test.Unit
             // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
-            player1.HireHero(tile);
+            player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
 
             // Act
@@ -64,7 +64,7 @@ namespace Wism.Client.Test.Unit
             // Assemble
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
-            player1.HireHero(tile);
+            player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
 
@@ -80,7 +80,7 @@ namespace Wism.Client.Test.Unit
         {
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
-            player1.HireHero(tile);
+            player1.HireHero(tile, 0);
             tile.Armies.Sort(new ByArmyBattleOrder(tile));
             Assert.AreEqual("Hero", tile.Armies[0].ShortName);
         }
@@ -104,7 +104,7 @@ namespace Wism.Client.Test.Unit
         {
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
-            player1.HireHero(tile);
+            player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
 
@@ -121,7 +121,7 @@ namespace Wism.Client.Test.Unit
             // Hero and set of armies
             var player1 = Game.Current.Players[0];
             var tile = World.Current.Map[2, 2];
-            player1.HireHero(tile);
+            player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
@@ -138,8 +138,8 @@ namespace Wism.Client.Test.Unit
         {
 
             var player1 = Game.Current.Players[0];
-            var tile = World.Current.Map[2, 2]; player1.HireHero(tile);
-            player1.HireHero(tile);
+            var tile = World.Current.Map[2, 2]; player1.HireHero(tile, 0);
+            player1.HireHero(tile, 0);
 
             tile.Armies.Sort(new ByArmyBattleOrder(tile));
             Assert.AreEqual("Hero", tile.Armies[0].ShortName);
@@ -149,13 +149,13 @@ namespace Wism.Client.Test.Unit
         public void StackBattleOrder_TwoHeroesAndSomeArmiesTest()
         {
             var player1 = Game.Current.Players[0];
-            var tile = World.Current.Map[2, 2]; player1.HireHero(tile);
+            var tile = World.Current.Map[2, 2]; player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
-            player1.HireHero(tile);
+            player1.HireHero(tile, 0);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
 
             tile.Armies.Sort(new ByArmyBattleOrder(tile));
@@ -668,13 +668,13 @@ namespace Wism.Client.Test.Unit
 
             var enemyTile = World.Current.Map[2, 3];
             player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);
-            player2.HireHero(enemyTile);            
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), enemyTile);
+            player2.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), enemyTile);
             var enemyArmies = new List<Army>(enemyTile.Armies);
 
             int expectedX = originalArmies[0].X;

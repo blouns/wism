@@ -20,6 +20,7 @@ TagManager:
   - InformationPanel
   - Location
   - YesNoBox
+  - SolicitInputPanel
   layers:
   - Default
   - TransparentFX

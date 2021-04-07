@@ -37,6 +37,8 @@ namespace Wism.Client.Factories
                     if (armyEntity.IsHero)
                     {
                         var hero = (Hero)army;
+                        player.AddHero(hero);
+
                         // Load items
                         if (armyEntity.Artifacts != null)
                         {
@@ -65,6 +67,7 @@ namespace Wism.Client.Factories
             player.Gold = playerEntity.Gold;
             player.IsDead = playerEntity.IsDead;
             player.Turn = playerEntity.Turn;
+            player.LastHeroTurn = playerEntity.LastHeroTurn;
 
             return player;
         }        
