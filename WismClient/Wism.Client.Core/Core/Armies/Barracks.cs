@@ -135,8 +135,10 @@ namespace Wism.Client.Core
         /// Perform beginning-of-turn production
         /// </summary>
         /// <returns>True if a new army has been produced; otherwise false</returns>
-        public bool Produce()
+        public bool Produce(out ArmyInTraining armyProduced)
         {
+            armyProduced = null;
+
             if (!ProducingArmy())
             {
                 return false;
@@ -148,6 +150,8 @@ namespace Wism.Client.Core
             // Is production complete?
             if (this.ArmyInTraining.TurnsToProduce == 0)
             {
+                armyProduced = this.ArmyInTraining;
+
                 // Do we need to deliver this to another city?
                 if (this.ArmyInTraining.DestinationCity != null)
                 {
@@ -159,13 +163,13 @@ namespace Wism.Client.Core
                 }
                 else
                 {
-                    Deploy(this.ArmyInTraining);
+                    Deploy(this.ArmyInTraining);                    
                 }
 
-                ArmyInTraining = null;
+                this.ArmyInTraining = null;
             }
 
-            return !ProducingArmy();
+            return armyProduced != null;
         }
 
         private void Deploy(ArmyInTraining army)
@@ -227,8 +231,9 @@ namespace Wism.Client.Core
         /// Delivers armies to their destination.
         /// </summary>
         /// <returns>True if an army has been delivered; otherwise, False</returns>
-        public bool Deliver()
+        public bool Deliver(out ArmyInTraining armyDelivered)
         {
+            armyDelivered = null;
             bool delivered = false;
 
             if (!HasDeliveries())
@@ -248,6 +253,7 @@ namespace Wism.Client.Core
             {
                 var armyInTraining = ArmiesToDeliver.Dequeue();
                 Deploy(armyInTraining);
+                armyDelivered = armyInTraining;
                 delivered = true;
             }
 

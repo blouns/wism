@@ -24,7 +24,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public bool CanExecute(ICommandAction command)
         {
-            return command is RenewAllProductionCommand;
+            return command is ReviewProductionCommand;
         }
 
         public ActionState Execute(ICommandAction command)

@@ -161,10 +161,13 @@ namespace Assets.Scripts.Managers
                 recruitHeroCommand);
             commandController.AddCommand(
                 new HireHeroCommand(provider.PlayerController, recruitHeroCommand));
-            
-            //// Renew production
-            //commandController.AddCommand(
-            //    new RenewAllProductionCommand(provider.CityController, player));
+
+            // Renew production
+            var reviewProductionCommand = new ReviewProductionCommand(provider.CityController, player);
+            commandController.AddCommand(
+                reviewProductionCommand);
+            commandController.AddCommand(
+                new RenewProductionCommand(provider.CityController, player, reviewProductionCommand));
         }
 
         public void EndTurn()

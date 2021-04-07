@@ -35,7 +35,6 @@ namespace Assets.Scripts.CommandProcessors
         {
             var startTurn = (StartTurnCommand)command;
 
-            //this.unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
             CenterOnCapitol(startTurn.Player);
 
             var messageBox = UnityUtilities.GameObjectHardFind("NotificationBox")

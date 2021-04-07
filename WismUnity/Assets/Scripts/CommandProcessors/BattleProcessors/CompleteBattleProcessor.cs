@@ -33,12 +33,14 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            var result = ((CompleteBattleCommand)command).AttackCommand.Result;
+            var attackCommand = ((CompleteBattleCommand)command).AttackCommand;
+            var result = attackCommand.Result;
             switch (result)
             {
                 case ActionState.Succeeded:
                     unityGame.WarPanel.Teardown();
                     unityGame.SetTime(GameManager.StandardTime);
+                    OpenProductionPanelIfClaimingCity(attackCommand);
                     break;
 
                 case ActionState.Failed:
@@ -53,6 +55,16 @@ namespace Assets.Scripts.CommandProcessors
             HideWarScene();
 
             return command.Execute();
+        }
+
+        private void OpenProductionPanelIfClaimingCity(AttackOnceCommand attackCommand)
+        {
+            var army = attackCommand.Armies[0];
+            var tile = army.Tile;
+            if (tile.HasCity())
+            {
+                unityGame.ShowProductionPanel(tile.City);
+            }
         }
 
         private void HideWarScene()

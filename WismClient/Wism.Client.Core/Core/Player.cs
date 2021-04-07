@@ -16,7 +16,10 @@ namespace Wism.Client.Core
         private List<Army> myArmies = new List<Army>();
         private List<Hero> myHeros = new List<Hero>();
         private List<City> myCities = new List<City>();
+
         private int lastHeroTurn;
+        private List<ArmyInTraining> armiesProduced = new List<ArmyInTraining>();
+        private List<ArmyInTraining> armiesDelivered = new List<ArmyInTraining>();
 
         private readonly IRecruitHeroStrategy recruitHeroStrategy;
         private readonly IDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
@@ -32,10 +35,6 @@ namespace Wism.Client.Core
         public City Capitol { get; set; }
 
         public int LastHeroTurn { get => lastHeroTurn; internal set => lastHeroTurn = value; }
-
-        public bool AnyArmiesProduced { get; private set; }
-        
-        public bool AnyArmiesDelivered { get; private set; }
 
         public IRecruitHeroStrategy RecruitHeroStrategy => recruitHeroStrategy;
 
@@ -290,12 +289,8 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// End the players turn.
+        /// End the player's turn.
         /// </summary>
-        /// <remarks>
-        /// Resets moves, triggers production, and allows for other clans 
-        /// to complete their turns.
-        /// </remarks>
         internal void EndTurn()
         {
             if (Game.Current.GetCurrentPlayer() != this)
@@ -305,8 +300,13 @@ namespace Wism.Client.Core
 
             Turn++;
             ResetArmies();
+            this.armiesProduced.Clear();
+            this.armiesDelivered.Clear();
         }
 
+        /// <summary>
+        /// Start the player's turn
+        /// </summary>
         internal void StartTurn()
         {
             if (Game.Current.GetCurrentPlayer() != this)
@@ -326,26 +326,54 @@ namespace Wism.Client.Core
 
         internal void DeliverArmies()
         {
-            bool anyArmiesDelivered = false;
-
             foreach (var city in myCities)
             {
-                anyArmiesDelivered |= city.Barracks.Deliver();
+                if (city.Barracks.Deliver(out ArmyInTraining newArmy))
+                {
+                    this.armiesDelivered.Add(newArmy);
+                }
             }
+        }
 
-            
+        internal bool AnyArmiesDelivered()
+        {
+            return this.armiesDelivered.Count > 0;
+        }
+
+        internal void ClearDeliveredArmies()
+        {
+            this.armiesDelivered.Clear();
+        }
+
+        internal IEnumerable<ArmyInTraining> GetDeliveredArmies()
+        {
+            return this.armiesDelivered;
         }
 
         internal void ProduceArmies()
         {
-            bool anyNewArmy = false;
-
             foreach (var city in myCities)
             {
-                anyNewArmy |= city.Barracks.Produce();
+                if (city.Barracks.Produce(out ArmyInTraining newArmy))
+                {
+                    this.armiesProduced.Add(newArmy);
+                }
             }
+        }
 
-            this.AnyArmiesProduced = anyNewArmy;
+        internal bool AnyArmiesProduced()
+        {
+            return this.armiesProduced.Count > 0;
+        }
+
+        internal void ClearProducedArmies()
+        {
+            this.armiesProduced.Clear();
+        }
+
+        internal IEnumerable<ArmyInTraining> GetProducedArmies()
+        {
+            return this.armiesProduced;
         }
 
         /// <summary>

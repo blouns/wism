@@ -117,7 +117,7 @@ namespace Assets.Scripts.Managers
                 new StartTurnProcessor(GameManager.LoggerFactory, this),
                 new RecruitHeroProcessor(GameManager.LoggerFactory, this),
                 new HireHeroProcessor(GameManager.LoggerFactory, this),
-                //new RenewProductionProcessor(GameManager.LoggerFactory, this),
+                new RenewProductionProcessor(GameManager.LoggerFactory, this),
                 new EndTurnProcessor(GameManager.LoggerFactory, this),
 
                 // Search processors
