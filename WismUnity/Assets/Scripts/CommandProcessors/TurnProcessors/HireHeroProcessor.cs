@@ -40,7 +40,8 @@ namespace Assets.Scripts.CommandProcessors
 
             var hireCommand = (HireHeroCommand)command;
 
-            if (hireCommand.RecruitHeroCommand.Result != ActionState.Succeeded)
+            if (hireCommand.RecruitHeroCommand.Result != ActionState.Succeeded ||
+                !hireCommand.RecruitHeroCommand.HeroAccepted.HasValue)
             {
                 // No hero was available
                 return ActionState.Failed;

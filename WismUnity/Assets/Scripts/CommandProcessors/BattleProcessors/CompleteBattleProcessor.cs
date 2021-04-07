@@ -41,12 +41,14 @@ namespace Assets.Scripts.CommandProcessors
                     unityGame.WarPanel.Teardown();
                     unityGame.SetTime(GameManager.StandardTime);
                     OpenProductionPanelIfClaimingCity(attackCommand);
+                    this.unityGame.InputManager.SetInputMode(InputMode.UI);
                     break;
 
                 case ActionState.Failed:
                     inputManager.InputHandler.DeselectObject();
                     unityGame.WarPanel.Teardown();
                     unityGame.SetTime(GameManager.StandardTime);
+                    this.unityGame.InputManager.SetInputMode(InputMode.Game);
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected ActionState: " + result);
@@ -58,11 +60,14 @@ namespace Assets.Scripts.CommandProcessors
         }
 
         private void OpenProductionPanelIfClaimingCity(AttackOnceCommand attackCommand)
-        {
-            var army = attackCommand.Armies[0];
-            var tile = army.Tile;
+        {            
+            var defender = attackCommand.OriginalDefendingArmies[0];
+            var tile = defender.Tile;
             if (tile.HasCity())
             {
+                // Transition state to production
+                unityGame.InputManager.InputHandler.DeselectObject();
+                unityGame.SetProductionMode(ProductionMode.SelectCity);
                 unityGame.ShowProductionPanel(tile.City);
             }
         }
@@ -70,8 +75,7 @@ namespace Assets.Scripts.CommandProcessors
         private void HideWarScene()
         {
             var warGO = UnityUtilities.GameObjectHardFind("War!");
-            warGO.SetActive(false);
-            this.unityGame.InputManager.SetInputMode(InputMode.Game);
+            warGO.SetActive(false);            
         }
     }
 }
