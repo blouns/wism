@@ -54,6 +54,10 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        // Center tuning
+        const float xOffset = 6f;
+        const float yOffset = 7f;
+
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             var unityManager = GetUnityManager();
@@ -65,8 +69,8 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
             float miniNormalX = 1 - (1 - viewportVector.x) / minimapNormal.x;
             float miniNormalY = 1 - (1 - viewportVector.y) / minimapNormal.y;
 
-            float x = miniNormalX * (World.Current.Map.GetUpperBound(0) + 1);
-            float y = miniNormalY * (World.Current.Map.GetUpperBound(1) + 1);
+            float x = miniNormalX * (World.Current.Map.GetUpperBound(0) + 1) + xOffset;
+            float y = miniNormalY * (World.Current.Map.GetUpperBound(1) + 1) + yOffset;
 
             this.mainCameraFollow.SetCameraTarget(new Vector3(x, y, 0f));
         }

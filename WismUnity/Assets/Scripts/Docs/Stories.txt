@@ -1,7 +1,7 @@
 ﻿Goal: 2P playable: Actual cities from Warlords with human players
 
 TODO:
-    * Center when selecting next army
+    * Initiate production view when claiming a city
 	* Renew production command
 	 - Ack deliveries
 	 - Renew production (one or all)

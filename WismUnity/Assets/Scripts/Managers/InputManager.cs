@@ -359,6 +359,7 @@ namespace Assets.Scripts.Managers
             if (!Game.Current.ArmiesSelected())
             {
                 this.unityManager.NotifyUser("You must have a hero selected for that!");
+                this.SetInputMode(InputMode.Game);
                 return;
             }
 
@@ -367,6 +368,7 @@ namespace Assets.Scripts.Managers
             if (army == null)
             {
                 this.unityManager.NotifyUser("You must have a hero selected for that!");
+                this.SetInputMode(InputMode.Game);
                 return;
             }
 

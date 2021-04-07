@@ -10,6 +10,7 @@ using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using ILogger = Wism.Client.Common.ILogger;
+using Tile = Wism.Client.Core.Tile;
 
 namespace Assets.Scripts.Managers
 {
@@ -40,7 +41,8 @@ namespace Assets.Scripts.Managers
         private ArmyPicker armyPicker;
         [SerializeField]
         private GameObject itemPickerPrefab;
-        private ItemPicker itemPicker;
+        private ItemPicker itemPicker;        
+
         [SerializeField]
         private GameObject saveLoadPickerPrefab;
         private SaveLoadPicker saveLoadPicker;
@@ -168,13 +170,13 @@ namespace Assets.Scripts.Managers
             NotifyUser("Game loaded successfully!");
         }
 
-        internal void GoToCapitol(Player player)
+        public void GoToCapitol(Player player)
         {
             var inputHandler = this.GetComponent<InputManager>().InputHandler;
             inputHandler.CenterOnTile(player.Capitol.Tile);
         }
 
-        internal void GoToLocation()
+        public void GoToLocation()
         {
             this.inputManager.SetInputMode(InputMode.LocationPicker);
         }
@@ -255,6 +257,7 @@ namespace Assets.Scripts.Managers
 
         internal void SetCameraToSelectedBox()
         {
+            this.cameraFollow.ResetCamera();
             SetCameraTarget(this.selectedArmyBox.transform);
         }
 
