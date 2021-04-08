@@ -62,7 +62,6 @@ namespace Assets.Scripts.CommandProcessors
 
         protected static bool? AskAcceptReject(string message, params object[] args)
         {
-            // TODO: Refactor to use same panel for Yes/No
             return AskYesNo("AcceptRejectPanel", message, args);
         }
 

@@ -10,6 +10,8 @@ public class YesNoBox : MonoBehaviour
 
     public bool? Answer { get => answer; set => answer = value; }
 
+    public bool Cancelled { get; private set; }
+
     public void Start()
     {
         var yesNoGO = gameObject;
@@ -20,7 +22,7 @@ public class YesNoBox : MonoBehaviour
 
     public void Update()
     {
-        if (Answer.HasValue)
+        if (Answer.HasValue || Cancelled)
         {
             Hide();
         }
@@ -60,6 +62,7 @@ public class YesNoBox : MonoBehaviour
     public void Clear()
     {
         this.Answer = null;
+        this.Cancelled = false;
     }
 
     public void Yes()
@@ -70,5 +73,10 @@ public class YesNoBox : MonoBehaviour
     public void No()
     {
         this.Answer = false;
+    }
+
+    public void Cancel()
+    {
+        this.Cancelled = true;
     }
 }
