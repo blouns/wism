@@ -33,37 +33,34 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(player));
             }
 
-            if (productionToRenew is null || productionToRenew.Count == 0)
+            if (productionToRenew is null)
             {
                 throw new ArgumentNullException(nameof(productionToRenew));
             }
 
             ActionState state = ActionState.Failed;
+            bool success = true;
 
-            if (player.AnyArmiesProduced())
+            foreach (var armyToRenew in productionToRenew)
             {
-                bool success = true;
-                foreach (var armyToRenew in productionToRenew)
+                if (armyToRenew.DestinationCity != null)
                 {
-                    if (armyToRenew.DestinationCity != null)
-                    {
-                        success &= TryStartingProductionToDestination(
-                            armyToRenew.ProductionCity, 
-                            armyToRenew.ArmyInfo, 
-                            armyToRenew.DestinationCity);
-                    }
-                    else
-                    {
-                        success &= TryStartingProduction(
-                            armyToRenew.ProductionCity, 
-                            armyToRenew.ArmyInfo);
-                    }
+                    success &= TryStartingProductionToDestination(
+                        armyToRenew.ProductionCity,
+                        armyToRenew.ArmyInfo,
+                        armyToRenew.DestinationCity);
                 }
+                else
+                {
+                    success &= TryStartingProduction(
+                        armyToRenew.ProductionCity,
+                        armyToRenew.ArmyInfo);
+                }
+            }
 
-                if (success)
-                {
-                    state = ActionState.Succeeded;
-                }
+            if (success)
+            {
+                state = ActionState.Succeeded;
             }
 
             return state;

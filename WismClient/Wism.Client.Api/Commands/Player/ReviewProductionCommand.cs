@@ -10,7 +10,6 @@ namespace Wism.Client.Api.Commands
 
         public List<ArmyInTraining> ArmiesProducedResult { get; private set; }
         public List<ArmyInTraining> ArmiesDeliveredResult { get; private set; }
-        public List<ArmyInTraining> ArmiesToRenewResult { get; private set; }
 
         public ReviewProductionCommand(CityController cityController, Player player)
             : base(player)
@@ -28,10 +27,6 @@ namespace Wism.Client.Api.Commands
             {
                 ArmiesProducedResult = armiesProduced;
                 ArmiesDeliveredResult = armiesDelivered;
-
-                // Default to renew-all; can be overridden by AI/UI
-                ArmiesToRenewResult = new List<ArmyInTraining>(armiesProduced);
-
                 state = ActionState.Succeeded;
             }
 
