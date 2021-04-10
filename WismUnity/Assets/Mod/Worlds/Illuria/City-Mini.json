@@ -1,0 +1,227 @@
+[
+  {
+    "ShortName": "Marthos",
+    "DisplayName": "Marthos",
+    "Defense": 6,
+    "Income": 32,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": -2,
+        "Strength": 0,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 0,
+        "Strength": 1,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 1,
+        "Strength": 0,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "Stormheim",
+    "DisplayName": "Stormheim",
+    "Defense": 6,
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      }
+    ]
+  },
+  {
+    "ShortName": "Khamar",
+    "DisplayName": "Khamar",
+    "Defense": 6,
+    "Income": 32,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 1,
+        "Strength": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Griffins",
+        "Moves": 2,
+        "Strength": 0,
+        "TurnsToProduce": 5,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "Kor",
+    "DisplayName": "Kor",
+    "Defense": 6,
+    "Income": 30,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": -2,
+        "Strength": 0,
+        "TurnsToProduce": 5,
+        "Upkeep": 6
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ]
+  },
+  {
+    "ShortName": "Elvallie",
+    "DisplayName": "Elvallie",
+    "Defense": 6,
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 6,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "Enmouth",
+    "DisplayName": "Enmouth",
+    "Defense": 6,
+    "Income": 35,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 0,
+        "Strength": -2,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 4,
+        "Strength": 1,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 2,
+        "Strength": 1,
+        "TurnsToProduce": 8,
+        "Upkeep": 20
+      }
+    ]
+  },
+  {
+    "ShortName": "Dunethel",
+    "DisplayName": "Dunethel",
+    "Defense": 6,
+    "Income": 27,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 0,
+        "Strength": -2,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 3,
+        "Strength": 1,
+        "TurnsToProduce": 3,
+        "Upkeep": 6
+      }
+    ]
+  },
+  {
+    "ShortName": "BanesCitadel",
+    "DisplayName": "Bane's Citadel",
+    "Defense": 6,
+    "Income": 30,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": -2,
+        "Strength": 0,
+        "TurnsToProduce": 4,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 0,
+        "Strength": 0,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ]
+  }
+]

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
 
 namespace Assets.Scripts.Editors
 {
@@ -77,3 +74,5 @@ namespace Assets.Scripts.Editors
         }
     }
 }
+
+#endif

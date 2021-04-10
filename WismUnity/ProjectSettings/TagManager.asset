@@ -21,6 +21,7 @@ TagManager:
   - Location
   - YesNoBox
   - SolicitInputPanel
+  - Debug
   layers:
   - Default
   - TransparentFX

@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Armies;
 using Assets.Scripts.Editors;
 using Assets.Scripts.Tilemaps;
-using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

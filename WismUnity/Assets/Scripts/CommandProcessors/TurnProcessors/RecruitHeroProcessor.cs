@@ -89,7 +89,7 @@ namespace Assets.Scripts.CommandProcessors
 
             if (this.yesNoBox == null)
             {
-                this.yesNoBox = GameObject.FindGameObjectWithTag("AcceptRejectPanel")
+                this.yesNoBox = UnityUtilities.GameObjectHardFind("AcceptRejectPanel")
                     .GetComponent<YesNoBox>();
             }
 

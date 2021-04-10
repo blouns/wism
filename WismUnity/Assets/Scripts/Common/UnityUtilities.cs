@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class UnityUtilities
 {
@@ -10,7 +8,8 @@ public static class UnityUtilities
         foreach (GameObject root in GameObject.FindObjectsOfType(typeof(GameObject)))
         {
             if (root.transform.parent == null)
-            { // means it's a root GO
+            { 
+                // Root GameObject
                 result = GameObjectHardFind(root, str, 0);
                 if (result != null) break;
             }

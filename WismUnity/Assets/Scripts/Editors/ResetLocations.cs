@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+#if UNITY_EDITOR
+
 [CustomEditor(typeof(LocationContainer))]
 public class ResetLocations : Editor
 {
@@ -33,3 +35,5 @@ public class ResetLocations : Editor
         }
     }
 }
+
+#endif

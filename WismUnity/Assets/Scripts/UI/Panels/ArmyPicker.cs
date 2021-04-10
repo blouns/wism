@@ -17,7 +17,7 @@ namespace Assets.Scripts.UI
         private ArmyManager armyManager;
         private List<Army> armies;
 
-        private bool[] selected = new bool[GameManager.MaxArmysPerArmy];
+        private bool[] selected = new bool[GameManager.MaxArmies];
         [SerializeField]
         private Sprite SelectedSprite;
         [SerializeField]
@@ -107,7 +107,7 @@ namespace Assets.Scripts.UI
                 throw new ArgumentNullException(nameof(armies));
             }
 
-            for (int i = 0; i < GameManager.MaxArmysPerArmy; i++)
+            for (int i = 0; i < GameManager.MaxArmies; i++)
             {
                 // Hide rows with no armies
                 if (i >= armies.Count)
