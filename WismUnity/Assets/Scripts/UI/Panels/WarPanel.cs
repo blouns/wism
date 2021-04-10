@@ -91,8 +91,8 @@ namespace Assets.Scripts.UI
 
         private Vector3 GetArmyPanelPosition(List<Army> armies, Vector3 position, int index, GameObject armyGo)
         {
-            const float xArmySize = 80f;
-            const float xOffset = -2f;
+            const float xArmySize = 60f;
+            const float xOffset = 0.0f;
 
             index = armies.Count - index; // Reverse the order to draw left-to-right
             float xTotal = xArmySize * armies.Count;
