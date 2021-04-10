@@ -30,6 +30,7 @@ namespace Assets.Scripts.Tiles
 
         public HasTile hasTile = HasTile;
 
+#if UNITY_EDITOR
         private static Dictionary<Vector3, GameObject> cityObjects = new Dictionary<Vector3, GameObject>();
         private bool isInitialized;
 
@@ -38,6 +39,7 @@ namespace Assets.Scripts.Tiles
             BuildCityGameObjectCache();
             isInitialized = true;
         }
+#endif
 
         public static bool HasTile(ITilemap tilemap, Vector3Int position)
         {
@@ -57,11 +59,13 @@ namespace Assets.Scripts.Tiles
                 case TopLeftAdjacencyIndex:
                     tileData.sprite = citySprites[TopLeftQuadrantIndex];
 
+#if UNITY_EDITOR
                     // TODO: Pull this out; cohesion issue 
                     // Create a new city GameObject for each Top-left city
                     var worldVector = tilemap.GetComponent<Tilemap>().CellToWorld(position);
                     CreateCityGameObject(new Vector3(worldVector.x + 1, worldVector.y, 0f));
-                    
+#endif
+
                     break;
                 case TopRightAdjacencyIndex:
                     tileData.sprite = citySprites[TopRightQuadrantIndex];
@@ -78,6 +82,7 @@ namespace Assets.Scripts.Tiles
             }            
         }
 
+#if UNITY_EDITOR
         public static void ClearCityCache()
         {
             cityObjects.Clear(); 
@@ -130,8 +135,7 @@ namespace Assets.Scripts.Tiles
             }
             Debug.Log($"City game object cache ready: {cityObjects.Count} cities");
         }
-
-#if UNITY_EDITOR        
+   
         // Add tile type into Unity Editor
         [MenuItem("Assets/Create/Tiles/CityTile")]
         public static void CreateCityTile()

@@ -4,13 +4,11 @@ using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using ILogger = Wism.Client.Common.ILogger;
-using Tile = Wism.Client.Core.Tile;
 
 namespace Assets.Scripts.Managers
 {
@@ -107,7 +105,7 @@ namespace Assets.Scripts.Managers
 
             this.DebugManager = GetComponent<DebugManager>();
             this.DebugManager.Initialize(this.GameManager.LoggerFactory);
-            this.DebugManager.ToggleDebug();
+            //this.DebugManager.ToggleDebug();
             DebugManager.LogInformation("Initialized GameManager: " + GameManager.DefaultModPath);
 
             // Create command processors

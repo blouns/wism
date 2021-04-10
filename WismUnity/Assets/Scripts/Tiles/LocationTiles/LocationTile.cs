@@ -15,6 +15,7 @@ namespace Assets.Scripts.Tiles
 
         public HasTile hasTile = HasTile;
 
+#if UNITY_EDITOR
         private static Dictionary<Vector3, GameObject> locationObjects = new Dictionary<Vector3, GameObject>();
         private bool isInitialized;
 
@@ -23,6 +24,7 @@ namespace Assets.Scripts.Tiles
             BuildLocationGameObjectCache();
             isInitialized = true;
         }
+#endif
 
         public static bool HasTile(ITilemap tilemap, Vector3Int position)
         {
@@ -37,14 +39,17 @@ namespace Assets.Scripts.Tiles
         {
             GetTileDataInternal(position, tilemap, ref tileData);
 
+#if UNITY_EDITOR
             // TODO: Pull this out; cohesion issue 
             // Create a new location GameObject for each location
             var worldVector = tilemap.GetComponent<Tilemap>().CellToWorld(position);
             CreateLocationGameObject(new Vector3(worldVector.x + 0.5f, worldVector.y + 0.5f, 0f));
+#endif
         }
 
         protected abstract void GetTileDataInternal(Vector3Int position, ITilemap tilemap, ref TileData tileData);
 
+#if UNITY_EDITOR
         public static void ClearLocationCache()
         {
             locationObjects.Clear();
@@ -99,5 +104,6 @@ namespace Assets.Scripts.Tiles
             }
             Debug.Log($"Location game object cache ready: {locationObjects.Count} locations");
         }
+#endif
     }
 }

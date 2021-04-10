@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Editors;
-using Assets.Scripts.Tilemaps;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -21,12 +20,12 @@ namespace Assets.Scripts.Tiles
             tileData.sprite = tombSprite;
         }
 
+#if UNITY_EDITOR
         protected override GameObject GetPrefab(LocationContainer container)
         {
             return container.TombPrefab;
         }
 
-#if UNITY_EDITOR        
         // Add tile type into Unity Editor
         [MenuItem("Assets/Create/Tiles/TombTile")]
         public static void CreateTombTile()

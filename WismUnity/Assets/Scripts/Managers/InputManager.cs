@@ -211,7 +211,7 @@ namespace Assets.Scripts.Managers
             else if (Input.GetKeyDown(KeyCode.D))
             {
                 GameManager.DefendSelectedArmies();
-            }            
+            }
             else if (Input.GetKeyDown(KeyCode.Z))
             {
                 GameManager.SearchLocationWithSelectedArmies();
@@ -252,6 +252,10 @@ namespace Assets.Scripts.Managers
             else if (Input.GetKeyDown(KeyCode.L))
             {
                 UnityManager.HandleSaveLoadPicker(false);
+            }
+            else if (Input.GetKeyDown(KeyCode.Q))
+            {
+                Application.Quit();
             }
             // TODO: Add resign action
             // TODO: Add change control action (human, AI)

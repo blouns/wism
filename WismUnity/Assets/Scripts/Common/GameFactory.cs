@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Editors;
 using Assets.Scripts.Managers;
 using Assets.Scripts.Tilemaps;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Core;
@@ -74,7 +75,11 @@ namespace Assets.Scripts
 
         public void CreateDefaultGame()
         {
+#if UNITY_EDITOR
             CreateGame(GameManager.DefaultWorld);
+#else
+            CreateGame(GameManager.DefaultWorld, (int)DateTime.Now.Ticks);
+#endif
         }
 
         private static List<Player> ReadyPlayers()

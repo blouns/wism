@@ -33,6 +33,9 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
+            unityGame.SetTime(GameManager.StandardTime);
+            this.unityGame.InputManager.SetInputMode(InputMode.Game);
+
             var attackCommand = ((CompleteBattleCommand)command).AttackCommand;
             var result = attackCommand.Result;
             switch (result)
@@ -40,15 +43,14 @@ namespace Assets.Scripts.CommandProcessors
                 case ActionState.Succeeded:
                     unityGame.WarPanel.Teardown();
                     unityGame.SetTime(GameManager.StandardTime);
+                    this.unityGame.InputManager.SetInputMode(InputMode.Game);
                     OpenProductionPanelIfClaimingCity(attackCommand);
-                    this.unityGame.InputManager.SetInputMode(InputMode.UI);
                     break;
 
                 case ActionState.Failed:
                     inputManager.InputHandler.DeselectObject();
                     unityGame.WarPanel.Teardown();
-                    unityGame.SetTime(GameManager.StandardTime);
-                    this.unityGame.InputManager.SetInputMode(InputMode.Game);
+                    
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected ActionState: " + result);
@@ -69,6 +71,7 @@ namespace Assets.Scripts.CommandProcessors
                 unityGame.InputManager.InputHandler.DeselectObject();
                 unityGame.SetProductionMode(ProductionMode.SelectCity);
                 unityGame.ShowProductionPanel(tile.City);
+                this.unityGame.InputManager.SetInputMode(InputMode.UI);
             }
         }
 

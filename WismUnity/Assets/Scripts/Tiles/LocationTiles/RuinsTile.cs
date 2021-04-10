@@ -21,12 +21,12 @@ namespace Assets.Scripts.Tiles
             tileData.sprite = ruinsSprite;
         }
 
+#if UNITY_EDITOR
         protected override GameObject GetPrefab(LocationContainer container)
         {
             return container.RuinsPrefab;
         }
 
-#if UNITY_EDITOR        
         // Add tile type into Unity Editor
         [MenuItem("Assets/Create/Tiles/RuinsTile")]
         public static void CreateRuinsTile()
