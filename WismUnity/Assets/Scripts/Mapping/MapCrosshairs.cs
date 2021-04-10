@@ -57,7 +57,7 @@ public class MapCrosshairs : MonoBehaviour
     {
         if (this.mainCamera == null)
         {
-            this.mainCamera = GameObject.FindGameObjectWithTag("MainCamera")
+            this.mainCamera = UnityUtilities.GameObjectHardFind("MainCamera")
                 .GetComponent<Camera>();
         }
 

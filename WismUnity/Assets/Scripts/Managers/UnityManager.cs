@@ -28,6 +28,7 @@ namespace Assets.Scripts.Managers
         [SerializeField]
         private WorldTilemap worldTilemap;
         private InputManager inputManager;
+        private DebugManager debugManager;
         private GameManager gameManager;
         private ArmyManager armyManager;
 
@@ -69,6 +70,7 @@ namespace Assets.Scripts.Managers
         public ItemPicker ItemPicker { get => itemPicker; set => itemPicker = value; }
         public SaveLoadPicker SaveLoadPicker { get => saveLoadPicker; set => saveLoadPicker = value; }
         public int LastCommandId { get => lastCommandId; set => lastCommandId = value; }
+        public DebugManager DebugManager { get => debugManager; set => debugManager = value; }
 
         public void Start()
         {
@@ -83,8 +85,9 @@ namespace Assets.Scripts.Managers
                 !this.isInitialized)
             {
                 if (this.showDebugError)
-                {
+                {                    
                     Debug.LogError("Game not initialized");
+                    DebugManager.LogInformation("Failed to initialize");
                     this.showDebugError = false;
                 }
 
@@ -98,9 +101,14 @@ namespace Assets.Scripts.Managers
         {            
             // Initialize WISM API
             this.GameManager = GetComponent<GameManager>();
-            this.GameManager.Initialize();
-            this.logger = this.GameManager.LoggerFactory.CreateLogger();
+            this.GameManager.Initialize();            
+            this.logger = this.GameManager.LoggerFactory.CreateLogger();            
             this.provider = this.GameManager.ControllerProvider;
+
+            this.DebugManager = GetComponent<DebugManager>();
+            this.DebugManager.Initialize(this.GameManager.LoggerFactory);
+            this.DebugManager.ToggleDebug();
+            DebugManager.LogInformation("Initialized GameManager: " + GameManager.DefaultModPath);
 
             // Create command processors
             this.commandProcessors = new List<ICommandProcessor>()
@@ -132,6 +140,7 @@ namespace Assets.Scripts.Managers
                 // Default processor
                 new StandardProcessor(GameManager.LoggerFactory)
             };
+            DebugManager.LogInformation("Initialized Command Processors");
 
             // Set up game UI            
             SetTime(GameManager.StandardTime);
@@ -144,16 +153,20 @@ namespace Assets.Scripts.Managers
             armyPicker = this.armyPickerPrefab.GetComponent<ArmyPicker>();
             ItemPicker = this.itemPickerPrefab.GetComponent<ItemPicker>();
             SaveLoadPicker = this.saveLoadPickerPrefab.GetComponent<SaveLoadPicker>();
-            productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
+            productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");            
+            DebugManager.LogInformation("Initialized UI");            
 
             // Set up default game (for testing purposes only)
             GetComponent<GameFactory>().CreateDefaultGame();
+            DebugManager.LogInformation("Initialized Default WISM Game");
 
             var startingTile = Game.Current.GetCurrentPlayer().Capitol.Tile;
             Vector3 worldVector = WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
             this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
 
             GameManager.StartTurn(Game.Current.GetCurrentPlayer());
+
+            DebugManager.LogInformation("Initialization complete");
 
             this.isInitialized = true;
         }
@@ -197,7 +210,8 @@ namespace Assets.Scripts.Managers
             catch (Exception ex)
             {
                 Debug.LogException(ex);
-                throw;
+                DebugManager.LogInformation(ex.Message);
+                //throw;
             }
         }
 
@@ -222,8 +236,7 @@ namespace Assets.Scripts.Managers
 
             // Retrieve next command
             var command = provider.CommandController.GetCommand(nextCommand);
-            logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
-            Debug.Log($"{command}");
+            DebugManager.LogInformation($"{command}");
 
             // Execute next command
             foreach (var processor in this.commandProcessors)
@@ -233,9 +246,7 @@ namespace Assets.Scripts.Managers
                     result = processor.Execute(command);
                     break;
                 }
-            }
-
-            Debug.Log($"Post-command GameState: {Game.Current.GameState}");
+            }          
 
             // Process the result
             if (result == ActionState.Succeeded)
@@ -252,6 +263,18 @@ namespace Assets.Scripts.Managers
             {
                 logger.LogInformation("Task started and in progress");
                 // Do nothing; do not advance Command ID
+            }
+        }
+
+        internal void LogInformation(string message, params object[] args)
+        {
+            if (this.DebugManager != null)
+            {
+                this.DebugManager.LogInformation(message, args);
+            }
+            else
+            {
+                Debug.Log(String.Format(message, args));
             }
         }
 

@@ -8,4 +8,10 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/Scenes/SplashScreen.unity
+    guid: 0253647eb8208604684174c52b8f3b3d
+  - enabled: 1
+    path: Assets/Scenes/Mini-Illuria.unity
+    guid: c4da893a9cdd87049bd417e7c178b013
   m_configObjects: {}

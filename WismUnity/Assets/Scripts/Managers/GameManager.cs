@@ -22,10 +22,10 @@ namespace Assets.Scripts.Managers
         public const int DefaultRandom = 1990;
         public const float StandardTime = 0.25f;
         public const float WarTime = 1.0f;
-        public const int MaxArmysPerArmy = Army.MaxArmies;
-        public static readonly string DefaultModPath = @"Assets\Scripts\Core\netstandard2.0\mod";
+        public const int MaxArmies = Army.MaxArmies;
         public static readonly string DefaultWorld = @"Illuria";
-        public static readonly string DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
+        public static string DefaultModPath = @"Assets\Mod";        
+        public static string DefaultWorldModPath;
 
         // Controllers for the WISM Client API
         private ControllerProvider provider;
@@ -38,7 +38,6 @@ namespace Assets.Scripts.Managers
         {
             // WISM API Command Controller setup
             LoggerFactory = new WismLoggerFactory();
-
             var repo = new WismClientInMemoryRepository(new SortedList<int, Command>());
             provider = new ControllerProvider()
             {
@@ -50,7 +49,11 @@ namespace Assets.Scripts.Managers
                 HeroController = new HeroController(LoggerFactory),
                 PlayerController = new PlayerController(LoggerFactory)
             };
-            commandController = provider.CommandController;            
+            commandController = provider.CommandController;
+
+            // Modules path
+            DefaultModPath = @$"{Application.dataPath}\{ModFactory.ModPath}";            
+            DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
         }
 
         public void SelectArmies(List<Army> armies)

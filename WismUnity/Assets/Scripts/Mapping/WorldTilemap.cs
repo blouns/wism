@@ -23,7 +23,11 @@ namespace Assets.Scripts.Tilemaps
 
         public World CreateWorldFromScene(string worldPath)
         {
+            var debugManager = UnityUtilities.GameObjectHardFind("UnityManager")
+                    .GetComponent<DebugManager>();
+
             MapBuilder.Initialize(GameManager.DefaultModPath, worldPath);
+            debugManager.LogInformation("Initialized MapBuilder");
 
             TileBase[] tilemapTiles = GetUnityTiles(out int boundsX, out int boundsY);
             Tile[,] gameMap = new Tile[boundsX, boundsY];
@@ -60,8 +64,12 @@ namespace Assets.Scripts.Tilemaps
                 }
             }
 
+            debugManager.LogInformation("Loaded map from Unity Tiles");
             MapBuilder.AffixMapObjects(gameMap);
+
+            debugManager.LogInformation("Affixed map objects");
             World.CreateWorld(gameMap);
+            debugManager.LogInformation("Created world from game map");
             World.Current.Name = GameManager.DefaultWorld;
 
             return World.Current;

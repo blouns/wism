@@ -269,6 +269,10 @@ namespace Assets.Scripts.Managers
             {
                 UnityManager.GoToLocation();
             }
+            else if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                UnityManager.DebugManager.ToggleDebug();
+            }
         }
 
         private void HandleRightClick()

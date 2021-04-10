@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Editors;
 using Assets.Scripts.Managers;
 using Assets.Scripts.Tilemaps;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Core;
@@ -14,6 +13,7 @@ namespace Assets.Scripts
     public class GameFactory : MonoBehaviour
     {
         private WorldTilemap worldTilemap;
+        private DebugManager debugManager;
         private bool isInitialized;
 
         public string WorldName { get; set; }
@@ -24,6 +24,8 @@ namespace Assets.Scripts
             {
                 this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
                     .GetComponent<WorldTilemap>();
+                this.debugManager = UnityUtilities.GameObjectHardFind("UnityManager")
+                    .GetComponent<DebugManager>();
 
                 this.isInitialized = true;
             }            
@@ -38,22 +40,36 @@ namespace Assets.Scripts
 
             this.WorldName = worldName;
 
+            this.debugManager = this.debugManager = UnityUtilities.GameObjectHardFind("UnityManager")
+                    .GetComponent<DebugManager>();
+            this.debugManager.LogInformation("World: " + worldName);
+            this.debugManager.LogInformation("Mod Path: " + GameManager.DefaultModPath);
+
             // Set up the Game
             MapBuilder.Initialize(GameManager.DefaultModPath, worldName);
+            this.debugManager.LogInformation("Initialized MapBuilder");
             Game.CreateEmpty();
             Game.Current.Random = new System.Random(randomSeed);
             Game.Current.WarStrategy = new DefaultWarStrategy();
+            this.debugManager.LogInformation("Initialized Game");
 
             ReadyPlayers();
+            this.debugManager.LogInformation("Initialized Players");
             if (!isInitialized)
             {
                 Start();
             }
+
+            this.debugManager.LogInformation("Creating World: " + GameManager.DefaultWorld);
             World.CreateWorld(
                 worldTilemap.CreateWorldFromScene(GameManager.DefaultWorld).Map);
+            debugManager.LogInformation("Created world from scene");
             CreateDefaultCitiesFromScene();
+            debugManager.LogInformation("Created cities from scene");
             CreateDefaultLocationsFromScene();
+            debugManager.LogInformation("Created locations from scene");
             CreateDefaultArmies();
+            this.debugManager.LogInformation("Initialized Game");
         }
 
         public void CreateDefaultGame()
@@ -120,7 +136,9 @@ namespace Assets.Scripts
 
             // Extract the X,Y coords from City GameObjects from the scene 
             var cityContainerGO = UnityUtilities.GameObjectHardFind("Cities");
+            this.debugManager.LogInformation("cityContainerGO == {0}", cityContainerGO);
             int cityCount = cityContainerGO.transform.childCount;
+            this.debugManager.LogInformation("cityCount == {0}", cityCount);
             for (int i = 0; i < cityCount; i++)
             {
                 var cityGO = cityContainerGO.transform.GetChild(i).gameObject;
@@ -134,11 +152,14 @@ namespace Assets.Scripts
                 citiesNames.Add(cityEntry.cityShortName, cityGO);
                 cityGO.name = cityEntry.cityShortName;
             }
+            this.debugManager.LogInformation("Initialized cities GameObjects");
 
             // Set the coordinates for the cities
             var cityInfos = new List<CityInfo>(
                 ModFactory.LoadCityInfos(GameManager.DefaultWorldModPath));
-            var illuriaCities = new List<CityInfo>();
+
+            this.debugManager.LogInformation("Loaded city infos");
+            var cities = new List<CityInfo>();
             foreach (CityInfo ci in cityInfos)
             {
                 if (citiesNames.ContainsKey(ci.ShortName))
@@ -147,10 +168,12 @@ namespace Assets.Scripts
                     var coords = worldTilemap.ConvertUnityToGameVector(go.transform.position);
                     ci.X = coords.x;
                     ci.Y = coords.y + 1;    // +1 Adjustment for city object overlay alignment (anchor)
-                    illuriaCities.Add(ci);
+                    cities.Add(ci);
                 }
             }
-            MapBuilder.AddCitiesFromInfos(World.Current, illuriaCities);
+            this.debugManager.LogInformation("Updated city infos with locations on map");
+            MapBuilder.AddCitiesFromInfos(World.Current, cities);
+            this.debugManager.LogInformation("Added cities from infos");
         }
 
         /// <summary>

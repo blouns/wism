@@ -1,9 +1,6 @@
-using Assets.Scripts.Tiles;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
+
+#if UNITY_EDITOR
 
 [CustomEditor(typeof(CityContainer))]
 public class ResetCities : Editor
@@ -32,3 +29,5 @@ public class ResetCities : Editor
         }
     }
 }
+
+#endif
