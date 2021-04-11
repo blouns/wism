@@ -20,7 +20,8 @@ namespace Wism.Client.Core
         private int currentPlayerIndex;
         private GameState gameState;
         private List<Army> selectedArmies;
-        private Queue<Tile> nextArmyQueue = new Queue<Tile>();
+        private List<Tile> nextArmyQueue = new List<Tile>();
+        private HashSet<Tile> quitArmySet = new HashSet<Tile>();
 
         /// <summary>
         /// Active game players
@@ -174,6 +175,7 @@ namespace Wism.Client.Core
             // End current players turn
             DeselectArmies();
             nextArmyQueue.Clear();
+            quitArmySet.Clear();
             var player = GetCurrentPlayer();
             player.EndTurn();
             if (SelectNextPlayer())
@@ -256,7 +258,8 @@ namespace Wism.Client.Core
             }
 
             Game.Current.DeselectArmies();
-            var tileWithArmies = nextArmyQueue.Dequeue();            
+            var tileWithArmies = nextArmyQueue[0];
+            nextArmyQueue.RemoveAt(0);
             SelectArmies(tileWithArmies.Armies);            
 
             return true;
@@ -333,7 +336,7 @@ namespace Wism.Client.Core
                 tile.Armies = null;
             }
 
-            SelectArmiesInternal(tile.VisitingArmies);
+            SelectArmiesInternal(tile.VisitingArmies);            
             Transition(GameState.SelectedArmy);
         }
 
@@ -341,6 +344,7 @@ namespace Wism.Client.Core
         {
             this.selectedArmies = new List<Army>(armies);
             this.selectedArmies.ForEach(a => a.IsDefending = false);
+            this.quitArmySet.Remove(armies[0].Tile);
         }
 
         /// <summary>
@@ -408,6 +412,23 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
+        /// "Quit" selecting these armies for one turn
+        /// </summary>
+        public void QuitSelectedArmies()
+        {
+            if (!ArmiesSelected())
+            {
+                return;
+            }
+
+            Tile tileWithArmiesToQuit = this.selectedArmies[0].Tile;
+            this.quitArmySet.Add(tileWithArmiesToQuit);
+            this.nextArmyQueue.Remove(tileWithArmiesToQuit);
+
+            DeselectArmies();
+        }
+
+        /// <summary>
         /// Create test-only default players for the game
         /// </summary>
         public static void CreateDefaultPlayers()
@@ -462,20 +483,31 @@ namespace Wism.Client.Core
 
         #region Helper methods
 
-        private Queue<Tile> GetTilesWithArmiesWithMoves(Player player)
+        /// <summary>
+        /// Getes a list of tiles that have armies that can be moved
+        /// </summary>
+        /// <param name="player">Current player</param>
+        /// <returns>List of tiles</returns>
+        /// <remarks>
+        /// Armies that have been marked to "defend" or "quit" will 
+        /// be skipped.
+        /// </remarks>
+        private List<Tile> GetTilesWithArmiesWithMoves(Player player)
         {
             var tiles = new HashSet<Tile>();
             var armies = player.GetArmies();
 
             foreach (var army in armies)
             {
-                if (!army.IsDefending && army.MovesRemaining > 0)
+                if (!army.IsDefending && 
+                    (army.MovesRemaining > 0) &&
+                    !this.quitArmySet.Contains(army.Tile))
                 {
                     tiles.Add(army.Tile);
                 }
             }
 
-            return new Queue<Tile>(tiles);
+            return new List<Tile>(tiles);
         }
         private static List<Army> RemoveDeadArmies(List<Army> armies)
         {

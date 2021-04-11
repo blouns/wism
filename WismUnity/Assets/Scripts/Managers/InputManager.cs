@@ -212,11 +212,14 @@ namespace Assets.Scripts.Managers
             {
                 GameManager.DefendSelectedArmies();
             }
+            else if (Input.GetKeyDown(KeyCode.Q))
+            {
+                GameManager.QuitSelectedArmies();
+            }
             else if (Input.GetKeyDown(KeyCode.Z))
             {
                 GameManager.SearchLocationWithSelectedArmies();
-            }
-            // TODO: Add Quit action for armies
+            }            
             // TODO: Add Disband action for armies
             // TODO: Add Find armies action
 
@@ -253,7 +256,11 @@ namespace Assets.Scripts.Managers
             {
                 UnityManager.HandleSaveLoadPicker(false);
             }
-            else if (Input.GetKeyDown(KeyCode.Q))
+            else if (Input.GetKeyDown(KeyCode.Slash))
+            {
+                UnityManager.ToggleHelp();
+            }
+            else if (Input.GetKeyDown(KeyCode.X))
             {
                 Application.Quit();
             }

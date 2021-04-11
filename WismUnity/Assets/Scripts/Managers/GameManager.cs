@@ -119,6 +119,12 @@ namespace Assets.Scripts.Managers
                 new DefendCommand(provider.ArmyController, Game.Current.GetSelectedArmies()));
         }
 
+        public void QuitSelectedArmies()
+        {
+            commandController.AddCommand(
+                new QuitArmyCommand(provider.ArmyController, Game.Current.GetSelectedArmies()));
+        }
+
         public void SelectNextArmy()
         {
             commandController.AddCommand(

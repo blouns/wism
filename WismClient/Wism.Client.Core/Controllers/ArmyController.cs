@@ -51,6 +51,12 @@ namespace Wism.Client.Core.Controllers
             return ActionState.Succeeded;
         }
 
+        public void QuitArmy(List<Army> armies)
+        {
+            logger.LogInformation("Quitting armies to be skipped for one turn.");
+            Game.Current.QuitSelectedArmies();
+        }
+
         public void DefendArmy(List<Army> armies)
         {
             logger.LogInformation("Setting armies to defensive sentry.");

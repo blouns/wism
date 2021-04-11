@@ -107,7 +107,7 @@ namespace Assets.Scripts.Tiles
         {
             bool shouldImport = false;
 
-            var editorObjs = GameObject.FindGameObjectsWithTag("EditorOnly");
+            var editorObjs = GameObject.FindGameObjectsWithTag("Container");
             for (int i = 0; i < editorObjs.Length; i++)
             {
                 if (editorObjs[i].name == "Cities")
@@ -122,8 +122,12 @@ namespace Assets.Scripts.Tiles
 
         private static void BuildCityGameObjectCache()
         {
-            Debug.Log("Building city game object cache");
             var cityContainer = UnityUtilities.GameObjectHardFind("Cities");
+            if (cityContainer == null)
+            {
+                return;
+            }
+
             int count = cityContainer.transform.childCount;
             for (int i = 0; i < count; i++)
             {

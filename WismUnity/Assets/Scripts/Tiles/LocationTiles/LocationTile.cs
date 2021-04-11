@@ -76,7 +76,7 @@ namespace Assets.Scripts.Tiles
         {
             bool shouldImport = false;
 
-            var editorObjs = GameObject.FindGameObjectsWithTag("EditorOnly");
+            var editorObjs = GameObject.FindGameObjectsWithTag("Container");
             for (int i = 0; i < editorObjs.Length; i++)
             {
                 if (editorObjs[i].name == "Locations")
@@ -90,9 +90,13 @@ namespace Assets.Scripts.Tiles
         }
 
         private static void BuildLocationGameObjectCache()
-        {
-            Debug.Log("Building location game object cache");
+        {            
             var locationContainer = UnityUtilities.GameObjectHardFind("Locations");
+            if (locationContainer == null)
+            {
+                return;
+            }
+
             int count = locationContainer.transform.childCount;
             for (int i = 0; i < count; i++)
             {

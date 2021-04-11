@@ -209,7 +209,7 @@ namespace Assets.Scripts.Managers
             {
                 Debug.LogException(ex);
                 DebugManager.LogInformation(ex.Message);
-                //throw;
+                throw;
             }
         }
 
@@ -381,6 +381,12 @@ namespace Assets.Scripts.Managers
         {
             GameObject map = UnityUtilities.GameObjectHardFind("MinimapPanel");
             map.SetActive(!map.activeSelf);
+        }
+
+        internal void ToggleHelp()
+        {
+            GameObject help = UnityUtilities.GameObjectHardFind("HelpText");
+            help.SetActive(!help.activeSelf);
         }
 
         private void SetupCameras()
