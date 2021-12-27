@@ -2,7 +2,7 @@
 
 [Overview]
 
-War! Welcome to War in a Senseless Mind (WISM). WISM is an original SSI Warlords 1990 clone, but is designed for modification and reuse/fork into similar projects as a game engine. Additionally, WISM was designed to have all core game logic outside of proprietary platforms like Unity or other game engines. This will allow for easier extension in the future and longevity as platforms evolve. A good example of this is the ASCII WISM app which provides a Console-based UI to the same game engine. 
+War! Welcome to War in a Senseless Mind (WISM). WISM is an original Warlords 1990 clone, but is designed for modification and reuse/fork into similar projects as a game engine. Additionally, WISM was designed to have all core game logic outside of proprietary platforms like Unity or other game engines. This will allow for easier extension in the future and longevity as platforms evolve. A good example of this is the ASCII WISM app which provides a Console-based UI to the same game engine. 
 
 Why another Warlords clone? Can't we just play the original on DosBox or Warlords Classic Strategy on iOS? Sure you can and you should! However, the original has limited playability on DosBox and old resolutions, it does not allow mods, new maps, armies, or features. The latter is a closed system and only works on iOS. We deserve better and we can do better with inspiration from SSI and all the subsequent great turn-based strategy games. Want to contribute?
 
