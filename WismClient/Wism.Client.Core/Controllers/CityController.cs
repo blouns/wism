@@ -115,6 +115,26 @@ namespace Wism.Client.Core.Controllers
             player.ClaimCity(city);
         }
 
+        /// <summary>
+        /// Gets the cost to build the cities defenses.
+        /// </summary>
+        /// <param name="city">City to build</param>
+        /// <returns>Cost in gp</returns>
+        public int GetBuildCost(City city)
+        {
+            if (city is null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            return city.GetCostToBuild();
+        }
+
+        /// <summary>
+        /// Try to build the cities defenses by one
+        /// </summary>
+        /// <param name="city">City to build</param>
+        /// <returns>True if improved; otherwise False</returns>
         public bool TryBuildDefense(City city)
         {
             if (city is null)
@@ -187,6 +207,10 @@ namespace Wism.Client.Core.Controllers
             return city.Barracks.StartProduction(armyInfo, destinationCity);
         }        
 
+        /// <summary>
+        /// Cancel production.
+        /// </summary>
+        /// <param name="city">City to stop production</param>
         public void StopProduction(City city)
         {
             if (city is null)

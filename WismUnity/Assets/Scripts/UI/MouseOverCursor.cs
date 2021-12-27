@@ -140,6 +140,7 @@ namespace Assets.Scripts.UI
                     mode == InputMode.LocationPicker ||
                     mode == InputMode.LoadGamePicker ||
                     mode == InputMode.SaveGamePicker ||
+                    mode == InputMode.WaitForKey ||
                     mode == InputMode.UI);
         }
 

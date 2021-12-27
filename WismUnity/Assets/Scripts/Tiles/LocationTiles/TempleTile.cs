@@ -20,12 +20,12 @@ namespace Assets.Scripts.Tiles
             tileData.sprite = templeSprite;
         }
 
+#if UNITY_EDITOR
         protected override GameObject GetPrefab(LocationContainer container)
         {
             return container.TemplePrefab;
         }
 
-#if UNITY_EDITOR        
         // Add tile type into Unity Editor
         [MenuItem("Assets/Create/Tiles/TempleTile")]
         public static void CreateTempleTile()

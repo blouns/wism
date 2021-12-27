@@ -4,13 +4,11 @@ using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using ILogger = Wism.Client.Common.ILogger;
-using Tile = Wism.Client.Core.Tile;
 
 namespace Assets.Scripts.Managers
 {
@@ -107,7 +105,7 @@ namespace Assets.Scripts.Managers
 
             this.DebugManager = GetComponent<DebugManager>();
             this.DebugManager.Initialize(this.GameManager.LoggerFactory);
-            this.DebugManager.ToggleDebug();
+            //this.DebugManager.ToggleDebug();
             DebugManager.LogInformation("Initialized GameManager: " + GameManager.DefaultModPath);
 
             // Create command processors
@@ -133,6 +131,10 @@ namespace Assets.Scripts.Managers
                 new SearchRuinsProcessor(GameManager.LoggerFactory, this),
                 new SearchLibraryProcessor(GameManager.LoggerFactory, this),               
                 new SearchSageProcessor(GameManager.LoggerFactory, this),
+
+                // City processors
+                new BuildCityDefensesProcessor(GameManager.LoggerFactory, this),
+                new RazeCityDefensesProcessor(GameManager.LoggerFactory, this),
 
                 // Game processors
                 new LoadGameProcessor(GameManager.LoggerFactory, this),
@@ -211,7 +213,7 @@ namespace Assets.Scripts.Managers
             {
                 Debug.LogException(ex);
                 DebugManager.LogInformation(ex.Message);
-                //throw;
+                throw;
             }
         }
 
@@ -383,6 +385,12 @@ namespace Assets.Scripts.Managers
         {
             GameObject map = UnityUtilities.GameObjectHardFind("MinimapPanel");
             map.SetActive(!map.activeSelf);
+        }
+
+        internal void ToggleHelp()
+        {
+            GameObject help = UnityUtilities.GameObjectHardFind("HelpText");
+            help.SetActive(!help.activeSelf);
         }
 
         private void SetupCameras()

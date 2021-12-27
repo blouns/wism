@@ -211,12 +211,15 @@ namespace Assets.Scripts.Managers
             else if (Input.GetKeyDown(KeyCode.D))
             {
                 GameManager.DefendSelectedArmies();
-            }            
+            }
+            else if (Input.GetKeyDown(KeyCode.Q))
+            {
+                GameManager.QuitSelectedArmies();
+            }
             else if (Input.GetKeyDown(KeyCode.Z))
             {
-                GameManager.SearchLocationWithSelectedArmies();
-            }
-            // TODO: Add Quit action for armies
+                GameManager.SearchLocation();
+            }            
             // TODO: Add Disband action for armies
             // TODO: Add Find armies action
 
@@ -237,8 +240,14 @@ namespace Assets.Scripts.Managers
             {
                 UnityManager.SetProductionMode(ProductionMode.SelectCity);
             }
-            // TODO: Add build (b) actions
-            // TODO: Add raze (r) action
+            else if (Input.GetKeyDown(KeyCode.R))
+            {
+                GameManager.RazeCity();
+            }
+            else if (Input.GetKeyDown(KeyCode.B))
+            {
+                GameManager.Build();
+            }
 
             // Game actions
             else if (Input.GetKeyDown(KeyCode.E))
@@ -252,6 +261,14 @@ namespace Assets.Scripts.Managers
             else if (Input.GetKeyDown(KeyCode.L))
             {
                 UnityManager.HandleSaveLoadPicker(false);
+            }
+            else if (Input.GetKeyDown(KeyCode.Slash))
+            {
+                UnityManager.ToggleHelp();
+            }
+            else if (Input.GetKeyDown(KeyCode.X))
+            {
+                Application.Quit();
             }
             // TODO: Add resign action
             // TODO: Add change control action (human, AI)

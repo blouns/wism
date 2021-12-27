@@ -7,7 +7,7 @@ namespace Wism.Client.MapObjects
 {
     public class City : MapObject, IBuildable
     {
-        public const int MaxDefense = 9; 
+        public const int MaxDefense = 10; 
 
         private CityInfo info;
 
@@ -98,10 +98,56 @@ namespace Wism.Client.MapObjects
                 return false;
             }
 
-            // TODO: Costs money
-            this.Defense++;
+            int cost = GetCostToBuild();
+            if (Player.Gold >= cost)
+            {
+                Player.Gold -= cost;
+                this.Defense++;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-            return true;
+        public int GetCostToBuild()
+        {
+            int cost;
+            switch (this.Defense)
+            {
+                case 0:
+                case 1:
+                case 2:
+                    cost = 50;
+                    break;
+                case 3:
+                    cost = 75;
+                    break;
+                case 4:
+                    cost = 100;
+                    break;
+                case 5:
+                    cost = 150;
+                    break;
+                case 6:
+                    cost = 175;
+                    break;
+                case 7:
+                    cost = 350;
+                    break;
+                case 8:
+                    cost = 500;
+                    break;
+                case 9:
+                    cost = 800;
+                    break;
+                default:
+                    cost = int.MaxValue;
+                    break;
+            }
+
+            return cost;
         }
 
         /// <summary>

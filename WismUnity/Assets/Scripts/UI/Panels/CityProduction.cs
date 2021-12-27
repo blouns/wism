@@ -29,6 +29,14 @@ namespace Assets.Scripts.UI
         private City productionCity;
         private ProductionInfo[] productionInfos;
 
+        public void LateUpdate()
+        {
+            if (armySelectedIndex > 0)
+            {
+                this.armyButtons[armySelectedIndex].Select();
+            }
+        }
+
         public void Initialize(UnityManager unityManager, City city)
         {
             if (unityManager is null)
@@ -200,6 +208,7 @@ namespace Assets.Scripts.UI
 
         public void OnExitClick()
         {
+            this.armySelectedIndex = -1;
             this.unityManager.InputManager.SetInputMode(InputMode.Game);
             this.unityManager.SetProductionMode(ProductionMode.None);
             this.gameObject.SetActive(false);

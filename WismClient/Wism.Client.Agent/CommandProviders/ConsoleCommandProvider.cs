@@ -65,10 +65,10 @@ namespace Wism.Client.Agent
             Console.WriteLine("+------------+----------------+---------+");
             Console.WriteLine("| (S)elect   | Deselect (Esc) |         |");
             Console.WriteLine("| (M)ove     | (A)ttack       |         |");
-            Console.WriteLine("| (N)ext     | (D)efend       |         |");
+            Console.WriteLine("| (N)ext     | (D)efend       | (Q)uit  |");
             Console.WriteLine("| (Z)earch   | (T)ake         | Dr(o)p  |");
             Console.WriteLine("| (P)roduce  |                |         |");
-            Console.WriteLine("| (E)nd turn | (Q)uit to DOS  |         |");
+            Console.WriteLine("| (E)nd turn | E(x)it to DOS  |         |");
             Console.WriteLine("+------------+----------------+---------+");
             Console.Write("Enter a command: ");
             var keyInfo = Console.ReadKey();
@@ -104,7 +104,7 @@ namespace Wism.Client.Agent
                     DoEndTurn();
                     break;
                 case ConsoleKey.Q:
-                    DoQuit();
+                    DoQuitArmy();
                     break;
                 case ConsoleKey.P:
                     DoProduce();
@@ -112,11 +112,20 @@ namespace Wism.Client.Agent
                 case ConsoleKey.N:
                     DoNextArmy();
                     break;
+                case ConsoleKey.R:
+                    DoRazeCity();
+                    break;
+                case ConsoleKey.B:
+                    DoBuildCity();
+                    break;
                 case ConsoleKey.V:
                     DoSave();
                     break;
                 case ConsoleKey.L:
                     DoLoad();
+                    break;
+                case ConsoleKey.X:
+                    DoExit();
                     break;
                 case ConsoleKey.UpArrow:
                     DoMoveArmyOneStep(0, 1);
@@ -131,6 +140,44 @@ namespace Wism.Client.Agent
                     DoMoveArmyOneStep(1, 0);
                     break;
             }
+        }
+
+        private void DoBuildCity()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var city = armies[0].Tile.City;
+            if (city == null)
+            {
+                Notify.Alert("Only cities can only be built upon.");
+                return;
+            }
+
+            commandController.AddCommand(
+                new BuildCityCommand(cityController, city));
+        }
+
+        private void DoRazeCity()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var city = armies[0].Tile.City;
+            if (city == null)
+            {
+                Notify.Alert("Only cities can only be razed.");
+                return;
+            }
+
+            commandController.AddCommand(
+                new RazeCityCommand(cityController, city));
         }
 
         private void DoLoad()
@@ -254,6 +301,12 @@ namespace Wism.Client.Agent
                 new DefendCommand(armyController, Game.Current.GetSelectedArmies()));
         }
 
+        private void DoQuitArmy()
+        {
+            commandController.AddCommand(
+                new QuitArmyCommand(armyController, Game.Current.GetSelectedArmies()));
+        }
+
         private void DoNextArmy()
         {
             commandController.AddCommand(
@@ -323,7 +376,7 @@ namespace Wism.Client.Agent
                 new StartProductionCommand(cityController, productionCity, armyInfo, destinationCity));
         }
 
-        private void DoQuit()
+        private void DoExit()
         {
             System.Environment.Exit(1);
         }

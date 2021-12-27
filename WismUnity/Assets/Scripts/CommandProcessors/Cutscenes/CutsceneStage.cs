@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.UI;
+﻿using Assets.Scripts.Managers;
+using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,13 +14,18 @@ namespace Assets.Scripts.CommandProcessors
 
         public List<CutsceneStage> Children { get; set; }
 
-        public CutsceneStage Next { get; set; }        
+        public CutsceneStage Next { get; set; }
+
+        public InputManager InputManager { get; set; }
 
         private bool keyPressed;
 
         public CutsceneStage(Command command)
         {
             Command = command;
+            this.InputManager = GameObject.FindGameObjectWithTag("UnityManager")
+                    .GetComponent<UnityManager>()
+                    .InputManager;
         }
 
         public abstract SceneResult Action();
@@ -53,30 +59,32 @@ namespace Assets.Scripts.CommandProcessors
             messageBox.ClearNotification();
         }
 
-        protected static void Notify(string message, params object[] args)
+        protected void Notify(string message, params object[] args)
         {
             var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
                 .GetComponent<NotificationBox>();
+            InputManager.SetInputMode(InputMode.WaitForKey);
             messageBox.Notify(String.Format(message, args));            
         }
 
-        protected static bool? AskAcceptReject(string message, params object[] args)
+        protected bool? AskAcceptReject(string message, params object[] args)
         {
             return AskYesNo("AcceptRejectPanel", message, args);
         }
 
-        protected static bool? AskYesNo(string message, params object[] args)
+        protected bool? AskYesNo(string message, params object[] args)
         {
             return AskYesNo("YesNoBox", message, args);
         }
 
-        protected static bool? AskYesNo(string panelName, string message, params object[] args)
+        protected bool? AskYesNo(string panelName, string message, params object[] args)
         {
             var yesNoBox = GameObject.FindGameObjectWithTag(panelName)
                .GetComponent<YesNoBox>();
 
             if (!yesNoBox.Answer.HasValue)
             {
+                InputManager.SetInputMode(InputMode.UI);
                 yesNoBox.Ask(String.Format(message, args));
             }
 

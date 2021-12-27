@@ -21,12 +21,12 @@ namespace Assets.Scripts.Tiles
             tileData.sprite = librarySprite;
         }
 
+#if UNITY_EDITOR
         protected override GameObject GetPrefab(LocationContainer container)
         {
             return container.LibraryPrefab;
         }
 
-#if UNITY_EDITOR        
         // Add tile type into Unity Editor
         [MenuItem("Assets/Create/Tiles/LibraryTile")]
         public static void CreateLibraryTile()

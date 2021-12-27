@@ -1,8 +1,8 @@
 ﻿using Assets.Scripts.Tilemaps;
 using Assets.Scripts.Tiles;
-using System;
 using UnityEngine;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.Managers
 {
@@ -13,6 +13,9 @@ namespace Assets.Scripts.Managers
 
         [SerializeField]
         private CityTile neutralCityTile;
+
+        [SerializeField]
+        private RuinsTile ruinsTile;
 
         private WorldTilemap worldTilemap;
         private bool isInitialized;
@@ -54,6 +57,14 @@ namespace Assets.Scripts.Managers
                 }
             }
         }
+
+        public void Raze(City city)
+        {
+            SetRuinsTile(city.Tile.X, city.Tile.Y);
+            SetRuinsTile(city.Tile.X + 1, city.Tile.Y);
+            SetRuinsTile(city.Tile.X, city.Tile.Y - 1);
+            SetRuinsTile(city.Tile.X + 1, city.Tile.Y - 1);
+        }        
 
         public void FixedUpdate()
         {
@@ -105,7 +116,7 @@ namespace Assets.Scripts.Managers
         }
 
         /// <summary>
-        /// Assign city by clan
+        /// Find a city by clan
         /// </summary>
         /// <param name="clanName">Clan to assign to the city or "neutral"</param>
         /// <returns>City matching the clan if found; otherwise Neutral city</returns>
@@ -124,6 +135,13 @@ namespace Assets.Scripts.Managers
             }
 
             return returnTile;
+        }
+
+        private void SetRuinsTile(int x, int y)
+        {
+            var worldVector = worldTilemap.ConvertGameToUnityVector(x, y);
+            worldTilemap.SetTile(worldVector, new RuinsTile());
+            worldTilemap.RefreshTile(worldVector);
         }
     }
 }
