@@ -51,18 +51,24 @@ namespace Wism.Client.Factories
                     // Armies (circular reference; add after army creation)
                     if (tileEntity.ArmyIds != null)
                     {
-                        foreach (var armyName in tileEntity.ArmyIds)
+                        foreach (var armyId in tileEntity.ArmyIds)
                         {
-                            armiesNameTileDict.Add(armyName, tile);
+                            if (!armiesNameTileDict.ContainsKey(armyId))
+                            {
+                                armiesNameTileDict.Add(armyId, tile);
+                            }
                         }
                     }
 
                     // Visiting Armies (circular reference; add after army creation)
                     if (tileEntity.VisitingArmyIds != null)
                     {
-                        foreach (var visitingName in tileEntity.VisitingArmyIds)
+                        foreach (var armyId in tileEntity.VisitingArmyIds)
                         {
-                            visitingNameTileDict.Add(visitingName, tile);
+                            if (!visitingNameTileDict.ContainsKey(armyId))
+                            {
+                                visitingNameTileDict.Add(armyId, tile);
+                            }
                         }
                     }
 

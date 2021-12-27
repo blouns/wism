@@ -36,7 +36,7 @@ namespace Assets.Scripts
         {
             if (string.IsNullOrWhiteSpace(worldName))
             {
-                throw new System.ArgumentException($"'{nameof(worldName)}' cannot be null or whitespace", nameof(worldName));
+                throw new ArgumentException($"'{nameof(worldName)}' cannot be null or whitespace", nameof(worldName));
             }
 
             this.WorldName = worldName;
@@ -103,6 +103,7 @@ namespace Assets.Scripts
             ClanInfo clanInfo = ClanInfo.GetClanInfo(clanShortName);
             Clan clan = Clan.Create(clanInfo);
             Player player = Player.Create(clan);
+            player.Gold = 2000; // FOR TESTING ONLY
             Game.Current.Players.Add(player);
         }
 
@@ -141,9 +142,7 @@ namespace Assets.Scripts
 
             // Extract the X,Y coords from City GameObjects from the scene 
             var cityContainerGO = UnityUtilities.GameObjectHardFind("Cities");
-            this.debugManager.LogInformation("cityContainerGO == {0}", cityContainerGO);
             int cityCount = cityContainerGO.transform.childCount;
-            this.debugManager.LogInformation("cityCount == {0}", cityCount);
             for (int i = 0; i < cityCount; i++)
             {
                 var cityGO = cityContainerGO.transform.GetChild(i).gameObject;

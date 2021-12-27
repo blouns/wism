@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Managers;
+﻿using Assets.Scripts.CommandProcessors.Cutscenes.CityStages;
+using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using Wism.Client.Api.Commands;
@@ -127,5 +128,55 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             return stager;
         }
 
+
+        public CutsceneStager CreateBuildCityStager(BuildCityCommand command)
+        {
+            if (command is null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
+            var stages = new List<CutsceneStage>();
+
+            stages.Add(new VerifyBuildStage(command));
+            stages.Add(new AskBuildStage(command));
+            stages.Add(new BuildCityStage(command));
+
+            var stager = new CutsceneStager(stages)
+            {
+                Final = new DefaultFinalStage(command),
+            };
+
+            // Set the input callback
+            inputManager.KeyPressed += stager.OnAnyKeyPressed;
+
+            return stager;
+        }
+
+        public CutsceneStager CreateRazeCityStager(RazeCityCommand command)
+        {
+            if (command is null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
+            var stages = new List<CutsceneStage>();
+
+            stages.Add(new AskRazeStage(command));
+            stages.Add(new RavageCityStage(command));
+            stages.Add(new RazeCityStage(command));
+            stages.Add(new CityInRuinsStage(command));
+
+            var stager = new CutsceneStager(stages)
+            {
+                Final = new DefaultFinalStage(command),
+            };
+
+            // Set the input callback
+            inputManager.KeyPressed += stager.OnAnyKeyPressed;
+
+            return stager;
+        }
     }
 }
+

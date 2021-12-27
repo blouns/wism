@@ -20,7 +20,7 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            ProductionCity.Barracks.StopProduction();
+            this.CityController.StopProduction(ProductionCity);
 
             return ActionState.Succeeded;
         }

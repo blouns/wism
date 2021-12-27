@@ -24,14 +24,17 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            ActionState state = ActionState.Failed;
-
-            if (ProductionCity.Barracks.StartProduction(ArmyInfo, DestinationCity))
+            bool success;
+            if (DestinationCity == null)
             {
-                state = ActionState.Succeeded;
+                success = this.CityController.TryStartingProduction(ProductionCity, ArmyInfo);
+            }
+            else
+            {
+                success = this.CityController.TryStartingProductionToDestination(ProductionCity, ArmyInfo, DestinationCity);
             }
 
-            return state;
+            return success ? ActionState.Succeeded : ActionState.Failed;
         }
 
         public override string ToString()

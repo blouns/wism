@@ -30,6 +30,7 @@ namespace Assets.Scripts.Managers
         // Controllers for the WISM Client API
         private ControllerProvider provider;
         private CommandController commandController;
+        private UnityManager unityManager;
 
         public ControllerProvider ControllerProvider { get => provider; set => provider = value; }
         public ILoggerFactory LoggerFactory { get; set; }
@@ -188,7 +189,7 @@ namespace Assets.Scripts.Managers
             StartTurn();
         }
 
-        public void SearchLocationWithSelectedArmies()
+        public void SearchLocation()
         {
             if (!Game.Current.ArmiesSelected())
             {
@@ -225,6 +226,45 @@ namespace Assets.Scripts.Managers
             commandController.AddCommand(command);
         }
 
+        internal void Build()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                NotifyUser("You must have an army selected to build.");
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var city = armies[0].Tile.City;
+            if (city == null)
+            {
+                NotifyUser("Tower building is not yet supported.");
+                return;
+            }
+
+            commandController.AddCommand(
+                new BuildCityCommand(provider.CityController, city));
+        }
+
+        internal void RazeCity()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var city = armies[0].Tile.City;
+            if (city == null)
+            {
+                NotifyUser("Only cities can only be razed.");
+                return;
+            }            
+
+            commandController.AddCommand(
+                new RazeCityCommand(provider.CityController, city));
+        }
+
         public void TakeItems(Hero hero, List<Artifact> items)
         {
             commandController.AddCommand(
@@ -255,6 +295,22 @@ namespace Assets.Scripts.Managers
             var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
             PersistanceManager.Save(filename, saveGameName, unityGame);
+        }
+
+        private void NotifyUser(string message, params object[] args)
+        {
+            GetUnityManager().NotifyUser(message, args);
+        }
+
+        private UnityManager GetUnityManager()
+        {
+            if (this.unityManager == null)
+            {
+                this.unityManager = UnityUtilities.GameObjectHardFind("UnityManager")
+                    .GetComponent<UnityManager>();
+            }
+
+            return this.unityManager;
         }
     }
 }

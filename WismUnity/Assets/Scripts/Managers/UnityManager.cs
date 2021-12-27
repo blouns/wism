@@ -132,6 +132,10 @@ namespace Assets.Scripts.Managers
                 new SearchLibraryProcessor(GameManager.LoggerFactory, this),               
                 new SearchSageProcessor(GameManager.LoggerFactory, this),
 
+                // City processors
+                new BuildCityDefensesProcessor(GameManager.LoggerFactory, this),
+                new RazeCityDefensesProcessor(GameManager.LoggerFactory, this),
+
                 // Game processors
                 new LoadGameProcessor(GameManager.LoggerFactory, this),
 

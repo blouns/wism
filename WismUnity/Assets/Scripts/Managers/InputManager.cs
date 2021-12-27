@@ -218,7 +218,7 @@ namespace Assets.Scripts.Managers
             }
             else if (Input.GetKeyDown(KeyCode.Z))
             {
-                GameManager.SearchLocationWithSelectedArmies();
+                GameManager.SearchLocation();
             }            
             // TODO: Add Disband action for armies
             // TODO: Add Find armies action
@@ -240,8 +240,14 @@ namespace Assets.Scripts.Managers
             {
                 UnityManager.SetProductionMode(ProductionMode.SelectCity);
             }
-            // TODO: Add build (b) actions
-            // TODO: Add raze (r) action
+            else if (Input.GetKeyDown(KeyCode.R))
+            {
+                GameManager.RazeCity();
+            }
+            else if (Input.GetKeyDown(KeyCode.B))
+            {
+                GameManager.Build();
+            }
 
             // Game actions
             else if (Input.GetKeyDown(KeyCode.E))

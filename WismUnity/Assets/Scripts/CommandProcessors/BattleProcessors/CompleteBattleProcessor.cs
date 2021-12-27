@@ -4,6 +4,7 @@ using System;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
+using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
@@ -62,9 +63,8 @@ namespace Assets.Scripts.CommandProcessors
         }
 
         private void OpenProductionPanelIfClaimingCity(AttackOnceCommand attackCommand)
-        {            
-            var defender = attackCommand.OriginalDefendingArmies[0];
-            var tile = defender.Tile;
+        {
+            var tile = World.Current.Map[attackCommand.X, attackCommand.Y];
             if (tile.HasCity())
             {
                 // Transition state to production

@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
 namespace Wism.Client.Test.Unit
@@ -52,9 +53,13 @@ namespace Wism.Client.Test.Unit
         public void Build_City()
         {
             // Assemble
+            Player player = Player.Create(
+                Clan.Create(ModFactory.FindClanInfo("Sirians")));
             var tile = World.Current.Map[1, 1];
             var city = MapBuilder.FindCity("Marthos");
             World.Current.AddCity(city, tile);
+            player.ClaimCity(city);
+            player.Gold = 175;  // Just enough
             var defense = city.Defense;
 
             // Act            
@@ -62,8 +67,60 @@ namespace Wism.Client.Test.Unit
 
             // Assert
             Assert.IsTrue(result, $"Build unsuccessful on city: {city}");
+            Assert.AreEqual(0, player.Gold, "Player should be out of money");
             Assert.AreEqual(defense + 1, city.Defense, "Defense value did not increase after successful build.");
 
+        }
+
+        [Test]
+        public void Build_City_TooExpensive()
+        {
+            // Assemble
+            Player player = Player.Create(
+                Clan.Create(ModFactory.FindClanInfo("Sirians")));
+            var tile = World.Current.Map[1, 1];
+            var city = MapBuilder.FindCity("Marthos");
+            World.Current.AddCity(city, tile);
+            player.ClaimCity(city);
+            player.Gold = 174;  // Not enough
+            var defense = city.Defense;
+
+            // Act            
+            bool result = city.TryBuild();
+
+            // Assert
+            Assert.IsFalse(result, $"Build successful on city: {city}");
+            Assert.AreEqual(174, player.Gold, "Player should not have been charged");
+            Assert.AreEqual(defense, city.Defense, "Defense value did not increase after successful build.");
+        }
+
+        [Test]
+        public void Build_City_MaxDefense()
+        {
+            // Assemble
+            Player player = Player.Create(
+                Clan.Create(ModFactory.FindClanInfo("Sirians")));
+            var tile = World.Current.Map[1, 1];
+            var city = MapBuilder.FindCity("Marthos");
+            city.Defense = 0;
+            World.Current.AddCity(city, tile);
+            player.ClaimCity(city);
+            player.Gold = 2300;  // Just enough
+
+            // Act            
+            bool result = true;
+            for (int i = 0; i < City.MaxDefense; i++)
+            {
+                result &= city.TryBuild();
+            }
+
+            bool overMaxResult = city.TryBuild();
+
+            // Assert
+            Assert.IsTrue(result, $"Build unsuccessful on city: {city}");
+            Assert.AreEqual(0, player.Gold, "Player should be out of money");
+            Assert.AreEqual(City.MaxDefense, city.Defense, "Defense value did not increase after successful build.");
+            Assert.IsFalse(overMaxResult, "Succeeding in building beyond legendary defenses!");
         }
 
         [Test]

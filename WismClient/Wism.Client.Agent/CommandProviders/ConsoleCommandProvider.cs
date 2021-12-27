@@ -112,6 +112,12 @@ namespace Wism.Client.Agent
                 case ConsoleKey.N:
                     DoNextArmy();
                     break;
+                case ConsoleKey.R:
+                    DoRazeCity();
+                    break;
+                case ConsoleKey.B:
+                    DoBuildCity();
+                    break;
                 case ConsoleKey.V:
                     DoSave();
                     break;
@@ -134,6 +140,44 @@ namespace Wism.Client.Agent
                     DoMoveArmyOneStep(1, 0);
                     break;
             }
+        }
+
+        private void DoBuildCity()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var city = armies[0].Tile.City;
+            if (city == null)
+            {
+                Notify.Alert("Only cities can only be built upon.");
+                return;
+            }
+
+            commandController.AddCommand(
+                new BuildCityCommand(cityController, city));
+        }
+
+        private void DoRazeCity()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            var armies = Game.Current.GetSelectedArmies();
+            var city = armies[0].Tile.City;
+            if (city == null)
+            {
+                Notify.Alert("Only cities can only be razed.");
+                return;
+            }
+
+            commandController.AddCommand(
+                new RazeCityCommand(cityController, city));
         }
 
         private void DoLoad()
