@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -47,147 +47,144 @@
   <PropertyGroup>
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <UnityProjectGenerator>Package</UnityProjectGenerator>
-    <UnityProjectGeneratorVersion>2.0.11</UnityProjectGeneratorVersion>
+    <UnityProjectGeneratorVersion>2.0.12</UnityProjectGeneratorVersion>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2020.3.22f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CityStages\RazeCityStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\YesNoBox.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\WaterTile.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\RuinsEncounteredMonsterStage.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\MountainTile.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\RuinsRevealBoonStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\SelectArmyProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\LocationPicker.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\LocationEntry.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\LocationTiles\RuinsTile.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\LocationTiles\TempleTile.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\InformationMappings\ArmyInformationMapping.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\CityTile.cs" />
+    <Compile Include="Assets\Scripts\Game\Common\TextUtilities.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\AltarBoonIdentifier.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\InformationMappings\PlayerInformationMapping.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\TurnProcessors\RecruitHeroProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\ResetLocations.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\ForestTile.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\ArmyManager.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\LocationCutsceneStage.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\LocationTiles\LocationTile.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\TurnProcessors\HireHeroProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CutsceneStagerFactory.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\IBoonIdentifier.cs" />
+    <Compile Include="Assets\Scripts\Game\Armies\ArmyGameObject.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\CityContainer.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\LocationTiles\TombTile.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\SplashScreen.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\RoadTile.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\CityEntry.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\LocationContainer.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\SageFinalStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\InformationMappings\TerrainInformationMapping.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CutsceneStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\InputHandler.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\ArmyPicker.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\ProductionMode.cs" />
+    <Compile Include="Assets\Scripts\Game\Mapping\WorldTilemap.cs" />
+    <Compile Include="Assets\Scripts\Game\Common\MapUtilities.cs" />
+    <Compile Include="Assets\Scripts\Game\Common\UnityUtilities.cs" />
+    <Compile Include="Assets\Scripts\Game\Persistance\Entities\UnityGameEntity.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\InformationMappings\IInformationMapping.cs" />
+    <Compile Include="Assets\Scripts\Game\Persistance\PersistanceManager.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\ArtifactBoonIdentifier.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\SageGoldStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\SageGemStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\SearchProcessors\SearchTempleProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\LibraryFinalStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\SolicitInput.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\ArmyPrefabArrayPropertyDrawer.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\PrefabArmyEditor.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\ResetCities.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\LocationTiles\LibraryTile.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\UnityManager.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\ItemPicker.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\CityManager.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\TempleEnterStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\InformationUpdate.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\SearchProcessors\SearchRuinsProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\WarPanel.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\SaveLoadPicker.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\BattleProcessors\CompleteBattleProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\Mapping\AdjacencyMap.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\LibrarySearchingStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\NotificationBox.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\SearchProcessors\SearchLibraryProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\TurnProcessors\StartTurnProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\SelectableButton.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\HillTile.cs" />
+    <Compile Include="Assets\Scripts\Game\Mapping\MinimapInteraction.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\CityProduction.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\CityProcessors\BuildCityDefenseProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\InformationMappings\CityInformationMapping.cs" />
+    <Compile Include="Assets\Scripts\Game\Mapping\TileUtility.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\SearchStatusStage.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\SnowPeakTile.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\RuinsIntroStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\GoldBoonIdentifier.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\InformationMappings\LocationInformationMapping.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\AlliesBoonIdentifier.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\CameraFollow.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\BridgeTile.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\LoadGameProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\TurnProcessors\RenewProductionProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\SageEnterStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\SearchLocationsStage.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\DebugManager.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CityStages\CityInRuinsStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\LibraryEnterStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CityStages\BuildCityStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\BattleProcessors\PrepareForBattleProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\SearchProcessors\SearchSageProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\Armies\ArmyFlagSize.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\LocationTiles\SageTile.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\CityProcessors\RazeCityDefensesProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\BattleProcessors\BattleProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\CityPicker.cs" />
+    <Compile Include="Assets\Scripts\Game\Tiles\VolcanoTile.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\RuinsFightMonsterStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\TurnProcessors\EndTurnProcessor.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CityStages\RavageCityStage.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\ItemManager.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CutsceneStager.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\FlagPrefabArrayLayout.cs" />
+    <Compile Include="Assets\Scripts\Game\Mapping\MapCrosshairs.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\CursorManager.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\InputManager.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\ArtifactBoonRedeemer.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\StageResult.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\TempleFinalStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\MouseOverCursor.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\FlagManager.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CityStages\AskBuildStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\SelectedArmyBox.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CityStages\AskRazeStage.cs" />
+    <Compile Include="Assets\Scripts\Game\Managers\GameManager.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\RuinsSitAtThroneStage.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\FlagPrefabArrayPropertyDrawer.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\RuinsFinalStage.cs" />
+    <Compile Include="Assets\Scripts\Game\UI\Panels\OkCancel.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\CityStages\VerifyBuildStage.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\DefaultFinalStage.cs" />
+    <Compile Include="Assets\Scripts\Game\Common\GameFactory.cs" />
+    <Compile Include="Assets\Scripts\Game\Editors\ArmyPrefabArrayLayout.cs" />
+    <Compile Include="Assets\Scripts\Game\CommandProcessors\Cutscenes\SearchStages\RuinsFoundThroneStage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CityStages\RazeCityStage.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\YesNoBox.cs" />
-    <Compile Include="Assets\Scripts\Tiles\WaterTile.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\RuinsEncounteredMonsterStage.cs" />
-    <Compile Include="Assets\Scripts\Tiles\MountainTile.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\RuinsRevealBoonStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\SelectArmyProcessor.cs" />
-    <Compile Include="Assets\Scripts\Editors\LocationPicker.cs" />
-    <Compile Include="Assets\Scripts\Editors\LocationEntry.cs" />
-    <Compile Include="Assets\Scripts\Tiles\LocationTiles\RuinsTile.cs" />
-    <Compile Include="Assets\Scripts\Tiles\LocationTiles\TempleTile.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\InformationMappings\ArmyInformationMapping.cs" />
-    <Compile Include="Assets\Scripts\Tiles\CityTile.cs" />
-    <Compile Include="Assets\Scripts\Common\TextUtilities.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\AltarBoonIdentifier.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\InformationMappings\PlayerInformationMapping.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\TurnProcessors\RecruitHeroProcessor.cs" />
-    <Compile Include="Assets\Scripts\Editors\ResetLocations.cs" />
-    <Compile Include="Assets\Scripts\Tiles\ForestTile.cs" />
-    <Compile Include="Assets\Scripts\Managers\ArmyManager.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\LocationCutsceneStage.cs" />
-    <Compile Include="Assets\Scripts\Tiles\LocationTiles\LocationTile.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\TurnProcessors\HireHeroProcessor.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CutsceneStagerFactory.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\IBoonIdentifier.cs" />
-    <Compile Include="Assets\Scripts\Armies\ArmyGameObject.cs" />
-    <Compile Include="Assets\Scripts\Editors\CityContainer.cs" />
-    <Compile Include="Assets\Scripts\Tiles\LocationTiles\TombTile.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\SplashScreen.cs" />
-    <Compile Include="Assets\Scripts\Tiles\RoadTile.cs" />
-    <Compile Include="Assets\Scripts\Editors\CityEntry.cs" />
-    <Compile Include="Assets\Scripts\Editors\LocationContainer.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\SageFinalStage.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\InformationMappings\TerrainInformationMapping.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CutsceneStage.cs" />
-    <Compile Include="Assets\Scripts\UI\InputHandler.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\ArmyPicker.cs" />
-    <Compile Include="Assets\Scripts\Managers\ProductionMode.cs" />
-    <Compile Include="Assets\Scripts\Mapping\WorldTilemap.cs" />
-    <Compile Include="Assets\Scripts\Common\MapUtilities.cs" />
-    <Compile Include="Assets\Scripts\Common\UnityUtilities.cs" />
-    <Compile Include="Assets\Scripts\Persistance\Entities\UnityGameEntity.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\InformationMappings\IInformationMapping.cs" />
-    <Compile Include="Assets\Scripts\Persistance\PersistanceManager.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\ArtifactBoonIdentifier.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\SageGoldStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\SageGemStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\SearchProcessors\SearchTempleProcessor.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\LibraryFinalStage.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\SolicitInput.cs" />
-    <Compile Include="Assets\Scripts\Editors\ArmyPrefabArrayPropertyDrawer.cs" />
-    <Compile Include="Assets\Scripts\Editors\PrefabArmyEditor.cs" />
-    <Compile Include="Assets\Scripts\Editors\ResetCities.cs" />
-    <Compile Include="Assets\Scripts\Tiles\LocationTiles\LibraryTile.cs" />
-    <Compile Include="Assets\Scripts\Managers\UnityManager.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\ItemPicker.cs" />
-    <Compile Include="Assets\Scripts\Managers\CityManager.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\TempleEnterStage.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\InformationUpdate.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\SearchProcessors\SearchRuinsProcessor.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\WarPanel.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\SaveLoadPicker.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\BattleProcessors\CompleteBattleProcessor.cs" />
-    <Compile Include="Assets\Scripts\Mapping\AdjacencyMap.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\LibrarySearchingStage.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\NotificationBox.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\SearchProcessors\SearchLibraryProcessor.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\TurnProcessors\StartTurnProcessor.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\SelectableButton.cs" />
-    <Compile Include="Assets\Scripts\Tiles\HillTile.cs" />
-    <Compile Include="Assets\Scripts\Mapping\MinimapInteraction.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\CityProduction.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\CityProcessors\BuildCityDefenseProcessor.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\InformationMappings\CityInformationMapping.cs" />
-    <Compile Include="Assets\Scripts\Mapping\TileUtility.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\SearchStatusStage.cs" />
-    <Compile Include="Assets\Scripts\Tiles\SnowPeakTile.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\RuinsIntroStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\GoldBoonIdentifier.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\InformationMappings\LocationInformationMapping.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\AlliesBoonIdentifier.cs" />
-    <Compile Include="Assets\Scripts\UI\CameraFollow.cs" />
-    <Compile Include="Assets\Scripts\Tiles\BridgeTile.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\LoadGameProcessor.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\TurnProcessors\RenewProductionProcessor.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\SageEnterStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\SearchLocationsStage.cs" />
-    <Compile Include="Assets\Scripts\Managers\DebugManager.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CityStages\CityInRuinsStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\LibraryEnterStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CityStages\BuildCityStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\BattleProcessors\PrepareForBattleProcessor.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\SearchProcessors\SearchSageProcessor.cs" />
-    <Compile Include="Assets\Scripts\Armies\ArmyFlagSize.cs" />
-    <Compile Include="Assets\Scripts\Tiles\LocationTiles\SageTile.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\CityProcessors\RazeCityDefensesProcessor.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\BattleProcessors\BattleProcessor.cs" />
-    <Compile Include="Assets\Scripts\Editors\CityPicker.cs" />
-    <Compile Include="Assets\Scripts\Tiles\VolcanoTile.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\RuinsFightMonsterStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\TurnProcessors\EndTurnProcessor.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CityStages\RavageCityStage.cs" />
-    <Compile Include="Assets\Scripts\Managers\ItemManager.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CutsceneStager.cs" />
-    <Compile Include="Assets\Scripts\Editors\FlagPrefabArrayLayout.cs" />
-    <Compile Include="Assets\Scripts\Mapping\MapCrosshairs.cs" />
-    <Compile Include="Assets\Scripts\UI\CursorManager.cs" />
-    <Compile Include="Assets\Scripts\Managers\InputManager.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\BoonIdentifiers\ArtifactBoonRedeemer.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\StageResult.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\TempleFinalStage.cs" />
-    <Compile Include="Assets\Scripts\UI\MouseOverCursor.cs" />
-    <Compile Include="Assets\Scripts\Managers\FlagManager.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CityStages\AskBuildStage.cs" />
-    <Compile Include="Assets\Scripts\UI\SelectedArmyBox.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CityStages\AskRazeStage.cs" />
-    <Compile Include="Assets\Scripts\Managers\GameManager.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\RuinsSitAtThroneStage.cs" />
-    <Compile Include="Assets\Scripts\Editors\FlagPrefabArrayPropertyDrawer.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\RuinsFinalStage.cs" />
-    <Compile Include="Assets\Scripts\UI\Panels\OkCancel.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\CityStages\VerifyBuildStage.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\DefaultFinalStage.cs" />
-    <Compile Include="Assets\Scripts\Common\GameFactory.cs" />
-    <Compile Include="Assets\Scripts\Editors\ArmyPrefabArrayLayout.cs" />
-    <Compile Include="Assets\Scripts\CommandProcessors\Cutscenes\SearchStages\RuinsFoundThroneStage.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Scripts\Core\netstandard2.0\Wism.Client.Api.dll" />
-    <None Include="Assets\Scripts\Docs\Stories.txt" />
-    <None Include="Assets\Scripts\Docs\Unity Refactoring Backlog.txt" />
-    <None Include="Assets\Scripts\Core\netstandard2.0\Wism.Client.Core.dll" />
+    <None Include="Assets\Scripts\Game\Core\netstandard2.0\Wism.Client.Api.dll" />
+    <None Include="Assets\Scripts\Game\Docs\Stories.txt" />
+    <None Include="Assets\Scripts\Game\Docs\Unity Refactoring Backlog.txt" />
+    <None Include="Assets\Scripts\Game\Core\netstandard2.0\Wism.Client.Core.dll" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -412,14 +409,14 @@
     <Reference Include="UnityEditor.UnityConnectModule">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2020.3.22f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
     </Reference>
-    <Reference Include="Wism.Client.Api">
-      <HintPath>Assets\Scripts\Core\netstandard2.0\Wism.Client.Api.dll</HintPath>
-    </Reference>
-    <Reference Include="Wism.Client.Core">
-      <HintPath>Assets\Scripts\Core\netstandard2.0\Wism.Client.Core.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@2.0.0\Runtime\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Wism.Client.Api">
+      <HintPath>Assets\Scripts\Game\Core\netstandard2.0\Wism.Client.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Wism.Client.Core">
+      <HintPath>Assets\Scripts\Game\Core\netstandard2.0\Wism.Client.Core.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2020.3.22f1\Editor\Data\NetStandard\ref\2.0.0\netstandard.dll</HintPath>

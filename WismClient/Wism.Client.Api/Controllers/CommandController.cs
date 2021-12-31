@@ -70,6 +70,22 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
+        /// Gets the latest command added.
+        /// </summary>
+        /// <returns>Command if one exists</returns>
+        /// <exception cref="InvalidOperationException">Thrown if no commands exist</exception>
+        public Command GetLastCommand()
+        {
+            var commands = wismClientRepository.GetCommands();
+            if (commands.Count > 0)
+            {
+                return commands[commands.Count - 1];
+            }
+
+            throw new InvalidOperationException("No commands in the repository.");
+        }
+
+        /// <summary>
         /// Checks if the given command exists.
         /// </summary>
         /// <param name="commandId">ID of command</param>

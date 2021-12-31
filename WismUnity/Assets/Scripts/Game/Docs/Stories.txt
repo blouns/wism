@@ -1,0 +1,14 @@
+﻿Goal: Play test 10 turns without bugs
+
+TODO:
+ * PlayTest basic test cases
+ * Scriptable game start (scene, mod, players, save)
+ * Test case generator from UI
+ * Headless operation for testing
+	- Hire hero
+	- Any click-required UI element (production, search, start turn)
+
+ Future:
+  * User clan picker panel
+  * Clan and army balance and attribute details (e.g. terrain bonuses)
+  * Cooper
