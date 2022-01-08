@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netstandard2.0&quot; $(ProjectDir)..\..\WismUnity\Assets\Scripts\Game\Core\netstandard2.0" />
+		<Exec Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netstandard2.0&quot; $(ProjectDir)..\..\WismUnity\Assets\Scripts\UnityGame\Core\netstandard2.0" />
 	</Target>
 
 </Project>

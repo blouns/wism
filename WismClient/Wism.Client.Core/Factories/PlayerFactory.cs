@@ -66,10 +66,21 @@ namespace Wism.Client.Factories
             // Player Details
             player.Gold = playerEntity.Gold;
             player.IsDead = playerEntity.IsDead;
+            player.IsHuman = playerEntity.IsHuman;
             player.Turn = playerEntity.Turn;
             player.LastHeroTurn = playerEntity.LastHeroTurn;
 
             return player;
-        }        
+        }
+
+        public static Player Create(PlayerEntity playerEntity)
+        {
+            Clan clan = Clan.Create(ModFactory.FindClanInfo(playerEntity.ClanShortName));
+            var player = Player.Create(clan);
+            player.Gold = playerEntity.Gold;
+            player.IsHuman = playerEntity.IsHuman;
+
+            return player;
+        }
     }
 }

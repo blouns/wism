@@ -213,6 +213,15 @@ namespace Wism.Client.Api.Data
                     //Snapshot = ((LoadGameCommand)command).Snapshot
                 };
             }
+            else if (command is NewGameCommand)
+            {
+                snapshot = new NewGameCommandEntity()
+                {
+                    // TODO: Do NOT snapshot the new game. Need to think through the 
+                    //       consequences of this and how to address it properly.
+                    //Snapshot = ((NewGameCommand)command).Snapshot
+                };
+            }
 
             return snapshot;
         }

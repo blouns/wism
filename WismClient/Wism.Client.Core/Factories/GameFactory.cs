@@ -10,6 +10,29 @@ namespace Wism.Client.Factories
 {
     public static class GameFactory
     {
+        public static Game Create(GameEntity settings)
+        {
+            if (settings is null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            Game.CreateEmpty();
+
+            // Game settings
+            Game.Current.Random = new Random(settings.Random.Seed);
+            var warEntity = settings.WarStrategy;
+            var warAssembly = Assembly.Load(warEntity.AssemblyName);
+            Game.Current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
+            Game.Current.Transition(settings.GameState);
+
+            CreatePlayers(settings, Game.Current);
+
+            var world = WorldFactory.Create(settings.World);
+
+            return Game.Current;
+        }
+
         public static Game Load(GameEntity snapshot)
         {
             if (snapshot is null)
@@ -41,6 +64,16 @@ namespace Wism.Client.Factories
             ArmyFactory.LastId = snapshot.LastArmyId;
 
             return Game.Current;
+        }
+
+        private static void CreatePlayers(GameEntity settings, Game current)
+        {
+            var players = settings.Players;
+            current.Players = new List<Player>();
+            for (int i = 0; i < players.Length; i++)
+            {
+                current.Players.Add(PlayerFactory.Create(players[i]));
+            }
         }
 
         private static void LoadArmies(GameEntity snapshot, Dictionary<int, Tile> armiesToTile, Dictionary<int, Tile> visitingToTile)

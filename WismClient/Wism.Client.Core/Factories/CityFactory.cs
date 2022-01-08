@@ -31,6 +31,23 @@ namespace Wism.Client.Factories
             return city;
         }
 
+        public static City Create(CityEntity cityEntity, World world)
+        {
+            if (cityEntity is null)
+            {
+                throw new ArgumentNullException(nameof(cityEntity));
+            }
+
+            if (world is null)
+            {
+                throw new ArgumentNullException(nameof(world));
+            }
+
+            MapBuilder.AddCity(world, cityEntity.X, cityEntity.Y, cityEntity.CityShortName, cityEntity.ClanShortName);            
+
+            return world.Map[cityEntity.X, cityEntity.Y].City;
+        }
+
         private static void LoadBarracks(CityEntity snapshot, World world, Barracks barracks)
         {
             // Armies To Deliver

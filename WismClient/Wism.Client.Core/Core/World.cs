@@ -15,9 +15,6 @@ namespace Wism.Client.Core
 
         public string Name { get; set; }
 
-        // Navigation associations
-        public Game Game { get; }
-
         private static World current;
 
         public static World Current
@@ -170,13 +167,6 @@ namespace Wism.Client.Core
 
             Tile[,] map = MapBuilder.CreateDefaultMap();
             Reset(map);
-        }
-
-        public void AddDefaultCities()
-        {
-            // Add cities
-            MapBuilder.AddCity(this, 1, 3, "Marthos", "Sirians");
-            MapBuilder.AddCity(this, 3, 1, "BanesCitadel", "LordBane");
         }
 
         public void Reset(Tile[,] map)

@@ -21,6 +21,12 @@
     <None Update="mod\Hero.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="mod\Worlds\Mini-Illuria\City.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="mod\Worlds\Mini-Illuria\Location.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="mod\Worlds\PlayTestWorld\City.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
