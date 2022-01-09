@@ -10,7 +10,7 @@ namespace Assets.Scripts.CommandProcessors
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             // This will change game state
             var result = Command.Execute();

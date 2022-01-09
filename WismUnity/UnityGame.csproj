@@ -179,14 +179,13 @@
     <Compile Include="Assets\Scripts\UnityGame\Persistance\Entities\UnityPlayerEntity.cs" />
     <Compile Include="Assets\Scripts\UnityGame\CommandProcessors\Cutscenes\SearchStages\RuinsSitAtThroneStage.cs" />
     <Compile Include="Assets\Scripts\UnityGame\Editors\FlagPrefabArrayPropertyDrawer.cs" />
+    <Compile Include="Assets\Scripts\UnityGame\Managers\ExecutionMode.cs" />
     <Compile Include="Assets\Scripts\UnityGame\CommandProcessors\Cutscenes\SearchStages\RuinsFinalStage.cs" />
     <Compile Include="Assets\Scripts\UnityGame\UI\Panels\OkCancel.cs" />
     <Compile Include="Assets\Scripts\UnityGame\CommandProcessors\Cutscenes\CityStages\VerifyBuildStage.cs" />
     <Compile Include="Assets\Scripts\UnityGame\CommandProcessors\Cutscenes\DefaultFinalStage.cs" />
     <Compile Include="Assets\Scripts\UnityGame\Factories\GameFactory.cs" />
     <Compile Include="Assets\Scripts\UnityGame\Editors\ArmyPrefabArrayLayout.cs" />
-    <Compile Include="Assets\Scripts\UnityGame\CommandProcessors\Cutscenes\SearchStages\RuinsFoundThroneStage.cs" />
-    <Compile Include="Assets\Scripts\UnityGame\Managers\ExecutionMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scripts\UnityGame\Core\netstandard2.0\Wism.Client.Core.dll" />

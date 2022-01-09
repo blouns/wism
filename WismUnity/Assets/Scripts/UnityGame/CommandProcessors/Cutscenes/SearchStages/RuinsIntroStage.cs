@@ -1,5 +1,5 @@
-﻿using Assets.Scripts.Managers;
-using Assets.Scripts.Tilemaps;
+﻿using Assets.Scripts.Tilemaps;
+using System;
 using UnityEngine;
 using Wism.Client.Api.Commands;
 
@@ -12,8 +12,13 @@ namespace Assets.Scripts.CommandProcessors
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
+            if (Hero == null)
+            {
+                throw new InvalidOperationException("Must have a hero to search ruins.");
+            }
+
             var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
             worldTilemap.ShowSearchIcon(Hero.X, Hero.Y);

@@ -10,7 +10,7 @@ namespace Assets.Scripts.CommandProcessors
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             if (Hero.IsDead)
             {

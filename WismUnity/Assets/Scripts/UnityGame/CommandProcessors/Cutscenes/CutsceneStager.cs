@@ -52,6 +52,8 @@ namespace Assets.Scripts.CommandProcessors
                     case SceneResult.Success:
                     case SceneResult.Failure:
                     default:
+                        // Advance to final scene
+                        result = SceneResult.Continue;
                         SceneIndex = Stages.Count;
                         break;
                 }

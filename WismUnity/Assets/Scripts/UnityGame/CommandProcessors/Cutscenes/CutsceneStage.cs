@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.UI;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Api.Commands;
 
@@ -10,13 +9,11 @@ namespace Assets.Scripts.CommandProcessors
 
     public abstract class CutsceneStage
     {
-        public Command Command { get; }
-
-        public List<CutsceneStage> Children { get; set; }
-
-        public CutsceneStage Next { get; set; }
+        public Command Command { get; private set;  }
 
         public InputManager InputManager { get; set; }
+
+        public bool IsFirstRun { get; set; }
 
         private bool keyPressed;
 
@@ -26,9 +23,25 @@ namespace Assets.Scripts.CommandProcessors
             this.InputManager = GameObject.FindGameObjectWithTag("UnityManager")
                     .GetComponent<UnityManager>()
                     .InputManager;
+
+            this.IsFirstRun = true;
         }
 
-        public abstract SceneResult Action();
+        public SceneResult Action()
+        {
+            if (this.IsFirstRun)
+            {
+                // Clear any static state such as YesNoBox results
+                // TODO: Consider instantiating new YesNo instead of static
+                Reset();
+                this.IsFirstRun = false;
+            }            
+
+            return ActionInternal();
+        }
+
+        protected abstract SceneResult ActionInternal();
+
 
         internal void OnAnyKeyPressed()
         {
@@ -67,11 +80,6 @@ namespace Assets.Scripts.CommandProcessors
             messageBox.Notify(String.Format(message, args));            
         }
 
-        protected bool? AskAcceptReject(string message, params object[] args)
-        {
-            return AskYesNo("AcceptRejectPanel", message, args);
-        }
-
         protected bool? AskYesNo(string message, params object[] args)
         {
             return AskYesNo("YesNoBox", message, args);
@@ -83,12 +91,25 @@ namespace Assets.Scripts.CommandProcessors
                .GetComponent<YesNoBox>();
 
             if (!yesNoBox.Answer.HasValue)
-            {
+            {                
                 InputManager.SetInputMode(InputMode.UI);
                 yesNoBox.Ask(String.Format(message, args));
             }
+            else
+            {
+                // REVIEW: Should this instead be 'previous' input mode?
+                InputManager.SetInputMode(InputMode.WaitForKey);
+            }
 
             return yesNoBox.Answer;
+        }
+
+        protected void Reset()
+        {
+            this.keyPressed = false;
+            GameObject.FindGameObjectWithTag("YesNoBox")
+               .GetComponent<YesNoBox>()
+               .Clear();
         }
     }
 }

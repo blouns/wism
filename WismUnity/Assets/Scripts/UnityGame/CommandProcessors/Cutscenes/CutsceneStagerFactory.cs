@@ -38,7 +38,6 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             }
             else if (command.Location.Boon is ThroneBoon)
             {
-                stages.Add(new RuinsFoundThroneStage(command));
                 stages.Add(new RuinsSitAtThroneStage(command));
             }
 

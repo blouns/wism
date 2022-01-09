@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Managers;
-using Wism.Client.Api.Commands;
+﻿using Wism.Client.Api.Commands;
 
 namespace Assets.Scripts.CommandProcessors
 {
@@ -10,17 +9,15 @@ namespace Assets.Scripts.CommandProcessors
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
-            bool? answer = AskYesNo(
-                "You have found a huge Golden Throne\n" +
-                "Will you sit in the the throne?");
+            bool? answer = AskYesNo("An giant throne stands before you. Will you sit at the throne?");
             if (answer.HasValue)
             {
                 return answer.Value ? SceneResult.Continue : SceneResult.Failure;
             }
 
             return SceneResult.Wait;
-        }
+        }        
     }
 }

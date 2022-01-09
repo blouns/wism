@@ -10,7 +10,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             if (Command.Result == ActionState.NotStarted)
             {

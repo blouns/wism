@@ -20,7 +20,7 @@ namespace Assets.Scripts.CommandProcessors
             };
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             var searchRuinsCommand = (SearchRuinsCommand)Command;
             foreach (var identifier in boonIdentifiers)

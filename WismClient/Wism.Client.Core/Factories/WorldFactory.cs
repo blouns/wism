@@ -122,10 +122,15 @@ namespace Wism.Client.Factories
             // Load late-bound Locations (after world creation) 
             if (worldEntity.Locations != null)
             {
+                var locations = new List<Location>();
+
                 foreach (var locationEntity in worldEntity.Locations)
                 {
-                    _ = LocationFactory.Create(locationEntity, world);
+                    locations.Add(
+                        LocationFactory.Create(locationEntity, world));
                 }
+
+                MapBuilder.AllocateBoons(locations);
             }
 
             // Load late-bound Cities (after world creation) 
@@ -138,47 +143,6 @@ namespace Wism.Client.Factories
             }
 
             return world;
-        }
-
-        private static Tile[,] CreateTiles(WorldEntity worldEntity)
-        {
-            int xMax = worldEntity.MapXUpperBound;
-            int yMax = worldEntity.MapYUpperBound;
-            Tile[,] map = new Tile[xMax, yMax];
-            for (int i = 0; i < map.GetLength(0); i++)
-            {
-                for (int j = 0; j < map.GetLength(1); j++)
-                {
-                    var entity = worldEntity.Tiles[i * xMax + j];
-                    var gameTile = new Tile();
-                    gameTile.X = i;
-                    gameTile.Y = j;
-
-                    if (entity != null)
-                    {
-                        foreach (Terrain terrain in MapBuilder.TerrainKinds.Values)
-                        {
-                            if (entity.TerrainShortName.ToLowerInvariant().Contains(terrain.ShortName.ToLowerInvariant()))
-                            {
-                                gameTile.Terrain = terrain;
-                                break;
-                            }
-                        }
-
-                        if (gameTile.Terrain == null)
-                        {
-                            throw new InvalidOperationException("Failed to create world; unknown terrain type: " + entity.TerrainShortName);
-                        }
-                    }
-                    else
-                    {
-                        // Null or empty tiles are "Void"
-                        gameTile.Terrain = MapBuilder.TerrainKinds["Void"];
-                    }
-                }
-            }
-
-            return map;
-        }
+        }        
     }
 }

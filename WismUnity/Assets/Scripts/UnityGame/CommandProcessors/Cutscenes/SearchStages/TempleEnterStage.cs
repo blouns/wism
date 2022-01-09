@@ -9,7 +9,7 @@ namespace Assets.Scripts.CommandProcessors
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             Notify("You have found a temple...");
             return ContinueOnKeyPress();

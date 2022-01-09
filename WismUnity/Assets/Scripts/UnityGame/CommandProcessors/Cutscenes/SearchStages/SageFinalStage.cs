@@ -9,7 +9,7 @@ namespace Assets.Scripts.CommandProcessors
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             // TODO: Create Sage advice panel
             Notify("A sign says: 'Go away'");

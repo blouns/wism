@@ -31,7 +31,7 @@ namespace Wism.Client.Factories
             return location;
         }
 
-        internal static object Create(LocationEntity locationEntity, World world)
+        internal static Location Create(LocationEntity locationEntity, World world)
         {
             if (locationEntity is null)
             {

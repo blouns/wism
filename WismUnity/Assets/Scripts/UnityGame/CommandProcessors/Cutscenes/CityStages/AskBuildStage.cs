@@ -9,7 +9,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             var cityCommand = (BuildCityCommand)Command;
             var city = cityCommand.City;            

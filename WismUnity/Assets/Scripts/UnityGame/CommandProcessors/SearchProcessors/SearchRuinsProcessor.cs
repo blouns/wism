@@ -12,7 +12,7 @@ namespace Assets.Scripts.CommandProcessors
     public class SearchRuinsProcessor : ICommandProcessor
     {
         private ILogger logger;
-        private readonly UnityManager unityGame;
+        private readonly UnityManager unityManager;
         private CutsceneStager stager;
 
         public SearchRuinsProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
@@ -23,7 +23,7 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             this.logger = loggerFactory.CreateLogger();
-            this.unityGame = unityGame ?? throw new ArgumentNullException(nameof(unityGame));            
+            this.unityManager = unityGame ?? throw new ArgumentNullException(nameof(unityGame));            
         }
 
         public bool CanExecute(ICommandAction command)
@@ -37,10 +37,10 @@ namespace Assets.Scripts.CommandProcessors
             var ruinsCommand = command as SearchRuinsCommand;
             if (stager == null)
             {
-                stager = new CutsceneStagerFactory(unityGame)
+                stager = new CutsceneStagerFactory(unityManager)
                     .CreateRuinsStager(ruinsCommand);
-                unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
-                unityGame.HideSelectedBox();
+                unityManager.InputManager.SetInputMode(InputMode.WaitForKey);
+                unityManager.HideSelectedBox();
             }
             
             var result = stager.Action();
@@ -48,8 +48,8 @@ namespace Assets.Scripts.CommandProcessors
             if (result == ActionState.Failed ||
                 result == ActionState.Succeeded)
             {
-                unityGame.InputManager.SetInputMode(InputMode.Game);
-                unityGame.GameManager.DeselectArmies();
+                unityManager.InputManager.SetInputMode(InputMode.Game);
+                unityManager.GameManager.DeselectArmies();
                 stager = null;
             }
 

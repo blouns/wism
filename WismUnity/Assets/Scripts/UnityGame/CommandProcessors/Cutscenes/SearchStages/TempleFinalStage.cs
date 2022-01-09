@@ -9,7 +9,7 @@ namespace Assets.Scripts.CommandProcessors
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             var templeCommand = (SearchTempleCommand)Command;
 

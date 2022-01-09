@@ -9,7 +9,7 @@ namespace Assets.Scripts.CommandProcessors
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             Notify("Searching through the books, you find...");
             return ContinueOnKeyPress();

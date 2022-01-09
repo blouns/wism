@@ -12,7 +12,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
         {
         }
 
-        public override SceneResult Action()
+        protected override SceneResult ActionInternal()
         {
             var razeCommand = (RazeCityCommand)Command;
             var city = razeCommand.City;

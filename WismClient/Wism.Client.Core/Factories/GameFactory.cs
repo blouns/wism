@@ -48,6 +48,7 @@ namespace Wism.Client.Factories
             var warAssembly = Assembly.Load(warEntity.AssemblyName);
             Game.Current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
             Game.Current.Transition(snapshot.GameState);
+            Game.Current.CurrentPlayerIndex = snapshot.CurrentPlayerIndex;
 
             LoadPlayers(snapshot, Game.Current,
                 out Dictionary<string, Player> cityToPlayer,
@@ -62,6 +63,7 @@ namespace Wism.Client.Factories
 
             // Factory state
             ArmyFactory.LastId = snapshot.LastArmyId;
+            
 
             return Game.Current;
         }
@@ -107,7 +109,10 @@ namespace Wism.Client.Factories
                     }
 
                     // Select armies: need to side-load since they were saved as Visiting Armies
-                    Game.Current.SelectArmiesInternal(selectedArmies);
+                    if (selectedArmies.Count > 0)
+                    {
+                        Game.Current.SelectArmiesInternal(selectedArmies);
+                    }
                 }
             }
         }
