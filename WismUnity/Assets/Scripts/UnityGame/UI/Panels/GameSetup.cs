@@ -1,10 +1,12 @@
 using Assets.Scripts.Managers;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using Wism.Client.Modules;
 using Toggle = UnityEngine.UI.Toggle;
 
 public class GameSetup : MonoBehaviour
@@ -36,13 +38,7 @@ public class GameSetup : MonoBehaviour
 
     public void LoadButton()
     {
-        if (String.IsNullOrEmpty(this.worldName))
-        {
-            // TODO: Notify user?
-            return;
-        }
-
-        LoadGame(this.worldName);
+        LoadGame();
     }
 
     public void StartButton()
@@ -63,21 +59,35 @@ public class GameSetup : MonoBehaviour
         this.worldName = GetWorldNameFromPanel();
     }
 
-    private void LoadGame(string worldName)
+    private void LoadGame()
     {
-        throw new NotImplementedException();
+        UnityNewGameEntity settings = new UnityNewGameEntity();
+        settings.IsNewGame = false;
+        UnityManager.SetNewGameSettings(settings);
+
+        LoadScene(worldName);        
     }
 
     private void StartNewGame(UnityNewGameEntity settings)
     {
         UnityManager.SetNewGameSettings(settings);
+
         LoadScene(settings.WorldName);
     }
 
     private void LoadScene(string worldName)
     {
-        SceneManager.LoadScene(nextScene);
-        SceneManager.UnloadSceneAsync(0);
+        string scenePath = "Scenes/";
+
+#if DEBUG
+        if (worldName.Contains("Test"))
+        {
+            scenePath += "Test/";
+        }
+#endif
+
+        SceneManager.LoadScene(scenePath + worldName);
+        SceneManager.UnloadSceneAsync(1);
     }
 
     private bool AreValidGameSettings(UnityNewGameEntity settings)
@@ -93,12 +103,30 @@ public class GameSetup : MonoBehaviour
             return false;
         }
 
-        // TODO: Load Mod cities for world and compare to number of players
-        //if (settings.World.Cities.Length < settings.Players.Length)
-        //{
-        //    Debug.LogError("Must have at least enough cities for each player.");
-        //    return false;
-        //}
+        if (string.IsNullOrWhiteSpace(settings.WorldName))
+        {
+            Debug.LogError("World name cannot be null.");
+            return false;
+        }
+
+        // Load Mod cities for world and compare to number of players
+        // Must have enough cities for all the players
+        IList<CityInfo> cityInfos = null;
+        try
+        {
+            cityInfos = ModFactory.LoadCityInfos(
+            @$"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{settings.WorldName}");
+        }
+        catch
+        {
+            Debug.LogError("Could not load the world: " + settings.WorldName);
+        }
+        
+        if (cityInfos != null && cityInfos.Count < settings.Players.Length)
+        {
+            Debug.LogError("Must have at least enough cities for each player.");
+            return false;
+        }
 
         return true;
     }
@@ -117,15 +145,19 @@ public class GameSetup : MonoBehaviour
 
     private UnityPlayerEntity[] GetSelectedPlayersFromPanel()
     {
-        var playerEntities = new UnityPlayerEntity[playerToggles.Length];
-        for (int i = 0; i < playerEntities.Length; i++)
+        var playerEntities = new List<UnityPlayerEntity>();
+        for (int i = 0; i < playerToggles.Length; i++)
         {
-            playerEntities[i] = new UnityPlayerEntity();
-            playerEntities[i].IsHuman = true;
-            playerEntities[i].ClanName = GetClanName(i);
+            if (playerToggles[i].isOn)
+            {
+                var playerEntity = new UnityPlayerEntity();
+                playerEntity.IsHuman = true;
+                playerEntity.ClanName = GetClanName(i);
+                playerEntities.Add(playerEntity);
+            }
         }
 
-        return playerEntities;
+        return playerEntities.ToArray();
     }
 
     private string GetClanName(int i)

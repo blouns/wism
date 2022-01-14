@@ -47,7 +47,7 @@ namespace Assets.Scripts.UnityGame.Factories
 
             // Set the coordinates for the locations
             var locationInfos = new List<LocationInfo>(
-                ModFactory.LoadLocationInfos(GameManager.DefaultWorldModPath));
+                ModFactory.LoadLocationInfos($@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{GameManager.CurrentWorldName}"));
             this.debugManager.LogInformation("Loaded location infos");
 
             var locations = new LocationEntity[locationNames.Count];

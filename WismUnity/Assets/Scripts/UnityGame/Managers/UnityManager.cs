@@ -148,7 +148,7 @@ namespace Assets.Scripts.Managers
             else
             {
                 DebugManager.LogInformation("Loading a game...");
-                GetComponent<GameFactory>().LoadGame(gameSettings.WorldName);
+                GetComponent<GameFactory>().LoadNewGame();
             }
         }
 

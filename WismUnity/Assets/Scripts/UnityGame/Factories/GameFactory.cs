@@ -131,14 +131,18 @@ namespace Assets.Scripts
             this.unityManager.GameManager.NewGame(settings);
         }
 
-        public void LoadGame(string worldName)
+        public void LoadNewGame()
         {
-            if (string.IsNullOrWhiteSpace(worldName))
-            {
-                throw new ArgumentException($"'{nameof(worldName)}' cannot be null or whitespace.", nameof(worldName));
-            }
+            Initialize();
+            this.debugManager = this.debugManager = UnityUtilities.GameObjectHardFind("UnityManager")
+                    .GetComponent<DebugManager>();
 
-            throw new NotImplementedException();
+            // Create temporary Game to bootstrap loader
+            Game.CreateDefaultGame();
+            World.CreateDefaultWorld();
+
+            // Load game picker
+            this.unityManager.InputManager.HandleSaveLoadPicker(false);
         }
 
         private static void ValidateNewGameSettings(UnityNewGameEntity newGameEntity)

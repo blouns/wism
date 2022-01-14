@@ -65,14 +65,14 @@ namespace Assets.Scripts.Managers
             HandleInput();
         }
 
-        void SingleLeftClick(object o, System.EventArgs e)
+        private void SingleLeftClick(object o, System.EventArgs e)
         {
             mouseSingleLeftClickTimer.Stop();
 
             singleLeftClickProcessed = true;
         }
 
-        void SingleRightClick(object o, EventArgs e)
+        private void SingleRightClick(object o, EventArgs e)
         {
             holdingRightButton = true;
         }
@@ -322,7 +322,7 @@ namespace Assets.Scripts.Managers
             return this.inputMode;
         }
 
-        private void HandleSaveLoadPicker(bool isSaving)
+        public void HandleSaveLoadPicker(bool isSaving)
         {
             var saveLoadPicker = this.unityManager.SaveLoadPicker;
             if (isSaving)

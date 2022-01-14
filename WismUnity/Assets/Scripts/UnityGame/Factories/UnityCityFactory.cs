@@ -47,7 +47,7 @@ namespace Assets.Scripts.UnityGame.Factories
 
             // Set the coordinates for the cities
             var cityInfos = new List<CityInfo>(
-                ModFactory.LoadCityInfos(GameManager.DefaultWorldModPath));
+                ModFactory.LoadCityInfos($@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{GameManager.CurrentWorldName}"));
             this.debugManager.LogInformation("Loaded city infos");
 
             var cities = new CityEntity[citiesNames.Count];
