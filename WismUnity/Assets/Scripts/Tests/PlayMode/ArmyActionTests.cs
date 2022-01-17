@@ -1,4 +1,6 @@
 ﻿using Assets.Scripts.Managers;
+using Assets.Scripts.Tests.PlayMode.Common;
+using Assets.Scripts.UnityGame.Persistance.Entities;
 using Assets.Tests.PlayMode;
 using NUnit.Framework;
 using System;
@@ -9,6 +11,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 
 public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
 {
@@ -16,7 +19,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
 
     public static string TestWorld = "TestWorld";
     public static string TestSceneFolder = @"Assets/Scenes/Test";
-    private string scenePath = @"Scenes/Test/TestScene";
+    private string scenePath = @"Scenes/Test/TestWorld";
     private bool sceneLoaded;
 
     public void Setup()
@@ -27,11 +30,49 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     [UnitySetUp]
     public IEnumerator UnitySetup()
     {
-        GameManager.CurrentWorldName = TestWorld;
+        UnityNewGameEntity settings = new UnityNewGameEntity()
+        {
+            InteractiveUI = false,
+            IsNewGame = true,
+            Players = GetTestPlayers(),
+            RandomSeed = 1990,
+            RandomStartLocations = false,
+            WorldName = TestWorld
+        };
+        UnityManager.SetNewGameSettings(settings);
         SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
         SceneManager.LoadScene(scenePath, LoadSceneMode.Additive);
 
         yield return new WaitWhile(() => sceneLoaded == false);
+        yield return new WaitForSeconds(2f);
+    }
+
+    [UnityTearDown]
+    public IEnumerator UnityTearDown()
+    {        
+        SceneManager.UnloadSceneAsync(scenePath);
+
+        yield return new WaitWhile(() => sceneLoaded == true);
+        Game.Unload();        
+    }
+
+
+    private UnityPlayerEntity[] GetTestPlayers()
+    {
+        return new UnityPlayerEntity[]
+        {
+            new UnityPlayerEntity()
+            {
+                ClanName = "Sirians",
+                IsHuman = true
+            },
+            new UnityPlayerEntity()
+            {
+                ClanName = "LordBane",
+                IsHuman = false
+            }
+        };
     }
 
     private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
@@ -39,10 +80,9 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         this.sceneLoaded = true;
     }
 
-    [UnityTearDown]
-    public IEnumerator UnityTearDown()
+    private void OnSceneUnloaded(Scene arg0)
     {
-        yield return SceneManager.UnloadSceneAsync(scenePath);
+        this.sceneLoaded = false;
     }
 
     public void Cleanup()
@@ -55,33 +95,41 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     [UnityTest]
     public IEnumerator Hero_HiredInCapitol_Pass()
     {
-        // Assign            
+        // Assign
         var player1 = Game.Current.GetCurrentPlayer();
-        var armies = player1.GetArmies();
-        var hero = armies[0] as Hero;
 
         // Act
-        yield return new WaitForSeconds(0.1f);
-
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
+        var hero = FindFirstHero(player1);
 
         // Assert
         Assert.AreEqual("Marthos", player1.Capitol.ShortName);
         Assert.AreEqual("Sirians", player1.Capitol.Clan.ShortName);
-        Assert.AreEqual(1, armies.Count);
+        Assert.AreEqual(1, player1.GetArmies().Count);
         Assert.IsNotNull(hero);
-        Assert.AreEqual("Marthos", hero.Tile.City.ShortName);
-    }
 
+        if (hero != null)
+        {
+            Assert.AreEqual("Marthos", hero.Tile.City.ShortName);
+            Assert.AreEqual("Lowenbrau", hero.DisplayName, "Lowenbrau has not returned!");
+        }
+    }
 
     [UnityTest]
     public IEnumerator Hero_MoveNorth_Pass()
     {
         // Assign
+        var inputManager = GameObject.FindGameObjectWithTag("UnityManager")
+            .GetComponent<InputManager>();
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
+
         var hero = FindFirstHero(Game.Current.GetCurrentPlayer());
         int originalX = hero.X;
         int originalY = hero.Y;
         var armies = new List<Army>() { hero };
-        var gameManager = UnityUtilities.GameObjectHardFind("UnityManager")
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
         gameManager.StandardTime = 0.1f;
 
@@ -100,11 +148,13 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     public IEnumerator Hero_MoveSouth_Pass()
     {
         // Assign
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
         var hero = FindFirstHero(Game.Current.GetCurrentPlayer());
         int originalX = hero.X;
         int originalY = hero.Y;
         var armies = new List<Army>() { hero };
-        var gameManager = UnityUtilities.GameObjectHardFind("UnityManager")
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
         gameManager.StandardTime = 0.1f;
 
@@ -124,11 +174,13 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     public IEnumerator Hero_MoveEast_Pass()
     {
         // Assign
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
         var hero = FindFirstHero(Game.Current.GetCurrentPlayer());
         int originalX = hero.X;
         int originalY = hero.Y;
         var armies = new List<Army>() { hero };
-        var gameManager = UnityUtilities.GameObjectHardFind("UnityManager")
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
         gameManager.StandardTime = 0.1f;
 
@@ -148,11 +200,13 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     public IEnumerator Hero_MoveWest_Pass()
     {
         // Assign
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
         var hero = FindFirstHero(Game.Current.GetCurrentPlayer());
         int originalX = hero.X;
         int originalY = hero.Y;
         var armies = new List<Army>() { hero };
-        var gameManager = UnityUtilities.GameObjectHardFind("UnityManager")
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
         gameManager.StandardTime = 0.1f;
 
@@ -173,16 +227,19 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     {
         // Assign
         var siriansPlayer = Game.Current.Players[0];
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
         var siriansHero = FindFirstHero(siriansPlayer);
         siriansHero.Strength = 9;
 
-        var banesPlayer = Game.Current.Players[1];
-        var banesHero = FindFirstHero(banesPlayer);
+        var banesPlayer = Game.Current.Players[1];        
         var banesCitadel = banesPlayer.Capitol;
+        banesPlayer.HireHero(banesCitadel.Tile);
+        var banesHero = FindFirstHero(banesPlayer);
         int originalY = siriansHero.Y;
         var armies = new List<Army>() { siriansHero };
 
-        var gameManager = UnityUtilities.GameObjectHardFind("UnityManager")
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
         gameManager.StandardTime = 0.25f;
         gameManager.WarTime = 0.25f;
@@ -211,32 +268,56 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     {
         // Assign
         var siriansPlayer = Game.Current.Players[0];
+
+        // Get new hero
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");        
         var siriansHero = FindFirstHero(siriansPlayer);
         siriansHero.Strength = 9;
         var siriansArmies = new List<Army>() { siriansHero };
 
-        var banesPlayer = Game.Current.Players[1];
-        var banesHero = FindFirstHero(banesPlayer);
-        banesHero.Strength = 3;
-        var banesArmies = new List<Army>() { banesHero };
-        var banesCitadel = banesPlayer.Capitol;
+        // Dismiss production panel
+        yield return new WaitForInteractivePanel(
+            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
+        yield return WismTestAction.DismissProductionPanel();
 
-        var gameManager = UnityUtilities.GameObjectHardFind("UnityManager")
+        var banesPlayer = Game.Current.Players[1];
+        var banesCitadel = banesPlayer.Capitol;                    
+
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
         gameManager.StandardTime = 0.25f;
         gameManager.WarTime = 0.25f;
 
-        // Act 1 : Move Sirians' hero to Banes Citadel
+        // Act 1 : Sirians: Move Sirians' hero to Banes Citadel
         gameManager.SelectArmies(siriansArmies);
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
         gameManager.MoveSelectedArmies(banesCitadel.X - 1, siriansHero.Y);
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
+        // Set ID for 'last seen command' after the final Sirians command for Lord Bane wait
+        int lastId = gameManager.ControllerProvider.CommandController.GetLastCommand().Id + 1;
         gameManager.EndTurn();
-        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+        //yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
-        // Act 2: Attack Sirians' hero 
+        // Act 2: Lord Bane: Attack Sirians' hero
+
+        // Get new hero        
+        ///////////////////////////////////////////////////////////////////////////////////////
+        // TODO: IDEA: Switch WismTestAction to non-static and keep track of lastId internally
+        ///////////////////////////////////////////////////////////////////////////////////////
+        yield return WismTestAction.WaitForNewHeroOffer(lastId);
+        yield return WismTestAction.AcceptNewHeroOffer("Lord Bane", lastId);
+        var banesHero = FindFirstHero(banesPlayer);
+        banesHero.Strength = 3;
+        var banesArmies = new List<Army>() { banesHero };
+
+        // Dismiss production panel
+        yield return new WaitForInteractivePanel(
+            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
+        yield return WismTestAction.DismissProductionPanel();
+
         gameManager.SelectArmies(banesArmies);
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
@@ -253,12 +334,23 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     {
         // Assign
         var siriansPlayer = Game.Current.Players[0];
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
         var siriansHero = FindFirstHero(siriansPlayer);
         var siriansArmies = new List<Army>() { siriansHero };
 
-        var ruins = World.Current.GetLocations().Find(l => l.ShortName == "CryptKeeper");
+        // Dismiss production panel
+        yield return new WaitForInteractivePanel(
+            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
+        yield return WismTestAction.DismissProductionPanel();
 
-        var gameManager = UnityUtilities.GameObjectHardFind("UnityManager")
+        // Override boon
+        var ruins = World.Current.GetLocations().Find(l => l.ShortName == "CryptKeeper");
+        var artifact = Artifact.Create(
+            ModFactory.FindArtifactInfo("StaffOfMight"));
+        ruins.Boon = new ArtifactBoon(artifact);
+
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
         gameManager.StandardTime = 0.25f;
 
@@ -270,7 +362,9 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
         gameManager.SearchLocation();
-        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+        var inputManager = GameObject.FindGameObjectWithTag("UnityManager")
+            .GetComponent<InputManager>();
+        yield return new WaitForSeconds(2f);
 
         if (siriansHero.Tile.HasItems())
         {

@@ -41,8 +41,8 @@ namespace Wism.Client.MapObjects
 
         public override string ShortName { get => Info.ShortName; }
         public string Kind { get => Info.Kind; }
-        public IBoon Boon { get; internal set; }
-        public string Monster { get; internal set; }
+        public IBoon Boon { get; set; }
+        public string Monster { get; set; }
         public bool Searched { get => searched; set => searched = value; }
 
         protected Location(LocationInfo info)

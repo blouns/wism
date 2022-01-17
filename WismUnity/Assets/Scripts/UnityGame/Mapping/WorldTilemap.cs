@@ -21,12 +21,13 @@ namespace Assets.Scripts.Tilemaps
             tileMap = transform.GetComponent<Tilemap>();
         }
 
-        public World CreateWorldFromScene(string worldPath)
+        public World CreateWorldFromScene()
         {
-            var debugManager = UnityUtilities.GameObjectHardFind("UnityManager")
-                    .GetComponent<DebugManager>();
+            var unityManagerGO = UnityUtilities.GameObjectHardFind("UnityManager");
+            var debugManager = unityManagerGO.GetComponent<DebugManager>();
+            var gameManager = unityManagerGO.GetComponent<GameManager>();
 
-            MapBuilder.Initialize(GameManager.DefaultModPath, worldPath);
+            MapBuilder.Initialize(gameManager.ModPath, gameManager.WorldName);
             debugManager.LogInformation("Initialized MapBuilder");
 
             TileBase[] tilemapTiles = GetUnityTiles(out int boundsX, out int boundsY);
@@ -126,12 +127,12 @@ namespace Assets.Scripts.Tilemaps
             tileMap.SetTile(tileMap.WorldToCell(position), tile);
         }
 
-        internal Vector3 ConvertGameToUnityVector(int gameX, int gameY)
+        public Vector3 ConvertGameToUnityVector(int gameX, int gameY)
         {
             return MapUtilities.ConvertGameToUnityVector(gameX, gameY, this);            
         }
 
-        internal Vector2Int ConvertUnityToGameVector(Vector3 worldVector)
+        public Vector2Int ConvertUnityToGameVector(Vector3 worldVector)
         {
             return MapUtilities.ConvertUnityToGameVector(worldVector);
         }

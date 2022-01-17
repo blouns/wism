@@ -27,7 +27,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public int SceneIndex { get; set; }
         
-        internal void OnAnyKeyPressed()
+        public void OnAnyKeyPressed()
         {
             if (SceneIndex < Stages.Count)
             {

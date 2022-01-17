@@ -1,4 +1,6 @@
 ﻿using Assets.Scripts.Managers;
+using Assets.Scripts.Tests.PlayMode.Common;
+using Assets.Scripts.UnityGame.Persistance.Entities;
 using Assets.Tests.PlayMode;
 using NUnit.Framework;
 using System;
@@ -16,7 +18,7 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
 
     public static string TestWorld = "TestWorld";
     public static string TestSceneFolder = @"Assets/Scenes/Test";
-    private string scenePath = @"Scenes/Test/TestScene";
+    private string scenePath = @"Scenes/Test/TestWorld";
     private bool sceneLoaded;
 
     public void Setup()
@@ -27,11 +29,49 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
     [UnitySetUp]
     public IEnumerator UnitySetup()
     {
-        GameManager.CurrentWorldName = TestWorld;
+        UnityNewGameEntity settings = new UnityNewGameEntity()
+        {
+            InteractiveUI = false,
+            IsNewGame = true,
+            Players = GetTestPlayers(),
+            RandomSeed = 1990,
+            RandomStartLocations = false,
+            WorldName = TestWorld
+        };
+        UnityManager.SetNewGameSettings(settings);
         SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
         SceneManager.LoadScene(scenePath, LoadSceneMode.Additive);
 
         yield return new WaitWhile(() => sceneLoaded == false);
+        yield return new WaitForSeconds(2f);
+    }
+
+    [UnityTearDown]
+    public IEnumerator UnityTearDown()
+    {
+        SceneManager.UnloadSceneAsync(scenePath);
+
+        yield return new WaitWhile(() => sceneLoaded == true);
+        Game.Unload();
+    }
+
+
+    private UnityPlayerEntity[] GetTestPlayers()
+    {
+        return new UnityPlayerEntity[]
+        {
+            new UnityPlayerEntity()
+            {
+                ClanName = "Sirians",
+                IsHuman = true
+            },
+            new UnityPlayerEntity()
+            {
+                ClanName = "LordBane",
+                IsHuman = false
+            }
+        };
     }
 
     private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
@@ -39,10 +79,9 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
         this.sceneLoaded = true;
     }
 
-    [UnityTearDown]
-    public IEnumerator UnityTearDown()
+    private void OnSceneUnloaded(Scene arg0)
     {
-        yield return SceneManager.UnloadSceneAsync(scenePath);
+        this.sceneLoaded = false;
     }
 
     public void Cleanup()
@@ -57,10 +96,17 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
     {
         // Assign
         var siriansPlayer = Game.Current.Players[0];
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
         var siriansHero = FindFirstHero(siriansPlayer);
-        var marthos = siriansPlayer.Capitol;       
+        var marthos = siriansPlayer.Capitol;
 
-        var gameManager = UnityUtilities.GameObjectHardFind("UnityManager")
+        // Dismiss production panel
+        yield return new WaitForInteractivePanel(
+            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
+        yield return WismTestAction.DismissProductionPanel();
+
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
         gameManager.StandardTime = 0.1f;
 
@@ -69,9 +115,16 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
         gameManager.EndTurn();
-        yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
         // Act 2: Bane do nothing
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lord Bane");
+
+        // Dismiss production panel
+        yield return new WaitForInteractivePanel(
+            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
+        yield return WismTestAction.DismissProductionPanel();
+
         gameManager.EndTurn();
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 

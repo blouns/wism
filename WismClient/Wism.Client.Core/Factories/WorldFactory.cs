@@ -20,7 +20,6 @@ namespace Wism.Client.Factories
 
             armiesNameTileDict = new Dictionary<int, Tile>();
             visitingNameTileDict = new Dictionary<int, Tile>();
-            var locationNameTileDict = new Dictionary<string, Tile>();
 
             for (int y = 0; y < yMax; y++)
             {
@@ -94,6 +93,10 @@ namespace Wism.Client.Factories
 
         public static World Create(WorldEntity worldEntity)
         {
+            // Initalize mod objects
+            // TODO: Add Mod Path to WorldEntity to avoid sublte bugs
+            MapBuilder.Initialize(ModFactory.ModPath, worldEntity.Name);
+
             // Create Tiles            
             int xMax = worldEntity.MapXUpperBound;
             int yMax = worldEntity.MapYUpperBound;

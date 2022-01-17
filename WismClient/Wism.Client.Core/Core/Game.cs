@@ -83,6 +83,14 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
+        /// Unload the current game
+        /// </summary>
+        public static void Unload()
+        {
+            Game.current = null;
+        }
+
+        /// <summary>
         /// Take a gave snapshot with all game state.
         /// </summary>
         /// <returns>Game snapshot</returns>

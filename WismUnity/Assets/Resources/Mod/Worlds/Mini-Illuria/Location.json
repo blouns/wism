@@ -1,0 +1,282 @@
+[
+  {
+    "Id": 0,
+    "X": 13,
+    "Y": 54,
+    "LocationShortName": "TempleIris",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 35,
+    "Y": 65,
+    "LocationShortName": "SeerRiver",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 59,
+    "Y": 52,
+    "LocationShortName": "TempleEmrik",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 82,
+    "Y": 73,
+    "LocationShortName": "GoldenLibrary",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 12,
+    "Y": 23,
+    "LocationShortName": "GreatLibrary",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 26,
+    "Y": 35,
+    "LocationShortName": "TempleMiridine",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 61,
+    "Y": 6,
+    "LocationShortName": "TempleLurinth",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 81,
+    "Y": 3,
+    "LocationShortName": "GrandOracle",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 19,
+    "Y": 71,
+    "LocationShortName": "GreyportRuins",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 16,
+    "Y": 68,
+    "LocationShortName": "EmperorsCrypt",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 14,
+    "Y": 56,
+    "LocationShortName": "HarvestStone",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 8,
+    "Y": 55,
+    "LocationShortName": "OldWoodsTower",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 25,
+    "Y": 73,
+    "LocationShortName": "DruidsTemple",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 28,
+    "Y": 52,
+    "LocationShortName": "NirnsCrypt",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 41,
+    "Y": 46,
+    "LocationShortName": "NirnsDeep",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 45,
+    "Y": 63,
+    "LocationShortName": "MirkDecay",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 59,
+    "Y": 67,
+    "LocationShortName": "WizardsHearth",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 55,
+    "Y": 48,
+    "LocationShortName": "DragonHalls",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 62,
+    "Y": 60,
+    "LocationShortName": "Bridgetower",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 78,
+    "Y": 70,
+    "LocationShortName": "CryptMolok",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 75,
+    "Y": 44,
+    "LocationShortName": "HallsChaos",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 68,
+    "Y": 47,
+    "LocationShortName": "DragontowerRuins",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 71,
+    "Y": 42,
+    "LocationShortName": "NevDolar",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 15,
+    "Y": 37,
+    "LocationShortName": "OldInn",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 21,
+    "Y": 20,
+    "LocationShortName": "ThroneHoran",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 17,
+    "Y": 13,
+    "LocationShortName": "ThroneBalnor",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 21,
+    "Y": 17,
+    "LocationShortName": "GiantsTomb",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 21,
+    "Y": 43,
+    "LocationShortName": "TowerDeath",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 37,
+    "Y": 22,
+    "LocationShortName": "RuinsHaviel",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 29,
+    "Y": 7,
+    "LocationShortName": "DuskStone",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 31,
+    "Y": 7,
+    "LocationShortName": "DawnStone",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 56,
+    "Y": 14,
+    "LocationShortName": "Gemhold",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 53,
+    "Y": 30,
+    "LocationShortName": "DarkBarrows",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 46,
+    "Y": 41,
+    "LocationShortName": "DwarfHalls",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 63,
+    "Y": 20,
+    "LocationShortName": "Guardian",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 76,
+    "Y": 22,
+    "LocationShortName": "TowerNight",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 71,
+    "Y": 12,
+    "LocationShortName": "CryptBaal",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 67,
+    "Y": 21,
+    "LocationShortName": "TombNaar",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 75,
+    "Y": 15,
+    "LocationShortName": "Monolyth",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 40,
+    "Y": 72,
+    "LocationShortName": "RuinsKabor",
+    "Searched": false
+  }
+]

@@ -43,7 +43,7 @@ namespace Assets.Scripts.CommandProcessors
         protected abstract SceneResult ActionInternal();
 
 
-        internal void OnAnyKeyPressed()
+        public void OnAnyKeyPressed()
         {
             keyPressed = true;
         }
@@ -62,6 +62,11 @@ namespace Assets.Scripts.CommandProcessors
 
         protected bool KeyPressed()
         {
+            if (!this.InputManager.UnityManager.InteractiveUI)
+            {
+                return true;
+            }
+
             return keyPressed;
         }
 

@@ -1,0 +1,23 @@
+[
+  {
+    "Id": 0,
+    "X": 5,
+    "Y": 3,
+    "LocationShortName": "CryptKeeper",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 35,
+    "Y": 10,
+    "LocationShortName": "SagesHut",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 9,
+    "Y": 6,
+    "LocationShortName": "TempleDog",
+    "Searched": false
+  }
+]

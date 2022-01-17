@@ -20,38 +20,37 @@ namespace Assets.Scripts.UnityGame.Factories
         /// <param name="worldName">World name</param>
         /// <param name="tilemap">WorldTilemap from scene</param>
         /// <returns>WorldEntity from a scene</returns>
-        public WorldEntity CreateWorld(string worldName, WorldTilemap tilemap)
+        public WorldEntity CreateWorld(string worldName, UnityManager unityManager)
         {
             if (string.IsNullOrWhiteSpace(worldName))
             {
-                throw new System.ArgumentException($"'{nameof(worldName)}' cannot be null or whitespace.", nameof(worldName));
+                throw new ArgumentException($"'{nameof(worldName)}' cannot be null or whitespace.", nameof(worldName));
             }
 
-            if (tilemap is null)
+            if (unityManager is null)
             {
-                throw new ArgumentNullException(nameof(tilemap));
+                throw new ArgumentNullException(nameof(unityManager));
             }
 
             WorldEntity entity = new WorldEntity();
 
             entity.Name = worldName;
-            entity.Tiles = CreateTiles(worldName, tilemap, out int xUpperBound, out int yUpperBound);
+            entity.Tiles = CreateTiles(unityManager.WorldTilemap, out int xUpperBound, out int yUpperBound);
             entity.MapXUpperBound = xUpperBound;
             entity.MapYUpperBound = yUpperBound;
 
-            // TODO: Load the Scene as opposed to using 'current' scene
             var cityFactory = new UnityCityFactory(debugManager);
-            entity.Cities = cityFactory.CreateCities(tilemap);
+            entity.Cities = cityFactory.CreateCities(worldName, unityManager);
 
             var locationFactory = new UnityLocationFactory(debugManager);
-            entity.Locations = locationFactory.CreateLocations(tilemap);
+            entity.Locations = locationFactory.CreateLocations(worldName, unityManager);
 
             return entity;
         }
 
-        private TileEntity[] CreateTiles(string worldName, WorldTilemap tilemap, out int xUpperBound, out int yUpperBound)
+        private TileEntity[] CreateTiles(WorldTilemap tilemap, out int xUpperBound, out int yUpperBound)
         {            
-            var map = tilemap.CreateWorldFromScene(worldName).Map;
+            var map = tilemap.CreateWorldFromScene().Map;
             xUpperBound = map.GetUpperBound(0);
             yUpperBound = map.GetUpperBound(1);
 

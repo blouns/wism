@@ -1,3 +1,4 @@
+using Assets.Scripts.Managers;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +8,7 @@ public class YesNoBox : MonoBehaviour
     private Text notificationText;
     private CanvasGroup canvasGroup;
     private bool? answer;
+    private UnityManager unityManager;
 
     public bool? Answer { get => answer; set => answer = value; }
 
@@ -16,6 +18,8 @@ public class YesNoBox : MonoBehaviour
     {
         var yesNoGO = gameObject;
 
+        this.unityManager = GameObject.FindGameObjectWithTag("UnityManager")
+            .GetComponent<UnityManager>();
         this.notificationText = yesNoGO.transform.Find("Message").GetComponent<Text>();
         this.canvasGroup = yesNoGO.GetComponent<CanvasGroup>();
     }
@@ -50,6 +54,12 @@ public class YesNoBox : MonoBehaviour
         canvasGroup.alpha = 1f;
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
+
+        // Automatic "Yes" if non-interactive UI
+        if (!this.unityManager.InteractiveUI)
+        {
+            Answer = true;
+        }
     }
 
     private void Hide()

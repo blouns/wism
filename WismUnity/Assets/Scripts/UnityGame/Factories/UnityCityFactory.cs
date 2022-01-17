@@ -23,7 +23,7 @@ namespace Assets.Scripts.UnityGame.Factories
         /// </summary>
         /// <param name="worldTilemap">WorldTilemap with cities to create</param>
         /// <returns>CityEntities based on scene</returns>
-        public CityEntity[] CreateCities(WorldTilemap worldTilemap)
+        public CityEntity[] CreateCities(string worldName, UnityManager unityManager)
         {
             Dictionary<string, GameObject> citiesNames = new Dictionary<string, GameObject>();
 
@@ -43,12 +43,12 @@ namespace Assets.Scripts.UnityGame.Factories
                 citiesNames.Add(cityEntry.cityShortName, cityGO);
                 cityGO.name = cityEntry.cityShortName;
             }
-            this.debugManager.LogInformation("Initialized city GameObjects");
+            this.debugManager.LogInformation("Initialized City GameObjects: " + cityCount);
 
             // Set the coordinates for the cities
-            var cityInfos = new List<CityInfo>(
-                ModFactory.LoadCityInfos($@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{GameManager.CurrentWorldName}"));
-            this.debugManager.LogInformation("Loaded city infos");
+            var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
+            var cityInfos = new List<CityInfo>(ModFactory.LoadCityInfos(path));
+            this.debugManager.LogInformation("Loaded CityInfos: " + path);
 
             var cities = new CityEntity[citiesNames.Count];
             int cityIndex = 0;
@@ -57,7 +57,7 @@ namespace Assets.Scripts.UnityGame.Factories
                 if (citiesNames.ContainsKey(ci.ShortName))
                 {
                     var go = citiesNames[ci.ShortName];
-                    var coords = worldTilemap.ConvertUnityToGameVector(go.transform.position);
+                    var coords = unityManager.WorldTilemap.ConvertUnityToGameVector(go.transform.position);
                     cities[cityIndex++] = new CityEntity()
                     {
                         CityShortName = ci.ShortName,

@@ -161,10 +161,9 @@ namespace Wism.Client.Test.Scenario
             var commandController = TestUtilities.CreateCommandController();
             var gameController = TestUtilities.CreateGameController();
 
-            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+            TestUtilities.NewGame(commandController, gameController, TestUtilities.DefaultTestWorld);
             Game.Current.IgnoreGameOver = true;
 
-            MapBuilder.AddCitiesFromWorldPath(World.Current, TestUtilities.DefaultTestWorld);
             Player sirians = Game.Current.Players[0];
             Player lordBane = Game.Current.Players[1];
             const int startingGold = 432;

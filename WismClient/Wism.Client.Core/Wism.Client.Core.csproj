@@ -27,10 +27,10 @@
     <None Update="mod\Worlds\Mini-Illuria\Location.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="mod\Worlds\PlayTestWorld\City.json">
+    <None Update="mod\Worlds\UnitTestWorld\City.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="mod\Worlds\PlayTestWorld\Location.json">
+    <None Update="mod\Worlds\UnitTestWorld\Location.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="mod\Worlds\TestWorld\City.json">

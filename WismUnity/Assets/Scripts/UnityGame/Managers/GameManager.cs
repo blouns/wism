@@ -24,11 +24,14 @@ namespace Assets.Scripts.Managers
         public float StandardTime = 0.25f;
         public float WarTime = 1.0f;
         public const int MaxArmies = Army.MaxArmies;
-        public static readonly string DefaultWorld = @"Illuria";
-        public static string DefaultModPath = @"Assets\Mod";
-        public static string DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
+        public readonly static string DefaultWorld = @"Mini-Illuria";
+        public readonly static string DefaultModPath = @"Assets\Mod";
+        public readonly static string DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
 
-        public static string CurrentWorldName = DefaultWorld;
+        [SerializeField]
+        private string worldName = DefaultWorld;
+        [SerializeField]
+        private string modPath = DefaultModPath;
 
         // Controllers for the WISM Client API
         private ControllerProvider provider;
@@ -37,6 +40,9 @@ namespace Assets.Scripts.Managers
 
         public ControllerProvider ControllerProvider { get => provider; set => provider = value; }
         public ILoggerFactory LoggerFactory { get; set; }
+        
+        public string WorldName { get => worldName; set => worldName = value; }
+        public string ModPath { get => modPath; set => modPath = value; }
 
         public void Initialize()
         {
@@ -54,10 +60,6 @@ namespace Assets.Scripts.Managers
                 PlayerController = new PlayerController(LoggerFactory)
             };
             commandController = provider.CommandController;
-
-            // Modules path
-            DefaultModPath = @$"{Application.dataPath}\{ModFactory.ModPath}";            
-            DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
         }
 
         public void SelectArmies(List<Army> armies)

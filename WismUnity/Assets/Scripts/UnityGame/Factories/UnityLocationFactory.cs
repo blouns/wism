@@ -23,7 +23,7 @@ namespace Assets.Scripts.UnityGame.Factories
         /// </summary>
         /// <param name="worldTilemap">WorldTilemap with locations to create</param>
         /// <returns>LocationEntities based on scene</returns>
-        public LocationEntity[] CreateLocations(WorldTilemap worldTilemap)
+        public LocationEntity[] CreateLocations(string worldName, UnityManager unityManger)
         {
             Dictionary<string, GameObject> locationNames = new Dictionary<string, GameObject>();
 
@@ -43,12 +43,13 @@ namespace Assets.Scripts.UnityGame.Factories
                 locationNames.Add(locationEntry.locationShortName, locationGO);
                 locationGO.name = locationEntry.locationShortName;
             }
-            this.debugManager.LogInformation("Initialized location GameObjects");
+            this.debugManager.LogInformation("Initialized Location GameObjects: " + locationCount);
 
             // Set the coordinates for the locations
+            var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
             var locationInfos = new List<LocationInfo>(
-                ModFactory.LoadLocationInfos($@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{GameManager.CurrentWorldName}"));
-            this.debugManager.LogInformation("Loaded location infos");
+                ModFactory.LoadLocationInfos(path));
+            this.debugManager.LogInformation("Loaded LocationInfos: " + path);
 
             var locations = new LocationEntity[locationNames.Count];
             int locationIndex = 0;
@@ -57,7 +58,7 @@ namespace Assets.Scripts.UnityGame.Factories
                 if (locationNames.ContainsKey(ci.ShortName))
                 {
                     var go = locationNames[ci.ShortName];
-                    var coords = worldTilemap.ConvertUnityToGameVector(go.transform.position);
+                    var coords = unityManger.WorldTilemap.ConvertUnityToGameVector(go.transform.position);
                     locations[locationIndex++] = new LocationEntity()
                     {
                         LocationShortName = ci.ShortName,

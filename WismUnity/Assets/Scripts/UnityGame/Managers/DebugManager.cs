@@ -3,6 +3,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using Wism.Client.Common;
+using Wism.Client.Core;
 using ILogger = Wism.Client.Common.ILogger;
 
 namespace Assets.Scripts.Managers
@@ -19,7 +20,10 @@ namespace Assets.Scripts.Managers
 
         public void LateUpdate()
         {
-            this.debugText.gameObject.SetActive(IsDebugOn());
+            if (this.debugText != null)
+            {
+                this.debugText.gameObject.SetActive(IsDebugOn());
+            }
 
             if (IsDebugOn())
             {

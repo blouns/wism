@@ -36,6 +36,7 @@ namespace Assets.Scripts.Managers
         public GameManager GameManager { get => gameManager; set => gameManager = value; }
         public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
         public InputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
+        public InputMode InputMode { get => inputMode; private set => inputMode = value; }
 
         public delegate void AnyKeyPressed();
 
@@ -79,7 +80,7 @@ namespace Assets.Scripts.Managers
 
         public void SetInputMode(InputMode mode)
         {
-            this.inputMode = mode;
+            this.InputMode = mode;
         }
 
         public void SkipInput()
@@ -92,7 +93,7 @@ namespace Assets.Scripts.Managers
         /// </summary>
         private void HandleInput()
         {
-            switch (this.inputMode)
+            switch (this.InputMode)
             {
                 case InputMode.Game:
                     HandleGameInput();
@@ -319,7 +320,7 @@ namespace Assets.Scripts.Managers
 
         public InputMode GetInputMode()
         {
-            return this.inputMode;
+            return this.InputMode;
         }
 
         public void HandleSaveLoadPicker(bool isSaving)

@@ -91,6 +91,11 @@ public class SolicitInput : MonoBehaviour
         return this.inputField.text;
     }
 
+    public void SetInputText(string text)
+    {
+        this.inputField.text = text;
+    }
+
     private void Close()
     {
         this.isInitialized = false;

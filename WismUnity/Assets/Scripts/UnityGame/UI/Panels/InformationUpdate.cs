@@ -41,6 +41,11 @@ namespace Assets.Scripts.UI
         /// </summary>
         public void LateUpdate()
         {
+            if (!Game.IsInitialized())
+            {
+                return;
+            }
+
             if (this.inputHandler == null)
             {
                 this.inputHandler = this.inputManager.InputHandler;

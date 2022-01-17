@@ -2,6 +2,7 @@
 using System;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
+using UnityEngine;
 
 namespace Assets.Scripts.UI
 {
@@ -39,8 +40,9 @@ namespace Assets.Scripts.UI
         {
             string value;
             Player player = Game.Current.GetCurrentPlayer();
-            Location location = subject.Location;
-            string worldName = GameManager.CurrentWorldName;
+            Location location = subject.Location;            
+            string worldName = GameObject.FindGameObjectWithTag("UnityManager")
+                .GetComponent<GameManager>().WorldName;
 
             switch (index)
             {

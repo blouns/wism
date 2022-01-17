@@ -39,7 +39,10 @@ namespace Assets.Scripts.CommandProcessors
             {
                 stager = new CutsceneStagerFactory(unityManager)
                     .CreateRuinsStager(ruinsCommand);
-                unityManager.InputManager.SetInputMode(InputMode.WaitForKey);
+                if (unityManager.InteractiveUI)
+                {
+                    unityManager.InputManager.SetInputMode(InputMode.WaitForKey);
+                }
                 unityManager.HideSelectedBox();
             }
             

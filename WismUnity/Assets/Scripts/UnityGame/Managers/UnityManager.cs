@@ -8,7 +8,6 @@ using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
-using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using ILogger = Wism.Client.Common.ILogger;
 
@@ -59,9 +58,10 @@ namespace Assets.Scripts.Managers
         private CameraFollow cameraFollow;
         
         private bool isInitialized;
-        private bool showDebugError = true;
+        private bool showDebugError = false;
         private ExecutionMode executionMode;
         private ProductionMode productionMode;
+        private bool interactiveUI = true;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }        
@@ -75,13 +75,8 @@ namespace Assets.Scripts.Managers
         public ItemPicker ItemPicker { get => itemPicker; set => itemPicker = value; }
         public SaveLoadPicker SaveLoadPicker { get => saveLoadPicker; set => saveLoadPicker = value; }
         public int LastCommandId { get => lastCommandId; set => lastCommandId = value; }
-        public DebugManager DebugManager { get => debugManager; set => debugManager = value; }        
-
-        public void Awake()
-        {
-            // For calling UnityManager from other scenes
-            DontDestroyOnLoad(this);
-        }
+        public DebugManager DebugManager { get => debugManager; set => debugManager = value; }
+        public bool InteractiveUI { get => interactiveUI; set => interactiveUI = value; }
 
         public void Start()
         {
@@ -113,6 +108,18 @@ namespace Assets.Scripts.Managers
 
             return result;
         }
+
+#if UNITY_EDITOR
+        public void InitializeEditor()
+        {
+            IntializeWismApi();
+
+            DebugManager.LogInformation("Editor initialization complete");
+
+            this.isInitialized = true;
+            this.ExecutionMode = ExecutionMode.Editor;
+        }
+#endif
 
         public void Initialize(UnityNewGameEntity gameSettings)
         {
@@ -215,7 +222,7 @@ namespace Assets.Scripts.Managers
 
             this.DebugManager = GetComponent<DebugManager>();
             this.DebugManager.Initialize(this.GameManager.LoggerFactory);
-            DebugManager.LogInformation("Initialized GameManager: " + GameManager.DefaultModPath);
+            DebugManager.LogInformation("Initialized GameManager: " + this.GameManager.ModPath);
         }
 
         /// <summary>
@@ -248,15 +255,13 @@ namespace Assets.Scripts.Managers
                 switch (this.ExecutionMode)
                 {
                     // Bootstrap game
-                    case ExecutionMode.Bootstrap:                        
+                    case ExecutionMode.Bootstrap:
                         DoTasks();
                         this.ExecutionMode = ExecutionMode.Starting;
                         break;
 
                     case ExecutionMode.Starting:
-                        var startingTile = Game.Current.GetCurrentPlayer().Capitol.Tile;
-                        Vector3 worldVector = WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
-                        this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
+                        InitializeSelectedArmyBox();
 
                         // Start first turn
                         GameManager.StartTurn(Game.Current.GetCurrentPlayer());
@@ -282,6 +287,13 @@ namespace Assets.Scripts.Managers
                 DebugManager.LogInformation(ex.Message);
                 throw;
             }
+        }
+
+        private void InitializeSelectedArmyBox()
+        {
+            var startingTile = Game.Current.GetCurrentPlayer().Capitol.Tile;
+            var worldVector = WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
+            this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
         }
 
         internal void Draw()
@@ -416,7 +428,7 @@ namespace Assets.Scripts.Managers
         {
             if (this.selectedArmyBox == null)
             {
-                throw new InvalidOperationException("Selected army box was null.");
+                return;
             }
 
             if (this.InputManager.GetInputMode() != InputMode.Game)

@@ -90,7 +90,7 @@ namespace Assets.Scripts.Managers
 
         private bool IsInitalized()
         {
-            return isInitialized;
+            return isInitialized && Game.IsInitialized();
         }
 
         private List<Artifact> GetItemsOnTiles()

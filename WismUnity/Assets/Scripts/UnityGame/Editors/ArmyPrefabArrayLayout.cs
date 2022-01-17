@@ -26,9 +26,10 @@ namespace Assets.Scripts.Editors
         }
 
         public void Initialize()
-        {
-            var clanInfos = ModFactory.LoadClanInfos(GameManager.DefaultModPath);
-            var armyInfos = ModFactory.LoadArmyInfos(GameManager.DefaultModPath);
+        {         
+            var modPath = GameManager.DefaultModPath;
+            var clanInfos = ModFactory.LoadClanInfos(modPath);
+            var armyInfos = ModFactory.LoadArmyInfos(modPath);
 
             count = clanInfos.Count;
             rows = new ClanArmy[count];            

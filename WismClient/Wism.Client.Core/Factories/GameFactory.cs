@@ -4,6 +4,7 @@ using System.Reflection;
 using Wism.Client.Core;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 using Wism.Client.War;
 
 namespace Wism.Client.Factories

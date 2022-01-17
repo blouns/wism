@@ -78,7 +78,7 @@ namespace Assets.Scripts.Managers
 
         private bool IsInitialized()
         {
-            return this.isInitialized;
+            return this.isInitialized && Game.IsInitialized();
         }
 
         public void DrawCities()

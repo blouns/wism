@@ -36,6 +36,11 @@ public class CameraFollow : MonoBehaviour
 
     public void LateUpdate()
     {
+        if (!Game.IsInitialized())
+        {
+            return;
+        }
+
         HandleCameraMove();
     }
 

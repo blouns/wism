@@ -28,6 +28,11 @@ namespace Assets.Scripts.UI
 
         public void OnMouseOver()
         {
+            if (!Game.IsInitialized())
+            {
+                return;
+            }
+
             // Order matters
             if (IsPanel())
             {

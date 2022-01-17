@@ -4,35 +4,35 @@
     "DisplayName": "Marthos",
     "Defense": 6,
     "Income": 32,
-    "X": 2,
-    "Y": 3,
+    "X": 3,
+    "Y": 4,
     "ClanName": "Sirians",
     "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
-        "Moves": 0,
-        "Strength": 0,
+        "Moves": 8,
+        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "Moves": -2,
-        "Strength": 0,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "Moves": 0,
-        "Strength": 1,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "Pegasus",
-        "Moves": 1,
-        "Strength": 0,
+        "Moves": 15,
+        "Strength": 5,
         "TurnsToProduce": 7,
         "Upkeep": 16
       }
@@ -41,37 +41,37 @@
   {
     "ShortName": "BanesCitadel",
     "DisplayName": "Bane's Citadel",
-    "X": 6,
-    "Y": 3,
+    "X": 7,
+    "Y": 4,
     "ClanName": "LordBane",
     "Defense": 6,
     "Income": 30,
     "ProductionInfos": [
       {
         "ArmyInfoName": "GiantWarriors",
-        "Moves": -2,
-        "Strength": 0,
+        "Moves": 10,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "LightInfantry",
-        "Moves": 0,
-        "Strength": 0,
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "Moves": 0,
-        "Strength": 0,
+        "Moves": 16,
+        "Strength": 6,
         "TurnsToProduce": 4,
         "Upkeep": 8
       },
       {
         "ArmyInfoName": "WolfRiders",
-        "Moves": 0,
-        "Strength": 0,
+        "Moves": 14,
+        "Strength": 5,
         "TurnsToProduce": 3,
         "Upkeep": 8
       }
@@ -92,7 +92,7 @@
       }
     ],
     "ShortName": "Deserton",
-    "X": 4,
-    "Y": 6
+    "X": 5,
+    "Y": 7
   }
 ]
