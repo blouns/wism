@@ -1,0 +1,2184 @@
+[
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Deserton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Deserton",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Zaigonne",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Zaigonne",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 6,
+    "DisplayName": "Bereri",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Bereri",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Tal",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Tal",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Minbourne",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 4,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Minbourne",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Tirfing",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 9,
+        "Strength": 4,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Tirfing",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Amenal",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Amenal",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Pareth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Pareth",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ungor",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Ungor",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gorag",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Gorag",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 3,
+    "DisplayName": "Vival",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Vival",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "LordBane",
+    "Defense": 6,
+    "DisplayName": "Bane's Citadel",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 10,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "BanesCitadel",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Needleton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Needleton",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Gunthang",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 16,
+        "Strength": 4,
+        "TurnsToProduce": 5,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Gunthang",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Deephallow",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Deephallow",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ak-Giriel",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 16,
+        "Strength": 4,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "AkGiriel",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ak-Enlie",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "AkEnlie",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ak-Farzon",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "AkFarzon",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Meneloth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Meneloth",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Malikor",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 13,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Malikor",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Selentines",
+    "Defense": 6,
+    "DisplayName": "Enmouth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 20,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 6,
+        "TurnsToProduce": 8,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Enmouth",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Argrond",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 7,
+        "Strength": 6,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Argrond",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Barthel",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Barthel",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Marton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 4,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Marton",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Waybourne",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Waybourne",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Dethal",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Dethal",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Greenweigh",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Greenweigh",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 3,
+    "DisplayName": "Upway",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Upway",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Darclan",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Darclan",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Maridun",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 18,
+        "Strength": 6,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Maridun",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Jessarton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 2,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 3,
+        "TurnsToProduce": 12,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Jessarton",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Zhoran",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Griffins",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Zhoran",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "GreyDwarves",
+    "Defense": 6,
+    "DisplayName": "Khamar",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Griffins",
+        "Moves": 18,
+        "Strength": 6,
+        "TurnsToProduce": 5,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Khamar",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Upbourne",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Upbourne",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Cragmorton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Griffins",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Cragmorton",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 3,
+    "DisplayName": "Paynor",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Paynor",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Carmel",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 12,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Carmel",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "HorseLords",
+    "Defense": 6,
+    "DisplayName": "Dunethal",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 19,
+        "Strength": 6,
+        "TurnsToProduce": 3,
+        "Upkeep": 6
+      }
+    ],
+    "ShortName": "Dunethal",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Derridon",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 9,
+        "Strength": 3,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 18,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Derridon",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Fleymark",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 18,
+        "Strength": 6,
+        "TurnsToProduce": 3,
+        "Upkeep": 6
+      }
+    ],
+    "ShortName": "Fleymark",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Pa-Kur",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "PaKur",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Ar-Arak",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "ArArak",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 6,
+    "DisplayName": "Dhar-Khosis",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Griffins",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 6,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "DharKhosis",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Citadel Of Fire",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "CitadelOfFire",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Citadel Of Ice",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "CitadelOfIce",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 6,
+    "DisplayName": "Hithos",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 5,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 20,
+        "Strength": 5,
+        "TurnsToProduce": 10,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Hithos",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ubar",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Ubar",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Galin",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 8,
+        "Upkeep": 10
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Galin",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Herzag",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 13,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Herzag",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gimlad",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Gimlad",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Vernon",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 7,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 6,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Vernon",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Thurtz",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Thurtz",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Kazrak",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Kazrak",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "OrcsOfKor",
+    "Defense": 6,
+    "DisplayName": "Kor",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 10,
+        "Strength": 6,
+        "TurnsToProduce": 5,
+        "Upkeep": 6
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Kor",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ilnyr",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Ilnyr",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Ohmsmouth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 10,
+        "Upkeep": 18
+      }
+    ],
+    "ShortName": "Ohmsmouth",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 3,
+    "DisplayName": "Himelton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Himelton",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Wellmore",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Wellmore",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 6,
+    "DisplayName": "Balad Naran",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 15,
+        "Strength": 6,
+        "TurnsToProduce": 2,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "BaladNaran",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Lador",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Lador",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Duinoth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 5,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Duinoth",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "StormGiants",
+    "Defense": 6,
+    "DisplayName": "Stormheim",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 12,
+        "Strength": 6,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Stormheim",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Angbar",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Angbar",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ssuri",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Ssuri",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Tasme",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Tasme",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Argenthorn",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 16,
+        "Strength": 4,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Argenthorn",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 3,
+    "DisplayName": "Troy",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 15,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Troy",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Garom",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Garom",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Quiesce",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Quiesce",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Varde",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Varde",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 3,
+    "DisplayName": "Charling",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Charling",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 6,
+    "DisplayName": "Hereuth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 13,
+        "Upkeep": 20
+      }
+    ],
+    "ShortName": "Hereuth",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Elvallie",
+    "Defense": 6,
+    "DisplayName": "Elvallie",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 10,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 16,
+        "Strength": 4,
+        "TurnsToProduce": 6,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Elvallie",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Gildenhome",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 16,
+        "Strength": 4,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Gildenhome",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 5,
+    "DisplayName": "Khorfe",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Griffins",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 8,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Khorfe",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gluk",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 10,
+        "Strength": 6,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Gluk",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Loremark",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 16,
+        "Strength": 4,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Loremark",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gork",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Gork",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Alfar's Gap",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "AlfarsGap",
+    "X": 0,
+    "Y": 0
+  },
+  {
+    "ClanName": "Sirians",
+    "Defense": 6,
+    "DisplayName": "Marthos",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ],
+    "ShortName": "Marthos",
+    "X": 0,
+    "Y": 0
+  }
+]

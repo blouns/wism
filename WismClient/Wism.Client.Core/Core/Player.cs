@@ -32,6 +32,8 @@ namespace Wism.Client.Core
 
         public bool IsDead { get; set; }
 
+        public bool IsHuman { get; set; }
+
         public City Capitol { get; set; }
 
         public int LastHeroTurn { get => lastHeroTurn; internal set => lastHeroTurn = value; }

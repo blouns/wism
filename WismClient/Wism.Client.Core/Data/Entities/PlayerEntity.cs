@@ -18,6 +18,9 @@ namespace Wism.Client.Entities
         public bool IsDead { get; set; }
 
         [DataMember]
+        public bool IsHuman { get; set; }
+
+        [DataMember]
         public string CapitolShortName { get; set; }
 
         [DataMember]

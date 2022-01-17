@@ -37,6 +37,25 @@ namespace Wism.Client.Core.Controllers
             StartTurn(Game.Current);
         }
 
+        public ActionState NewGame(GameEntity settings)
+        {
+            logger.LogInformation("Creating new game...");
+            try
+            {
+                // Load into current game
+                _ = GameFactory.Create(settings);
+            }
+            catch
+            {
+                logger.LogError("Game creation failed.");
+                throw;
+            }
+
+            logger.LogInformation("New game successfully created.");
+
+            return ActionState.Succeeded;
+        }
+
         public ActionState LoadSnapshot(GameEntity snapshot)
         {
             logger.LogInformation("Loading game snapshot...");

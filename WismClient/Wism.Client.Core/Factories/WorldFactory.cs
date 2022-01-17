@@ -20,7 +20,6 @@ namespace Wism.Client.Factories
 
             armiesNameTileDict = new Dictionary<int, Tile>();
             visitingNameTileDict = new Dictionary<int, Tile>();
-            var locationNameTileDict = new Dictionary<string, Tile>();
 
             for (int y = 0; y < yMax; y++)
             {
@@ -91,5 +90,62 @@ namespace Wism.Client.Factories
 
             return world;
         }
+
+        public static World Create(WorldEntity worldEntity)
+        {
+            // Initalize mod objects
+            // TODO: Add Mod Path to WorldEntity to avoid sublte bugs
+            MapBuilder.Initialize(ModFactory.ModPath, worldEntity.Name);
+
+            // Create Tiles            
+            int xMax = worldEntity.MapXUpperBound;
+            int yMax = worldEntity.MapYUpperBound;
+            Tile[,] map = new Tile[xMax, yMax];
+
+            for (int y = 0; y < yMax; y++)
+            {
+                for (int x = 0; x < xMax; x++)
+                {
+                    var tileEntity = worldEntity.Tiles[x + y * xMax];
+
+                    // Tile details
+                    Tile tile = new Tile();
+                    tile.X = tileEntity.X;
+                    tile.Y = tileEntity.Y;
+                    tile.Terrain = MapBuilder.TerrainKinds[tileEntity.TerrainShortName];
+
+                    map[x, y] = tile;
+                }
+            }
+
+            World.CreateWorld(map);
+            var world = World.Current;
+            world.Name = worldEntity.Name;
+
+            // Load late-bound Locations (after world creation) 
+            if (worldEntity.Locations != null)
+            {
+                var locations = new List<Location>();
+
+                foreach (var locationEntity in worldEntity.Locations)
+                {
+                    locations.Add(
+                        LocationFactory.Create(locationEntity, world));
+                }
+
+                MapBuilder.AllocateBoons(locations);
+            }
+
+            // Load late-bound Cities (after world creation) 
+            if (worldEntity.Cities != null)
+            {
+                foreach (var cityEntity in worldEntity.Cities)
+                {
+                    _ = CityFactory.Create(cityEntity, world);
+                }
+            }
+
+            return world;
+        }        
     }
 }

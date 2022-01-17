@@ -4,12 +4,36 @@ using System.Reflection;
 using Wism.Client.Core;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
 using Wism.Client.War;
 
 namespace Wism.Client.Factories
 {
     public static class GameFactory
     {
+        public static Game Create(GameEntity settings)
+        {
+            if (settings is null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            Game.CreateEmpty();
+
+            // Game settings
+            Game.Current.Random = new Random(settings.Random.Seed);
+            var warEntity = settings.WarStrategy;
+            var warAssembly = Assembly.Load(warEntity.AssemblyName);
+            Game.Current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
+            Game.Current.Transition(settings.GameState);
+
+            CreatePlayers(settings, Game.Current);
+
+            var world = WorldFactory.Create(settings.World);
+
+            return Game.Current;
+        }
+
         public static Game Load(GameEntity snapshot)
         {
             if (snapshot is null)
@@ -25,6 +49,7 @@ namespace Wism.Client.Factories
             var warAssembly = Assembly.Load(warEntity.AssemblyName);
             Game.Current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
             Game.Current.Transition(snapshot.GameState);
+            Game.Current.CurrentPlayerIndex = snapshot.CurrentPlayerIndex;
 
             LoadPlayers(snapshot, Game.Current,
                 out Dictionary<string, Player> cityToPlayer,
@@ -39,8 +64,19 @@ namespace Wism.Client.Factories
 
             // Factory state
             ArmyFactory.LastId = snapshot.LastArmyId;
+            
 
             return Game.Current;
+        }
+
+        private static void CreatePlayers(GameEntity settings, Game current)
+        {
+            var players = settings.Players;
+            current.Players = new List<Player>();
+            for (int i = 0; i < players.Length; i++)
+            {
+                current.Players.Add(PlayerFactory.Create(players[i]));
+            }
         }
 
         private static void LoadArmies(GameEntity snapshot, Dictionary<int, Tile> armiesToTile, Dictionary<int, Tile> visitingToTile)
@@ -74,7 +110,10 @@ namespace Wism.Client.Factories
                     }
 
                     // Select armies: need to side-load since they were saved as Visiting Armies
-                    Game.Current.SelectArmiesInternal(selectedArmies);
+                    if (selectedArmies.Count > 0)
+                    {
+                        Game.Current.SelectArmiesInternal(selectedArmies);
+                    }
                 }
             }
         }

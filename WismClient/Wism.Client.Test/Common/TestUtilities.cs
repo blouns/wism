@@ -12,17 +12,11 @@ namespace Wism.Client.Test.Common
 {
     public static class TestUtilities
     {
-        internal static readonly string DefaultTestWorld = "TestWorld";
+        internal static readonly string DefaultTestWorld = "UnitTestWorld";
 
         public static ILoggerFactory CreateLogFactory()
         {
             return new WismLoggerFactory();
-
-            //var serviceProvider = new ServiceCollection()
-            //                    .AddLogging()
-            //                    .BuildServiceProvider();
-            //var logFactory = serviceProvider.GetService<ILoggerFactory>();
-            //return logFactory;
         }
 
         public static ControllerProvider CreateControllerProvider()
@@ -73,6 +67,14 @@ namespace Wism.Client.Test.Common
         public static LocationController CreateLocationController()
         {
             return new LocationController(CreateLogFactory());
+        }
+
+        public static ActionState NewGame(CommandController commandController, GameController gameController, string worldName)
+        {
+            var settings = TestGameFactory.CreateDefaultNewGameSettings(worldName);
+
+            return ExecuteCommandUntilDone(commandController,
+                new NewGameCommand(gameController, settings));
         }
 
         public static ActionState Select(CommandController commandController, ArmyController armyController, List<Army> armies)
@@ -208,6 +210,6 @@ namespace Wism.Client.Test.Common
             Location location = MapBuilder.FindLocation(shortName);
             Tile tile = World.Current.Map[x, y];
             World.Current.AddLocation(location, tile);
-        }
+        }        
     }
 }

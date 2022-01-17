@@ -1,0 +1,642 @@
+[
+  {
+    "Id": 0,
+    "X": 77,
+    "Y": 74,
+    "CityShortName": "Deserton",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 70,
+    "Y": 72,
+    "CityShortName": "Zaigonne",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 10,
+    "Y": 77,
+    "CityShortName": "Bereri",
+    "Defense": 6,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 41,
+    "Y": 75,
+    "CityShortName": "Tal",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 59,
+    "Y": 73,
+    "CityShortName": "Minbourne",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 58,
+    "Y": 69,
+    "CityShortName": "Tirfing",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 8,
+    "Y": 73,
+    "CityShortName": "Amenal",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 48,
+    "Y": 72,
+    "CityShortName": "Pareth",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 70,
+    "Y": 62,
+    "CityShortName": "Ungor",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 75,
+    "Y": 62,
+    "CityShortName": "Gorag",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 5,
+    "Y": 70,
+    "CityShortName": "Vival",
+    "Defense": 3,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 72,
+    "Y": 57,
+    "CityShortName": "BanesCitadel",
+    "Defense": 6,
+    "ClanShortName": "LordBane"
+  },
+  {
+    "Id": 0,
+    "X": 43,
+    "Y": 70,
+    "CityShortName": "Needleton",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 25,
+    "Y": 70,
+    "CityShortName": "Gunthang",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 47,
+    "Y": 67,
+    "CityShortName": "Deephallow",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 22,
+    "Y": 69,
+    "CityShortName": "AkGiriel",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 18,
+    "Y": 64,
+    "CityShortName": "AkEnlie",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 27,
+    "Y": 67,
+    "CityShortName": "AkFarzon",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 55,
+    "Y": 62,
+    "CityShortName": "Meneloth",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 74,
+    "Y": 51,
+    "CityShortName": "Malikor",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 10,
+    "Y": 62,
+    "CityShortName": "Enmouth",
+    "Defense": 6,
+    "ClanShortName": "Selentines"
+  },
+  {
+    "Id": 0,
+    "X": 69,
+    "Y": 52,
+    "CityShortName": "Argrond",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 26,
+    "Y": 61,
+    "CityShortName": "Barthel",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 16,
+    "Y": 58,
+    "CityShortName": "Marton",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 6,
+    "Y": 58,
+    "CityShortName": "Waybourne",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 73,
+    "Y": 45,
+    "CityShortName": "Dethal",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 21,
+    "Y": 56,
+    "CityShortName": "Greenweigh",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 27,
+    "Y": 54,
+    "CityShortName": "Upway",
+    "Defense": 3,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 67,
+    "Y": 46,
+    "CityShortName": "Darclan",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 47,
+    "Y": 52,
+    "CityShortName": "Maridun",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 4,
+    "Y": 55,
+    "CityShortName": "Jessarton",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 17,
+    "Y": 54,
+    "CityShortName": "Zhoran",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 25,
+    "Y": 50,
+    "CityShortName": "Khamar",
+    "Defense": 6,
+    "ClanShortName": "GreyDwarves"
+  },
+  {
+    "Id": 0,
+    "X": 4,
+    "Y": 52,
+    "CityShortName": "Upbourne",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 20,
+    "Y": 51,
+    "CityShortName": "Cragmorton",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 64,
+    "Y": 43,
+    "CityShortName": "Paynor",
+    "Defense": 3,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 10,
+    "Y": 52,
+    "CityShortName": "Carmel",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 48,
+    "Y": 47,
+    "CityShortName": "Dunethal",
+    "Defense": 6,
+    "ClanShortName": "HorseLords"
+  },
+  {
+    "Id": 0,
+    "X": 43,
+    "Y": 47,
+    "CityShortName": "Derridon",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 56,
+    "Y": 45,
+    "CityShortName": "Fleymark",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 68,
+    "Y": 40,
+    "CityShortName": "PaKur",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 72,
+    "Y": 40,
+    "CityShortName": "ArArak",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 22,
+    "Y": 44,
+    "CityShortName": "DharKhosis",
+    "Defense": 6,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 47,
+    "Y": 41,
+    "CityShortName": "CitadelOfFire",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 50,
+    "Y": 41,
+    "CityShortName": "CitadelOfIce",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 9,
+    "Y": 44,
+    "CityShortName": "Hithos",
+    "Defense": 6,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 30,
+    "Y": 42,
+    "CityShortName": "Ubar",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 25,
+    "Y": 40,
+    "CityShortName": "Galin",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 63,
+    "Y": 38,
+    "CityShortName": "Herzag",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 70,
+    "Y": 36,
+    "CityShortName": "Gimlad",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 31,
+    "Y": 38,
+    "CityShortName": "Vernon",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 66,
+    "Y": 35,
+    "CityShortName": "Thurtz",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 45,
+    "Y": 36,
+    "CityShortName": "Kazrak",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 75,
+    "Y": 36,
+    "CityShortName": "Kor",
+    "Defense": 6,
+    "ClanShortName": "OrcsOfKor"
+  },
+  {
+    "Id": 0,
+    "X": 57,
+    "Y": 37,
+    "CityShortName": "Ilnyr",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 10,
+    "Y": 38,
+    "CityShortName": "Ohmsmouth",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 18,
+    "Y": 39,
+    "CityShortName": "Himelton",
+    "Defense": 3,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 4,
+    "Y": 35,
+    "CityShortName": "Wellmore",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 71,
+    "Y": 30,
+    "CityShortName": "BaladNaran",
+    "Defense": 6,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 26,
+    "Y": 30,
+    "CityShortName": "Lador",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 54,
+    "Y": 28,
+    "CityShortName": "Duinoth",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 16,
+    "Y": 31,
+    "CityShortName": "Stormheim",
+    "Defense": 6,
+    "ClanShortName": "StormGiants"
+  },
+  {
+    "Id": 0,
+    "X": 44,
+    "Y": 27,
+    "CityShortName": "Angbar",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 48,
+    "Y": 25,
+    "CityShortName": "Ssuri",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 8,
+    "Y": 27,
+    "CityShortName": "Tasme",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 39,
+    "Y": 26,
+    "CityShortName": "Argenthorn",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 46,
+    "Y": 22,
+    "CityShortName": "Troy",
+    "Defense": 3,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 70,
+    "Y": 24,
+    "CityShortName": "Garom",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 16,
+    "Y": 22,
+    "CityShortName": "Quiesce",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 8,
+    "Y": 21,
+    "CityShortName": "Varde",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 41,
+    "Y": 19,
+    "CityShortName": "Charling",
+    "Defense": 3,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 55,
+    "Y": 20,
+    "CityShortName": "Hereuth",
+    "Defense": 6,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 36,
+    "Y": 16,
+    "CityShortName": "Elvallie",
+    "Defense": 6,
+    "ClanShortName": "Elvallie"
+  },
+  {
+    "Id": 0,
+    "X": 26,
+    "Y": 16,
+    "CityShortName": "Gildenhome",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 8,
+    "Y": 14,
+    "CityShortName": "Khorfe",
+    "Defense": 5,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 69,
+    "Y": 10,
+    "CityShortName": "Gluk",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 38,
+    "Y": 12,
+    "CityShortName": "Loremark",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 70,
+    "Y": 7,
+    "CityShortName": "Gork",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 20,
+    "Y": 9,
+    "CityShortName": "AlfarsGap",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  },
+  {
+    "Id": 0,
+    "X": 52,
+    "Y": 10,
+    "CityShortName": "Marthos",
+    "Defense": 6,
+    "ClanShortName": "Sirians"
+  }
+]

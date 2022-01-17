@@ -23,6 +23,7 @@ TagManager:
   - SolicitInputPanel
   - Debug
   - Container
+  - AcceptRejectPanel
   layers:
   - Default
   - TransparentFX

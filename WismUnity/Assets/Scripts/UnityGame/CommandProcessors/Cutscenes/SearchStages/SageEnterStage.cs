@@ -1,0 +1,26 @@
+﻿using Wism.Client.Api.Commands;
+
+namespace Assets.Scripts.CommandProcessors
+{
+    public class SageEnterStage : LocationCutsceneStage
+    {
+        public SageEnterStage(SearchLocationCommand command)
+            : base(command)
+        {
+        }
+
+        protected override SceneResult ActionInternal()
+        {
+            if (Hero == null)
+            {
+                Notify("You find nothing!");
+                return SceneResult.Failure;
+            }
+            else
+            {
+                Notify("You are greeted warmly...");
+                return ContinueOnKeyPress();
+            }
+        }
+    }
+}

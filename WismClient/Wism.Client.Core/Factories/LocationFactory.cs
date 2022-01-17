@@ -30,5 +30,19 @@ namespace Wism.Client.Factories
 
             return location;
         }
+
+        internal static Location Create(LocationEntity locationEntity, World world)
+        {
+            if (locationEntity is null)
+            {
+                throw new ArgumentNullException(nameof(locationEntity));
+            }
+
+            var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world.Name}";
+            LocationBuilder builder = new LocationBuilder(path);
+            builder.AddLocation(world, locationEntity.X, locationEntity.Y, locationEntity.LocationShortName);
+
+            return world.Map[locationEntity.X, locationEntity.Y].Location;
+        }
     }
 }
