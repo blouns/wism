@@ -460,6 +460,20 @@ namespace Assets.Scripts.Managers
             this.InputManager.SetInputMode(mode);
         }
 
+        public void HandlePetCompanion()
+        {
+            if (Game.Current.GameState == GameState.SelectedArmy)
+            {
+                var selected = Game.Current.GetSelectedArmies();
+                var hero = selected.Find(army => army is Hero);
+                if (hero != null)
+                {
+                    NotifyUser(
+                        ((Hero)hero).GetCompanionInteraction());
+                }
+            }
+        }
+
         internal void ToggleMinimap()
         {
             GameObject map = UnityUtilities.GameObjectHardFind("MinimapPanel");

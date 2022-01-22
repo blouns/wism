@@ -82,5 +82,21 @@
     "DisplayName": "Crimson Banner",
     "CommandBonus": 1,
     "CombatBonus": 0
+  },
+  {
+    "ShortName": "Cooper",
+    "DisplayName": "Cooper",
+    "CommandBonus": 1,
+    "CombatBonus": 0,
+    "IsCompanion": true,
+    "Interaction": "Cooper layed down and got fur everywhere."
+  },
+  {
+    "ShortName": "Wilson",
+    "DisplayName": "Wilson",
+    "CommandBonus": 0,
+    "CombatBonus": 1,
+    "IsCompanion": true,
+    "Interaction": "Wilson sat down and farted."
   }
 ]

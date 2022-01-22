@@ -19,6 +19,8 @@ namespace Wism.Client.MapObjects
 
         public int CommandBonus { get => Info.CommandBonus; }        
 
+        public string CompanionInteraction { get => Info.Interaction; }
+
         public void Drop(Hero hero)
         {
             if (hero is null)

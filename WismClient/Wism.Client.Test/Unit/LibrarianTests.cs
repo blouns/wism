@@ -83,7 +83,7 @@ namespace Wism.Client.Test.Unit
             foreach (var name in artifactNames)
             {
                 TestContext.WriteLine(name);
-                if (name == "Staff of Might")
+                if (name == "Crown of Loriel")
                 {
                     found = true;
                 }

@@ -34,5 +34,17 @@
     "DisplayName": "Temple of the Cat",
     "Kind": "Temple",
     "Terrain": "Temple"
+  },
+  {
+    "ShortName": "Doghouse",
+    "DisplayName": "Cooper's Doghouse",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "Yakima",
+    "DisplayName": "The Streets of Yakima",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
   }
 ]
