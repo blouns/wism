@@ -32,10 +32,10 @@ namespace Wism.Client.Entities
         public AssemblyEntity WarStrategy { get; set; }
 
         [DataMember]
-        public AssemblyEntity TraversalStrategy { get; set; }
+        public AssemblyEntity[] TraversalStrategies { get; set; }
 
         [DataMember]
-        public AssemblyEntity MovementSeer { get; set; }
+        public AssemblyEntity[] MovementStrategies { get; set; }
 
         [DataMember]
         public int LastArmyId { get; set; }

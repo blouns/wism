@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Wism.Client.Core;
+using Wism.Client.Core.Armies;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -22,9 +23,47 @@ namespace Wism.Client.Data
                 Random = SnapshotRandom(game.Random, game),
                 SelectedArmyIds = SnapshotSelectedArmies(game.GetSelectedArmies()),
                 WarStrategy = SnapshotWarStrategy(game.WarStrategy),
+                MovementStrategies = SnapshotMovementStrategies(game.MovementCoordinator),
+                TraversalStrategies = SnapshotTraversalStrategies(game.TraversalStrategy),
                 World = SnapshotWorld(World.Current),
                 LastArmyId = ArmyFactory.LastId                
             };
+
+            return snapshot;
+        }
+
+        private static AssemblyEntity[] SnapshotTraversalStrategies(ITraversalStrategy traversalStrategy)
+        {
+            var compositeStrategy = traversalStrategy as CompositeTraversalStrategy;
+            if (compositeStrategy == null)
+            {
+                throw new NotSupportedException("The given TraversalStrategy is not supported.");
+            }
+
+            var snapshot = new AssemblyEntity[compositeStrategy.Strategies.Count];
+            for (int i = 0; i < snapshot.Length; i++)
+            {
+                snapshot[i] = new AssemblyEntity()
+                {
+                    AssemblyName = Assembly.GetAssembly(compositeStrategy.Strategies[i].GetType()).FullName,
+                    TypeName = compositeStrategy.Strategies[i].GetType().FullName
+                };
+            }
+
+            return snapshot;
+        }
+
+        private static AssemblyEntity[] SnapshotMovementStrategies(MovementStrategyCoordinator movementCoordinator)
+        {
+            var snapshot = new AssemblyEntity[movementCoordinator.Strategies.Count];
+            for (int i = 0; i < snapshot.Length; i++)
+            {
+                snapshot[i] = new AssemblyEntity()
+                {
+                    AssemblyName = Assembly.GetAssembly(movementCoordinator.Strategies[i].GetType()).FullName,
+                    TypeName = movementCoordinator.Strategies[i].GetType().FullName
+                };
+            }
 
             return snapshot;
         }

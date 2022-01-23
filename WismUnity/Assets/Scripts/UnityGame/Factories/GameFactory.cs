@@ -118,9 +118,9 @@ namespace Assets.Scripts
             }
         }
 
-        private static WarStrategyEntity CreateDefaultWarStrategy()
+        private static AssemblyEntity CreateDefaultWarStrategy()
         {
-            var entity = new WarStrategyEntity()
+            var entity = new AssemblyEntity()
             {
                 AssemblyName = Assembly.GetAssembly(typeof(DefaultWarStrategy)).FullName,
                 TypeName = (typeof(DefaultWarStrategy)).FullName

@@ -96,7 +96,7 @@ namespace Wism.Client.Core.Controllers
             // Note: The MovementSeer accounts for armies riding or in a boat or on a flying creature
             // TODO: Account for terrain bonuses
             var armiesWithMovesThatMatter = Game.Current.
-                MovementSeer.GetApplicableArmies(armiesToMove, targetTile);
+                MovementCoordinator.GetApplicableArmies(armiesToMove, targetTile);
             if (armiesWithMovesThatMatter.Any(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
             {
                 logger.LogInformation($"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");

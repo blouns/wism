@@ -8,17 +8,19 @@ namespace Wism.Client.Core.Armies
     /// Composite traversal strategy to check if ANY of the given strategies
     /// allow for the armies to traverse to a tile.
     /// </summary>
-    public class AnyTraversalStrategy : ITraversalStrategy
+    public class CompositeTraversalStrategy : ITraversalStrategy
     {
         private List<ITraversalStrategy> traversalStrategies;
+
+        public List<ITraversalStrategy> Strategies { get => traversalStrategies; set => traversalStrategies = value; }
 
         /// <summary>
         /// Create the default traversal strategy
         /// </summary>
         /// <returns>Default traversal strategy</returns>
-        public static ITraversalStrategy CreateDefault()
+        public static CompositeTraversalStrategy CreateDefault()
         {
-            return new AnyTraversalStrategy(new List<ITraversalStrategy>()
+            return new CompositeTraversalStrategy(new List<ITraversalStrategy>()
             {
                 new StandardTraversalStrategy(),
                 new HeroFlightTraversalStrategy(),
@@ -26,21 +28,21 @@ namespace Wism.Client.Core.Armies
             });
         }
 
-        public AnyTraversalStrategy(List<ITraversalStrategy> strategies)
+        public CompositeTraversalStrategy(List<ITraversalStrategy> strategies)
         {
-            this.traversalStrategies = new List<ITraversalStrategy>(strategies);
+            this.Strategies = new List<ITraversalStrategy>(strategies);
         }
 
         public bool CanTraverse(List<Army> armies, Tile tile)
         {
-            var strategy = this.traversalStrategies.Find(s => s.CanTraverse(armies, tile));
+            var strategy = this.Strategies.Find(s => s.CanTraverse(armies, tile));
 
             return strategy != null;
         }
 
         public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile)
         {
-            var strategy = this.traversalStrategies.Find(s => s.CanTraverse(clan, armyInfo, tile));
+            var strategy = this.Strategies.Find(s => s.CanTraverse(clan, armyInfo, tile));
 
             return strategy != null;
         }

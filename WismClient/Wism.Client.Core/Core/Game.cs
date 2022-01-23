@@ -57,7 +57,7 @@ namespace Wism.Client.Core
         /// <summary>
         /// Gets or sets the seer that describes the strategies applicable movement
         /// </summary>
-        public MovementStrategySeer MovementSeer { get; set; }
+        public MovementStrategyCoordinator MovementCoordinator { get; set; }
 
         /// <summary>
         /// Current GameState
@@ -484,8 +484,8 @@ namespace Wism.Client.Core
             current.RandomSeed = Game.DefaultRandomSeed;
             current.Random = new Random(Game.DefaultRandomSeed);
             current.WarStrategy = new DefaultWarStrategy();
-            current.TraversalStrategy = AnyTraversalStrategy.CreateDefault();
-            current.MovementSeer = MovementStrategySeer.CreateDefault();
+            current.TraversalStrategy = CompositeTraversalStrategy.CreateDefault();
+            current.MovementCoordinator = MovementStrategyCoordinator.CreateDefault();
 
             // Setup default players for testing
             current.Players = new List<Player>();

@@ -14,11 +14,11 @@ namespace Wism.Client.Core.Armies
     /// An army riding in a boat should not have its moves counted while
     /// the boat is moving--only the boats moves will are applicable. 
     /// </remarks>
-    public class MovementStrategySeer
+    public class MovementStrategyCoordinator
     {
-        public static MovementStrategySeer CreateDefault()
+        public static MovementStrategyCoordinator CreateDefault()
         {
-            return new MovementStrategySeer(new List<IMovementStrategy>()
+            return new MovementStrategyCoordinator(new List<IMovementStrategy>()
             {
                 new NavalMovementStrategy(),
                 new HeroFlightMovementStrategy(),
@@ -26,7 +26,7 @@ namespace Wism.Client.Core.Armies
             });
         }
 
-        public MovementStrategySeer(List<IMovementStrategy> strategies)
+        public MovementStrategyCoordinator(List<IMovementStrategy> strategies)
         {
             Strategies = strategies ?? throw new System.ArgumentNullException(nameof(strategies));
         }

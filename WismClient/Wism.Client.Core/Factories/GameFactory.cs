@@ -23,8 +23,8 @@ namespace Wism.Client.Factories
             // Game settings
             Game.Current.Random = new Random(settings.Random.Seed);
             Game.Current.WarStrategy = GetWarStrategy(settings.WarStrategy);
-            Game.Current.TraversalStrategy = GetTraversalStrategy(settings.TraversalStrategy);
-            Game.Current.MovementSeer = GetMovementSeer(settings.MovementSeer);
+            Game.Current.TraversalStrategy = GetTraversalStrategy(settings.TraversalStrategies);
+            Game.Current.MovementCoordinator = GetMovementCoordinator(settings.MovementStrategies);
             Game.Current.Transition(settings.GameState);
 
             CreatePlayers(settings, Game.Current);
@@ -46,8 +46,8 @@ namespace Wism.Client.Factories
             // Game settings
             Game.Current.Random = LoadRandom(snapshot.Random);
             Game.Current.WarStrategy = GetWarStrategy(snapshot.WarStrategy);
-            Game.Current.TraversalStrategy = GetTraversalStrategy(snapshot.TraversalStrategy);
-            Game.Current.MovementSeer = GetMovementSeer(snapshot.MovementSeer);
+            Game.Current.TraversalStrategy = GetTraversalStrategy(snapshot.TraversalStrategies);
+            Game.Current.MovementCoordinator = GetMovementCoordinator(snapshot.MovementStrategies);
             Game.Current.Transition(snapshot.GameState);
             Game.Current.CurrentPlayerIndex = snapshot.CurrentPlayerIndex;
 
@@ -92,38 +92,54 @@ namespace Wism.Client.Factories
             return warStrategy;
         }
 
-        private static ITraversalStrategy GetTraversalStrategy(AssemblyEntity entity)
+        private static ITraversalStrategy GetTraversalStrategy(AssemblyEntity[] traversalEntities)
         {
-            ITraversalStrategy traversalStrategy;
+            CompositeTraversalStrategy traversalStrategy;
 
             try
             {
-                traversalStrategy = CreateObject<ITraversalStrategy>(entity);
+                List<ITraversalStrategy> strategies = new List<ITraversalStrategy>();
+                for (int i = 0; i < traversalEntities.Length; i++)
+                {
+                    var strategyEntity = traversalEntities[i];
+                    var strategy = CreateObject<ITraversalStrategy>(strategyEntity);
+                    strategies.Add(strategy);
+                }
+
+                traversalStrategy = new CompositeTraversalStrategy(strategies);
             }
             catch
             {
                 // Use default to protect against missing or corrupt mods
-                traversalStrategy = AnyTraversalStrategy.CreateDefault();
+                traversalStrategy = CompositeTraversalStrategy.CreateDefault();
             }
 
             return traversalStrategy;
         }
 
-        private static MovementStrategySeer GetMovementSeer(AssemblyEntity entity)
+        private static MovementStrategyCoordinator GetMovementCoordinator(AssemblyEntity[] strategyEntities)
         {
-            MovementStrategySeer movementSeer;
+            MovementStrategyCoordinator movementCoordinator;
 
             try
             {
-                movementSeer = CreateObject<MovementStrategySeer>(entity);
+                List<IMovementStrategy> strategies = new List<IMovementStrategy>();
+                for (int i = 0; i < strategyEntities.Length; i++)
+                {
+                    var strategyEntity = strategyEntities[i];
+                    var strategy = CreateObject<IMovementStrategy>(strategyEntity);
+                    strategies.Add(strategy);
+                }
+
+                movementCoordinator = new MovementStrategyCoordinator(strategies);
             }
             catch
             {
                 // Use default to protect against missing or corrupt mods
-                movementSeer = MovementStrategySeer.CreateDefault();
+                movementCoordinator = MovementStrategyCoordinator.CreateDefault();
             }
 
-            return movementSeer;
+            return movementCoordinator;
         }
 
         private static void CreatePlayers(GameEntity settings, Game current)
