@@ -1,6 +1,6 @@
 "# wism" 
 
-For discussion and more details, see: www.facebook.com/groups/unofficalwarlords/.
+For discussion and more details, see: http://warlords.branallygames.com.
 
 [Overview]
 
