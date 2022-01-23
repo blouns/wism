@@ -353,6 +353,106 @@ namespace Wism.Client.Test.Unit
             return map;
         }
 
+        /// <summary>
+        /// Converts a simple matrix into a <c>Map</c> for a Navy.
+        /// </summary>
+        /// <param name="matrix">2D array of token strings</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Token strings are semicolon separated lists where:
+        ///     S   = Starting location of Navy on water (optional; must be one and only one in matrix)
+        ///     T   = Target destination on water (optional; must be one and only one in matrix)
+        ///     $   = Neutral city (will create 4x4 city using this as top-left location
+        ///     1-9 = Numeral (positive integer) indicating the Weight of the terrain
+        ///     
+        /// Example tokens:
+        ///     "S;1" = Start with weight 1
+        ///     "T;5" = Target with weight of 5
+        ///     "1"   = Terrain of weight cost 1
+        ///     "9"   = Terrain of weight cost 9
+        /// </remarks>
+        public static Tile[,] ConvertMatrixToMapForNavy(string[,] matrix, out List<Army> armies, out Tile target)
+        {
+            armies = null;
+            target = null;
+
+            MapBuilder.Initialize();
+            Tile[,] map = new Tile[matrix.GetLength(0), matrix.GetLength(1)];
+            for (int y = 0; y < matrix.GetLength(0); y++)
+            {
+                for (int x = 0; x < matrix.GetLength(1); x++)
+                {
+                    Tile tile = new Tile();
+                    tile.X = x;
+                    tile.Y = y;
+                    map[tile.X, tile.Y] = tile;
+                    string[] tokens = matrix[x, y].Split(';');
+                    for (int i = 0; i < tokens.Length; i++)
+                    {
+
+                        if (tokens[i] == "S")
+                        {
+                            // S = Start
+                            if (armies == null)
+                            {
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Water"));
+                                tile.Terrain.MovementCost = 1;
+
+                                var player = Game.Current.GetCurrentPlayer();
+                                armies = new List<Army>() { player.ConscriptArmy(ModFactory.FindArmyInfo("Navy"), tile) };
+                            }
+                            else
+                            {
+                                throw new ArgumentException("TEST: Path cannot have multiple starting locations.");
+                            }
+                        }
+                        else if (tokens[i] == "T")
+                        {
+                            // T = Target
+                            if (target == null)
+                            {
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Water"));
+                                tile.Terrain.MovementCost = 1;
+                                target = tile;
+                            }
+                            else
+                            {
+                                throw new ArgumentException("TEST: Path cannot have multiple starting locations.");
+                            }
+                        }
+                        else if (Int32.TryParse(tokens[i], out int weight))
+                        {
+                            // # = Weight                            
+                            // Add terrain variation just for easier debugging
+                            if (weight == 0)
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Void"));
+                            else if (weight == 1)
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Water"));
+                            else if (weight == 2)
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Grass"));
+                            else if (weight == 3)
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Forest"));
+                            else if (weight == 4)
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Hill"));
+                            else if (weight > 4)
+                                tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Mountain"));
+
+                            tile.Terrain.MovementCost = weight;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("TEST: Unknown token: " + tokens[i]);
+                        }
+                    }
+                }
+            }
+
+            if (armies == null || target == null)
+                throw new ArgumentException("TEST: Must have at least one starting army and target.");
+
+            return map;
+        }
+
         #endregion
     }
 }

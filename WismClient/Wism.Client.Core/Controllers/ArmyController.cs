@@ -85,8 +85,7 @@ namespace Wism.Client.Core.Controllers
             }
 
             // Can we traverse in that terrain?            
-            if (!armiesToMove.TrueForAll(
-                army => targetTile.CanTraverseHere(army)))
+            if (!targetTile.CanTraverseHere(armiesToMove))
             {
                 logger.LogInformation($"{ArmiesToString(armiesToMove)} cannot traverse {targetTile}");
                 Game.Current.Transition(GameState.SelectedArmy);
@@ -94,8 +93,11 @@ namespace Wism.Client.Core.Controllers
             }
 
             // Do we have enough moves?
+            // Note: The MovementSeer accounts for armies riding or in a boat or on a flying creature
             // TODO: Account for terrain bonuses
-            if (armiesToMove.Any(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
+            var armiesWithMovesThatMatter = Game.Current.
+                MovementSeer.GetApplicableArmies(armiesToMove, targetTile);
+            if (armiesWithMovesThatMatter.Any(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
             {
                 logger.LogInformation($"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");
                 Game.Current.DeselectArmies();
@@ -349,6 +351,10 @@ namespace Wism.Client.Core.Controllers
 
                 // TODO: Account for bonuses
                 a.MovesRemaining -= targetTile.Terrain.MovementCost;
+                if (a.MovesRemaining <= 0)
+                {
+                    a.MovesRemaining = 0;
+                }
             });
 
             targetTile.VisitingArmies.Sort(new ByArmyViewingOrder());

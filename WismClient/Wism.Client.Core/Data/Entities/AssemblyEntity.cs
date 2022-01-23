@@ -3,7 +3,7 @@
 namespace Wism.Client.Entities
 {
     [DataContract]
-    public class WarStrategyEntity
+    public class AssemblyEntity
     {
         [DataMember]
         public string TypeName { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Wism.Client.Core.Armies;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -9,6 +10,7 @@ namespace Wism.Client.Core
     public class Tile
     {
         public int X { get; set; }
+
         public int Y { get; set; }
 
         /// <summary>
@@ -36,7 +38,7 @@ namespace Wism.Client.Core
         /// </summary>
         public Location Location { get; set; }
 
-        public List<Artifact> Items { get; internal set; }
+        public List<Artifact> Items { get; internal set; }        
 
         public void AddItem(Artifact artifact)
         {
@@ -304,32 +306,13 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Check if the army info can move onto this tile
+        /// Check if the given armies can move onto this tile
         /// </summary>
-        /// <param name="clan">Clan of the army</param>
-        /// <param name="armyInfo">Army kind</param>
-        /// <returns>True if the army can move here; otherwise, false</returns>
-        public bool CanTraverseHere(Clan clan, ArmyInfo armyInfo)
+        /// <param name="armies">Armies to test</param>
+        /// <returns>True if the armies can move here; otherwise, false</returns>
+        public bool CanTraverseHere(List<Army> armies)
         {
-            if (clan is null)
-            {
-                throw new ArgumentNullException(nameof(clan));
-            }
-
-            if (armyInfo is null)
-            {
-                throw new ArgumentNullException(nameof(armyInfo));
-            }
-
-            bool canTraverse = true;
-            if (HasCity())
-            {
-                canTraverse = this.City.CanTraverse(clan);
-            }
-            
-            canTraverse &= this.Terrain.CanTraverse(armyInfo.CanWalk, armyInfo.CanFloat, armyInfo.CanFly);
-
-            return canTraverse;
+            return Game.Current.TraversalStrategy.CanTraverse(armies, this);
         }
 
         /// <summary>
@@ -339,7 +322,18 @@ namespace Wism.Client.Core
         /// <returns>True if the army can move here; otherwise, false</returns>
         public bool CanTraverseHere(Army army)
         {
-            return CanTraverseHere(army.Clan, army.Info);
+            return CanTraverseHere(new List<Army>() { army });
+        }
+
+        /// <summary>
+        /// Check if the given ArmyInfo and Clan can move onto this tile
+        /// </summary>
+        /// <param name="clan"></param>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        public bool CanTraverseHere(Clan clan, ArmyInfo info)
+        {
+            return Game.Current.TraversalStrategy.CanTraverse(clan, info, this);
         }
 
         /// <summary>
@@ -354,17 +348,6 @@ namespace Wism.Client.Core
         public bool HasLocation()
         {
             return (this.Location != null);
-        }
-
-        /// <summary>
-        /// Check if the given armies can move onto this tile
-        /// </summary>
-        /// <param name="army">Armies to test</param>
-        /// <returns>True if the armies can move here; otherwise, false</returns>
-        public bool CanTraverseHere(List<Army> armies)
-        {
-            return armies.TrueForAll(
-                army => this.CanTraverseHere(army));
         }
 
         /// <summary>

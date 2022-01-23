@@ -29,9 +29,14 @@ namespace Wism.Client.Entities
         public WorldEntity World { get; set; }
 
         [DataMember]
-        public WarStrategyEntity WarStrategy { get; set; }
+        public AssemblyEntity WarStrategy { get; set; }
 
-        // Other fields
+        [DataMember]
+        public AssemblyEntity TraversalStrategy { get; set; }
+
+        [DataMember]
+        public AssemblyEntity MovementSeer { get; set; }
+
         [DataMember]
         public int LastArmyId { get; set; }
     }

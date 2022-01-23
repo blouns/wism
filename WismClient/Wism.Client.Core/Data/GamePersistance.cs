@@ -29,9 +29,9 @@ namespace Wism.Client.Data
             return snapshot;
         }
 
-        private static WarStrategyEntity SnapshotWarStrategy(IWarStrategy warStrategy)
+        private static AssemblyEntity SnapshotWarStrategy(IWarStrategy warStrategy)
         {
-            var snapshot = new WarStrategyEntity()
+            var snapshot = new AssemblyEntity()
             {
                 AssemblyName = Assembly.GetAssembly(warStrategy.GetType()).FullName,
                 TypeName = warStrategy.GetType().FullName
