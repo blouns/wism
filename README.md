@@ -1,5 +1,7 @@
 "# wism" 
 
+For discussion and more details, see: www.facebook.com/groups/unofficalwarlords/.
+
 [Overview]
 
 War! Welcome to War in a Senseless Mind (WISM). WISM is an original Warlords 1990 clone, but is designed for modification and reuse/fork into similar projects as a game engine. Additionally, WISM was designed to have all core game logic outside of proprietary platforms like Unity or other game engines. This will allow for easier extension in the future and longevity as platforms evolve. A good example of this is the ASCII WISM app which provides a Console-based UI to the same game engine. 
@@ -34,6 +36,7 @@ Thank you for visiting. I hope you enjoy the game!
 Legal Disclaimer: Warlords and all related imagery and references are copyrights of SSG registered trademarks and attributed to Steven Fawkner and Roger Keating. Use of this code is for educational purposes only and may not be distributed for commercial use.
 
 [References]
+
 https://en.wikipedia.org/wiki/Warlords_(1990_video_game)
 http://www.ssg.com.au/
 
