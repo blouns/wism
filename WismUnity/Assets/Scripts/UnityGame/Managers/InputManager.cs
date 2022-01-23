@@ -234,6 +234,10 @@ namespace Assets.Scripts.Managers
             {
                 UnityManager.HandleItemPicker(false);
             }
+            else if (Input.GetKey(KeyCode.C))
+            {
+                UnityManager.HandlePetCompanion();
+            }
             // TODO: Add Inventory action
             // TODO: Add Find heros (k) action
 
@@ -270,6 +274,9 @@ namespace Assets.Scripts.Managers
             }
             else if (Input.GetKeyDown(KeyCode.X))
             {
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#endif
                 Application.Quit();
             }
             // TODO: Add resign action

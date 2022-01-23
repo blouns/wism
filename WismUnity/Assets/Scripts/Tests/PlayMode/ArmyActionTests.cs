@@ -380,6 +380,64 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         Assert.AreEqual("StaffOfMight", ((Artifact)siriansHero.Items[0]).ShortName, "Hero did not pick up the Staff of Might");
     }
 
+    [UnityTest]
+    public IEnumerator Hero_PetCompanion_HasCompanion()
+    {
+        // Assign
+        var siriansPlayer = Game.Current.Players[0];
+        yield return WismTestAction.WaitForNewHeroOffer();
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
+        var siriansHero = FindFirstHero(siriansPlayer);
+        var siriansArmies = new List<Army>() { siriansHero };
+
+        // Dismiss production panel
+        yield return new WaitForInteractivePanel(
+            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
+        yield return WismTestAction.DismissProductionPanel();
+
+        // Override boon
+        var ruins = World.Current.GetLocations().Find(l => l.ShortName == "CryptKeeper");
+        var artifact = Artifact.Create(
+            ModFactory.FindArtifactInfo("Cooper"));
+        ruins.Boon = new ArtifactBoon(artifact);
+
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
+            .GetComponent<GameManager>();
+        gameManager.StandardTime = 0.25f;
+
+        // Act 1 : Move Sirians' hero to Crypt Keeper's ruins
+        gameManager.SelectArmies(siriansArmies);
+        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+
+        gameManager.MoveSelectedArmies(ruins.X, ruins.Y);
+        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+
+        gameManager.SearchLocation();
+        var inputManager = GameObject.FindGameObjectWithTag("UnityManager")
+            .GetComponent<InputManager>();
+        yield return new WaitForSeconds(2f);
+
+        if (siriansHero.Tile.HasItems())
+        {
+            gameManager.TakeItems(siriansHero, siriansHero.Tile.Items);
+            yield return new WaitForLastCommand(gameManager.ControllerProvider);
+        }
+
+        gameManager.SelectArmies(siriansArmies);
+        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+
+        inputManager.UnityManager.HandlePetCompanion();
+
+        // Assert
+        Assert.IsTrue(ruins.Searched, "Ruins have not been searched");
+        Assert.IsFalse(siriansHero.IsDead, "Sirians' hero was killed");
+        Assert.IsFalse(siriansHero.Tile.HasItems(), "Hero did not find Cooper");
+        Assert.IsTrue(siriansHero.HasItems(), "Hero did not find Cooper");
+        Assert.AreEqual("Cooper", ((Artifact)siriansHero.Items[0]).ShortName, "Hero did not find Cooper");        
+        Assert.AreEqual("Cooper layed down and got fur everywhere.",
+            siriansHero.GetCompanionInteraction(), "Cooper did not have the expected interaction.");
+    }
+
     #region Helper methods
 
     private Hero FindFirstHero(Player player)

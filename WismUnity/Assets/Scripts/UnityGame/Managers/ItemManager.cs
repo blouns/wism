@@ -12,6 +12,8 @@ namespace Assets.Scripts.Managers
     {
         [SerializeField]
         private GameObject itemPrefab;
+        [SerializeField]
+        private GameObject companionPrefab;
 
         private WorldTilemap worldTilemap;
         private readonly Dictionary<Artifact, GameObject> itemGameObjects = new Dictionary<Artifact, GameObject>();
@@ -73,7 +75,20 @@ namespace Assets.Scripts.Managers
         private GameObject InstantiateItemGo(Artifact item)
         {
             Vector3 worldVector = worldTilemap.ConvertGameToUnityVector(item.X, item.Y);
-            return Instantiate<GameObject>(itemPrefab, worldVector, Quaternion.identity, worldTilemap.transform);
+            GameObject go = null;
+            
+            if (item.CompanionInteraction != null)
+            {
+                // The "Item" is a Companion!
+                go = Instantiate<GameObject>(companionPrefab, worldVector, Quaternion.identity, worldTilemap.transform);
+            }
+            else
+            {
+                // Normal Item
+                go = Instantiate<GameObject>(itemPrefab, worldVector, Quaternion.identity, worldTilemap.transform);
+            }            
+
+            return go;
         }
 
         private void Initialize()

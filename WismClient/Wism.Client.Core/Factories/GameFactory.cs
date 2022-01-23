@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Wism.Client.Core;
+using Wism.Client.Core.Armies;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
 using Wism.Client.War;
 
 namespace Wism.Client.Factories
@@ -22,14 +22,14 @@ namespace Wism.Client.Factories
 
             // Game settings
             Game.Current.Random = new Random(settings.Random.Seed);
-            var warEntity = settings.WarStrategy;
-            var warAssembly = Assembly.Load(warEntity.AssemblyName);
-            Game.Current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
+            Game.Current.WarStrategy = GetWarStrategy(settings.WarStrategy);
+            Game.Current.TraversalStrategy = GetTraversalStrategy(settings.TraversalStrategies);
+            Game.Current.MovementCoordinator = GetMovementCoordinator(settings.MovementStrategies);
             Game.Current.Transition(settings.GameState);
 
             CreatePlayers(settings, Game.Current);
 
-            var world = WorldFactory.Create(settings.World);
+            _ = WorldFactory.Create(settings.World);
 
             return Game.Current;
         }
@@ -45,9 +45,9 @@ namespace Wism.Client.Factories
 
             // Game settings
             Game.Current.Random = LoadRandom(snapshot.Random);
-            var warEntity = snapshot.WarStrategy;
-            var warAssembly = Assembly.Load(warEntity.AssemblyName);
-            Game.Current.WarStrategy = (IWarStrategy)warAssembly.CreateInstance(warEntity.TypeName);
+            Game.Current.WarStrategy = GetWarStrategy(snapshot.WarStrategy);
+            Game.Current.TraversalStrategy = GetTraversalStrategy(snapshot.TraversalStrategies);
+            Game.Current.MovementCoordinator = GetMovementCoordinator(snapshot.MovementStrategies);
             Game.Current.Transition(snapshot.GameState);
             Game.Current.CurrentPlayerIndex = snapshot.CurrentPlayerIndex;
 
@@ -67,6 +67,79 @@ namespace Wism.Client.Factories
             
 
             return Game.Current;
+        }
+
+        private static T CreateObject<T>(AssemblyEntity entity) 
+        {
+            var assembly = Assembly.Load(entity.AssemblyName);
+            return (T)assembly.CreateInstance(entity.TypeName);
+        }
+
+        private static IWarStrategy GetWarStrategy(AssemblyEntity entity)
+        {
+            IWarStrategy warStrategy;
+
+            try
+            {
+                warStrategy = CreateObject<IWarStrategy>(entity);
+            }
+            catch
+            {
+                // Use default to protect against missing or corrupt mods
+                warStrategy = new DefaultWarStrategy();
+            }
+
+            return warStrategy;
+        }
+
+        private static ITraversalStrategy GetTraversalStrategy(AssemblyEntity[] traversalEntities)
+        {
+            CompositeTraversalStrategy traversalStrategy;
+
+            try
+            {
+                List<ITraversalStrategy> strategies = new List<ITraversalStrategy>();
+                for (int i = 0; i < traversalEntities.Length; i++)
+                {
+                    var strategyEntity = traversalEntities[i];
+                    var strategy = CreateObject<ITraversalStrategy>(strategyEntity);
+                    strategies.Add(strategy);
+                }
+
+                traversalStrategy = new CompositeTraversalStrategy(strategies);
+            }
+            catch
+            {
+                // Use default to protect against missing or corrupt mods
+                traversalStrategy = CompositeTraversalStrategy.CreateDefault();
+            }
+
+            return traversalStrategy;
+        }
+
+        private static MovementStrategyCoordinator GetMovementCoordinator(AssemblyEntity[] strategyEntities)
+        {
+            MovementStrategyCoordinator movementCoordinator;
+
+            try
+            {
+                List<IMovementStrategy> strategies = new List<IMovementStrategy>();
+                for (int i = 0; i < strategyEntities.Length; i++)
+                {
+                    var strategyEntity = strategyEntities[i];
+                    var strategy = CreateObject<IMovementStrategy>(strategyEntity);
+                    strategies.Add(strategy);
+                }
+
+                movementCoordinator = new MovementStrategyCoordinator(strategies);
+            }
+            catch
+            {
+                // Use default to protect against missing or corrupt mods
+                movementCoordinator = MovementStrategyCoordinator.CreateDefault();
+            }
+
+            return movementCoordinator;
         }
 
         private static void CreatePlayers(GameEntity settings, Game current)

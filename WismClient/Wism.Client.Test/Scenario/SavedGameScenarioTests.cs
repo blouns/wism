@@ -572,7 +572,7 @@ namespace Wism.Client.Test.Scenario
 
                 // Assert
                 Assert.IsTrue(((Hero)siriansHero1[0]).HasItems(), "Hero had a hole in his pocket!");
-                Assert.AreEqual("StaffOfMight", ((Hero)siriansHero1[0]).Items[0].ShortName, "Hero had a hole in his pocket!");
+                Assert.AreEqual("CrownOfLoriel", ((Hero)siriansHero1[0]).Items[0].ShortName, "Hero had a hole in his pocket!");
                 Assert.AreEqual(9, siriansHero1[0].Strength, "Hero was not pias enough!");
                 Assert.AreEqual(9, siriansHero1[1].Strength, "Griffins were not pias enough!");
                 Assert.AreEqual(7, siriansHero1[2].Strength, "Light infantry was not pias enough!");

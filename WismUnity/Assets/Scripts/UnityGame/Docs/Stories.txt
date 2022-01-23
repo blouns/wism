@@ -1,14 +1,45 @@
-﻿Goal: Play test 10 turns without bugs
+﻿Goal: 
 
-TODO:
- * PlayTest basic test cases
- * Scriptable game start (scene, mod, players, save)
- * Test case generator from UI
- * Headless operation for testing
-	- Hire hero
-	- Any click-required UI element (production, search, start turn)
+Bugs:
+  1 Select next army on Defense or Quit
+  2 Hero with allies notification goes too fast / is overritten by production reports
+  3 Hero strength mysteriously dropped (was 9, then picked up Spear of Ankh and went to 8 w/ 2 Bonus)
+  4 Click targets are not super accurate
+  5 No beep when no more 'next' army
+  6 Saved game at slot 4, then it moved to 3, then overwrote and got both 3 and 4
+  7 Hero displays above the Navy
+  8 Screen flicker about 1/sec
+  9 Production renewal panel is too narrow and Yes/No buttons stick
+  10 Pathing is slow; move to A*
+  11 Next army selection is selecting groups with zero moves
+  12 Single-click selection is a bit slow and doesn't differntiate from select-all
+  13 Navy attacks in wrong order (not last)
+  14 Navy can move into a city during attack; moving to another part of city results in NullReferenceException (below)
+	>> Can't move from source because the navy is on land (city) and it's not traversable
+	>> Dijkstra Line 39: graph[armiesToMove[0].X, armiesToMove[0].Y].Distance = 0.0f; // graph[x,y] =  null
+  15 Navy under production seemingly dissappeared; left the city with no production
+  16 8th Save location is not clickable
+  17 Duplicate GameObject created; broken stack and cannot be merged (but can be moved together); See "Dupe GO Repro" saved game
 
  Future:
-  * User clan picker panel
   * Clan and army balance and attribute details (e.g. terrain bonuses)
-  * Cooper
+  * Test case generator from UI
+  * All-city production panel
+  * Hero finder
+  * Production in alternate location
+  * Enhanced mini-map icons
+  * AI
+  * Show unsearched locations
+  
+Bug 14 Details:
+NullReferenceException: Object reference not set to an instance of an object
+Wism.Client.Pathing.DijkstraPathingStrategy.FindShortestRoute (Wism.Client.Core.Tile[,] map, System.Collections.Generic.List`1[T] armiesToMove, Wism.Client.Core.Tile target, System.Collections.Generic.IList`1[Wism.Client.Core.Tile]& fastestRoute, System.Single& distance) (at C:/source/wism/WismClient/Wism.Client.Core/Pathing/DijkstraPathingStrategy.cs:39)
+Wism.Client.Core.Controllers.ArmyController.FindPath (System.Collections.Generic.List`1[T] armiesToMove, Wism.Client.Core.Tile targetTile, System.Single& distance) (at C:/source/wism/WismClient/Wism.Client.Core/Controllers/ArmyController.cs:220)
+Wism.Client.Core.Controllers.ArmyController.MoveOneStep (System.Collections.Generic.List`1[T] armiesToMove, Wism.Client.Core.Tile targetTile, System.Collections.Generic.IList`1[Wism.Client.Core.Tile]& path, System.Single& distance) (at C:/source/wism/WismClient/Wism.Client.Core/Controllers/ArmyController.cs:174)
+Wism.Client.Api.Commands.MoveOnceCommand.ExecuteInternal () (at C:/source/wism/WismClient/Wism.Client.Api/Commands/Army/MoveOnceCommand.cs:24)
+Wism.Client.Api.Commands.Command.Execute () (at C:/source/wism/WismClient/Wism.Client.Api/Commands/Command.cs:25)
+Wism.Client.Api.CommandProcessors.StandardProcessor.Execute (Wism.Client.Api.Commands.ICommandAction command) (at C:/source/wism/WismClient/Wism.Client.Api/CommandProcessors/StandardProcessor.cs:34)
+Assets.Scripts.Managers.UnityManager.DoTasks () (at Assets/Scripts/UnityGame/Managers/UnityManager.cs:327)
+Assets.Scripts.Managers.UnityManager.FixedUpdate () (at Assets/Scripts/UnityGame/Managers/UnityManager.cs:274)
+UnityEngine.Debug:LogException(Exception)
+Assets.Scripts.Managers.UnityManager:FixedUpdate() (at Assets/Scripts/UnityGame/Managers/UnityManager.cs:286)

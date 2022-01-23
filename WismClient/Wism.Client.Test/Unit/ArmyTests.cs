@@ -258,7 +258,9 @@ namespace Wism.Client.Test.Unit
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
             }
 
+            Assert.IsNotNull(path, "Failed to traverse the route.");
             Assert.AreEqual(0, path.Count, "Mismatch on the number of expected moves remaining.");
+            Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
         }
 
         [Test]
@@ -284,6 +286,158 @@ namespace Wism.Client.Test.Unit
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
             }
+            Assert.IsNotNull(path, "Failed to traverse the route.");
+            Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        }
+
+        [Test]
+        public void Move_HeroFlyOnDragonPathTest()
+        {
+            // ASSEMBLE
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "0", "1" },
+                { "0", "0", "0", "0", "0", "0" },
+                { "1", "1", "1", "2", "2", "2" },
+                { "1", "1", "1", "2", "T", "1" },
+                { "1", "1", "1", "2", "1", "1" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out List<Army> armies, out Tile target));
+            var player1 = Game.Current.Players[0];
+            var dragon = player1.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), armies[0].Tile);
+            armies.Add(dragon);
+            int expectedCount = 5;
+
+            // ACT / ASSERT
+            IList<Tile> path = null;
+            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            {
+                Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
+            }
+            Assert.IsNotNull(path, "Failed to traverse the route.");
+            Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        }
+
+        [Test]
+        public void Move_NavyPathTest()
+        {
+            // ASSEMBLE
+            // Note: '1' = Water for Navy tests
+            string[,] matrix = new string[,]
+            {
+                { "2", "2", "2", "2", "2", "2" },
+                { "2", "S", "2", "2", "2", "2" },
+                { "2", "1", "1", "1", "1", "2" },
+                { "2", "2", "2", "2", "1", "2" },
+                { "2", "2", "2", "2", "T", "2" },
+                { "2", "2", "2", "2", "2", "2" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMapForNavy(matrix, out List<Army> armies, out Tile target));
+            int expectedCount = 4;
+
+            // ACT / ASSERT
+            IList<Tile> path = null;
+            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            {
+                Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
+            }
+            Assert.IsNotNull(path, "Failed to traverse the route.");
+            Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        }
+
+        [Test]
+        public void Move_NavyWithCrewPathTest()
+        {
+            // ASSEMBLE
+            // Note: '1' = Water for Navy tests
+            string[,] matrix = new string[,]
+            {
+                { "2", "2", "2", "2", "2", "2" },
+                { "2", "S", "2", "2", "2", "2" },
+                { "2", "1", "1", "1", "1", "2" },
+                { "2", "2", "2", "2", "1", "2" },
+                { "2", "2", "2", "2", "T", "2" },
+                { "2", "2", "2", "2", "2", "2" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMapForNavy(matrix, out List<Army> armies, out Tile target));
+            var player1 = Game.Current.Players[0];
+            var infantry = player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), armies[0].Tile);
+            armies.Add(infantry);
+            int expectedCount = 4;
+
+            // ACT / ASSERT
+            IList<Tile> path = null;
+            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            {
+                Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
+            }
+            Assert.IsNotNull(path, "Failed to traverse the route.");
+            Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        }
+
+        [Test]
+        public void Move_NavyWithCrewOutOfMovesPathTest()
+        {
+            // ASSEMBLE
+            // Note: '1' = Water for Navy tests
+            string[,] matrix = new string[,]
+            {
+                { "2", "2", "2", "2", "2", "2" },
+                { "2", "S", "2", "2", "2", "2" },
+                { "2", "1", "1", "1", "1", "2" },
+                { "2", "2", "2", "2", "1", "2" },
+                { "2", "2", "2", "2", "T", "2" },
+                { "2", "2", "2", "2", "2", "2" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMapForNavy(matrix, out List<Army> armies, out Tile target));
+            var player1 = Game.Current.Players[0];
+            var infantry = player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), armies[0].Tile);
+            infantry.MovesRemaining = 0;
+            armies.Add(infantry);
+            int expectedCount = 4;
+
+            // ACT / ASSERT
+            IList<Tile> path = null;
+            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            {
+                Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
+            }
+            Assert.IsNotNull(path, "Failed to traverse the route.");
+            Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        }
+
+        [Test]
+        public void Move_NonHeroFlyOnDragonPathTest_Fail()
+        {
+            // ASSEMBLE
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "0", "1" },
+                { "0", "0", "0", "0", "0", "0" },
+                { "1", "1", "1", "2", "2", "2" },
+                { "1", "1", "1", "2", "T", "1" },
+                { "1", "1", "1", "2", "1", "1" },
+            };
+
+            World.CreateWorld(PathingStrategyTests.ConvertMatrixToMap(matrix, out List<Army> armies, out Tile target));
+            var player1 = Game.Current.Players[0];
+            var dragon = player1.ConscriptArmy(ModFactory.FindArmyInfo("Dragons"), armies[0].Tile);
+            var infantry = player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), armies[0].Tile);
+            armies.Clear();
+            armies.Add(dragon);
+            armies.Add(infantry);
+
+            // ACT / ASSERT
+            IList<Tile> path = null;
+            var result = armyController.MoveOneStep(armies, target, ref path, out _);
+            
+            Assert.AreEqual(ActionState.Failed, result, "Infantry was able to ride the dragon!");
         }
 
         [Test]

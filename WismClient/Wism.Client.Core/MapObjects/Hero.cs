@@ -85,6 +85,33 @@ namespace Wism.Client.MapObjects
             }
         }
 
+        public string GetCompanionInteraction()
+        {
+            if (!HasCompanion())
+            {
+                return "You pet yourself when no one is looking.";
+            }
+            else
+            {
+                var companion = Items.Find(c => c.CompanionInteraction != null);
+
+                // TODO: Allow only one companion per hero
+                return companion.CompanionInteraction;
+            }
+        }
+
+        public bool HasCompanion()
+        {
+            if (!HasItems())
+            {
+                return false;
+            }
+
+            var companion = Items.Find(c => c.CompanionInteraction != null);
+
+            return companion != null;
+        }
+
         private void RecalculateCombatBonsuses()
         {
             int totalStrength = Info.Strength + BlessedAt.Count;

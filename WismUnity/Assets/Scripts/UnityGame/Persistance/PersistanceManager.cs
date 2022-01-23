@@ -55,7 +55,7 @@ namespace Assets.Scripts.Managers
                 snapshot.CameraPosition[1],
                 snapshot.CameraPosition[2]);
             unityGame.LastCommandId = snapshot.LastCommandId;
-            unityGame.GetComponent<GameFactory>().WorldName = snapshot.WorldName;
+            unityGame.GetComponent<UnityGameFactory>().WorldName = snapshot.WorldName;
         }
 
         public static UnityGameEntity LoadEntities(string path, UnityManager unityGame)

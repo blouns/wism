@@ -47,9 +47,9 @@ namespace Assets.Scripts.UnityGame.Editors
         {
             SerializeCities(path + "/City.json", worldEntity.Cities);
             SerializeLocations(path + "/Location.json", worldEntity.Locations);
-            //Serialize(path + "/Map.json", worldEntity.Tiles);
 
             // Stripped down worldEntity for "Map"
+            // TODO: Create "CreateWorldEntity" to avoid this
             var mapEntity = new WorldEntity()
             {
                 MapXUpperBound = worldEntity.MapXUpperBound,
@@ -94,6 +94,6 @@ namespace Assets.Scripts.UnityGame.Editors
                 writer.Write(mapJson);
             }
         }
-    }
 #endif
+    }
 }

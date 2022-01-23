@@ -62,14 +62,14 @@ namespace Wism.Client.Agent
                 return;
             }
 
-            Console.WriteLine("+------------+----------------+---------+");
-            Console.WriteLine("| (S)elect   | Deselect (Esc) |         |");
-            Console.WriteLine("| (M)ove     | (A)ttack       |         |");
-            Console.WriteLine("| (N)ext     | (D)efend       | (Q)uit  |");
-            Console.WriteLine("| (Z)earch   | (T)ake         | Dr(o)p  |");
-            Console.WriteLine("| (P)roduce  |                |         |");
-            Console.WriteLine("| (E)nd turn | E(x)it to DOS  |         |");
-            Console.WriteLine("+------------+----------------+---------+");
+            Console.WriteLine("+------------+-----------------+---------+");
+            Console.WriteLine("| (S)elect   | Deselect (Esc)  |         |");
+            Console.WriteLine("| (M)ove     | (A)ttack        |         |");
+            Console.WriteLine("| (N)ext     | (D)efend        | (Q)uit  |");
+            Console.WriteLine("| (Z)earch   | (T)ake          | Dr(o)p  |");
+            Console.WriteLine("| (P)roduce  | Pet (c)ompanion |         |");
+            Console.WriteLine("| (E)nd turn | E(x)it to DOS   |         |");
+            Console.WriteLine("+------------+-----------------+---------+");
             Console.Write("Enter a command: ");
             var keyInfo = Console.ReadKey();
             Console.WriteLine();
@@ -127,6 +127,9 @@ namespace Wism.Client.Agent
                 case ConsoleKey.X:
                     DoExit();
                     break;
+                case ConsoleKey.C:
+                    DoPetCompanion();
+                    break;
                 case ConsoleKey.UpArrow:
                     DoMoveArmyOneStep(0, 1);
                     break;
@@ -140,6 +143,24 @@ namespace Wism.Client.Agent
                     DoMoveArmyOneStep(1, 0);
                     break;
             }
+        }
+
+        private void DoPetCompanion()
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return;
+            }
+
+            Hero hero = Game.Current.GetSelectedArmies()
+                .Find(army => army is Hero) as Hero;
+            if (hero == null ||
+                !hero.HasCompanion())
+            {
+                return;
+            }
+
+            Console.WriteLine(hero.GetCompanionInteraction());
         }
 
         private void DoBuildCity()

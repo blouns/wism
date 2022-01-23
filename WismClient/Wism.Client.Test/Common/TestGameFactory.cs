@@ -1,13 +1,8 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Reflection;
+﻿using System.Reflection;
 using Wism.Client.Entities;
 using Wism.Client.War;
 using System.IO;
 using Newtonsoft.Json;
-using Wism.Client.Core;
-using Wism.Client.Modules;
-using System.Collections.Generic;
 
 namespace Wism.Client.Test.Common
 {
@@ -69,9 +64,9 @@ namespace Wism.Client.Test.Common
             };
         }
 
-        private static WarStrategyEntity CreateDefaultWarStrategy()
+        private static AssemblyEntity CreateDefaultWarStrategy()
         {
-            var entity = new WarStrategyEntity()
+            var entity = new AssemblyEntity()
             {
                 AssemblyName = Assembly.GetAssembly(typeof(DefaultWarStrategy)).FullName,
                 TypeName = (typeof(DefaultWarStrategy)).FullName

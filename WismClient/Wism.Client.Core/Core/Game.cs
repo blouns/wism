@@ -6,6 +6,7 @@ using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Data;
 using Wism.Client.War;
+using Wism.Client.Core.Armies;
 
 namespace Wism.Client.Core
 {
@@ -47,6 +48,16 @@ namespace Wism.Client.Core
         /// Gets or sets the strategy used for battles
         /// </summary>
         public IWarStrategy WarStrategy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the strategy used for terrain traversal
+        /// </summary>
+        public ITraversalStrategy TraversalStrategy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the seer that describes the strategies applicable movement
+        /// </summary>
+        public MovementStrategyCoordinator MovementCoordinator { get; set; }
 
         /// <summary>
         /// Current GameState
@@ -473,6 +484,8 @@ namespace Wism.Client.Core
             current.RandomSeed = Game.DefaultRandomSeed;
             current.Random = new Random(Game.DefaultRandomSeed);
             current.WarStrategy = new DefaultWarStrategy();
+            current.TraversalStrategy = CompositeTraversalStrategy.CreateDefault();
+            current.MovementCoordinator = MovementStrategyCoordinator.CreateDefault();
 
             // Setup default players for testing
             current.Players = new List<Player>();

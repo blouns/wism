@@ -29,7 +29,7 @@ namespace Assets.Scripts.Persistance.Entities
         private void Initialize(string gameDisplayName, UnityManager unityGame)
         {
             this.DisplayName = gameDisplayName;
-            this.WorldName = unityGame.GetComponent<GameFactory>().WorldName;   // TODO: Resolve dupe world name with GameManager
+            this.WorldName = unityGame.GetComponent<UnityGameFactory>().WorldName;   // TODO: Resolve dupe world name with GameManager
             this.LastCommandId = unityGame.LastCommandId;
             var cameraPosition = unityGame.GetMainCamera().transform.position;
             this.CameraPosition = new float[3]

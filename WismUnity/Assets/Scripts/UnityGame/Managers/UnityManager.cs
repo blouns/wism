@@ -125,7 +125,7 @@ namespace Assets.Scripts.Managers
         {
             if (gameSettings == null)
             {
-                gameSettings = GameFactory.CreateDefaultGameSettings();
+                gameSettings = UnityGameFactory.CreateDefaultGameSettings();
             }
 
             IntializeWismApi();
@@ -150,12 +150,12 @@ namespace Assets.Scripts.Managers
             if (gameSettings.IsNewGame)
             {
                 DebugManager.LogInformation("Starting a new game...");
-                GetComponent<GameFactory>().CreateGame(gameSettings);
+                GetComponent<UnityGameFactory>().CreateGame(gameSettings);
             }
             else
             {
                 DebugManager.LogInformation("Loading a game...");
-                GetComponent<GameFactory>().LoadNewGame();
+                GetComponent<UnityGameFactory>().LoadNewGame();
             }
         }
 
@@ -458,6 +458,20 @@ namespace Assets.Scripts.Managers
         {
             var mode = (saving) ? InputMode.SaveGamePicker : InputMode.LoadGamePicker;
             this.InputManager.SetInputMode(mode);
+        }
+
+        public void HandlePetCompanion()
+        {
+            if (Game.Current.GameState == GameState.SelectedArmy)
+            {
+                var selected = Game.Current.GetSelectedArmies();
+                var hero = selected.Find(army => army is Hero);
+                if (hero != null)
+                {
+                    NotifyUser(
+                        ((Hero)hero).GetCompanionInteraction());
+                }
+            }
         }
 
         internal void ToggleMinimap()

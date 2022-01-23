@@ -18,5 +18,8 @@ namespace Wism.Client.Modules
 
         [DataMember]
         public int CombatBonus { get; set; } = 0;
+
+        [DataMember]
+        public string Interaction { get; set; }
     }
 }

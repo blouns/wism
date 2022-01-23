@@ -381,6 +381,80 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(hero.IsDead, "Hero has been resurrected and is haunting you.");
         }
 
+        [Test]
+        public void Take_CompanionCooper_Pass()
+        {
+            // Assemble
+            // Set up location            
+            var tile = World.Current.Map[2, 2];
+            var location = MapBuilder.FindLocation("Doghouse");
+            World.Current.AddLocation(location, tile);
+
+            // Set up boon
+            var artifact = FindArtifact("Cooper");
+            var boon = new ArtifactBoon(artifact);
+            location.Boon = boon;
+
+            // Set up hero
+            var player1 = Game.Current.Players[0];
+            var hero = player1.HireHero(tile);
+            Game.Current.SelectArmies(new List<Army>() { hero });
+            var success = tile.Location.Search(new List<Army>() { hero }, out var result);
+            Assert.IsTrue(success, "Test setup failed");
+
+            // Act            
+            hero.Take(tile.Items);
+            var interaction = hero.GetCompanionInteraction();
+
+            // Assert
+            Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
+            Assert.AreEqual(1, hero.Items.Count, "Hero does not have correct items.");
+            Assert.IsTrue(hero.Items[0] is Artifact);
+            Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
+
+            var actualArtifactName = (hero.Items[0]).ShortName;
+            Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
+            Assert.AreEqual(1, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
+            Assert.AreEqual("Cooper layed down and got fur everywhere.", interaction, "Cooper did not have the expected reaction");
+        }
+
+        [Test]
+        public void Take_CompanionWilson_Pass()
+        {
+            // Assemble
+            // Set up location            
+            var tile = World.Current.Map[2, 2];
+            var location = MapBuilder.FindLocation("Yakima");
+            World.Current.AddLocation(location, tile);
+
+            // Set up boon
+            var artifact = FindArtifact("Wilson");
+            var boon = new ArtifactBoon(artifact);
+            location.Boon = boon;
+
+            // Set up hero
+            var player1 = Game.Current.Players[0];
+            var hero = player1.HireHero(tile);
+            Game.Current.SelectArmies(new List<Army>() { hero });
+            var success = tile.Location.Search(new List<Army>() { hero }, out var result);
+            Assert.IsTrue(success, "Test setup failed");
+
+            // Act            
+            hero.Take(tile.Items);
+            var interaction = hero.GetCompanionInteraction();
+
+            // Assert
+            Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
+            Assert.AreEqual(1, hero.Items.Count, "Hero does not have correct items.");
+            Assert.IsTrue(hero.Items[0] is Artifact);
+            Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
+
+            var actualArtifactName = (hero.Items[0]).ShortName;
+            Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
+            Assert.AreEqual(1, hero.GetCombatBonus(), "Hero did not get the correct Command Bonus.");
+            Assert.AreEqual("Wilson sat down and farted.", interaction, "Wilson did not have the expected reaction");
+        }
+
         #region Helper methods
 
         private static Artifact FindArtifact(string artifactName)
