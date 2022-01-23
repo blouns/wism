@@ -415,7 +415,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         gameManager.SearchLocation();
         var inputManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<InputManager>();
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(2f);
 
         if (siriansHero.Tile.HasItems())
         {
@@ -427,7 +427,6 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
         inputManager.UnityManager.HandlePetCompanion();
-        yield return new WaitForSeconds(10f);
 
         // Assert
         Assert.IsTrue(ruins.Searched, "Ruins have not been searched");

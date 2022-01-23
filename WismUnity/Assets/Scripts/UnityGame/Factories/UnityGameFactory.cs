@@ -1,19 +1,17 @@
 ﻿using Assets.Scripts.Managers;
-using Assets.Scripts.Tilemaps;
 using Assets.Scripts.UnityGame.Factories;
 using Assets.Scripts.UnityGame.Persistance.Entities;
-using Newtonsoft.Json;
 using System;
 using System.Reflection;
 using UnityEngine;
 using Wism.Client.Core;
+using Wism.Client.Core.Armies;
 using Wism.Client.Entities;
-using Wism.Client.Modules;
 using Wism.Client.War;
 
 namespace Assets.Scripts
 {
-    public class GameFactory : MonoBehaviour
+    public class UnityGameFactory : MonoBehaviour
     {
         private UnityManager unityManager;
         private DebugManager debugManager;
@@ -76,7 +74,9 @@ namespace Assets.Scripts
             this.debugManager.LogInformation("Creating new game settings...");
             GameEntity settings = new GameEntity();
             settings.Random = new RandomEntity() { Seed = newGameEntity.RandomSeed };
-            settings.WarStrategy = CreateDefaultWarStrategy();                       
+            settings.WarStrategy = CreateDefaultWarStrategy();
+            settings.MovementStrategies = CreateDefaultMovementStrategies();
+            settings.TraversalStrategies = CreateDefaultTraversalStrategies();
 
             // TODO: Random start location setting
 
@@ -87,10 +87,7 @@ namespace Assets.Scripts
 
             this.debugManager.LogInformation("Creating world from scene " + this.WorldName + "...");
             UnityWorldFactory worldFactory = new UnityWorldFactory(this.debugManager);
-            settings.World = worldFactory.CreateWorld(this.WorldName, unityManager);
-
-            var serializedSettings = JsonConvert.SerializeObject(settings, Formatting.Indented);
-            
+            settings.World = worldFactory.CreateWorld(this.WorldName, unityManager);          
 
             this.debugManager.LogInformation("Initializing game...");
             this.unityManager.GameManager.NewGame(settings);
@@ -127,6 +124,40 @@ namespace Assets.Scripts
             };
 
             return entity;
+        }
+
+        private static AssemblyEntity[] CreateDefaultTraversalStrategies()
+        {
+            var composite = CompositeTraversalStrategy.CreateDefault();
+
+            var strategyEntities = new AssemblyEntity[composite.Strategies.Count];
+            for (int i = 0; i < strategyEntities.Length; i++)
+            {
+                strategyEntities[i] = new AssemblyEntity()
+                {
+                    AssemblyName = Assembly.GetAssembly(composite.Strategies[i].GetType()).FullName,
+                    TypeName = composite.Strategies[i].GetType().FullName
+                };
+            }
+
+            return strategyEntities;
+        }
+
+        private static AssemblyEntity[] CreateDefaultMovementStrategies()
+        {
+            var coordinator = MovementStrategyCoordinator.CreateDefault();
+
+            var strategyEntities = new AssemblyEntity[coordinator.Strategies.Count];
+            for (int i = 0; i < strategyEntities.Length; i++)
+            {
+                strategyEntities[i] = new AssemblyEntity()
+                {
+                    AssemblyName = Assembly.GetAssembly(coordinator.Strategies[i].GetType()).FullName,
+                    TypeName = coordinator.Strategies[i].GetType().FullName
+                };
+            }
+
+            return strategyEntities;
         }
 
         public static UnityNewGameEntity CreateDefaultGameSettings()

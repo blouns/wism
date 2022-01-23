@@ -185,7 +185,7 @@
     <Compile Include="Assets\Scripts\UnityGame\UI\Panels\OkCancel.cs" />
     <Compile Include="Assets\Scripts\UnityGame\CommandProcessors\Cutscenes\CityStages\VerifyBuildStage.cs" />
     <Compile Include="Assets\Scripts\UnityGame\CommandProcessors\Cutscenes\DefaultFinalStage.cs" />
-    <Compile Include="Assets\Scripts\UnityGame\Factories\GameFactory.cs" />
+    <Compile Include="Assets\Scripts\UnityGame\Factories\UnityGameFactory.cs" />
     <Compile Include="Assets\Scripts\UnityGame\Editors\ArmyPrefabArrayLayout.cs" />
   </ItemGroup>
   <ItemGroup>

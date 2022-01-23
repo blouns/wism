@@ -125,7 +125,7 @@ namespace Assets.Scripts.Managers
         {
             if (gameSettings == null)
             {
-                gameSettings = GameFactory.CreateDefaultGameSettings();
+                gameSettings = UnityGameFactory.CreateDefaultGameSettings();
             }
 
             IntializeWismApi();
@@ -150,12 +150,12 @@ namespace Assets.Scripts.Managers
             if (gameSettings.IsNewGame)
             {
                 DebugManager.LogInformation("Starting a new game...");
-                GetComponent<GameFactory>().CreateGame(gameSettings);
+                GetComponent<UnityGameFactory>().CreateGame(gameSettings);
             }
             else
             {
                 DebugManager.LogInformation("Loading a game...");
-                GetComponent<GameFactory>().LoadNewGame();
+                GetComponent<UnityGameFactory>().LoadNewGame();
             }
         }
 
