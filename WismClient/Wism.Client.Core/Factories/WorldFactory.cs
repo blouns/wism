@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
@@ -9,8 +8,8 @@ namespace Wism.Client.Factories
 {
     public static class WorldFactory
     {
-        public static World Load(WorldEntity snapshot, 
-            out Dictionary<int, Tile> armiesNameTileDict, 
+        public static World Load(WorldEntity snapshot,
+            out Dictionary<int, Tile> armiesNameTileDict,
             out Dictionary<int, Tile> visitingNameTileDict)
         {
             // Load Tiles            
@@ -28,7 +27,7 @@ namespace Wism.Client.Factories
                     var tileEntity = snapshot.Tiles[x + y * xMax];
 
                     // Tile details
-                    Tile tile = new Tile();                    
+                    Tile tile = new Tile();
                     tile.X = tileEntity.X;
                     tile.Y = tileEntity.Y;
                     tile.Terrain = MapBuilder.TerrainKinds[tileEntity.TerrainShortName];
@@ -146,6 +145,6 @@ namespace Wism.Client.Factories
             }
 
             return world;
-        }        
+        }
     }
 }

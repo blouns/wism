@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
@@ -17,9 +15,9 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            bool success = LocationController.SearchLibrary(Armies, Location, out string item);
+            bool success = this.LocationController.SearchLibrary(this.Armies, this.Location, out string item);
 
-            Knowledge = item;
+            this.Knowledge = item;
             return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
 

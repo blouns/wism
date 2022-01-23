@@ -65,16 +65,16 @@ namespace Wism.Client.War
         public AttackingForceCombatModifier()
         {
             // Standard Warlords rules
-            modifiers.Add(new HeroPresentAFCM());
-            modifiers.Add(new FlyingArmyPresentAFCM());
-            modifiers.Add(new SpecialArmyPresentAFCM());
-            modifiers.Add(new CommandItemPresentAFCM());
-            modifiers.Add(new TerrainAFCM());
+            this.modifiers.Add(new HeroPresentAFCM());
+            this.modifiers.Add(new FlyingArmyPresentAFCM());
+            this.modifiers.Add(new SpecialArmyPresentAFCM());
+            this.modifiers.Add(new CommandItemPresentAFCM());
+            this.modifiers.Add(new TerrainAFCM());
         }
 
         public int Calculate(Army attacker, Tile target, int modifier = 0)
         {
-            int compositeModifer = modifiers.Sum<ICombatModifier>(v => v.Calculate(attacker, target, modifier));
+            int compositeModifer = this.modifiers.Sum<ICombatModifier>(v => v.Calculate(attacker, target, modifier));
 
             return modifier + compositeModifer;
         }

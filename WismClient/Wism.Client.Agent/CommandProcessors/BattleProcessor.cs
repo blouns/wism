@@ -80,7 +80,7 @@ namespace Wism.Client.Agent.CommandProcessors
 
             if (armies == null || armies.Count == 0)
             {
-                Console.WriteLine("The garrison has fled before you!");                
+                Console.WriteLine("The garrison has fled before you!");
             }
             else
             {

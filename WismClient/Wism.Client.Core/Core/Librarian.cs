@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Core
@@ -28,7 +27,7 @@ namespace Wism.Client.Core
         private readonly string locationSeerKnowledgeGold = "An valuable gold treasure is there!";
         private readonly string locationSeerKnowledgeLibrary = "It is a truly magnificent collection of books!";
         private readonly string locationSeerKnowledgeTemple = "Blessed is he who visits this place!";
-        private readonly string locationSeerKnowledgeSage = "Ahhh grasshopper! A place to seek wisdom!";        
+        private readonly string locationSeerKnowledgeSage = "Ahhh grasshopper! A place to seek wisdom!";
         private readonly string locationSeerKnowledgeExplored = "It has already been explored!";
 
         private List<Location> allLocations;
@@ -42,7 +41,7 @@ namespace Wism.Client.Core
         {
             BuildLocationKnowledge();
 
-            var names = allLocations.ConvertAll<string>(
+            var names = this.allLocations.ConvertAll<string>(
                 new Converter<Location, string>(MapObjectToName));
 
             return names.ToArray();
@@ -57,7 +56,7 @@ namespace Wism.Client.Core
             BuildArtifactKnowledge();
 
             // Create the list of names
-            var allArtifacts = new List<Artifact>(artifactDictionary.Keys);
+            var allArtifacts = new List<Artifact>(this.artifactDictionary.Keys);
             var names = allArtifacts.ConvertAll<string>(new Converter<Artifact, string>(MapObjectToName));
 
             return names.ToArray();
@@ -80,8 +79,8 @@ namespace Wism.Client.Core
             BuildLocationKnowledge();
             BuildArtifactKnowledge();
             var otherKnowledge = BuildOtherKnowledge();
-            var locationsWithBoons = allLocations.FindAll(loc => loc.HasBoon());
-            var allArtifacts = new List<Artifact>(artifactDictionary.Keys);
+            var locationsWithBoons = this.allLocations.FindAll(loc => loc.HasBoon());
+            var allArtifacts = new List<Artifact>(this.artifactDictionary.Keys);
 
             int totalKnowledge = allArtifacts.Count + locationsWithBoons.Count + otherKnowledge.Length;
             int index = Game.Current.Random.Next(totalKnowledge);
@@ -90,7 +89,7 @@ namespace Wism.Client.Core
                 // Give Artifact knowledge
                 knowledge = GetArtifactLibraryKnowledge(
                     allArtifacts[index],                        // Artifact
-                    artifactDictionary[allArtifacts[index]]);   // Location, hero, or tile
+                    this.artifactDictionary[allArtifacts[index]]);   // Location, hero, or tile
             }
             else if (index < (allArtifacts.Count + locationsWithBoons.Count))
             {
@@ -121,26 +120,26 @@ namespace Wism.Client.Core
             }
 
             var knowledge = new string[2];
-            knowledge[0] = String.Format(artifactSeerKnowledgeIntro, artifact.DisplayName);
+            knowledge[0] = String.Format(this.artifactSeerKnowledgeIntro, artifact.DisplayName);
 
             var place = this.artifactDictionary[artifact];
             if (place is Location)
             {
-                knowledge[1] = String.Format(artifactSeerKnowledgeLocation, ((Location)place).DisplayName);
+                knowledge[1] = String.Format(this.artifactSeerKnowledgeLocation, ((Location)place).DisplayName);
             }
             else if (place is Hero)
             {
                 Hero hero = (Hero)place;
                 City city = GetClosestCity(hero.Tile);
 
-                knowledge[1] = String.Format(artifactSeerKnowledgeHero, city, hero.Clan);
+                knowledge[1] = String.Format(this.artifactSeerKnowledgeHero, city, hero.Clan);
             }
             else if (place is Tile)
             {
                 Tile tile = (Tile)place;
                 City city = GetClosestCity(tile);
 
-                knowledge[1] = String.Format(artifactSeerKnowledgeTile, city.Clan, city.DisplayName);
+                knowledge[1] = String.Format(this.artifactSeerKnowledgeTile, city.Clan, city.DisplayName);
             }
             else
             {
@@ -161,22 +160,22 @@ namespace Wism.Client.Core
             switch (location.Kind)
             {
                 case "Library":
-                    knowledge.Add(locationSeerKnowledgeLibrary);
+                    knowledge.Add(this.locationSeerKnowledgeLibrary);
                     break;
                 case "Ruins":
                 case "Tomb":
                     AddRuinsKnowledge(location, knowledge);
                     break;
                 case "Sage":
-                    knowledge.Add(locationSeerKnowledgeSage);
+                    knowledge.Add(this.locationSeerKnowledgeSage);
                     break;
                 case "Temple":
-                    knowledge.Add(locationSeerKnowledgeTemple);
+                    knowledge.Add(this.locationSeerKnowledgeTemple);
                     break;
                 default:
                     knowledge.Add("Its contents are a mystery even to me!");
                     break;
-            }         
+            }
 
             return knowledge.ToArray();
         }
@@ -185,17 +184,17 @@ namespace Wism.Client.Core
         {
             if (location.Searched)
             {
-                knowledge.Add(locationSeerKnowledgeExplored);
+                knowledge.Add(this.locationSeerKnowledgeExplored);
             }
             else
             {
                 if (location.HasMonster())
                 {
-                    knowledge.Add(String.Format(locationSeerKnowledgeInhabited, location.Monster));
+                    knowledge.Add(String.Format(this.locationSeerKnowledgeInhabited, location.Monster));
                 }
                 else
                 {
-                    knowledge.Add(locationSeerKnowledgeUninhabited);
+                    knowledge.Add(this.locationSeerKnowledgeUninhabited);
                 }
 
                 if (location.HasBoon())
@@ -216,21 +215,21 @@ namespace Wism.Client.Core
             {
                 if (location.Boon is AlliesBoon)
                 {
-                    knowledge.Add(locationSeerKnowledgeAllies);
+                    knowledge.Add(this.locationSeerKnowledgeAllies);
                 }
                 else if (location.Boon is ThroneBoon)
                 {
-                    knowledge.Add(locationSeerKnowledgeThrone);
+                    knowledge.Add(this.locationSeerKnowledgeThrone);
                 }
                 else if (location.Boon is ArtifactBoon)
                 {
                     var artifact = ((ArtifactBoon)location.Boon).Artifact;
-                    knowledge.Add(locationSeerKnowledgeArtifactIntro);
-                    knowledge.Add(String.Format(locationSeerKnowledgeArtifact, artifact.DisplayName));
+                    knowledge.Add(this.locationSeerKnowledgeArtifactIntro);
+                    knowledge.Add(String.Format(this.locationSeerKnowledgeArtifact, artifact.DisplayName));
                 }
                 else if (location.Boon is GoldBoon)
                 {
-                    knowledge.Add(locationSeerKnowledgeGold);
+                    knowledge.Add(this.locationSeerKnowledgeGold);
                 }
                 else
                 {
@@ -245,20 +244,20 @@ namespace Wism.Client.Core
 
             if (container is Location)
             {
-                knowledge = String.Format(artifactBookKnowledgeLocation,
+                knowledge = String.Format(this.artifactBookKnowledgeLocation,
                     artifact.DisplayName,
                     ((Location)container).DisplayName);
             }
             else if (container is Hero)
             {
-                knowledge = String.Format(artifactBookKnowledgeHero,
+                knowledge = String.Format(this.artifactBookKnowledgeHero,
                     artifact.DisplayName,
                     ((Hero)container).DisplayName);
             }
             else if (container is Tile)
             {
                 City city = GetClosestCity((Tile)container);
-                knowledge = String.Format(artifactBookKnowledgeTile,
+                knowledge = String.Format(this.artifactBookKnowledgeTile,
                     artifact.DisplayName,
                     city.Clan.DisplayName,
                     city.DisplayName);
@@ -292,7 +291,7 @@ namespace Wism.Client.Core
                 BuildArtifactKnowledge();
             }
 
-            var allArtifacts = new List<Artifact>(artifactDictionary.Keys);
+            var allArtifacts = new List<Artifact>(this.artifactDictionary.Keys);
             return allArtifacts.Find(art => art.ShortName == shortName);
         }
 
@@ -303,7 +302,7 @@ namespace Wism.Client.Core
                 BuildArtifactKnowledge();
             }
 
-            var allArtifacts = new List<Artifact>(artifactDictionary.Keys);
+            var allArtifacts = new List<Artifact>(this.artifactDictionary.Keys);
             return allArtifacts[index];
         }
 
@@ -394,9 +393,9 @@ namespace Wism.Client.Core
 
         private void BuildLocationKnowledge()
         {
-            if (allLocations == null)
+            if (this.allLocations == null)
             {
-                allLocations = World.Current.GetLocations();
+                this.allLocations = World.Current.GetLocations();
             }
         }
 
@@ -465,11 +464,11 @@ namespace Wism.Client.Core
 
             if (location.HasMonster())
             {
-                knowledge = String.Format(locationBookKnowledgeInhabited, location.DisplayName, location.Monster);
+                knowledge = String.Format(this.locationBookKnowledgeInhabited, location.DisplayName, location.Monster);
             }
             else
             {
-                knowledge = String.Format(locationBookKnowledgeUninhabited, location.DisplayName);
+                knowledge = String.Format(this.locationBookKnowledgeUninhabited, location.DisplayName);
             }
 
             return knowledge;

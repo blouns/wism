@@ -27,7 +27,7 @@ namespace Wism.Client.Core
 
             target.VisitingArmies[0].Player.Gold += goldBoon;
 
-            Result = goldBoon;
+            this.Result = goldBoon;
             return goldBoon;
         }
     }

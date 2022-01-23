@@ -36,13 +36,13 @@ namespace Wism.Client.Test.Unit
             // Assert
             Assert.AreEqual(tile, city.Tile);
             Assert.AreEqual("Marthos", city.DisplayName);
-            
+
             var tiles = city.GetTiles();
             Assert.IsNotNull(tiles);
             for (int i = 0; i < 4; i++)
             {
                 Assert.IsNotNull(tiles[i]);
-                Assert.AreEqual(expectedTerrain, tiles[i].Terrain);                
+                Assert.AreEqual(expectedTerrain, tiles[i].Terrain);
                 Assert.AreEqual(city, tiles[i].City);
             }
 
@@ -205,7 +205,7 @@ namespace Wism.Client.Test.Unit
             var tile = World.Current.Map[1, 1];
             var city = MapBuilder.FindCity("Marthos");
             var expectedPlayer = Game.Current.GetCurrentPlayer();
-            var armyInfo = ModFactory.FindArmyInfo("LightInfantry");            
+            var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
             World.Current.AddCity(city, tile);
             expectedPlayer.ClaimCity(city);
             expectedPlayer.Gold = 0;
@@ -233,7 +233,7 @@ namespace Wism.Client.Test.Unit
             // Act & Assert
             Assert.Throws<ArgumentException>(() =>
                 city.Barracks.StartProduction(armyInfo)
-            );       
+            );
         }
 
         [Test]
@@ -250,8 +250,8 @@ namespace Wism.Client.Test.Unit
             World.Current.AddCity(city, tile);
             player.ClaimCity(city);
 
-            player.Gold = startingGold;            
-            var result = city.Barracks.StartProduction(armyInfo);        
+            player.Gold = startingGold;
+            var result = city.Barracks.StartProduction(armyInfo);
 
             // Act
             city.Barracks.StopProduction();
@@ -279,7 +279,7 @@ namespace Wism.Client.Test.Unit
             // Act
             TestContext.WriteLine("Starting production.");
             var result = city.Barracks.StartProduction(armyInfo);
-            while(!city.Barracks.Produce(out _))
+            while (!city.Barracks.Produce(out _))
             {
                 TestContext.WriteLine("Produced one turn.");
             }
@@ -383,13 +383,13 @@ namespace Wism.Client.Test.Unit
                     TestContext.WriteLine("Produced one turn");
                 }
                 TestContext.WriteLine("Produced" + i);
-            }            
+            }
 
             // Assert                         
             Assert.AreEqual(NumberOfArmiesToProduce, player.GetArmies().Count, "Not all armies were deployed");
             Assert.IsNotNull(tile.Armies, "Army was not deployed");
             Assert.AreEqual(8, tile.Armies.Count);
-            
+
             // City tiles should be full (8 x 4)
             var tiles = city.GetTiles();
             for (int i = 0; i < tiles.Length; i++)
@@ -398,7 +398,7 @@ namespace Wism.Client.Test.Unit
             }
 
             // Surrounding tiles should have one tile full (8) and one tile with one (1) army
-            Assert.IsNotNull(World.Current.Map[1, 3].Armies.Count);            
+            Assert.IsNotNull(World.Current.Map[1, 3].Armies.Count);
             Assert.AreEqual(8, World.Current.Map[1, 3].Armies.Count);
             Assert.IsNotNull(World.Current.Map[2, 3].Armies.Count);
             Assert.AreEqual(1, World.Current.Map[2, 3].Armies.Count);

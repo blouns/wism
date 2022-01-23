@@ -18,7 +18,7 @@ namespace Wism.Client.MapObjects
         public Terrain Terrain
         {
             get
-            { 
+            {
                 if (this.terrain == null)
                 {
                     this.terrain = MapBuilder.TerrainKinds[this.info.Terrain];
@@ -35,15 +35,15 @@ namespace Wism.Client.MapObjects
                 {
                     this.info = MapBuilder.FindLocationInfo(this.ShortName);
                 }
-                return info;
+                return this.info;
             }
         }
 
-        public override string ShortName { get => Info.ShortName; }
-        public string Kind { get => Info.Kind; }
+        public override string ShortName { get => this.Info.ShortName; }
+        public string Kind { get => this.Info.Kind; }
         public IBoon Boon { get; set; }
         public string Monster { get; set; }
-        public bool Searched { get => searched; set => searched = value; }
+        public bool Searched { get => this.searched; set => this.searched = value; }
 
         protected Location(LocationInfo info)
         {
@@ -83,22 +83,22 @@ namespace Wism.Client.MapObjects
 
         public bool Search(List<Army> armies, out object result)
         {
-            if (!searchStrategy.CanSearchKind(Kind))
+            if (!this.searchStrategy.CanSearchKind(this.Kind))
             {
-                throw new InvalidOperationException("Search strategy cannot be used with this location: " + searchStrategy);
+                throw new InvalidOperationException("Search strategy cannot be used with this location: " + this.searchStrategy);
             }
 
-            var success = searchStrategy.Search(armies, this, out result);            
+            var success = this.searchStrategy.Search(armies, this, out result);
             if (success)
             {
-                Searched = true;
-                
-                if (this.HasBoon())
+                this.Searched = true;
+
+                if (HasBoon())
                 {
                     this.Boon = null;
                 }
 
-                if (this.HasMonster())
+                if (HasMonster())
                 {
                     this.Monster = null;
                 }
@@ -109,12 +109,12 @@ namespace Wism.Client.MapObjects
 
         public bool HasBoon()
         {
-            return Boon != null;
+            return this.Boon != null;
         }
 
         public bool HasMonster()
         {
-            return Monster != null;
+            return this.Monster != null;
         }
 
         public override bool Equals(object obj)
@@ -135,7 +135,7 @@ namespace Wism.Client.MapObjects
 
         public override string ToString()
         {
-            return $"{ShortName}-{Kind}({Id})";
+            return $"{this.ShortName}-{this.Kind}({this.Id})";
         }
     }
 }

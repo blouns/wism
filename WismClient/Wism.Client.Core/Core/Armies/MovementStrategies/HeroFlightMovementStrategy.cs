@@ -8,7 +8,7 @@ namespace Wism.Client.Core.Armies.MovementStrategies
         public List<Army> GetArmiesWithApplicableMoves(List<Army> armiesToMove)
         {
             var armiesThatMatter = new List<Army>();
-            
+
             foreach (Army army in armiesToMove)
             {
                 if (army.CanFly)
@@ -41,7 +41,7 @@ namespace Wism.Client.Core.Armies.MovementStrategies
                     return false;
                 }
             }
-            
+
             return hasFlying && hasHero;
         }
     }

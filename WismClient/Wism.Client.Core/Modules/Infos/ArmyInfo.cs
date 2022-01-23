@@ -5,7 +5,7 @@ namespace Wism.Client.Modules
 {
     [DataContract]
     public class ArmyInfo
-    {        
+    {
         private static readonly string HeroId = "Hero";
         public static readonly string FileName = "Army.json";
 

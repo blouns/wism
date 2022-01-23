@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Wism.Client.Core;
 
 namespace Wism.Client.MapObjects
@@ -7,7 +6,7 @@ namespace Wism.Client.MapObjects
     public class SearchLibrary : ISearchable
     {
         private const int MovesToSearch = 4;
-        
+
         private static readonly SearchLibrary instance = new SearchLibrary();
 
         public static SearchLibrary Instance => instance;
@@ -39,7 +38,7 @@ namespace Wism.Client.MapObjects
             // Lose 4 moves for searching
             hero.MovesRemaining -= MovesToSearch;
 
-            result = librarian.GetRandomKnowledge(hero.Player);
+            result = this.librarian.GetRandomKnowledge(hero.Player);
             return true;
         }
     }

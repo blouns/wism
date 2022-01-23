@@ -1,9 +1,6 @@
 ﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Controller
@@ -24,7 +21,7 @@ namespace Wism.Client.Test.Controller
             gameController.EndTurn();
 
             // Assert
-            Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(), 
+            Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
                 "Current player is incorrect.");
         }
 
@@ -42,7 +39,7 @@ namespace Wism.Client.Test.Controller
             gameController.EndTurn();
 
             // Assert
-            Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(), 
+            Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(),
                 "Current player is incorrect.");
         }
 
@@ -60,7 +57,7 @@ namespace Wism.Client.Test.Controller
             gameController.EndTurn();
 
             // Assert
-            Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(), 
+            Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(),
                 "Current player is incorrect.");
             Assert.AreEqual(GameState.GameOver, Game.Current.GameState, "Game should be over after last player dies (one player left).");
         }

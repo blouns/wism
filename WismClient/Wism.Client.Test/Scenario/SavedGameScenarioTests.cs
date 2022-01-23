@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
-using Wism.Client.Api.Commands;
 using Wism.Client.Core;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
@@ -82,7 +81,7 @@ namespace Wism.Client.Test.Scenario
                     tile3 = World.Current.Map[4, 3];
                     tile4 = World.Current.Map[4, 4];
                     lordBaneHero1 = new List<Army>(tile3.Armies);
-                    lordBaneHero2 = new List<Army>(tile4.Armies);                    
+                    lordBaneHero2 = new List<Army>(tile4.Armies);
                 }
 
                 // Turn 1: Sirians

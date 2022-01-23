@@ -11,7 +11,7 @@ namespace Wism.Client.Core.Controllers
     {
         Moved,
         InsuffientMoves,
-        Blocked    
+        Blocked
     }
 
     public enum AttackResult
@@ -41,11 +41,11 @@ namespace Wism.Client.Core.Controllers
         {
             if (!Game.Current.ArmiesSelected())
             {
-                logger.LogInformation("Cannot prepare for battle when no armies are selected.");
+                this.logger.LogInformation("Cannot prepare for battle when no armies are selected.");
                 return ActionState.Failed;
             }
 
-            logger.LogInformation("Transitioning to AttackingArmy state.");
+            this.logger.LogInformation("Transitioning to AttackingArmy state.");
             Game.Current.Transition(GameState.AttackingArmy);
 
             return ActionState.Succeeded;
@@ -53,19 +53,19 @@ namespace Wism.Client.Core.Controllers
 
         public void QuitArmy(List<Army> armies)
         {
-            logger.LogInformation("Quitting armies to be skipped for one turn.");
+            this.logger.LogInformation("Quitting armies to be skipped for one turn.");
             Game.Current.QuitSelectedArmies();
         }
 
         public void DefendArmy(List<Army> armies)
         {
-            logger.LogInformation("Setting armies to defensive sentry.");
+            this.logger.LogInformation("Setting armies to defensive sentry.");
             Game.Current.DefendSelectedArmies();
         }
 
         public bool SelectNextArmy()
         {
-            logger.LogInformation("Selecting next non-defending army with moves.");
+            this.logger.LogInformation("Selecting next non-defending army with moves.");
             return Game.Current.SelectNextArmy();
         }
 
@@ -87,7 +87,7 @@ namespace Wism.Client.Core.Controllers
             // Can we traverse in that terrain?            
             if (!targetTile.CanTraverseHere(armiesToMove))
             {
-                logger.LogInformation($"{ArmiesToString(armiesToMove)} cannot traverse {targetTile}");
+                this.logger.LogInformation($"{ArmiesToString(armiesToMove)} cannot traverse {targetTile}");
                 Game.Current.Transition(GameState.SelectedArmy);
                 return MoveResult.Blocked;
             }
@@ -99,18 +99,18 @@ namespace Wism.Client.Core.Controllers
                 MovementCoordinator.GetApplicableArmies(armiesToMove, targetTile);
             if (armiesWithMovesThatMatter.Any(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
             {
-                logger.LogInformation($"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");
+                this.logger.LogInformation($"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");
                 Game.Current.DeselectArmies();
                 return MoveResult.InsuffientMoves;
             }
-            
+
             if (targetTile.HasArmies())
             {
                 // Does the tile have room for the unit of the same team?
                 if ((targetTile.Armies[0].Clan == armiesToMove[0].Clan) &&
                     (!targetTile.HasRoom(armiesToMove.Count)))
                 {
-                    logger.LogInformation($"{targetTile} has too many units to move there");
+                    this.logger.LogInformation($"{targetTile} has too many units to move there");
                     Game.Current.Transition(GameState.SelectedArmy);
                     return MoveResult.Blocked;
                 }
@@ -119,7 +119,7 @@ namespace Wism.Client.Core.Controllers
                 if ((targetTile.HasArmies()) &&
                     (targetTile.Armies[0].Clan != armiesToMove[0].Clan))
                 {
-                    logger.LogInformation(
+                    this.logger.LogInformation(
                         $"Army cannot move {ArmiesToString(armiesToMove)} to {targetTile} " +
                         $"as it occupied by {targetTile.Armies[0].Clan}");
                     Game.Current.Transition(GameState.SelectedArmy);
@@ -128,7 +128,7 @@ namespace Wism.Client.Core.Controllers
             }
 
             // We are clear to advance!
-            logger.LogInformation($"Moving {ArmiesToString(armiesToMove)} to {targetTile}");
+            this.logger.LogInformation($"Moving {ArmiesToString(armiesToMove)} to {targetTile}");
             MoveSelectedArmies(armiesToMove, targetTile);
 
             return MoveResult.Moved;
@@ -185,7 +185,7 @@ namespace Wism.Client.Core.Controllers
             var moveResult = TryMove(armiesToMove, myPath[1]);
             if (moveResult == MoveResult.Moved)
             {
-                logger.LogInformation($"Moved {ArmiesToString(armiesToMove)} to {targetTile}");
+                this.logger.LogInformation($"Moved {ArmiesToString(armiesToMove)} to {targetTile}");
 
                 // Pop the starting location and return updated path and distance
                 myPath.RemoveAt(0);
@@ -195,12 +195,12 @@ namespace Wism.Client.Core.Controllers
             else if (moveResult == MoveResult.InsuffientMoves)
             {
                 // Could not move due to lack of moves remaining
-                logger.LogWarning($"Could not move due to lack of moves remaining to: {myPath[1]}");
+                this.logger.LogWarning($"Could not move due to lack of moves remaining to: {myPath[1]}");
                 result = ActionState.Failed;
             }
             else
             {
-                logger.LogWarning($"Move was blocked: {myPath[1]}");
+                this.logger.LogWarning($"Move was blocked: {myPath[1]}");
                 myPath = null;
                 myDistance = 0;
                 result = ActionState.Failed;
@@ -222,10 +222,10 @@ namespace Wism.Client.Core.Controllers
             if (path == null || path.Count == 0)
             {
                 // Impossible route
-                logger.LogInformation($"Path between {ArmiesToString(armiesToMove)} and {targetTile} is impassable.");
+                this.logger.LogInformation($"Path between {ArmiesToString(armiesToMove)} and {targetTile} is impassable.");
 
                 distance = 0.0f;
-                path = null;                
+                path = null;
                 Game.Current.Transition(GameState.SelectedArmy);
             }
 
@@ -244,7 +244,7 @@ namespace Wism.Client.Core.Controllers
 
         private void PrepareArmiesForArrival(List<Army> armiesToMove, IList<Tile> path, out float distance)
         {
-            logger.LogInformation($"{ArmiesToString(armiesToMove)} arrived at its destination.");
+            this.logger.LogInformation($"{ArmiesToString(armiesToMove)} arrived at its destination.");
             path.Clear();
             distance = 0;
 
@@ -308,19 +308,19 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentException("Target tile must have armies of another clan.");
             }
 
-            logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile} once");
+            this.logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile} once");
 
             // Attack!
             var war = Game.Current.WarStrategy;
             var attackSucceeded = war.AttackOnce(armiesToAttackWith, targetTile);
-            
+
             if (war.BattleContinues(targetTile.MusterArmy(), armiesToAttackWith))
             {
                 // Battle continues
                 result = (attackSucceeded) ? AttackResult.AttackerWinsRound : AttackResult.DefenderWinsRound;
             }
             else
-            {               
+            {
                 // Battle is over
                 Game.Current.Transition(GameState.CompletedBattle);
                 if (attackSucceeded)
@@ -332,9 +332,9 @@ namespace Wism.Client.Core.Controllers
                 {
                     attackingFromTile.VisitingArmies = null;
                     result = AttackResult.DefenderWinBattle;
-                }                
-            }            
-                        
+                }
+            }
+
             return result;
         }
 
@@ -377,7 +377,7 @@ namespace Wism.Client.Core.Controllers
             if (Game.Current.GameState != GameState.CompletedBattle)
             {
                 throw new InvalidOperationException("Cannot complete the battle in this state: " + Game.Current.GameState);
-            }            
+            }
 
             if (attackerWon)
             {

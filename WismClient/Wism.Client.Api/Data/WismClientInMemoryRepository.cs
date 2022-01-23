@@ -27,29 +27,29 @@ namespace Wism.Client.Api
                 throw new ArgumentNullException(nameof(command));
             }
 
-            lock (sync)
+            lock (this.sync)
             {
                 // Generate the ID on the client side
-                command.Id = ++lastId;
-                commands.Add(command.Id, command);
+                command.Id = ++this.lastId;
+                this.commands.Add(command.Id, command);
             }
         }
 
         public bool CommandExists(int commandId)
         {
-            lock (sync)
+            lock (this.sync)
             {
-                return commands.ContainsKey(commandId);
-            }            
+                return this.commands.ContainsKey(commandId);
+            }
         }
 
         public async Task<bool> CommandExistsAsync(int commandId)
         {
             return await Task<bool>.Run(() =>
             {
-                lock (sync)
+                lock (this.sync)
                 {
-                    return commands.ContainsKey(commandId);
+                    return this.commands.ContainsKey(commandId);
                 }
             });
         }
@@ -61,18 +61,18 @@ namespace Wism.Client.Api
                 throw new ArgumentNullException(nameof(command));
             }
 
-            lock (sync)
+            lock (this.sync)
             {
-                commands.Remove(command.Id);
+                this.commands.Remove(command.Id);
             }
         }
 
         public Command GetCommand(int commandId)
         {
             Command commandToReturn = null;
-            lock (sync)
+            lock (this.sync)
             {
-                _ = commands.TryGetValue(commandId, out commandToReturn);
+                _ = this.commands.TryGetValue(commandId, out commandToReturn);
             }
 
             return commandToReturn;
@@ -83,10 +83,10 @@ namespace Wism.Client.Api
             Command commandToReturn = null;
             return await Task<Command>.Run(() =>
             {
-                lock (sync)
+                lock (this.sync)
                 {
                     // Intentionally ignoring return
-                    commands.TryGetValue(commandId, out commandToReturn);
+                    this.commands.TryGetValue(commandId, out commandToReturn);
                 }
 
                 return commandToReturn;
@@ -98,9 +98,9 @@ namespace Wism.Client.Api
             List<Command> commandsToReturn = new List<Command>();
             IEnumerable<KeyValuePair<int, Command>> sortedCommands;
 
-            lock (sync)
+            lock (this.sync)
             {
-                sortedCommands = commands.Where(c => c.Key > lastSeenCommandId);
+                sortedCommands = this.commands.Where(c => c.Key > lastSeenCommandId);
             }
 
             foreach (var pair in sortedCommands)
@@ -118,9 +118,9 @@ namespace Wism.Client.Api
 
             return await Task<List<Command>>.Run(() =>
             {
-                lock (sync)
+                lock (this.sync)
                 {
-                    sortedCommands = commands.Where(c => c.Key > lastSeenCommandId);
+                    sortedCommands = this.commands.Where(c => c.Key > lastSeenCommandId);
                 }
 
                 foreach (var pair in sortedCommands)
@@ -134,9 +134,9 @@ namespace Wism.Client.Api
 
         public List<Command> GetCommands()
         {
-            lock (sync)
+            lock (this.sync)
             {
-                return commands.Values.ToList<Command>();
+                return this.commands.Values.ToList<Command>();
             }
         }
 
@@ -144,9 +144,9 @@ namespace Wism.Client.Api
         {
             return await Task<List<Command>>.Run(() =>
             {
-                lock (sync)
+                lock (this.sync)
                 {
-                    return commands.Values.ToList<Command>();
+                    return this.commands.Values.ToList<Command>();
                 }
             });
         }
@@ -165,7 +165,7 @@ namespace Wism.Client.Api
 
         public int GetCount()
         {
-            lock (sync)
+            lock (this.sync)
             {
                 return this.commands.Count;
             }

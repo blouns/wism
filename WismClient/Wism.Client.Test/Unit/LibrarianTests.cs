@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -23,7 +22,7 @@ namespace Wism.Client.Test.Unit
         [SetUp]
         public void Setup()
         {
-            Game.CreateDefaultGame(WorldName);
+            Game.CreateDefaultGame(this.WorldName);
         }
 
         [Test]
@@ -133,7 +132,7 @@ namespace Wism.Client.Test.Unit
         {
             // Assemble
             var map = World.Current.Map;
-            var player1 = Game.Current.Players[0];            
+            var player1 = Game.Current.Players[0];
             var artifact = new Artifact(
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
@@ -387,7 +386,7 @@ namespace Wism.Client.Test.Unit
                 ModFactory.FindArtifactInfo("Firesword"));
             artifact.DisplayName = "Firesword";
             hero1.Items = new List<Artifact>();
-            hero1.Items.Add(artifact);            
+            hero1.Items.Add(artifact);
 
             // Items
             artifact = new Artifact(

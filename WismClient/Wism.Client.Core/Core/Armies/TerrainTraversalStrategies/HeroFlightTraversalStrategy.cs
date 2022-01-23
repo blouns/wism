@@ -37,7 +37,7 @@ namespace Wism.Client.Core.Armies
                 }
             }
 
-            return ((heroCount > 0) && 
+            return ((heroCount > 0) &&
                     (flyableCount > 0) &&
                     (flyableCount == armies.Count - heroCount));
         }

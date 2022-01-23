@@ -21,8 +21,8 @@ namespace Wism.Client.Api.Commands
             : base(player)
         {
             this.playerController = playerController ?? throw new ArgumentNullException(nameof(playerController));
-            Tile = tile ?? throw new ArgumentNullException(nameof(tile));
-            ArmyKinds = armyKinds ?? throw new ArgumentNullException(nameof(armyKinds));
+            this.Tile = tile ?? throw new ArgumentNullException(nameof(tile));
+            this.ArmyKinds = armyKinds ?? throw new ArgumentNullException(nameof(armyKinds));
 
             if (armyKinds.Count == 0)
             {
@@ -32,7 +32,7 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            var state = playerController.ConscriptArmies(
+            var state = this.playerController.ConscriptArmies(
                 this.Player, this.ArmyKinds, this.Tile, out List<Army> armies);
 
             if (state == ActionState.Succeeded)
@@ -45,7 +45,7 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            return $"Command: {Player.Clan} conscripting armies";
+            return $"Command: {this.Player.Clan} conscripting armies";
         }
     }
 }

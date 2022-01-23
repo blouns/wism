@@ -12,26 +12,26 @@ namespace Wism.Client.Api.Commands
         public ArmyInfo ArmyInfo { get; }
         public City DestinationCity { get; }
 
-        public StartProductionCommand(CityController cityController, 
+        public StartProductionCommand(CityController cityController,
             City productionCity, ArmyInfo armyInfo, City destinationCity = null)
             : base()
         {
-            CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
-            ProductionCity = productionCity ?? throw new ArgumentNullException(nameof(productionCity));
-            ArmyInfo = armyInfo ?? throw new ArgumentNullException(nameof(armyInfo));
-            DestinationCity = destinationCity;
+            this.CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
+            this.ProductionCity = productionCity ?? throw new ArgumentNullException(nameof(productionCity));
+            this.ArmyInfo = armyInfo ?? throw new ArgumentNullException(nameof(armyInfo));
+            this.DestinationCity = destinationCity;
         }
 
         protected override ActionState ExecuteInternal()
         {
             bool success;
-            if (DestinationCity == null)
+            if (this.DestinationCity == null)
             {
-                success = this.CityController.TryStartingProduction(ProductionCity, ArmyInfo);
+                success = this.CityController.TryStartingProduction(this.ProductionCity, this.ArmyInfo);
             }
             else
             {
-                success = this.CityController.TryStartingProductionToDestination(ProductionCity, ArmyInfo, DestinationCity);
+                success = this.CityController.TryStartingProductionToDestination(this.ProductionCity, this.ArmyInfo, this.DestinationCity);
             }
 
             return success ? ActionState.Succeeded : ActionState.Failed;
@@ -39,8 +39,8 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            var dest = (DestinationCity == null) ? ProductionCity.DisplayName : DestinationCity.DisplayName;
-            return $"{ProductionCity.DisplayName} start production of {ArmyInfo.DisplayName} at {dest}";                
+            var dest = (this.DestinationCity == null) ? this.ProductionCity.DisplayName : this.DestinationCity.DisplayName;
+            return $"{this.ProductionCity.DisplayName} start production of {this.ArmyInfo.DisplayName} at {dest}";
         }
     }
 }

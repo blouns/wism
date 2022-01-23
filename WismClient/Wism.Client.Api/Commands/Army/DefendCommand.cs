@@ -12,15 +12,15 @@ namespace Wism.Client.Api.Commands
         }
 
         protected override ActionState ExecuteInternal()
-        {            
-            armyController.DefendArmy(this.Armies);
+        {
+            this.armyController.DefendArmy(this.Armies);
 
             return ActionState.Succeeded;
         }
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} defend";
+            return $"Command: {ArmyUtilities.ArmiesToString(this.Armies)} defend";
         }
     }
 }

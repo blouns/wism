@@ -12,7 +12,7 @@ namespace Wism.Client.Core.Armies
     {
         private List<ITraversalStrategy> traversalStrategies;
 
-        public List<ITraversalStrategy> Strategies { get => traversalStrategies; set => traversalStrategies = value; }
+        public List<ITraversalStrategy> Strategies { get => this.traversalStrategies; set => this.traversalStrategies = value; }
 
         /// <summary>
         /// Create the default traversal strategy

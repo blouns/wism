@@ -14,7 +14,7 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            var result = armyController.SelectNextArmy();
+            var result = this.armyController.SelectNextArmy();
 
             return result ? ActionState.Succeeded : ActionState.Failed;
         }

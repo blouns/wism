@@ -5,6 +5,6 @@
         NotStarted,
         InProgress,
         Succeeded,
-        Failed,        
+        Failed,
     }
 }

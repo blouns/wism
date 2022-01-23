@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
-using System.Collections.Generic;
 
 namespace Wism.Client.Pathing
 {

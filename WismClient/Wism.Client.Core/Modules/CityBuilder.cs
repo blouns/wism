@@ -12,9 +12,9 @@ namespace Wism.Client.Modules
         private static IList<CityInfo> cityInfos;
 
         // Mutable objects; do not expose directly; use Find
-        public Dictionary<string, City> CityKinds { get => cityKinds; }
+        public Dictionary<string, City> CityKinds { get => this.cityKinds; }
 
-        public string WorldPath => worldPath;
+        public string WorldPath => this.worldPath;
 
         public CityBuilder(string worldPath)
         {
@@ -70,7 +70,7 @@ namespace Wism.Client.Modules
                 throw new ArgumentException($"'{nameof(shortName)}' cannot be null or empty", nameof(shortName));
             }
 
-            var city = CityKinds[shortName];
+            var city = this.CityKinds[shortName];
             if (city == null)
             {
                 throw new ArgumentException($"{shortName} not found in city modules.");
@@ -103,7 +103,7 @@ namespace Wism.Client.Modules
 
         internal CityInfo FindCityInfo(string key)
         {
-            return CityKinds[key].Info;
+            return this.CityKinds[key].Info;
         }
 
         /// <summary>
@@ -114,10 +114,10 @@ namespace Wism.Client.Modules
         public City FindCity(string shortName)
         {
             City city = null;
-            if (CityKinds.ContainsKey(shortName))
+            if (this.CityKinds.ContainsKey(shortName))
             {
                 // Cities are mutable so return a clone of original
-                city = CityKinds[shortName].Clone();
+                city = this.CityKinds[shortName].Clone();
             }
 
             return city;
@@ -133,11 +133,11 @@ namespace Wism.Client.Modules
 
         private void LoadCityKinds(string path)
         {
-            CityKinds.Clear();
+            this.CityKinds.Clear();
             IList<City> cities = ModFactory.LoadCities(path);
             foreach (City city in cities)
             {
-                CityKinds.Add(city.ShortName, city);
+                this.CityKinds.Add(city.ShortName, city);
             }
         }
     }

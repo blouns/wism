@@ -12,9 +12,9 @@ namespace Wism.Client.Modules
         private static IList<LocationInfo> locationInfos;
 
         // Mutable objects; do not expose directly; use Find
-        public Dictionary<string, Location> LocationKinds { get => locationKinds; }
+        public Dictionary<string, Location> LocationKinds { get => this.locationKinds; }
 
-        public string WorldPath => worldPath;
+        public string WorldPath => this.worldPath;
 
         public LocationBuilder(string worldPath)
         {
@@ -61,7 +61,7 @@ namespace Wism.Client.Modules
                 throw new ArgumentException($"'{nameof(shortName)}' cannot be null or empty", nameof(shortName));
             }
 
-            var location = LocationKinds[shortName];
+            var location = this.LocationKinds[shortName];
             if (location == null)
             {
                 throw new ArgumentException($"{shortName} not found in location modules.");
@@ -74,7 +74,7 @@ namespace Wism.Client.Modules
 
         internal LocationInfo FindLocationInfo(string key)
         {
-            return LocationKinds[key].Info;
+            return this.LocationKinds[key].Info;
         }
 
         /// <summary>
@@ -85,10 +85,10 @@ namespace Wism.Client.Modules
         public Location FindLocation(string shortName)
         {
             Location location = null;
-            if (LocationKinds.ContainsKey(shortName))
+            if (this.LocationKinds.ContainsKey(shortName))
             {
                 // Locations are mutable so return a clone of original
-                location = LocationKinds[shortName].Clone();
+                location = this.LocationKinds[shortName].Clone();
             }
 
             return location;
@@ -104,11 +104,11 @@ namespace Wism.Client.Modules
 
         private void LoadLocationKinds(string path)
         {
-            LocationKinds.Clear();
+            this.LocationKinds.Clear();
             IList<Location> locations = ModFactory.LoadLocations(path);
             foreach (Location location in locations)
             {
-                LocationKinds.Add(location.ShortName, location);
+                this.LocationKinds.Add(location.ShortName, location);
             }
         }
     }

@@ -18,27 +18,27 @@ namespace Wism.Client.Api.Commands
         public CompleteBattleCommand(ArmyController armyController, AttackOnceCommand attackCommand)
             : base(armyController, attackCommand.Armies)
         {
-            AttackCommand = attackCommand ?? throw new ArgumentNullException(nameof(attackCommand));
+            this.AttackCommand = attackCommand ?? throw new ArgumentNullException(nameof(attackCommand));
             this.X = attackCommand.X;
             this.Y = attackCommand.Y;
-            this.TargetTile = World.Current.Map[X, Y];
-            this.Defenders = TargetTile.MusterArmy();
-            this.Defenders.Sort(new ByArmyBattleOrder(TargetTile));
+            this.TargetTile = World.Current.Map[this.X, this.Y];
+            this.Defenders = this.TargetTile.MusterArmy();
+            this.Defenders.Sort(new ByArmyBattleOrder(this.TargetTile));
         }
 
 
         protected override ActionState ExecuteInternal()
         {
-            return armyController.CompleteBattle(
-                AttackCommand.OriginalAttackingArmies, 
-                TargetTile, 
-                AttackCommand.Result == ActionState.Succeeded);
+            return this.armyController.CompleteBattle(
+                this.AttackCommand.OriginalAttackingArmies,
+                this.TargetTile,
+                this.AttackCommand.Result == ActionState.Succeeded);
         }
 
         public override string ToString()
         {
-            return $"Command: Complete battle of {ArmyUtilities.ArmiesToString(AttackCommand.OriginalAttackingArmies)} against " +
-                $"{World.Current.Map[X,Y]}";
+            return $"Command: Complete battle of {ArmyUtilities.ArmiesToString(this.AttackCommand.OriginalAttackingArmies)} against " +
+                $"{World.Current.Map[this.X, this.Y]}";
         }
     }
 }

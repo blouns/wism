@@ -9,10 +9,10 @@ namespace Wism.Client.Entities
         public int Id { get; set; }
 
         [DataMember]
-        public string ArtifactShortName { get; set; }        
+        public string ArtifactShortName { get; set; }
 
         [DataMember]
-        public int X { get; set;  }
+        public int X { get; set; }
 
         [DataMember]
         public int Y { get; set; }

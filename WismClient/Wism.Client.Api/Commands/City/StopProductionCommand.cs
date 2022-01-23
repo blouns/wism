@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
@@ -14,20 +12,20 @@ namespace Wism.Client.Api.Commands
 
         public StopProductionCommand(CityController cityController, City productionCity)
         {
-            CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
-            ProductionCity = productionCity ?? throw new ArgumentNullException(nameof(productionCity));
+            this.CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
+            this.ProductionCity = productionCity ?? throw new ArgumentNullException(nameof(productionCity));
         }
 
         protected override ActionState ExecuteInternal()
         {
-            this.CityController.StopProduction(ProductionCity);
+            this.CityController.StopProduction(this.ProductionCity);
 
             return ActionState.Succeeded;
         }
 
         public override string ToString()
         {
-            return $"{ProductionCity} stop production";
+            return $"{this.ProductionCity} stop production";
         }
     }
 }

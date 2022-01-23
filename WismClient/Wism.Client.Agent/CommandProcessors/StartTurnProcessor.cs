@@ -2,7 +2,6 @@
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
-using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.Agent.CommandProcessors

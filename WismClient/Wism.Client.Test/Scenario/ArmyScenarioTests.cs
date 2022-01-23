@@ -22,7 +22,7 @@ namespace Wism.Client.Test.Scenario
             Tile originalTile = World.Current.Map[2, 2];
             player1.HireHero(originalTile, 0);
             var armiesToMove = new List<Army>(originalTile.Armies);
-            
+
             int expectedX = 4;
             int expectedY = 4;
 
@@ -59,7 +59,7 @@ namespace Wism.Client.Test.Scenario
                     }
 
                     break;
-                } 
+                }
             }
 
             // Assert
@@ -85,14 +85,14 @@ namespace Wism.Client.Test.Scenario
             int direction = 1;
 
             // March back and forth until we run out of moves.   
-            for (int i = 0; i < 100; i++)            
+            for (int i = 0; i < 100; i++)
             {
                 if (Math.Abs(x + direction) == 5 || Math.Abs(x + direction) == 1)
                 {
                     direction *= -1;
                 }
                 x += direction;
-                commandController.AddCommand(new MoveOnceCommand(armyController, armiesToMove, x, y));                
+                commandController.AddCommand(new MoveOnceCommand(armyController, armiesToMove, x, y));
             };
 
             // Act / Assert                     
@@ -200,7 +200,7 @@ namespace Wism.Client.Test.Scenario
             var armiesToMove = new List<Army>(originalTile.Armies);
 
             Player player2 = Game.Current.Players[1];
-            player2.HireHero(World.Current.Map[2, 3]);            
+            player2.HireHero(World.Current.Map[2, 3]);
 
             int expectedX = 2;
             int expectedY = 3;
@@ -461,7 +461,7 @@ namespace Wism.Client.Test.Scenario
                 new SearchSageCommand(locationController, armiesToMove2, map[2, 4].Location),
                 // Ruins
                 new MoveOnceCommand(armyController, armiesToMove2, 3, 1),
-                new SearchRuinsCommand(locationController, armiesToMove2, map[3, 1].Location),                
+                new SearchRuinsCommand(locationController, armiesToMove2, map[3, 1].Location),
                 new DeselectArmyCommand(armyController, armiesToMove2),
                 new EndTurnCommand(gameController, player2),
             };
@@ -492,7 +492,7 @@ namespace Wism.Client.Test.Scenario
                             break;
                     }
                 } while (result == ActionState.InProgress);
-            }            
+            }
 
             // Assert 2
             // TODO: Verify items

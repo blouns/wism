@@ -60,7 +60,7 @@ namespace Wism.Client.Agent.CommandProcessors
                 Notify.Alert("Error: Unexpected game state" + battleResult);
             }
 
-            asciiGame.GameSpeed = AsciiGame.DefaultGameSpeed;
+            this.asciiGame.GameSpeed = AsciiGame.DefaultGameSpeed;
 
             return command.Execute();
         }

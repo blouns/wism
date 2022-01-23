@@ -13,14 +13,14 @@ namespace Wism.Client.Api.Commands
 
         public SearchLocationCommand(LocationController locationController, List<Army> armies, Location location)
         {
-            LocationController = locationController ?? throw new ArgumentNullException(nameof(locationController));
-            Armies = armies ?? throw new ArgumentNullException(nameof(armies));
-            Location = location ?? throw new ArgumentNullException(nameof(location));
+            this.LocationController = locationController ?? throw new ArgumentNullException(nameof(locationController));
+            this.Armies = armies ?? throw new ArgumentNullException(nameof(armies));
+            this.Location = location ?? throw new ArgumentNullException(nameof(location));
         }
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} search {Location}";
+            return $"Command: {ArmyUtilities.ArmiesToString(this.Armies)} search {this.Location}";
         }
     }
 }

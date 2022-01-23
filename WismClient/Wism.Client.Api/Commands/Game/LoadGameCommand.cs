@@ -17,13 +17,13 @@ namespace Wism.Client.Api.Commands
                 throw new ArgumentNullException(nameof(gameController));
             }
 
-            GameController = gameController;
-            Snapshot = snapshot ?? throw new ArgumentNullException(nameof(snapshot));
+            this.GameController = gameController;
+            this.Snapshot = snapshot ?? throw new ArgumentNullException(nameof(snapshot));
         }
 
         protected override ActionState ExecuteInternal()
         {
-            return GameController.LoadSnapshot(Snapshot);
+            return this.GameController.LoadSnapshot(this.Snapshot);
         }
     }
 }

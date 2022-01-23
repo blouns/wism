@@ -121,7 +121,7 @@ namespace Wism.Client.Test.Unit
             List<Army> attackers = Game.Current.Players[0].GetArmies();
             IWarStrategy war = new DefaultWarStrategy();
 
-            while (attackers.Count > 0 && tile.Armies.Count> 0)
+            while (attackers.Count > 0 && tile.Armies.Count > 0)
             {
                 bool won = war.AttackOnce(attackers, tile);
             }
@@ -154,7 +154,7 @@ namespace Wism.Client.Test.Unit
             List<Army> attackers = player1.GetArmies();
             IWarStrategy war = new DefaultWarStrategy();
 
-            while (attackers.Count > 0 && tile.Armies.Count> 0)
+            while (attackers.Count > 0 && tile.Armies.Count > 0)
             {
                 bool won = war.AttackOnce(attackers, tile);
             }

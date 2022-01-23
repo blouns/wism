@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Hosting;
-//using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Common;
+using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.Agent
 {
@@ -33,7 +32,7 @@ namespace Wism.Client.Agent
         {
             try
             {
-                logger.LogInformation("WISM Agent is alive");
+                this.logger.LogInformation("WISM Agent is alive");
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     // TODO: Poll cloud API for updates   

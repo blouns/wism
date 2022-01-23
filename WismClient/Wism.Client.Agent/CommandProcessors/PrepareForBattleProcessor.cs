@@ -56,7 +56,7 @@ namespace Wism.Client.Agent.CommandProcessors
             DrawBattleSetupSequence(attackingPlayer, defendingPlayer);
             BattleProcessor.DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
 
-            asciiGame.GameSpeed = AsciiGame.DefaultAttackSpeed;
+            this.asciiGame.GameSpeed = AsciiGame.DefaultAttackSpeed;
 
             return command.Execute();
         }

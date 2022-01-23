@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
 namespace Wism.Client.Modules
@@ -13,7 +8,7 @@ namespace Wism.Client.Modules
         public static readonly string FileName = "Location.json";
 
         [DataMember]
-        public string DisplayName { get; set; } = "Old Ruins";      
+        public string DisplayName { get; set; } = "Old Ruins";
 
         [DataMember]
         public string ShortName { get; set; } = "OldRuins";

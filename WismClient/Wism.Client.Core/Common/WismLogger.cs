@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Wism.Client.Common
+﻿namespace Wism.Client.Common
 {
     public class WismLogger : ILogger
     {

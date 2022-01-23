@@ -64,12 +64,12 @@ namespace Wism.Client.Factories
 
             // Factory state
             ArmyFactory.LastId = snapshot.LastArmyId;
-            
+
 
             return Game.Current;
         }
 
-        private static T CreateObject<T>(AssemblyEntity entity) 
+        private static T CreateObject<T>(AssemblyEntity entity)
         {
             var assembly = Assembly.Load(entity.AssemblyName);
             return (T)assembly.CreateInstance(entity.TypeName);
@@ -177,7 +177,7 @@ namespace Wism.Client.Factories
                     {
                         if (army.Id == snapshot.SelectedArmyIds[i])
                         {
-                            selectedArmies.Add(army);                            
+                            selectedArmies.Add(army);
                             break;
                         }
                     }
@@ -192,7 +192,7 @@ namespace Wism.Client.Factories
         }
 
         private static void LoadCities(GameEntity snapshot, World world,
-            Dictionary<string, Player> cityToPlayer, 
+            Dictionary<string, Player> cityToPlayer,
             Dictionary<string, Player> capitolToPlayer)
         {
             if (snapshot.World.Cities != null)
@@ -238,10 +238,10 @@ namespace Wism.Client.Factories
             capitolToPlayer = new Dictionary<string, Player>();
 
             var players = snapshot.Players;
-            current.Players = new List<Player>();            
+            current.Players = new List<Player>();
             for (int i = 0; i < players.Length; i++)
             {
-                current.Players.Add(PlayerFactory.Load(players[i], 
+                current.Players.Add(PlayerFactory.Load(players[i],
                     out cityToPlayer,
                     out capitolToPlayer));
             }

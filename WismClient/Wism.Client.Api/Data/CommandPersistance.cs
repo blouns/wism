@@ -116,7 +116,7 @@ namespace Wism.Client.Api.Data
                         AllyIdsResult = ConvertBoonToAlliesIds(boon.Result),
                         ArtifactShortNameResult = ConvertBoonToArtifactName(boon.Result),
                         GoldResult = (boon is GoldBoon) ? (int?)boon.Result : null,
-                        StrengthResult = (boon is ThroneBoon) ? (int?)boon.Result : null,                       
+                        StrengthResult = (boon is ThroneBoon) ? (int?)boon.Result : null,
                     };
                 }
                 else if (command is SearchSageCommand)

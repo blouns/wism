@@ -2,7 +2,7 @@
 {
     public interface IBoon
     {
-        object Result { get;  set; }
+        object Result { get; set; }
 
         bool IsDefended { get; }
 

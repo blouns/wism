@@ -28,7 +28,7 @@ namespace Wism.Client.Core.Armies
 
         public MovementStrategyCoordinator(List<IMovementStrategy> strategies)
         {
-            Strategies = strategies ?? throw new System.ArgumentNullException(nameof(strategies));
+            this.Strategies = strategies ?? throw new System.ArgumentNullException(nameof(strategies));
         }
 
         public List<IMovementStrategy> Strategies { get; }
@@ -46,7 +46,7 @@ namespace Wism.Client.Core.Armies
         /// </remarks>
         public List<Army> GetApplicableArmies(List<Army> armiesToMove, Tile nextTile)
         {
-            foreach (var strategy in Strategies)
+            foreach (var strategy in this.Strategies)
             {
                 if (strategy.IsRelevant(armiesToMove, nextTile))
                 {

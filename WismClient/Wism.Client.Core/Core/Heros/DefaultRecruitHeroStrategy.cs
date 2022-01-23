@@ -61,7 +61,7 @@ namespace Wism.Client.Core.Heros
                     {
                         allies.Add(specialArmyKinds[specialIndex]);
                     }
-                }                    
+                }
             }
 
             return allies;
@@ -73,21 +73,21 @@ namespace Wism.Client.Core.Heros
         /// <returns>Hero name</returns>
         public string GetHeroName()
         {
-            if (heroNames == null)
+            if (this.heroNames == null)
             {
                 string path = ModFactory.ModPath + "\\" + ModFactory.HeroPath;
-                heroNames = RandomizeList<string>(
+                this.heroNames = RandomizeList<string>(
                     Game.Current.Random,
                     ModFactory.LoadHeroNames(path));
             }
 
-            if (heroNames.Count == 0)
+            if (this.heroNames.Count == 0)
             {
                 return "Branally";
             }
 
-            string name = heroNames[heroNameIndex];
-            heroNameIndex = (heroNameIndex + 1) % heroNames.Count;
+            string name = this.heroNames[this.heroNameIndex];
+            this.heroNameIndex = (this.heroNameIndex + 1) % this.heroNames.Count;
 
             return name;
         }

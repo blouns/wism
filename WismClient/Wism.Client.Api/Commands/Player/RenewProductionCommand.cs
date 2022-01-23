@@ -12,12 +12,12 @@ namespace Wism.Client.Api.Commands
 
         public List<ArmyInTraining> ArmiesToRenew { get; set; }
 
-        public RenewProductionCommand(CityController cityController, Player player, 
+        public RenewProductionCommand(CityController cityController, Player player,
             ReviewProductionCommand reviewProductionCommand)
             : base(player)
-        {           
+        {
             this.cityController = cityController ?? throw new System.ArgumentNullException(nameof(cityController));
-            ReviewProductionCommand = reviewProductionCommand ?? throw new System.ArgumentNullException(nameof(reviewProductionCommand));
+            this.ReviewProductionCommand = reviewProductionCommand ?? throw new System.ArgumentNullException(nameof(reviewProductionCommand));
 
             // Default to renewing all production
             if (reviewProductionCommand.ArmiesProducedResult != null)
@@ -30,9 +30,9 @@ namespace Wism.Client.Api.Commands
         {
             var state = ActionState.Failed;
 
-            if (ReviewProductionCommand.Result == ActionState.Succeeded)
-            {                
-                state = this.cityController.RenewProduction(Player, ArmiesToRenew);
+            if (this.ReviewProductionCommand.Result == ActionState.Succeeded)
+            {
+                state = this.cityController.RenewProduction(this.Player, this.ArmiesToRenew);
             }
 
             return state;
@@ -40,7 +40,7 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            return $"Command: {Player.Clan} renewing production";
+            return $"Command: {this.Player.Clan} renewing production";
         }
     }
 }

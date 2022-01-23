@@ -39,7 +39,7 @@ namespace Wism.Client.Test.Common
 
         public static CommandController CreateCommandController(IWismClientRepository repo = null)
         {
-            
+
             if (repo == null)
             {
                 var commands = new SortedList<int, Command>();
@@ -93,7 +93,7 @@ namespace Wism.Client.Test.Common
         {
             var targetTile = World.Current.Map[x, y];
             var originalAttackingArmies = new List<Army>(armies);
-            
+
             var result = armyController.PrepareForBattle();
             if (result != ActionState.Succeeded)
             {
@@ -125,7 +125,7 @@ namespace Wism.Client.Test.Common
                 new StartTurnCommand(gameController, Game.Current.GetNextPlayer()));
         }
 
-        public static ActionState SearchLibrary(CommandController commandController, LocationController locationController, 
+        public static ActionState SearchLibrary(CommandController commandController, LocationController locationController,
             List<Army> armies)
         {
             var location = armies[0].Tile.Location;
@@ -157,7 +157,7 @@ namespace Wism.Client.Test.Common
                 new SearchTempleCommand(locationController, armies, location));
         }
 
-        public static ActionState TakeItems(CommandController commandController, HeroController heroController, 
+        public static ActionState TakeItems(CommandController commandController, HeroController heroController,
             Hero hero)
         {
             return ExecuteCommandUntilDone(commandController,
@@ -210,6 +210,6 @@ namespace Wism.Client.Test.Common
             Location location = MapBuilder.FindLocation(shortName);
             Tile tile = World.Current.Map[x, y];
             World.Current.AddLocation(location, tile);
-        }        
+        }
     }
 }

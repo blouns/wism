@@ -190,7 +190,7 @@ namespace Wism.Client.Test.Unit
             var matrix = new string[,]
             {
                 { "2", "2", "2", "2", "2", "2" },
-                { "2", "2", "2", "2", "2", "2" },   
+                { "2", "2", "2", "2", "2", "2" },
                 { "2", "2", "2", "2", "2", "2" },
                 { "2", "2", "1", "1", "2", "2" },
                 { "2", "2", "1", "1", "2", "2" },
@@ -198,7 +198,7 @@ namespace Wism.Client.Test.Unit
             };
 
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
-            
+
             // TODO: Coupling issue: need to create a world; consider mocking
             World.CreateWorld(map);
             map = World.Current.Map;
@@ -231,7 +231,7 @@ namespace Wism.Client.Test.Unit
                 }
                 TestContext.WriteLine();
             }
-        }       
+        }
 
         private void PrintMatrix(string[,] matrix)
         {
@@ -239,7 +239,7 @@ namespace Wism.Client.Test.Unit
             {
                 for (int x = 0; x <= matrix.GetUpperBound(1); x++)
                 {
-                    TestContext.Write($"({x},{y})[{matrix[x,y]}]\t");
+                    TestContext.Write($"({x},{y})[{matrix[x, y]}]\t");
                 }
                 TestContext.WriteLine();
             }

@@ -1,8 +1,8 @@
-﻿using System.Reflection;
+﻿using Newtonsoft.Json;
+using System.IO;
+using System.Reflection;
 using Wism.Client.Entities;
 using Wism.Client.War;
-using System.IO;
-using Newtonsoft.Json;
 
 namespace Wism.Client.Test.Common
 {
@@ -32,7 +32,7 @@ namespace Wism.Client.Test.Common
             entity.Locations = Deserialize<LocationEntity[]>($@"{DataPath}\{worldName}\Location.json");
 
             return entity;
-        }        
+        }
 
         private static T Deserialize<T>(string path)
         {

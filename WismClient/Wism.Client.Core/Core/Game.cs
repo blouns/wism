@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Common;
+using Wism.Client.Core.Armies;
+using Wism.Client.Data;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
-using Wism.Client.Data;
 using Wism.Client.War;
-using Wism.Client.Core.Armies;
 
 namespace Wism.Client.Core
 {
     public class Game
     {
         // Default random seed (the year Warlords was born!)
-        public const int DefaultRandomSeed = 1990;  
+        public const int DefaultRandomSeed = 1990;
 
         // Singleton instance
-        private static Game current;        
+        private static Game current;
 
         private int currentPlayerIndex;
         private GameState gameState;
@@ -62,7 +62,7 @@ namespace Wism.Client.Core
         /// <summary>
         /// Current GameState
         /// </summary>
-        public GameState GameState { get => gameState; }
+        public GameState GameState { get => this.gameState; }
 
         public bool IgnoreGameOver { get; set; }
 
@@ -71,7 +71,7 @@ namespace Wism.Client.Core
         /// </summary>
         public static Game Current
         {
-            get 
+            get
             {
                 if (Game.current == null)
                 {
@@ -82,7 +82,7 @@ namespace Wism.Client.Core
             }
         }
 
-        internal int CurrentPlayerIndex { get => currentPlayerIndex; set => currentPlayerIndex = value; }
+        internal int CurrentPlayerIndex { get => this.currentPlayerIndex; set => this.currentPlayerIndex = value; }
 
         /// <summary>
         /// Test if the game has been initialized.
@@ -121,7 +121,7 @@ namespace Wism.Client.Core
         public List<Army> GetAllArmies()
         {
             var armies = new List<Army>();
-            foreach (var player in Players)
+            foreach (var player in this.Players)
             {
                 armies.AddRange(player.GetArmies());
             }
@@ -135,12 +135,12 @@ namespace Wism.Client.Core
         /// <returns>Player whose turn it is now</returns>
         public Player GetCurrentPlayer()
         {
-            if (Players == null || Players.Count == 0)
+            if (this.Players == null || this.Players.Count == 0)
             {
                 throw new InvalidOperationException("Players have not been initialized.");
             }
 
-            return Players[CurrentPlayerIndex];
+            return this.Players[this.CurrentPlayerIndex];
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Wism.Client.Core
         /// <returns>Player whose turn is next, or null if no players are alive</returns>
         public Player GetNextPlayer()
         {
-            if (Players == null || Players.Count == 0)
+            if (this.Players == null || this.Players.Count == 0)
             {
                 throw new InvalidOperationException("Players have not been initialized.");
             }
@@ -157,10 +157,10 @@ namespace Wism.Client.Core
             var currentPlayer = GetCurrentPlayer();
 
             // Find the next alive player
-            var nextPlayer = Players[(CurrentPlayerIndex + 1) % Players.Count];
+            var nextPlayer = this.Players[(this.CurrentPlayerIndex + 1) % this.Players.Count];
             while (nextPlayer.IsDead)
             {
-                nextPlayer = Players[(CurrentPlayerIndex + 1) % Players.Count];
+                nextPlayer = this.Players[(this.CurrentPlayerIndex + 1) % this.Players.Count];
                 if (nextPlayer == currentPlayer)
                 {
                     // No players are alive
@@ -193,8 +193,8 @@ namespace Wism.Client.Core
         {
             // End current players turn
             DeselectArmies();
-            nextArmyQueue.Clear();
-            quitArmySet.Clear();
+            this.nextArmyQueue.Clear();
+            this.quitArmySet.Clear();
             var player = GetCurrentPlayer();
             player.EndTurn();
             if (SelectNextPlayer())
@@ -212,20 +212,20 @@ namespace Wism.Client.Core
         /// </summary>
         /// <returns>True if next player selected; False if there are no other players left</returns>
         private bool SelectNextPlayer()
-        {            
-            int lastPlayerIndex = CurrentPlayerIndex;
+        {
+            int lastPlayerIndex = this.CurrentPlayerIndex;
 
             // Find next player that is still in the fight
-            CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
-            CurrentPlayerIndex = Players.FindIndex(CurrentPlayerIndex, p => !p.IsDead);
-            if (CurrentPlayerIndex == -1)
+            this.CurrentPlayerIndex = (this.CurrentPlayerIndex + 1) % this.Players.Count;
+            this.CurrentPlayerIndex = this.Players.FindIndex(this.CurrentPlayerIndex, p => !p.IsDead);
+            if (this.CurrentPlayerIndex == -1)
             {
                 // Not found in first pass; look starting from beginning of list                
-                CurrentPlayerIndex = Players.FindIndex(p => !p.IsDead);
+                this.CurrentPlayerIndex = this.Players.FindIndex(p => !p.IsDead);
             }
 
             // This may roll back to the original player (player wins); so return False in that case
-            return (lastPlayerIndex != CurrentPlayerIndex);
+            return (lastPlayerIndex != this.CurrentPlayerIndex);
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace Wism.Client.Core
             var player = GetCurrentPlayer();
 
             if (player.GetCities().Count == 0 &&
-                !IgnoreGameOver)
+                !this.IgnoreGameOver)
             {
                 // You are no longer in the fight!
                 player.IsDead = true;
@@ -250,7 +250,7 @@ namespace Wism.Client.Core
             if (!SelectNextArmy())
             {
                 Transition(GameState.Ready);
-            }            
+            }
         }
 
         /// <summary>
@@ -259,30 +259,30 @@ namespace Wism.Client.Core
         /// <returns>True if a new army has been selected; otherwise, False</returns>
         public bool SelectNextArmy()
         {
-            if (GameState != GameState.Ready &&
-                GameState != GameState.SelectedArmy)
+            if (this.GameState != GameState.Ready &&
+                this.GameState != GameState.SelectedArmy)
             {
                 return false;
             }
 
-            if (nextArmyQueue.Count == 0)
+            if (this.nextArmyQueue.Count == 0)
             {
                 this.nextArmyQueue = GetTilesWithArmiesWithMoves(GetCurrentPlayer());
 
                 // No more armies with moves
-                if (nextArmyQueue.Count == 0)
+                if (this.nextArmyQueue.Count == 0)
                 {
                     return false;
                 }
             }
 
             Game.Current.DeselectArmies();
-            var tileWithArmies = nextArmyQueue[0];
-            nextArmyQueue.RemoveAt(0);
-            SelectArmies(tileWithArmies.Armies);            
+            var tileWithArmies = this.nextArmyQueue[0];
+            this.nextArmyQueue.RemoveAt(0);
+            SelectArmies(tileWithArmies.Armies);
 
             return true;
-        }        
+        }
 
         /// <summary>
         /// Get the current selected armies
@@ -296,7 +296,7 @@ namespace Wism.Client.Core
             }
 
             // return a copy of the list
-            return new List<Army>(selectedArmies);
+            return new List<Army>(this.selectedArmies);
         }
 
         /// <summary>
@@ -313,8 +313,8 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(armies));
             }
 
-            if (GameState != GameState.Ready &&
-                GameState != GameState.SelectedArmy)
+            if (this.GameState != GameState.Ready &&
+                this.GameState != GameState.SelectedArmy)
             {
                 return;
             }
@@ -327,7 +327,7 @@ namespace Wism.Client.Core
             if (ArmiesSelected())
             {
                 DeselectArmies();
-            }            
+            }
 
             Tile tile = armies[0].Tile;
             if (tile.HasVisitingArmies())
@@ -355,7 +355,7 @@ namespace Wism.Client.Core
                 tile.Armies = null;
             }
 
-            SelectArmiesInternal(tile.VisitingArmies);            
+            SelectArmiesInternal(tile.VisitingArmies);
             Transition(GameState.SelectedArmy);
         }
 
@@ -381,7 +381,7 @@ namespace Wism.Client.Core
             armies[0].Tile.RemoveVisitingArmies(armies);
 
             // Remove from selected armies
-            armies.ForEach(a => selectedArmies.Remove(a));
+            armies.ForEach(a => this.selectedArmies.Remove(a));
         }
 
         /// <summary>
@@ -390,11 +390,11 @@ namespace Wism.Client.Core
         /// <returns>True if armies are selected; otherwise False</returns>
         public bool ArmiesSelected()
         {
-            return (GameState == GameState.SelectedArmy || 
-                    GameState == GameState.MovingArmy ||
-                    GameState == GameState.AttackingArmy) &&
-                   (selectedArmies != null) &&
-                   (selectedArmies.Count > 0);
+            return (this.GameState == GameState.SelectedArmy ||
+                    this.GameState == GameState.MovingArmy ||
+                    this.GameState == GameState.AttackingArmy) &&
+                   (this.selectedArmies != null) &&
+                   (this.selectedArmies.Count > 0);
         }
 
         /// <summary>
@@ -425,7 +425,7 @@ namespace Wism.Client.Core
             {
                 return;
             }
-            
+
             this.selectedArmies.ForEach(a => a.Defend());
             DeselectArmies();
         }
@@ -520,7 +520,7 @@ namespace Wism.Client.Core
 
             foreach (var army in armies)
             {
-                if (!army.IsDefending && 
+                if (!army.IsDefending &&
                     (army.MovesRemaining > 0) &&
                     !this.quitArmySet.Contains(army.Tile))
                 {

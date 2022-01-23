@@ -203,9 +203,9 @@ namespace Wism.Client.Core.Controllers
             {
                 throw new ArgumentNullException(nameof(destinationCity));
             }
-            
+
             return city.Barracks.StartProduction(armyInfo, destinationCity);
-        }        
+        }
 
         /// <summary>
         /// Cancel production.

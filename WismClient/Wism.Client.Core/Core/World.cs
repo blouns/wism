@@ -91,7 +91,7 @@ namespace Wism.Client.Core
             {
                 throw new ArgumentException($"{city} already exists in the world.");
             }
-            
+
             int x = tile.X;
             int y = tile.Y;
 
@@ -134,10 +134,10 @@ namespace Wism.Client.Core
 
             location.Tile = tile;
             tile.Location = location;
-            tile.Terrain = location.Terrain;      
-            
+            tile.Terrain = location.Terrain;
+
             // Add location for tracking
-            locations.Add(location);
+            this.locations.Add(location);
         }
 
         public List<City> GetCities()

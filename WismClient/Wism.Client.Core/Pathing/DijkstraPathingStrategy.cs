@@ -28,7 +28,7 @@ namespace Wism.Client.Pathing
 
             fastestRoute = new List<Tile>();
             distance = Int32.MaxValue;
-            
+
             // TODO: Switch to priority queue for performance (eliminate the sorting)
             List<PathNode> queue = new List<PathNode>();
 
@@ -36,7 +36,7 @@ namespace Wism.Client.Pathing
             PathNode[,] graph = BuildGraph(map, queue, armiesToMove);
 
             // Distance from source to source is zero
-            graph[armiesToMove[0].X, armiesToMove[0].Y].Distance = 0.0f;   
+            graph[armiesToMove[0].X, armiesToMove[0].Y].Distance = 0.0f;
 
             while (queue.Count > 0)
             {
@@ -73,7 +73,7 @@ namespace Wism.Client.Pathing
         }
 
         private static PathNode[,] BuildGraph(Tile[,] map, List<PathNode> queue, List<Army> armies)
-        {            
+        {
             int mapSizeX = map.GetLength(0);
             int mapSizeY = map.GetLength(1);
             PathNode[,] graph = new PathNode[mapSizeX, mapSizeY];
@@ -84,7 +84,7 @@ namespace Wism.Client.Pathing
                     // Only add a node if the army can actually traverse there
                     // Note: this will leave some "null" spots as a sparse-array
                     if (map[x, y].CanTraverseHere(armies))
-                    {                        
+                    {
                         PathNode node = new PathNode();
                         node.Distance = Int32.MaxValue;
                         node.Value = map[x, y];
@@ -104,7 +104,7 @@ namespace Wism.Client.Pathing
                         continue;
 
                     int xMax = mapSizeX - 1;
-                    int yMax = mapSizeY - 1;                    
+                    int yMax = mapSizeY - 1;
                     if (x == 0 && y == 0)
                     {
                         // Upper-left corner

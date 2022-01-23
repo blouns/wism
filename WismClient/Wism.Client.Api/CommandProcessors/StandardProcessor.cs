@@ -16,7 +16,7 @@ namespace Wism.Client.Api.CommandProcessors
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
-            logger = loggerFactory.CreateLogger();
+            this.logger = loggerFactory.CreateLogger();
         }
 
         public bool CanExecute(ICommandAction command)

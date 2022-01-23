@@ -13,20 +13,20 @@ namespace Wism.Client.Api.Commands
         public RazeCityCommand(CityController cityController, City city)
             : base(city.Player)
         {
-            CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
-            City = city ?? throw new ArgumentNullException(nameof(city));
+            this.CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
+            this.City = city ?? throw new ArgumentNullException(nameof(city));
         }
 
         protected override ActionState ExecuteInternal()
         {
             this.CityController.RazeCity(this.City, this.Player);
-            
+
             return ActionState.Succeeded;
         }
 
         public override string ToString()
         {
-            return $"{City} raze";
+            return $"{this.City} raze";
         }
     }
 }

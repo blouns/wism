@@ -1,6 +1,6 @@
 ﻿using System;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.Api.Commands
 {
@@ -21,14 +21,14 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            gameController.EndTurn(Game.Current);
+            this.gameController.EndTurn(Game.Current);
 
             return ActionState.Succeeded;
         }
 
         public override string ToString()
         {
-            return $"Command: {Player.Clan} end turn";
+            return $"Command: {this.Player.Clan} end turn";
         }
     }
 }

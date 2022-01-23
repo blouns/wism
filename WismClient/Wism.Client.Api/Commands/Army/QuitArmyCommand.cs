@@ -13,14 +13,14 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            armyController.QuitArmy(this.Armies);
+            this.armyController.QuitArmy(this.Armies);
 
             return ActionState.Succeeded;
         }
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} quit";
+            return $"Command: {ArmyUtilities.ArmiesToString(this.Armies)} quit";
         }
     }
 }

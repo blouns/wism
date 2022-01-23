@@ -31,8 +31,8 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(command));
             }
 
-            wismClientRepository.AddCommand(command);
-            wismClientRepository.Save();
+            this.wismClientRepository.AddCommand(command);
+            this.wismClientRepository.Save();
         }
 
         /// <summary>
@@ -42,13 +42,13 @@ namespace Wism.Client.Core.Controllers
         /// <returns>Command</returns>
         public Command GetCommand(int commandId)
         {
-            if (!wismClientRepository.CommandExists(commandId))
+            if (!this.wismClientRepository.CommandExists(commandId))
             {
                 throw new ArgumentOutOfRangeException(nameof(commandId));
             }
 
-            return wismClientRepository.GetCommand(commandId);
-        }      
+            return this.wismClientRepository.GetCommand(commandId);
+        }
 
         /// <summary>
         /// Gets all commands
@@ -56,7 +56,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns>All commands</returns>
         public IEnumerable<Command> GetCommands()
         {
-            return wismClientRepository.GetCommands();
+            return this.wismClientRepository.GetCommands();
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns>All commands after <c>lastSeenCommandId</c></returns>
         public IEnumerable<Command> GetCommandsAfterId(int lastSeenCommandId)
         {
-            return wismClientRepository.GetCommandsAfterId(lastSeenCommandId);
+            return this.wismClientRepository.GetCommandsAfterId(lastSeenCommandId);
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Wism.Client.Core.Controllers
         /// <exception cref="InvalidOperationException">Thrown if no commands exist</exception>
         public Command GetLastCommand()
         {
-            var commands = wismClientRepository.GetCommands();
+            var commands = this.wismClientRepository.GetCommands();
             if (commands.Count > 0)
             {
                 return commands[commands.Count - 1];
@@ -92,7 +92,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if command exists; otherwise, False</returns>
         public bool CommandExists(int commandId)
         {
-            return wismClientRepository.CommandExists(commandId);
+            return this.wismClientRepository.CommandExists(commandId);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns></returns>
         public string GetCommandsJSON()
         {
-            if (wismClientRepository.GetCount() == 0)
+            if (this.wismClientRepository.GetCount() == 0)
             {
                 return "{}";
             }
@@ -116,7 +116,7 @@ namespace Wism.Client.Core.Controllers
             //       What about 'observers' or remotes? Perhaps need only
             //       to persist back to oldest 'last command ID' across all
             //       remotes.
-            var commands = CommandPersistance.SnapshotCommands(wismClientRepository.GetCommands());            
+            var commands = CommandPersistance.SnapshotCommands(this.wismClientRepository.GetCommands());
 
             return JsonConvert.SerializeObject(commands, settings);
         }

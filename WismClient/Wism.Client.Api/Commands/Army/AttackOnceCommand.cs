@@ -25,7 +25,7 @@ namespace Wism.Client.Api.Commands
             var targetTile = World.Current.Map[x, y];
             this.Defenders = targetTile.MusterArmy();
             this.Defenders.Sort(new ByArmyBattleOrder(targetTile));
-            
+
             this.OriginalDefendingArmies = new List<Army>(this.Defenders);
             this.OriginalDefendingArmies.Sort(new ByArmyBattleOrder(targetTile));
 
@@ -36,9 +36,9 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            var targetTile = World.Current.Map[X, Y];
-            var result = armyController.AttackOnce(Armies, targetTile);
-            
+            var targetTile = World.Current.Map[this.X, this.Y];
+            var result = this.armyController.AttackOnce(this.Armies, targetTile);
+
             if (result == AttackResult.DefenderWinBattle)
             {
                 return ActionState.Failed;
@@ -59,7 +59,7 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(OriginalAttackingArmies)} attack ({World.Current.Map[X, Y]}";
+            return $"Command: {ArmyUtilities.ArmiesToString(this.OriginalAttackingArmies)} attack ({World.Current.Map[this.X, this.Y]}";
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
@@ -16,9 +15,9 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            bool success = LocationController.SearchSage(Armies, Location, out int gold);
+            bool success = this.LocationController.SearchSage(this.Armies, this.Location, out int gold);
 
-            Gold = gold;
+            this.Gold = gold;
             return (success) ? ActionState.Succeeded : ActionState.Failed;
         }
     }

@@ -9,11 +9,11 @@ namespace Wism.Client.Core
         private ClanInfo info;
         private IList<ClanTerrainModifierInfo> terrainModifiers = new List<ClanTerrainModifierInfo>();
 
-        public string DisplayName { get => info.DisplayName; set => info.DisplayName = value; }
+        public string DisplayName { get => this.info.DisplayName; set => this.info.DisplayName = value; }
 
-        public string ShortName { get => info.ShortName; }
+        public string ShortName { get => this.info.ShortName; }
 
-        public Player Player { get => Game.Current.Players.Find(p => p.Clan == this);  }
+        public Player Player { get => Game.Current.Players.Find(p => p.Clan == this); }
 
         public static Clan Create(ClanInfo info)
         {
@@ -31,7 +31,7 @@ namespace Wism.Client.Core
             {
                 if (this.info == null)
                     this.info = MapBuilder.FindClanInfo(this.ShortName);
-                return info;
+                return this.info;
             }
         }
 
@@ -76,7 +76,7 @@ namespace Wism.Client.Core
 
         public override string ToString()
         {
-            return ShortName;
+            return this.ShortName;
         }
 
         public override bool Equals(object obj)

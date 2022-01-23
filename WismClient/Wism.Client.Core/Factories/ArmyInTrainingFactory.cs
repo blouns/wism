@@ -23,8 +23,8 @@ namespace Wism.Client.Factories
             {
 
                 ArmyInfo = ModFactory.FindArmyInfo(snapshot.ArmyShortName),
-                DestinationCity = String.IsNullOrWhiteSpace(snapshot.DestinationCityShortName) ? 
-                    null : 
+                DestinationCity = String.IsNullOrWhiteSpace(snapshot.DestinationCityShortName) ?
+                    null :
                     world.FindCity(snapshot.DestinationCityShortName),
                 ProductionCity = world.FindCity(snapshot.ProductionCityShortName),
                 TurnsToProduce = snapshot.TurnsToProduce,

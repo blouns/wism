@@ -27,7 +27,7 @@ namespace Wism.Client.MapObjects
         public bool Search(List<Army> armies, Location location, out object result)
         {
             result = null;
-            Army hero = armies.Find(a => 
+            Army hero = armies.Find(a =>
                 a is Hero &&
                 a.Tile == location.Tile &&
                 a.MovesRemaining >= MovesToSearch);

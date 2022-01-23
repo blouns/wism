@@ -31,7 +31,7 @@ namespace Wism.Client.Agent.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            var searchCommand = (SearchSageCommand)command;            
+            var searchCommand = (SearchSageCommand)command;
 
             var result = searchCommand.Execute();
             if (searchCommand.Gold > 0)
@@ -59,7 +59,7 @@ namespace Wism.Client.Agent.CommandProcessors
             Notify.Information("\t\"The Great Sage Master of Wisdom,");
             Notify.Information("\tInformation on Magical Items and Locations.\"");
             Notify.Information("The sage welcomes you");
-            Notify.Information("What do you wish to know?");            
+            Notify.Information("What do you wish to know?");
             Console.WriteLine("[I]tems");
             Console.WriteLine("[L]ocations");
             Console.WriteLine("[C]ancel");
@@ -82,7 +82,7 @@ namespace Wism.Client.Agent.CommandProcessors
 
         private void DoItemAdvice()
         {
-            var names = librarian.GetAllArtifactNames();
+            var names = this.librarian.GetAllArtifactNames();
             for (int i = 0; i < names.Length; i++)
             {
                 Notify.Information("({0}) {1}", i, names[i]);
@@ -101,13 +101,13 @@ namespace Wism.Client.Agent.CommandProcessors
                 if (!Int32.TryParse(response, out int index) &&
                             index < 0 || index >= names.Length)
                 {
-                    Notify.Alert("Must enter a valid number.");                    
+                    Notify.Alert("Must enter a valid number.");
                 }
                 else
                 {
                     valid = true;
                     var artifact = this.librarian.GetArtifact(index);
-                    var knowledge = librarian.GetSageArtifactKnowledge(artifact, false);
+                    var knowledge = this.librarian.GetSageArtifactKnowledge(artifact, false);
                     foreach (var message in knowledge)
                     {
                         Notify.DisplayAndWait(message);
@@ -118,7 +118,7 @@ namespace Wism.Client.Agent.CommandProcessors
 
         private void DoLocationAdvice()
         {
-            var names = librarian.GetAllLocationNames();
+            var names = this.librarian.GetAllLocationNames();
             for (int i = 0; i < names.Length; i++)
             {
                 Notify.Information("({0}) {1}", i, names[i]);
@@ -143,7 +143,7 @@ namespace Wism.Client.Agent.CommandProcessors
                 {
                     valid = true;
                     var location = this.librarian.GetLocation(index);
-                    var knowledge = librarian.GetSageLocationKnowledge(location);
+                    var knowledge = this.librarian.GetSageLocationKnowledge(location);
                     foreach (var message in knowledge)
                     {
                         Notify.DisplayAndWait(message);

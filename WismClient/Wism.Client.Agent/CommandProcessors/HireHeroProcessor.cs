@@ -40,17 +40,17 @@ namespace Wism.Client.Agent.CommandProcessors
             }
 
             if (hireCommand.HeroAccepted &&
-                heroName == null)
+                this.heroName == null)
             {
                 // Wait for user to name the hero
-                heroName = GetHeroName(hireCommand);
+                this.heroName = GetHeroName(hireCommand);
                 state = ActionState.InProgress;
             }
             else if (hireCommand.HeroAccepted)
             {
                 // Hire the hero
                 state = hireCommand.Execute();
-                hireCommand.Hero.DisplayName = heroName;
+                hireCommand.Hero.DisplayName = this.heroName;
 
                 // Create any allies that will join the hero
                 CreateAnyAllies(hireCommand);
@@ -61,7 +61,7 @@ namespace Wism.Client.Agent.CommandProcessors
                 state = ActionState.Failed;
             }
 
-            return state;            
+            return state;
         }
 
         private void CreateAnyAllies(HireHeroCommand command)
@@ -72,7 +72,7 @@ namespace Wism.Client.Agent.CommandProcessors
             {
                 Notify.DisplayAndWait($"And the hero brings {allies.Count} allies!");
                 this.asciiGame.CommandController.AddCommand(
-                    new ConscriptArmiesCommand(this.asciiGame.PlayerController, 
+                    new ConscriptArmiesCommand(this.asciiGame.PlayerController,
                         command.Player, command.HeroTile, command.HeroAllies));
             }
         }
