@@ -4,13 +4,13 @@
 
 War! Welcome to War in a Senseless Mind (WISM). WISM is an original Warlords 1990 clone, but is designed for modification and reuse/fork into similar projects as a game engine. Additionally, WISM was designed to have all core game logic outside of proprietary platforms like Unity or other game engines. This will allow for easier extension in the future and longevity as platforms evolve. A good example of this is the ASCII WISM app which provides a Console-based UI to the same game engine. 
 
-Why another Warlords clone? Can't we just play the original on DosBox or Warlords Classic Strategy on iOS? Sure you can and you should! However, the original has limited playability on DosBox and old resolutions, it does not allow mods, new maps, armies, or features. The latter is a closed system and only works on iOS. We deserve better and we can do better with inspiration from SSI and all the subsequent great turn-based strategy games. Want to contribute?
+Why another Warlords clone? Can't we just play the original on DosBox or Warlords Classic Strategy on iOS? Sure you can and you should! However, the original has limited re-playability on DosBox and old resolutions, it does not allow mods, new maps, armies, or features (though Warlords III introduced some of this). Warlords Classic is an iOS exclusive latter and closed source. We deserve more Warlords and we can with inspiration from SSG and all the subsequent great turn-based strategy games.
 
 Here is a brief orientation to the projects.
 
 [WISM Client]
 
-This project is for core WISM game logic and is separated roughly into the API (Controller), Core (Model), and Agent (View). 
+This project is for core WISM game logic and is separated roughly into the API (Controller), Core (Model), and Agent (ASCII View). 
 
 API:
 The Client API is the local contract for a UI, AI, or remote player interface. Since all changes must be driven through Commands, the interface for a UI like Unity or the Console, an AI or set of AI controllers, or remote players is the same. This drives simplicity and is a key design principle.
@@ -25,8 +25,16 @@ The agent contains basic primitives for constructing a game loop and interfacing
 
 [WISM Unity]
 
-This is the primary UI for the Warlords clone implementation. It is designed to accurately reflect the original SSI Warlords look and feel. It borrows concepts, art, and sound to skin the game with an authentic experience. The desire is to add similar Module capability to the Unity UI to allow for easy extension, similar to WISM Core. At present updates and mods require changes to the Unity environment prefabs and GameObjects, which is not the long-term goal. As mentioned above, game logic is pushed as low as possible in the stack--down towards Core. However, there may be some user experience elements that are best left to the View (ASCII WISM or Unity WISM). Examples include display of combat sequences, army selection, or cut-scenes. 
+This is the primary UI for the Warlords clone implementation. It is designed to accurately reflect Fawkner's look and feel. It borrows concepts, art, and sound to skin the game with an authentic experience. The desire is to add similar Module capability to the Unity UI to allow for easy extension, similar to WISM Core. At present updates and mods require changes to the Unity environment prefabs and GameObjects, which is not the long-term goal. As mentioned above, game logic is pushed as low as possible in the stack--down towards Core. However, there may be some user experience elements that are best left to the View (ASCII WISM or Unity WISM). Examples include display of combat sequences, army selection, or cut-scenes. 
 
-The choice of using Unity and all .NET Standard 2.0 binaries means that this game is fully portable to all modern gaming environments, including Windows PC, iOS, Android, Xbox, or any of the platforms supported by Unity. Currently, the primary device target is Windows 10 as it most closely honors the original Warlords spirit. 
+The choice of using Unity and all .NET Standard 2.0 binaries means that this game is fully portable to all modern gaming environments, including Windows PC, iOS, Android, Xbox, or any of the platforms supported by Unity. Currently, the primary device target is Windows as it most closely honors the original Warlords spirit. 
 
 Thank you for visiting. I hope you enjoy the game!
+
+Legal Disclaimer: Warlords and all related imagery and references are copyrights of SSG registered trademarks and attributed to Steven Fawkner and Roger Keating. Use of this code is for educational purposes only and may not be distributed for commercial use.
+
+[References]
+https://en.wikipedia.org/wiki/Warlords_(1990_video_game)
+http://www.ssg.com.au/
+
+No affiliation with Warlords Classic. For official Warlords content, visit and support: https://www.facebook.com/WarlordsGame.
