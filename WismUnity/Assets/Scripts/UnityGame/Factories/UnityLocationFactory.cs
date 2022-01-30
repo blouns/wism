@@ -1,6 +1,5 @@
 ﻿using Assets.Scripts.Editors;
 using Assets.Scripts.Managers;
-using Assets.Scripts.Tilemaps;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Entities;
@@ -69,7 +68,7 @@ namespace Assets.Scripts.UnityGame.Factories
             }
 
             this.debugManager.LogInformation("Updated locations with coordinates from scene");
-            
+
             return locations;
         }
     }

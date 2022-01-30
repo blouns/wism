@@ -31,7 +31,7 @@ namespace Assets.Scripts.CommandProcessors
         {
             ActionState result = command.Execute();
 
-            unityGame.WarPanel.UpdateBattle(unityGame.CurrentAttackers, unityGame.CurrentDefenders);
+            this.unityGame.WarPanel.UpdateBattle(this.unityGame.CurrentAttackers, this.unityGame.CurrentDefenders);
 
             return result;
         }

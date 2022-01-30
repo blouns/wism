@@ -6,6 +6,6 @@ namespace Assets.Scripts.UI
     {
         public void GetLabelValuePair(int index, Tile subject, out string label, out string value);
 
-        public bool CanMapSubject(Tile subject);     
+        public bool CanMapSubject(Tile subject);
     }
 }

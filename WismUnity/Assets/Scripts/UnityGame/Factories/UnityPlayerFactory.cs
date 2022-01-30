@@ -10,7 +10,7 @@ namespace Assets.Scripts.UnityGame.Factories
         public PlayerEntity[] CreatePlayers(UnityPlayerEntity[] unityPlayers)
         {
             if (unityPlayers is null)
-            {   
+            {
                 throw new ArgumentNullException(nameof(unityPlayers));
             }
             if (unityPlayers.Length == 0)
@@ -20,7 +20,7 @@ namespace Assets.Scripts.UnityGame.Factories
             PlayerEntity[] playerEntities = new PlayerEntity[unityPlayers.Length];
             for (int i = 0; i < unityPlayers.Length; i++)
             {
-                playerEntities[i] = new PlayerEntity();                
+                playerEntities[i] = new PlayerEntity();
 
                 // Verify the clan exists
                 if (ModFactory.FindClanInfo(unityPlayers[i].ClanName) == null)

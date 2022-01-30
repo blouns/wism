@@ -14,14 +14,14 @@ namespace Assets.Scripts.CommandProcessors
 
         protected override SceneResult ActionInternal()
         {
-            if (Hero == null)
+            if (this.Hero == null)
             {
                 throw new InvalidOperationException("Must have a hero to search ruins.");
             }
 
             var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
-            worldTilemap.ShowSearchIcon(Hero.X, Hero.Y);
+            worldTilemap.ShowSearchIcon(this.Hero.X, this.Hero.Y);
 
             return SceneResult.Continue;
         }

@@ -3,7 +3,6 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using Wism.Client.Common;
-using Wism.Client.Core;
 using ILogger = Wism.Client.Common.ILogger;
 
 namespace Assets.Scripts.Managers
@@ -34,7 +33,7 @@ namespace Assets.Scripts.Managers
         private void ShowLog()
         {
             this.logBuilder.Clear();
-            foreach (var line in logLines)
+            foreach (var line in this.logLines)
             {
                 this.logBuilder.AppendLine(line);
             }
@@ -57,7 +56,7 @@ namespace Assets.Scripts.Managers
         {
             string logMessage = string.Format(message, args);
             Debug.Log(logMessage);
-            logger.LogInformation(logMessage);
+            this.logger.LogInformation(logMessage);
 
             AddLogLine(logMessage);
         }
@@ -66,7 +65,7 @@ namespace Assets.Scripts.Managers
         {
             string logMessage = string.Format(message, args);
             Debug.LogError(logMessage);
-            logger.LogError(logMessage);
+            this.logger.LogError(logMessage);
 
             AddLogLine(logMessage);
         }
@@ -75,22 +74,22 @@ namespace Assets.Scripts.Managers
         {
             string logMessage = string.Format(message, args);
             Debug.LogWarning(logMessage);
-            logger.LogWarning(logMessage);
+            this.logger.LogWarning(logMessage);
 
             AddLogLine(logMessage);
         }
 
         private void AddLogLine(string logMessage)
         {
-            if (logMessage != lastMessage) // Skip repeats
+            if (logMessage != this.lastMessage) // Skip repeats
             {
-                logLines.Insert(0, logMessage);
-                if (logLines.Count > maxLines)
+                this.logLines.Insert(0, logMessage);
+                if (this.logLines.Count > maxLines)
                 {
-                    logLines.RemoveAt(maxLines - 1);
+                    this.logLines.RemoveAt(maxLines - 1);
                 }
 
-                lastMessage = logMessage;
+                this.lastMessage = logMessage;
             }
         }
 

@@ -10,13 +10,13 @@ public class YesNoBox : MonoBehaviour
     private bool? answer;
     private UnityManager unityManager;
 
-    public bool? Answer { get => answer; set => answer = value; }
+    public bool? Answer { get => this.answer; set => this.answer = value; }
 
     public bool Cancelled { get; private set; }
 
     public void Start()
     {
-        var yesNoGO = gameObject;
+        var yesNoGO = this.gameObject;
 
         this.unityManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<UnityManager>();
@@ -26,7 +26,7 @@ public class YesNoBox : MonoBehaviour
 
     public void Update()
     {
-        if (Answer.HasValue || Cancelled)
+        if (this.Answer.HasValue || this.Cancelled)
         {
             Hide();
         }
@@ -46,27 +46,27 @@ public class YesNoBox : MonoBehaviour
 
     public bool IsActive()
     {
-        return canvasGroup.alpha == 1f;
+        return this.canvasGroup.alpha == 1f;
     }
 
     private void Show()
     {
-        canvasGroup.alpha = 1f;
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
+        this.canvasGroup.alpha = 1f;
+        this.canvasGroup.interactable = true;
+        this.canvasGroup.blocksRaycasts = true;
 
         // Automatic "Yes" if non-interactive UI
         if (!this.unityManager.InteractiveUI)
         {
-            Answer = true;
+            this.Answer = true;
         }
     }
 
     private void Hide()
     {
-        canvasGroup.alpha = 0f;
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
+        this.canvasGroup.alpha = 0f;
+        this.canvasGroup.interactable = false;
+        this.canvasGroup.blocksRaycasts = false;
     }
 
     public void Clear()

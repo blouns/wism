@@ -42,27 +42,27 @@ namespace Assets.Scripts.UI
                 targetTile.HasCity())
             {
                 // Defenseless city
-                if (defenderPanelObjects != null)
+                if (this.defenderPanelObjects != null)
                 {
-                    defenderPanelObjects.Clear();
+                    this.defenderPanelObjects.Clear();
                 }
             }
 
             this.armyManager = GameObject.FindGameObjectWithTag("UnityManager")
                 .GetComponent<ArmyManager>();
 
-            currentAttackerIndex = 0;
-            currentDefenderIndex = 0;
+            this.currentAttackerIndex = 0;
+            this.currentDefenderIndex = 0;
 
             List<Army> attackingArmies = new List<Army>(attackers);
             attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
-            attackerPanelObjects = CreateArmyPanelObjects(attackingArmies, AttackerPrefab, AttackerPrefab.transform.position);
+            this.attackerPanelObjects = CreateArmyPanelObjects(attackingArmies, this.AttackerPrefab, this.AttackerPrefab.transform.position);
 
             if (defenders.Count > 0)
             {
                 List<Army> defendingArmies = new List<Army>(defenders);
                 defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
-                defenderPanelObjects = CreateArmyPanelObjects(defendingArmies, DefenderPrefab, DefenderPrefab.transform.position);
+                this.defenderPanelObjects = CreateArmyPanelObjects(defendingArmies, this.DefenderPrefab, this.DefenderPrefab.transform.position);
             }
 
             this.gameObject.SetActive(true);
@@ -74,7 +74,7 @@ namespace Assets.Scripts.UI
             for (int i = 0; i < armies.Count; i++)
             {
                 // Create the GO for the panel            
-                GameObject armyGo = Instantiate<GameObject>(prefab, position, Quaternion.identity, gameObject.transform);
+                GameObject armyGo = Instantiate<GameObject>(prefab, position, Quaternion.identity, this.gameObject.transform);
 
                 // Replace image with army kind
                 ReplaceImage(armies[i], armyGo);
@@ -102,7 +102,7 @@ namespace Assets.Scripts.UI
 
         private void ReplaceImage(Army army, GameObject armyGo)
         {
-            GameObject armyKind = armyManager.FindGameObjectKind(army);
+            GameObject armyKind = this.armyManager.FindGameObjectKind(army);
             SpriteRenderer spriteRenderer = armyKind.GetComponent<SpriteRenderer>();
             Image image = armyGo.GetComponent<Image>();
             image.sprite = spriteRenderer.sprite;
@@ -112,12 +112,12 @@ namespace Assets.Scripts.UI
         {
             this.gameObject.SetActive(false);
 
-            foreach (GameObject go in attackerPanelObjects.Values)
+            foreach (GameObject go in this.attackerPanelObjects.Values)
             {
                 Destroy(go);
             }
 
-            foreach (GameObject go in defenderPanelObjects.Values)
+            foreach (GameObject go in this.defenderPanelObjects.Values)
             {
                 Destroy(go);
             }
@@ -131,8 +131,8 @@ namespace Assets.Scripts.UI
                 return;
             }
 
-            var attacker = attackers[currentAttackerIndex];
-            var defender = defenders[currentDefenderIndex];
+            var attacker = attackers[this.currentAttackerIndex];
+            var defender = defenders[this.currentDefenderIndex];
             bool didAttackerWin;
             Army losingArmy;
 
@@ -140,20 +140,20 @@ namespace Assets.Scripts.UI
             {
                 didAttackerWin = false;
                 losingArmy = attacker;
-                currentAttackerIndex = (currentAttackerIndex + 1 == attackers.Count) ?
-                    currentAttackerIndex :
-                    currentAttackerIndex + 1;
+                this.currentAttackerIndex = (this.currentAttackerIndex + 1 == attackers.Count) ?
+                    this.currentAttackerIndex :
+                    this.currentAttackerIndex + 1;
             }
             else
             {
                 didAttackerWin = true;
                 losingArmy = defender;
-                currentDefenderIndex = (currentDefenderIndex + 1 == defenders.Count) ?
-                    currentDefenderIndex :
-                    currentDefenderIndex + 1;
+                this.currentDefenderIndex = (this.currentDefenderIndex + 1 == defenders.Count) ?
+                    this.currentDefenderIndex :
+                    this.currentDefenderIndex + 1;
             }
 
-            Dictionary<Army, GameObject> losingArmies = (didAttackerWin) ? defenderPanelObjects : attackerPanelObjects;
+            Dictionary<Army, GameObject> losingArmies = (didAttackerWin) ? this.defenderPanelObjects : this.attackerPanelObjects;
 
             if (!losingArmies.ContainsKey(losingArmy))
             {
@@ -163,8 +163,8 @@ namespace Assets.Scripts.UI
             Vector3 position = losingArmyPanelObject.transform.position;
 
             // Draw killed sprite over defeated army
-            KilledPrefab.transform.SetPositionAndRotation(position, Quaternion.identity);
-            GameObject killedPanelObject = Instantiate(KilledPrefab, position, Quaternion.identity, gameObject.transform);
+            this.KilledPrefab.transform.SetPositionAndRotation(position, Quaternion.identity);
+            GameObject killedPanelObject = Instantiate(this.KilledPrefab, position, Quaternion.identity, this.gameObject.transform);
             killedPanelObject.SetActive(true);
 
             // Remove killed sprite and army from panel after an interval

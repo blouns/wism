@@ -20,7 +20,7 @@ namespace Assets.Scripts.Tiles
         public void OnEnable()
         {
             BuildLocationGameObjectCache();
-            isInitialized = true;
+            this.isInitialized = true;
         }
 #endif
 
@@ -31,7 +31,7 @@ namespace Assets.Scripts.Tiles
 
         public override void RefreshTile(Vector3Int position, ITilemap tilemap)
         {
-            TileUtility.RefreshTile(position, tilemap, hasTile);
+            TileUtility.RefreshTile(position, tilemap, this.hasTile);
         }
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
@@ -54,8 +54,8 @@ namespace Assets.Scripts.Tiles
         }
 
         private void CreateLocationGameObject(Vector3 worldVector)
-        {            
-            if (!locationObjects.ContainsKey(worldVector) && 
+        {
+            if (!locationObjects.ContainsKey(worldVector) &&
                 this.isInitialized &&
                 ShouldImportLocationsFromTilemap())
             {
@@ -84,11 +84,11 @@ namespace Assets.Scripts.Tiles
                 }
             }
 
-            return shouldImport; 
+            return shouldImport;
         }
 
         private static void BuildLocationGameObjectCache()
-        {            
+        {
             var locationContainer = UnityUtilities.GameObjectHardFind("Locations");
             if (locationContainer == null)
             {

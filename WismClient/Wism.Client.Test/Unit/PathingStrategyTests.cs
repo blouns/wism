@@ -18,6 +18,14 @@ namespace Wism.Client.Test.Unit
             Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
         }
 
+        [SetUp]
+        public void SetUp()
+        {
+            Game.CreateDefaultGame();
+        }
+
+        #region Dijkstra Pathing Tests
+
         [Test]
         public void DijkstraSimple1_3x3Test()
         {
@@ -32,7 +40,7 @@ namespace Wism.Client.Test.Unit
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
-            //Assert.AreEqual(2, distance, "Did not find the shortest route.");
+            Assert.AreEqual(2, (int)distance, "Did not find the shortest route.");
             Assert.AreEqual(3, shortestRoute.Count, "Did not find the correct number of steps.");
             AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
@@ -51,7 +59,7 @@ namespace Wism.Client.Test.Unit
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
-            //Assert.AreEqual(1, distance, "Did not find the shortest route.");
+            Assert.AreEqual(1, (int)distance, "Did not find the shortest route.");
             Assert.AreEqual(2, shortestRoute.Count, "Did not find the correct number of steps.");
             AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
@@ -70,7 +78,7 @@ namespace Wism.Client.Test.Unit
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
-            //Assert.AreEqual(3, distance, "Did not find the shortest route.");
+            Assert.AreEqual(3, (int)distance, "Did not find the shortest route.");
             Assert.AreEqual(4, shortestRoute.Count, "Did not find the correct number of steps.");
             AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
@@ -89,7 +97,7 @@ namespace Wism.Client.Test.Unit
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
-            //Assert.AreEqual(4, distance, "Did not find the shortest route.");
+            Assert.AreEqual(4, (int)distance, "Did not find the shortest route.");
             Assert.AreEqual(5, shortestRoute.Count, "Did not find the correct number of steps.");
             AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
@@ -111,7 +119,7 @@ namespace Wism.Client.Test.Unit
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
-            //Assert.AreEqual(6, distance, "Did not find the shortest route.");
+            Assert.AreEqual(7, (int)distance, "Did not find the shortest route.");
             Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
         }
 
@@ -132,7 +140,7 @@ namespace Wism.Client.Test.Unit
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
-            //Assert.AreEqual(11, distance, "Did not find the shortest route.");
+            Assert.AreEqual(12, (int)distance, "Did not find the shortest route.");
             Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
             AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
@@ -154,7 +162,7 @@ namespace Wism.Client.Test.Unit
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
-            //Assert.AreEqual(6, distance, "Did not find the shortest route.");
+            Assert.AreEqual(7, (int)distance, "Did not find the shortest route.");
             Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
             AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
@@ -176,7 +184,7 @@ namespace Wism.Client.Test.Unit
             Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
             pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
 
-            //Assert.AreEqual(7, distance, "Did not find the shortest route.");
+            Assert.AreEqual(8, (int)distance, "Did not find the shortest route.");
             Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
             AssertPathStartsWithHeroEndsWithTower(shortestRoute);
         }
@@ -211,6 +219,206 @@ namespace Wism.Client.Test.Unit
             PlotRouteOnMatrix(matrix, new List<Tile>(shortestRoute));
             Assert.AreEqual(8, shortestRoute.Count, "Did not find the correct number of steps.");
         }
+
+        #endregion
+
+        #region A* Pathing Tests
+
+        [Test]
+        public void AStarSimple1_3x3Test()
+        {
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "T" },
+                { "1", "1", "1" },
+                { "S", "1", "1" },
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            Assert.AreEqual(3, (int)distance, "Did not find the shortest route.");
+            Assert.AreEqual(3, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
+        }
+
+        [Test]
+        public void AStarSimple2_3x3Test()
+        {
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "T" },
+                { "1", "S", "1" },
+                { "1", "1", "1" },
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            Assert.AreEqual(2, (int)distance, "Did not find the shortest route.");
+            Assert.AreEqual(2, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
+        }
+
+        [Test]
+        public void AStarWeighted1_3x3Test()
+        {
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "9", "T" },
+                { "1", "9", "1" },
+                { "S", "1", "1" },
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            Assert.AreEqual(4, (int)distance, "Did not find the shortest route.");
+            Assert.AreEqual(4, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
+        }
+
+        [Test]
+        public void AStarWeighted2_3x3Test()
+        {
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "S", "5", "T" },
+                { "1", "4", "1" },
+                { "1", "1", "1" },
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            Assert.AreEqual(5, (int)distance, "Did not find the shortest route.");
+            Assert.AreEqual(4, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
+        }
+
+        [Test]
+        public void AStarOnePath_6x6Test()
+        {
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "9", "9", "S", "9", "9", "1" },
+                { "9", "9", "9", "9", "9", "1" },
+                { "9", "9", "9", "9", "9", "1" },
+                { "9", "9", "9", "9", "T", "1" },
+                { "1", "1", "1", "1", "1", "1" },
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            Assert.AreEqual(7, (int)distance, "Did not find the shortest route.");
+            Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        }
+
+        [Test]
+        public void AStarOnePath2_6x6Test()
+        {
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "2", "2", "2" },
+                { "9", "9", "S", "9", "9", "2" },
+                { "9", "9", "9", "9", "9", "2" },
+                { "9", "9", "9", "9", "9", "2" },
+                { "9", "9", "9", "9", "T", "1" },
+                { "1", "1", "1", "1", "1", "1" },
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            Assert.AreEqual(12, (int)distance, "Did not find the shortest route.");
+            Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
+        }
+
+        [Test]
+        public void AStarManyPaths_6x6Test()
+        {
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "9", "1" },
+                { "1", "9", "9", "9", "9", "1" },
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "1", "1", "T", "1" },
+                { "1", "1", "1", "1", "1", "1" },
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            Assert.AreEqual(7, (int)distance, "Did not find the shortest route.");
+            Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
+        }
+
+        [Test]
+        public void AStarManyPaths2_6x6Test()
+        {
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            string[,] matrix = new string[,]
+            {
+                { "1", "1", "1", "1", "1", "1" },
+                { "1", "1", "S", "1", "9", "1" },
+                { "1", "9", "9", "9", "9", "1" },
+                { "1", "1", "1", "2", "2", "2" },
+                { "1", "1", "1", "2", "T", "1" },
+                { "1", "1", "1", "2", "1", "1" },
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            Assert.AreEqual(8, (int)distance, "Did not find the shortest route.");
+            Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+            AssertPathStartsWithHeroEndsWithTower(shortestRoute);
+        }
+
+        [Test]
+        public void AStarRouteAroundUnownedCity_6x6Test()
+        {
+            // Assemble
+            Game.CreateDefaultGame();
+            IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+            var matrix = new string[,]
+            {
+                { "2", "2", "2", "2", "2", "2" },
+                { "2", "2", "2", "2", "2", "2" },
+                { "2", "2", "2", "2", "2", "2" },
+                { "2", "2", "1", "1", "2", "2" },
+                { "2", "2", "1", "1", "2", "2" },
+                { "S", "2", "9", "9", "2", "T" }
+            };
+
+            Tile[,] map = ConvertMatrixToMap(matrix, out List<Army> start, out Tile target);
+
+            // TODO: Coupling issue: need to create a world; consider mocking
+            World.CreateWorld(map);
+            map = World.Current.Map;
+            MapBuilder.AddCity(World.Current, 3, 2, "Marthos");
+
+            // Act
+            pathingStrategy.FindShortestRoute(map, start, target, out IList<Tile> shortestRoute, out float distance);
+
+            // Assert
+            PlotRouteOnMatrix(matrix, new List<Tile>(shortestRoute));
+            Assert.AreEqual(8, shortestRoute.Count, "Did not find the correct number of steps.");
+        }
+
+        #endregion
 
         #region Helper methods
         private void PlotRouteOnMatrix(string[,] matrix, List<Tile> path)

@@ -41,18 +41,18 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
         UnityManager.SetNewGameSettings(settings);
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
-        SceneManager.LoadScene(scenePath, LoadSceneMode.Additive);
+        SceneManager.LoadScene(this.scenePath, LoadSceneMode.Additive);
 
-        yield return new WaitWhile(() => sceneLoaded == false);
+        yield return new WaitWhile(() => this.sceneLoaded == false);
         yield return new WaitForSeconds(2f);
     }
 
     [UnityTearDown]
     public IEnumerator UnityTearDown()
     {
-        SceneManager.UnloadSceneAsync(scenePath);
+        SceneManager.UnloadSceneAsync(this.scenePath);
 
-        yield return new WaitWhile(() => sceneLoaded == true);
+        yield return new WaitWhile(() => this.sceneLoaded == true);
         Game.Unload();
     }
 

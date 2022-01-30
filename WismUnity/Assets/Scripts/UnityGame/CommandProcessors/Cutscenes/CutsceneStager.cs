@@ -11,14 +11,14 @@ namespace Assets.Scripts.CommandProcessors
     {
         internal CutsceneStager(List<CutsceneStage> stages)
         {
-            Stages = stages ?? throw new ArgumentNullException(nameof(stages));
+            this.Stages = stages ?? throw new ArgumentNullException(nameof(stages));
 
-            if (Stages.Count == 0)
+            if (this.Stages.Count == 0)
             {
                 throw new ArgumentException("Must include at least one CutsceneStage", nameof(stages));
             }
 
-            Final = stages[stages.Count - 1];
+            this.Final = stages[stages.Count - 1];
         }
 
         public List<CutsceneStage> Stages { get; }
@@ -26,25 +26,25 @@ namespace Assets.Scripts.CommandProcessors
         public CutsceneStage Final { get; set; }
 
         public int SceneIndex { get; set; }
-        
+
         public void OnAnyKeyPressed()
         {
-            if (SceneIndex < Stages.Count)
+            if (this.SceneIndex < this.Stages.Count)
             {
-                Stages[SceneIndex].OnAnyKeyPressed();
+                this.Stages[this.SceneIndex].OnAnyKeyPressed();
             }
         }
 
         public ActionState Action()
-        {            
+        {
             SceneResult result;
-            if (SceneIndex < Stages.Count)
+            if (this.SceneIndex < this.Stages.Count)
             {
-                result = Stages[SceneIndex].Action();
+                result = this.Stages[this.SceneIndex].Action();
                 switch (result)
                 {
                     case SceneResult.Continue:
-                        SceneIndex++;
+                        this.SceneIndex++;
                         break;
                     case SceneResult.Wait:
                         // Wait for user input
@@ -54,7 +54,7 @@ namespace Assets.Scripts.CommandProcessors
                     default:
                         // Advance to final scene
                         result = SceneResult.Continue;
-                        SceneIndex = Stages.Count;
+                        this.SceneIndex = this.Stages.Count;
                         break;
                 }
             }
@@ -89,7 +89,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public SceneResult Close()
         {
-            return Final.Action();
+            return this.Final.Action();
         }
     }
 }

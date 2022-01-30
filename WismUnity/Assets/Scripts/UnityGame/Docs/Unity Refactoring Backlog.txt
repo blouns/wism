@@ -1,6 +1,6 @@
 ﻿[UNITY REFACTORING]
 
-The quality of the Unity UI is at the prototype-level. Given my newness to the platform there are
+The quality of the Unity UI is at the Alpha-level. Given my newness to the platform there are
 several examples of things that were done with cut-corners, hacks, or other "unofficial" solutions.
 This captures a list of some of these known areas that are worth revisiting.
 

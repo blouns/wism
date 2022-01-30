@@ -1,6 +1,5 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.Tilemaps;
-using Assets.Scripts.UI;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Core;
@@ -29,7 +28,7 @@ namespace Assets.Scripts.UI
         }
 
         private void Initialize()
-        {            
+        {
             this.selectedArmyIndex = -1;
         }
 
@@ -57,7 +56,7 @@ namespace Assets.Scripts.UI
                     if (isAttacking && isAdjacent)
                     {
                         // War!
-                        gameManager.AttackWithSelectedArmies(clickedTile.X, clickedTile.Y);
+                        this.gameManager.AttackWithSelectedArmies(clickedTile.X, clickedTile.Y);
                     }
                     // Cannot attack from non-adjacent tile
                     else if (isAttacking & !isAdjacent)
@@ -68,7 +67,7 @@ namespace Assets.Scripts.UI
                     else if (!isAttacking)
                     {
                         // Move
-                        gameManager.MoveSelectedArmies(clickedTile.X, clickedTile.Y);
+                        this.gameManager.MoveSelectedArmies(clickedTile.X, clickedTile.Y);
                     }
                     break;
             }
@@ -92,13 +91,13 @@ namespace Assets.Scripts.UI
 
         internal void HandleCityClick(Tile tile)
         {
-            switch (unityManager.ProductionMode)
+            switch (this.unityManager.ProductionMode)
             {
                 case ProductionMode.SelectCity:
                     if (tile.HasCity() &&
                         tile.City.Clan == Game.Current.GetCurrentPlayer().Clan)
                     {
-                        unityManager.ShowProductionPanel(tile.City);
+                        this.unityManager.ShowProductionPanel(tile.City);
                     }
                     break;
                 default:
@@ -152,7 +151,7 @@ namespace Assets.Scripts.UI
             if (armiesToSelect.Count > 0)
             {
                 armiesToSelect.Sort(new ByArmyViewingOrder());
-                gameManager.SelectArmies(armiesToSelect);
+                this.gameManager.SelectArmies(armiesToSelect);
                 CenterOnTile(tile);
             }
         }
@@ -161,7 +160,7 @@ namespace Assets.Scripts.UI
         {
             if (Game.Current.ArmiesSelected())
             {
-                gameManager.DeselectArmies();
+                this.gameManager.DeselectArmies();
             }
 
             this.unityManager.HideSelectedBox();
@@ -174,7 +173,7 @@ namespace Assets.Scripts.UI
             if (clickedTile.X >= 0 && clickedTile.X <= World.Current.Map.GetUpperBound(0) &&
                 clickedTile.Y >= 0 && clickedTile.Y <= World.Current.Map.GetUpperBound(1))
             {
-                Vector3 worldVector = worldTilemap.ConvertGameToUnityVector(clickedTile.X, clickedTile.Y);
+                Vector3 worldVector = this.worldTilemap.ConvertGameToUnityVector(clickedTile.X, clickedTile.Y);
                 this.unityManager.SetSelectedBoxPosition(worldVector, false);
                 this.unityManager.SetCameraToSelectedBox();
             }
@@ -182,7 +181,7 @@ namespace Assets.Scripts.UI
 
         internal void DisplayTileInfo(Tile clickedTile)
         {
-            Vector3 worldVector = worldTilemap.ConvertGameToUnityVector(clickedTile.X, clickedTile.Y);
+            Vector3 worldVector = this.worldTilemap.ConvertGameToUnityVector(clickedTile.X, clickedTile.Y);
             this.unityManager.SetSelectedBoxPosition(worldVector, false);
 
             if (clickedTile.X >= 0 && clickedTile.X <= World.Current.Map.GetUpperBound(0) &&

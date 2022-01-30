@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using Wism.Client.Modules;
 using Toggle = UnityEngine.UI.Toggle;
 
@@ -20,16 +19,16 @@ public class GameSetup : MonoBehaviour
 
     public void Start()
     {
-        if (playerToggles == null || playerToggles.Length == 0)
+        if (this.playerToggles == null || this.playerToggles.Length == 0)
         {
             throw new InvalidOperationException("Must have at least one player.");
         }
 
         // Default to all players
-        for (int i = 0; i < playerToggles.Length; i++)
+        for (int i = 0; i < this.playerToggles.Length; i++)
         {
-            playerToggles[i].isOn = true;
-            playerToggles[i].interactable = true;
+            this.playerToggles[i].isOn = true;
+            this.playerToggles[i].interactable = true;
         }
 
         // Default world
@@ -65,7 +64,7 @@ public class GameSetup : MonoBehaviour
         settings.IsNewGame = false;
         UnityManager.SetNewGameSettings(settings);
 
-        LoadScene(worldName);        
+        LoadScene(this.worldName);
     }
 
     private void StartNewGame(UnityNewGameEntity settings)
@@ -121,7 +120,7 @@ public class GameSetup : MonoBehaviour
         {
             Debug.LogError("Could not load the world: " + settings.WorldName);
         }
-        
+
         if (cityInfos != null && cityInfos.Count < settings.Players.Length)
         {
             Debug.LogError("Must have at least enough cities for each player.");
@@ -146,9 +145,9 @@ public class GameSetup : MonoBehaviour
     private UnityPlayerEntity[] GetSelectedPlayersFromPanel()
     {
         var playerEntities = new List<UnityPlayerEntity>();
-        for (int i = 0; i < playerToggles.Length; i++)
+        for (int i = 0; i < this.playerToggles.Length; i++)
         {
-            if (playerToggles[i].isOn)
+            if (this.playerToggles[i].isOn)
             {
                 var playerEntity = new UnityPlayerEntity();
                 playerEntity.IsHuman = true;

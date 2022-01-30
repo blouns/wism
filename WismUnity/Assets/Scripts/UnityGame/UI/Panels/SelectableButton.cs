@@ -15,14 +15,14 @@ namespace Assets.Scripts.UI
 
         public void OnClick()
         {
-            string name = gameObject.name;
+            string name = this.gameObject.name;
             if (name == "ButtonTemplate")
             {
                 return;
             }
 
             int index = Int32.Parse(name.Replace("Button", ""));
-            itemPicker.SetCurrentItem(index - 1);
+            this.itemPicker.SetCurrentItem(index - 1);
         }
     }
 }

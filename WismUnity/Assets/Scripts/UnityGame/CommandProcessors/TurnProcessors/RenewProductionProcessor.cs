@@ -1,6 +1,5 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.UI;
-using System;
 using System.Collections.Generic;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
@@ -55,7 +54,7 @@ namespace Assets.Scripts.CommandProcessors
 
             // Show production on first city
             if (player.Turn == 1)
-            {                
+            {
                 OpenProductionPanel(player);
                 return ActionState.Succeeded;
             }
@@ -65,11 +64,11 @@ namespace Assets.Scripts.CommandProcessors
             this.unityGame.InputManager.SetInputMode(InputMode.UI);
 
             // Clear the renewal queue and ask user for input
-            if (!renewalCleared)
+            if (!this.renewalCleared)
             {
                 renewCommand.ArmiesToRenew = new List<ArmyInTraining>();
-                renewalCleared = true;
-            }                        
+                this.renewalCleared = true;
+            }
 
             // Show deliveries
             if (reviewCommand.ArmiesDeliveredResult != null &&
@@ -78,7 +77,7 @@ namespace Assets.Scripts.CommandProcessors
                 HandleDeliveries(reviewCommand);
             }
             // Show production
-            else if (reviewCommand.ArmiesProducedResult != null && 
+            else if (reviewCommand.ArmiesProducedResult != null &&
                      reviewCommand.ArmiesProducedResult.Count > 0)
             {
                 HandleProduction(reviewCommand, renewCommand);
@@ -87,9 +86,9 @@ namespace Assets.Scripts.CommandProcessors
             else
             {
                 // Renew all armies in ArmiesToRenew
-                result = command.Execute();                
+                result = command.Execute();
                 this.unityGame.InputManager.SetInputMode(InputMode.Game);
-                this.Reset();
+                Reset();
             }
 
             return result;
@@ -109,7 +108,7 @@ namespace Assets.Scripts.CommandProcessors
                     // Stop production
                     reviewCommand.ArmiesProducedResult.RemoveAt(0);
                     break;
-                case YesNoCancel.Cancel:                    
+                case YesNoCancel.Cancel:
                     // Renew all remaining production
                     renewCommand.ArmiesToRenew.AddRange(reviewCommand.ArmiesProducedResult);
                     reviewCommand.ArmiesProducedResult.Clear();
@@ -144,36 +143,36 @@ namespace Assets.Scripts.CommandProcessors
             YesNoCancel state = YesNoCancel.None;
 
             // Ask the user if they'd like to renew production
-            if (yesNoCancelBox == null)
+            if (this.yesNoCancelBox == null)
             {
-                yesNoCancelBox = UnityUtilities.GameObjectHardFind("RenewProductionPanel")
-                    .GetComponent<YesNoBox>();                
+                this.yesNoCancelBox = UnityUtilities.GameObjectHardFind("RenewProductionPanel")
+                    .GetComponent<YesNoBox>();
             }
 
             // If new request prompt the user
-            if (!yesNoCancelBox.Cancelled &&
-                !yesNoCancelBox.Answer.HasValue)
+            if (!this.yesNoCancelBox.Cancelled &&
+                !this.yesNoCancelBox.Answer.HasValue)
             {
-                yesNoCancelBox.Ask($"{ait.DisplayName} - Produced!");
+                this.yesNoCancelBox.Ask($"{ait.DisplayName} - Produced!");
             }
             // If User skipped the reports
-            else if (yesNoCancelBox.Cancelled)
-            {                
-                yesNoCancelBox.Clear();
+            else if (this.yesNoCancelBox.Cancelled)
+            {
+                this.yesNoCancelBox.Clear();
                 state = YesNoCancel.Cancel;
             }
             // If User has selected "Yes"
-            else if (yesNoCancelBox.Answer.HasValue &&
-                     yesNoCancelBox.Answer.Value)
-            {                
-                yesNoCancelBox.Clear();
+            else if (this.yesNoCancelBox.Answer.HasValue &&
+                     this.yesNoCancelBox.Answer.Value)
+            {
+                this.yesNoCancelBox.Clear();
                 state = YesNoCancel.Yes;
             }
             // If User selected "No"
-            else if (yesNoCancelBox.Answer.HasValue &&
-                     !yesNoCancelBox.Answer.Value)
+            else if (this.yesNoCancelBox.Answer.HasValue &&
+                     !this.yesNoCancelBox.Answer.Value)
             {
-                yesNoCancelBox.Clear();
+                this.yesNoCancelBox.Clear();
                 state = YesNoCancel.No;
             }
             // Else wait for user input
@@ -196,21 +195,21 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             // If new request prompt the user
-            if (!yesNoCancelBox.Cancelled &&
-                !yesNoCancelBox.Answer.HasValue)
+            if (!this.yesNoCancelBox.Cancelled &&
+                !this.yesNoCancelBox.Answer.HasValue)
             {
-                yesNoCancelBox.Ask($"{ait.DisplayName} reaches {ait.DestinationCity.DisplayName}");
+                this.yesNoCancelBox.Ask($"{ait.DisplayName} reaches {ait.DestinationCity.DisplayName}");
             }
-            else if (okCancelBox.Cancelled)
+            else if (this.okCancelBox.Cancelled)
             {
                 // User skipped the reports
-                okCancelBox.Clear();
+                this.okCancelBox.Clear();
                 state = OkCancel.Cancel;
             }
-            else if (okCancelBox.Answer.HasValue)
+            else if (this.okCancelBox.Answer.HasValue)
             {
                 // User has selected "Ok"
-                okCancelBox.Clear();
+                this.okCancelBox.Clear();
                 state = OkCancel.Ok;
             }
             else
@@ -227,9 +226,9 @@ namespace Assets.Scripts.CommandProcessors
             if (player.Capitol != null)
             {
                 // Transition state to production
-                unityGame.InputManager.InputHandler.DeselectObject();
-                unityGame.SetProductionMode(ProductionMode.SelectCity);
-                unityGame.ShowProductionPanel(player.Capitol);
+                this.unityGame.InputManager.InputHandler.DeselectObject();
+                this.unityGame.SetProductionMode(ProductionMode.SelectCity);
+                this.unityGame.ShowProductionPanel(player.Capitol);
             }
         }
 

@@ -11,8 +11,8 @@ namespace Assets.Scripts.CommandProcessors
 
         protected override SceneResult ActionInternal()
         {
-            var sageCommand = (SearchSageCommand)Command;
-            if (!Location.Searched)
+            var sageCommand = (SearchSageCommand)this.Command;
+            if (!this.Location.Searched)
             {
                 Notify($"...worth {sageCommand.Gold} gp!");
                 return ContinueOnKeyPress();

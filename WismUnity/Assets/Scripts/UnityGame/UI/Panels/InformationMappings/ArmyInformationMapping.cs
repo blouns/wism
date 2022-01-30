@@ -28,12 +28,12 @@ namespace Assets.Scripts.UI
 
         public void GetLabelValuePair(int index, Tile subject, out string label, out string value)
         {
-            if (index >= labels.Length)
+            if (index >= this.labels.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
 
-            label = labels[index];
+            label = this.labels[index];
             value = GetLabelValuePair(index, subject);
         }
 
@@ -52,7 +52,7 @@ namespace Assets.Scripts.UI
                     value = armies.Min(a => a.MovesRemaining).ToString();
                     break;
                 case 2: // Army
-                    value = (armies.Count == 1) ? armies[0].DisplayName : "Group";                    
+                    value = (armies.Count == 1) ? armies[0].DisplayName : "Group";
                     break;
                 case 5: // Command
                     value = "Move Army";

@@ -12,9 +12,9 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
 
         protected override SceneResult ActionInternal()
         {
-            if (Command.Result == ActionState.NotStarted)
+            if (this.Command.Result == ActionState.NotStarted)
             {
-                var state = Command.Execute();                
+                var state = this.Command.Execute();
                 if (state != ActionState.Succeeded)
                 {
                     // Should not be possible
@@ -26,5 +26,5 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
             Notify("You have improved your city defenses!");
             return ContinueOnKeyPress();
         }
-    }    
+    }
 }

@@ -50,7 +50,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             };
 
             // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
+            this.inputManager.KeyPressed += stager.OnAnyKeyPressed;
 
             return stager;
         }
@@ -74,7 +74,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             };
 
             // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
+            this.inputManager.KeyPressed += stager.OnAnyKeyPressed;
 
             return stager;
         }
@@ -99,7 +99,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             };
 
             // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
+            this.inputManager.KeyPressed += stager.OnAnyKeyPressed;
 
             return stager;
         }
@@ -122,7 +122,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             };
 
             // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
+            this.inputManager.KeyPressed += stager.OnAnyKeyPressed;
 
             return stager;
         }
@@ -147,7 +147,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             };
 
             // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
+            this.inputManager.KeyPressed += stager.OnAnyKeyPressed;
 
             return stager;
         }
@@ -172,7 +172,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             };
 
             // Set the input callback
-            inputManager.KeyPressed += stager.OnAnyKeyPressed;
+            this.inputManager.KeyPressed += stager.OnAnyKeyPressed;
 
             return stager;
         }

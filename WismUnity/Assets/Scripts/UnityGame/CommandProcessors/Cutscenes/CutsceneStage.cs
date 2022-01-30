@@ -9,7 +9,7 @@ namespace Assets.Scripts.CommandProcessors
 
     public abstract class CutsceneStage
     {
-        public Command Command { get; private set;  }
+        public Command Command { get; private set; }
 
         public InputManager InputManager { get; set; }
 
@@ -19,7 +19,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public CutsceneStage(Command command)
         {
-            Command = command;
+            this.Command = command;
             this.InputManager = GameObject.FindGameObjectWithTag("UnityManager")
                     .GetComponent<UnityManager>()
                     .InputManager;
@@ -35,7 +35,7 @@ namespace Assets.Scripts.CommandProcessors
                 // TODO: Consider instantiating new YesNo instead of static
                 Reset();
                 this.IsFirstRun = false;
-            }            
+            }
 
             return ActionInternal();
         }
@@ -45,7 +45,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public void OnAnyKeyPressed()
         {
-            keyPressed = true;
+            this.keyPressed = true;
         }
 
         protected SceneResult ContinueOnKeyPress()
@@ -67,7 +67,7 @@ namespace Assets.Scripts.CommandProcessors
                 return true;
             }
 
-            return keyPressed;
+            return this.keyPressed;
         }
 
         protected static void ClearNotifications()
@@ -81,8 +81,8 @@ namespace Assets.Scripts.CommandProcessors
         {
             var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
                 .GetComponent<NotificationBox>();
-            InputManager.SetInputMode(InputMode.WaitForKey);
-            messageBox.Notify(String.Format(message, args));            
+            this.InputManager.SetInputMode(InputMode.WaitForKey);
+            messageBox.Notify(String.Format(message, args));
         }
 
         protected bool? AskYesNo(string message, params object[] args)
@@ -96,14 +96,14 @@ namespace Assets.Scripts.CommandProcessors
                .GetComponent<YesNoBox>();
 
             if (!yesNoBox.Answer.HasValue)
-            {                
-                InputManager.SetInputMode(InputMode.UI);
+            {
+                this.InputManager.SetInputMode(InputMode.UI);
                 yesNoBox.Ask(String.Format(message, args));
             }
             else
             {
                 // REVIEW: Should this instead be 'previous' input mode?
-                InputManager.SetInputMode(InputMode.WaitForKey);
+                this.InputManager.SetInputMode(InputMode.WaitForKey);
             }
 
             return yesNoBox.Answer;

@@ -6,7 +6,7 @@ using UnityEngine.Tilemaps;
 namespace Assets.Scripts.Tiles
 {
     public class TombTile : LocationTile
-    {        
+    {
         [SerializeField]
         private Sprite tombSprite;
 
@@ -17,7 +17,7 @@ namespace Assets.Scripts.Tiles
 
         protected override void GetTileDataInternal(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            tileData.sprite = tombSprite;
+            tileData.sprite = this.tombSprite;
         }
 
 #if UNITY_EDITOR

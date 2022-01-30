@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Wism.Client.Api.Commands;
 
 namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
@@ -15,7 +14,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
 
         protected override SceneResult ActionInternal()
         {
-            var cityCommand = (RazeCityCommand)Command;
+            var cityCommand = (RazeCityCommand)this.Command;
             var city = cityCommand.City;
 
             Notify($"Your troops ravage {city.DisplayName}");

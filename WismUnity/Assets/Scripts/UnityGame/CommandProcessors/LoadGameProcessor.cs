@@ -38,10 +38,10 @@ namespace Assets.Scripts.CommandProcessors
                 // Load Unity game state
                 // TODO: Ensure this cannot be out of sync w/ game state
                 //       Currently rapid saves would get out of sync.
-                PersistanceManager.LoadLastSnapshot(unityGame);
+                PersistanceManager.LoadLastSnapshot(this.unityGame);
 
                 // Reset Unity managers
-                unityGame.Reset();
+                this.unityGame.Reset();
 
                 var loadGameCommand = (LoadGameCommand)command;
                 Debug.Log($"Game loaded successfully '{loadGameCommand.Snapshot.World.Name}'.");

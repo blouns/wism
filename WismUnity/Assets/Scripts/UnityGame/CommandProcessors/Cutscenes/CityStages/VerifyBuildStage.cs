@@ -12,7 +12,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
 
         protected override SceneResult ActionInternal()
         {
-            var cityCommand = (BuildCityCommand)Command;
+            var cityCommand = (BuildCityCommand)this.Command;
             var city = cityCommand.City;
 
             if (city.Defense == City.MaxDefense)

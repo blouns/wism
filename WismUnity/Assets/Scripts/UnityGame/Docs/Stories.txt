@@ -1,4 +1,6 @@
-﻿Goal: 
+﻿Goals: 
+* Bug Fixes: 1, 5, 7, 9, 11
+* Bug Fix: 10 (Pathing performance; move to A*)
 
 Bugs:
   1 Select next army on Defense or Quit

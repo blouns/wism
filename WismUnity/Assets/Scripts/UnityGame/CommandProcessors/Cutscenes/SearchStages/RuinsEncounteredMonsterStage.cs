@@ -6,15 +6,15 @@ namespace Assets.Scripts.CommandProcessors
     {
         public RuinsEncounteredMonsterStage(SearchRuinsCommand command)
             : base(command)
-        {            
+        {
         }
 
         protected override SceneResult ActionInternal()
         {
-            var monster = Location.Monster;
+            var monster = this.Location.Monster;
             if (monster != null)
             {
-                Notify($"{Hero.DisplayName} encounters a {monster}...");
+                Notify($"{this.Hero.DisplayName} encounters a {monster}...");
                 return ContinueOnKeyPress();
             }
 

@@ -6,6 +6,7 @@ using Wism.Client.Data;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Pathing;
 using Wism.Client.War;
 
 namespace Wism.Client.Core
@@ -53,6 +54,11 @@ namespace Wism.Client.Core
         /// Gets or sets the strategy used for terrain traversal
         /// </summary>
         public ITraversalStrategy TraversalStrategy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the pathing strategy for army movement
+        /// </summary>
+        public IPathingStrategy PathingStrategy { get; set; }
 
         /// <summary>
         /// Gets or sets the seer that describes the strategies applicable movement
@@ -486,6 +492,7 @@ namespace Wism.Client.Core
             current.WarStrategy = new DefaultWarStrategy();
             current.TraversalStrategy = CompositeTraversalStrategy.CreateDefault();
             current.MovementCoordinator = MovementStrategyCoordinator.CreateDefault();
+            current.PathingStrategy = new DijkstraPathingStrategy();
 
             // Setup default players for testing
             current.Players = new List<Player>();

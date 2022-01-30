@@ -18,7 +18,7 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
                     .GetComponent<UnityManager>();
             unityManager.InputManager.SetInputMode(InputMode.Game);
 
-            if (Command.Result == ActionState.Succeeded)
+            if (this.Command.Result == ActionState.Succeeded)
             {
                 return SceneResult.Success;
             }

@@ -8,7 +8,7 @@ public static class UnityUtilities
         foreach (GameObject root in GameObject.FindObjectsOfType(typeof(GameObject)))
         {
             if (root.transform.parent == null)
-            { 
+            {
                 // Root GameObject
                 result = GameObjectHardFind(root, str, 0);
                 if (result != null) break;

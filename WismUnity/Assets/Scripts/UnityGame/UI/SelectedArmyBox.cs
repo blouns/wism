@@ -28,7 +28,7 @@ namespace Assets.Scripts.UI
             this.armyManager = unityManagerGO.GetComponent<ArmyManager>();
             this.unityManager = unityManagerGO.GetComponent<UnityManager>();
 
-            isInitialized = true;
+            this.isInitialized = true;
         }
 
         public void SetActive(bool active)
@@ -39,8 +39,8 @@ namespace Assets.Scripts.UI
         public void ShowSelectedBox(Vector3 worldVector)
         {
             this.transform.position = worldVector;
-            this.SetActive(true);
-            this.unityManager.SetCameraTarget(transform);
+            SetActive(true);
+            this.unityManager.SetCameraTarget(this.transform);
         }
 
         public void HideSelectedBox()
@@ -76,7 +76,7 @@ namespace Assets.Scripts.UI
             var worldTilemap = unityGame.WorldTilemap;
             if (IsSelectedBoxActive())
             {
-                var boxGameCoords = worldTilemap.ConvertUnityToGameVector(transform.position);
+                var boxGameCoords = worldTilemap.ConvertUnityToGameVector(this.transform.position);
                 if (boxGameCoords.x == tile.X &&
                     boxGameCoords.y == tile.Y)
                 {
@@ -90,14 +90,14 @@ namespace Assets.Scripts.UI
                 }
             }
 
-            if (!armyManager.ArmyDictionary.ContainsKey(army.Id))
+            if (!this.armyManager.ArmyDictionary.ContainsKey(army.Id))
             {
                 throw new InvalidOperationException("Could not find selected army in game objects.");
             }
 
             // Render the selected box
             Vector3 worldVector = worldTilemap.ConvertGameToUnityVector(army.X, army.Y);
-            ShowSelectedBox(worldVector);            
+            ShowSelectedBox(worldVector);
         }
     }
 }

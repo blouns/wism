@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using UnityEngine;
-using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.Armies
@@ -16,7 +14,7 @@ namespace Assets.Scripts.Armies
             this.gameObject = gameObject ?? throw new System.ArgumentNullException(nameof(gameObject));
         }
 
-        public GameObject GameObject { get => gameObject; set => gameObject = value; }
-        public Army Army { get => army; set => army = value; }
+        public GameObject GameObject { get => this.gameObject; set => this.gameObject = value; }
+        public Army Army { get => this.army; set => this.army = value; }
     }
 }

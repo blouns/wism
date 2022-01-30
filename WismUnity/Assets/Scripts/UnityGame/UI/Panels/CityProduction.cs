@@ -31,9 +31,9 @@ namespace Assets.Scripts.UI
 
         public void LateUpdate()
         {
-            if (armySelectedIndex > 0)
+            if (this.armySelectedIndex > 0)
             {
-                this.armyButtons[armySelectedIndex].Select();
+                this.armyButtons[this.armySelectedIndex].Select();
             }
         }
 
@@ -60,11 +60,11 @@ namespace Assets.Scripts.UI
         {
             SetInitialButtonState();
 
-            var barracks = productionCity.Barracks;
+            var barracks = this.productionCity.Barracks;
 
             // Unpack the army infos for each production slot
             this.productionInfos = barracks.GetProductionKinds().ToArray();
-            for (int i = 0; i < productionInfos.Length; i++)
+            for (int i = 0; i < this.productionInfos.Length; i++)
             {
                 InitializeProductionSlot(i);
             }
@@ -85,25 +85,25 @@ namespace Assets.Scripts.UI
                     Game.Current.GetCurrentPlayer().Clan,
                     barracks.ArmyInTraining.ArmyInfo,
                     "CurrentArmyKind");
-                transform.Find("CurrentArmyKind").gameObject.SetActive(true);
+                this.transform.Find("CurrentArmyKind").gameObject.SetActive(true);
 
                 turnsRemainingString = barracks.ArmyInTraining.TurnsToProduce + "t";
             }
             else
             {
-                transform.Find("CurrentArmyKind").gameObject.SetActive(false);
+                this.transform.Find("CurrentArmyKind").gameObject.SetActive(false);
             }
 
             // Set turns remaining text
-            var turnsText = gameObject.transform.Find("TurnsRemainingText").GetComponent<Text>();
+            var turnsText = this.gameObject.transform.Find("TurnsRemainingText").GetComponent<Text>();
             turnsText.text = turnsRemainingString;
         }
 
         private void SetArmyImageOnGameObject(Clan clan, ArmyInfo info, string gameObjectName)
         {
-            var armyPrefab = armyManager.FindGameObjectKind(clan, info);
+            var armyPrefab = this.armyManager.FindGameObjectKind(clan, info);
             SpriteRenderer spriteRenderer = armyPrefab.GetComponent<SpriteRenderer>();
-            var image = gameObject.transform.Find(gameObjectName).GetComponent<Image>();
+            var image = this.gameObject.transform.Find(gameObjectName).GetComponent<Image>();
             image.sprite = spriteRenderer.sprite;
         }
 
@@ -118,27 +118,27 @@ namespace Assets.Scripts.UI
 
         private void InitializeProductionSlot(int index)
         {
-            ArmyInfo armyInfo = ModFactory.FindArmyInfo(productionInfos[index].ArmyInfoName);
+            ArmyInfo armyInfo = ModFactory.FindArmyInfo(this.productionInfos[index].ArmyInfoName);
 
             // Set image
             var clan = Game.Current.GetCurrentPlayer().Clan;
-            var armyPrefab = armyManager.FindGameObjectKind(clan, armyInfo);
+            var armyPrefab = this.armyManager.FindGameObjectKind(clan, armyInfo);
             SpriteRenderer spriteRenderer = armyPrefab.GetComponent<SpriteRenderer>();
-            var image = armyButtons[index].gameObject.transform.Find("ArmyKind")
+            var image = this.armyButtons[index].gameObject.transform.Find("ArmyKind")
                 .GetComponent<Image>();
             image.sprite = spriteRenderer.sprite;
 
             // Set production info
-            Text productionText = armyButtons[index].gameObject.transform.Find("ArmyInfo")
+            Text productionText = this.armyButtons[index].gameObject.transform.Find("ArmyInfo")
                 .GetComponent<Text>();
-            productionText.text = $"{productionInfos[index].TurnsToProduce}t / {productionInfos[index].Upkeep}gp";
+            productionText.text = $"{this.productionInfos[index].TurnsToProduce}t / {this.productionInfos[index].Upkeep}gp";
 
             this.armyButtons[index].gameObject.SetActive(true);
         }
 
         private void ClearProduction()
         {
-            for (int i = 0; i < armyButtons.Length; i++)
+            for (int i = 0; i < this.armyButtons.Length; i++)
             {
                 this.armyButtons[i].gameObject.SetActive(false);
             }
@@ -146,25 +146,25 @@ namespace Assets.Scripts.UI
 
         public void OnArmy1Click()
         {
-            armySelectedIndex = 0;
+            this.armySelectedIndex = 0;
             EnableProduction();
         }
 
         public void OnArmy2Click()
         {
-            armySelectedIndex = 1;
+            this.armySelectedIndex = 1;
             EnableProduction();
         }
 
         public void OnArmy3Click()
         {
-            armySelectedIndex = 2;
+            this.armySelectedIndex = 2;
             EnableProduction();
         }
 
         public void OnArmy4Click()
         {
-            armySelectedIndex = 3;
+            this.armySelectedIndex = 3;
             EnableProduction();
         }
 
@@ -178,7 +178,7 @@ namespace Assets.Scripts.UI
 
         private void StartProduction(City destinationCity = null)
         {
-            var armyName = productionInfos[armySelectedIndex].ArmyInfoName;
+            var armyName = this.productionInfos[this.armySelectedIndex].ArmyInfoName;
             var armyInfo = ModFactory.FindArmyInfo(armyName);
 
             Debug.Log($"Starting production of {armyInfo.DisplayName}" +

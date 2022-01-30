@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Managers;
-using System;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -8,7 +7,7 @@ using Wism.Client.Core.Controllers;
 namespace Assets.Scripts.CommandProcessors
 {
     public class HireHeroProcessor : ICommandProcessor
-    {        
+    {
         private readonly ILogger logger;
         private readonly UnityManager unityGame;
 
@@ -47,19 +46,19 @@ namespace Assets.Scripts.CommandProcessors
                 return ActionState.Failed;
             }
 
-            if (hireCommand.HeroAccepted && 
-                heroName == null)
+            if (hireCommand.HeroAccepted &&
+                this.heroName == null)
             {
                 // Wait for user to name the hero
                 this.unityGame.InputManager.SetInputMode(InputMode.UI);
-                heroName = GetHeroName(hireCommand);
+                this.heroName = GetHeroName(hireCommand);
                 state = ActionState.InProgress;
             }
             else if (hireCommand.HeroAccepted)
             {
                 // Hire the hero
                 state = hireCommand.Execute();
-                hireCommand.Hero.DisplayName = heroName;
+                hireCommand.Hero.DisplayName = this.heroName;
 
                 // Create any allies that will join the hero
                 CreateAnyAllies(hireCommand);
@@ -72,7 +71,7 @@ namespace Assets.Scripts.CommandProcessors
                 this.unityGame.InputManager.SetInputMode(InputMode.Game);
                 state = ActionState.Failed;
                 Reset();
-            }            
+            }
 
             return state;
         }
@@ -96,11 +95,11 @@ namespace Assets.Scripts.CommandProcessors
                 // No allies for you
                 return;
             }
-            
-            this.unityGame.NotifyUser(heroBringsAlliesMsg,
+
+            this.unityGame.NotifyUser(this.heroBringsAlliesMsg,
                 allies.Count,
                 allies[0].DisplayName,
-                heroName);
+                this.heroName);
 
             this.unityGame.GameManager.ConscriptArmies(player, tile, allies);
         }
@@ -119,13 +118,13 @@ namespace Assets.Scripts.CommandProcessors
             {
                 this.input = UnityUtilities.GameObjectHardFind("SolicitInputPanel")
                     .GetComponent<SolicitInput>();
-            }            
+            }
 
             // Show input box to enter hero's name
-            if (!this.input.IsInitialized() && 
+            if (!this.input.IsInitialized() &&
                 this.input.OkCancelResult == UI.OkCancel.None)
             {
-                this.input.Initialize(enterHeroNameMsg, command.HeroDisplayName);
+                this.input.Initialize(this.enterHeroNameMsg, command.HeroDisplayName);
                 this.input.Show();
             }
 

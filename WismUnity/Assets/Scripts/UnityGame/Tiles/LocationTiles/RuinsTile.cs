@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Editors;
-using Assets.Scripts.Tilemaps;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -7,7 +6,7 @@ using UnityEngine.Tilemaps;
 namespace Assets.Scripts.Tiles
 {
     public class RuinsTile : LocationTile
-    {        
+    {
         [SerializeField]
         private Sprite ruinsSprite;
 
@@ -18,7 +17,7 @@ namespace Assets.Scripts.Tiles
 
         protected override void GetTileDataInternal(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            tileData.sprite = ruinsSprite;
+            tileData.sprite = this.ruinsSprite;
         }
 
 #if UNITY_EDITOR

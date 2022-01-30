@@ -1,6 +1,5 @@
 ﻿using Assets.Scripts.CommandProcessors.Cutscenes;
 using Assets.Scripts.Managers;
-using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -35,22 +34,22 @@ namespace Assets.Scripts.CommandProcessors
         {
             var searchCommand = (SearchLibraryCommand)command;
 
-            if (stager == null)
+            if (this.stager == null)
             {
-                stager = new CutsceneStagerFactory(unityGame)
+                this.stager = new CutsceneStagerFactory(this.unityGame)
                     .CreateLibraryStager(searchCommand);
-                unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
-                unityGame.HideSelectedBox();
+                this.unityGame.InputManager.SetInputMode(InputMode.WaitForKey);
+                this.unityGame.HideSelectedBox();
             }
 
-            var result = stager.Action();
+            var result = this.stager.Action();
 
             if (result == ActionState.Failed ||
                 result == ActionState.Succeeded)
             {
-                unityGame.InputManager.SetInputMode(InputMode.Game);
-                unityGame.GameManager.DeselectArmies();
-                stager = null;
+                this.unityGame.InputManager.SetInputMode(InputMode.Game);
+                this.unityGame.GameManager.DeselectArmies();
+                this.stager = null;
             }
 
             return result;

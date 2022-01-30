@@ -4,7 +4,7 @@ using Wism.Client.Core;
 
 namespace Wism.Client.Pathing
 {
-    internal class PathNode
+    public class PathNode
     {
         private PathNode previous;
         private float distance;

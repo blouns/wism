@@ -14,12 +14,13 @@ namespace Assets.Tests.PlayMode
         }
 
         public override bool keepWaiting
-        {   get
+        {
+            get
             {
                 return (this.command.Result == ActionState.NotStarted) ||
                        (this.command.Result == ActionState.InProgress);
-           
-          }
+
+            }
         }
     }
 }

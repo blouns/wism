@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Managers;
-using Assets.Scripts.UI;
 using System;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
@@ -34,7 +33,7 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            unityGame.SetTime(unityGame.GameManager.StandardTime);
+            this.unityGame.SetTime(this.unityGame.GameManager.StandardTime);
             this.unityGame.InputManager.SetInputMode(InputMode.Game);
 
             var attackCommand = ((CompleteBattleCommand)command).AttackCommand;
@@ -42,16 +41,16 @@ namespace Assets.Scripts.CommandProcessors
             switch (result)
             {
                 case ActionState.Succeeded:
-                    unityGame.WarPanel.Teardown();
-                    unityGame.SetTime(unityGame.GameManager.StandardTime);
+                    this.unityGame.WarPanel.Teardown();
+                    this.unityGame.SetTime(this.unityGame.GameManager.StandardTime);
                     this.unityGame.InputManager.SetInputMode(InputMode.Game);
                     OpenProductionPanelIfClaimingCity(attackCommand);
                     break;
 
                 case ActionState.Failed:
-                    inputManager.InputHandler.DeselectObject();
-                    unityGame.WarPanel.Teardown();
-                    
+                    this.inputManager.InputHandler.DeselectObject();
+                    this.unityGame.WarPanel.Teardown();
+
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected ActionState: " + result);
@@ -68,9 +67,9 @@ namespace Assets.Scripts.CommandProcessors
             if (tile.HasCity())
             {
                 // Transition state to production
-                unityGame.InputManager.InputHandler.DeselectObject();
-                unityGame.SetProductionMode(ProductionMode.SelectCity);
-                unityGame.ShowProductionPanel(tile.City);
+                this.unityGame.InputManager.InputHandler.DeselectObject();
+                this.unityGame.SetProductionMode(ProductionMode.SelectCity);
+                this.unityGame.ShowProductionPanel(tile.City);
                 this.unityGame.InputManager.SetInputMode(InputMode.UI);
             }
         }
@@ -78,7 +77,7 @@ namespace Assets.Scripts.CommandProcessors
         private void HideWarScene()
         {
             var warGO = UnityUtilities.GameObjectHardFind("War!");
-            warGO.SetActive(false);            
+            warGO.SetActive(false);
         }
     }
 }

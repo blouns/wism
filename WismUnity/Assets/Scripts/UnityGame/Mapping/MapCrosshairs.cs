@@ -1,6 +1,4 @@
-using Assets.Scripts.Tilemaps;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using Wism.Client.Core;
 
 public class MapCrosshairs : MonoBehaviour
@@ -18,7 +16,7 @@ public class MapCrosshairs : MonoBehaviour
     {
         var camera = GetMainCamera();
         var center = camera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, 0f));
-        
+
         var minimapPanelRect = GetMinimapPanelRect();
 
         float newXPercent = center.x / (float)World.Current.Map.GetUpperBound(0);

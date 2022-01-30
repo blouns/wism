@@ -31,13 +31,13 @@ namespace Assets.Scripts.Managers
         }
 
         public void Reset()
-        {           
-            worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
+        {
+            this.worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
 
             // Reset all cities to neutral
             foreach (var city in World.Current.GetCities())
-            {                
+            {
                 SetNeutralCityTile(city.Tile.X, city.Tile.Y);
                 SetNeutralCityTile(city.Tile.X + 1, city.Tile.Y);
                 SetNeutralCityTile(city.Tile.X, city.Tile.Y - 1);
@@ -64,7 +64,7 @@ namespace Assets.Scripts.Managers
             SetRuinsTile(city.Tile.X + 1, city.Tile.Y);
             SetRuinsTile(city.Tile.X, city.Tile.Y - 1);
             SetRuinsTile(city.Tile.X + 1, city.Tile.Y - 1);
-        }        
+        }
 
         public void FixedUpdate()
         {
@@ -83,7 +83,7 @@ namespace Assets.Scripts.Managers
 
         public void DrawCities()
         {
-            worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
+            this.worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
 
             // Draw player-owned cities
@@ -93,26 +93,26 @@ namespace Assets.Scripts.Managers
                 {
                     // Draw city from top-left
                     SetCityTile(city.Tile.X, city.Tile.Y, player.Clan.ShortName);
-                    SetCityTile(city.Tile.X+1, city.Tile.Y, player.Clan.ShortName);
-                    SetCityTile(city.Tile.X, city.Tile.Y-1, player.Clan.ShortName);
-                    SetCityTile(city.Tile.X+1, city.Tile.Y-1, player.Clan.ShortName);
-                }                
+                    SetCityTile(city.Tile.X + 1, city.Tile.Y, player.Clan.ShortName);
+                    SetCityTile(city.Tile.X, city.Tile.Y - 1, player.Clan.ShortName);
+                    SetCityTile(city.Tile.X + 1, city.Tile.Y - 1, player.Clan.ShortName);
+                }
             }
         }
 
         internal void SetCityTile(int x, int y, string clanName)
         {
-            var worldVector = worldTilemap.ConvertGameToUnityVector(x, y);
+            var worldVector = this.worldTilemap.ConvertGameToUnityVector(x, y);
             var cityTile = FindCityTile(clanName);
-            worldTilemap.SetTile(worldVector, cityTile);
-            worldTilemap.RefreshTile(worldVector);            
+            this.worldTilemap.SetTile(worldVector, cityTile);
+            this.worldTilemap.RefreshTile(worldVector);
         }
 
         private void SetNeutralCityTile(int x, int y)
         {
-            var worldVector = worldTilemap.ConvertGameToUnityVector(x, y);
-            worldTilemap.SetTile(worldVector, neutralCityTile);
-            worldTilemap.RefreshTile(worldVector);
+            var worldVector = this.worldTilemap.ConvertGameToUnityVector(x, y);
+            this.worldTilemap.SetTile(worldVector, this.neutralCityTile);
+            this.worldTilemap.RefreshTile(worldVector);
         }
 
         /// <summary>
@@ -122,14 +122,14 @@ namespace Assets.Scripts.Managers
         /// <returns>City matching the clan if found; otherwise Neutral city</returns>
         private CityTile FindCityTile(string clanName)
         {
-            var returnTile = neutralCityTile;
-            
-            for (int i = 0; i < cityTiles.Length; i++)
+            var returnTile = this.neutralCityTile;
+
+            for (int i = 0; i < this.cityTiles.Length; i++)
             {
-                string tileShortName = cityTiles[i].name.ToLowerInvariant();
+                string tileShortName = this.cityTiles[i].name.ToLowerInvariant();
                 if (tileShortName.Contains(clanName.ToLowerInvariant()))
                 {
-                    returnTile = cityTiles[i];
+                    returnTile = this.cityTiles[i];
                     break;
                 }
             }
@@ -139,10 +139,10 @@ namespace Assets.Scripts.Managers
 
         private void SetRuinsTile(int x, int y)
         {
-            var worldVector = worldTilemap.ConvertGameToUnityVector(x, y);
+            var worldVector = this.worldTilemap.ConvertGameToUnityVector(x, y);
             // BUGBUG: This does not work. Image is reset to the original neutral castle instead.
-            worldTilemap.SetTile(worldVector, ScriptableObject.CreateInstance<RuinsTile>());
-            worldTilemap.RefreshTile(worldVector);
+            this.worldTilemap.SetTile(worldVector, ScriptableObject.CreateInstance<RuinsTile>());
+            this.worldTilemap.RefreshTile(worldVector);
         }
     }
 }

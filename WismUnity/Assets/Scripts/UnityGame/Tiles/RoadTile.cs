@@ -52,82 +52,82 @@ namespace Assets.Scripts.Tiles
                 }
             }
 
-            tileData.sprite = roadSprites[RoadTileDefault];
+            tileData.sprite = this.roadSprites[RoadTileDefault];
 
             // 0) East end
             if (composition[1] == 'R' && composition[3] == 'E' && composition[5] == 'E' && composition[7] == 'E')
             {
-                tileData.sprite = roadSprites[0];
+                tileData.sprite = this.roadSprites[0];
             }
             // 1) East-west
             else if (composition[1] == 'R' && composition[3] == 'E' && composition[5] == 'E' && composition[7] == 'R')
             {
-                tileData.sprite = roadSprites[1];
+                tileData.sprite = this.roadSprites[1];
             }
             // 2) North end
             else if (composition[1] == 'E' && composition[3] == 'R' && composition[5] == 'E' && composition[7] == 'E')
             {
-                tileData.sprite = roadSprites[2];
+                tileData.sprite = this.roadSprites[2];
             }
             // 3) North-east corner
             else if (composition[1] == 'E' && composition[3] == 'E' && composition[5] == 'R' && composition[7] == 'R')
             {
-                tileData.sprite = roadSprites[3];
+                tileData.sprite = this.roadSprites[3];
             }
             // 4) North-south
             else if (composition[1] == 'E' && composition[3] == 'R' && composition[5] == 'R' && composition[7] == 'E')
             {
-                tileData.sprite = roadSprites[4];
+                tileData.sprite = this.roadSprites[4];
             }
             // 5) North-west corner
             else if (composition[1] == 'R' && composition[3] == 'E' && composition[5] == 'R' && composition[7] == 'E')
             {
-                tileData.sprite = roadSprites[5];
+                tileData.sprite = this.roadSprites[5];
             }
             // 6) South end
             else if (composition[1] == 'E' && composition[3] == 'E' && composition[5] == 'R' && composition[7] == 'E')
             {
-                tileData.sprite = roadSprites[6];
+                tileData.sprite = this.roadSprites[6];
             }
             // 7) South-east corner
             else if (composition[1] == 'E' && composition[3] == 'R' && composition[5] == 'E' && composition[7] == 'R')
             {
-                tileData.sprite = roadSprites[7];
+                tileData.sprite = this.roadSprites[7];
             }
             // 8) South-west corner
             else if (composition[1] == 'R' && composition[3] == 'R' && composition[5] == 'E' && composition[7] == 'E')
             {
-                tileData.sprite = roadSprites[8];
+                tileData.sprite = this.roadSprites[8];
             }
             // 9) T north-east-south
             else if (composition[1] == 'E' && composition[3] == 'R' && composition[5] == 'R' && composition[7] == 'R')
             {
-                tileData.sprite = roadSprites[9];
+                tileData.sprite = this.roadSprites[9];
             }
             // 10) T north-east-south-west
             else if (composition[1] == 'R' && composition[3] == 'R' && composition[5] == 'R' && composition[7] == 'R')
             {
-                tileData.sprite = roadSprites[10];
+                tileData.sprite = this.roadSprites[10];
             }
             // 11) T west-north-east
             else if (composition[1] == 'R' && composition[3] == 'E' && composition[5] == 'R' && composition[7] == 'R')
             {
-                tileData.sprite = roadSprites[11];
+                tileData.sprite = this.roadSprites[11];
             }
             // 12) T west-north-south
             else if (composition[1] == 'R' && composition[3] == 'R' && composition[5] == 'R' && composition[7] == 'E')
             {
-                tileData.sprite = roadSprites[12];
+                tileData.sprite = this.roadSprites[12];
             }
             // 13) T west-south-east
             else if (composition[1] == 'R' && composition[3] == 'R' && composition[5] == 'E' && composition[7] == 'R')
             {
-                tileData.sprite = roadSprites[13];
+                tileData.sprite = this.roadSprites[13];
             }
             // 14) West end
             else if (composition[1] == 'E' && composition[3] == 'E' && composition[5] == 'E' && composition[7] == 'R')
             {
-                tileData.sprite = roadSprites[14];
+                tileData.sprite = this.roadSprites[14];
             }
         }
 

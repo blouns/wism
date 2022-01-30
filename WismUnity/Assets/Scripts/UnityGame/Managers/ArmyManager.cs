@@ -18,14 +18,14 @@ namespace Assets.Scripts.Managers
         private Dictionary<string, GameObject> armiesByClanMap;
         private FlagManager flagManager;
         private readonly Dictionary<int, ArmyGameObject> armyDictionary = new Dictionary<int, ArmyGameObject>();
-        private UnityManager unityManager;        
+        private UnityManager unityManager;
         private WorldTilemap worldTilemap;
         private InputManager inputManager;
 
-        public Dictionary<int, ArmyGameObject> ArmyDictionary => armyDictionary;
+        public Dictionary<int, ArmyGameObject> ArmyDictionary => this.armyDictionary;
 
-        public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
-        public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
+        public WorldTilemap WorldTilemap { get => this.worldTilemap; set => this.worldTilemap = value; }
+        public UnityManager UnityManager { get => this.unityManager; set => this.unityManager = value; }
 
         private bool isInitialized;
 
@@ -37,7 +37,7 @@ namespace Assets.Scripts.Managers
         public void FixedUpdate()
         {
             if (!IsInitialized())
-            { 
+            {
                 return;
             }
 
@@ -46,25 +46,25 @@ namespace Assets.Scripts.Managers
 
         public void Initialize()
         {
-            if (armiesByClan == null)
+            if (this.armiesByClan == null)
             {
                 throw new InvalidOperationException("Army prefabs have not been mapped in armiesByClan");
             }
 
-            armiesByClanMap = new Dictionary<string, GameObject>();
-            for (int i = 0; i < armiesByClan.count; i++)
+            this.armiesByClanMap = new Dictionary<string, GameObject>();
+            for (int i = 0; i < this.armiesByClan.count; i++)
             {
-                for (int j = 0; j < armiesByClan.rows[i].count; j++)
+                for (int j = 0; j < this.armiesByClan.rows[i].count; j++)
                 {
-                    armiesByClanMap.Add(
-                        armiesByClan.rows[i].name + "_" + armiesByClan.rows[i].rowNames[j],
-                        armiesByClan.rows[i].row[j]);
+                    this.armiesByClanMap.Add(
+                        this.armiesByClan.rows[i].name + "_" + this.armiesByClan.rows[i].rowNames[j],
+                        this.armiesByClan.rows[i].row[j]);
                 }
             }
 
-            this.flagManager = gameObject.GetComponent<FlagManager>();
+            this.flagManager = this.gameObject.GetComponent<FlagManager>();
             this.flagManager.Initialize();
-            this.unityManager = this.GetComponentInParent<UnityManager>();
+            this.unityManager = GetComponentInParent<UnityManager>();
             this.worldTilemap = UnityUtilities.GameObjectHardFind("WorldTilemap")
                 .GetComponent<WorldTilemap>();
             this.inputManager = this.unityManager.GetComponent<InputManager>();
@@ -74,11 +74,11 @@ namespace Assets.Scripts.Managers
 
         public void Reset()
         {
-            foreach (var ago in armyDictionary.Values)
+            foreach (var ago in this.armyDictionary.Values)
             {
                 Destroy(ago.GameObject);
             }
-            this.armyDictionary.Clear();            
+            this.armyDictionary.Clear();
         }
 
         public GameObject FindGameObjectKind(Army army)
@@ -88,7 +88,7 @@ namespace Assets.Scripts.Managers
                 Initialize();
             }
 
-            return armiesByClanMap[$"{army.Clan.ShortName}_{army.ShortName}"];
+            return this.armiesByClanMap[$"{army.Clan.ShortName}_{army.ShortName}"];
         }
 
         public GameObject FindGameObjectKind(Clan clan, ArmyInfo armyInfo)
@@ -98,7 +98,7 @@ namespace Assets.Scripts.Managers
                 Initialize();
             }
 
-            return armiesByClanMap[$"{clan.ShortName}_{armyInfo.ShortName}"];
+            return this.armiesByClanMap[$"{clan.ShortName}_{armyInfo.ShortName}"];
         }
 
         public GameObject Instantiate(Army army, Vector3 worldVector, Transform parent)
@@ -113,26 +113,26 @@ namespace Assets.Scripts.Managers
             armyGO.GetComponent<SpriteRenderer>().sortingOrder = 1;
 
             // Create flag objects for army GameObjects
-            this.flagManager.Instantiate(army.Clan, 1, armyGO.transform);            
+            this.flagManager.Instantiate(army.Clan, 1, armyGO.transform);
 
             return armyGO;
         }
 
         internal bool IsInitialized()
         {
-            return isInitialized;
+            return this.isInitialized;
         }
 
         public void CleanupArmies()
         {
             // Find and cleanup stale game objects
-            var toDelete = new List<int>(ArmyDictionary.Keys);
+            var toDelete = new List<int>(this.ArmyDictionary.Keys);
             foreach (Player player in Game.Current.Players)
             {
                 IList<Army> armies = player.GetArmies();
                 foreach (Army army in armies)
                 {
-                    if (ArmyDictionary.ContainsKey(army.Id))
+                    if (this.ArmyDictionary.ContainsKey(army.Id))
                     {
                         // Found the army so don't remove it
                         toDelete.Remove(army.Id);
@@ -143,8 +143,8 @@ namespace Assets.Scripts.Managers
             // Remove objects missing from the game
             toDelete.ForEach(id =>
             {
-                Destroy(ArmyDictionary[id].GameObject);
-                ArmyDictionary.Remove(id);
+                Destroy(this.ArmyDictionary[id].GameObject);
+                this.ArmyDictionary.Remove(id);
             });
         }
 
@@ -156,17 +156,17 @@ namespace Assets.Scripts.Managers
                 foreach (Army army in player.GetArmies())
                 {
                     // Find or create and set up the GameObject connected to WISM MapObject
-                    if (!ArmyDictionary.ContainsKey(army.Id))
+                    if (!this.ArmyDictionary.ContainsKey(army.Id))
                     {
-                        Vector3 worldVector = WorldTilemap.ConvertGameToUnityVector(army.X, army.Y);
+                        Vector3 worldVector = this.WorldTilemap.ConvertGameToUnityVector(army.X, army.Y);
                         InstantiateArmy(army, worldVector);
                     }
                     else
                     {
-                        ArmyDictionary[army.Id].GameObject.SetActive(false);
+                        this.ArmyDictionary[army.Id].GameObject.SetActive(false);
                     }
                 }
-                
+
                 if (Game.Current.GameState == GameState.MovingArmy ||
                     Game.Current.GameState == GameState.SelectedArmy)
                 {
@@ -180,10 +180,10 @@ namespace Assets.Scripts.Managers
                 {
                     int armyId;
                     // Draw visiting armies over stationed armies
-                    if (tile.HasVisitingArmies() && ArmyDictionary.ContainsKey(tile.VisitingArmies[0].Id))
+                    if (tile.HasVisitingArmies() && this.ArmyDictionary.ContainsKey(tile.VisitingArmies[0].Id))
                     {
                         armyId = tile.VisitingArmies[0].Id;
-                        this.unityManager.SetCameraTarget(ArmyDictionary[armyId].GameObject.transform);
+                        this.unityManager.SetCameraTarget(this.ArmyDictionary[armyId].GameObject.transform);
 
                         // Update the current tile for info panel
                         //var coords = WorldTilemap.ConvertUnityToGameVector(this.selectedArmyBox.transform.position);
@@ -200,7 +200,7 @@ namespace Assets.Scripts.Managers
                     }
 
                     ArmyGameObject ago = this.ArmyDictionary[armyId];
-                    Vector3 vector = WorldTilemap.ConvertGameToUnityVector(ago.Army.X, ago.Army.Y);
+                    Vector3 vector = this.WorldTilemap.ConvertGameToUnityVector(ago.Army.X, ago.Army.Y);
                     ago.GameObject.transform.position = vector;
                     ago.GameObject.SetActive(true);
                     var flagGO = ago.GameObject.GetComponentInChildren<ArmyFlagSize>();
@@ -211,12 +211,12 @@ namespace Assets.Scripts.Managers
 
         internal void InstantiateArmy(Army army, Vector3 worldVector)
         {
-            var armyGO = Instantiate(army, worldVector, WorldTilemap.transform);
+            var armyGO = Instantiate(army, worldVector, this.WorldTilemap.transform);
             armyGO.SetActive(false);
 
             // Add to the instantiated army to dictionary for tracking
             ArmyGameObject ago = new ArmyGameObject(army, armyGO);
-            ArmyDictionary.Add(army.Id, ago);
+            this.ArmyDictionary.Add(army.Id, ago);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Assets.Scripts.CommandProcessors
 
         protected override SceneResult ActionInternal()
         {
-            if (Hero == null)
+            if (this.Hero == null)
             {
                 Notify("You find nothing!");
                 return SceneResult.Failure;

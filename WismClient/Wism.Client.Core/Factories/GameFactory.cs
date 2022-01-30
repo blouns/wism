@@ -5,6 +5,7 @@ using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
+using Wism.Client.Pathing;
 using Wism.Client.War;
 
 namespace Wism.Client.Factories
@@ -25,6 +26,7 @@ namespace Wism.Client.Factories
             Game.Current.WarStrategy = GetWarStrategy(settings.WarStrategy);
             Game.Current.TraversalStrategy = GetTraversalStrategy(settings.TraversalStrategies);
             Game.Current.MovementCoordinator = GetMovementCoordinator(settings.MovementStrategies);
+            Game.Current.PathingStrategy = GetPathingStrategy(settings.PathingStrategy);
             Game.Current.Transition(settings.GameState);
 
             CreatePlayers(settings, Game.Current);
@@ -48,6 +50,7 @@ namespace Wism.Client.Factories
             Game.Current.WarStrategy = GetWarStrategy(snapshot.WarStrategy);
             Game.Current.TraversalStrategy = GetTraversalStrategy(snapshot.TraversalStrategies);
             Game.Current.MovementCoordinator = GetMovementCoordinator(snapshot.MovementStrategies);
+            Game.Current.PathingStrategy = GetPathingStrategy(snapshot.PathingStrategy);
             Game.Current.Transition(snapshot.GameState);
             Game.Current.CurrentPlayerIndex = snapshot.CurrentPlayerIndex;
 
@@ -90,6 +93,23 @@ namespace Wism.Client.Factories
             }
 
             return warStrategy;
+        }
+
+        private static IPathingStrategy GetPathingStrategy(AssemblyEntity entity)
+        {
+            IPathingStrategy strategy;
+
+            try
+            {
+                strategy = CreateObject<IPathingStrategy>(entity);
+            }
+            catch
+            {
+                // Use default to protect against missing or corrupt mods
+                strategy = new DijkstraPathingStrategy();
+            }
+
+            return strategy;
         }
 
         private static ITraversalStrategy GetTraversalStrategy(AssemblyEntity[] traversalEntities)

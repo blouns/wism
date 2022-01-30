@@ -20,7 +20,7 @@ public class SolicitInput : MonoBehaviour
 
     public void Start()
     {
-        this.canvasGroup = gameObject.GetComponent<CanvasGroup>();
+        this.canvasGroup = this.gameObject.GetComponent<CanvasGroup>();
     }
 
     public void Initialize(string message, string defaultInputText)
@@ -34,7 +34,7 @@ public class SolicitInput : MonoBehaviour
         {
             throw new ArgumentNullException(nameof(defaultInputText));
         }
-        
+
         this.OkCancelResult = OkCancel.None;
         this.message.text = message;
         this.inputField.text = defaultInputText;
@@ -42,7 +42,7 @@ public class SolicitInput : MonoBehaviour
         if (String.IsNullOrWhiteSpace(defaultInputText))
         {
             this.okButton.interactable = false;
-        }        
+        }
 
         this.isInitialized = true;
     }
@@ -54,18 +54,18 @@ public class SolicitInput : MonoBehaviour
 
     public void Show()
     {
-        canvasGroup.alpha = 1f;
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
+        this.canvasGroup.alpha = 1f;
+        this.canvasGroup.interactable = true;
+        this.canvasGroup.blocksRaycasts = true;
         EventSystem.current.SetSelectedGameObject(
             this.inputField.gameObject);
     }
 
     public void Hide()
     {
-        canvasGroup.alpha = 0f;
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
+        this.canvasGroup.alpha = 0f;
+        this.canvasGroup.interactable = false;
+        this.canvasGroup.blocksRaycasts = false;
     }
 
     public void Ok()

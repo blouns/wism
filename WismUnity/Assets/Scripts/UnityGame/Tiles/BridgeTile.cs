@@ -60,27 +60,27 @@ namespace Assets.Scripts.Tiles
                 }
             }
 
-            tileData.sprite = bridgeSprites[BridgeTileDefault];
+            tileData.sprite = this.bridgeSprites[BridgeTileDefault];
 
             // 0) Bridge east-west left 
             if (composition[1] == 'R' && composition[3] == 'W' && composition[5] == 'W' && composition[7] == 'B')
             {
-                tileData.sprite = bridgeSprites[0];
+                tileData.sprite = this.bridgeSprites[0];
             }
             // 1) Bridge north-south bottom
             else if (composition[1] == 'W' && composition[3] == 'R' && composition[5] == 'B' && composition[7] == 'W')
             {
-                tileData.sprite = bridgeSprites[1];
+                tileData.sprite = this.bridgeSprites[1];
             }
             // 2) Bridge north-south top
             else if (composition[1] == 'W' && composition[3] == 'B' && composition[5] == 'R' && composition[7] == 'W')
             {
-                tileData.sprite = bridgeSprites[2];
+                tileData.sprite = this.bridgeSprites[2];
             }
             // 3) Bridge east-west right        
             else if (composition[1] == 'B' && composition[3] == 'W' && composition[5] == 'W' && composition[7] == 'R')
             {
-                tileData.sprite = bridgeSprites[3];
+                tileData.sprite = this.bridgeSprites[3];
             }
         }
 

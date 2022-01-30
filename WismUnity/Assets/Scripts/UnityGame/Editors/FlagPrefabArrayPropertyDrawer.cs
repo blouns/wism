@@ -19,12 +19,12 @@ namespace Assets.Scripts.Editors
         {
             EditorGUI.PrefixLabel(position, label);
 
-            clanCount = property.FindPropertyRelative("count").intValue;        
+            this.clanCount = property.FindPropertyRelative("count").intValue;
             Rect newPosition = position;
             newPosition.y += DefaultEntryHeight;
             SerializedProperty data = property.FindPropertyRelative("rows");
 
-            for (int j = 0; j < clanCount; j++)
+            for (int j = 0; j < this.clanCount; j++)
             {
                 // Add clan label
                 newPosition.height = DefaultEntryHeight;
@@ -33,23 +33,23 @@ namespace Assets.Scripts.Editors
                 EditorGUI.LabelField(newPosition, newLabel);
 
                 // Get flag count for this clan
-                flagCount = data.GetArrayElementAtIndex(j).FindPropertyRelative("count").intValue;
+                this.flagCount = data.GetArrayElementAtIndex(j).FindPropertyRelative("count").intValue;
 
                 // Add clan name entry box                                
                 newPosition.width = position.width - ClanLabelWidth;
-                newPosition.x = position.x + ClanLabelWidth;                
+                newPosition.x = position.x + ClanLabelWidth;
                 SerializedProperty name = data.GetArrayElementAtIndex(j).FindPropertyRelative("name");
                 EditorGUI.PropertyField(newPosition, name, GUIContent.none);
 
                 // Display flag game object entry boxes (one per flag kind)
                 SerializedProperty row = data.GetArrayElementAtIndex(j).FindPropertyRelative("row");
                 SerializedProperty rowNames = data.GetArrayElementAtIndex(j).FindPropertyRelative("rowNames");
-                if (row.arraySize != flagCount)
+                if (row.arraySize != this.flagCount)
                 {
-                    row.arraySize = flagCount;
+                    row.arraySize = this.flagCount;
                 }
                 newPosition.y += DefaultEntryHeight;
-                for (int i = 0; i < flagCount; i++)
+                for (int i = 0; i < this.flagCount; i++)
                 {
                     // Add flag-kind name label
                     newLabel = new GUIContent(rowNames.GetArrayElementAtIndex(i).stringValue);
@@ -63,14 +63,14 @@ namespace Assets.Scripts.Editors
 
                 newPosition.x = position.x;
                 newPosition.y += DefaultEntryHeight;
-            }                        
+            }
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return 
-                (DefaultEntryHeight * (clanCount + 1) * 2) + 
-                ((DefaultEntryHeight * (flagCount * 2) * clanCount));
+            return
+                (DefaultEntryHeight * (this.clanCount + 1) * 2) +
+                ((DefaultEntryHeight * (this.flagCount * 2) * this.clanCount));
         }
     }
 }

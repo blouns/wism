@@ -13,8 +13,8 @@ namespace Assets.Scripts.Editors
             var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
 
-            var coords = worldTilemap.ConvertUnityToGameVector(gameObject.transform.position);
-            return new Vector2Int(coords.x, coords.y + 1); 
+            var coords = worldTilemap.ConvertUnityToGameVector(this.gameObject.transform.position);
+            return new Vector2Int(coords.x, coords.y + 1);
         }
 
 #if UNITY_EDITOR

@@ -216,7 +216,7 @@ namespace Wism.Client.Core.Controllers
             IList<Tile> path;
 
             // Calculate the shortest route
-            IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+            IPathingStrategy pathingStrategy = Game.Current.PathingStrategy;
             pathingStrategy.FindShortestRoute(World.Current.Map, armiesToMove, targetTile, out path, out _);
 
             if (path == null || path.Count == 0)

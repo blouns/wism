@@ -2,7 +2,6 @@ using Assets.Scripts.Managers;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using Assets.Tests.PlayMode;
 using NUnit.Framework;
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -36,9 +35,9 @@ public class GameInitializationTests : IPrebuildSetup, IPostBuildCleanup
         };
         UnityManager.SetNewGameSettings(settings);
         SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.LoadScene(scenePath, LoadSceneMode.Additive);
+        SceneManager.LoadScene(this.scenePath, LoadSceneMode.Additive);
 
-        yield return new WaitWhile(() => sceneLoaded == false);
+        yield return new WaitWhile(() => this.sceneLoaded == false);
     }
 
     private UnityPlayerEntity[] GetTestPlayers()
@@ -66,7 +65,7 @@ public class GameInitializationTests : IPrebuildSetup, IPostBuildCleanup
     [UnityTearDown]
     public IEnumerator UnityTearDown()
     {
-        yield return SceneManager.UnloadSceneAsync(scenePath);
+        yield return SceneManager.UnloadSceneAsync(this.scenePath);
     }
 
     public void Cleanup()
