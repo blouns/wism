@@ -1,7 +1,12 @@
 ﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Wism.Client.Core.Armies;
+using Wism.Client.Data;
 using Wism.Client.Entities;
+using Wism.Client.Pathing;
 using Wism.Client.War;
 
 namespace Wism.Client.Test.Common
@@ -16,8 +21,12 @@ namespace Wism.Client.Test.Common
 
             settings.Random = new RandomEntity() { Seed = seed };
             settings.WarStrategy = CreateDefaultWarStrategy();
+            settings.PathingStrategy = CreatePathingStrategy();
+            settings.TraversalStrategies = CreateTraversalStrategies();
+            settings.MovementStrategies = CreateMovementStrategies();
             settings.Players = CreateDefaultPlayers();
             settings.World = CreateWorld(worldName);
+            settings.GameState = Core.GameState.Ready;
 
             return settings;
         }
@@ -70,6 +79,36 @@ namespace Wism.Client.Test.Common
             {
                 AssemblyName = Assembly.GetAssembly(typeof(DefaultWarStrategy)).FullName,
                 TypeName = (typeof(DefaultWarStrategy)).FullName
+            };
+
+            return entity;
+        }
+
+        private static AssemblyEntity[] CreateMovementStrategies()
+        {
+            var movementStrategy = MovementStrategyCoordinator.CreateDefault();
+
+            return GamePersistance.SnapshotMovementStrategies(movementStrategy);
+        }
+
+        private static AssemblyEntity[] CreateTraversalStrategies()
+        {
+            var traversalStrategy = new CompositeTraversalStrategy(new List<ITraversalStrategy>()
+            {
+                new StandardTraversalStrategy(),
+                new HeroFlightTraversalStrategy(),
+                new NavalTraversalStrategy()
+            });
+
+            return GamePersistance.SnapshotTraversalStrategies(traversalStrategy);
+        }
+
+        private static AssemblyEntity CreatePathingStrategy()
+        {
+            var entity = new AssemblyEntity()
+            {
+                AssemblyName = Assembly.GetAssembly(typeof(AStarPathingStrategy)).FullName,
+                TypeName = (typeof(AStarPathingStrategy)).FullName
             };
 
             return entity;

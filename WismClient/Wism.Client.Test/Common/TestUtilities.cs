@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
@@ -162,6 +163,13 @@ namespace Wism.Client.Test.Common
         {
             return ExecuteCommandUntilDone(commandController,
                 new TakeItemsCommand(heroController, hero));
+        }
+
+        public static ActionState DropItems(CommandController commandController, HeroController heroController,
+            Hero hero, List<Artifact> items)
+        {
+            return ExecuteCommandUntilDone(commandController,
+                new DropItemsCommand(heroController, hero, items));
         }
 
         public static ActionState ExecuteCommandUntilDone(CommandController commandController, Command command)

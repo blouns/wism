@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="CommandProviders\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using Wism.Client.Core;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
@@ -83,8 +84,8 @@ namespace Wism.Client.Factories
             {
                 foreach (var locationEntity in snapshot.Locations)
                 {
-                    _ = LocationFactory.Load(locationEntity, world);
-                }
+                    var location = LocationFactory.Load(locationEntity, world);
+                }                
             }
 
             return world;

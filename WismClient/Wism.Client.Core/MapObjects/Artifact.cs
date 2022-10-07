@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Core;
 using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
@@ -28,7 +29,11 @@ namespace Wism.Client.MapObjects
                 throw new ArgumentNullException(nameof(hero));
             }
 
-            hero.Tile.AddItem(this);
+            var tile = hero.Tile;
+            tile.Items.Add(this);
+            
+            // Add for tracking
+            World.Current.AddLooseItem(this, tile);
         }
 
         public void Take(Hero hero)
@@ -47,6 +52,9 @@ namespace Wism.Client.MapObjects
                 }
                 hero.Items.Add(this);
                 hero.Tile.RemoveItem(this);
+
+                // Remove from tracking
+                World.Current.RemoveLooseItem(this, hero.Tile);
             }
         }
 

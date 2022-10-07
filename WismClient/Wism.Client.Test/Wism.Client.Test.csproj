@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -50,6 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Wism.Client.AI\Wism.Client.AI.csproj" />
     <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
     <ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
   </ItemGroup>

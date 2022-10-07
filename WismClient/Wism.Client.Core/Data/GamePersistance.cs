@@ -6,6 +6,7 @@ using Wism.Client.Core.Armies;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Pathing;
 using Wism.Client.War;
 
 namespace Wism.Client.Data
@@ -25,6 +26,7 @@ namespace Wism.Client.Data
                 WarStrategy = SnapshotWarStrategy(game.WarStrategy),
                 MovementStrategies = SnapshotMovementStrategies(game.MovementCoordinator),
                 TraversalStrategies = SnapshotTraversalStrategies(game.TraversalStrategy),
+                PathingStrategy = SnapshotPathingStrategy(game.PathingStrategy),
                 World = SnapshotWorld(World.Current),
                 LastArmyId = ArmyFactory.LastId
             };
@@ -32,7 +34,18 @@ namespace Wism.Client.Data
             return snapshot;
         }
 
-        private static AssemblyEntity[] SnapshotTraversalStrategies(ITraversalStrategy traversalStrategy)
+        private static AssemblyEntity SnapshotPathingStrategy(IPathingStrategy pathingStrategy)
+        {
+            var snapshot = new AssemblyEntity()
+            {
+                AssemblyName = Assembly.GetAssembly(pathingStrategy.GetType()).FullName,
+                TypeName = pathingStrategy.GetType().FullName
+            };
+
+            return snapshot;
+        }
+
+        public static AssemblyEntity[] SnapshotTraversalStrategies(ITraversalStrategy traversalStrategy)
         {
             var compositeStrategy = traversalStrategy as CompositeTraversalStrategy;
             if (compositeStrategy == null)
@@ -53,7 +66,7 @@ namespace Wism.Client.Data
             return snapshot;
         }
 
-        private static AssemblyEntity[] SnapshotMovementStrategies(MovementStrategyCoordinator movementCoordinator)
+        public static AssemblyEntity[] SnapshotMovementStrategies(MovementStrategyCoordinator movementCoordinator)
         {
             var snapshot = new AssemblyEntity[movementCoordinator.Strategies.Count];
             for (int i = 0; i < snapshot.Length; i++)

@@ -246,8 +246,15 @@ namespace Wism.Client.Factories
         /// </remarks>
         private static Random LoadRandom(RandomEntity snapshot)
         {
-            Game.Current.RandomSeed = snapshot.Seed;
-            return snapshot.Random;
+            var random = new Random(snapshot.Seed);
+            //if (snapshot.SeedArray != null)
+            //{
+            //    var seedArrayCopy = (int[])snapshot.SeedArray.Clone();
+            //    var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            //    seedArrayInfo.SetValue(random, seedArrayCopy);
+            //}
+
+            return random;
         }
 
         private static void LoadPlayers(GameEntity snapshot, Game current,
