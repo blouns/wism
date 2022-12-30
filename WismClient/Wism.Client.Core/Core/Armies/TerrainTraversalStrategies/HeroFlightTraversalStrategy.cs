@@ -10,7 +10,7 @@ namespace Wism.Client.Core.Armies
     /// </summary>
     public class HeroFlightTraversalStrategy : ITraversalStrategy
     {
-        public bool CanTraverse(List<Army> armies, Tile tile)
+        public bool CanTraverse(List<Army> armies, Tile tile, bool ignoreClan = false)
         {
             if (armies is null)
             {
@@ -42,7 +42,7 @@ namespace Wism.Client.Core.Armies
                     (flyableCount == armies.Count - heroCount));
         }
 
-        public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile)
+        public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile, bool ignoreClan = false)
         {
             // Must have at least two armies to ride
             return false;

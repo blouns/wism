@@ -93,11 +93,9 @@ namespace Wism.Client.Core.Controllers
             }
 
             // Do we have enough moves?
-            // Note: The MovementSeer accounts for armies riding or in a boat or on a flying creature
-            // TODO: Account for terrain bonuses
-            var armiesWithMovesThatMatter = Game.Current.
-                MovementCoordinator.GetApplicableArmies(armiesToMove, targetTile);
-            if (armiesWithMovesThatMatter.Any(army => army.MovesRemaining < targetTile.Terrain.MovementCost))
+            // Note: The Movement Coordinator accounts for armies riding or in a boat or on a flying creature
+            var armiesWithApplicableMoves = Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armiesToMove, targetTile);
+            if (!Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(armiesWithApplicableMoves, targetTile))
             {
                 this.logger.LogInformation($"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");
                 Game.Current.DeselectArmies();

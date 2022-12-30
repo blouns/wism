@@ -91,6 +91,7 @@ namespace Wism.Client.Pathing.External
         private double                          mCompletedTime          = 0;
         private bool                            mDebugProgress          = false;
         private bool                            mDebugFoundPath         = false;
+        private bool                            mIgnoreClan             = false;
         #endregion
 
         #region Constructors
@@ -174,6 +175,12 @@ namespace Wism.Client.Pathing.External
             get { return mDebugFoundPath; }
             set { mDebugFoundPath = value; }
         }
+
+        public bool IgnoreClan
+        {
+            get { return mIgnoreClan; }
+            set { mIgnoreClan = value; }
+        }
         #endregion
 
         #region Methods
@@ -253,7 +260,7 @@ namespace Wism.Client.Pathing.External
                         continue;
 
                     // Is this traversable?
-                    if (!mGrid[newX, newY].CanTraverseHere(mArmiesToMove))
+                    if (!mGrid[newX, newY].CanTraverseHere(mArmiesToMove, mIgnoreClan))
                         continue;
 
                     newNode.Value = mGrid[newX, newY];

@@ -308,20 +308,22 @@ namespace Wism.Client.Core
         /// Check if the given armies can move onto this tile
         /// </summary>
         /// <param name="armies">Armies to test</param>
+        /// <param name="ignoreClan">Should include clan check?</param>
         /// <returns>True if the armies can move here; otherwise, false</returns>
-        public bool CanTraverseHere(List<Army> armies)
+        public bool CanTraverseHere(List<Army> armies, bool ignoreClan = false)
         {
-            return Game.Current.TraversalStrategy.CanTraverse(armies, this);
+            return Game.Current.TraversalStrategy.CanTraverse(armies, this, ignoreClan);
         }
 
         /// <summary>
         /// Check if the given army can move onto this tile
         /// </summary>
         /// <param name="army">Army to test</param>
+        /// <param name="ignoreClan">Should include clan check?</param>
         /// <returns>True if the army can move here; otherwise, false</returns>
-        public bool CanTraverseHere(Army army)
+        public bool CanTraverseHere(Army army, bool ignoreClan = false)
         {
-            return CanTraverseHere(new List<Army>() { army });
+            return CanTraverseHere(new List<Army>() { army }, ignoreClan);
         }
 
         /// <summary>

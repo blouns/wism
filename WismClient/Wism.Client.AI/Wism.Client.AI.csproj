@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="CommandProviders\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
   </ItemGroup>
 

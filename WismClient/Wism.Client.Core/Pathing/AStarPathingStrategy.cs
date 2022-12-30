@@ -16,13 +16,17 @@ namespace Wism.Client.Pathing
     /// </remarks>
     public class AStarPathingStrategy : IPathingStrategy
     {
-        public void FindShortestRoute(Tile[,] map, List<Army> armies, Tile target, out IList<Tile> fastestRoute, out float distance)
+        public void FindShortestRoute(Tile[,] map, List<Army> armies, Tile target, out IList<Tile> fastestRoute, out float distance, bool ignoreClan = false)
         {
             fastestRoute = null;
             distance = 0f;
             
             var start = armies[0].Tile;
-            var pathFinder = new PathFinder(map, armies);            
+            var pathFinder = new PathFinder(map, armies); 
+            if (ignoreClan)
+            {
+                pathFinder.IgnoreClan = true;
+            }
             var pathNodes = pathFinder.FindPath(start, target);
 
             ConvertToTilePath(map, armies, pathNodes, ref fastestRoute, ref distance);

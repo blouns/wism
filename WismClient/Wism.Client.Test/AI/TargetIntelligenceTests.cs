@@ -1,9 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using Wism.Client.AI.ResourceAssignment;
+using Wism.Client.AI.Task;
 using Wism.Client.Core;
-using Wism.Client.Core.Heros;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Test.Common;
@@ -11,7 +10,7 @@ using Wism.Client.Test.Common;
 namespace Wism.Client.Test.AI
 {
     [TestFixture]
-    public class ObjectDetectorTests
+    public class TargetIntelligenceTests
     {
         [OneTimeSetUp]
         public void OneTimeSetup()
@@ -47,10 +46,10 @@ namespace Wism.Client.Test.AI
             var lordBaneHero1 = new List<Army>(tile3.Armies);
             var lordBaneHero2 = new List<Army>(tile4.Armies);
 
-            var detector = new ObjectDetector(World.Current);
+            var detector = new TargetIntelligence(World.Current);
 
             // Act
-            var taskableObjects = detector.FindTaskableObjects(lordBane);
+            var taskableObjects = detector.FindTargetObjects(lordBane);
 
             // Assert
             Assert.NotNull(taskableObjects.OpposingArmies, "Should have found at least one army.");
@@ -86,10 +85,10 @@ namespace Wism.Client.Test.AI
             var lordBaneHero1 = new List<Army>(tile3.Armies);
             var lordBaneHero2 = new List<Army>(tile4.Armies);
 
-            var detector = new ObjectDetector(World.Current);
+            var detector = new TargetIntelligence(World.Current);
 
             // Act
-            var taskableObjects = detector.FindTaskableObjects(lordBane);
+            var taskableObjects = detector.FindTargetObjects(lordBane);
 
             // Assert
             Assert.NotNull(taskableObjects.OpposingArmies, "Armies should be an empty list.");
@@ -98,7 +97,7 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
-        public void FindAllCitiesTest_Found()
+        public void FindOpposingCitiesTest_Found()
         {
             // Assemble
             var commandController = TestUtilities.CreateCommandController();
@@ -110,15 +109,42 @@ namespace Wism.Client.Test.AI
             // Initial Lord Bane setup
             Player lordBane = Game.Current.Players[1];
 
-            var detector = new ObjectDetector(World.Current);
+            var detector = new TargetIntelligence(World.Current);
 
             // Act
-            var taskableObjects = detector.FindTaskableObjects(lordBane);
+            var targets = detector.FindTargetObjects(lordBane);
 
-            // Assert
-            Assert.NotNull(taskableObjects.AllCities, "Should be a valid list.");
-            Assert.AreEqual(3, taskableObjects.AllCities.Count, "Did not find expected number of cities.");
+            // Assert            
+            Assert.NotNull(targets.OpposingCities, "Should be a valid list.");
+            Assert.AreEqual(1, targets.OpposingCities.Count, "Did not find expected number of cities.");
+            var expectedCity = targets.OpposingCities[0];
+            Assert.AreEqual("Marthos", expectedCity.ShortName, "Did not find expected city.");
 
+        }
+
+        [Test]
+        public void FindNeutralCitiesTest_Found()
+        {
+            // Assemble
+            var commandController = TestUtilities.CreateCommandController();
+            var gameController = TestUtilities.CreateGameController();
+
+            TestUtilities.NewGame(commandController, gameController, TestUtilities.DefaultTestWorld);
+            Game.Current.IgnoreGameOver = true;
+
+            // Initial Lord Bane setup
+            Player lordBane = Game.Current.Players[1];
+
+            var detector = new TargetIntelligence(World.Current);
+
+            // Act
+            var taskableObjects = detector.FindTargetObjects(lordBane);
+
+            // Assert            
+            Assert.NotNull(taskableObjects.OpposingCities, "Should be a valid list.");            
+            Assert.AreEqual(1, taskableObjects.OpposingCities.Count, "Did not find expected number of cities.");
+            var expectedCity = taskableObjects.NeutralCities[0];
+            Assert.AreEqual("Deserton", expectedCity.ShortName, "Did not find expected city.");
         }
 
         [Test]
@@ -134,10 +160,10 @@ namespace Wism.Client.Test.AI
             // Initial Lord Bane setup
             Player lordBane = Game.Current.Players[1];
 
-            var detector = new ObjectDetector(World.Current);
+            var detector = new TargetIntelligence(World.Current);
 
             // Act
-            var taskableObjects = detector.FindTaskableObjects(lordBane);
+            var taskableObjects = detector.FindTargetObjects(lordBane);
 
             // Assert
             Assert.NotNull(taskableObjects.UnsearchedLocations, "Should be a valid list.");
@@ -162,14 +188,14 @@ namespace Wism.Client.Test.AI
             sirians.HireHero(tile1);
             var siriansHero1 = new List<Army>(tile1.Armies);
 
-            var detector = new ObjectDetector(World.Current);
+            var detector = new TargetIntelligence(World.Current);
 
             // Search one location
             TestUtilities.Select(commandController, armyController, siriansHero1);
             TestUtilities.SearchRuins(commandController, locationController, siriansHero1);
 
             // Act
-            var taskableObjects = detector.FindTaskableObjects(sirians);
+            var taskableObjects = detector.FindTargetObjects(sirians);
 
             // Assert
             Assert.NotNull(taskableObjects.UnsearchedLocations, "Should be a valid list.");
@@ -202,7 +228,7 @@ namespace Wism.Client.Test.AI
             sirians.HireHero(tile3);
             var siriansHero3 = new List<Army>(tile3.Armies);
 
-            var detector = new ObjectDetector(World.Current);
+            var detector = new TargetIntelligence(World.Current);
 
             // Search one location
             TestUtilities.Select(commandController, armyController, siriansHero1);
@@ -213,7 +239,7 @@ namespace Wism.Client.Test.AI
             TestUtilities.SearchTemple(commandController, locationController, siriansHero3);
 
             // Act
-            var taskableObjects = detector.FindTaskableObjects(sirians);
+            var taskableObjects = detector.FindTargetObjects(sirians);
 
             // Assert
             Assert.NotNull(taskableObjects.UnsearchedLocations, "Should be a valid list.");
@@ -241,10 +267,10 @@ namespace Wism.Client.Test.AI
             tile1.AddItem(item);
             World.Current.AddLooseItem(item, tile1);
 
-            var detector = new ObjectDetector(World.Current);
+            var detector = new TargetIntelligence(World.Current);
 
             // Act
-            var taskableObjects = detector.FindTaskableObjects(sirians);
+            var taskableObjects = detector.FindTargetObjects(sirians);
 
             // Assert
             Assert.NotNull(taskableObjects.LooseItems, "Should be a valid list.");
@@ -267,10 +293,10 @@ namespace Wism.Client.Test.AI
             var hero = sirians.HireHero(tile1);
             var siriansHero1 = new List<Army>(tile1.Armies);
 
-            var detector = new ObjectDetector(World.Current);
+            var detector = new TargetIntelligence(World.Current);
 
             // Act
-            var taskableObjects = detector.FindTaskableObjects(sirians);
+            var taskableObjects = detector.FindTargetObjects(sirians);
 
             // Assert
             Assert.NotNull(taskableObjects.LooseItems, "Should be a valid list.");
