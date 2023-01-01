@@ -1,139 +1,139 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Json;
-using Wism.Client.Core;
-using Wism.Client.MapObjects;
+using NUnit.Framework;
 using Wism.Client.Modules;
 
-namespace Wism.Client.Test.Unit
+namespace Wism.Client.Test.Unit;
+
+[TestFixture]
+public class ModFactoryTest
 {
-    [TestFixture]
-    public class ModFactoryTest
+    [OneTimeSetUp]
+    public void OneTimeSetup()
     {
-        #region Test constants
+        Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+    }
 
-        public const string TestModPath = @"mod";
+    [OneTimeTearDown]
+    public void Cleanup()
+    {
+        this.CleanupTestFiles();
+    }
 
-        private const string clanFileName = "Clan_Template.json";
-        private const string unitFileName = "Army_Template.json";
-        private const string terrainFileName = "Terrain_Template.json";
+    public const string TestModPath = @"mod";
 
-        #endregion
+    private const string clanFileName = "Clan_Template.json";
+    private const string unitFileName = "Army_Template.json";
+    private const string terrainFileName = "Terrain_Template.json";
 
-        [OneTimeSetUp]
-        public void OneTimeSetup()
+    [Test]
+    public void WriteTemplatesTest()
+    {
+        this.CleanupTestFiles();
+
+        var clanInfo = new ClanInfo();
+        var unitInfo = new ArmyInfo();
+        var terrainInfo = new TerrainInfo();
+
+        SerializeType(clanFileName, clanInfo);
+        SerializeType(unitFileName, unitInfo);
+        SerializeType(terrainFileName, terrainInfo);
+
+        if (!File.Exists(clanFileName) ||
+            !File.Exists(unitFileName) ||
+            !File.Exists(terrainFileName))
         {
-            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+            Assert.Fail("Templates not written as expected.");
         }
+    }
 
-        [Test]
-        public void WriteTemplatesTest()
+    [Test]
+    public void LoadClansTest()
+    {
+        var foundOrcs = false;
+        var clans = ModFactory.LoadClans(TestModPath);
+        foreach (var clan in clans)
         {
-            CleanupTestFiles();
-
-            ClanInfo clanInfo = new ClanInfo();
-            ArmyInfo unitInfo = new ArmyInfo();
-            TerrainInfo terrainInfo = new TerrainInfo();
-
-            SerializeType(clanFileName, clanInfo);
-            SerializeType(unitFileName, unitInfo);
-            SerializeType(terrainFileName, terrainInfo);
-
-            if (!File.Exists(clanFileName) ||
-                !File.Exists(unitFileName) ||
-                !File.Exists(terrainFileName))
+            TestContext.WriteLine("Clan: {0}", clan);
+            if (clan.DisplayName == "Orcs of Kor")
             {
-                Assert.Fail("Templates not written as expected.");
+                foundOrcs = true;
+                Assert.AreEqual(1, clan.GetTerrainModifier("Marsh"));
+                Assert.AreEqual(-1, clan.GetTerrainModifier("Forest"));
+                Assert.AreEqual(0, clan.GetTerrainModifier("Grass"));
+                Assert.AreEqual(0, clan.GetTerrainModifier("Hill"));
+                Assert.AreEqual(0, clan.GetTerrainModifier("OuterSpace"));
             }
         }
 
-        [Test]
-        public void LoadClansTest()
+        Assert.IsTrue(foundOrcs);
+    }
+
+
+    [Test]
+    public void LoadArmysTest()
+    {
+        var foundHero = false;
+        var units = ModFactory.LoadArmies(TestModPath);
+
+        foreach (var unit in units)
         {
-            bool foundOrcs = false;
-            IList<Clan> clans = ModFactory.LoadClans(TestModPath);
-            foreach (Clan clan in clans)
+            TestContext.WriteLine("Army: {0}", unit);
+            if (unit.ShortName == "Hero")
             {
-                TestContext.WriteLine("Clan: {0}", clan);
-                if (clan.DisplayName == "Orcs of Kor")
-                {
-                    foundOrcs = true;
-                    Assert.AreEqual(1, clan.GetTerrainModifier("Marsh"));
-                    Assert.AreEqual(-1, clan.GetTerrainModifier("Forest"));
-                    Assert.AreEqual(0, clan.GetTerrainModifier("Grass"));
-                    Assert.AreEqual(0, clan.GetTerrainModifier("Hill"));
-                    Assert.AreEqual(0, clan.GetTerrainModifier("OuterSpace"));
-                }
+                foundHero = true;
             }
-
-            Assert.IsTrue(foundOrcs);
         }
 
+        Assert.IsTrue(foundHero);
+    }
 
-        [Test]
-        public void LoadArmysTest()
+    [Test]
+    public void LoadTerrainTest()
+    {
+        var foundMeadow = false;
+        var terrains = ModFactory.LoadTerrains(TestModPath);
+        foreach (var terrain in terrains)
         {
-            bool foundHero = false;
-            IList<Army> units = ModFactory.LoadArmies(TestModPath);
-
-            foreach (Army unit in units)
+            TestContext.WriteLine("Terrain: {0}", terrain);
+            if (terrain.DisplayName == "Grass")
             {
-                TestContext.WriteLine("Army: {0}", unit);
-                if (unit.ShortName == "Hero")
-                    foundHero = true;
+                foundMeadow = true;
             }
-
-            Assert.IsTrue(foundHero);
         }
 
-        [Test]
-        public void LoadTerrainTest()
+        Assert.IsTrue(foundMeadow);
+    }
+
+    private void CleanupTestFiles()
+    {
+        if (File.Exists(clanFileName))
         {
-            bool foundMeadow = false;
-            IList<Terrain> terrains = ModFactory.LoadTerrains(TestModPath);
-            foreach (Terrain terrain in terrains)
-            {
-                TestContext.WriteLine("Terrain: {0}", terrain);
-                if (terrain.DisplayName == "Grass")
-                    foundMeadow = true;
-            }
-
-            Assert.IsTrue(foundMeadow);
+            File.Delete(clanFileName);
         }
 
-        [OneTimeTearDown]
-        public void Cleanup()
+        if (File.Exists(unitFileName))
         {
-            CleanupTestFiles();
+            File.Delete(unitFileName);
         }
 
-        #region Utility methods        
-        private void CleanupTestFiles()
+        if (File.Exists(terrainFileName))
         {
-            if (File.Exists(clanFileName))
-                File.Delete(clanFileName);
-            if (File.Exists(unitFileName))
-                File.Delete(unitFileName);
-            if (File.Exists(terrainFileName))
-                File.Delete(terrainFileName);
+            File.Delete(terrainFileName);
         }
+    }
 
-        private static void SerializeType(string fileName, object obj)
-        {
-            MemoryStream stream = new MemoryStream();
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
-            serializer.WriteObject(stream, obj);
+    private static void SerializeType(string fileName, object obj)
+    {
+        var stream = new MemoryStream();
+        var serializer = new DataContractJsonSerializer(obj.GetType());
+        serializer.WriteObject(stream, obj);
 
-            TestContext.WriteLine("Writing: {0}", fileName);
+        TestContext.WriteLine("Writing: {0}", fileName);
 
-            stream.Position = 0;
-            StreamReader sr = new StreamReader(stream);
-            File.WriteAllText(fileName, sr.ReadToEnd());
-        }
-
-        #endregion
-
+        stream.Position = 0;
+        var sr = new StreamReader(stream);
+        File.WriteAllText(fileName, sr.ReadToEnd());
     }
 }

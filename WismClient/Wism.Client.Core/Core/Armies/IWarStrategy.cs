@@ -7,7 +7,7 @@ namespace Wism.Client.War
     public interface IWarStrategy
     {
         /// <summary>
-        /// Combat strategy for attacking a given tile with a unit (entire stack)
+        ///     Combat strategy for attacking a given tile with a unit (entire stack)
         /// </summary>
         /// <param name="attackers">Armies attacking</param>
         /// <param name="tile">Tile being defended</param>
@@ -15,7 +15,7 @@ namespace Wism.Client.War
         bool Attack(List<Army> attackers, Tile tile);
 
         /// <summary>
-        /// Combat strategy for attacking a given tile with an army (one army in stack)
+        ///     Combat strategy for attacking a given tile with an army (one army in stack)
         /// </summary>
         /// <param name="attacker">Armies attacking</param>
         /// <param name="tile">Tile being defended</param>
@@ -23,7 +23,7 @@ namespace Wism.Client.War
         bool AttackOnce(List<Army> attackers, Tile tile);
 
         /// <summary>
-        /// Combat strategy for attacking a given tile with an army (one army in stack)
+        ///     Combat strategy for attacking a given tile with an army (one army in stack)
         /// </summary>
         /// <param name="attacker">Armies attacking</param>
         /// <param name="tile">Tile being defended</param>
@@ -32,7 +32,7 @@ namespace Wism.Client.War
         bool AttackOnce(List<Army> attackers, Tile tile, out bool wasSuccessful);
 
         /// <summary>
-        /// Test if the battle is still in progress or completed.
+        ///     Test if the battle is still in progress or completed.
         /// </summary>
         /// <param name="defenders">Defenders currently battling</param>
         /// <param name="attacker">Attackers currently battling</param>

@@ -1,137 +1,134 @@
-﻿using NUnit.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Test.Common;
 
-namespace Wism.Client.Test.Controller
+namespace Wism.Client.Test.Controller;
+
+[TestFixture]
+public class LocationControllerTests
 {
-    [TestFixture]
-    public class LocationControllerTests
+    [Test]
+    public void SearchTemple_HeroUnexplored()
     {
-        [Test]
-        public void SearchTemple_HeroUnexplored()
-        {
-            // Assemble
-            LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
-            Player player1 = Game.Current.Players[0];
-            Location location = MapBuilder.FindLocation("TempleDog");
-            Tile tile = World.Current.Map[1, 1];
-            World.Current.AddLocation(location, tile);
-            Army army = player1.HireHero(tile);
-            List<Army> armies = new List<Army>() { army };
+        // Assemble
+        var locationController = TestUtilities.CreateLocationController();
+        Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+        var player1 = Game.Current.Players[0];
+        var location = MapBuilder.FindLocation("TempleDog");
+        var tile = World.Current.Map[1, 1];
+        World.Current.AddLocation(location, tile);
+        Army army = player1.HireHero(tile);
+        var armies = new List<Army> { army };
 
-            // Act
-            var result = locationController.SearchTemple(armies, location, out int armiesBlessed);
+        // Act
+        var result = locationController.SearchTemple(armies, location, out var armiesBlessed);
 
-            // Assert
-            Assert.IsTrue(result);
-            Assert.IsTrue(location.Searched);
-            Assert.AreEqual(1, armiesBlessed);
-        }
+        // Assert
+        Assert.IsTrue(result);
+        Assert.IsTrue(location.Searched);
+        Assert.AreEqual(1, armiesBlessed);
+    }
 
-        [Test]
-        public void SearchSage_HeroUnexplored()
-        {
-            // Assemble
-            LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
-            Player player1 = Game.Current.Players[0];
-            Location location = MapBuilder.FindLocation("SagesHut");
-            Tile tile = World.Current.Map[1, 1];
-            World.Current.AddLocation(location, tile);
-            Army army = player1.HireHero(tile);
-            List<Army> armies = new List<Army>() { army };
-            int initialGold = player1.Gold;
+    [Test]
+    public void SearchSage_HeroUnexplored()
+    {
+        // Assemble
+        var locationController = TestUtilities.CreateLocationController();
+        Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+        var player1 = Game.Current.Players[0];
+        var location = MapBuilder.FindLocation("SagesHut");
+        var tile = World.Current.Map[1, 1];
+        World.Current.AddLocation(location, tile);
+        Army army = player1.HireHero(tile);
+        var armies = new List<Army> { army };
+        var initialGold = player1.Gold;
 
-            // Act
-            var success = locationController.SearchSage(armies, location, out int gold);
+        // Act
+        var success = locationController.SearchSage(armies, location, out var gold);
 
-            // Assert
-            Assert.IsTrue(success);
-            Assert.AreEqual(player1.Gold, gold + initialGold);
-            Assert.IsTrue(player1.Gold > initialGold);
-            Assert.IsTrue(location.Searched);
-        }
+        // Assert
+        Assert.IsTrue(success);
+        Assert.AreEqual(player1.Gold, gold + initialGold);
+        Assert.IsTrue(player1.Gold > initialGold);
+        Assert.IsTrue(location.Searched);
+    }
 
-        [Test]
-        public void SearchLibrary_Unexplored()
-        {
-            // Assemble
-            LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
-            Player player1 = Game.Current.Players[0];
-            Location location = MapBuilder.FindLocation("Suzzallo");
-            Tile tile = World.Current.Map[1, 1];
-            World.Current.AddLocation(location, tile);
-            Army army = player1.HireHero(tile);
-            List<Army> armies = new List<Army>() { army };
-            string expectedKnowledge = "Lord Lowenbrau will return!";
+    [Test]
+    public void SearchLibrary_Unexplored()
+    {
+        // Assemble
+        var locationController = TestUtilities.CreateLocationController();
+        Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+        var player1 = Game.Current.Players[0];
+        var location = MapBuilder.FindLocation("Suzzallo");
+        var tile = World.Current.Map[1, 1];
+        World.Current.AddLocation(location, tile);
+        Army army = player1.HireHero(tile);
+        var armies = new List<Army> { army };
+        var expectedKnowledge = "Lord Lowenbrau will return!";
 
-            // Act
-            var success = locationController.SearchLibrary(armies, location, out string knowledge);
+        // Act
+        var success = locationController.SearchLibrary(armies, location, out var knowledge);
 
-            // Assert
-            Assert.IsTrue(success);
-            Assert.AreEqual(expectedKnowledge, knowledge);
-            Assert.IsTrue(location.Searched);
-        }
+        // Assert
+        Assert.IsTrue(success);
+        Assert.AreEqual(expectedKnowledge, knowledge);
+        Assert.IsTrue(location.Searched);
+    }
 
-        [Test]
-        public void SearchTomb_Unexplored()
-        {
-            // Assemble
-            LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
-            Player player1 = Game.Current.Players[0];
-            Location location = MapBuilder.FindLocation("CryptKeeper");
-            Tile tile = World.Current.Map[1, 1];
-            World.Current.AddLocation(location, tile);
-            TestUtilities.AllocateBoons();
-            Army army = player1.HireHero(tile);
-            List<Army> armies = new List<Army>() { army };
-            Game.Current.SelectArmies(armies);
+    [Test]
+    public void SearchTomb_Unexplored()
+    {
+        // Assemble
+        var locationController = TestUtilities.CreateLocationController();
+        Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+        var player1 = Game.Current.Players[0];
+        var location = MapBuilder.FindLocation("CryptKeeper");
+        var tile = World.Current.Map[1, 1];
+        World.Current.AddLocation(location, tile);
+        TestUtilities.AllocateBoons();
+        Army army = player1.HireHero(tile);
+        var armies = new List<Army> { army };
+        Game.Current.SelectArmies(armies);
 
-            // Act
-            var success = locationController.SearchTomb(armies, location, out IBoon boon);
+        // Act
+        var success = locationController.SearchTomb(armies, location, out var boon);
 
-            // Assert
-            Assert.IsTrue(success);
-            Assert.IsNotNull(boon);
-            Assert.IsTrue(location.Searched);
-            Assert.IsFalse(location.HasMonster());
-            Assert.IsFalse(location.HasBoon());
-        }
+        // Assert
+        Assert.IsTrue(success);
+        Assert.IsNotNull(boon);
+        Assert.IsTrue(location.Searched);
+        Assert.IsFalse(location.HasMonster());
+        Assert.IsFalse(location.HasBoon());
+    }
 
-        [Test]
-        public void SearchSage_HeroExplored()
-        {
-            // Assemble
-            LocationController locationController = TestUtilities.CreateLocationController();
-            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
-            Player player1 = Game.Current.Players[0];
-            Location location = MapBuilder.FindLocation("SagesHut");
-            Tile tile = World.Current.Map[1, 1];
-            World.Current.AddLocation(location, tile);
-            Army army = player1.HireHero(tile);
-            List<Army> armies = new List<Army>() { army };
-            var success = locationController.SearchSage(armies, location, out int gold);
-            Assert.IsTrue(success);
-            int expectedGold = player1.Gold;
+    [Test]
+    public void SearchSage_HeroExplored()
+    {
+        // Assemble
+        var locationController = TestUtilities.CreateLocationController();
+        Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+        var player1 = Game.Current.Players[0];
+        var location = MapBuilder.FindLocation("SagesHut");
+        var tile = World.Current.Map[1, 1];
+        World.Current.AddLocation(location, tile);
+        Army army = player1.HireHero(tile);
+        var armies = new List<Army> { army };
+        var success = locationController.SearchSage(armies, location, out var gold);
+        Assert.IsTrue(success);
+        var expectedGold = player1.Gold;
 
-            // Act
-            success = locationController.SearchSage(armies, location, out gold);
+        // Act
+        success = locationController.SearchSage(armies, location, out gold);
 
-            // Assert
-            // Sage can always be searched
-            Assert.IsTrue(success);
-            Assert.AreEqual(0, gold);
-            Assert.AreEqual(expectedGold, player1.Gold);
-            Assert.IsTrue(location.Searched);
-        }
-
+        // Assert
+        // Sage can always be searched
+        Assert.IsTrue(success);
+        Assert.AreEqual(0, gold);
+        Assert.AreEqual(expectedGold, player1.Gold);
+        Assert.IsTrue(location.Searched);
     }
 }

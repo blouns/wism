@@ -6,13 +6,12 @@ namespace Wism.Client.MapObjects
     public class SearchRuins : ISearchable
     {
         private const float oddsToDefeatMonster = 0.9f;
-        private static readonly SearchRuins instance = new SearchRuins();
-
-        public static SearchRuins Instance => instance;
 
         private SearchRuins()
         {
         }
+
+        public static SearchRuins Instance { get; } = new SearchRuins();
 
         public bool CanSearchKind(string kind)
         {
@@ -22,7 +21,7 @@ namespace Wism.Client.MapObjects
         public bool Search(List<Army> armies, Location location, out object result)
         {
             result = null;
-            Army hero = armies.Find(a =>
+            var hero = armies.Find(a =>
                 a is Hero &&
                 a.Tile == location.Tile &&
                 a.MovesRemaining > 0);
@@ -35,7 +34,7 @@ namespace Wism.Client.MapObjects
             if (!location.Searched)
             {
                 if (location.HasMonster() &&
-                   !DefeatedMonster())
+                    !this.DefeatedMonster())
                 {
                     // Hero was slain!
                     hero.Player.KillArmy(hero);
@@ -55,12 +54,12 @@ namespace Wism.Client.MapObjects
         }
 
         /// <summary>
-        /// Fights the monster inhabiting the location
+        ///     Fights the monster inhabiting the location
         /// </summary>
         /// <returns>True if monster is defeated; otherwise False</returns>
         private bool DefeatedMonster()
         {
-            return (Game.Current.Random.Next(0, 10) / 10) < oddsToDefeatMonster;
+            return Game.Current.Random.Next(0, 10) / 10 < oddsToDefeatMonster;
         }
     }
 }

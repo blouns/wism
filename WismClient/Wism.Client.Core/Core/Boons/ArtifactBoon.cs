@@ -11,9 +11,9 @@ namespace Wism.Client.Core
             this.Artifact = artifact ?? throw new ArgumentNullException(nameof(artifact));
         }
 
-        public bool IsDefended => true;
-
         public Artifact Artifact { get; }
+
+        public bool IsDefended => true;
 
         public object Result { get; set; }
 

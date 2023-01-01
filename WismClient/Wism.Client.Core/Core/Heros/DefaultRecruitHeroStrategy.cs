@@ -6,28 +6,28 @@ using Wism.Client.Modules;
 namespace Wism.Client.Core.Heros
 {
     /// <summary>
-    /// Default hero recruitment strategy based on number of current heros
-    /// and how long it's been since the last hero was hired. The first hero 
-    /// is free!
+    ///     Default hero recruitment strategy based on number of current heros
+    ///     and how long it's been since the last hero was hired. The first hero
+    ///     is free!
     /// </summary>
     public class DefaultRecruitHeroStrategy : IRecruitHeroStrategy
     {
         private const double BringAlliesChance = 0.5;
         private const int MinAllies = 1;
         private const int MaxAllies = 3;
-
-        private IList<string> heroNames;
         private int heroNameIndex;
 
+        private IList<string> heroNames;
+
         /// <summary>
-        /// Gets the hero's allies if they come with any.
+        ///     Gets the hero's allies if they come with any.
         /// </summary>
         /// <param name="player">Player looking for a hero</param>
         /// <returns>List of new army kinds or an empty list</returns>
         /// <remarks>
-        /// Not all heros will come with allies. This strategy will select 
-        /// a special army kind and random number of allies to join the 
-        /// hero.
+        ///     Not all heros will come with allies. This strategy will select
+        ///     a special army kind and random number of allies to join the
+        ///     hero.
         /// </remarks>
         public List<ArmyInfo> GetAllies(Player player)
         {
@@ -57,7 +57,10 @@ namespace Wism.Client.Core.Heros
                     // Add up to MaxAllies of the chosen armies
                     var allyCount = Game.Current.Random.Next(MinAllies, MaxAllies);
 
-                    for (var i = 0; i < allyCount; i++) allies.Add(specialArmyKinds[specialIndex]);
+                    for (var i = 0; i < allyCount; i++)
+                    {
+                        allies.Add(specialArmyKinds[specialIndex]);
+                    }
                 }
             }
 
@@ -65,7 +68,7 @@ namespace Wism.Client.Core.Heros
         }
 
         /// <summary>
-        /// Gets a random hero name.
+        ///     Gets a random hero name.
         /// </summary>
         /// <returns>Hero name</returns>
         public string GetHeroName()
@@ -73,7 +76,7 @@ namespace Wism.Client.Core.Heros
             if (this.heroNames == null)
             {
                 var path = ModFactory.ModPath + "\\" + ModFactory.HeroPath;
-                this.heroNames = RandomizeList<string>(
+                this.heroNames = RandomizeList(
                     Game.Current.Random,
                     ModFactory.LoadHeroNames(path));
             }
@@ -89,30 +92,9 @@ namespace Wism.Client.Core.Heros
             return name;
         }
 
-        private static IList<T> RandomizeList<T>(Random r, IEnumerable<T> source)
-        {
-            var list = new List<T>();
-            foreach (var item in source)
-            {
-                var i = r.Next(list.Count + 1);
-                if (i == list.Count)
-                {
-                    list.Add(item);
-                }
-                else
-                {
-                    var temp = list[i];
-                    list[i] = item;
-                    list.Add(temp);
-                }
-            }
-
-            return list;
-        }
-
         /// <summary>
-        /// Gets a random hero price between <c>Hero.MinGoldToHire</c> 
-        /// and <c>Hero.MaxGoldToHire</c>.
+        ///     Gets a random hero price between <c>Hero.MinGoldToHire</c>
+        ///     and <c>Hero.MaxGoldToHire</c>.
         /// </summary>
         /// <param name="player">Player looking for a hero</param>
         /// <returns>Hero's price</returns>
@@ -144,7 +126,7 @@ namespace Wism.Client.Core.Heros
         }
 
         /// <summary>
-        /// Returns a random city owned by the player.
+        ///     Returns a random city owned by the player.
         /// </summary>
         /// <param name="player">Player looking for a hero</param>
         /// <returns>City for the new hero</returns>
@@ -162,16 +144,16 @@ namespace Wism.Client.Core.Heros
         }
 
         /// <summary>
-        /// Checks if a new hero is available for the given player.
+        ///     Checks if a new hero is available for the given player.
         /// </summary>
         /// <param name="player">Player looking for a hero</param>
         /// <returns>True if a hero is available; otherwise, False</returns>
         /// <remarks>
-        /// Strategy is based on two primary factors and the first turn always
-        /// gets a free hero. No heros are available without at least one city.
-        /// Factors:
-        ///  1. Time since last hero (more time is more likely)
-        ///  2. Number of heros (less heros is more likely)
+        ///     Strategy is based on two primary factors and the first turn always
+        ///     gets a free hero. No heros are available without at least one city.
+        ///     Factors:
+        ///     1. Time since last hero (more time is more likely)
+        ///     2. Number of heros (less heros is more likely)
         /// </remarks>
         public bool IsHeroAvailable(Player player)
         {
@@ -213,6 +195,27 @@ namespace Wism.Client.Core.Heros
             var isHeroForHire = chance < heroCountChance * turnsSinceLastHeroChance;
 
             return isHeroForHire;
+        }
+
+        private static IList<T> RandomizeList<T>(Random r, IEnumerable<T> source)
+        {
+            var list = new List<T>();
+            foreach (var item in source)
+            {
+                var i = r.Next(list.Count + 1);
+                if (i == list.Count)
+                {
+                    list.Add(item);
+                }
+                else
+                {
+                    var temp = list[i];
+                    list[i] = item;
+                    list.Add(temp);
+                }
+            }
+
+            return list;
         }
     }
 }

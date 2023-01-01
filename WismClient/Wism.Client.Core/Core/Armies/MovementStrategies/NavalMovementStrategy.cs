@@ -9,7 +9,7 @@ namespace Wism.Client.Core.Armies.MovementStrategies
         public bool IsRelevant(List<Army> armiesToMove, Tile nextTile)
         {
             return nextTile.Terrain.CanTraverse(false, true, false) &&
-                armiesToMove.Any(a => a.CanFloat);
+                   armiesToMove.Any(a => a.CanFloat);
         }
 
         public List<Army> GetArmiesWithApplicableMoves(List<Army> armiesToMove)
@@ -17,7 +17,7 @@ namespace Wism.Client.Core.Armies.MovementStrategies
             var armiesThatMatter = new List<Army>();
 
             // Include only armies that float
-            foreach (Army army in armiesToMove)
+            foreach (var army in armiesToMove)
             {
                 if (army.CanFloat)
                 {

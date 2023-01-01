@@ -1,11 +1,10 @@
 ﻿using Wism.Client.Core;
 
-namespace Wism.Client.Agent.CommandProcessors
-{
-    public interface IBoonIdentfier
-    {
-        bool CanIdentify(IBoon boon);
+namespace Wism.Client.Agent.CommandProcessors;
 
-        void Identify(IBoon boon);
-    }
+public interface IBoonIdentfier
+{
+    bool CanIdentify(IBoon boon);
+
+    void Identify(IBoon boon);
 }

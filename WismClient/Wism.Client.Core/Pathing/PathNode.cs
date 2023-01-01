@@ -6,52 +6,50 @@ namespace Wism.Client.Pathing
 {
     public class PathNode
     {
-        private PathNode previous;
-        private float distance;
-        private Tile value;
-        private List<PathNode> neighbors = new List<PathNode>();
+        internal Tile Value { get; set; }
 
-        internal Tile Value { get => this.value; set => this.value = value; }
-        internal float Distance { get => this.distance; set => this.distance = value; }
-        internal PathNode Previous { get => this.previous; set => this.previous = value; }
-        internal List<PathNode> Neighbors { get => this.neighbors; set => this.neighbors = value; }
+        internal float Distance { get; set; }
+
+        internal PathNode Previous { get; set; }
+
+        internal List<PathNode> Neighbors { get; set; } = new List<PathNode>();
 
         /// <summary>
-        /// Calculate Euclidean distance between the two tiles
+        ///     Calculate Euclidean distance between the two tiles
         /// </summary>
         /// <param name="neighbor"></param>
         /// <returns></returns>
         internal float GetDistanceTo(PathNode other)
         {
-            double a = (other.Value.X - this.Value.X);
-            double b = (other.Value.Y - this.Value.Y);
+            double a = other.Value.X - this.Value.X;
+            double b = other.Value.Y - this.Value.Y;
 
-            float euclidean = Convert.ToSingle(Math.Sqrt(a * a + b * b));
+            var euclidean = Convert.ToSingle(Math.Sqrt(a * a + b * b));
 
             // TODO: Factor in unit and Clan cost mappings; for now, static
-            return (euclidean - (float)Math.Floor(euclidean)) + (float)other.Value.Terrain.MovementCost;
+            return euclidean - (float)Math.Floor(euclidean) + other.Value.Terrain.MovementCost;
         }
 
         internal void AddNeighbor(PathNode neighbor)
         {
             if (neighbor != null)
+            {
                 this.Neighbors.Add(neighbor);
+            }
         }
 
         public override string ToString()
         {
             if (this.Value != null)
             {
-                return String.Format("({0},{1});{2};{3}",
+                return string.Format("({0},{1});{2};{3}",
                     this.Value.X,
                     this.Value.Y,
-                    this.Value.Terrain.ToString(),
+                    this.Value.Terrain,
                     this.Value.Terrain.MovementCost);
             }
-            else
-            {
-                return base.ToString();
-            }
+
+            return base.ToString();
         }
     }
 

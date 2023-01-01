@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.AI.Common;
-using Wism.Client.AI.Intelligence;
 using Wism.Client.AI.Task;
-using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
@@ -19,7 +16,8 @@ namespace Wism.Client.AI.Adapta.TacticalModules
 
         //private readonly SimplePriorityQueue<Bid> bidQueue = new SimplePriorityQueue<Bid>();
 
-        public override Dictionary<Army, Bid> GenerateArmyBids(List<Army> myArmies, List<City> myCities, TargetPortfolio targets)
+        public override Dictionary<Army, Bid> GenerateArmyBids(List<Army> myArmies, List<City> myCities,
+            TargetPortfolio targets)
         {
             var armyBidMap = new Dictionary<Army, Bid>();
 
@@ -33,7 +31,7 @@ namespace Wism.Client.AI.Adapta.TacticalModules
             //       Must be achievable (cannot walk on water)
 
             // Pick closest neutral city for each army
-            armyBidMap = AddBidsByArmyForNearbyCities(myArmies, targets.NeutralCities);
+            armyBidMap = this.AddBidsByArmyForNearbyCities(myArmies, targets.NeutralCities);
 
             return armyBidMap;
         }
@@ -66,9 +64,9 @@ namespace Wism.Client.AI.Adapta.TacticalModules
                 var armyClanName = armies[0].Clan.ShortName;
                 var moveCoordinator = Game.Current.MovementCoordinator;
                 var armiesWithApplicableMoves = moveCoordinator.GetArmiesWithApplicableMoves(armies, targetTile);
-                bool targetReached = false;
+                var targetReached = false;
                 // Start at 1 as Path starts at army location
-                for (int i = 1; i < bid.PathToTarget.Count; i++)
+                for (var i = 1; i < bid.PathToTarget.Count; i++)
                 {
                     var tile = bid.PathToTarget[i];
 
@@ -89,13 +87,13 @@ namespace Wism.Client.AI.Adapta.TacticalModules
                             targetReached = true;
                             break;
                         }
-                    }                    
+                    }
                 }
 
                 //  2. Second Pass: Move as close to target as possible (walk backwards from target in path)
                 if (!targetReached)
                 {
-                    for (int i = bid.PathToTarget.Count - 1; i >= 0; i--)
+                    for (var i = bid.PathToTarget.Count - 1; i >= 0; i--)
                     {
                         var tile = bid.PathToTarget[i];
                         if (tile.CanTraverseHere(armiesWithApplicableMoves))
@@ -110,24 +108,29 @@ namespace Wism.Client.AI.Adapta.TacticalModules
             AddDeselectArmyCommand(commandController, armyController, armies);
         }
 
-        private static void AddDeselectArmyCommand(CommandController commandController, ArmyController armyController, List<Army> armies)
+        private static void AddDeselectArmyCommand(CommandController commandController, ArmyController armyController,
+            List<Army> armies)
         {
             commandController.AddCommand(new DeselectArmyCommand(armyController, armies));
         }
 
-        private static void AddSelectArmyCommand(CommandController commandController, ArmyController armyController, List<Army> armies)
+        private static void AddSelectArmyCommand(CommandController commandController, ArmyController armyController,
+            List<Army> armies)
         {
             commandController.AddCommand(new SelectArmyCommand(armyController, armies));
         }
 
-        private static void AddMoveCommand(CommandController commandController, ArmyController armyController, List<Army> armies, Tile targetTile)
+        private static void AddMoveCommand(CommandController commandController, ArmyController armyController,
+            List<Army> armies, Tile targetTile)
         {
             commandController.AddCommand(new MoveOnceCommand(armyController, armies, targetTile.X, targetTile.Y));
         }
 
-        private static void AddAttackCommand(CommandController commandController, ArmyController armyController, List<Army> armies, Tile targetTile)
+        private static void AddAttackCommand(CommandController commandController, ArmyController armyController,
+            List<Army> armies, Tile targetTile)
         {
-            commandController.AddCommand(new PrepareForBattleCommand(armyController, armies, targetTile.X, targetTile.Y));
+            commandController.AddCommand(
+                new PrepareForBattleCommand(armyController, armies, targetTile.X, targetTile.Y));
             var attackCommand = new AttackOnceCommand(armyController, armies, targetTile.X, targetTile.Y);
             commandController.AddCommand(attackCommand);
             commandController.AddCommand(new CompleteBattleCommand(armyController, attackCommand));
@@ -144,33 +147,33 @@ namespace Wism.Client.AI.Adapta.TacticalModules
 
             // Assign a bid for each army
             Bid bid = null;
-            var armiesToAllocate = new List<Army>(myArmies);            
+            var armiesToAllocate = new List<Army>(myArmies);
             foreach (var army in armiesToAllocate)
             {
                 // TODO: Only look near the army (not world) for perf
-                var nearestCity = FindNearestNeutralCity(army, neutralCities, out List<Tile> path, out int distance);
+                var nearestCity = this.FindNearestNeutralCity(army, neutralCities, out var path, out var distance);
                 if (nearestCity == null)
                 {
                     continue;
                 }
 
-                int turnsToComplete = 0;
+                var turnsToComplete = 0;
                 if (distance > army.MovesRemaining)
                 {
-                    turnsToComplete = ((distance - army.MovesRemaining) / army.Moves);
+                    turnsToComplete = (distance - army.MovesRemaining) / army.Moves;
                 }
 
                 bid = new Bid(this)
                 {
-                    Assets = new List<Army>() { army },
+                    Assets = new List<Army> { army },
                     Target = nearestCity,
-                    UtilityValue = -distance,   // Inverse as closer is better
+                    UtilityValue = -distance, // Inverse as closer is better
                     TurnsToComplete = turnsToComplete,
                     PathToTarget = path
                 };
 
                 armyBidMap.Add(army, bid);
-            }            
+            }
 
             return armyBidMap;
         }
@@ -180,12 +183,13 @@ namespace Wism.Client.AI.Adapta.TacticalModules
             path = null;
             distance = 0;
 
-            int closestCityDistance = int.MaxValue;
+            var closestCityDistance = int.MaxValue;
             City closestCity = null;
             foreach (var city in neutralCities)
             {
-                path = new List<Tile>(Game.Current.MovementCoordinator.FindPath(new List<Army> { army }, city.Tile, ref distance, true));
-                if (path != null && 
+                path = new List<Tile>(Game.Current.MovementCoordinator.FindPath(new List<Army> { army }, city.Tile,
+                    ref distance, true));
+                if (path != null &&
                     distance < closestCityDistance)
                 {
                     closestCity = city;
@@ -224,5 +228,4 @@ namespace Wism.Client.AI.Adapta.TacticalModules
         //    }
         //}
     }
-
 }

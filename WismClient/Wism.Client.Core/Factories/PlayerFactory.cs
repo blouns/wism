@@ -16,7 +16,7 @@ namespace Wism.Client.Factories
             cityToPlayer = new Dictionary<string, Player>();
 
             // Player
-            Clan clan = Clan.Create(
+            var clan = Clan.Create(
                 ModFactory.FindClanInfo(playerEntity.ClanShortName));
             var player = Player.Create(clan);
 
@@ -73,7 +73,7 @@ namespace Wism.Client.Factories
 
         public static Player Create(PlayerEntity playerEntity)
         {
-            Clan clan = Clan.Create(ModFactory.FindClanInfo(playerEntity.ClanShortName));
+            var clan = Clan.Create(ModFactory.FindClanInfo(playerEntity.ClanShortName));
             var player = Player.Create(clan);
             player.Gold = playerEntity.Gold;
             player.IsHuman = playerEntity.IsHuman;

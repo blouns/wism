@@ -5,7 +5,6 @@ using Wism.Client.Modules;
 
 namespace Wism.Client.Core.Armies
 {
-
     public class StandardTraversalStrategy : ITraversalStrategy
     {
         public bool CanTraverse(List<Army> armies, Tile tile, bool ignoreClan = false)
@@ -25,11 +24,11 @@ namespace Wism.Client.Core.Armies
                 throw new ArgumentNullException(nameof(tile));
             }
 
-            return armies.TrueForAll(a => CanTraverse(a.Clan, a.Info, tile, ignoreClan));
+            return armies.TrueForAll(a => this.CanTraverse(a.Clan, a.Info, tile, ignoreClan));
         }
 
         /// <summary>
-        /// Check if the army info can move onto this tile
+        ///     Check if the army info can move onto this tile
         /// </summary>
         /// <param name="clan">Clan of the army</param>
         /// <param name="armyInfo">Army kind</param>
@@ -52,7 +51,7 @@ namespace Wism.Client.Core.Armies
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
-            bool canTraverse = true;
+            var canTraverse = true;
             if (targetTile.HasCity() && !ignoreClan)
             {
                 canTraverse = targetTile.City.CanTraverse(clan);

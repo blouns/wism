@@ -5,7 +5,6 @@ using Wism.Client.Modules;
 
 namespace Wism.Client.Core.Armies
 {
-
     public class DefaultDeploymentStrategy : IDeploymentStrategy
     {
         public Tile FindNextOpenTile(Player player, ArmyInfo armyInfo, Tile targetTile)
@@ -25,13 +24,13 @@ namespace Wism.Client.Core.Armies
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
-            HashSet<Tile> tilesSeen = new HashSet<Tile>();
-            Stack<Tile> tileStack = new Stack<Tile>();
+            var tilesSeen = new HashSet<Tile>();
+            var tileStack = new Stack<Tile>();
             const int maxAttempts = 10000;
-            int attempts = 0;
+            var attempts = 0;
 
             // Try current tile
-            if (CanDeployHere(player, armyInfo, targetTile))
+            if (this.CanDeployHere(player, armyInfo, targetTile))
             {
                 return targetTile;
             }
@@ -47,9 +46,9 @@ namespace Wism.Client.Core.Armies
                 targetTile.City.Clan == player.Clan)
             {
                 var tiles = targetTile.City.GetTiles();
-                for (int i = 0; i < tiles.Length; i++)
+                for (var i = 0; i < tiles.Length; i++)
                 {
-                    if (CanDeployHere(player, armyInfo, tiles[i]))
+                    if (this.CanDeployHere(player, armyInfo, tiles[i]))
                     {
                         return tiles[i];
                     }
@@ -73,9 +72,9 @@ namespace Wism.Client.Core.Armies
                 var tile = tileStack.Pop();
                 var tiles = tile.GetNineGrid();
 
-                for (int i = 0; i <= tiles.GetUpperBound(0); i++)
+                for (var i = 0; i <= tiles.GetUpperBound(0); i++)
                 {
-                    for (int j = 0; j <= tiles.GetUpperBound(1); j++)
+                    for (var j = 0; j <= tiles.GetUpperBound(1); j++)
                     {
                         if (tilesSeen.Contains(tiles[i, j]) ||
                             tiles[i, j] == null)
@@ -84,13 +83,14 @@ namespace Wism.Client.Core.Armies
                             continue;
                         }
 
-                        if (CanDeployHere(player, armyInfo, tiles[i, j]))
+                        if (this.CanDeployHere(player, armyInfo, tiles[i, j]))
                         {
                             // Found a place to deploy
                             return tiles[i, j];
                         }
-                        else if (targetTile.CanTraverseHere(player.Clan, armyInfo) &&
-                                 IsTileFull(tiles[i, j]))
+
+                        if (targetTile.CanTraverseHere(player.Clan, armyInfo) &&
+                            IsTileFull(tiles[i, j]))
                         {
                             // Add traversable tiles for further area search
                             tileStack.Push(tiles[i, j]);
@@ -106,8 +106,8 @@ namespace Wism.Client.Core.Armies
 
         private bool CanDeployHere(Player player, ArmyInfo armyInfo, Tile targetTile)
         {
-            return (!IsTileFull(targetTile)) &&
-                    targetTile.CanTraverseHere(player.Clan, armyInfo);
+            return !IsTileFull(targetTile) &&
+                   targetTile.CanTraverseHere(player.Clan, armyInfo);
         }
 
         private static bool IsTileFull(Tile targetTile)

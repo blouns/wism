@@ -18,102 +18,100 @@ namespace Wism.Client.Core
 
         // Singleton instance
         private static Game current;
+        private readonly HashSet<Tile> quitArmySet = new HashSet<Tile>();
 
-        private int currentPlayerIndex;
-        private GameState gameState;
-        private List<Army> selectedArmies;
         private List<Tile> nextArmyQueue = new List<Tile>();
-        private HashSet<Tile> quitArmySet = new HashSet<Tile>();
+        private List<Army> selectedArmies;
 
         /// <summary>
-        /// Active game players
+        ///     Active game players
         /// </summary>
         public List<Player> Players { get; set; }
 
         /// <summary>
-        /// Gets or sets the randomization generator used for the game
+        ///     Gets or sets the randomization generator used for the game
         /// </summary>
         /// <remarks>
-        /// IMPORTANT: *ALL* use of randomization that affects game state *MUST* use
-        /// this and only this for randomization. Otherwise, remote players will be 
-        /// out of sync with the game state.
+        ///     IMPORTANT: *ALL* use of randomization that affects game state *MUST* use
+        ///     this and only this for randomization. Otherwise, remote players will be
+        ///     out of sync with the game state.
         /// </remarks>
         public Random Random { get; set; }
 
         /// <summary>
-        /// Random number seed
+        ///     Random number seed
         /// </summary>
         public int RandomSeed { get; set; }
 
         /// <summary>
-        /// Gets or sets the strategy used for battles
+        ///     Gets or sets the strategy used for battles
         /// </summary>
         public IWarStrategy WarStrategy { get; set; }
 
         /// <summary>
-        /// Gets or sets the strategy used for terrain traversal
+        ///     Gets or sets the strategy used for terrain traversal
         /// </summary>
         public ITraversalStrategy TraversalStrategy { get; set; }
 
         /// <summary>
-        /// Gets or sets the pathing strategy for army movement
+        ///     Gets or sets the pathing strategy for army movement
         /// </summary>
         public IPathingStrategy PathingStrategy { get; set; }
 
         /// <summary>
-        /// Gets or sets the seer that describes the strategies applicable movement
+        ///     Gets or sets the seer that describes the strategies applicable movement
         /// </summary>
         public MovementStrategyCoordinator MovementCoordinator { get; set; }
 
         /// <summary>
-        /// Current GameState
+        ///     Current GameState
         /// </summary>
-        public GameState GameState { get => this.gameState; }
+        public GameState GameState { get; private set; }
 
         public bool IgnoreGameOver { get; set; }
 
         /// <summary>
-        /// Returns the current game instance as a Singleton
+        ///     Returns the current game instance as a Singleton
         /// </summary>
         public static Game Current
         {
             get
             {
-                if (Game.current == null)
+                if (current == null)
                 {
                     throw new InvalidOperationException("No current game exists.");
                 }
 
-                return Game.current;
+                return current;
             }
         }
 
-        internal int CurrentPlayerIndex { get => this.currentPlayerIndex; set => this.currentPlayerIndex = value; }
+        internal int CurrentPlayerIndex { get; set; }
 
         /// <summary>
-        /// Test if the game has been initialized.
+        ///     Test if the game has been initialized.
         /// </summary>
         /// <returns>True if so; otherwise False</returns>
         public static bool IsInitialized()
         {
-            return Game.current != null;
+            return current != null;
         }
 
         /// <summary>
-        /// Unload the current game
+        ///     Unload the current game
         /// </summary>
         public static void Unload()
         {
-            Game.current = null;
+            current = null;
         }
 
         /// <summary>
-        /// Take a gave snapshot with all game state.
+        ///     Take a gave snapshot with all game state.
         /// </summary>
         /// <returns>Game snapshot</returns>
         /// <remarks>
-        /// Creates a graph of entities comprising the entire game state 
-        /// to be persisted, saved, or shared.
+        ///     Creates a graph of entities comprising the entire game state
+        ///     to be persisted, saved, or shared.
         /// </remarks>
         public GameEntity Snapshot()
         {
@@ -121,7 +119,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Gets all armies in the world for each player
+        ///     Gets all armies in the world for each player
         /// </summary>
         /// <returns></returns>
         public List<Army> GetAllArmies()
@@ -136,7 +134,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Gets the current player based on their turn
+        ///     Gets the current player based on their turn
         /// </summary>
         /// <returns>Player whose turn it is now</returns>
         public Player GetCurrentPlayer()
@@ -150,7 +148,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Gets the next alive player
+        ///     Gets the next alive player
         /// </summary>
         /// <returns>Player whose turn is next, or null if no players are alive</returns>
         public Player GetNextPlayer()
@@ -160,7 +158,7 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Players have not been initialized.");
             }
 
-            var currentPlayer = GetCurrentPlayer();
+            var currentPlayer = this.GetCurrentPlayer();
 
             // Find the next alive player
             var nextPlayer = this.Players[(this.CurrentPlayerIndex + 1) % this.Players.Count];
@@ -179,47 +177,47 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Transition to a new game state
+        ///     Transition to a new game state
         /// </summary>
         /// <param name="newState">State to transition to</param>
         public void Transition(GameState newState)
         {
             // For now just set it; later we can validate and manage the state machine
-            this.gameState = newState;
+            this.GameState = newState;
         }
 
         /// <summary>
-        /// End the players turn.
+        ///     End the players turn.
         /// </summary>
         /// <remarks>
-        /// Resets moves, triggers production, and allows for other clans 
-        /// to complete their turns.
+        ///     Resets moves, triggers production, and allows for other clans
+        ///     to complete their turns.
         /// </remarks>
         public void EndTurn()
         {
             // End current players turn
-            DeselectArmies();
+            this.DeselectArmies();
             this.nextArmyQueue.Clear();
             this.quitArmySet.Clear();
-            var player = GetCurrentPlayer();
+            var player = this.GetCurrentPlayer();
             player.EndTurn();
-            if (SelectNextPlayer())
+            if (this.SelectNextPlayer())
             {
-                Transition(GameState.StartingTurn);
+                this.Transition(GameState.StartingTurn);
             }
             else
             {
-                HandleGameOver();
+                this.HandleGameOver();
             }
         }
 
         /// <summary>
-        /// Select the next Player who is still in the fight.
+        ///     Select the next Player who is still in the fight.
         /// </summary>
         /// <returns>True if next player selected; False if there are no other players left</returns>
         private bool SelectNextPlayer()
         {
-            int lastPlayerIndex = this.CurrentPlayerIndex;
+            var lastPlayerIndex = this.CurrentPlayerIndex;
 
             // Find next player that is still in the fight
             this.CurrentPlayerIndex = (this.CurrentPlayerIndex + 1) % this.Players.Count;
@@ -231,36 +229,36 @@ namespace Wism.Client.Core
             }
 
             // This may roll back to the original player (player wins); so return False in that case
-            return (lastPlayerIndex != this.CurrentPlayerIndex);
+            return lastPlayerIndex != this.CurrentPlayerIndex;
         }
 
         /// <summary>
-        /// Process production, new heros, evaluate if player is alive, etc.
+        ///     Process production, new heros, evaluate if player is alive, etc.
         /// </summary>
         public void StartTurn()
         {
-            var player = GetCurrentPlayer();
+            var player = this.GetCurrentPlayer();
 
             if (player.GetCities().Count == 0 &&
                 !this.IgnoreGameOver)
             {
                 // You are no longer in the fight!
                 player.IsDead = true;
-                Transition(GameState.Ready);
+                this.Transition(GameState.Ready);
                 return;
             }
 
             player.StartTurn();
 
             // Select the next army if one is available
-            if (!SelectNextArmy())
+            if (!this.SelectNextArmy())
             {
-                Transition(GameState.Ready);
+                this.Transition(GameState.Ready);
             }
         }
 
         /// <summary>
-        /// Selects the next army with moves remaining
+        ///     Selects the next army with moves remaining
         /// </summary>
         /// <returns>True if a new army has been selected; otherwise, False</returns>
         public bool SelectNextArmy()
@@ -273,7 +271,7 @@ namespace Wism.Client.Core
 
             if (this.nextArmyQueue.Count == 0)
             {
-                this.nextArmyQueue = GetTilesWithArmiesWithMoves(GetCurrentPlayer());
+                this.nextArmyQueue = this.GetTilesWithArmiesWithMoves(this.GetCurrentPlayer());
 
                 // No more armies with moves
                 if (this.nextArmyQueue.Count == 0)
@@ -282,21 +280,21 @@ namespace Wism.Client.Core
                 }
             }
 
-            Game.Current.DeselectArmies();
+            Current.DeselectArmies();
             var tileWithArmies = this.nextArmyQueue[0];
             this.nextArmyQueue.RemoveAt(0);
-            SelectArmies(tileWithArmies.Armies);
+            this.SelectArmies(tileWithArmies.Armies);
 
             return true;
         }
 
         /// <summary>
-        /// Get the current selected armies
+        ///     Get the current selected armies
         /// </summary>
         /// <returns>Armies that are selected</returns>
         public List<Army> GetSelectedArmies()
         {
-            if (!ArmiesSelected())
+            if (!this.ArmiesSelected())
             {
                 return null;
             }
@@ -306,11 +304,11 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Sets the given armies as currently selected
+        ///     Sets the given armies as currently selected
         /// </summary>
         /// <param name="armies">Armies to select</param>
         /// <remarks>
-        /// Selecting an army moves its state on its Tile from Armies to VisitingArmies.
+        ///     Selecting an army moves its state on its Tile from Armies to VisitingArmies.
         /// </remarks>
         public void SelectArmies(List<Army> armies)
         {
@@ -325,17 +323,17 @@ namespace Wism.Client.Core
                 return;
             }
 
-            if (!armies.TrueForAll(army => GetCurrentPlayer().Clan.ShortName == army.Player.Clan.ShortName))
+            if (!armies.TrueForAll(army => this.GetCurrentPlayer().Clan.ShortName == army.Player.Clan.ShortName))
             {
                 throw new InvalidOperationException("Only the current player can select an army.");
             }
 
-            if (ArmiesSelected())
+            if (this.ArmiesSelected())
             {
-                DeselectArmies();
+                this.DeselectArmies();
             }
 
-            Tile tile = armies[0].Tile;
+            var tile = armies[0].Tile;
             if (tile.HasVisitingArmies())
             {
                 throw new InvalidOperationException(
@@ -346,7 +344,7 @@ namespace Wism.Client.Core
             Log.WriteLine(Log.TraceLevel.Information, $"Selecting army: {ArmiesToString(armies)}");
             tile.VisitingArmies = new List<Army>(armies);
             tile.VisitingArmies.Sort(new ByArmyViewingOrder());
-            foreach (Army army in tile.VisitingArmies)
+            foreach (var army in tile.VisitingArmies)
             {
                 tile.Armies.Remove(army);
             }
@@ -361,8 +359,8 @@ namespace Wism.Client.Core
                 tile.Armies = null;
             }
 
-            SelectArmiesInternal(tile.VisitingArmies);
-            Transition(GameState.SelectedArmy);
+            this.SelectArmiesInternal(tile.VisitingArmies);
+            this.Transition(GameState.SelectedArmy);
         }
 
         internal void SelectArmiesInternal(List<Army> armies)
@@ -373,12 +371,12 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Removes the given armies from currently selected armies
+        ///     Removes the given armies from currently selected armies
         /// </summary>
         /// <param name="armies">Armies to remove</param>
         public void RemoveSelectedArmies(List<Army> armies)
         {
-            if (!ArmiesSelected())
+            if (!this.ArmiesSelected())
             {
                 return;
             }
@@ -391,7 +389,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Test if there are any armies currently selected.
+        ///     Test if there are any armies currently selected.
         /// </summary>
         /// <returns>True if armies are selected; otherwise False</returns>
         public bool ArmiesSelected()
@@ -399,16 +397,16 @@ namespace Wism.Client.Core
             return (this.GameState == GameState.SelectedArmy ||
                     this.GameState == GameState.MovingArmy ||
                     this.GameState == GameState.AttackingArmy) &&
-                   (this.selectedArmies != null) &&
-                   (this.selectedArmies.Count > 0);
+                   this.selectedArmies != null &&
+                   this.selectedArmies.Count > 0;
         }
 
         /// <summary>
-        /// Deselect the selected armies.
+        ///     Deselect the selected armies.
         /// </summary>
         public void DeselectArmies()
         {
-            if (!ArmiesSelected())
+            if (!this.ArmiesSelected())
             {
                 return;
             }
@@ -419,61 +417,61 @@ namespace Wism.Client.Core
             // Deselect
             armiesToDeselect[0].Tile.CommitVisitingArmies();
             this.selectedArmies = null;
-            Transition(GameState.Ready);
+            this.Transition(GameState.Ready);
         }
 
         /// <summary>
-        /// Set the armies into defensive sentry mode
+        ///     Set the armies into defensive sentry mode
         /// </summary>
         public void DefendSelectedArmies()
         {
-            if (!ArmiesSelected())
+            if (!this.ArmiesSelected())
             {
                 return;
             }
 
             this.selectedArmies.ForEach(a => a.Defend());
-            DeselectArmies();
+            this.DeselectArmies();
         }
 
         /// <summary>
-        /// "Quit" selecting these armies for one turn
+        ///     "Quit" selecting these armies for one turn
         /// </summary>
         public void QuitSelectedArmies()
         {
-            if (!ArmiesSelected())
+            if (!this.ArmiesSelected())
             {
                 return;
             }
 
-            Tile tileWithArmiesToQuit = this.selectedArmies[0].Tile;
+            var tileWithArmiesToQuit = this.selectedArmies[0].Tile;
             this.quitArmySet.Add(tileWithArmiesToQuit);
             this.nextArmyQueue.Remove(tileWithArmiesToQuit);
 
-            DeselectArmies();
+            this.DeselectArmies();
         }
 
         /// <summary>
-        /// Create test-only default players for the game
+        ///     Create test-only default players for the game
         /// </summary>
         public static void CreateDefaultPlayers()
         {
             // Default two players for now
-            ClanInfo clanInfo = ClanInfo.GetClanInfo("Sirians");
-            Clan clan = Clan.Create(clanInfo);
-            Player player1 = Player.Create(clan);
+            var clanInfo = ClanInfo.GetClanInfo("Sirians");
+            var clan = Clan.Create(clanInfo);
+            var player1 = Player.Create(clan);
             Current.Players.Add(player1);
 
             clanInfo = ClanInfo.GetClanInfo("LordBane");
             clan = Clan.Create(clanInfo);
-            Player player2 = Player.Create(clan);
+            var player2 = Player.Create(clan);
             Current.Players.Add(player2);
 
-            Game.Current.CurrentPlayerIndex = 0;
+            Current.CurrentPlayerIndex = 0;
         }
 
         /// <summary>
-        /// Create test-only defaults for the game
+        ///     Create test-only defaults for the game
         /// </summary>
         public static void CreateDefaultGame()
         {
@@ -481,15 +479,15 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// /// Create test-only defaults for the game
+        ///     /// Create test-only defaults for the game
         /// </summary>
         /// <param name="worldName">World to use</param>
         public static void CreateDefaultGame(string worldName)
         {
             current = new Game
             {
-                RandomSeed = Game.DefaultRandomSeed,
-                Random = new Random(Game.DefaultRandomSeed),
+                RandomSeed = DefaultRandomSeed,
+                Random = new Random(DefaultRandomSeed),
                 WarStrategy = new DefaultWarStrategy(),
                 TraversalStrategy = CompositeTraversalStrategy.CreateDefault(),
                 MovementCoordinator = MovementStrategyCoordinator.CreateDefault(),
@@ -504,7 +502,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Create an empty game
+        ///     Create an empty game
         /// </summary>
         public static void CreateEmpty()
         {
@@ -514,13 +512,13 @@ namespace Wism.Client.Core
         #region Helper methods
 
         /// <summary>
-        /// Getes a list of tiles that have armies that can be moved
+        ///     Getes a list of tiles that have armies that can be moved
         /// </summary>
         /// <param name="player">Current player</param>
         /// <returns>List of tiles</returns>
         /// <remarks>
-        /// Armies that have been marked to "defend" or "quit" will 
-        /// be skipped.
+        ///     Armies that have been marked to "defend" or "quit" will
+        ///     be skipped.
         /// </remarks>
         private List<Tile> GetTilesWithArmiesWithMoves(Player player)
         {
@@ -530,7 +528,7 @@ namespace Wism.Client.Core
             foreach (var army in armies)
             {
                 if (!army.IsDefending &&
-                    (army.MovesRemaining > 0) &&
+                    army.MovesRemaining > 0 &&
                     !this.quitArmySet.Contains(army.Tile))
                 {
                     tiles.Add(army.Tile);
@@ -539,10 +537,11 @@ namespace Wism.Client.Core
 
             return new List<Tile>(tiles);
         }
+
         private static List<Army> RemoveDeadArmies(List<Army> armies)
         {
             var armiesToReturn = new List<Army>(armies);
-            foreach (Army army in armies)
+            foreach (var army in armies)
             {
                 if (!army.IsDead)
                 {
@@ -560,7 +559,7 @@ namespace Wism.Client.Core
 
         private void HandleGameOver()
         {
-            Transition(GameState.GameOver);
+            this.Transition(GameState.GameOver);
         }
 
         #endregion

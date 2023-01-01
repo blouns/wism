@@ -55,12 +55,12 @@ namespace Wism.Client.Factories
             Game.Current.CurrentPlayerIndex = snapshot.CurrentPlayerIndex;
 
             LoadPlayers(snapshot, Game.Current,
-                out Dictionary<string, Player> cityToPlayer,
-                out Dictionary<string, Player> capitolToPlayer);
+                out var cityToPlayer,
+                out var capitolToPlayer);
 
             var world = WorldFactory.Load(snapshot.World,
-                out Dictionary<int, Tile> armiesToTile,
-                out Dictionary<int, Tile> visitingToTile);
+                out var armiesToTile,
+                out var visitingToTile);
 
             LoadCities(snapshot, world, cityToPlayer, capitolToPlayer);
             LoadArmies(snapshot, armiesToTile, visitingToTile);
@@ -118,8 +118,8 @@ namespace Wism.Client.Factories
 
             try
             {
-                List<ITraversalStrategy> strategies = new List<ITraversalStrategy>();
-                for (int i = 0; i < traversalEntities.Length; i++)
+                var strategies = new List<ITraversalStrategy>();
+                for (var i = 0; i < traversalEntities.Length; i++)
                 {
                     var strategyEntity = traversalEntities[i];
                     var strategy = CreateObject<ITraversalStrategy>(strategyEntity);
@@ -143,8 +143,8 @@ namespace Wism.Client.Factories
 
             try
             {
-                List<IMovementStrategy> strategies = new List<IMovementStrategy>();
-                for (int i = 0; i < strategyEntities.Length; i++)
+                var strategies = new List<IMovementStrategy>();
+                for (var i = 0; i < strategyEntities.Length; i++)
                 {
                     var strategyEntity = strategyEntities[i];
                     var strategy = CreateObject<IMovementStrategy>(strategyEntity);
@@ -166,13 +166,14 @@ namespace Wism.Client.Factories
         {
             var players = settings.Players;
             current.Players = new List<Player>();
-            for (int i = 0; i < players.Length; i++)
+            for (var i = 0; i < players.Length; i++)
             {
                 current.Players.Add(PlayerFactory.Create(players[i]));
             }
         }
 
-        private static void LoadArmies(GameEntity snapshot, Dictionary<int, Tile> armiesToTile, Dictionary<int, Tile> visitingToTile)
+        private static void LoadArmies(GameEntity snapshot, Dictionary<int, Tile> armiesToTile,
+            Dictionary<int, Tile> visitingToTile)
         {
             var selectedArmies = new List<Army>();
             var allArmies = Game.Current.GetAllArmies();
@@ -182,18 +183,18 @@ namespace Wism.Client.Factories
                 if (armiesToTile.ContainsKey(army.Id))
                 {
                     var tile = armiesToTile[army.Id];
-                    tile.AddArmies(new List<Army>() { army });
+                    tile.AddArmies(new List<Army> { army });
                 }
                 else if (visitingToTile.ContainsKey(army.Id))
                 {
                     var tile = visitingToTile[army.Id];
-                    tile.AddVisitingArmies(new List<Army>() { army });
+                    tile.AddVisitingArmies(new List<Army> { army });
                 }
 
                 // Selected armies
                 if (snapshot.SelectedArmyIds != null)
                 {
-                    for (int i = 0; i < snapshot.SelectedArmyIds.Length; i++)
+                    for (var i = 0; i < snapshot.SelectedArmyIds.Length; i++)
                     {
                         if (army.Id == snapshot.SelectedArmyIds[i])
                         {
@@ -236,13 +237,13 @@ namespace Wism.Client.Factories
         }
 
         /// <summary>
-        /// Loads the random seed array into a new Random instance
+        ///     Loads the random seed array into a new Random instance
         /// </summary>
         /// <param name="snapshot">RandomEntity to load</param>
         /// <returns>New Random based on the snapshot</returns>
         /// <remarks>
-        /// This method overwrites the private seed array from Random. The seed in this 
-        /// case is actually unused, but it is set for consistency.
+        ///     This method overwrites the private seed array from Random. The seed in this
+        ///     case is actually unused, but it is set for consistency.
         /// </remarks>
         private static Random LoadRandom(RandomEntity snapshot)
         {
@@ -266,7 +267,7 @@ namespace Wism.Client.Factories
 
             var players = snapshot.Players;
             current.Players = new List<Player>();
-            for (int i = 0; i < players.Length; i++)
+            for (var i = 0; i < players.Length; i++)
             {
                 current.Players.Add(PlayerFactory.Load(players[i],
                     out cityToPlayer,

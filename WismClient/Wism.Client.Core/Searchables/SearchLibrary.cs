@@ -7,15 +7,13 @@ namespace Wism.Client.MapObjects
     {
         private const int MovesToSearch = 4;
 
-        private static readonly SearchLibrary instance = new SearchLibrary();
-
-        public static SearchLibrary Instance => instance;
-
         private readonly Librarian librarian = new Librarian();
 
         private SearchLibrary()
         {
         }
+
+        public static SearchLibrary Instance { get; } = new SearchLibrary();
 
         public bool CanSearchKind(string kind)
         {
@@ -25,7 +23,7 @@ namespace Wism.Client.MapObjects
         public bool Search(List<Army> armies, Location location, out object result)
         {
             result = null;
-            Army hero = armies.Find(a =>
+            var hero = armies.Find(a =>
                 a is Hero &&
                 a.Tile == location.Tile &&
                 a.MovesRemaining >= MovesToSearch);

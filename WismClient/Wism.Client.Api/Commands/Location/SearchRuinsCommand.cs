@@ -7,24 +7,24 @@ namespace Wism.Client.Api.Commands
 {
     public class SearchRuinsCommand : SearchLocationCommand
     {
-        public IBoon Boon { get; private set; }
-        public object BoonResult { get; set; }
-
         public SearchRuinsCommand(LocationController locationController, List<Army> armies, Location location)
             : base(locationController, armies, location)
         {
         }
 
+        public IBoon Boon { get; private set; }
+        public object BoonResult { get; set; }
+
         protected override ActionState ExecuteInternal()
         {
-            bool success = this.LocationController.SearchRuins(this.Armies, this.Location, out IBoon boon);
+            var success = this.LocationController.SearchRuins(this.Armies, this.Location, out var boon);
             if (success)
             {
                 this.Boon = boon;
                 this.BoonResult = boon.Result;
             }
 
-            return (success) ? ActionState.Succeeded : ActionState.Failed;
+            return success ? ActionState.Succeeded : ActionState.Failed;
         }
     }
 }

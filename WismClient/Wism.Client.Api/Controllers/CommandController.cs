@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
 using Wism.Client.Api.Data;
@@ -10,8 +10,8 @@ namespace Wism.Client.Core.Controllers
 {
     public class CommandController
     {
-        private readonly IWismClientRepository wismClientRepository;
         private readonly ILogger logger;
+        private readonly IWismClientRepository wismClientRepository;
 
         public CommandController(ILoggerFactory loggerFactory, IWismClientRepository wismClientRepository)
         {
@@ -21,7 +21,8 @@ namespace Wism.Client.Core.Controllers
             }
 
             this.logger = loggerFactory.CreateLogger();
-            this.wismClientRepository = wismClientRepository ?? throw new ArgumentNullException(nameof(wismClientRepository));
+            this.wismClientRepository =
+                wismClientRepository ?? throw new ArgumentNullException(nameof(wismClientRepository));
         }
 
         public void AddCommand(Command command)
@@ -36,7 +37,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Gets a command
+        ///     Gets a command
         /// </summary>
         /// <param name="commandId">ID of the command</param>
         /// <returns>Command</returns>
@@ -51,7 +52,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Gets all commands
+        ///     Gets all commands
         /// </summary>
         /// <returns>All commands</returns>
         public IEnumerable<Command> GetCommands()
@@ -60,7 +61,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Gets all commands that occured after the given command ID
+        ///     Gets all commands that occured after the given command ID
         /// </summary>
         /// <param name="lastSeenCommandId"></param>
         /// <returns>All commands after <c>lastSeenCommandId</c></returns>
@@ -70,7 +71,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Gets the latest command added.
+        ///     Gets the latest command added.
         /// </summary>
         /// <returns>Command if one exists</returns>
         /// <exception cref="InvalidOperationException">Thrown if no commands exist</exception>
@@ -86,7 +87,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Checks if the given command exists.
+        ///     Checks if the given command exists.
         /// </summary>
         /// <param name="commandId">ID of command</param>
         /// <returns>True if command exists; otherwise, False</returns>
@@ -96,7 +97,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Gets all commands serialized as JSON
+        ///     Gets all commands serialized as JSON
         /// </summary>
         /// <returns></returns>
         public string GetCommandsJSON()
@@ -106,7 +107,7 @@ namespace Wism.Client.Core.Controllers
                 return "{}";
             }
 
-            var settings = new JsonSerializerSettings()
+            var settings = new JsonSerializerSettings
             {
                 //PreserveReferencesHandling = PreserveReferencesHandling.Objects,
                 TypeNameHandling = TypeNameHandling.All

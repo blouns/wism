@@ -1,28 +1,29 @@
-﻿using Wism.Client.Core;
+﻿using System;
+using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.Api.Commands
 {
     public abstract class Command : ICommandAction
     {
-        public int Id { get; set; }
-
-        public Player Player { get; set; }
-
-        public ActionState Result { get; private set; }
-
         public Command()
         {
         }
 
         public Command(Player player)
         {
-            this.Player = player ?? throw new System.ArgumentNullException(nameof(player));
+            this.Player = player ?? throw new ArgumentNullException(nameof(player));
         }
+
+        public int Id { get; set; }
+
+        public Player Player { get; set; }
+
+        public ActionState Result { get; private set; }
 
         public ActionState Execute()
         {
-            this.Result = ExecuteInternal();
+            this.Result = this.ExecuteInternal();
 
             return this.Result;
         }
@@ -31,7 +32,7 @@ namespace Wism.Client.Api.Commands
 
         protected bool PlayerIsAlive()
         {
-            return (this.Player == null || this.Player.IsDead);
+            return this.Player == null || this.Player.IsDead;
         }
     }
 }

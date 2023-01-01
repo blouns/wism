@@ -21,7 +21,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Renew production projects
+        ///     Renew production projects
         /// </summary>
         /// <param name="player">Player to renew production</param>
         /// <param name="productionToRenew">Armies that have been renewed for production</param>
@@ -38,21 +38,21 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(productionToRenew));
             }
 
-            ActionState state = ActionState.Failed;
-            bool success = true;
+            var state = ActionState.Failed;
+            var success = true;
 
             foreach (var armyToRenew in productionToRenew)
             {
                 if (armyToRenew.DestinationCity != null)
                 {
-                    success &= TryStartingProductionToDestination(
+                    success &= this.TryStartingProductionToDestination(
                         armyToRenew.ProductionCity,
                         armyToRenew.ArmyInfo,
                         armyToRenew.DestinationCity);
                 }
                 else
                 {
-                    success &= TryStartingProduction(
+                    success &= this.TryStartingProduction(
                         armyToRenew.ProductionCity,
                         armyToRenew.ArmyInfo);
                 }
@@ -67,13 +67,14 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Renew all completed production projects.
+        ///     Renew all completed production projects.
         /// </summary>
         /// <param name="player">Player to renew production for</param>
         /// <param name="armiesProduced">Armies produced or empty</param>
         /// <param name="armiesDelivered">Armies delivered or empty</param>
         /// <returns>True if any armies are returned (produced or delivered); otherwise False</returns>
-        public bool TryGetProducedArmies(Player player, out List<ArmyInTraining> armiesProduced, out List<ArmyInTraining> armiesDelivered)
+        public bool TryGetProducedArmies(Player player, out List<ArmyInTraining> armiesProduced,
+            out List<ArmyInTraining> armiesDelivered)
         {
             if (player is null)
             {
@@ -92,11 +93,11 @@ namespace Wism.Client.Core.Controllers
                 armiesDelivered.AddRange(player.GetDeliveredArmies());
             }
 
-            return (armiesDelivered.Count > 0) || (armiesProduced.Count > 0);
+            return armiesDelivered.Count > 0 || armiesProduced.Count > 0;
         }
 
         /// <summary>
-        /// Claim a city for a given player.
+        ///     Claim a city for a given player.
         /// </summary>
         /// <param name="city">City to claim</param>
         /// <param name="player">Player who will stake the claim</param>
@@ -116,7 +117,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Gets the cost to build the cities defenses.
+        ///     Gets the cost to build the cities defenses.
         /// </summary>
         /// <param name="city">City to build</param>
         /// <returns>Cost in gp</returns>
@@ -131,7 +132,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Try to build the cities defenses by one
+        ///     Try to build the cities defenses by one
         /// </summary>
         /// <param name="city">City to build</param>
         /// <returns>True if improved; otherwise False</returns>
@@ -146,7 +147,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Destroy a city forever.
+        ///     Destroy a city forever.
         /// </summary>
         /// <param name="city">City to raze</param>
         public void RazeCity(City city, Player player)
@@ -160,7 +161,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Start production on an army.
+        ///     Start production on an army.
         /// </summary>
         /// <param name="city">City to produce in</param>
         /// <param name="armyInfo">Army kind to produce</param>
@@ -181,7 +182,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Start production on an army that will be delivered to the destination city.
+        ///     Start production on an army that will be delivered to the destination city.
         /// </summary>
         /// <param name="city">City to produce from</param>
         /// <param name="armyInfo">Army kind to produce</param>
@@ -208,7 +209,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Cancel production.
+        ///     Cancel production.
         /// </summary>
         /// <param name="city">City to stop production</param>
         public void StopProduction(City city)

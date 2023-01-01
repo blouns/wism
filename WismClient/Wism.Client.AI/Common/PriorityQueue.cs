@@ -6,49 +6,17 @@ namespace Wism.Client.AI.Common
 {
     public class SimplePriorityQueue<T> : IEnumerable<T>
     {
-        private SortedList<Pair<int>, T> innerList;
-        private int hashIndex = 0;
-
-        public int Count { get => innerList.Count; }
-
-        public bool IsReadOnly => throw new NotImplementedException();
+        private readonly SortedList<Pair<int>, T> innerList;
+        private int hashIndex;
 
         public SimplePriorityQueue()
         {
-            innerList = new SortedList<Pair<int>, T>(new PairComparer<int>());
+            this.innerList = new SortedList<Pair<int>, T>(new PairComparer<int>());
         }
 
-        public void Enqueue(T item, int priority)
-        {
-            // Hash index is to handle duplicates of priority
-            innerList.Add(new Pair<int>(priority, hashIndex++), item);
-        }
+        public int Count => this.innerList.Count;
 
-        public T Dequeue()
-        {
-            if (innerList.Count == 0)
-            {
-                throw new InvalidOperationException("No items to dequeue.");
-            }    
-
-            T item = innerList[innerList.Keys[0]];
-            innerList.RemoveAt(0);
-            return item;
-        }
-
-        public void Remove(T item)
-        {
-            int index = this.innerList.IndexOfValue(item);
-            if (index >= 0)
-            {
-                this.innerList.RemoveAt(index);
-            }
-        }
-
-        public bool Contains(T item)
-        {
-            return this.innerList.ContainsValue(item);
-        }
+        public bool IsReadOnly => throw new NotImplementedException();
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -59,32 +27,65 @@ namespace Wism.Client.AI.Common
         {
             return this.innerList.GetEnumerator();
         }
+
+        public void Enqueue(T item, int priority)
+        {
+            // Hash index is to handle duplicates of priority
+            this.innerList.Add(new Pair<int>(priority, this.hashIndex++), item);
+        }
+
+        public T Dequeue()
+        {
+            if (this.innerList.Count == 0)
+            {
+                throw new InvalidOperationException("No items to dequeue.");
+            }
+
+            var item = this.innerList[this.innerList.Keys[0]];
+            this.innerList.RemoveAt(0);
+            return item;
+        }
+
+        public void Remove(T item)
+        {
+            var index = this.innerList.IndexOfValue(item);
+            if (index >= 0)
+            {
+                this.innerList.RemoveAt(index);
+            }
+        }
+
+        public bool Contains(T item)
+        {
+            return this.innerList.ContainsValue(item);
+        }
     }
 
     public class Pair<T>
     {
-        public T First { get; private set; }
-        public T Second { get; private set; }
-
         public Pair(T first, T second)
         {
-            First = first;
-            Second = second;
+            this.First = first;
+            this.Second = second;
         }
+
+        public T First { get; }
+        public T Second { get; }
 
         public override int GetHashCode()
         {
-            return First.GetHashCode() ^ Second.GetHashCode();
+            return this.First.GetHashCode() ^ this.Second.GetHashCode();
         }
 
         public override bool Equals(object other)
         {
-            Pair<T> pair = other as Pair<T>;
+            var pair = other as Pair<T>;
             if (pair == null)
             {
                 return false;
             }
-            return (this.First.Equals(pair.First) && this.Second.Equals(pair.Second));
+
+            return this.First.Equals(pair.First) && this.Second.Equals(pair.Second);
         }
     }
 
@@ -97,16 +98,13 @@ namespace Wism.Client.AI.Common
             {
                 return 1;
             }
-            else if (x.First.CompareTo(y.First) > 0)
+
+            if (x.First.CompareTo(y.First) > 0)
             {
                 return -1;
             }
-            else
-            {
-                return x.Second.CompareTo(y.Second);
-            }
+
+            return x.Second.CompareTo(y.Second);
         }
     }
-
-
 }

@@ -9,9 +9,7 @@ namespace Wism.Client.Core
     {
         public const int DefaultHitPoints = 2;
 
-        private static int lastId = 0;
-
-        public static int LastId { get => lastId; set => lastId = value; }
+        public static int LastId { get; set; }
 
         public static Army CreateArmy(Player player, ArmyInfo info)
         {
@@ -20,7 +18,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(info));
             }
 
-            Army newArmy = (info.ShortName == "Hero") ? new Hero() : new Army();
+            var newArmy = info.ShortName == "Hero" ? new Hero() : new Army();
             newArmy.Id = ++LastId;
             newArmy.Info = info;
             newArmy.Strength = info.Strength;

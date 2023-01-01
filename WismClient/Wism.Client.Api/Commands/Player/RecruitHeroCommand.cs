@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
 namespace Wism.Client.Api.Commands
@@ -10,6 +9,12 @@ namespace Wism.Client.Api.Commands
     public class RecruitHeroCommand : Command
     {
         private readonly PlayerController playerController;
+
+        public RecruitHeroCommand(PlayerController playerController, Player player)
+            : base(player)
+        {
+            this.playerController = playerController ?? throw new ArgumentNullException(nameof(playerController));
+        }
 
         public Tile HeroTile { get; set; }
 
@@ -21,12 +26,6 @@ namespace Wism.Client.Api.Commands
 
         public List<ArmyInfo> HeroAllies { get; set; }
 
-        public RecruitHeroCommand(PlayerController playerController, Player player)
-            : base(player)
-        {
-            this.playerController = playerController ?? throw new ArgumentNullException(nameof(playerController));
-        }
-
         protected override ActionState ExecuteInternal()
         {
             ActionState state;
@@ -37,7 +36,7 @@ namespace Wism.Client.Api.Commands
             }
 
             if (this.playerController.RecruitHero(this.Player,
-                out string name, out City city, out int price, out List<ArmyInfo> allies))
+                    out var name, out var city, out var price, out var allies))
             {
                 this.HeroTile = city.Tile;
                 this.HeroDisplayName = name;
