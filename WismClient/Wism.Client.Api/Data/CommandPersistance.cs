@@ -1,11 +1,21 @@
 ﻿using System.Collections.Generic;
-using Wism.Client.Api.Commands;
-using Wism.Client.Api.Data.Entities;
+using Wism.Client.Commands;
+using Wism.Client.Commands.Army;
+using Wism.Client.Commands.Game;
+using Wism.Client.Commands.Hero;
+using Wism.Client.Commands.Location;
+using Wism.Client.Commands.Player;
 using Wism.Client.Core;
-using Wism.Client.Data;
+using Wism.Client.Core.Boons;
+using Wism.Client.Data.Entities;
+using Wism.Client.Data.Entities.Army;
+using Wism.Client.Data.Entities.Game;
+using Wism.Client.Data.Entities.Hero;
+using Wism.Client.Data.Entities.Location;
+using Wism.Client.Data.Entities.Player;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Api.Data
+namespace Wism.Client.Data
 {
     public static class CommandPersistance
     {

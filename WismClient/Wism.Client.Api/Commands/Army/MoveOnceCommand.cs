@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
+using Wism.Client.Common;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Army
 {
     public class MoveOnceCommand : ArmyCommand
     {
         private IList<Tile> path;
 
-        public MoveOnceCommand(ArmyController armyController, List<Army> armies, int x, int y)
+        public MoveOnceCommand(ArmyController armyController, List<MapObjects.Army> armies, int x, int y)
             : base(armyController, armies)
         {
             this.X = x;

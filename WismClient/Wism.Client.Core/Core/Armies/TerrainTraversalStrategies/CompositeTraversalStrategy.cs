@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
-namespace Wism.Client.Core.Armies
+namespace Wism.Client.Core.Armies.TerrainTraversalStrategies
 {
     /// <summary>
     ///     Composite traversal strategy to check if ANY of the given strategies

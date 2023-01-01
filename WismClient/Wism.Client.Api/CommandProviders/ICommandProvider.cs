@@ -1,4 +1,4 @@
-﻿namespace Wism.Client.Api.CommandProviders
+﻿namespace Wism.Client.CommandProviders
 {
     public interface ICommandProvider
     {

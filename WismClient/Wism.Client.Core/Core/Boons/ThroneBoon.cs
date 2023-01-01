@@ -1,7 +1,7 @@
 ﻿using System;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Core
+namespace Wism.Client.Core.Boons
 {
     public class ThroneBoon : IBoon
     {

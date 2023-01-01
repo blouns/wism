@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
+using Wism.Client.Searchables;
 
 [assembly: InternalsVisibleTo("Wism.Client.Test")]
 

@@ -1,6 +1,4 @@
-﻿using Wism.Client.Entities;
-
-namespace Wism.Client.Api.Data.Entities
+﻿namespace Wism.Client.Data.Entities.Game
 {
     public class NewGameCommandEntity : CommandEntity
     {

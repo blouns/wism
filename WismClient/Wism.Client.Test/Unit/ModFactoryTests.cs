@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.Serialization.Json;
 using NUnit.Framework;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Test.Unit;
 

@@ -5,13 +5,14 @@ using Newtonsoft.Json;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Data;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Agent;
 

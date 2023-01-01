@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Common;
+using Wism.Client.Core;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
-namespace Wism.Client.Core.Controllers
+namespace Wism.Client.Controllers
 {
     public class PlayerController
     {

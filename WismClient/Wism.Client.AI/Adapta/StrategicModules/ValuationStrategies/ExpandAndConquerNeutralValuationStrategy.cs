@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.AI.Adapta.TacticalModules;
-using Wism.Client.AI.Task;
+using Wism.Client.AI.Intelligence;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.AI.Adapta.Strategic.UtilityValuation
+namespace Wism.Client.AI.Adapta.StrategicModules.ValuationStrategies
 {
     /// <summary>
     ///     Simple one-dimensional strategy to expand and conquer remaining neutral cities.

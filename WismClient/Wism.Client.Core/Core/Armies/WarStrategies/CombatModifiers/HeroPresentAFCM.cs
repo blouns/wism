@@ -1,7 +1,6 @@
-﻿using Wism.Client.Core;
-using Wism.Client.MapObjects;
+﻿using Wism.Client.MapObjects;
 
-namespace Wism.Client.War
+namespace Wism.Client.Core.Armies.WarStrategies.CombatModifiers
 {
     /// <summary>
     /// Hero Present. If the hero's combat strength is 0 to 3, the modifier

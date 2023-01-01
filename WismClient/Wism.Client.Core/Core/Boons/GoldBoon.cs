@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Wism.Client.Core
+namespace Wism.Client.Core.Boons
 {
     public class GoldBoon : IBoon
     {

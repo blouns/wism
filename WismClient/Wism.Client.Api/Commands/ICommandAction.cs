@@ -1,6 +1,6 @@
-﻿using Wism.Client.Core.Controllers;
+﻿using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands
 {
     public interface ICommandAction
     {

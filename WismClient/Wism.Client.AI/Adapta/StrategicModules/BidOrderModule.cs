@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Wism.Client.AI.Adapta.Strategic
+namespace Wism.Client.AI.Adapta.StrategicModules
 {
     public class BidOrderModule
     {

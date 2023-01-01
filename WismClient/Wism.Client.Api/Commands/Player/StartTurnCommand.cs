@@ -1,14 +1,13 @@
 ﻿using System;
-using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Player
 {
     public class StartTurnCommand : Command
     {
         private readonly GameController gameController;
 
-        public StartTurnCommand(GameController gameController, Player player)
+        public StartTurnCommand(GameController gameController, Core.Player player)
             : base(player)
         {
             if (gameController is null)
@@ -21,7 +20,7 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            this.gameController.StartTurn(Game.Current);
+            this.gameController.StartTurn(Core.Game.Current);
 
             return ActionState.Succeeded;
         }

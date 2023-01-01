@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Core;
+using Wism.Client.Core.Armies;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.MapObjects
 {

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Test.Common;
 

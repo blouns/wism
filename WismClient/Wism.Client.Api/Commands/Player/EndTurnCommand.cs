@@ -1,14 +1,13 @@
 ﻿using System;
-using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Player
 {
     public class EndTurnCommand : Command
     {
         private readonly GameController gameController;
 
-        public EndTurnCommand(GameController gameController, Player player)
+        public EndTurnCommand(GameController gameController, Core.Player player)
             : base(player)
         {
             if (gameController is null)
@@ -21,7 +20,7 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            this.gameController.EndTurn(Game.Current);
+            this.gameController.EndTurn(Core.Game.Current);
 
             return ActionState.Succeeded;
         }

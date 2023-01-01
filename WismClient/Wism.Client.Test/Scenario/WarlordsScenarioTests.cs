@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Scenario;

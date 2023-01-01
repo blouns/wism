@@ -1,4 +1,4 @@
-﻿namespace Wism.Client.Api.Data.Entities
+﻿namespace Wism.Client.Data.Entities.Location
 {
     public abstract class SearchLocationCommandEntity : CommandEntity
     {

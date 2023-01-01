@@ -1,8 +1,8 @@
 ﻿using System;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
-namespace Wism.Client.Core
+namespace Wism.Client.Core.Boons
 {
     public class AlliesBoon : IBoon
     {

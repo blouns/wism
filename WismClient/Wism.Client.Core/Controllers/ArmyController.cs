@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Common;
+using Wism.Client.Comparers;
+using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Core.Controllers
+namespace Wism.Client.Controllers
 {
     public enum MoveResult
     {

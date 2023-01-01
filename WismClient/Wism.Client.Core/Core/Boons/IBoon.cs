@@ -1,4 +1,4 @@
-﻿namespace Wism.Client.Core
+﻿namespace Wism.Client.Core.Boons
 {
     public interface IBoon
     {

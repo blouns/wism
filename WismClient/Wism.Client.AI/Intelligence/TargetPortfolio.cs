@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.AI.Task
+namespace Wism.Client.AI.Intelligence
 {
     public class TargetPortfolio
     {

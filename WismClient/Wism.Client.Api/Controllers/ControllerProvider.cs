@@ -1,4 +1,4 @@
-﻿namespace Wism.Client.Core.Controllers
+﻿namespace Wism.Client.Controllers
 {
     public class ControllerProvider
     {

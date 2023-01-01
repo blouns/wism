@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
+using Wism.Client.Common;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Army
 {
     public class DefendCommand : ArmyCommand
     {
-        public DefendCommand(ArmyController armyController, List<Army> armies)
+        public DefendCommand(ArmyController armyController, List<MapObjects.Army> armies)
             : base(armyController, armies)
         {
         }

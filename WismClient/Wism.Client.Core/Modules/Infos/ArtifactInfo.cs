@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Wism.Client.Modules
+namespace Wism.Client.Modules.Infos
 {
     [DataContract]
     public class ArtifactInfo

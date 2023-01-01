@@ -1,4 +1,4 @@
-﻿using Wism.Client.Core;
+﻿using Wism.Client.Core.Boons;
 
 namespace Wism.Client.Agent.CommandProcessors;
 

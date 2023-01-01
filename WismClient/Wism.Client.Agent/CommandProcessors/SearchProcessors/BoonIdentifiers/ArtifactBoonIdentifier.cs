@@ -1,5 +1,6 @@
 ﻿using System;
-using Wism.Client.Core;
+using Wism.Client.Agent.Common;
+using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors;

@@ -1,7 +1,6 @@
-﻿using Wism.Client.Core;
-using Wism.Client.MapObjects;
+﻿using Wism.Client.MapObjects;
 
-namespace Wism.Client.War
+namespace Wism.Client.Core.Armies.WarStrategies.CombatModifiers
 {
     internal class DefendingForceCombatModifer : ICombatModifier
     {

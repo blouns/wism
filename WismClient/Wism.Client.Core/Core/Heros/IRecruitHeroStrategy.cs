@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Core.Heros
 {
