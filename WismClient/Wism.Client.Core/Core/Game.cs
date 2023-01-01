@@ -486,16 +486,18 @@ namespace Wism.Client.Core
         /// <param name="worldName">World to use</param>
         public static void CreateDefaultGame(string worldName)
         {
-            current = new Game();
-            current.RandomSeed = Game.DefaultRandomSeed;
-            current.Random = new Random(Game.DefaultRandomSeed);
-            current.WarStrategy = new DefaultWarStrategy();
-            current.TraversalStrategy = CompositeTraversalStrategy.CreateDefault();
-            current.MovementCoordinator = MovementStrategyCoordinator.CreateDefault();
-            current.PathingStrategy = new DijkstraPathingStrategy();
+            current = new Game
+            {
+                RandomSeed = Game.DefaultRandomSeed,
+                Random = new Random(Game.DefaultRandomSeed),
+                WarStrategy = new DefaultWarStrategy(),
+                TraversalStrategy = CompositeTraversalStrategy.CreateDefault(),
+                MovementCoordinator = MovementStrategyCoordinator.CreateDefault(),
+                PathingStrategy = new DijkstraPathingStrategy(),
+                Players = new List<Player>()
+            };
 
             // Setup default players for testing
-            current.Players = new List<Player>();
             CreateDefaultPlayers();
 
             World.CreateWorld(worldName);

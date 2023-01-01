@@ -31,8 +31,14 @@ namespace Wism.Client.Test.Common
                 GameController = CreateGameController(),
                 CityController = CreateCityController(),
                 HeroController = CreateHeroController(),
-                LocationController = CreateLocationController()
+                LocationController = CreateLocationController(),
+                PlayerController = CreatePlayerController()
             };
+        }
+
+        private static PlayerController CreatePlayerController()
+        {
+            return new PlayerController(CreateLogFactory());
         }
 
         public static HeroController CreateHeroController()
@@ -42,12 +48,10 @@ namespace Wism.Client.Test.Common
 
         public static CommandController CreateCommandController(IWismClientRepository repo = null)
         {
+            if (repo != null) return new CommandController(CreateLogFactory(), repo);
 
-            if (repo == null)
-            {
-                var commands = new SortedList<int, Command>();
-                repo = new WismClientInMemoryRepository(commands);
-            }
+            var commands = new SortedList<int, Command>();
+            repo = new WismClientInMemoryRepository(commands);
 
             return new CommandController(CreateLogFactory(), repo);
         }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Data;
 using Wism.Client.Entities;
@@ -17,16 +18,17 @@ namespace Wism.Client.Test.Common
 
         public static GameEntity CreateDefaultNewGameSettings(string worldName, int seed = 1990)
         {
-            GameEntity settings = new GameEntity();
-
-            settings.Random = new RandomEntity() { Seed = seed };
-            settings.WarStrategy = CreateDefaultWarStrategy();
-            settings.PathingStrategy = CreatePathingStrategy();
-            settings.TraversalStrategies = CreateTraversalStrategies();
-            settings.MovementStrategies = CreateMovementStrategies();
-            settings.Players = CreateDefaultPlayers();
-            settings.World = CreateWorld(worldName);
-            settings.GameState = Core.GameState.Ready;
+            var settings = new GameEntity
+            {
+                Random = new RandomEntity() { Seed = seed },
+                WarStrategy = CreateDefaultWarStrategy(),
+                PathingStrategy = CreatePathingStrategy(),
+                TraversalStrategies = CreateTraversalStrategies(),
+                MovementStrategies = CreateMovementStrategies(),
+                Players = CreateDefaultPlayers(),
+                World = CreateWorld(worldName),
+                GameState = Core.GameState.Ready
+            };
 
             return settings;
         }

@@ -12,10 +12,10 @@ using Wism.Client.Test.Common;
 namespace Wism.Client.Test.Scenario
 {
     [TestFixture]
-    public class AIExpandAndConquerTests
+    public class AiExpandAndConquerTests
     {
         /// <summary>
-        /// Scenario: AI race to capture the neutral city, Deserton.
+        /// Scenario: AI race to capture the neutral city.
         /// </summary>
         [Test]
         public void CaptureNeutralCity_TwoAI()
@@ -25,6 +25,7 @@ namespace Wism.Client.Test.Scenario
             var commander = new AdaptaCommandProvider(TestUtilities.CreateLogFactory(), controller);
 
             TestUtilities.NewGame(controller, TestUtilities.DefaultTestWorld);
+            Console.WriteLine($"Random: {Game.Current.Random.Next()}");
             Game.Current.IgnoreGameOver = true;
 
             // Initial Sirians setup

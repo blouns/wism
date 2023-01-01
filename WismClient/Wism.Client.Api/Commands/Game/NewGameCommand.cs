@@ -12,12 +12,7 @@ namespace Wism.Client.Api.Commands
 
         public NewGameCommand(GameController gameController, GameEntity settings)
         {
-            if (gameController is null)
-            {
-                throw new ArgumentNullException(nameof(gameController));
-            }
-
-            this.GameController = gameController;
+            this.GameController = gameController ?? throw new ArgumentNullException(nameof(gameController));
             this.Settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
