@@ -11,13 +11,21 @@ namespace Wism.Client.MapObjects
 
         private CityInfo info;
 
+        private City(CityInfo info)
+        {
+            this.info = info ?? throw new ArgumentNullException(nameof(info));
+            this.Defense = info.Defense;
+            this.DisplayName = info.DisplayName;
+            this.Barracks = new Barracks(this, info.ProductionInfos);
+        }
+
         public int Defense { get; set; }
 
         public Clan Clan { get; private set; }
 
-        public int Income { get => this.Info.Income; }
+        public int Income => this.Info.Income;
 
-        public override string ShortName { get => this.Info.ShortName; }
+        public override string ShortName => this.Info.ShortName;
 
         public Barracks Barracks { get; set; }
 
@@ -34,12 +42,37 @@ namespace Wism.Client.MapObjects
             }
         }
 
-        private City(CityInfo info)
+        public bool TryBuild()
         {
-            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
-            this.Defense = info.Defense;
-            this.DisplayName = info.DisplayName;
-            this.Barracks = new Barracks(this, info.ProductionInfos);
+            if (this.Defense == MaxDefense)
+            {
+                return false;
+            }
+
+            var cost = this.GetCostToBuild();
+            if (this.Player.Gold >= cost)
+            {
+                this.Player.Gold -= cost;
+                this.Defense++;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     Reduces the city to ruins! This is irreparable and causes a reputation hit.
+        /// </summary>
+        public void Raze()
+        {
+            var tiles = this.GetTiles();
+            for (var i = 0; i < 4; i++)
+            {
+                tiles[i].RazeInternal();
+            }
+
+            // Reset production
+            this.Barracks.Reset();
         }
 
         public static City Create(CityInfo info)
@@ -54,10 +87,10 @@ namespace Wism.Client.MapObjects
 
         public List<Army> MusterArmies()
         {
-            List<Army> armies = new List<Army>();
+            var armies = new List<Army>();
 
-            var tiles = GetTiles();
-            for (int i = 0; i < 4; i++)
+            var tiles = this.GetTiles();
+            for (var i = 0; i < 4; i++)
             {
                 if (tiles[i].HasArmies())
                 {
@@ -69,7 +102,7 @@ namespace Wism.Client.MapObjects
         }
 
         /// <summary>
-        /// Gets the tiles for the city (4x4)
+        ///     Gets the tiles for the city (4x4)
         /// </summary>
         /// <returns>Array contain four tiles</returns>
         public Tile[] GetTiles()
@@ -88,27 +121,6 @@ namespace Wism.Client.MapObjects
                 nineGrid[2, 0],
                 nineGrid[2, 1]
             };
-
-        }
-
-        public bool TryBuild()
-        {
-            if (this.Defense == MaxDefense)
-            {
-                return false;
-            }
-
-            int cost = GetCostToBuild();
-            if (this.Player.Gold >= cost)
-            {
-                this.Player.Gold -= cost;
-                this.Defense++;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
 
         public int GetCostToBuild()
@@ -151,27 +163,12 @@ namespace Wism.Client.MapObjects
         }
 
         /// <summary>
-        /// Reduces the city to ruins! This is irreparable and causes a reputation hit.
-        /// </summary>
-        public void Raze()
-        {
-            var tiles = GetTiles();
-            for (int i = 0; i < 4; i++)
-            {
-                tiles[i].RazeInternal();
-            }
-
-            // Reset production
-            this.Barracks.Reset();
-        }
-
-        /// <summary>
-        /// Stake a claim for the given player
+        ///     Stake a claim for the given player
         /// </summary>
         /// <param name="player">Player to stake claim</param>
         public void Claim(Player player)
         {
-            Claim(player, this.Tile);
+            this.Claim(player, this.Tile);
         }
 
         internal void Claim(Player player, Tile tile)
@@ -187,7 +184,7 @@ namespace Wism.Client.MapObjects
             }
 
             // Ensure all armies are friendly in the city
-            var cityArmies = MusterArmies();
+            var cityArmies = this.MusterArmies();
             if (!cityArmies.TrueForAll(a => a.Clan == player.Clan))
             {
                 throw new ArgumentException("Clan cannot claim a city when there are armies of another clan present.");
@@ -197,19 +194,20 @@ namespace Wism.Client.MapObjects
             this.Player = player;
             this.Clan = player.Clan;
             this.Tile = tile;
-            var tiles = GetTiles();
-            for (int i = 0; i < 4; i++)
+            var tiles = this.GetTiles();
+            for (var i = 0; i < 4; i++)
             {
                 if (tiles[i].City == null)
                 {
                     throw new InvalidOperationException("Not able to claim as there is no city on this tile.");
                 }
+
                 tiles[i].City.Clan = player.Clan;
             }
 
             // Reset production
             this.Barracks.Reset();
-            CancelIncomingProduction();
+            this.CancelIncomingProduction();
         }
 
         private void CancelIncomingProduction()
@@ -221,14 +219,14 @@ namespace Wism.Client.MapObjects
             }
 
             var cities = this.Player.GetCities();
-            foreach (City otherCity in cities)
+            foreach (var otherCity in cities)
             {
                 otherCity.Barracks.CancelDelivery(this);
             }
         }
 
         /// <summary>
-        /// Start producing an army in the barracks.
+        ///     Start producing an army in the barracks.
         /// </summary>
         /// <param name="armyInfo"></param>
         /// <param name="destinationCity"></param>
@@ -265,10 +263,10 @@ namespace Wism.Client.MapObjects
 
         public override bool Equals(object obj)
         {
-            City other = (City)obj;
+            var other = (City)obj;
             return
-                (this.ShortName == other.ShortName) &&
-                (this.Tile == other.Tile);
+                this.ShortName == other.ShortName &&
+                this.Tile == other.Tile;
         }
 
         public override int GetHashCode()

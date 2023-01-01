@@ -8,13 +8,6 @@ namespace Wism.Client.Api.Commands
 {
     public class CompleteBattleCommand : ArmyCommand
     {
-        public int X { get; }
-        public int Y { get; }
-
-        public List<Army> Defenders { get; }
-        public AttackOnceCommand AttackCommand { get; }
-        public Tile TargetTile { get; }
-
         public CompleteBattleCommand(ArmyController armyController, AttackOnceCommand attackCommand)
             : base(armyController, attackCommand.Armies)
         {
@@ -25,6 +18,13 @@ namespace Wism.Client.Api.Commands
             this.Defenders = this.TargetTile.MusterArmy();
             this.Defenders.Sort(new ByArmyBattleOrder(this.TargetTile));
         }
+
+        public int X { get; }
+        public int Y { get; }
+
+        public List<Army> Defenders { get; }
+        public AttackOnceCommand AttackCommand { get; }
+        public Tile TargetTile { get; }
 
 
         protected override ActionState ExecuteInternal()
@@ -37,7 +37,8 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            return $"Command: Complete battle of {ArmyUtilities.ArmiesToString(this.AttackCommand.OriginalAttackingArmies)} against " +
+            return
+                $"Command: Complete battle of {ArmyUtilities.ArmiesToString(this.AttackCommand.OriginalAttackingArmies)} against " +
                 $"{World.Current.Map[this.X, this.Y]}";
         }
     }

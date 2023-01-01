@@ -6,7 +6,7 @@ using Wism.Client.Modules;
 namespace Wism.Client.Core.Armies
 {
     /// <summary>
-    /// Allows for a Hero to fly on the back of a flying creature.
+    ///     Allows for a Hero to fly on the back of a flying creature.
     /// </summary>
     public class HeroFlightTraversalStrategy : ITraversalStrategy
     {
@@ -22,8 +22,8 @@ namespace Wism.Client.Core.Armies
                 throw new ArgumentNullException(nameof(tile));
             }
 
-            int heroCount = 0;
-            int flyableCount = 0;
+            var heroCount = 0;
+            var flyableCount = 0;
             foreach (var army in armies)
             {
                 if (army is Hero)
@@ -37,9 +37,9 @@ namespace Wism.Client.Core.Armies
                 }
             }
 
-            return ((heroCount > 0) &&
-                    (flyableCount > 0) &&
-                    (flyableCount == armies.Count - heroCount));
+            return heroCount > 0 &&
+                   flyableCount > 0 &&
+                   flyableCount == armies.Count - heroCount;
         }
 
         public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile, bool ignoreClan = false)

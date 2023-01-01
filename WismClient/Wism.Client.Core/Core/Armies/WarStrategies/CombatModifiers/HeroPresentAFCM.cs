@@ -16,13 +16,21 @@ namespace Wism.Client.War
             if (attacker is Hero)
             {
                 if (attacker.Strength <= 3)
+                {
                     modifier += 0;
+                }
                 else if (attacker.Strength >= 4 && attacker.Strength <= 6)
+                {
                     modifier += 1;
+                }
                 else if (attacker.Strength >= 7 && attacker.Strength <= 8)
+                {
                     modifier += 2;
+                }
                 else if (attacker.Strength >= 9)
+                {
                     modifier += 3;
+                }
             }
 
             return modifier;

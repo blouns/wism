@@ -7,7 +7,9 @@ namespace Wism.Client.Data
         public static T Clone<T>(T source)
         {
             if (ReferenceEquals(source, null))
-                return default(T);
+            {
+                return default;
+            }
 
             var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
 

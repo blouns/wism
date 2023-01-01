@@ -7,11 +7,6 @@ namespace Wism.Client.Api.Commands
 {
     public class PrepareForBattleCommand : ArmyCommand
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-
-        public List<Army> Defenders { get; set; }
-
         public PrepareForBattleCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armyController, armies)
         {
@@ -22,6 +17,11 @@ namespace Wism.Client.Api.Commands
             armies.Sort(new ByArmyBattleOrder(World.Current.Map[this.X, this.Y]));
         }
 
+        public int X { get; set; }
+        public int Y { get; set; }
+
+        public List<Army> Defenders { get; set; }
+
         protected override ActionState ExecuteInternal()
         {
             return this.armyController.PrepareForBattle();
@@ -30,7 +30,7 @@ namespace Wism.Client.Api.Commands
         public override string ToString()
         {
             return $"Command: Prepare for battle of {ArmyUtilities.ArmiesToString(this.Armies)} against " +
-                $"{World.Current.Map[this.X, this.Y]}";
+                   $"{World.Current.Map[this.X, this.Y]}";
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Wism.Client.Data
     {
         public static GameEntity SnapshotGame(Game game)
         {
-            GameEntity snapshot = new GameEntity()
+            var snapshot = new GameEntity
             {
                 Timestamp = DateTime.UtcNow,
                 CurrentPlayerIndex = game.CurrentPlayerIndex,
@@ -36,7 +36,7 @@ namespace Wism.Client.Data
 
         private static AssemblyEntity SnapshotPathingStrategy(IPathingStrategy pathingStrategy)
         {
-            var snapshot = new AssemblyEntity()
+            var snapshot = new AssemblyEntity
             {
                 AssemblyName = Assembly.GetAssembly(pathingStrategy.GetType()).FullName,
                 TypeName = pathingStrategy.GetType().FullName
@@ -54,9 +54,9 @@ namespace Wism.Client.Data
             }
 
             var snapshot = new AssemblyEntity[compositeStrategy.Strategies.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            for (var i = 0; i < snapshot.Length; i++)
             {
-                snapshot[i] = new AssemblyEntity()
+                snapshot[i] = new AssemblyEntity
                 {
                     AssemblyName = Assembly.GetAssembly(compositeStrategy.Strategies[i].GetType()).FullName,
                     TypeName = compositeStrategy.Strategies[i].GetType().FullName
@@ -69,9 +69,9 @@ namespace Wism.Client.Data
         public static AssemblyEntity[] SnapshotMovementStrategies(MovementStrategyCoordinator movementCoordinator)
         {
             var snapshot = new AssemblyEntity[movementCoordinator.Strategies.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            for (var i = 0; i < snapshot.Length; i++)
             {
-                snapshot[i] = new AssemblyEntity()
+                snapshot[i] = new AssemblyEntity
                 {
                     AssemblyName = Assembly.GetAssembly(movementCoordinator.Strategies[i].GetType()).FullName,
                     TypeName = movementCoordinator.Strategies[i].GetType().FullName
@@ -83,7 +83,7 @@ namespace Wism.Client.Data
 
         private static AssemblyEntity SnapshotWarStrategy(IWarStrategy warStrategy)
         {
-            var snapshot = new AssemblyEntity()
+            var snapshot = new AssemblyEntity
             {
                 AssemblyName = Assembly.GetAssembly(warStrategy.GetType()).FullName,
                 TypeName = warStrategy.GetType().FullName
@@ -99,7 +99,7 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            return selectedArmies.ConvertAll<int>(a => a.Id).ToArray();
+            return selectedArmies.ConvertAll(a => a.Id).ToArray();
         }
 
         private static WorldEntity SnapshotWorld(World world)
@@ -109,9 +109,9 @@ namespace Wism.Client.Data
                 throw new ArgumentNullException(nameof(world));
             }
 
-            int xBound = world.Map.GetUpperBound(0) + 1;
-            int yBound = world.Map.GetUpperBound(1) + 1;
-            var snapshot = new WorldEntity()
+            var xBound = world.Map.GetUpperBound(0) + 1;
+            var yBound = world.Map.GetUpperBound(1) + 1;
+            var snapshot = new WorldEntity
             {
                 Name = world.Name,
                 Cities = SnapshotCities(world),
@@ -133,9 +133,9 @@ namespace Wism.Client.Data
             }
 
             var snapshot = new LocationEntity[locations.Count];
-            for (int i = 0; i < locations.Count; i++)
+            for (var i = 0; i < locations.Count; i++)
             {
-                snapshot[i] = new LocationEntity()
+                snapshot[i] = new LocationEntity
                 {
                     Boon = SnapshotBoon(locations[i].Boon),
                     Id = locations[i].Id,
@@ -157,10 +157,10 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            var snapshot = new BoonEntity()
+            var snapshot = new BoonEntity
             {
-                AlliesShortName = (boon is AlliesBoon) ? ((AlliesBoon)boon).ArmyInfo.ShortName : null,
-                ArtifactShortName = (boon is ArtifactBoon) ? ((ArtifactBoon)boon).Artifact.ShortName : null,
+                AlliesShortName = boon is AlliesBoon ? ((AlliesBoon)boon).ArmyInfo.ShortName : null,
+                ArtifactShortName = boon is ArtifactBoon ? ((ArtifactBoon)boon).Artifact.ShortName : null,
                 BoonAssemblyName = Assembly.GetAssembly(boon.GetType()).FullName,
                 BoonTypeName = boon.GetType().FullName
             };
@@ -173,12 +173,12 @@ namespace Wism.Client.Data
             var map = world.Map;
             var snapshot = new TileEntity[xUpperBound * yUpperBound];
 
-            for (int y = 0; y < yUpperBound; y++)
+            for (var y = 0; y < yUpperBound; y++)
             {
-                for (int x = 0; x < xUpperBound; x++)
+                for (var x = 0; x < xUpperBound; x++)
                 {
                     var tile = map[x, y];
-                    snapshot[x + y * xUpperBound] = new TileEntity()
+                    snapshot[x + y * xUpperBound] = new TileEntity
                     {
                         ArmyIds = ConvertToArmyIds(tile.Armies),
                         CityShortName = tile.HasCity() ? tile.City.ShortName : null,
@@ -203,9 +203,9 @@ namespace Wism.Client.Data
             }
 
             var snapshot = new ArtifactEntity[items.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            for (var i = 0; i < snapshot.Length; i++)
             {
-                snapshot[i] = new ArtifactEntity()
+                snapshot[i] = new ArtifactEntity
                 {
                     ArtifactShortName = items[i].ShortName,
                     Id = items[i].Id,
@@ -220,7 +220,7 @@ namespace Wism.Client.Data
 
         private static int GetPlayerIndex(Artifact artifact)
         {
-            for (int i = 0; i < Game.Current.Players.Count; i++)
+            for (var i = 0; i < Game.Current.Players.Count; i++)
             {
                 if (artifact.Player != null)
                 {
@@ -241,7 +241,7 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            return armies.ConvertAll<int>(a => a.Id).ToArray();
+            return armies.ConvertAll(a => a.Id).ToArray();
         }
 
         private static int[] ConvertToHeroIds(List<Hero> heroes)
@@ -251,7 +251,7 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            return heroes.ConvertAll<int>(a => a.Id).ToArray();
+            return heroes.ConvertAll(a => a.Id).ToArray();
         }
 
         private static CityEntity[] SnapshotCities(World world)
@@ -263,13 +263,13 @@ namespace Wism.Client.Data
             }
 
             var snapshot = new CityEntity[cities.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            for (var i = 0; i < snapshot.Length; i++)
             {
-                snapshot[i] = new CityEntity()
+                snapshot[i] = new CityEntity
                 {
                     ArmiesToDeliver = SnapshotArmiesToDeliver(cities[i].Barracks.ArmiesToDeliver),
                     ArmyInTraining = SnapshotArmyInTraining(cities[i].Barracks.ArmyInTraining),
-                    ClanShortName = (cities[i].Clan == null) ? null : cities[i].Clan.ShortName,
+                    ClanShortName = cities[i].Clan == null ? null : cities[i].Clan.ShortName,
                     CityShortName = cities[i].ShortName,
                     ProductionInfo = SnapshotProductionSlots(cities[i].Barracks),
                     Defense = cities[i].Defense,
@@ -290,7 +290,7 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            var snapshot = new ProductionEntity()
+            var snapshot = new ProductionEntity
             {
                 ArmyNames = ConvertToArmyShortNames(productionSlots),
                 ProductionNumbers = ConvertToProductionNumbers(barracks, productionSlots)
@@ -306,8 +306,8 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            string[] armyNames = new string[productionSlots.Count];
-            for (int i = 0; i < armyNames.Length; i++)
+            var armyNames = new string[productionSlots.Count];
+            for (var i = 0; i < armyNames.Length; i++)
             {
                 armyNames[i] = productionSlots[i].ArmyInfoName;
             }
@@ -322,8 +322,8 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            int[] productionNumbers = new int[productionSlots.Count];
-            for (int i = 0; i < productionNumbers.Length; i++)
+            var productionNumbers = new int[productionSlots.Count];
+            for (var i = 0; i < productionNumbers.Length; i++)
             {
                 productionNumbers[i] = barracks.GetProductionNumber(productionSlots[i].ArmyInfoName);
             }
@@ -338,10 +338,12 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            var snapshot = new ArmyInTrainingEntity()
+            var snapshot = new ArmyInTrainingEntity
             {
                 ArmyShortName = armyInTraining.ArmyInfo.ShortName,
-                DestinationCityShortName = (armyInTraining.DestinationCity == null) ? null : armyInTraining.DestinationCity.ShortName,
+                DestinationCityShortName = armyInTraining.DestinationCity == null
+                    ? null
+                    : armyInTraining.DestinationCity.ShortName,
                 DisplayName = armyInTraining.DisplayName,
                 Moves = armyInTraining.Moves,
                 ProductionCityShortName = armyInTraining.ProductionCity.ShortName,
@@ -362,11 +364,13 @@ namespace Wism.Client.Data
             }
 
             var snapshot = new ArmyInTrainingEntity[armiesToDeliver.Count];
-            int i = 0;
+            var i = 0;
             foreach (var ait in armiesToDeliver)
             {
                 snapshot[i++] = SnapshotArmyInTraining(ait);
-            };
+            }
+
+            ;
 
             return snapshot;
         }
@@ -379,12 +383,12 @@ namespace Wism.Client.Data
             }
 
             var snapshot = new PlayerEntity[players.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            for (var i = 0; i < snapshot.Length; i++)
             {
-                snapshot[i] = new PlayerEntity()
+                snapshot[i] = new PlayerEntity
                 {
                     Armies = SnapshotArmies(players[i].GetArmies()),
-                    CapitolShortName = (players[i].Capitol != null) ? players[i].Capitol.ShortName : null,
+                    CapitolShortName = players[i].Capitol != null ? players[i].Capitol.ShortName : null,
                     ClanShortName = players[i].Clan.ShortName,
                     Gold = players[i].Gold,
                     IsDead = players[i].IsDead,
@@ -401,7 +405,7 @@ namespace Wism.Client.Data
 
         private static string[] ConvertToCityShortNames(List<City> cities)
         {
-            return cities.ConvertAll<string>(c => c.ShortName).ToArray();
+            return cities.ConvertAll(c => c.ShortName).ToArray();
         }
 
         private static ArmyEntity[] SnapshotArmies(List<Army> armies)
@@ -412,9 +416,9 @@ namespace Wism.Client.Data
             }
 
             var snapshot = new ArmyEntity[armies.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            for (var i = 0; i < snapshot.Length; i++)
             {
-                snapshot[i] = new ArmyEntity()
+                snapshot[i] = new ArmyEntity
                 {
                     ArmyShortName = armies[i].ShortName,
                     Artifacts = SnapshotArtifacts(armies[i]),
@@ -442,7 +446,7 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            return blessedAt.ConvertAll<string>(l => l.ShortName).ToArray();
+            return blessedAt.ConvertAll(l => l.ShortName).ToArray();
         }
 
         private static ArtifactEntity[] SnapshotArtifacts(Army army)
@@ -454,9 +458,9 @@ namespace Wism.Client.Data
             }
 
             var snapshot = new ArtifactEntity[hero.Items.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            for (var i = 0; i < snapshot.Length; i++)
             {
-                snapshot[i] = new ArtifactEntity()
+                snapshot[i] = new ArtifactEntity
                 {
                     ArtifactShortName = hero.Items[i].ShortName,
                     Id = hero.Items[i].Id,
@@ -472,7 +476,7 @@ namespace Wism.Client.Data
             var snapshot = new RandomEntity();
 
             snapshot.Seed = game.RandomSeed;
-            snapshot.Random = Cloner.Clone<Random>(random);
+            snapshot.Random = Cloner.Clone(random);
 
             return snapshot;
         }

@@ -23,7 +23,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(target), "Target tile has no visiting armies");
             }
 
-            int goldBoon = Game.Current.Random.Next(MinGold, MaxGold + 1);
+            var goldBoon = Game.Current.Random.Next(MinGold, MaxGold + 1);
 
             target.VisitingArmies[0].Player.Gold += goldBoon;
 

@@ -1,6 +1,6 @@
 <Project>
-  <PropertyGroup>
-    <!--
+	<PropertyGroup>
+		<!--
         AssemblyVersion:
         Where other assemblies that reference your assembly will look. If this 
         number changes, other assemblies have to update their references to your 
@@ -8,9 +8,9 @@
 
         Format: major.minor
     -->
-    <Version>0.2</Version>
+		<Version>0.2</Version>
 
-    <!-- 
+		<!-- 
         AssemblyFileVersion:
         Used for deployment. You can increase this number for every deployment.       
 
@@ -19,9 +19,9 @@
         Note: Follow SemVer for the first three parts and use the buildnumber of the 
         buildserver for the last part (0 for local build).
     -->
-    <FileVersion>0.2.0.0</FileVersion>    
+		<FileVersion>0.2.0.0</FileVersion>
 
-    <!--
+		<!--
         The Product version of the assembly. This is the version you would use when 
         talking to customers or for display on your website. This version can be a 
         string, like '1.0 Release Candidate'.
@@ -29,7 +29,7 @@
 
         Format: major.minor[.patch] [revision as string]
     -->
-    <InformationalVersion>0.2 Pre-Alpha</InformationalVersion>
+		<InformationalVersion>0.2 Pre-Alpha</InformationalVersion>
 
-  </PropertyGroup>
+	</PropertyGroup>
 </Project>

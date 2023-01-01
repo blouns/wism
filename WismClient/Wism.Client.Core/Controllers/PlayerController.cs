@@ -31,7 +31,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Gets info on any available hero for hire
+        ///     Gets info on any available hero for hire
         /// </summary>
         /// <param name="player">Player looking for a hero</param>
         /// <param name="name">Display name of hero</param>
@@ -39,7 +39,8 @@ namespace Wism.Client.Core.Controllers
         /// <param name="price">Hero's price to hire</param>
         /// <param name="allyKinds">Any allies joining the hero (may be zero)</param>
         /// <returns>True if a hero is available</returns>
-        public bool RecruitHero(Player player, out string name, out City city, out int price, out List<ArmyInfo> allyKinds)
+        public bool RecruitHero(Player player, out string name, out City city, out int price,
+            out List<ArmyInfo> allyKinds)
         {
             name = null;
             city = null;
@@ -61,7 +62,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Conscript new armies at the given tile.
+        ///     Conscript new armies at the given tile.
         /// </summary>
         /// <param name="player">Player to conscript armies</param>
         /// <param name="armyKinds">Army kinds (may be duplicate)</param>
@@ -93,7 +94,7 @@ namespace Wism.Client.Core.Controllers
                     player.ConscriptArmy(armyKind, tile));
             }
 
-            return (armies.Count > 0) ? ActionState.Succeeded : ActionState.Failed;
+            return armies.Count > 0 ? ActionState.Succeeded : ActionState.Failed;
         }
     }
 }

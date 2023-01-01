@@ -1,43 +1,42 @@
 ﻿using NUnit.Framework;
 using Wism.Client.Core;
 
-namespace Wism.Client.Test.Unit
+namespace Wism.Client.Test.Unit;
+
+[TestFixture]
+public class GameTests
 {
-    [TestFixture]
-    public class GameTests
+    [Test]
+    public void EndTurn_Multiplayer_NextPlayersTurn()
     {
-        [Test]
-        public void EndTurn_Multiplayer_NextPlayersTurn()
-        {
-            // Assemble            
-            Game.CreateDefaultGame();
-            Player player1 = Game.Current.Players[0];
-            Player player2 = Game.Current.Players[1];
+        // Assemble            
+        Game.CreateDefaultGame();
+        var player1 = Game.Current.Players[0];
+        var player2 = Game.Current.Players[1];
 
-            // Act
-            Game.Current.EndTurn();
+        // Act
+        Game.Current.EndTurn();
 
-            // Assert
-            Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
-                "Current player is incorrect.");
-        }
+        // Assert
+        Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
+            "Current player is incorrect.");
+    }
 
-        [Test]
-        public void StartTurn_NoCities_Gameover()
-        {
-            // Assemble            
-            Game.CreateDefaultGame();
-            Player player1 = Game.Current.Players[0];
-            Player player2 = Game.Current.Players[1];
-            Game.Current.EndTurn();
+    [Test]
+    public void StartTurn_NoCities_Gameover()
+    {
+        // Assemble            
+        Game.CreateDefaultGame();
+        var player1 = Game.Current.Players[0];
+        var player2 = Game.Current.Players[1];
+        Game.Current.EndTurn();
 
-            // Act
-            Game.Current.StartTurn();
+        // Act
+        Game.Current.StartTurn();
 
-            // Assert
-            Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
-                "Current player is incorrect.");
-            Assert.IsTrue(player2.IsDead, "Player should be dead.");
-        }
+        // Assert
+        Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
+            "Current player is incorrect.");
+        Assert.IsTrue(player2.IsDead, "Player should be dead.");
     }
 }

@@ -10,7 +10,7 @@ namespace Wism.Client.War
     {
         public int Calculate(Army attacker, Tile target, int modifier = 0)
         {
-            Hero hero = attacker as Hero;
+            var hero = attacker as Hero;
             if (hero != null)
             {
                 modifier += hero.GetCommandBonus();

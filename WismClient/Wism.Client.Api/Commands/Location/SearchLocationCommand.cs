@@ -7,16 +7,16 @@ namespace Wism.Client.Api.Commands
 {
     public abstract class SearchLocationCommand : Command
     {
-        public LocationController LocationController { get; }
-        public List<Army> Armies { get; }
-        public Location Location { get; }
-
         public SearchLocationCommand(LocationController locationController, List<Army> armies, Location location)
         {
             this.LocationController = locationController ?? throw new ArgumentNullException(nameof(locationController));
             this.Armies = armies ?? throw new ArgumentNullException(nameof(armies));
             this.Location = location ?? throw new ArgumentNullException(nameof(location));
         }
+
+        public LocationController LocationController { get; }
+        public List<Army> Armies { get; }
+        public Location Location { get; }
 
         public override string ToString()
         {

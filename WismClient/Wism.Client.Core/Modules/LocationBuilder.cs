@@ -7,35 +7,31 @@ namespace Wism.Client.Modules
 {
     public class LocationBuilder
     {
-        private readonly string worldPath;
-
         private static IList<LocationInfo> locationInfos;
-
-        // Mutable objects; do not expose directly; use Find
-        public Dictionary<string, Location> LocationKinds { get => this.locationKinds; }
-
-        public string WorldPath => this.worldPath;
 
         public LocationBuilder(string worldPath)
         {
-            this.worldPath = worldPath;
-            LoadLocationKinds(worldPath);
+            this.WorldPath = worldPath;
+            this.LoadLocationKinds(worldPath);
         }
 
-        private readonly Dictionary<string, Location> locationKinds = new Dictionary<string, Location>();
+        // Mutable objects; do not expose directly; use Find
+        public Dictionary<string, Location> LocationKinds { get; } = new Dictionary<string, Location>();
+
+        public string WorldPath { get; }
 
         public void AddLocationsFromWorldPath(World world, string worldPath)
         {
             var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldPath}";
 
-            AddLocations(world, LoadLocationInfos(path));
+            this.AddLocations(world, this.LoadLocationInfos(path));
         }
 
         public void AddLocations(World world, IList<LocationInfo> locationInfos)
         {
             foreach (var locationInfo in locationInfos)
             {
-                AddLocation(world, locationInfo);
+                this.AddLocation(world, locationInfo);
             }
         }
 
@@ -46,7 +42,7 @@ namespace Wism.Client.Modules
                 throw new ArgumentNullException(nameof(info));
             }
 
-            AddLocation(world, info.X, info.Y, info.ShortName);
+            this.AddLocation(world, info.X, info.Y, info.ShortName);
         }
 
         public void AddLocation(World world, int x, int y, string shortName)
@@ -66,6 +62,7 @@ namespace Wism.Client.Modules
             {
                 throw new ArgumentException($"{shortName} not found in location modules.");
             }
+
             location = location.Clone();
 
             // Add to map
@@ -78,7 +75,7 @@ namespace Wism.Client.Modules
         }
 
         /// <summary>
-        /// Find a location matching the shortName given
+        ///     Find a location matching the shortName given
         /// </summary>
         /// <param name="shortName">Name to match</param>
         /// <returns>Location matching the name; otherwise, null</returns>
@@ -96,7 +93,7 @@ namespace Wism.Client.Modules
 
         private IList<LocationInfo> LoadLocationInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, LocationInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, LocationInfo.FileName);
             locationInfos = ModFactory.LoadModFiles<LocationInfo>(filePath);
 
             return locationInfos;
@@ -105,8 +102,8 @@ namespace Wism.Client.Modules
         private void LoadLocationKinds(string path)
         {
             this.LocationKinds.Clear();
-            IList<Location> locations = ModFactory.LoadLocations(path);
-            foreach (Location location in locations)
+            var locations = ModFactory.LoadLocations(path);
+            foreach (var location in locations)
             {
                 this.LocationKinds.Add(location.ShortName, location);
             }

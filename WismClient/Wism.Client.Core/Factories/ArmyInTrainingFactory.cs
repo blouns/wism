@@ -19,13 +19,12 @@ namespace Wism.Client.Factories
                 throw new ArgumentNullException(nameof(world));
             }
 
-            var ait = new ArmyInTraining()
+            var ait = new ArmyInTraining
             {
-
                 ArmyInfo = ModFactory.FindArmyInfo(snapshot.ArmyShortName),
-                DestinationCity = String.IsNullOrWhiteSpace(snapshot.DestinationCityShortName) ?
-                    null :
-                    world.FindCity(snapshot.DestinationCityShortName),
+                DestinationCity = string.IsNullOrWhiteSpace(snapshot.DestinationCityShortName)
+                    ? null
+                    : world.FindCity(snapshot.DestinationCityShortName),
                 ProductionCity = world.FindCity(snapshot.ProductionCityShortName),
                 TurnsToProduce = snapshot.TurnsToProduce,
                 TurnsToDeliver = snapshot.TurnsToDeliver,

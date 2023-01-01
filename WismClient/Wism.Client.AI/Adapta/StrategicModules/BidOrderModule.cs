@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Wism.Client.MapObjects;
+﻿using System.Collections.Generic;
 
 namespace Wism.Client.AI.Adapta.Strategic
 {
@@ -8,7 +6,6 @@ namespace Wism.Client.AI.Adapta.Strategic
     {
         private BidOrderModule()
         {
-
         }
 
         public static BidOrderModule CreateDefault()

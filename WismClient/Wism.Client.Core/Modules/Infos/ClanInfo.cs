@@ -8,20 +8,19 @@ namespace Wism.Client.Modules
     {
         public static readonly string FileName = "Clan.json";
 
-        [DataMember]
-        public string ShortName = "xx";
+        [DataMember] public string Color = "(255, 0, 0)";
 
-        [DataMember]
-        public string DisplayName { get; set; } = "Clan Name";
+        [DataMember] public string ShortName = "xx";
 
-        [DataMember]
-        public string Color = "(255, 0, 0)";
+        [DataMember] public string DisplayName { get; set; } = "Clan Name";
 
         public static ClanInfo GetClanInfo(string id)
         {
-            ClanInfo info = ModFactory.FindClanInfo(id);
+            var info = ModFactory.FindClanInfo(id);
             if (info == null)
+            {
                 throw new InvalidOperationException("No such type found.");
+            }
 
             return info;
         }

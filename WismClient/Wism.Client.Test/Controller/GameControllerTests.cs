@@ -1,65 +1,64 @@
 ﻿using NUnit.Framework;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.Test.Common;
 
-namespace Wism.Client.Test.Controller
+namespace Wism.Client.Test.Controller;
+
+[TestFixture]
+public class GameControllerTests
 {
-    [TestFixture]
-    public class GameControllerTests
+    [Test]
+    public void EndTurn_Player1Test()
     {
-        [Test]
-        public void EndTurn_Player1Test()
-        {
-            // Assemble
-            GameController gameController = TestUtilities.CreateGameController();
-            Game.CreateDefaultGame();
-            Player player1 = Game.Current.Players[0];
-            Player player2 = Game.Current.Players[1];
+        // Assemble
+        var gameController = TestUtilities.CreateGameController();
+        Game.CreateDefaultGame();
+        var player1 = Game.Current.Players[0];
+        var player2 = Game.Current.Players[1];
 
-            // Act
-            gameController.EndTurn();
+        // Act
+        gameController.EndTurn();
 
-            // Assert
-            Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
-                "Current player is incorrect.");
-        }
+        // Assert
+        Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
+            "Current player is incorrect.");
+    }
 
-        [Test]
-        public void EndTurn_Player2Test()
-        {
-            // Assemble
-            GameController gameController = TestUtilities.CreateGameController();
-            Game.CreateDefaultGame();
-            Player player1 = Game.Current.Players[0];
-            Player player2 = Game.Current.Players[1];
+    [Test]
+    public void EndTurn_Player2Test()
+    {
+        // Assemble
+        var gameController = TestUtilities.CreateGameController();
+        Game.CreateDefaultGame();
+        var player1 = Game.Current.Players[0];
+        var player2 = Game.Current.Players[1];
 
-            // Act
-            gameController.EndTurn();
-            gameController.EndTurn();
+        // Act
+        gameController.EndTurn();
+        gameController.EndTurn();
 
-            // Assert
-            Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(),
-                "Current player is incorrect.");
-        }
+        // Assert
+        Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(),
+            "Current player is incorrect.");
+    }
 
-        [Test]
-        public void EndTurn_GameOver_Player1Win()
-        {
-            // Assemble
-            GameController gameController = TestUtilities.CreateGameController();
-            Game.CreateDefaultGame();
-            Player player1 = Game.Current.Players[0];
-            Player player2 = Game.Current.Players[1];
-            player2.IsDead = true;
+    [Test]
+    public void EndTurn_GameOver_Player1Win()
+    {
+        // Assemble
+        var gameController = TestUtilities.CreateGameController();
+        Game.CreateDefaultGame();
+        var player1 = Game.Current.Players[0];
+        var player2 = Game.Current.Players[1];
+        player2.IsDead = true;
 
-            // Act
-            gameController.EndTurn();
+        // Act
+        gameController.EndTurn();
 
-            // Assert
-            Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(),
-                "Current player is incorrect.");
-            Assert.AreEqual(GameState.GameOver, Game.Current.GameState, "Game should be over after last player dies (one player left).");
-        }
+        // Assert
+        Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(),
+            "Current player is incorrect.");
+        Assert.AreEqual(GameState.GameOver, Game.Current.GameState,
+            "Game should be over after last player dies (one player left).");
     }
 }

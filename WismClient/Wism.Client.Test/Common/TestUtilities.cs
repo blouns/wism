@@ -1,7 +1,5 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using Wism.Client.AI.CommandProviders;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
 using Wism.Client.Api;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
@@ -11,272 +9,280 @@ using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
-namespace Wism.Client.Test.Common
+namespace Wism.Client.Test.Common;
+
+public static class TestUtilities
 {
-    public static class TestUtilities
+    internal static readonly string DefaultTestWorld = "UnitTestWorld";
+
+    public static ILoggerFactory CreateLogFactory()
     {
-        internal static readonly string DefaultTestWorld = "UnitTestWorld";
+        return new WismLoggerFactory();
+    }
 
-        public static ILoggerFactory CreateLogFactory()
+    public static ControllerProvider CreateControllerProvider()
+    {
+        return new ControllerProvider
         {
-            return new WismLoggerFactory();
-        }
+            ArmyController = CreateArmyController(),
+            CommandController = CreateCommandController(),
+            GameController = CreateGameController(),
+            CityController = CreateCityController(),
+            HeroController = CreateHeroController(),
+            LocationController = CreateLocationController(),
+            PlayerController = CreatePlayerController()
+        };
+    }
 
-        public static ControllerProvider CreateControllerProvider()
+    private static PlayerController CreatePlayerController()
+    {
+        return new PlayerController(CreateLogFactory());
+    }
+
+    public static HeroController CreateHeroController()
+    {
+        return new HeroController(CreateLogFactory());
+    }
+
+    public static CommandController CreateCommandController(IWismClientRepository repo = null)
+    {
+        if (repo != null)
         {
-            return new ControllerProvider()
-            {
-                ArmyController = CreateArmyController(),
-                CommandController = CreateCommandController(),
-                GameController = CreateGameController(),
-                CityController = CreateCityController(),
-                HeroController = CreateHeroController(),
-                LocationController = CreateLocationController(),
-                PlayerController = CreatePlayerController()
-            };
-        }
-
-        private static PlayerController CreatePlayerController()
-        {
-            return new PlayerController(CreateLogFactory());
-        }
-
-        public static HeroController CreateHeroController()
-        {
-            return new HeroController(CreateLogFactory());
-        }
-
-        public static CommandController CreateCommandController(IWismClientRepository repo = null)
-        {
-            if (repo != null) return new CommandController(CreateLogFactory(), repo);
-
-            var commands = new SortedList<int, Command>();
-            repo = new WismClientInMemoryRepository(commands);
-
             return new CommandController(CreateLogFactory(), repo);
         }
 
-        public static ArmyController CreateArmyController()
+        var commands = new SortedList<int, Command>();
+        repo = new WismClientInMemoryRepository(commands);
+
+        return new CommandController(CreateLogFactory(), repo);
+    }
+
+    public static ArmyController CreateArmyController()
+    {
+        return new ArmyController(CreateLogFactory());
+    }
+
+    public static GameController CreateGameController()
+    {
+        return new GameController(CreateLogFactory());
+    }
+
+    public static CityController CreateCityController()
+    {
+        return new CityController(CreateLogFactory());
+    }
+
+    public static LocationController CreateLocationController()
+    {
+        return new LocationController(CreateLogFactory());
+    }
+
+    public static ActionState NewGame(ControllerProvider cp, string worldName)
+    {
+        return NewGame(cp.CommandController, cp.GameController, worldName);
+    }
+
+    public static ActionState NewGame(CommandController commandController, GameController gameController,
+        string worldName)
+    {
+        var settings = TestGameFactory.CreateDefaultNewGameSettings(worldName);
+
+        return ExecuteCommandUntilDone(commandController,
+            new NewGameCommand(gameController, settings));
+    }
+
+    public static ActionState Select(ControllerProvider cp, List<Army> armies)
+    {
+        return Select(cp.CommandController, cp.ArmyController, armies);
+    }
+
+    public static ActionState Select(CommandController commandController, ArmyController armyController,
+        List<Army> armies)
+    {
+        return ExecuteCommandUntilDone(commandController,
+            new SelectArmyCommand(armyController, armies));
+    }
+
+    public static ActionState Deselect(ControllerProvider cp, List<Army> armies)
+    {
+        return Deselect(cp.CommandController, cp.ArmyController, armies);
+    }
+
+    public static ActionState Deselect(CommandController commandController, ArmyController armyController,
+        List<Army> armies)
+    {
+        return ExecuteCommandUntilDone(commandController,
+            new DeselectArmyCommand(armyController, armies));
+    }
+
+    public static ActionState AttackUntilDone(CommandController commandController, ArmyController armyController,
+        List<Army> armies, int x, int y)
+    {
+        var targetTile = World.Current.Map[x, y];
+        var originalAttackingArmies = new List<Army>(armies);
+
+        var result = armyController.PrepareForBattle();
+        if (result != ActionState.Succeeded)
         {
-            return new ArmyController(CreateLogFactory());
-        }
-
-        public static GameController CreateGameController()
-        {
-            return new GameController(CreateLogFactory());
-        }
-
-        public static CityController CreateCityController()
-        {
-            return new CityController(CreateLogFactory());
-        }
-
-        public static LocationController CreateLocationController()
-        {
-            return new LocationController(CreateLogFactory());
-        }
-
-        public static ActionState NewGame(ControllerProvider cp, string worldName)
-        {
-            return NewGame(cp.CommandController, cp.GameController, worldName);
-        }
-
-        public static ActionState NewGame(CommandController commandController, GameController gameController, string worldName)
-        {
-            var settings = TestGameFactory.CreateDefaultNewGameSettings(worldName);
-
-            return ExecuteCommandUntilDone(commandController,
-                new NewGameCommand(gameController, settings));
-        }
-
-        public static ActionState Select(ControllerProvider cp, List<Army> armies)
-        {
-            return Select(cp.CommandController, cp.ArmyController, armies);
-        }
-
-        public static ActionState Select(CommandController commandController, ArmyController armyController, List<Army> armies)
-        {
-            return ExecuteCommandUntilDone(commandController,
-                new SelectArmyCommand(armyController, armies));
-        }
-
-        public static ActionState Deselect(ControllerProvider cp, List<Army> armies)
-        {
-            return Deselect(cp.CommandController, cp.ArmyController, armies);
-        }
-
-        public static ActionState Deselect(CommandController commandController, ArmyController armyController, List<Army> armies)
-        {
-            return ExecuteCommandUntilDone(commandController,
-                new DeselectArmyCommand(armyController, armies));
-        }
-
-        public static ActionState AttackUntilDone(CommandController commandController, ArmyController armyController, List<Army> armies, int x, int y)
-        {
-            var targetTile = World.Current.Map[x, y];
-            var originalAttackingArmies = new List<Army>(armies);
-
-            var result = armyController.PrepareForBattle();
-            if (result != ActionState.Succeeded)
-            {
-                return result;
-            }
-
-            var attackCommand = new AttackOnceCommand(armyController, armies, x, y);
-            result = ExecuteCommandUntilDone(commandController, attackCommand);
-            _ = armyController.CompleteBattle(originalAttackingArmies, targetTile, result == ActionState.Succeeded);
-
             return result;
         }
 
-        public static ActionState MoveUntilDone(CommandController commandController, ArmyController armyController, List<Army> armies, int x, int y)
+        var attackCommand = new AttackOnceCommand(armyController, armies, x, y);
+        result = ExecuteCommandUntilDone(commandController, attackCommand);
+        _ = armyController.CompleteBattle(originalAttackingArmies, targetTile, result == ActionState.Succeeded);
+
+        return result;
+    }
+
+    public static ActionState MoveUntilDone(CommandController commandController, ArmyController armyController,
+        List<Army> armies, int x, int y)
+    {
+        return ExecuteCommandUntilDone(commandController,
+            new MoveOnceCommand(armyController, armies, x, y));
+    }
+
+    public static ActionState EndTurn(CommandController commandController, GameController gameController)
+    {
+        return ExecuteCommandUntilDone(commandController,
+            new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
+    }
+
+    public static ActionState StartTurn(ControllerProvider cp)
+    {
+        return StartTurn(cp.CommandController, cp.GameController);
+    }
+
+    public static ActionState StartTurn(CommandController commandController, GameController gameController)
+    {
+        return ExecuteCommandUntilDone(commandController,
+            new StartTurnCommand(gameController, Game.Current.GetNextPlayer()));
+    }
+
+    public static ActionState SearchLibrary(CommandController commandController, LocationController locationController,
+        List<Army> armies)
+    {
+        var location = armies[0].Tile.Location;
+        return ExecuteCommandUntilDone(commandController,
+            new SearchLibraryCommand(locationController, armies, location));
+    }
+
+    public static ActionState SearchRuins(CommandController commandController, LocationController locationController,
+        List<Army> armies)
+    {
+        var location = armies[0].Tile.Location;
+        return ExecuteCommandUntilDone(commandController,
+            new SearchRuinsCommand(locationController, armies, location));
+    }
+
+    public static ActionState SearchSage(CommandController commandController, LocationController locationController,
+        List<Army> armies)
+    {
+        var location = armies[0].Tile.Location;
+        return ExecuteCommandUntilDone(commandController,
+            new SearchSageCommand(locationController, armies, location));
+    }
+
+    public static ActionState SearchTemple(CommandController commandController, LocationController locationController,
+        List<Army> armies)
+    {
+        var location = armies[0].Tile.Location;
+        return ExecuteCommandUntilDone(commandController,
+            new SearchTempleCommand(locationController, armies, location));
+    }
+
+    public static ActionState TakeItems(CommandController commandController, HeroController heroController,
+        Hero hero)
+    {
+        return ExecuteCommandUntilDone(commandController,
+            new TakeItemsCommand(heroController, hero));
+    }
+
+    public static ActionState DropItems(CommandController commandController, HeroController heroController,
+        Hero hero, List<Artifact> items)
+    {
+        return ExecuteCommandUntilDone(commandController,
+            new DropItemsCommand(heroController, hero, items));
+    }
+
+    public static ActionState ExecuteCommandUntilDone(CommandController commandController, Command command)
+    {
+        // Simulate two-phase execution            
+        commandController.AddCommand(command);
+
+        var commandToExecute = commandController.GetCommand(command.Id);
+        var result = commandToExecute.Execute();
+        while (result == ActionState.InProgress)
         {
-            return ExecuteCommandUntilDone(commandController,
-                new MoveOnceCommand(armyController, armies, x, y));
+            result = commandToExecute.Execute();
         }
 
-        public static ActionState EndTurn(CommandController commandController, GameController gameController)
+        return result;
+    }
+
+    /// <summary>
+    ///     Executes a full AI-based turn for a player.
+    /// </summary>
+    /// <param name="controller">Controller Provider</param>
+    /// <param name="player">AI Player to run</param>
+    /// <remarks>
+    ///     Assumes the turn is already started. Will end turn.
+    /// </remarks>
+    public static void ExecuteCurrentTurnAsAIUntilDone(ControllerProvider controller, ICommandProvider commander)
+    {
+        ActionState actionState;
+
+        // Get AI player
+        var player = Game.Current.GetCurrentPlayer();
+        var isHuman = player.IsHuman;
+        player.IsHuman = false;
+        var turn = player.Turn;
+        var clanName = Game.Current.GetCurrentPlayer().Clan.ShortName;
+
+        // Generate and execute commands as an AI
+        var lastId = controller.CommandController.GetLastCommand().Id;
+        commander.GenerateCommands();
+        var commands = controller.CommandController.GetCommandsAfterId(lastId);
+        foreach (var command in commands)
         {
-            return ExecuteCommandUntilDone(commandController,
-                new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
+            actionState = ExecuteCommandUntilDone(controller.CommandController, command);
+            // Log action state?
         }
 
-        public static ActionState StartTurn(ControllerProvider cp)
-        {
-            return StartTurn(cp.CommandController, cp.GameController);
-        }
+        // Restore player type
+        player.IsHuman = isHuman;
+    }
 
-        public static ActionState StartTurn(CommandController commandController, GameController gameController)
+    public static void PlotRouteOnMap(Tile[,] map, List<Tile> path)
+    {
+        for (var y = 0; y <= map.GetUpperBound(0); y++)
         {
-            return ExecuteCommandUntilDone(commandController,
-                new StartTurnCommand(gameController, Game.Current.GetNextPlayer()));
-        }
-
-        public static ActionState SearchLibrary(CommandController commandController, LocationController locationController,
-            List<Army> armies)
-        {
-            var location = armies[0].Tile.Location;
-            return ExecuteCommandUntilDone(commandController,
-                new SearchLibraryCommand(locationController, armies, location));
-        }
-
-        public static ActionState SearchRuins(CommandController commandController, LocationController locationController,
-            List<Army> armies)
-        {
-            var location = armies[0].Tile.Location;
-            return ExecuteCommandUntilDone(commandController,
-                new SearchRuinsCommand(locationController, armies, location));
-        }
-
-        public static ActionState SearchSage(CommandController commandController, LocationController locationController,
-            List<Army> armies)
-        {
-            var location = armies[0].Tile.Location;
-            return ExecuteCommandUntilDone(commandController,
-                new SearchSageCommand(locationController, armies, location));
-        }
-
-        public static ActionState SearchTemple(CommandController commandController, LocationController locationController,
-            List<Army> armies)
-        {
-            var location = armies[0].Tile.Location;
-            return ExecuteCommandUntilDone(commandController,
-                new SearchTempleCommand(locationController, armies, location));
-        }
-
-        public static ActionState TakeItems(CommandController commandController, HeroController heroController,
-            Hero hero)
-        {
-            return ExecuteCommandUntilDone(commandController,
-                new TakeItemsCommand(heroController, hero));
-        }
-
-        public static ActionState DropItems(CommandController commandController, HeroController heroController,
-            Hero hero, List<Artifact> items)
-        {
-            return ExecuteCommandUntilDone(commandController,
-                new DropItemsCommand(heroController, hero, items));
-        }
-
-        public static ActionState ExecuteCommandUntilDone(CommandController commandController, Command command)
-        {
-            // Simulate two-phase execution            
-            commandController.AddCommand(command);
-
-            var commandToExecute = commandController.GetCommand(command.Id);
-            var result = commandToExecute.Execute();
-            while (result == ActionState.InProgress)
+            for (var x = 0; x <= map.GetUpperBound(1); x++)
             {
-                result = commandToExecute.Execute();
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Executes a full AI-based turn for a player.
-        /// </summary>
-        /// <param name="controller">Controller Provider</param>
-        /// <param name="player">AI Player to run</param>
-        /// <remarks>
-        /// Assumes the turn is already started. Will end turn.
-        /// </remarks>
-        public static void ExecuteCurrentTurnAsAIUntilDone(ControllerProvider controller, ICommandProvider commander)
-        {
-            ActionState actionState;
-
-            // Get AI player
-            var player = Game.Current.GetCurrentPlayer();
-            bool isHuman = player.IsHuman;
-            player.IsHuman = false;
-            int turn = player.Turn;
-            string clanName = Game.Current.GetCurrentPlayer().Clan.ShortName;
-
-            // Generate and execute commands as an AI
-            int lastId = controller.CommandController.GetLastCommand().Id;
-            commander.GenerateCommands();
-            var commands = controller.CommandController.GetCommandsAfterId(lastId);
-            foreach (var command in commands)
-            {
-                actionState = ExecuteCommandUntilDone(controller.CommandController, command);
-                // Log action state?
-            }
-            
-            // Restore player type
-            player.IsHuman = isHuman;
-        }
-
-        public static void PlotRouteOnMap(Tile[,] map, List<Tile> path)
-        {
-            for (int y = 0; y <= map.GetUpperBound(0); y++)
-            {
-                for (int x = 0; x <= map.GetUpperBound(1); x++)
+                var tile = path.Find(t => t.X == x && t.Y == y);
+                if (tile != null)
                 {
-                    var tile = path.Find(t => ((t.X == x) && (t.Y == y)));
-                    if (tile != null)
-                    {
-                        TestContext.Write($"({x},{y}){{{map[x, y]}}}>\t");
-                    }
-                    else
-                    {
-                        TestContext.Write($"({x},{y})[{map[x, y]}]\t");
-                    }
+                    TestContext.Write($"({x},{y}){{{map[x, y]}}}>\t");
                 }
-                TestContext.WriteLine();
+                else
+                {
+                    TestContext.Write($"({x},{y})[{map[x, y]}]\t");
+                }
             }
-        }
 
-        public static void AllocateBoons()
-        {
-            BoonAllocator boonAllocator = new BoonAllocator();
-            boonAllocator.Allocate(World.Current.GetLocations());
+            TestContext.WriteLine();
         }
+    }
 
-        internal static void AddLocation(int x, int y, string shortName)
-        {
-            Location location = MapBuilder.FindLocation(shortName);
-            Tile tile = World.Current.Map[x, y];
-            World.Current.AddLocation(location, tile);
-        }
+    public static void AllocateBoons()
+    {
+        var boonAllocator = new BoonAllocator();
+        boonAllocator.Allocate(World.Current.GetLocations());
+    }
+
+    internal static void AddLocation(int x, int y, string shortName)
+    {
+        var location = MapBuilder.FindLocation(shortName);
+        var tile = World.Current.Map[x, y];
+        World.Current.AddLocation(location, tile);
     }
 }

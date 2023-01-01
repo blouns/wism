@@ -6,16 +6,16 @@ namespace Wism.Client.Api.Commands
 {
     public class RazeCityCommand : Command
     {
-        public CityController CityController { get; }
-
-        public City City { get; }
-
         public RazeCityCommand(CityController cityController, City city)
             : base(city.Player)
         {
             this.CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
             this.City = city ?? throw new ArgumentNullException(nameof(city));
         }
+
+        public CityController CityController { get; }
+
+        public City City { get; }
 
         protected override ActionState ExecuteInternal()
         {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 
@@ -8,16 +9,13 @@ namespace Wism.Client.Api.Commands
     {
         private readonly CityController cityController;
 
-        public ReviewProductionCommand ReviewProductionCommand { get; private set; }
-
-        public List<ArmyInTraining> ArmiesToRenew { get; set; }
-
         public RenewProductionCommand(CityController cityController, Player player,
             ReviewProductionCommand reviewProductionCommand)
             : base(player)
         {
-            this.cityController = cityController ?? throw new System.ArgumentNullException(nameof(cityController));
-            this.ReviewProductionCommand = reviewProductionCommand ?? throw new System.ArgumentNullException(nameof(reviewProductionCommand));
+            this.cityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
+            this.ReviewProductionCommand = reviewProductionCommand ??
+                                           throw new ArgumentNullException(nameof(reviewProductionCommand));
 
             // Default to renewing all production
             if (reviewProductionCommand.ArmiesProducedResult != null)
@@ -25,6 +23,10 @@ namespace Wism.Client.Api.Commands
                 this.ArmiesToRenew = new List<ArmyInTraining>(reviewProductionCommand.ArmiesProducedResult);
             }
         }
+
+        public ReviewProductionCommand ReviewProductionCommand { get; }
+
+        public List<ArmyInTraining> ArmiesToRenew { get; set; }
 
         protected override ActionState ExecuteInternal()
         {

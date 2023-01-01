@@ -6,10 +6,10 @@ namespace Wism.Client.MapObjects
     {
         public override int Compare(Army x, Army y)
         {
-            int compare = 0;
+            var compare = 0;
 
             // Heros stack to top
-            if ((x is Hero) && !(y is Hero))
+            if (x is Hero && !(y is Hero))
             {
                 compare = -1;
             }

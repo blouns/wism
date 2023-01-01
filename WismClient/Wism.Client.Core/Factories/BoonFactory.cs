@@ -19,13 +19,13 @@ namespace Wism.Client.Factories
             var assembly = Assembly.Load(snapshot.BoonAssemblyName);
             IBoon boon;
 
-            if (!String.IsNullOrWhiteSpace(snapshot.AlliesShortName))
+            if (!string.IsNullOrWhiteSpace(snapshot.AlliesShortName))
             {
                 var armyInfo = ModFactory.FindArmyInfo(snapshot.AlliesShortName);
                 boon = (IBoon)Activator.CreateInstance(
                     assembly.GetType(snapshot.BoonTypeName), armyInfo);
             }
-            else if (!String.IsNullOrWhiteSpace(snapshot.ArtifactShortName))
+            else if (!string.IsNullOrWhiteSpace(snapshot.ArtifactShortName))
             {
                 var artifactInfo = ModFactory.FindArtifactInfo(snapshot.ArtifactShortName);
                 var artifact = Artifact.Create(artifactInfo);

@@ -1,27 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using Wism.Client.AI.Adapta;
 using Wism.Client.AI.Adapta.Strategic;
 using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
 
 namespace Wism.Client.AI.CommandProviders
 {
     public class AdaptaCommandProvider : ICommandProvider
     {
-        private readonly CommandController commandController;
         private readonly ArmyController armyController;
-        private readonly GameController gameController;
         private readonly CityController cityController;
-        private readonly LocationController locationController;
-        private readonly HeroController heroController;
-        private readonly PlayerController playerController;
-        private readonly ILogger logger;
+        private readonly CommandController commandController;
         private readonly ControllerProvider controllerProvider;
+        private readonly GameController gameController;
+        private readonly HeroController heroController;
+        private readonly LocationController locationController;
+        private readonly ILogger logger;
+        private readonly PlayerController playerController;
 
         public AdaptaCommandProvider(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
         {
@@ -35,27 +32,28 @@ namespace Wism.Client.AI.CommandProviders
                 throw new ArgumentNullException(nameof(controllerProvider));
             }
 
-            logger = loggerFactory.CreateLogger();
-            commandController = controllerProvider.CommandController;
-            armyController = controllerProvider.ArmyController;
-            gameController = controllerProvider.GameController;
-            cityController = controllerProvider.CityController;
-            locationController = controllerProvider.LocationController;
-            heroController = controllerProvider.HeroController;
-            playerController = controllerProvider.PlayerController;
+            this.logger = loggerFactory.CreateLogger();
+            this.commandController = controllerProvider.CommandController;
+            this.armyController = controllerProvider.ArmyController;
+            this.gameController = controllerProvider.GameController;
+            this.cityController = controllerProvider.CityController;
+            this.locationController = controllerProvider.LocationController;
+            this.heroController = controllerProvider.HeroController;
+            this.playerController = controllerProvider.PlayerController;
             this.controllerProvider = controllerProvider;
         }
 
         public void GenerateCommands()
         {
-            Player currentPlayer = Game.Current.GetCurrentPlayer();
-            
+            var currentPlayer = Game.Current.GetCurrentPlayer();
+
             // 1. Asset Allocation: Allocate all available armies to bids
-            var allocator = AssetAllocationModule.CreateDefault(controllerProvider, World.Current, currentPlayer, logger);
+            var allocator =
+                AssetAllocationModule.CreateDefault(this.controllerProvider, World.Current, currentPlayer, this.logger);
             var bidsByModule = allocator.Allocate();
 
             // 2. Utility Valuation: Select winning bids across modules
-            var valuator = BidValuationModule.CreateDefault(World.Current, currentPlayer, logger);
+            var valuator = BidValuationModule.CreateDefault(World.Current, currentPlayer, this.logger);
             var winningBids = valuator.SelectWinners(bidsByModule);
 
             // 3. Movement Order: Create commands in optimal order
@@ -63,7 +61,7 @@ namespace Wism.Client.AI.CommandProviders
             orderer.AssignTasks(winningBids);
 
             // End the turn
-            this.commandController.AddCommand(new EndTurnCommand(this.gameController, currentPlayer));            
-        }     
+            this.commandController.AddCommand(new EndTurnCommand(this.gameController, currentPlayer));
+        }
     }
 }

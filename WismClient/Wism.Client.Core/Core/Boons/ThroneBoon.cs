@@ -22,7 +22,7 @@ namespace Wism.Client.Core
             }
 
             int strengthBoon;
-            int chance = Game.Current.Random.Next(1, 11);
+            var chance = Game.Current.Random.Next(1, 11);
             if (chance < 3)
             {
                 // Gods ignore (30%)

@@ -11,6 +11,7 @@
 //
 //  Modified for use in WISM by Brian Lounsberry
 //
+
 using System.Collections.Generic;
 using Wism.Client.Core;
 
@@ -20,86 +21,44 @@ namespace Wism.Client.Pathing.External
     public interface IPathFinder
     {
         #region Events
+
         event PathFinderDebugHandler PathFinderDebug;
+
         #endregion
 
         #region Properties
-        bool Stopped
-        {
-            get;
-        }
 
-        HeuristicFormula Formula
-        {
-            get;
-            set;
-        }
+        bool Stopped { get; }
 
-        bool Diagonals
-        {
-            get;
-            set;
-        }
+        HeuristicFormula Formula { get; set; }
 
-        bool HeavyDiagonals
-        {
-            get;
-            set;
-        }
+        bool Diagonals { get; set; }
 
-        int HeuristicEstimate
-        {
-            get;
-            set;
-        }
+        bool HeavyDiagonals { get; set; }
 
-        bool PunishChangeDirection
-        {
-            get;
-            set;
-        }
+        int HeuristicEstimate { get; set; }
 
-        bool ReopenCloseNodes
-        {
-            get;
-            set;
-        }
+        bool PunishChangeDirection { get; set; }
 
-        bool TieBreaker
-        {
-            get;
-            set;
-        }
+        bool ReopenCloseNodes { get; set; }
 
-        int SearchLimit
-        {
-            get;
-            set;
-        }
+        bool TieBreaker { get; set; }
 
-        double CompletedTime
-        {
-            get;
-            set;
-        }
+        int SearchLimit { get; set; }
 
-        bool DebugProgress
-        {
-            get;
-            set;
-        }
+        double CompletedTime { get; set; }
 
-        bool DebugFoundPath
-        {
-            get;
-            set;
-        }
+        bool DebugProgress { get; set; }
+
+        bool DebugFoundPath { get; set; }
+
         #endregion
 
         #region Methods
+
         void FindPathStop();
         List<AStarPathNode> FindPath(Tile start, Tile end);
-        #endregion
 
+        #endregion
     }
 }

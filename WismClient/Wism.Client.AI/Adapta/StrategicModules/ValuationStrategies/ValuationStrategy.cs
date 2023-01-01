@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Wism.Client.AI.Adapta.TacticalModules;
 using Wism.Client.AI.Task;
 using Wism.Client.Core;
@@ -10,13 +11,14 @@ namespace Wism.Client.AI.Adapta.Strategic.UtilityValuation
     {
         public ValuationStrategy(World world, Player player)
         {
-            World = world ?? throw new System.ArgumentNullException(nameof(world));
-            Player = player ?? throw new System.ArgumentNullException(nameof(player));
+            this.World = world ?? throw new ArgumentNullException(nameof(world));
+            this.Player = player ?? throw new ArgumentNullException(nameof(player));
         }
 
         public World World { get; }
         public Player Player { get; }
 
-        public abstract float CalculateValue(TacticalModule module, List<Army> myArmies, List<City> myCities, TargetPortfolio targets);
+        public abstract float CalculateValue(TacticalModule module, List<Army> myArmies, List<City> myCities,
+            TargetPortfolio targets);
     }
 }

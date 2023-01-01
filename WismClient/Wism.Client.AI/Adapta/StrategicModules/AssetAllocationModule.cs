@@ -11,18 +11,25 @@ namespace Wism.Client.AI.Adapta.Strategic
 {
     public class AssetAllocationModule
     {
-        public World World { get; }
-        public Player Player { get; }
-        public List<TacticalModule> TacticalModules { get => tacticalModules; set => tacticalModules = value; }
-
-        private TargetPortfolio targets = new TargetPortfolio();
+        private readonly ILogger logger;
         private List<Army> myArmies = new List<Army>();
         private List<City> myCities = new List<City>();
-        private readonly ILogger logger;
 
-        private List<TacticalModule> tacticalModules = new List<TacticalModule>();        
+        private TargetPortfolio targets = new TargetPortfolio();
 
-        public static AssetAllocationModule CreateDefault(ControllerProvider provider, World world, Player player, ILogger logger)
+        private AssetAllocationModule(World world, Player player, ILogger logger)
+        {
+            this.World = world ?? throw new ArgumentNullException(nameof(world));
+            this.Player = player ?? throw new ArgumentNullException(nameof(player));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public World World { get; }
+        public Player Player { get; }
+        public List<TacticalModule> TacticalModules { get; set; } = new List<TacticalModule>();
+
+        public static AssetAllocationModule CreateDefault(ControllerProvider provider, World world, Player player,
+            ILogger logger)
         {
             var allocator = new AssetAllocationModule(world, player, logger);
 
@@ -32,17 +39,10 @@ namespace Wism.Client.AI.Adapta.Strategic
             return allocator;
         }
 
-        private AssetAllocationModule(World world, Player player, ILogger logger)
-        {
-            this.World = world ?? throw new ArgumentNullException(nameof(world));
-            this.Player = player ?? throw new ArgumentNullException(nameof(player));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
         private Dictionary<TacticalModule, Dictionary<Army, Bid>> AcceptBids()
         {
             var bidsByModule = new Dictionary<TacticalModule, Dictionary<Army, Bid>>();
-            foreach (var module in this.tacticalModules)
+            foreach (var module in this.TacticalModules)
             {
                 bidsByModule.Add(module, module.GenerateArmyBids(this.myArmies, this.myCities, this.targets));
             }
@@ -53,25 +53,25 @@ namespace Wism.Client.AI.Adapta.Strategic
         private void GatherTargets()
         {
             // TODO: Only create tasks for relevant doers (i.e. if i have no heros, then locations are useless)
-            var ti = new TargetIntelligence(World);
-            var targets = ti.FindTargetObjects(Player);
+            var ti = new TargetIntelligence(this.World);
+            var targets = ti.FindTargetObjects(this.Player);
 
-            logger.LogInformation($"Detected {targets.LooseItems} loose items.");
-            logger.LogInformation($"Detected {targets.OpposingCities} opposing cities.");
-            logger.LogInformation($"Detected {targets.NeutralCities} opposing cities.");
-            logger.LogInformation($"Detected {targets.OpposingArmies} opposing armies.");
-            logger.LogInformation($"Detected {targets.UnsearchedLocations} unsearched locations.");
+            this.logger.LogInformation($"Detected {targets.LooseItems} loose items.");
+            this.logger.LogInformation($"Detected {targets.OpposingCities} opposing cities.");
+            this.logger.LogInformation($"Detected {targets.NeutralCities} opposing cities.");
+            this.logger.LogInformation($"Detected {targets.OpposingArmies} opposing armies.");
+            this.logger.LogInformation($"Detected {targets.UnsearchedLocations} unsearched locations.");
 
             this.targets = targets;
         }
 
         private void GatherAssets()
         {
-            myArmies = Player.GetArmies();
-            myCities = Player.GetCities();
+            this.myArmies = this.Player.GetArmies();
+            this.myCities = this.Player.GetCities();
 
-            logger.LogInformation($"Detected {myArmies.Count} friendly armies.");
-            logger.LogInformation($"Detected {myCities.Count} friendly cities.");
+            this.logger.LogInformation($"Detected {this.myArmies.Count} friendly armies.");
+            this.logger.LogInformation($"Detected {this.myCities.Count} friendly cities.");
         }
 
         //public List<Bid> SelectBids()
@@ -102,7 +102,7 @@ namespace Wism.Client.AI.Adapta.Strategic
 
         //    return winningBids;
         //}
-       
+
         private List<Bid> EvaluateBids(Dictionary<TacticalModule, Dictionary<Army, Bid>> bidsByModule)
         {
             // Only one module for now so just skip this step
@@ -113,13 +113,13 @@ namespace Wism.Client.AI.Adapta.Strategic
 
         internal Dictionary<TacticalModule, Dictionary<Army, Bid>> Allocate()
         {
-            List<Bid> winningBids = new List<Bid>();
+            var winningBids = new List<Bid>();
 
-            GatherAssets();
-            GatherTargets();
+            this.GatherAssets();
+            this.GatherTargets();
 
-            logger.LogInformation($"Accepting bids from tactical modules...");
-            return AcceptBids();
+            this.logger.LogInformation("Accepting bids from tactical modules...");
+            return this.AcceptBids();
         }
     }
 }

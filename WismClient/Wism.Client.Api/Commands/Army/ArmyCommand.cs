@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
@@ -8,13 +9,13 @@ namespace Wism.Client.Api.Commands
     {
         protected readonly ArmyController armyController;
 
-        public List<Army> Armies { get; set; }
-
         public ArmyCommand(ArmyController armyController, List<Army> armies)
         {
-            this.armyController = armyController ?? throw new System.ArgumentNullException(nameof(armyController));
-            this.Armies = armies ?? throw new System.ArgumentNullException(nameof(armies));
+            this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
+            this.Armies = armies ?? throw new ArgumentNullException(nameof(armies));
             this.Player = this.Armies[0].Player;
         }
+
+        public List<Army> Armies { get; set; }
     }
 }

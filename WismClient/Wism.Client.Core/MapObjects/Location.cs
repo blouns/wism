@@ -11,9 +11,14 @@ namespace Wism.Client.MapObjects
     public class Location : MapObject
     {
         protected LocationInfo info;
+        private ISearchable searchStrategy;
         protected Terrain terrain;
-        ISearchable searchStrategy;
-        bool searched;
+
+        protected Location(LocationInfo info)
+        {
+            this.info = info ?? throw new ArgumentNullException(nameof(info));
+            this.DisplayName = info.DisplayName;
+        }
 
         public Terrain Terrain
         {
@@ -23,6 +28,7 @@ namespace Wism.Client.MapObjects
                 {
                     this.terrain = MapBuilder.TerrainKinds[this.info.Terrain];
                 }
+
                 return this.terrain;
             }
         }
@@ -35,21 +41,16 @@ namespace Wism.Client.MapObjects
                 {
                     this.info = MapBuilder.FindLocationInfo(this.ShortName);
                 }
+
                 return this.info;
             }
         }
 
-        public override string ShortName { get => this.Info.ShortName; }
-        public string Kind { get => this.Info.Kind; }
+        public override string ShortName => this.Info.ShortName;
+        public string Kind => this.Info.Kind;
         public IBoon Boon { get; set; }
         public string Monster { get; set; }
-        public bool Searched { get => this.searched; set => this.searched = value; }
-
-        protected Location(LocationInfo info)
-        {
-            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
-            this.DisplayName = info.DisplayName;
-        }
+        public bool Searched { get; set; }
 
         public static Location Create(LocationInfo info)
         {
@@ -85,7 +86,8 @@ namespace Wism.Client.MapObjects
         {
             if (!this.searchStrategy.CanSearchKind(this.Kind))
             {
-                throw new InvalidOperationException("Search strategy cannot be used with this location: " + this.searchStrategy);
+                throw new InvalidOperationException("Search strategy cannot be used with this location: " +
+                                                    this.searchStrategy);
             }
 
             var success = this.searchStrategy.Search(armies, this, out result);
@@ -93,12 +95,12 @@ namespace Wism.Client.MapObjects
             {
                 this.Searched = true;
 
-                if (HasBoon())
+                if (this.HasBoon())
                 {
                     this.Boon = null;
                 }
 
-                if (HasMonster())
+                if (this.HasMonster())
                 {
                     this.Monster = null;
                 }

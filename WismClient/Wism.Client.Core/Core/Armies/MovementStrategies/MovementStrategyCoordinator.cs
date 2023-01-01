@@ -3,24 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Core.Armies.MovementStrategies;
 using Wism.Client.MapObjects;
-using Wism.Client.Pathing;
 
 namespace Wism.Client.Core.Armies
 {
     /// <summary>
-    /// Class that can determine which armies should be included when
-    /// counting moves along a path.
+    ///     Class that can determine which armies should be included when
+    ///     counting moves along a path.
     /// </summary>
     /// <remarks>
-    /// Example: 
-    /// An army riding in a boat should not have its moves counted while
-    /// the boat is moving--only the boats moves will are applicable. 
+    ///     Example:
+    ///     An army riding in a boat should not have its moves counted while
+    ///     the boat is moving--only the boats moves will are applicable.
     /// </remarks>
     public class MovementStrategyCoordinator
     {
+        public MovementStrategyCoordinator(List<IMovementStrategy> strategies)
+        {
+            this.Strategies = strategies ?? throw new ArgumentNullException(nameof(strategies));
+        }
+
+        public List<IMovementStrategy> Strategies { get; }
+
         public static MovementStrategyCoordinator CreateDefault()
         {
-            return new MovementStrategyCoordinator(new List<IMovementStrategy>()
+            return new MovementStrategyCoordinator(new List<IMovementStrategy>
             {
                 new NavalMovementStrategy(),
                 new HeroFlightMovementStrategy(),
@@ -28,23 +34,16 @@ namespace Wism.Client.Core.Armies
             });
         }
 
-        public MovementStrategyCoordinator(List<IMovementStrategy> strategies)
-        {
-            this.Strategies = strategies ?? throw new System.ArgumentNullException(nameof(strategies));
-        }
-
-        public List<IMovementStrategy> Strategies { get; }
-
         /// <summary>
-        /// Gets armies whose moves are applicable to moving to the next tile.
+        ///     Gets armies whose moves are applicable to moving to the next tile.
         /// </summary>
         /// <param name="armiesToMove">Armies to move</param>
         /// <param name="nextTile">Next tile along the path</param>
         /// <returns>Armies whose moves should be included.</returns>
         /// <remarks>
-        /// Example: 
-        /// An army riding in a boat should not have its moves counted while
-        /// the boat is moving--only the boats moves will are applicable. 
+        ///     Example:
+        ///     An army riding in a boat should not have its moves counted while
+        ///     the boat is moving--only the boats moves will are applicable.
         /// </remarks>
         public List<Army> GetArmiesWithApplicableMoves(List<Army> armiesToMove, Tile nextTile)
         {
@@ -70,7 +69,7 @@ namespace Wism.Client.Core.Armies
         }
 
         /// <summary>
-        /// Check that armies have sufficient moves to reach adjacent tile.
+        ///     Check that armies have sufficient moves to reach adjacent tile.
         /// </summary>
         /// <param name="armiesToMove">Armies to move</param>
         /// <param name="targetTile">Adjacent target tile</param>
@@ -86,12 +85,13 @@ namespace Wism.Client.Core.Armies
             {
                 throw new ArgumentNullException(nameof(targetTile));
             }
+
             // TODO: Account for terrain bonuses
             return armiesWithMovesThatMatter.All(army => army.MovesRemaining >= targetTile.Terrain.MovementCost);
         }
 
         /// <summary>
-        /// Check that armies have sufficient moves to reach the target tile along a given path.
+        ///     Check that armies have sufficient moves to reach the target tile along a given path.
         /// </summary>
         /// <param name="armiesWithApplicableMoves">Armies with applicable moves</param>
         /// <param name="path">Path to target</param>
@@ -99,27 +99,27 @@ namespace Wism.Client.Core.Armies
         /// <returns></returns>
         public bool HasSufficientMovesPath(List<Army> armiesWithApplicableMoves, List<Tile> path, Tile targetTile)
         {
-            int movesRemaining = GetEffectiveMovesRemaining(armiesWithApplicableMoves);
-            int movesRequired = GetMovesToTarget(armiesWithApplicableMoves, path, targetTile);
+            var movesRemaining = this.GetEffectiveMovesRemaining(armiesWithApplicableMoves);
+            var movesRequired = this.GetMovesToTarget(armiesWithApplicableMoves, path, targetTile);
 
-            return (movesRequired - movesRemaining) >= 0;
+            return movesRequired - movesRemaining >= 0;
         }
 
         public int GetEffectiveMovesRemaining(List<Army> armiesWithApplicableMoves)
         {
-            return armiesWithApplicableMoves.Min<Army>(a => a.MovesRemaining);
+            return armiesWithApplicableMoves.Min(a => a.MovesRemaining);
         }
 
         public int GetMovesToTarget(List<Army> armiesWithApplicableMoves, List<Tile> path, Tile targetTile)
         {
-            int moves = 0;
+            var moves = 0;
 
             // Start at 1 as path includes starting position
-            bool targetReached = false;
-            for (int i = 1; i < path.Count; i++)
+            var targetReached = false;
+            for (var i = 1; i < path.Count; i++)
             {
                 var tile = path[i];
-                moves += tile.Terrain.MovementCost;    // TODO: Include terrain / clan bonuses
+                moves += tile.Terrain.MovementCost; // TODO: Include terrain / clan bonuses
                 if (tile == targetTile)
                 {
                     targetReached = true;
@@ -131,11 +131,12 @@ namespace Wism.Client.Core.Armies
             {
                 throw new ArgumentOutOfRangeException(nameof(targetTile));
             }
-            
+
             return moves;
         }
 
-        public IList<Tile> FindPath(List<Army> armiesWithApplicableMoves, Tile targetTile, ref int distance, bool ignoreClan = false)
+        public IList<Tile> FindPath(List<Army> armiesWithApplicableMoves, Tile targetTile, ref int distance,
+            bool ignoreClan = false)
         {
             if (armiesWithApplicableMoves is null)
             {
@@ -148,10 +149,11 @@ namespace Wism.Client.Core.Armies
             }
 
             IList<Tile> path;
-          
+
             // Calculate the shortest route
-            IPathingStrategy pathingStrategy = Game.Current.PathingStrategy;
-            pathingStrategy.FindShortestRoute(World.Current.Map, armiesWithApplicableMoves, targetTile, out path, out _, ignoreClan);
+            var pathingStrategy = Game.Current.PathingStrategy;
+            pathingStrategy.FindShortestRoute(World.Current.Map, armiesWithApplicableMoves, targetTile, out path, out _,
+                ignoreClan);
 
             if (path == null || path.Count == 0)
             {

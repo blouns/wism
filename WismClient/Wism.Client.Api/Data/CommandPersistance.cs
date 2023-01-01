@@ -17,7 +17,7 @@ namespace Wism.Client.Api.Data
             }
 
             var snapshot = new CommandEntity[commands.Count];
-            for (int i = 0; i < snapshot.Length; i++)
+            for (var i = 0; i < snapshot.Length; i++)
             {
                 snapshot[i] = SnapshotCommand(commands[i]);
             }
@@ -76,14 +76,14 @@ namespace Wism.Client.Api.Data
 
             if (command is EndTurnCommand)
             {
-                snapshot = new TurnCommandEntity()
+                snapshot = new TurnCommandEntity
                 {
                     Starting = false
                 };
             }
             else if (command is StartTurnCommand)
             {
-                snapshot = new TurnCommandEntity()
+                snapshot = new TurnCommandEntity
                 {
                     Starting = true
                 };
@@ -101,7 +101,7 @@ namespace Wism.Client.Api.Data
                 if (command is SearchLibraryCommand)
                 {
                     var subCommand = (SearchLibraryCommand)command;
-                    snapshot = new SearchLibraryCommandEntity()
+                    snapshot = new SearchLibraryCommandEntity
                     {
                         Knowledge = subCommand.Knowledge
                     };
@@ -110,19 +110,19 @@ namespace Wism.Client.Api.Data
                 {
                     var subCommand = (SearchRuinsCommand)command;
                     var boon = subCommand.Boon;
-                    snapshot = new SearchRuinsCommandEntity()
+                    snapshot = new SearchRuinsCommandEntity
                     {
                         Boon = GamePersistance.SnapshotBoon(subCommand.Boon),
                         AllyIdsResult = ConvertBoonToAlliesIds(boon.Result),
                         ArtifactShortNameResult = ConvertBoonToArtifactName(boon.Result),
-                        GoldResult = (boon is GoldBoon) ? (int?)boon.Result : null,
-                        StrengthResult = (boon is ThroneBoon) ? (int?)boon.Result : null,
+                        GoldResult = boon is GoldBoon ? (int?)boon.Result : null,
+                        StrengthResult = boon is ThroneBoon ? (int?)boon.Result : null
                     };
                 }
                 else if (command is SearchSageCommand)
                 {
                     var subCommand = (SearchSageCommand)command;
-                    snapshot = new SearchSageCommandEntity()
+                    snapshot = new SearchSageCommandEntity
                     {
                         Gold = subCommand.Gold
                     };
@@ -130,7 +130,7 @@ namespace Wism.Client.Api.Data
                 else if (command is SearchTempleCommand)
                 {
                     var subCommand = (SearchTempleCommand)command;
-                    snapshot = new SearchTempleCommandEntity()
+                    snapshot = new SearchTempleCommandEntity
                     {
                         BlessedArmyCount = subCommand.BlessedArmyCount
                     };
@@ -143,7 +143,9 @@ namespace Wism.Client.Api.Data
                 {
                     locationEntity.LocationShortName = locationCommand.Location.ShortName;
                     locationEntity.ArmyIds = ConvertToArmyIds(locationCommand.Armies);
-                };
+                }
+
+                ;
             }
 
             return snapshot;
@@ -165,7 +167,7 @@ namespace Wism.Client.Api.Data
             {
                 var allies = (Army[])result;
                 var allyIds = new int[allies.Length];
-                for (int i = 0; i < allies.Length; i++)
+                for (var i = 0; i < allies.Length; i++)
                 {
                     allyIds[i] = allies[i].Id;
                 }
@@ -180,7 +182,7 @@ namespace Wism.Client.Api.Data
             if (command is TakeItemsCommand)
             {
                 var subCommand = (TakeItemsCommand)command;
-                snapshot = new ItemsCommandEntity()
+                snapshot = new ItemsCommandEntity
                 {
                     HeroId = subCommand.Hero.Id,
                     ItemShortNames = ConvertToItemNames(subCommand.Items),
@@ -190,7 +192,7 @@ namespace Wism.Client.Api.Data
             else if (command is DropItemsCommand)
             {
                 var subCommand = (DropItemsCommand)command;
-                snapshot = new ItemsCommandEntity()
+                snapshot = new ItemsCommandEntity
                 {
                     HeroId = subCommand.Hero.Id,
                     ItemShortNames = ConvertToItemNames(subCommand.Items),
@@ -206,7 +208,7 @@ namespace Wism.Client.Api.Data
             CommandEntity snapshot = null;
             if (command is LoadGameCommand)
             {
-                snapshot = new LoadGameCommandEntity()
+                snapshot = new LoadGameCommandEntity
                 {
                     // TODO: Do NOT snapshot the snapshot. Need to think through the 
                     //       consequences of this and how to address it properly.
@@ -215,7 +217,7 @@ namespace Wism.Client.Api.Data
             }
             else if (command is NewGameCommand)
             {
-                snapshot = new NewGameCommandEntity()
+                snapshot = new NewGameCommandEntity
                 {
                     // TODO: Do NOT snapshot the new game. Need to think through the 
                     //       consequences of this and how to address it properly.
@@ -235,7 +237,7 @@ namespace Wism.Client.Api.Data
                 if (command is AttackOnceCommand)
                 {
                     var subCommand = (AttackOnceCommand)command;
-                    snapshot = new AttackCommandEntity()
+                    snapshot = new AttackCommandEntity
                     {
                         DefendingArmyIds = ConvertToArmyIds(subCommand.Defenders),
                         OriginalAttackingArmyIds = ConvertToArmyIds(subCommand.OriginalAttackingArmies),
@@ -245,7 +247,7 @@ namespace Wism.Client.Api.Data
                 else if (command is CompleteBattleCommand)
                 {
                     var subCommand = (CompleteBattleCommand)command;
-                    snapshot = new CompleteBattleCommandEntity()
+                    snapshot = new CompleteBattleCommandEntity
                     {
                         AttackCommand = (AttackCommandEntity)SnapshotCommand(subCommand.AttackCommand),
                         DefendingArmyIds = ConvertToArmyIds(subCommand.Defenders),
@@ -264,7 +266,7 @@ namespace Wism.Client.Api.Data
                 else if (command is MoveOnceCommand)
                 {
                     var subCommand = (MoveOnceCommand)command;
-                    snapshot = new MoveCommandEntity()
+                    snapshot = new MoveCommandEntity
                     {
                         PathX = ConvertToInts(subCommand.Path, 0),
                         PathY = ConvertToInts(subCommand.Path, 1)
@@ -273,7 +275,7 @@ namespace Wism.Client.Api.Data
                 else if (command is PrepareForBattleCommand)
                 {
                     var subCommand = (PrepareForBattleCommand)command;
-                    snapshot = new PrepareForBattleCommandEntity()
+                    snapshot = new PrepareForBattleCommandEntity
                     {
                         DefendingArmyIds = ConvertToArmyIds(subCommand.Defenders),
                         TargetTileX = subCommand.X,
@@ -305,7 +307,7 @@ namespace Wism.Client.Api.Data
                 return null;
             }
 
-            return items.ConvertAll<string>(a => a.ShortName).ToArray();
+            return items.ConvertAll(a => a.ShortName).ToArray();
         }
 
         private static int[] ConvertToInts(IList<Tile> path, int dimension)
@@ -315,10 +317,10 @@ namespace Wism.Client.Api.Data
                 return null;
             }
 
-            int[] pathInts = new int[path.Count];
-            for (int i = 0; i < path.Count; i++)
+            var pathInts = new int[path.Count];
+            for (var i = 0; i < path.Count; i++)
             {
-                pathInts[i] = (dimension == 0) ? path[i].X : path[i].Y;
+                pathInts[i] = dimension == 0 ? path[i].X : path[i].Y;
             }
 
             return pathInts;
@@ -331,14 +333,14 @@ namespace Wism.Client.Api.Data
                 return null;
             }
 
-            return armies.ConvertAll<int>(a => a.Id).ToArray();
+            return armies.ConvertAll(a => a.Id).ToArray();
         }
 
         private static int GetPlayerIndex(Player player)
         {
             if (player != null)
             {
-                for (int i = 0; i < Game.Current.Players.Count; i++)
+                for (var i = 0; i < Game.Current.Players.Count; i++)
                 {
                     if (player != null)
                     {

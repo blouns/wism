@@ -11,34 +11,32 @@ namespace Wism.Client.MapObjects
         public const int MaxArmies = 8;
         public const int MaxStrength = 9;
 
-        private ArmyInfo info;
+        internal Army()
+        {
+        }
 
-        internal ArmyInfo Info { get => this.info; set => this.info = value; }
+        internal ArmyInfo Info { get; set; }
 
         public int Upkeep { get; set; }
         public int Strength { get; set; }
         public int MovesRemaining { get; set; }
-        public Clan Clan { get => this.Player.Clan; }
+        public Clan Clan => this.Player.Clan;
         public bool IsDead { get; set; }
         public int Moves { get; internal set; }
         public List<Location> BlessedAt { get; set; } = new List<Location>();
 
-        public string KindName { get => this.Info.DisplayName; }
+        public string KindName => this.Info.DisplayName;
         public override string ShortName => this.Info.ShortName;
 
         // Traversal info
-        public virtual bool CanWalk { get => this.Info.CanWalk; }
-        public virtual bool CanFloat { get => this.Info.CanFloat; }
-        public virtual bool CanFly { get => this.Info.CanFly; }
+        public virtual bool CanWalk => this.Info.CanWalk;
+        public virtual bool CanFloat => this.Info.CanFloat;
+        public virtual bool CanFly => this.Info.CanFly;
 
         // Ephemeral properties used during combat only
         public int HitPoints { get; set; }
         public int ModifiedStrength { get; set; }
         public bool IsDefending { get; internal set; }
-
-        internal Army()
-        {
-        }
 
         public void Defend()
         {
@@ -53,7 +51,7 @@ namespace Wism.Client.MapObjects
 
         public bool IsSpecial()
         {
-            return this.info.IsSpecial;
+            return this.Info.IsSpecial;
         }
 
         public void Reset()
@@ -65,7 +63,7 @@ namespace Wism.Client.MapObjects
         public virtual int GetAttackModifier(Tile target)
         {
             ICombatModifier attackModifier = new AttackingForceCombatModifier();
-            int attackerModifier = attackModifier.Calculate(this, target);
+            var attackerModifier = attackModifier.Calculate(this, target);
 
             return attackerModifier;
         }
@@ -73,16 +71,16 @@ namespace Wism.Client.MapObjects
         public virtual int GetDefenseModifier()
         {
             ICombatModifier defenseModifier = new DefendingForceCombatModifer();
-            int defenderModifier = defenseModifier.Calculate(this, this.Tile);
+            var defenderModifier = defenseModifier.Calculate(this, this.Tile);
 
             return defenderModifier;
         }
 
         public string ToStringVerbose()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
-            sb.AppendLine($"Type: {GetType()}");
+            sb.AppendLine($"Type: {this.GetType()}");
             sb.AppendLine($"ID: {this.Id}");
             sb.AppendLine($"Name: {this.ShortName}");
             sb.AppendLine($"Clan: {this.Clan}");

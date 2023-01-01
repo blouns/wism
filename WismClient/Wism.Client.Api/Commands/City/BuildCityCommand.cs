@@ -6,10 +6,6 @@ namespace Wism.Client.Api.Commands
 {
     public class BuildCityCommand : Command
     {
-        public CityController CityController { get; }
-
-        public City City { get; }
-
         public BuildCityCommand(CityController cityController, City city)
             : base(city.Player)
         {
@@ -17,16 +13,18 @@ namespace Wism.Client.Api.Commands
             this.City = city ?? throw new ArgumentNullException(nameof(city));
         }
 
+        public CityController CityController { get; }
+
+        public City City { get; }
+
         protected override ActionState ExecuteInternal()
         {
             if (this.CityController.TryBuildDefense(this.City))
             {
                 return ActionState.Succeeded;
             }
-            else
-            {
-                return ActionState.Failed;
-            }
+
+            return ActionState.Failed;
         }
 
         public override string ToString()

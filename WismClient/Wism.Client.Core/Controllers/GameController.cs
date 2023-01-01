@@ -21,7 +21,7 @@ namespace Wism.Client.Core.Controllers
 
         public void EndTurn()
         {
-            EndTurn(Game.Current);
+            this.EndTurn(Game.Current);
         }
 
         public void EndTurn(Game game)
@@ -34,7 +34,7 @@ namespace Wism.Client.Core.Controllers
 
         public void StartTurn()
         {
-            StartTurn(Game.Current);
+            this.StartTurn(Game.Current);
         }
 
         public ActionState NewGame(GameEntity settings)

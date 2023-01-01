@@ -11,13 +11,8 @@ namespace Wism.Client.Api.Commands
     {
         private readonly PlayerController playerController;
 
-        public Tile Tile { get; set; }
-
-        public List<ArmyInfo> ArmyKinds { get; set; }
-
-        public List<Army> ArmiesResult { get; private set; }
-
-        public ConscriptArmiesCommand(PlayerController playerController, Player player, Tile tile, List<ArmyInfo> armyKinds)
+        public ConscriptArmiesCommand(PlayerController playerController, Player player, Tile tile,
+            List<ArmyInfo> armyKinds)
             : base(player)
         {
             this.playerController = playerController ?? throw new ArgumentNullException(nameof(playerController));
@@ -30,10 +25,16 @@ namespace Wism.Client.Api.Commands
             }
         }
 
+        public Tile Tile { get; set; }
+
+        public List<ArmyInfo> ArmyKinds { get; set; }
+
+        public List<Army> ArmiesResult { get; private set; }
+
         protected override ActionState ExecuteInternal()
         {
             var state = this.playerController.ConscriptArmies(
-                this.Player, this.ArmyKinds, this.Tile, out List<Army> armies);
+                this.Player, this.ArmyKinds, this.Tile, out var armies);
 
             if (state == ActionState.Succeeded)
             {

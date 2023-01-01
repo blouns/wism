@@ -52,4 +52,3 @@ namespace Wism.Client.Pathing.External
     }
     */
 }
-

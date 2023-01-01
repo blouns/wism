@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Core;
 using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
@@ -11,19 +10,19 @@ namespace Wism.Client.MapObjects
         public const int MinGoldToHire = 800;
         public const int MaxGoldToHire = 2000;
 
-        public List<Artifact> Items { get; internal set; }
-
         internal Hero()
         {
             this.Info = ArmyInfo.GetHeroInfo();
             this.DisplayName = this.Info.DisplayName;
         }
 
+        public List<Artifact> Items { get; internal set; }
+
         public void TakeAll()
         {
             if (this.Tile.HasItems())
             {
-                Take(this.Tile.Items);
+                this.Take(this.Tile.Items);
             }
         }
 
@@ -35,7 +34,7 @@ namespace Wism.Client.MapObjects
             }
 
             item.Take(this);
-            RecalculateCombatBonsuses();
+            this.RecalculateCombatBonsuses();
         }
 
         public void Take(List<Artifact> items)
@@ -53,20 +52,20 @@ namespace Wism.Client.MapObjects
                     throw new ArgumentException("Item was not found on current tile: " + item);
                 }
 
-                Take(item);
+                this.Take(item);
             }
         }
 
         public void DropAll()
         {
-            if (!HasItems())
+            if (!this.HasItems())
             {
                 return;
             }
 
             foreach (var item in new List<Artifact>(this.Items))
             {
-                Drop(item);
+                this.Drop(item);
             }
         }
 
@@ -77,33 +76,31 @@ namespace Wism.Client.MapObjects
                 throw new ArgumentNullException(nameof(item));
             }
 
-            if (HasItems() &&
+            if (this.HasItems() &&
                 this.Items.Contains(item))
             {
                 item.Drop(this);
                 this.Items.Remove(item);
-                RecalculateCombatBonsuses();
+                this.RecalculateCombatBonsuses();
             }
         }
 
         public string GetCompanionInteraction()
         {
-            if (!HasCompanion())
+            if (!this.HasCompanion())
             {
                 return "You pet yourself when no one is looking.";
             }
-            else
-            {
-                var companion = this.Items.Find(c => c.CompanionInteraction != null);
 
-                // TODO: Allow only one companion per hero
-                return companion.CompanionInteraction;
-            }
+            var companion = this.Items.Find(c => c.CompanionInteraction != null);
+
+            // TODO: Allow only one companion per hero
+            return companion.CompanionInteraction;
         }
 
         public bool HasCompanion()
         {
-            if (!HasItems())
+            if (!this.HasItems())
             {
                 return false;
             }
@@ -115,7 +112,7 @@ namespace Wism.Client.MapObjects
 
         private void RecalculateCombatBonsuses()
         {
-            int totalStrength = this.Info.Strength + this.BlessedAt.Count;
+            var totalStrength = this.Info.Strength + this.BlessedAt.Count;
             foreach (var item in this.Items)
             {
                 totalStrength += item.CombatBonus;
@@ -130,26 +127,26 @@ namespace Wism.Client.MapObjects
         }
 
         /// <summary>
-        /// Drop all items when a hero is slain
+        ///     Drop all items when a hero is slain
         /// </summary>
         public override void Kill()
         {
-            DropAll();
+            this.DropAll();
             base.Kill();
         }
 
         public int GetCommandBonus()
         {
-            int bonus = 0;
+            var bonus = 0;
 
-            if (!HasItems())
+            if (!this.HasItems())
             {
                 return bonus;
             }
 
             foreach (var item in this.Items)
             {
-                Artifact artifact = item as Artifact;
+                var artifact = item;
                 if (artifact == null)
                 {
                     continue;
@@ -163,16 +160,16 @@ namespace Wism.Client.MapObjects
 
         public int GetCombatBonus()
         {
-            int bonus = 0;
+            var bonus = 0;
 
-            if (!HasItems())
+            if (!this.HasItems())
             {
                 return bonus;
             }
 
             foreach (var item in this.Items)
             {
-                Artifact artifact = item as Artifact;
+                var artifact = item;
                 if (artifact == null)
                 {
                     continue;

@@ -20,7 +20,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Search a location
+        ///     Search a location
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
@@ -38,14 +38,14 @@ namespace Wism.Client.Core.Controllers
                 throw new ArgumentNullException(nameof(location));
             }
 
-            var success = location.Search(armies, out object resultObj);
-            result = (resultObj == null) ? default : (T)resultObj;
+            var success = location.Search(armies, out var resultObj);
+            result = resultObj == null ? default : (T)resultObj;
 
             return success;
         }
 
         /// <summary>
-        /// Search a temple
+        ///     Search a temple
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
@@ -53,14 +53,14 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if search successful; else false</returns>
         public bool SearchTemple(List<Army> armies, Location location, out int armiesBlessed)
         {
-            var success = SearchLocation<int>(armies, location, out armiesBlessed);
+            var success = this.SearchLocation(armies, location, out armiesBlessed);
             this.logger.LogInformation($"Blessed {armiesBlessed} armies");
 
             return success;
         }
 
         /// <summary>
-        /// Search a sage
+        ///     Search a sage
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
@@ -68,7 +68,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if search successful; else false</returns>
         public bool SearchSage(List<Army> armies, Location location, out int gold)
         {
-            var success = SearchLocation<int>(armies, location, out gold);
+            var success = this.SearchLocation(armies, location, out gold);
             if (gold > 0)
             {
                 this.logger.LogInformation($"Seer's gem worth {gold} gp");
@@ -78,7 +78,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Search a library
+        ///     Search a library
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
@@ -86,11 +86,11 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if search successful; else false</returns>
         public bool SearchLibrary(List<Army> armies, Location location, out string knowledge)
         {
-            return SearchLocation<string>(armies, location, out knowledge);
+            return this.SearchLocation(armies, location, out knowledge);
         }
 
         /// <summary>
-        /// Search a ruins
+        ///     Search a ruins
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
@@ -118,7 +118,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        /// Search a tomb
+        ///     Search a tomb
         /// </summary>
         /// <param name="armies">Armies who will search location</param>
         /// <param name="location">Location to search</param>
@@ -126,7 +126,7 @@ namespace Wism.Client.Core.Controllers
         /// <returns>True if search successful; else false</returns>
         public bool SearchTomb(List<Army> armies, Location location, out IBoon boon)
         {
-            return SearchRuins(armies, location, out boon);
+            return this.SearchRuins(armies, location, out boon);
         }
     }
 }

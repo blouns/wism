@@ -8,7 +8,7 @@ using Wism.Client.MapObjects;
 namespace Wism.Client.AI.Adapta.Strategic.UtilityValuation
 {
     /// <summary>
-    /// Simple one-dimensional strategy to expand and conquer remaining neutral cities.
+    ///     Simple one-dimensional strategy to expand and conquer remaining neutral cities.
     /// </summary>
     public class ExpandAndConquerNeutralValuationStrategy : ValuationStrategy
     {
@@ -16,7 +16,8 @@ namespace Wism.Client.AI.Adapta.Strategic.UtilityValuation
         {
         }
 
-        public override float CalculateValue(TacticalModule module, List<Army> myArmies, List<City> myCities, TargetPortfolio targets)
+        public override float CalculateValue(TacticalModule module, List<Army> myArmies, List<City> myCities,
+            TargetPortfolio targets)
         {
             throw new NotImplementedException();
         }

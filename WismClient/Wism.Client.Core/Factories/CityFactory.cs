@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
@@ -55,8 +56,9 @@ namespace Wism.Client.Factories
             {
                 if (barracks.ArmiesToDeliver == null)
                 {
-                    barracks.ArmiesToDeliver = new System.Collections.Generic.Queue<ArmyInTraining>();
+                    barracks.ArmiesToDeliver = new Queue<ArmyInTraining>();
                 }
+
                 barracks.ArmiesToDeliver.Clear();
                 foreach (var aitEntity in snapshot.ArmiesToDeliver)
                 {
@@ -88,7 +90,7 @@ namespace Wism.Client.Factories
                 throw new InvalidOperationException("Production slots do not match");
             }
 
-            for (int i = 0; i < productionKinds.Count; i++)
+            for (var i = 0; i < productionKinds.Count; i++)
             {
                 barracks.SetProductionNumber(productionInfo.ArmyNames[i], productionInfo.ProductionNumbers[i]);
             }

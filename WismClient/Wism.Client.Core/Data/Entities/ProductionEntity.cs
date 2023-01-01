@@ -5,10 +5,8 @@ namespace Wism.Client.Entities
     [DataContract]
     public class ProductionEntity
     {
-        [DataMember]
-        public string[] ArmyNames { get; set; }
+        [DataMember] public string[] ArmyNames { get; set; }
 
-        [DataMember]
-        public int[] ProductionNumbers { get; set; }
+        [DataMember] public int[] ProductionNumbers { get; set; }
     }
 }

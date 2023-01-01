@@ -9,29 +9,21 @@ namespace Wism.Client.Modules
         private static readonly string HeroId = "Hero";
         public static readonly string FileName = "Army.json";
 
-        [DataMember]
-        public string DisplayName { get; set; } = "Army Name";
+        [DataMember] public bool CanFloat;
 
-        [DataMember]
-        public string ShortName { get; set; } = "x";
+        [DataMember] public bool CanFly;
 
-        [DataMember]
-        public bool IsSpecial { get; internal set; }
+        [DataMember] public bool CanWalk;
 
-        [DataMember]
-        public bool CanWalk;
+        [DataMember] public int Moves;
 
-        [DataMember]
-        public bool CanFloat;
+        [DataMember] public int Strength;
 
-        [DataMember]
-        public bool CanFly;
+        [DataMember] public string DisplayName { get; set; } = "Army Name";
 
-        [DataMember]
-        public int Strength;
+        [DataMember] public string ShortName { get; set; } = "x";
 
-        [DataMember]
-        public int Moves;
+        [DataMember] public bool IsSpecial { get; internal set; }
 
         public static ArmyInfo GetHeroInfo()
         {
@@ -40,9 +32,11 @@ namespace Wism.Client.Modules
 
         public static ArmyInfo GetArmyInfo(string shortName)
         {
-            ArmyInfo info = ModFactory.FindArmyInfo(shortName);
+            var info = ModFactory.FindArmyInfo(shortName);
             if (info == null)
+            {
                 throw new InvalidOperationException("No such type found.");
+            }
 
             return info;
         }

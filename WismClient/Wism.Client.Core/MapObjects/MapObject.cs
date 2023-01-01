@@ -10,25 +10,28 @@ namespace Wism.Client.MapObjects
         public abstract string ShortName { get; }
         public Tile Tile { get; set; }
         public Player Player { get; set; }
-        public int X { get => (this.Tile == null) ? 0 : this.Tile.X; }
-        public int Y { get => (this.Tile == null) ? 0 : this.Tile.Y; }
+        public int X => this.Tile == null ? 0 : this.Tile.X;
+        public int Y => this.Tile == null ? 0 : this.Tile.Y;
 
         public override bool Equals(object obj)
         {
-            MapObject other = obj as MapObject;
+            var other = obj as MapObject;
             if (other == null)
+            {
                 return false;
+            }
 
             return this.Id.Equals(other.Id);
         }
 
         public override int GetHashCode()
         {
-            return $"{GetType()}({this.Id})".GetHashCode();
+            return $"{this.GetType()}({this.Id})".GetHashCode();
         }
+
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             if (this.Player != null)
             {
                 sb.Append(this.Player.Clan);

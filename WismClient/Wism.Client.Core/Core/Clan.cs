@@ -6,33 +6,40 @@ namespace Wism.Client.Core
 {
     public class Clan
     {
+        private readonly IList<ClanTerrainModifierInfo> terrainModifiers = new List<ClanTerrainModifierInfo>();
         private ClanInfo info;
-        private IList<ClanTerrainModifierInfo> terrainModifiers = new List<ClanTerrainModifierInfo>();
-
-        public string DisplayName { get => this.info.DisplayName; set => this.info.DisplayName = value; }
-
-        public string ShortName { get => this.info.ShortName; }
-
-        public Player Player { get => Game.Current.Players.Find(p => p.Clan == this); }
-
-        public static Clan Create(ClanInfo info)
-        {
-            return new Clan(info);
-        }
 
         private Clan(ClanInfo info)
         {
             this.info = info;
         }
 
+        public string DisplayName
+        {
+            get => this.info.DisplayName;
+            set => this.info.DisplayName = value;
+        }
+
+        public string ShortName => this.info.ShortName;
+
+        public Player Player => Game.Current.Players.Find(p => p.Clan == this);
+
         public ClanInfo Info
         {
             get
             {
                 if (this.info == null)
+                {
                     this.info = MapBuilder.FindClanInfo(this.ShortName);
+                }
+
                 return this.info;
             }
+        }
+
+        public static Clan Create(ClanInfo info)
+        {
+            return new Clan(info);
         }
 
         public IList<ClanTerrainModifierInfo> GetTerrainModifiers()
@@ -52,8 +59,8 @@ namespace Wism.Client.Core
                 throw new ArgumentException("message", nameof(terrainId));
             }
 
-            IList<ClanTerrainModifierInfo> modifiers = ModFactory.FindClanTerrainMappingInfos(this.ShortName);
-            foreach (ClanTerrainModifierInfo value in modifiers)
+            var modifiers = ModFactory.FindClanTerrainMappingInfos(this.ShortName);
+            foreach (var value in modifiers)
             {
                 if (value.TerrainName == terrainId)
                 {
@@ -71,7 +78,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(tile));
             }
 
-            return GetTerrainModifier(tile.Terrain.ShortName);
+            return this.GetTerrainModifier(tile.Terrain.ShortName);
         }
 
         public override string ToString()
@@ -81,7 +88,7 @@ namespace Wism.Client.Core
 
         public override bool Equals(object obj)
         {
-            Clan other = obj as Clan;
+            var other = obj as Clan;
 
             if (other == null)
             {
