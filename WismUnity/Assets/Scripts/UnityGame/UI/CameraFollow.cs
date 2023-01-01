@@ -1,6 +1,3 @@
-using Assets.Scripts.Managers;
-using Assets.Scripts.Tilemaps;
-using Assets.Scripts.UI;
 using UnityEngine;
 using Wism.Client.Core;
 
@@ -25,13 +22,13 @@ public class CameraFollow : MonoBehaviour
     private Vector3 difference;
     private bool isDragging;
     private bool centered;
-    private Camera followCamera; 
+    private Camera followCamera;
 
     // Start is called before the first frame update
     void Start()
     {
-        followCamera = GetComponent<Camera>();
-        followCamera.orthographicSize = (Screen.height / 100f) / this.scale;
+        this.followCamera = GetComponent<Camera>();
+        this.followCamera.orthographicSize = (Screen.height / 100f) / this.scale;
     }
 
     public void LateUpdate()
@@ -55,58 +52,58 @@ public class CameraFollow : MonoBehaviour
         // Right mouse button drags the screen
         if (Input.GetMouseButton(1))
         {
-            difference = (followCamera.ScreenToWorldPoint(Input.mousePosition)) - followCamera.transform.position;
-            if (isDragging == false)
+            this.difference = (this.followCamera.ScreenToWorldPoint(Input.mousePosition)) - this.followCamera.transform.position;
+            if (this.isDragging == false)
             {
-                isDragging = true;
-                origin = followCamera.ScreenToWorldPoint(Input.mousePosition);
+                this.isDragging = true;
+                this.origin = this.followCamera.ScreenToWorldPoint(Input.mousePosition);
             }
-        }       
+        }
         else
         {
-            isDragging = false;
-            if (target != null && 
+            this.isDragging = false;
+            if (this.target != null &&
                (Game.Current.GameState == GameState.MovingArmy))
             {
                 // Linearly interpolate
-                SetCameraTargetLerp(target);
+                SetCameraTargetLerp(this.target);
             }
             // Snap to a location
-            else if (target != null && 
+            else if (this.target != null &&
                     (Game.Current.GameState != GameState.SelectedArmy))
             {
                 // Snap to target
-                SetCameraTarget(target.position);
-                target = null;
+                SetCameraTarget(this.target.position);
+                this.target = null;
             }
             //  Snap to selected army, but only once to avoid "snap-back"
-            else if (target != null && 
-                    (Game.Current.GameState == GameState.SelectedArmy) && 
-                    !centered)
+            else if (this.target != null &&
+                    (Game.Current.GameState == GameState.SelectedArmy) &&
+                    !this.centered)
             {
-                SetCameraTarget(target.position);
-                centered = true;
+                SetCameraTarget(this.target.position);
+                this.centered = true;
             }
         }
 
-        if (isDragging == true)
+        if (this.isDragging == true)
         {
-            Vector3 move = origin - difference;
-            followCamera.transform.position = ClampVectorToTilemap(move);
+            Vector3 move = this.origin - this.difference;
+            this.followCamera.transform.position = ClampVectorToTilemap(move);
         }
     }
 
     private Vector3 ClampVectorToTilemap(Vector3 vector)
     {
         return new Vector3(
-            Mathf.Clamp(vector.x, xMinClamp, xMaxClamp),
-            Mathf.Clamp(vector.y, yMinClamp, yMaxClamp),
+            Mathf.Clamp(vector.x, this.xMinClamp, this.xMaxClamp),
+            Mathf.Clamp(vector.y, this.yMinClamp, this.yMaxClamp),
             vector.z);
     }
 
     public void SetCameraTarget(Vector3 vector)
     {
-        transform.position = ClampVectorToTilemap(vector + new Vector3(0f, 0f, -10f));
+        this.transform.position = ClampVectorToTilemap(vector + new Vector3(0f, 0f, -10f));
     }
 
     public void SetCameraTargetLerp(Transform newTarget)
@@ -116,9 +113,9 @@ public class CameraFollow : MonoBehaviour
 
     public void SetCameraTargetLerp(Vector3 vector)
     {
-        Vector3 lerpPosition = Vector3.Lerp(transform.position, vector, speed) +
+        Vector3 lerpPosition = Vector3.Lerp(this.transform.position, vector, this.speed) +
                             new Vector3(0f, 0f, -10f);
 
-        transform.position = ClampVectorToTilemap(lerpPosition);
+        this.transform.position = ClampVectorToTilemap(lerpPosition);
     }
 }

@@ -22,10 +22,10 @@ namespace Wism.Client.Core
         public BoonAllocator()
         {
             // Default percentages must add up to 100%
-            AlliesPercent = DefaultAlliesPercent;
-            ArtifactPercent = DefaultArtifactPercent;
-            ThronePercent = DefaultThronePercent;
-            GoldPercent = DefaultGoldPercent;            
+            this.AlliesPercent = DefaultAlliesPercent;
+            this.ArtifactPercent = DefaultArtifactPercent;
+            this.ThronePercent = DefaultThronePercent;
+            this.GoldPercent = DefaultGoldPercent;
         }
 
         /// <summary>
@@ -61,14 +61,14 @@ namespace Wism.Client.Core
         /// </summary>
         private void ValidateAllocationPercentages()
         {
-            if ((AlliesPercent + ArtifactPercent + ThronePercent + GoldPercent) > 1f)
+            if ((this.AlliesPercent + this.ArtifactPercent + this.ThronePercent + this.GoldPercent) > 1f)
             {
                 throw new InvalidOperationException(String.Format(
                     "Allocations must equal 100%: Allies: {0}%, Artifact: {1}%, Throne: {2}%, Gold: {3}%",
-                    AlliesPercent * 100f,
-                    ArtifactPercent * 100f,
-                    ThronePercent * 100f,
-                    GoldPercent * 100f));
+                    this.AlliesPercent * 100f,
+                    this.ArtifactPercent * 100f,
+                    this.ThronePercent * 100f,
+                    this.GoldPercent * 100f));
             }
         }
 
@@ -77,13 +77,13 @@ namespace Wism.Client.Core
         /// </summary>
         private void RandomizeBoons()
         {
-            var boonPool = new List<IBoon>(boonLibrary);            
-            var random = Game.Current.Random;           
-            boonOrder = new int[boonLibrary.Count];
-            for (int i = 0; i < boonLibrary.Count; i++)
+            var boonPool = new List<IBoon>(this.boonLibrary);
+            var random = Game.Current.Random;
+            this.boonOrder = new int[this.boonLibrary.Count];
+            for (int i = 0; i < this.boonLibrary.Count; i++)
             {
                 int index = random.Next(0, boonPool.Count);
-                boonOrder[i] = boonLibrary.IndexOf(boonPool[index]);
+                this.boonOrder[i] = this.boonLibrary.IndexOf(boonPool[index]);
                 boonPool.RemoveAt(index);
             }
         }
@@ -95,14 +95,14 @@ namespace Wism.Client.Core
         /// <param name="boonCount">Total boons to create</param>
         private void BuildBoonLibrary(string modPath, int boonCount)
         {
-            var artifacts = ModFactory.LoadArtifacts(modPath);            
+            var artifacts = ModFactory.LoadArtifacts(modPath);
             float artifactActual, alliesActual, throneActual, goldActual;
             CalculateActualAllocationPercent(boonCount, artifacts, out artifactActual, out alliesActual, out throneActual, out goldActual);
 
             AddArtifacts(artifacts, boonCount, artifactActual);
             AddAllies(boonCount, alliesActual);
             AddGold(boonCount, goldActual);
-            AddThrone(boonCount, throneActual); 
+            AddThrone(boonCount, throneActual);
         }
 
         /// <summary>
@@ -118,20 +118,20 @@ namespace Wism.Client.Core
         private void CalculateActualAllocationPercent(int boonCount, IList<Artifact> artifacts, out float artifactActual, out float alliesActual, out float throneActual, out float goldActual)
         {
             float artifactsPerBoon = ((float)artifacts.Count) / ((float)boonCount);
-            artifactActual = (artifactsPerBoon > ArtifactPercent) ? ArtifactPercent : artifactsPerBoon;
-            
-            if (artifactActual < ArtifactPercent)
+            artifactActual = (artifactsPerBoon > this.ArtifactPercent) ? this.ArtifactPercent : artifactsPerBoon;
+
+            if (artifactActual < this.ArtifactPercent)
             {
-                float artifactPercentDelta = (ArtifactPercent - artifactActual) / artifactActual;
-                alliesActual = (artifactPercentDelta * AlliesPercent) + AlliesPercent;
-                throneActual = (artifactPercentDelta * ThronePercent) + ThronePercent;
-                goldActual = (artifactPercentDelta * GoldPercent) + GoldPercent;
+                float artifactPercentDelta = (this.ArtifactPercent - artifactActual) / artifactActual;
+                alliesActual = (artifactPercentDelta * this.AlliesPercent) + this.AlliesPercent;
+                throneActual = (artifactPercentDelta * this.ThronePercent) + this.ThronePercent;
+                goldActual = (artifactPercentDelta * this.GoldPercent) + this.GoldPercent;
             }
             else
             {
-                alliesActual = AlliesPercent;
-                throneActual = ThronePercent;
-                goldActual = GoldPercent;
+                alliesActual = this.AlliesPercent;
+                throneActual = this.ThronePercent;
+                goldActual = this.GoldPercent;
                 goldActual += 1f - (artifactActual + alliesActual + goldActual); // Remainder goes to gold
             }
         }
@@ -145,7 +145,7 @@ namespace Wism.Client.Core
         {
             for (int i = 0; i < boonCount * throneActual; i++)
             {
-                boonLibrary.Add(new ThroneBoon());
+                this.boonLibrary.Add(new ThroneBoon());
             }
         }
 
@@ -158,7 +158,7 @@ namespace Wism.Client.Core
         {
             for (int i = 0; i < boonCount * goldActual; i++)
             {
-                boonLibrary.Add(new GoldBoon());
+                this.boonLibrary.Add(new GoldBoon());
             }
         }
 
@@ -173,7 +173,7 @@ namespace Wism.Client.Core
             for (int i = 0; i < boonCount * alliesActual; i++)
             {
                 var armyInfo = allies[Game.Current.Random.Next(0, allies.Count)];
-                boonLibrary.Add(new AlliesBoon(armyInfo));
+                this.boonLibrary.Add(new AlliesBoon(armyInfo));
             }
         }
 
@@ -184,11 +184,11 @@ namespace Wism.Client.Core
         /// <param name="artifactActual">% of Artifacts desired</param>
         private void AddArtifacts(IList<Artifact> artifacts, int boonCount, float artifactActual)
         {
-            if (artifactActual >= ArtifactPercent)
+            if (artifactActual >= this.ArtifactPercent)
             {
                 // If too many artifacts then pick a random set that fits
                 var artifactPool = new List<Artifact>(artifacts);
-                int artifactFitCount = (int)(boonCount * ArtifactPercent);
+                int artifactFitCount = (int)(boonCount * this.ArtifactPercent);
                 var artifactOrder = new int[artifactFitCount];
                 for (int i = 0; i < artifactFitCount; i++)
                 {
@@ -201,7 +201,7 @@ namespace Wism.Client.Core
                 for (int i = 0; i < artifactFitCount; i++)
                 {
                     var randomArtifact = artifacts[artifactOrder[i]];
-                    boonLibrary.Add(new ArtifactBoon(randomArtifact));
+                    this.boonLibrary.Add(new ArtifactBoon(randomArtifact));
                 }
             }
             else
@@ -209,7 +209,7 @@ namespace Wism.Client.Core
                 // Too few artifacts, so just add all of them
                 foreach (var artifact in artifacts)
                 {
-                    boonLibrary.Add(new ArtifactBoon(artifact));
+                    this.boonLibrary.Add(new ArtifactBoon(artifact));
                 }
             }
         }
@@ -242,7 +242,7 @@ namespace Wism.Client.Core
             for (int i = 0; i < locations.Count; i++)
             {
                 // Assign a random boon
-                locations[i].Boon = boonLibrary[boonOrder[i]];
+                locations[i].Boon = this.boonLibrary[this.boonOrder[i]];
 
                 if (locations[i].Boon.IsDefended)
                 {

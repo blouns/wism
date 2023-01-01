@@ -10,7 +10,7 @@ namespace Wism.Client.Api.Commands
         private IList<Tile> path;
         public int X { get; set; }
         public int Y { get; set; }
-        public IList<Tile> Path { get => path; set => path = value; }
+        public IList<Tile> Path { get => this.path; set => this.path = value; }
 
         public MoveOnceCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armyController, armies)
@@ -21,12 +21,12 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            return armyController.MoveOneStep(Armies, World.Current.Map[X, Y], ref path, out _);
+            return this.armyController.MoveOneStep(this.Armies, World.Current.Map[this.X, this.Y], ref this.path, out _);
         }
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} move to ({World.Current.Map[X, Y]}";
+            return $"Command: {ArmyUtilities.ArmiesToString(this.Armies)} move to ({World.Current.Map[this.X, this.Y]}";
         }
     }
 }

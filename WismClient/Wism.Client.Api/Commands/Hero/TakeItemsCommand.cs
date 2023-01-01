@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
@@ -20,8 +19,8 @@ namespace Wism.Client.Api.Commands
         public TakeItemsCommand(HeroController heroController, Hero hero, List<Artifact> items)
         {
             this.heroController = heroController ?? throw new System.ArgumentNullException(nameof(heroController));
-            Hero = hero ?? throw new System.ArgumentNullException(nameof(hero));
-            Items = items ?? throw new System.ArgumentNullException(nameof(items));
+            this.Hero = hero ?? throw new System.ArgumentNullException(nameof(hero));
+            this.Items = items ?? throw new System.ArgumentNullException(nameof(items));
         }
 
         /// <summary>
@@ -36,14 +35,14 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            heroController.TakeItems(Hero, Items);
+            this.heroController.TakeItems(this.Hero, this.Items);
 
             return ActionState.Succeeded;
         }
 
         public override string ToString()
         {
-            return $"Command: {Hero} taking item(s) {Items}";
+            return $"Command: {this.Hero} taking item(s) {this.Items}";
         }
     }
 }

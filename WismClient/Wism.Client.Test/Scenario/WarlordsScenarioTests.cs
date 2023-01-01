@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
-using Wism.Client.Api.Commands;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -141,7 +140,7 @@ namespace Wism.Client.Test.Scenario
             TestUtilities.AttackUntilDone(commandController, armyController,
                 Game.Current.GetSelectedArmies(), 1, 1);
 
-            TestUtilities.EndTurn(commandController, gameController);           
+            TestUtilities.EndTurn(commandController, gameController);
 
             // Assert
             Assert.AreEqual(0, lordBane.GetArmies().Count, "Lord Bane is not yet defeated!");
@@ -230,8 +229,8 @@ namespace Wism.Client.Test.Scenario
 
             // Initial Sirians setup
             Player sirians = Game.Current.Players[0];
-            Tile tile1 = World.Current.Map[1, 1];            
-            var siriansHero1 = new List<Army>() 
+            Tile tile1 = World.Current.Map[1, 1];
+            var siriansHero1 = new List<Army>()
             {
                 sirians.HireHero(tile1, 0)
             };
@@ -252,7 +251,7 @@ namespace Wism.Client.Test.Scenario
             Assert.AreEqual(1, siriansHero1[0].Y, "Hero did not move to the correct position.");
             Assert.AreEqual(
                 siriansHero1[0].Moves - 14,      // Should take 14 moves
-                siriansHero1[0].MovesRemaining, 
+                siriansHero1[0].MovesRemaining,
                 "Hero did not follow the expected route.");
         }
 
@@ -346,7 +345,7 @@ namespace Wism.Client.Test.Scenario
                 siriansHero1);
             TestUtilities.AttackUntilDone(commandController, armyController,
                 siriansHero1, 2, 2);
-            
+
             // Assert
             Assert.AreEqual(0, sirians.GetArmies().Count, "Hero is still alive!.");
             Assert.AreEqual(8, tile2.Armies.Count, "Unexpected number of armies remaining.");
@@ -404,9 +403,9 @@ namespace Wism.Client.Test.Scenario
             const int x = 2;
             const int y = 2;
             Player bane = Game.Current.Players[1];
-            Tile tile2 = World.Current.Map[x, y-1];
-            Tile tile3 = World.Current.Map[x+1, y];
-            Tile tile4 = World.Current.Map[x+1, y-1];
+            Tile tile2 = World.Current.Map[x, y - 1];
+            Tile tile3 = World.Current.Map[x + 1, y];
+            Tile tile4 = World.Current.Map[x + 1, y - 1];
             bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile2);
             bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile3);
             bane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile4);
@@ -474,7 +473,7 @@ namespace Wism.Client.Test.Scenario
 
             // Initial Bane's setup
             Player bane = Game.Current.Players[1];
-            
+
             // Add city owned by Lord Bane full of troops (but not in (2,2))
             MapBuilder.AddCity(World.Current, 2, 2, "BanesCitadel", "LordBane");
 
@@ -485,7 +484,7 @@ namespace Wism.Client.Test.Scenario
                 siriansHero1, 2, 2);
 
             // Assert
-            Assert.AreEqual(sirians.Clan, World.Current.Map[2, 2].City.Clan, 
+            Assert.AreEqual(sirians.Clan, World.Current.Map[2, 2].City.Clan,
                 "Sirian's can't even take an empty city!");
             Assert.AreEqual(2, siriansHero1[0].X, "Army didn't actually move into the city.");
             Assert.AreEqual(2, siriansHero1[0].Y, "Army didn't actually move into the city.");
@@ -557,7 +556,7 @@ namespace Wism.Client.Test.Scenario
             // Act
 
             // Turn 1: Sirians: Let's get blessed!
-            TestUtilities.Select(commandController, armyController, 
+            TestUtilities.Select(commandController, armyController,
                 siriansHero1);
             TestUtilities.MoveUntilDone(commandController, armyController,
                 siriansHero1, 1, 4);

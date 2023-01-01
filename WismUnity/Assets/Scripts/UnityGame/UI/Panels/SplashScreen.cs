@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System;
 
 namespace Assets.Scripts.UI.Panels
 {
@@ -25,11 +23,11 @@ namespace Assets.Scripts.UI.Panels
             {
                 NextScene();
             }
-            
+
             Show();
             yield return new WaitForEndOfFrame();
             PlayAudio();
-            yield return new WaitForSeconds(waitTime);
+            yield return new WaitForSeconds(this.waitTime);
             Clear();
             NextScene();
         }
@@ -40,8 +38,8 @@ namespace Assets.Scripts.UI.Panels
         }
 
         private void NextScene()
-        {            
-            SceneManager.LoadScene(nextScene);
+        {
+            SceneManager.LoadScene(this.nextScene);
             SceneManager.UnloadSceneAsync(0);
         }
 
@@ -53,7 +51,7 @@ namespace Assets.Scripts.UI.Panels
         private void Clear()
         {
             this.splashScreenGroup.alpha = 0f;
-            gameObject.SetActive(false);
+            this.gameObject.SetActive(false);
         }
     }
 }

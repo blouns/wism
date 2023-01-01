@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Wism.Client.Common;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
 
 namespace Wism.Client.Core.Controllers
 {
@@ -55,7 +54,7 @@ namespace Wism.Client.Core.Controllers
         public bool SearchTemple(List<Army> armies, Location location, out int armiesBlessed)
         {
             var success = SearchLocation<int>(armies, location, out armiesBlessed);
-            logger.LogInformation($"Blessed {armiesBlessed} armies");
+            this.logger.LogInformation($"Blessed {armiesBlessed} armies");
 
             return success;
         }
@@ -72,7 +71,7 @@ namespace Wism.Client.Core.Controllers
             var success = SearchLocation<int>(armies, location, out gold);
             if (gold > 0)
             {
-                logger.LogInformation($"Seer's gem worth {gold} gp");
+                this.logger.LogInformation($"Seer's gem worth {gold} gp");
             }
 
             return success;
@@ -111,7 +110,7 @@ namespace Wism.Client.Core.Controllers
             var success = location.Search(armies, out _);
             if (success && myBoon != null)
             {
-                logger.LogInformation($"Found {myBoon.Result}");
+                this.logger.LogInformation($"Found {myBoon.Result}");
             }
 
             boon = myBoon;

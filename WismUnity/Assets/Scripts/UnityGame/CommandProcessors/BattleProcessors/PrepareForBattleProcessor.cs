@@ -1,6 +1,6 @@
-﻿using Assets.Scripts.UI;
-using Assets.Scripts.Common;
+﻿using Assets.Scripts.Common;
 using Assets.Scripts.Managers;
+using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using System.Timers;
@@ -32,7 +32,7 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             this.logger = loggerFactory.CreateLogger();
-            this.unityGame = unityGame ?? throw new System.ArgumentNullException(nameof(unityGame));            
+            this.unityGame = unityGame ?? throw new System.ArgumentNullException(nameof(unityGame));
         }
 
         public bool CanExecute(ICommandAction command)
@@ -45,15 +45,15 @@ namespace Assets.Scripts.CommandProcessors
             var prepForBattleCommand = (PrepareForBattleCommand)command;
             var targetTile = World.Current.Map[prepForBattleCommand.X, prepForBattleCommand.Y];
             var attackingPlayer = prepForBattleCommand.Player;
-            unityGame.CurrentAttackers = new List<Army>(prepForBattleCommand.Armies);
-            unityGame.CurrentAttackers.Sort(new ByArmyBattleOrder(targetTile));
+            this.unityGame.CurrentAttackers = new List<Army>(prepForBattleCommand.Armies);
+            this.unityGame.CurrentAttackers.Sort(new ByArmyBattleOrder(targetTile));
 
             Player defendingPlayer;
             if (prepForBattleCommand.Defenders.Count > 0)
             {
                 defendingPlayer = prepForBattleCommand.Defenders[0].Player;
-                unityGame.CurrentDefenders = targetTile.MusterArmy();
-                unityGame.CurrentDefenders.Sort(new ByArmyBattleOrder(targetTile));
+                this.unityGame.CurrentDefenders = targetTile.MusterArmy();
+                this.unityGame.CurrentDefenders.Sort(new ByArmyBattleOrder(targetTile));
             }
             else
             {
@@ -64,10 +64,10 @@ namespace Assets.Scripts.CommandProcessors
                     throw new InvalidOperationException($"Expected a city to be present on {tile}");
                 }
                 defendingPlayer = tile.City.Player;
-                unityGame.CurrentDefenders = new List<Army>();
+                this.unityGame.CurrentDefenders = new List<Army>();
             }
 
-            if (!timerElapsed)
+            if (!this.timerElapsed)
             {
                 this.unityGame.InputManager.SetInputMode(InputMode.UI);
                 UnityUtilities.GameObjectHardFind("SelectedBox").SetActive(false);
@@ -79,7 +79,7 @@ namespace Assets.Scripts.CommandProcessors
             }
             else
             {
-                ShowWarPanel(attackingPlayer, unityGame.CurrentAttackers, defendingPlayer, unityGame.CurrentDefenders, targetTile);
+                ShowWarPanel(attackingPlayer, this.unityGame.CurrentAttackers, defendingPlayer, this.unityGame.CurrentDefenders, targetTile);
                 this.timerElapsed = false;
                 this.timer = null;
 
@@ -100,12 +100,12 @@ namespace Assets.Scripts.CommandProcessors
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             this.timer.Stop();
-            this.timerElapsed = true;            
+            this.timerElapsed = true;
         }
 
         private void DrawWarScene(Tile targetTile)
         {
-            var worldTilemap = unityGame.WorldTilemap;
+            var worldTilemap = this.unityGame.WorldTilemap;
             var warGO = UnityUtilities.GameObjectHardFind("War!");
             warGO.transform.position = worldTilemap.ConvertGameToUnityVector(targetTile.X, targetTile.Y);
             warGO.SetActive(true);
@@ -136,8 +136,8 @@ namespace Assets.Scripts.CommandProcessors
                 $"attacking {defendingPlayer.Clan.DisplayName}!");
 
             // Set up war UI
-            unityGame.WarPanel.Initialize(attackingArmies, defendingArmies, targetTile);
-            unityGame.SetTime(unityGame.GameManager.WarTime);
+            this.unityGame.WarPanel.Initialize(attackingArmies, defendingArmies, targetTile);
+            this.unityGame.SetTime(this.unityGame.GameManager.WarTime);
         }
     }
 }

@@ -34,19 +34,19 @@ namespace Assets.Scripts.CommandProcessors
         {
             var cityCommand = (RazeCityCommand)command;
 
-            if (stager == null)
+            if (this.stager == null)
             {
-                stager = new CutsceneStagerFactory(unityGame)
+                this.stager = new CutsceneStagerFactory(this.unityGame)
                     .CreateRazeCityStager(cityCommand);
             }
 
-            var result = stager.Action();
+            var result = this.stager.Action();
 
             if (result == ActionState.Failed ||
                 result == ActionState.Succeeded)
             {
-                unityGame.InputManager.SetInputMode(InputMode.Game);
-                stager = null;
+                this.unityGame.InputManager.SetInputMode(InputMode.Game);
+                this.stager = null;
             }
 
             return result;

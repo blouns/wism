@@ -49,12 +49,12 @@ namespace Wism.Client.Core.Controllers
             var success = player.RecruitHeroStrategy.IsHeroAvailable(player);
 
             if (success)
-            {                
+            {
                 name = player.RecruitHeroStrategy.GetHeroName();
                 city = player.RecruitHeroStrategy.GetTargetCity(player);
                 price = player.RecruitHeroStrategy.GetHeroPrice(player);
                 allyKinds = player.RecruitHeroStrategy.GetAllies(player);
-                logger.LogInformation($"{name} of {city} is available for {price}!");
+                this.logger.LogInformation($"{name} of {city} is available for {price}!");
             }
 
             return success;

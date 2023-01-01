@@ -16,26 +16,26 @@ namespace Assets.Scripts.Managers
 
         public void Initialize()
         {
-            if (flagsByClan == null)
+            if (this.flagsByClan == null)
             {
                 throw new InvalidOperationException("Flag prefabs have not been mapped in armiesByClan");
             }
 
-            flagsByClanMap = new Dictionary<string, GameObject>();
-            for (int i = 0; i < flagsByClan.count; i++)
+            this.flagsByClanMap = new Dictionary<string, GameObject>();
+            for (int i = 0; i < this.flagsByClan.count; i++)
             {
-                for (int j = 0; j < flagsByClan.rows[i].count; j++)
+                for (int j = 0; j < this.flagsByClan.rows[i].count; j++)
                 {
-                    flagsByClanMap.Add(
-                        flagsByClan.rows[i].name.ToLowerInvariant() + "_Flag" + (j + 1),
-                        flagsByClan.rows[i].row[j]);
+                    this.flagsByClanMap.Add(
+                        this.flagsByClan.rows[i].name.ToLowerInvariant() + "_Flag" + (j + 1),
+                        this.flagsByClan.rows[i].row[j]);
                 }
             }
         }
 
         public GameObject FindGameObjectKind(Clan clan, int flagSize)
-        { 
-            return flagsByClanMap[$"{clan.ShortName.ToLowerInvariant()}_Flag{flagSize}"];
+        {
+            return this.flagsByClanMap[$"{clan.ShortName.ToLowerInvariant()}_Flag{flagSize}"];
         }
 
         public GameObject Instantiate(Clan clan, int flagSize, Transform parent)
@@ -55,7 +55,7 @@ namespace Assets.Scripts.Managers
 
         internal bool IsInitialized()
         {
-            return flagsByClanMap != null;
+            return this.flagsByClanMap != null;
         }
     }
 }

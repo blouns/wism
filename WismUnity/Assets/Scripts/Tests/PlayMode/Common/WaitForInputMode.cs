@@ -7,15 +7,15 @@ namespace Assets.Tests.PlayMode
     {
         public WaitForInputMode(InputManager inputManager, InputMode mode)
         {
-            InputManager = inputManager;
-            Mode = mode;
+            this.InputManager = inputManager;
+            this.Mode = mode;
         }
 
         public override bool keepWaiting
         {
             get
             {
-                return this.Mode != Mode;
+                return this.Mode != this.Mode;
             }
         }
 

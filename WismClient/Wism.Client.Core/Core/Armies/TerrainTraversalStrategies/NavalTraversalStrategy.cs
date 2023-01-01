@@ -18,7 +18,7 @@ namespace Wism.Client.Core.Armies
         /// <param name="tile"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public bool CanTraverse(List<Army> armies, Tile tile)
+        public bool CanTraverse(List<Army> armies, Tile tile, bool ignoreClan = false)
         {
             if (armies is null)
             {
@@ -41,20 +41,15 @@ namespace Wism.Client.Core.Armies
 
             // Or the target must have Navy of same clan
             var targetHasNavy = (tile.HasArmies() &&
-                 tile.Armies[0].Clan == armies[0].Clan &&
+                 (tile.Armies[0].Clan == armies[0].Clan || ignoreClan) &&
                  tile.Armies.Find(a => a.CanFloat) != null);
 
 
             return armyHasNavy || targetHasNavy;
         }
 
-        public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile)
-        {
-            if (clan is null)
-            {
-                throw new ArgumentNullException(nameof(clan));
-            }
-
+        public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile, bool ignoreClan = false)
+        { 
             if (armyInfo is null)
             {
                 throw new ArgumentNullException(nameof(armyInfo));
@@ -73,7 +68,7 @@ namespace Wism.Client.Core.Armies
 
             var targetHasNavy =
                 (tile.HasArmies() &&
-                 tile.Armies[0].Clan == clan &&
+                 (tile.Armies[0].Clan == clan && !ignoreClan) &&
                  tile.Armies.Find(a => a.CanFloat) != null);
 
             return (armyInfo.CanFloat || targetHasNavy);

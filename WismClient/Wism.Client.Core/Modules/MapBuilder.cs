@@ -6,16 +6,16 @@ using Wism.Client.MapObjects;
 namespace Wism.Client.Modules
 {
     public static class MapBuilder
-    {       
+    {
         private static readonly Dictionary<string, Terrain> terrainKinds = new Dictionary<string, Terrain>();
         private static readonly Dictionary<string, Army> armyKinds = new Dictionary<string, Army>();
-        private static readonly Dictionary<string, Clan> clanKinds = new Dictionary<string, Clan>();                
+        private static readonly Dictionary<string, Clan> clanKinds = new Dictionary<string, Clan>();
         private static LocationBuilder locationBuilder;
         private static CityBuilder cityBuilder;
 
         public static Dictionary<string, Terrain> TerrainKinds { get => terrainKinds; }
         public static Dictionary<string, Army> ArmyKinds { get => armyKinds; }
-        public static Dictionary<string, Clan> ClanKinds { get => clanKinds; }  
+        public static Dictionary<string, Clan> ClanKinds { get => clanKinds; }
 
         public static void Initialize()
         {
@@ -130,7 +130,7 @@ namespace Wism.Client.Modules
         /// Legend { 1:X, 2:Y, 3:Terrain, 4:Army 5:ArmyCount }    
         /// </remarks>
         public static Tile[,] CreateDefaultMap()
-        {            
+        {
             Tile[,] map = new Tile[6, 6];
             for (int x = 0; x < map.GetLength(0); x++)
             {
@@ -214,5 +214,5 @@ namespace Wism.Client.Modules
         {
             locationBuilder.AddLocations(world, locationInfos);
         }
-    }    
+    }
 }

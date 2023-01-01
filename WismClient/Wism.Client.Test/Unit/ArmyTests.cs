@@ -23,8 +23,8 @@ namespace Wism.Client.Test.Unit
         [SetUp]
         public void Setup()
         {
-            Game.CreateDefaultGame();            
-            armyController = TestUtilities.CreateArmyController();
+            Game.CreateDefaultGame();
+            this.armyController = TestUtilities.CreateArmyController();
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace Wism.Client.Test.Unit
             tile.Armies.Sort(new ByArmyViewingOrder());
 
             // Assert
-            Assert.AreEqual("Hero", tile.Armies[0].ShortName);           
+            Assert.AreEqual("Hero", tile.Armies[0].ShortName);
         }
 
         [Test]
@@ -72,7 +72,7 @@ namespace Wism.Client.Test.Unit
             tile.Armies.Sort(new ByArmyViewingOrder());
 
             // Assert
-            Assert.AreEqual("Hero", tile.Armies[0].ShortName);            
+            Assert.AreEqual("Hero", tile.Armies[0].ShortName);
         }
 
         [Test]
@@ -195,7 +195,7 @@ namespace Wism.Client.Test.Unit
         {
             // Assemble
             var player1 = Game.Current.Players[0];
-            var tile = World.Current.Map[2, 2]; 
+            var tile = World.Current.Map[2, 2];
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Cavalry"), tile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tile);
@@ -232,7 +232,7 @@ namespace Wism.Client.Test.Unit
             Assert.IsTrue(army.CanWalk, "Hero cannot walk. Broken leg?");
             Assert.IsFalse(army.CanFloat, "Hero learned how to swim!");
             Assert.IsFalse(army.CanFly, "Heros can fly!? Crazy talk.");
-        }        
+        }
 
         [Test]
         public void Move_HeroMountainPathTest()
@@ -253,7 +253,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
             }
@@ -282,7 +282,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
             }
@@ -312,7 +312,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
             }
@@ -340,7 +340,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
             }
@@ -371,7 +371,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
             }
@@ -403,7 +403,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
             }
@@ -435,8 +435,8 @@ namespace Wism.Client.Test.Unit
 
             // ACT / ASSERT
             IList<Tile> path = null;
-            var result = armyController.MoveOneStep(armies, target, ref path, out _);
-            
+            var result = this.armyController.MoveOneStep(armies, target, ref path, out _);
+
             Assert.AreEqual(ActionState.Failed, result, "Infantry was able to ride the dragon!");
         }
 
@@ -462,7 +462,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT
             IList<Tile> path = null;
-            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 // do nothing
             }
@@ -492,7 +492,7 @@ namespace Wism.Client.Test.Unit
 
             // ACT
             IList<Tile> path = null;
-            while (armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
+            while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
             {
                 // do nothing
             }
@@ -515,7 +515,7 @@ namespace Wism.Client.Test.Unit
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), originalTile);
-            
+
             var originalArmies = new List<Army>(originalTile.Armies);
             int expectedX = originalArmies[0].X;
             int expectedY = originalArmies[0].Y + 1;
@@ -527,8 +527,8 @@ namespace Wism.Client.Test.Unit
                 originalTile.Armies[5]
             };
             originalArmies.RemoveAt(4);
-            originalArmies.RemoveAt(5);         
-            armyController.SelectArmy(selectedArmies);
+            originalArmies.RemoveAt(5);
+            this.armyController.SelectArmy(selectedArmies);
 
             // ACT: Move the selected armies
             if (!TryMove(selectedArmies, Direction.North))
@@ -537,7 +537,7 @@ namespace Wism.Client.Test.Unit
             }
 
             // Deselect the armies
-            armyController.DeselectArmy(selectedArmies);
+            this.armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
@@ -565,7 +565,7 @@ namespace Wism.Client.Test.Unit
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originalTile);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), originalTile);
-            
+
             var originalArmies = new List<Army>(originalTile.Armies);
             int expectedX = originalArmies[0].X;
             int expectedY = originalArmies[0].Y + 2;
@@ -578,7 +578,7 @@ namespace Wism.Client.Test.Unit
             };
             originalArmies.RemoveAt(4);
             originalArmies.RemoveAt(5);
-            armyController.SelectArmy(selectedArmies);
+            this.armyController.SelectArmy(selectedArmies);
 
             // ACT: Move the selected armies
             if (!TryMove(selectedArmies, Direction.North))
@@ -599,7 +599,7 @@ namespace Wism.Client.Test.Unit
             }
 
             // Deselect the armies
-            armyController.DeselectArmy(selectedArmies);
+            this.armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
@@ -635,11 +635,11 @@ namespace Wism.Client.Test.Unit
             int expectedY = mergeArmies[0].Y;
 
             // Select all armies from the original tile            
-            List<Army> selectedArmies = new List<Army>(originalTile.Armies);            
-            armyController.SelectArmy(selectedArmies);
+            List<Army> selectedArmies = new List<Army>(originalTile.Armies);
+            this.armyController.SelectArmy(selectedArmies);
 
             // ACT
-            
+
             // Move the selected armies one north
             if (!TryMove(selectedArmies, Direction.North))
             {
@@ -653,7 +653,7 @@ namespace Wism.Client.Test.Unit
             }
 
             // Deselect the armies
-            armyController.DeselectArmy(selectedArmies);
+            this.armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
@@ -686,7 +686,7 @@ namespace Wism.Client.Test.Unit
             int expectedY = 4;
 
             // Select all armies from the original tile            
-            armyController.SelectArmy(originalArmies);
+            this.armyController.SelectArmy(originalArmies);
 
             // ACT
 
@@ -703,7 +703,7 @@ namespace Wism.Client.Test.Unit
             }
 
             // Deselect the armies
-            armyController.DeselectArmy(originalArmies);
+            this.armyController.DeselectArmy(originalArmies);
 
             // ASSERT
             var newTile = originalArmies[0].Tile;
@@ -740,17 +740,17 @@ namespace Wism.Client.Test.Unit
 
             // Select all armies from the original tile            
             List<Army> selectedArmies = new List<Army>(originalArmies);
-            armyController.SelectArmy(selectedArmies);
+            this.armyController.SelectArmy(selectedArmies);
 
             // ACT
             // Attack: Should win but not advance
-            armyController.PrepareForBattle();
-            var result = armyController.AttackOnce(selectedArmies, enemyTile);
+            this.armyController.PrepareForBattle();
+            var result = this.armyController.AttackOnce(selectedArmies, enemyTile);
             Assert.AreEqual(AttackResult.AttackerWinsRound, result, "Attacker did not win round.");
-            result = armyController.AttackOnce(selectedArmies, enemyTile);
+            result = this.armyController.AttackOnce(selectedArmies, enemyTile);
 
             // Deselect the armies
-            armyController.DeselectArmy(selectedArmies);
+            this.armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
@@ -775,7 +775,7 @@ namespace Wism.Client.Test.Unit
             player1.HireHero(World.Current.Map[2, 2]);
             player1.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), originalTile);
             var originalArmies = new List<Army>(originalTile.Armies);
-            
+
             var enemyTile = World.Current.Map[2, 3];
             player2.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), enemyTile);
             var enemyArmies = new List<Army>(enemyTile.Armies);
@@ -787,15 +787,15 @@ namespace Wism.Client.Test.Unit
 
             // Select all armies from the original tile            
             List<Army> selectedArmies = new List<Army>(originalArmies);
-            armyController.SelectArmy(selectedArmies);
-            armyController.PrepareForBattle();
+            this.armyController.SelectArmy(selectedArmies);
+            this.armyController.PrepareForBattle();
 
             // ACT
             // Attack: Should win but not advance
-            var result = armyController.AttackOnce(selectedArmies, enemyTile);
+            var result = this.armyController.AttackOnce(selectedArmies, enemyTile);
 
             // Deselect the armies
-            armyController.DeselectArmy(selectedArmies);
+            this.armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
@@ -838,12 +838,12 @@ namespace Wism.Client.Test.Unit
 
             // Select all armies from the original tile            
             List<Army> selectedArmies = new List<Army>(originalArmies);
-            armyController.SelectArmy(selectedArmies);
-            armyController.PrepareForBattle();
+            this.armyController.SelectArmy(selectedArmies);
+            this.armyController.PrepareForBattle();
 
             // ACT
             // Attack: Should win but not advance
-            var result = armyController.AttackOnce(selectedArmies, enemyTile);
+            var result = this.armyController.AttackOnce(selectedArmies, enemyTile);
 
             // ASSERT
             Assert.AreEqual(AttackResult.DefenderWinBattle, result, "Original army was defeated.");
@@ -890,21 +890,21 @@ namespace Wism.Client.Test.Unit
 
             // Select all armies from the original tile            
             List<Army> selectedArmies = new List<Army>(originalArmies);
-            armyController.SelectArmy(selectedArmies);
-            armyController.PrepareForBattle();
+            this.armyController.SelectArmy(selectedArmies);
+            this.armyController.PrepareForBattle();
 
             // ACT
             // Attack until battle completed: Should win but not advance
             var result = AttackResult.NotStarted;
             do
             {
-                result = armyController.AttackOnce(selectedArmies, enemyTile);
+                result = this.armyController.AttackOnce(selectedArmies, enemyTile);
 
             } while (result == AttackResult.AttackerWinsRound ||
                      result == AttackResult.DefenderWinsRound);
 
             // Deselect the armies
-            armyController.DeselectArmy(selectedArmies);
+            this.armyController.DeselectArmy(selectedArmies);
 
             // ASSERT
             var newTile = selectedArmies[0].Tile;
@@ -933,7 +933,7 @@ namespace Wism.Client.Test.Unit
             }
 
             throw new InvalidOperationException("Cannot find the hero in the world.");
-        }        
+        }
 
         private bool TryMove(List<Army> armies, Direction direction)
         {
@@ -957,12 +957,12 @@ namespace Wism.Client.Test.Unit
             }
 
             IList<Tile> path = null;
-            var state = armyController.MoveOneStep(armies, World.Current.Map[x, y], ref path, out _);
+            var state = this.armyController.MoveOneStep(armies, World.Current.Map[x, y], ref path, out _);
             if (state == ActionState.InProgress &&
                 path.Count == 1)
             {
                 // We are only moving one step; calling again to "reach destination"
-                state = armyController.MoveOneStep(armies, World.Current.Map[x, y], ref path, out _);
+                state = this.armyController.MoveOneStep(armies, World.Current.Map[x, y], ref path, out _);
             }
             return state == ActionState.Succeeded;
         }

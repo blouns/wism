@@ -51,7 +51,7 @@ namespace Wism.Client.Core
             }
 
             var info = ModFactory.FindArmyInfo(armyEntity.ArmyShortName);
-            var army = CreateArmy(player, info);            
+            var army = CreateArmy(player, info);
             army.Id = armyEntity.Id;
             army.IsDead = armyEntity.IsDead;
             army.DisplayName = armyEntity.DisplayName;

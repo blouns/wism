@@ -9,7 +9,7 @@ public class ResetCities : Editor
     {
         DrawDefaultInspector();
 
-        var container = target as CityContainer;
+        var container = this.target as CityContainer;
         if (container != null)
         {
             if (container.Reset == true)
@@ -18,11 +18,11 @@ public class ResetCities : Editor
                 ClearCities(container);
                 container.Reset = false;
             }
-        }        
+        }
     }
 
     private void ClearCities(CityContainer cities)
-    {        
+    {
         for (int i = cities.transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(cities.transform.GetChild(i).gameObject);

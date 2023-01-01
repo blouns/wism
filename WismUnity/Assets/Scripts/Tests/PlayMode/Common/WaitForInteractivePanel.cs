@@ -11,8 +11,8 @@ namespace Assets.Tests.PlayMode
         /// <param name="waitForActive">Wait for panel to be active if True, otherwise wait for panel to be inactive</param>
         public WaitForInteractivePanel(GameObject panel, bool waitForActive = true)
         {
-            Panel = panel;
-            WaitForActive = waitForActive;
+            this.Panel = panel;
+            this.WaitForActive = waitForActive;
         }
 
         public override bool keepWaiting

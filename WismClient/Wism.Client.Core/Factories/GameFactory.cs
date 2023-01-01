@@ -5,6 +5,7 @@ using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
+using Wism.Client.Pathing;
 using Wism.Client.War;
 
 namespace Wism.Client.Factories
@@ -25,6 +26,7 @@ namespace Wism.Client.Factories
             Game.Current.WarStrategy = GetWarStrategy(settings.WarStrategy);
             Game.Current.TraversalStrategy = GetTraversalStrategy(settings.TraversalStrategies);
             Game.Current.MovementCoordinator = GetMovementCoordinator(settings.MovementStrategies);
+            Game.Current.PathingStrategy = GetPathingStrategy(settings.PathingStrategy);
             Game.Current.Transition(settings.GameState);
 
             CreatePlayers(settings, Game.Current);
@@ -48,6 +50,7 @@ namespace Wism.Client.Factories
             Game.Current.WarStrategy = GetWarStrategy(snapshot.WarStrategy);
             Game.Current.TraversalStrategy = GetTraversalStrategy(snapshot.TraversalStrategies);
             Game.Current.MovementCoordinator = GetMovementCoordinator(snapshot.MovementStrategies);
+            Game.Current.PathingStrategy = GetPathingStrategy(snapshot.PathingStrategy);
             Game.Current.Transition(snapshot.GameState);
             Game.Current.CurrentPlayerIndex = snapshot.CurrentPlayerIndex;
 
@@ -64,12 +67,12 @@ namespace Wism.Client.Factories
 
             // Factory state
             ArmyFactory.LastId = snapshot.LastArmyId;
-            
+
 
             return Game.Current;
         }
 
-        private static T CreateObject<T>(AssemblyEntity entity) 
+        private static T CreateObject<T>(AssemblyEntity entity)
         {
             var assembly = Assembly.Load(entity.AssemblyName);
             return (T)assembly.CreateInstance(entity.TypeName);
@@ -90,6 +93,23 @@ namespace Wism.Client.Factories
             }
 
             return warStrategy;
+        }
+
+        private static IPathingStrategy GetPathingStrategy(AssemblyEntity entity)
+        {
+            IPathingStrategy strategy;
+
+            try
+            {
+                strategy = CreateObject<IPathingStrategy>(entity);
+            }
+            catch
+            {
+                // Use default to protect against missing or corrupt mods
+                strategy = new DijkstraPathingStrategy();
+            }
+
+            return strategy;
         }
 
         private static ITraversalStrategy GetTraversalStrategy(AssemblyEntity[] traversalEntities)
@@ -177,7 +197,7 @@ namespace Wism.Client.Factories
                     {
                         if (army.Id == snapshot.SelectedArmyIds[i])
                         {
-                            selectedArmies.Add(army);                            
+                            selectedArmies.Add(army);
                             break;
                         }
                     }
@@ -192,7 +212,7 @@ namespace Wism.Client.Factories
         }
 
         private static void LoadCities(GameEntity snapshot, World world,
-            Dictionary<string, Player> cityToPlayer, 
+            Dictionary<string, Player> cityToPlayer,
             Dictionary<string, Player> capitolToPlayer)
         {
             if (snapshot.World.Cities != null)
@@ -226,8 +246,15 @@ namespace Wism.Client.Factories
         /// </remarks>
         private static Random LoadRandom(RandomEntity snapshot)
         {
-            Game.Current.RandomSeed = snapshot.Seed;
-            return snapshot.Random;
+            var random = new Random(snapshot.Seed);
+            //if (snapshot.SeedArray != null)
+            //{
+            //    var seedArrayCopy = (int[])snapshot.SeedArray.Clone();
+            //    var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            //    seedArrayInfo.SetValue(random, seedArrayCopy);
+            //}
+
+            return random;
         }
 
         private static void LoadPlayers(GameEntity snapshot, Game current,
@@ -238,10 +265,10 @@ namespace Wism.Client.Factories
             capitolToPlayer = new Dictionary<string, Player>();
 
             var players = snapshot.Players;
-            current.Players = new List<Player>();            
+            current.Players = new List<Player>();
             for (int i = 0; i < players.Length; i++)
             {
-                current.Players.Add(PlayerFactory.Load(players[i], 
+                current.Players.Add(PlayerFactory.Load(players[i],
                     out cityToPlayer,
                     out capitolToPlayer));
             }

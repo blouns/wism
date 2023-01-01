@@ -10,7 +10,7 @@ public class ResetLocations : Editor
     {
         DrawDefaultInspector();
 
-        var container = target as LocationContainer;
+        var container = this.target as LocationContainer;
         if (container != null)
         {
             if (container.Reset == true)
@@ -19,11 +19,11 @@ public class ResetLocations : Editor
                 ClearLocations(container);
                 container.Reset = false;
             }
-        }        
+        }
     }
 
     private void ClearLocations(LocationContainer locations)
-    {        
+    {
         for (int i = locations.transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(locations.transform.GetChild(i).gameObject);

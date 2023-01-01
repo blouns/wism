@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Assets.Scripts.UnityGame.Persistance.Entities
+﻿namespace Assets.Scripts.UnityGame.Persistance.Entities
 {
     public class UnityNewGameEntity
     {
@@ -10,7 +8,7 @@ namespace Assets.Scripts.UnityGame.Persistance.Entities
 
         public bool InteractiveUI { get; set; }
 
-        public int  RandomSeed { get; set; }
+        public int RandomSeed { get; set; }
 
         public UnityPlayerEntity[] Players { get; set; }
 

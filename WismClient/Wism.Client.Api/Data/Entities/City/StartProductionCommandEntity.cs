@@ -6,6 +6,6 @@
 
         public string ArmyShortName { get; set; }
 
-        public string DestinationCityShortName { get; set;  }
+        public string DestinationCityShortName { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace Wism.Client.Core.Armies
 
     public class StandardTraversalStrategy : ITraversalStrategy
     {
-        public bool CanTraverse(List<Army> armies, Tile tile)
+        public bool CanTraverse(List<Army> armies, Tile tile, bool ignoreClan = false)
         {
             if (armies is null)
             {
@@ -25,7 +25,7 @@ namespace Wism.Client.Core.Armies
                 throw new ArgumentNullException(nameof(tile));
             }
 
-            return armies.TrueForAll(a => CanTraverse(a.Clan, a.Info, tile));
+            return armies.TrueForAll(a => CanTraverse(a.Clan, a.Info, tile, ignoreClan));
         }
 
         /// <summary>
@@ -33,8 +33,9 @@ namespace Wism.Client.Core.Armies
         /// </summary>
         /// <param name="clan">Clan of the army</param>
         /// <param name="armyInfo">Army kind</param>
+        /// <param name="targetTile">Destination</param>
         /// <returns>True if the army can move here; otherwise, false</returns>
-        public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile targetTile)
+        public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile targetTile, bool ignoreClan = false)
         {
             if (clan is null)
             {
@@ -46,8 +47,13 @@ namespace Wism.Client.Core.Armies
                 throw new ArgumentNullException(nameof(armyInfo));
             }
 
+            if (targetTile is null)
+            {
+                throw new ArgumentNullException(nameof(targetTile));
+            }
+
             bool canTraverse = true;
-            if (targetTile.HasCity())
+            if (targetTile.HasCity() && !ignoreClan)
             {
                 canTraverse = targetTile.City.CanTraverse(clan);
             }

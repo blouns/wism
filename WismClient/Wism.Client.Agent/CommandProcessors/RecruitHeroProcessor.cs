@@ -84,7 +84,7 @@ namespace Wism.Client.Agent.CommandProcessors
                 command.HeroAccepted = true;
                 state = ActionState.Succeeded;
             }
-            Console.WriteLine();            
+            Console.WriteLine();
 
             return state;
         }

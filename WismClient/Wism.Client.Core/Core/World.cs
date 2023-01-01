@@ -10,6 +10,7 @@ namespace Wism.Client.Core
     {
         private List<City> cities = new List<City>();
         private List<Location> locations = new List<Location>();
+        private List<Artifact> looseItems = new List<Artifact>();
 
         public Tile[,] Map { get; protected set; }
 
@@ -91,7 +92,7 @@ namespace Wism.Client.Core
             {
                 throw new ArgumentException($"{city} already exists in the world.");
             }
-            
+
             int x = tile.X;
             int y = tile.Y;
 
@@ -134,11 +135,32 @@ namespace Wism.Client.Core
 
             location.Tile = tile;
             tile.Location = location;
-            tile.Terrain = location.Terrain;      
-            
+            tile.Terrain = location.Terrain;
+
             // Add location for tracking
-            locations.Add(location);
+            this.locations.Add(location);
         }
+
+        public void AddLooseItem(Artifact item, Tile tile)
+        {
+            if (item is null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            if (tile is null)
+            {
+                throw new ArgumentNullException(nameof(tile));
+            }
+
+            if (this.looseItems.Contains(item))
+            {
+                throw new ArgumentException($"{item} already exists in world.");
+            }
+
+            // Add loose item for tracking
+            this.looseItems.Add(item);
+        }       
 
         public List<City> GetCities()
         {
@@ -154,10 +176,33 @@ namespace Wism.Client.Core
 
             return this.cities.Find(c => c.ShortName == shortName);
         }
-
+       
         public List<Location> GetLocations()
         {
             return new List<Location>(this.locations);
+        }
+
+        public List<Artifact> GetLooseItems()
+        {
+            return new List<Artifact>(this.looseItems);
+        }
+
+        public void RemoveLooseItem(Artifact artifact, Tile tile)
+        {
+            if (artifact is null)
+            {
+                throw new ArgumentNullException(nameof(artifact));
+            }
+
+            if (tile is null)
+            {
+                throw new ArgumentNullException(nameof(tile));
+            }
+
+            if (this.looseItems.Contains(artifact))
+            {
+                this.looseItems.Remove(artifact);                
+            }
         }
 
         public void Reset()

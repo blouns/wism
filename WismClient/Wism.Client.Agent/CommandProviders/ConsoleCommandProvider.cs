@@ -40,7 +40,7 @@ namespace Wism.Client.Agent
                 throw new ArgumentNullException(nameof(controllerProvider));
             }
 
-            logger = loggerFactory.CreateLogger();
+            this.logger = loggerFactory.CreateLogger();
             this.commandController = controllerProvider.CommandController;
             this.armyController = controllerProvider.ArmyController;
             this.gameController = controllerProvider.GameController;
@@ -58,7 +58,7 @@ namespace Wism.Client.Agent
             if (Game.Current.Players.FindAll(p => !p.IsDead).Count < 2)
             {
                 DoGameOver();
-                logger.LogInformation("No commands. We have lost.");
+                this.logger.LogInformation("No commands. We have lost.");
                 return;
             }
 
@@ -178,8 +178,8 @@ namespace Wism.Client.Agent
                 return;
             }
 
-            commandController.AddCommand(
-                new BuildCityCommand(cityController, city));
+            this.commandController.AddCommand(
+                new BuildCityCommand(this.cityController, city));
         }
 
         private void DoRazeCity()
@@ -197,8 +197,8 @@ namespace Wism.Client.Agent
                 return;
             }
 
-            commandController.AddCommand(
-                new RazeCityCommand(cityController, city));
+            this.commandController.AddCommand(
+                new RazeCityCommand(this.cityController, city));
         }
 
         private void DoLoad()
@@ -235,7 +235,7 @@ namespace Wism.Client.Agent
                 writer.Write(json);
             }
 
-            var commands = commandController.GetCommandsJSON();
+            var commands = this.commandController.GetCommandsJSON();
             File.WriteAllText(CommandsFilePath, commands);
             Notify.Display("Game saved successfully.");
         }
@@ -254,8 +254,8 @@ namespace Wism.Client.Agent
                 return;
             }
 
-            commandController.AddCommand
-                (new TakeItemsCommand(heroController, hero));
+            this.commandController.AddCommand
+                (new TakeItemsCommand(this.heroController, hero));
         }
 
         private void DoDrop()
@@ -272,12 +272,12 @@ namespace Wism.Client.Agent
                 return;
             }
 
-            commandController.AddCommand
-                (new DropItemsCommand(heroController, hero));
+            this.commandController.AddCommand
+                (new DropItemsCommand(this.heroController, hero));
         }
 
         private void DoSearch()
-        {   
+        {
             if (!Game.Current.ArmiesSelected())
             {
                 return;
@@ -290,54 +290,54 @@ namespace Wism.Client.Agent
                 Notify.DisplayAndWait("You find nothing.");
             }
             else
-            { 
+            {
                 Command command;
                 switch (tile.Location.Kind)
                 {
                     case "Library":
-                        command = new SearchLibraryCommand(locationController, armies, tile.Location);
+                        command = new SearchLibraryCommand(this.locationController, armies, tile.Location);
                         break;
                     case "Ruins":
                     case "Tomb":
-                        command = new SearchRuinsCommand(locationController, armies, tile.Location);
+                        command = new SearchRuinsCommand(this.locationController, armies, tile.Location);
                         break;
                     case "Sage":
-                        command = new SearchSageCommand(locationController, armies, tile.Location);
+                        command = new SearchSageCommand(this.locationController, armies, tile.Location);
                         break;
                     case "Temple":
-                        command = new SearchTempleCommand(locationController, armies, tile.Location);
+                        command = new SearchTempleCommand(this.locationController, armies, tile.Location);
                         break;
                     default:
                         throw new InvalidOperationException("No location to search.");
                 }
-                commandController.AddCommand(command);
+                this.commandController.AddCommand(command);
             }
 
-            
+
         }
 
         private void DoDefendArmy()
         {
-            commandController.AddCommand(
-                new DefendCommand(armyController, Game.Current.GetSelectedArmies()));
+            this.commandController.AddCommand(
+                new DefendCommand(this.armyController, Game.Current.GetSelectedArmies()));
         }
 
         private void DoQuitArmy()
         {
-            commandController.AddCommand(
-                new QuitArmyCommand(armyController, Game.Current.GetSelectedArmies()));
+            this.commandController.AddCommand(
+                new QuitArmyCommand(this.armyController, Game.Current.GetSelectedArmies()));
         }
 
         private void DoNextArmy()
         {
-            commandController.AddCommand(
-                new SelectNextArmyCommand(armyController));
+            this.commandController.AddCommand(
+                new SelectNextArmyCommand(this.armyController));
         }
 
         private void DoProduce()
         {
             // Arguments for the command
-            City productionCity;            
+            City productionCity;
             ArmyInfo armyInfo;
             City destinationCity = null;    // Optional
 
@@ -393,8 +393,8 @@ namespace Wism.Client.Agent
                 }
             }
 
-            commandController.AddCommand(
-                new StartProductionCommand(cityController, productionCity, armyInfo, destinationCity));
+            this.commandController.AddCommand(
+                new StartProductionCommand(this.cityController, productionCity, armyInfo, destinationCity));
         }
 
         private void DoExit()
@@ -404,15 +404,15 @@ namespace Wism.Client.Agent
 
         private void DoEndTurn()
         {
-            commandController.AddCommand(
-                    new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
+            this.commandController.AddCommand(
+                    new EndTurnCommand(this.gameController, Game.Current.GetCurrentPlayer()));
 
             var nextPlayer = Game.Current.GetNextPlayer();
             if (nextPlayer == null)
             {
                 Console.WriteLine("No players are alive!");
                 System.Environment.Exit(1);
-                
+
             }
 
             DoStartTurn(nextPlayer);
@@ -420,15 +420,15 @@ namespace Wism.Client.Agent
 
         private void DoStartTurn(Player player)
         {
-            commandController.AddCommand(
-                    new StartTurnCommand(gameController, player));
+            this.commandController.AddCommand(
+                    new StartTurnCommand(this.gameController, player));
 
             // Check for and hire any new heros
-            var recruitHeroCommand = new RecruitHeroCommand(playerController, player);
-            commandController.AddCommand(
+            var recruitHeroCommand = new RecruitHeroCommand(this.playerController, player);
+            this.commandController.AddCommand(
                 recruitHeroCommand);
-            commandController.AddCommand(
-                new HireHeroCommand(playerController, recruitHeroCommand));
+            this.commandController.AddCommand(
+                new HireHeroCommand(this.playerController, recruitHeroCommand));
 
             // Renew production
             //commandController.AddCommand(
@@ -457,20 +457,20 @@ namespace Wism.Client.Agent
             else
             {
                 // Move to the new location
-                commandController.AddCommand(
-                    new MoveOnceCommand(armyController, armies, x, y)); 
+                this.commandController.AddCommand(
+                    new MoveOnceCommand(this.armyController, armies, x, y));
             }
         }
 
         private void AddAttackCommands(List<Army> armies, int x, int y)
         {
-            commandController.AddCommand(
-                                new PrepareForBattleCommand(armyController, armies, x, y));
-            var attackCommand = new AttackOnceCommand(armyController, armies, x, y);
-            commandController.AddCommand(
+            this.commandController.AddCommand(
+                                new PrepareForBattleCommand(this.armyController, armies, x, y));
+            var attackCommand = new AttackOnceCommand(this.armyController, armies, x, y);
+            this.commandController.AddCommand(
                 attackCommand);
-            commandController.AddCommand(
-                new CompleteBattleCommand(armyController, attackCommand));
+            this.commandController.AddCommand(
+                new CompleteBattleCommand(this.armyController, attackCommand));
         }
 
         private void DoAttackOnce()
@@ -499,7 +499,7 @@ namespace Wism.Client.Agent
             }
 
             AddAttackCommands(armies, x, y);
-        }    
+        }
 
         private void DoDeselectArmy()
         {
@@ -515,8 +515,8 @@ namespace Wism.Client.Agent
                 throw new InvalidOperationException("Selected armies were not set.");
             }
 
-            commandController.AddCommand(
-                    new DeselectArmyCommand(armyController, armies));
+            this.commandController.AddCommand(
+                    new DeselectArmyCommand(this.armyController, armies));
         }
 
         private void DoMoveArmy()
@@ -545,8 +545,8 @@ namespace Wism.Client.Agent
                 return;
             }
 
-            commandController.AddCommand(
-                    new MoveOnceCommand(armyController, armies, x, y));
+            this.commandController.AddCommand(
+                    new MoveOnceCommand(this.armyController, armies, x, y));
         }
 
         private void DoGameOver()
@@ -586,7 +586,7 @@ namespace Wism.Client.Agent
                         $"Strength: {armies[i].Strength}\t" +
                         $"Moves: {armies[i].MovesRemaining}");
                 }
-                
+
                 Console.WriteLine("Select which [#[,#,...]]: ");
                 string[] numbers = Console.ReadLine().Split(new char[] { ',' });
                 for (int i = 0; i < numbers.Length; i++)
@@ -598,7 +598,7 @@ namespace Wism.Client.Agent
                         return;
                     }
 
-                    specificArmies.Add(armies[index]);                    
+                    specificArmies.Add(armies[index]);
                 }
 
                 if (specificArmies.Count == 0)
@@ -611,8 +611,8 @@ namespace Wism.Client.Agent
             }
 
             // Select the armies
-            commandController.AddCommand(
-                    new SelectArmyCommand(armyController, armies));
+            this.commandController.AddCommand(
+                    new SelectArmyCommand(this.armyController, armies));
         }
 
         private static int ReadLocationInput(int dimension)

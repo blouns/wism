@@ -38,6 +38,9 @@ namespace Wism.Client.Entities
         public AssemblyEntity[] MovementStrategies { get; set; }
 
         [DataMember]
+        public AssemblyEntity PathingStrategy { get; set; }
+
+        [DataMember]
         public int LastArmyId { get; set; }
     }
 }

@@ -143,6 +143,6 @@ namespace Assets.Scripts.Tilemaps
             }
 
             return kinds;
-        }        
+        }
     }
 }

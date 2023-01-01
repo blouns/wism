@@ -6,6 +6,7 @@ using Wism.Client.Core.Armies;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Pathing;
 using Wism.Client.War;
 
 namespace Wism.Client.Data
@@ -25,14 +26,26 @@ namespace Wism.Client.Data
                 WarStrategy = SnapshotWarStrategy(game.WarStrategy),
                 MovementStrategies = SnapshotMovementStrategies(game.MovementCoordinator),
                 TraversalStrategies = SnapshotTraversalStrategies(game.TraversalStrategy),
+                PathingStrategy = SnapshotPathingStrategy(game.PathingStrategy),
                 World = SnapshotWorld(World.Current),
-                LastArmyId = ArmyFactory.LastId                
+                LastArmyId = ArmyFactory.LastId
             };
 
             return snapshot;
         }
 
-        private static AssemblyEntity[] SnapshotTraversalStrategies(ITraversalStrategy traversalStrategy)
+        private static AssemblyEntity SnapshotPathingStrategy(IPathingStrategy pathingStrategy)
+        {
+            var snapshot = new AssemblyEntity()
+            {
+                AssemblyName = Assembly.GetAssembly(pathingStrategy.GetType()).FullName,
+                TypeName = pathingStrategy.GetType().FullName
+            };
+
+            return snapshot;
+        }
+
+        public static AssemblyEntity[] SnapshotTraversalStrategies(ITraversalStrategy traversalStrategy)
         {
             var compositeStrategy = traversalStrategy as CompositeTraversalStrategy;
             if (compositeStrategy == null)
@@ -53,7 +66,7 @@ namespace Wism.Client.Data
             return snapshot;
         }
 
-        private static AssemblyEntity[] SnapshotMovementStrategies(MovementStrategyCoordinator movementCoordinator)
+        public static AssemblyEntity[] SnapshotMovementStrategies(MovementStrategyCoordinator movementCoordinator)
         {
             var snapshot = new AssemblyEntity[movementCoordinator.Strategies.Count];
             for (int i = 0; i < snapshot.Length; i++)
@@ -147,7 +160,7 @@ namespace Wism.Client.Data
             var snapshot = new BoonEntity()
             {
                 AlliesShortName = (boon is AlliesBoon) ? ((AlliesBoon)boon).ArmyInfo.ShortName : null,
-                ArtifactShortName = (boon is ArtifactBoon) ? ((ArtifactBoon)boon).Artifact.ShortName : null,                
+                ArtifactShortName = (boon is ArtifactBoon) ? ((ArtifactBoon)boon).Artifact.ShortName : null,
                 BoonAssemblyName = Assembly.GetAssembly(boon.GetType()).FullName,
                 BoonTypeName = boon.GetType().FullName
             };
@@ -158,7 +171,7 @@ namespace Wism.Client.Data
         private static TileEntity[] SnapshotTiles(World world, int xUpperBound, int yUpperBound)
         {
             var map = world.Map;
-            var snapshot = new TileEntity[xUpperBound * yUpperBound];            
+            var snapshot = new TileEntity[xUpperBound * yUpperBound];
 
             for (int y = 0; y < yUpperBound; y++)
             {
@@ -277,7 +290,7 @@ namespace Wism.Client.Data
                 return null;
             }
 
-            var snapshot = new ProductionEntity()           
+            var snapshot = new ProductionEntity()
             {
                 ArmyNames = ConvertToArmyShortNames(productionSlots),
                 ProductionNumbers = ConvertToProductionNumbers(barracks, productionSlots)

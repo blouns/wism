@@ -1,8 +1,14 @@
-﻿using System.Reflection;
-using Wism.Client.Entities;
-using Wism.Client.War;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using System.Reflection;
+using Wism.Client.Core;
+using Wism.Client.Core.Armies;
+using Wism.Client.Data;
+using Wism.Client.Entities;
+using Wism.Client.Pathing;
+using Wism.Client.War;
 
 namespace Wism.Client.Test.Common
 {
@@ -12,12 +18,17 @@ namespace Wism.Client.Test.Common
 
         public static GameEntity CreateDefaultNewGameSettings(string worldName, int seed = 1990)
         {
-            GameEntity settings = new GameEntity();
-
-            settings.Random = new RandomEntity() { Seed = seed };
-            settings.WarStrategy = CreateDefaultWarStrategy();
-            settings.Players = CreateDefaultPlayers();
-            settings.World = CreateWorld(worldName);
+            var settings = new GameEntity
+            {
+                Random = new RandomEntity() { Seed = seed },
+                WarStrategy = CreateDefaultWarStrategy(),
+                PathingStrategy = CreatePathingStrategy(),
+                TraversalStrategies = CreateTraversalStrategies(),
+                MovementStrategies = CreateMovementStrategies(),
+                Players = CreateDefaultPlayers(),
+                World = CreateWorld(worldName),
+                GameState = Core.GameState.Ready
+            };
 
             return settings;
         }
@@ -32,7 +43,7 @@ namespace Wism.Client.Test.Common
             entity.Locations = Deserialize<LocationEntity[]>($@"{DataPath}\{worldName}\Location.json");
 
             return entity;
-        }        
+        }
 
         private static T Deserialize<T>(string path)
         {
@@ -70,6 +81,36 @@ namespace Wism.Client.Test.Common
             {
                 AssemblyName = Assembly.GetAssembly(typeof(DefaultWarStrategy)).FullName,
                 TypeName = (typeof(DefaultWarStrategy)).FullName
+            };
+
+            return entity;
+        }
+
+        private static AssemblyEntity[] CreateMovementStrategies()
+        {
+            var movementStrategy = MovementStrategyCoordinator.CreateDefault();
+
+            return GamePersistance.SnapshotMovementStrategies(movementStrategy);
+        }
+
+        private static AssemblyEntity[] CreateTraversalStrategies()
+        {
+            var traversalStrategy = new CompositeTraversalStrategy(new List<ITraversalStrategy>()
+            {
+                new StandardTraversalStrategy(),
+                new HeroFlightTraversalStrategy(),
+                new NavalTraversalStrategy()
+            });
+
+            return GamePersistance.SnapshotTraversalStrategies(traversalStrategy);
+        }
+
+        private static AssemblyEntity CreatePathingStrategy()
+        {
+            var entity = new AssemblyEntity()
+            {
+                AssemblyName = Assembly.GetAssembly(typeof(AStarPathingStrategy)).FullName,
+                TypeName = (typeof(AStarPathingStrategy)).FullName
             };
 
             return entity;

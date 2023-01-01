@@ -16,7 +16,7 @@ namespace Assets.Scripts.Managers
         LocationPicker,
         LoadGamePicker,
         SaveGamePicker,
-        UI,        
+        UI,
         WaitForKey
     }
 
@@ -29,14 +29,14 @@ namespace Assets.Scripts.Managers
         private readonly Timer mouseSingleLeftClickTimer = new Timer();
         private bool singleLeftClickProcessed;
         private readonly Timer mouseRightClickHoldTimer = new Timer();
-        private bool holdingRightButton;        
+        private bool holdingRightButton;
         private InputMode inputMode = InputMode.Game;
         private bool skipInput;
 
-        public GameManager GameManager { get => gameManager; set => gameManager = value; }
-        public UnityManager UnityManager { get => unityManager; set => unityManager = value; }
-        public InputHandler InputHandler { get => inputHandler; set => inputHandler = value; }
-        public InputMode InputMode { get => inputMode; private set => inputMode = value; }
+        public GameManager GameManager { get => this.gameManager; set => this.gameManager = value; }
+        public UnityManager UnityManager { get => this.unityManager; set => this.unityManager = value; }
+        public InputHandler InputHandler { get => this.inputHandler; set => this.inputHandler = value; }
+        public InputMode InputMode { get => this.inputMode; private set => this.inputMode = value; }
 
         public delegate void AnyKeyPressed();
 
@@ -46,19 +46,19 @@ namespace Assets.Scripts.Managers
         {
             this.UnityManager = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
-            this.GameManager = UnityManager.GetComponent<GameManager>();
+            this.GameManager = this.UnityManager.GetComponent<GameManager>();
             this.InputHandler = new InputHandler(this.UnityManager);
 
             // Mouse click timing
-            mouseSingleLeftClickTimer.Interval = 400;
-            mouseSingleLeftClickTimer.Elapsed += SingleLeftClick;
-            mouseRightClickHoldTimer.Interval = 200;
-            mouseRightClickHoldTimer.Elapsed += SingleRightClick;
+            this.mouseSingleLeftClickTimer.Interval = 400;
+            this.mouseSingleLeftClickTimer.Elapsed += SingleLeftClick;
+            this.mouseRightClickHoldTimer.Interval = 200;
+            this.mouseRightClickHoldTimer.Elapsed += SingleRightClick;
         }
 
         public void Update()
         {
-            if (!UnityManager.IsInitalized())
+            if (!this.UnityManager.IsInitalized())
             {
                 return;
             }
@@ -68,14 +68,14 @@ namespace Assets.Scripts.Managers
 
         private void SingleLeftClick(object o, System.EventArgs e)
         {
-            mouseSingleLeftClickTimer.Stop();
+            this.mouseSingleLeftClickTimer.Stop();
 
-            singleLeftClickProcessed = true;
+            this.singleLeftClickProcessed = true;
         }
 
         private void SingleRightClick(object o, EventArgs e)
         {
-            holdingRightButton = true;
+            this.holdingRightButton = true;
         }
 
         public void SetInputMode(InputMode mode)
@@ -117,7 +117,7 @@ namespace Assets.Scripts.Managers
                     HandleWaitForKey();
                     break;
                 case InputMode.UI:
-                    // Handled by Event System
+                // Handled by Event System
                 default:
                     break;
             }
@@ -125,41 +125,41 @@ namespace Assets.Scripts.Managers
 
         private void HandleWaitForKey()
         {
-            if (KeyPressed != null && 
+            if (this.KeyPressed != null &&
                 Input.anyKeyDown)
             {
-                KeyPressed();
+                this.KeyPressed();
             }
         }
 
         private void HandleGameInput()
         {
-            if (skipInput || 
+            if (this.skipInput ||
                 this.unityManager.ExecutionMode != ExecutionMode.Running)
             {
-                skipInput = false;
+                this.skipInput = false;
                 return;
             }
 
-            if (singleLeftClickProcessed)
+            if (this.singleLeftClickProcessed)
             {
                 // Single left click performed
                 HandleLeftClick();
-                singleLeftClickProcessed = false;
+                this.singleLeftClickProcessed = false;
             }
             else if (Input.GetMouseButtonDown(0))
             {
                 // Detect single vs. double-click
-                if (mouseSingleLeftClickTimer.Enabled == false)
+                if (this.mouseSingleLeftClickTimer.Enabled == false)
                 {
-                    mouseSingleLeftClickTimer.Start();
+                    this.mouseSingleLeftClickTimer.Start();
                     // Wait for double click
                     return;
                 }
                 else
                 {
                     // Double click performed, so cancel single click
-                    mouseSingleLeftClickTimer.Stop();
+                    this.mouseSingleLeftClickTimer.Stop();
 
                     HandleLeftClick(true);
                 }
@@ -167,31 +167,31 @@ namespace Assets.Scripts.Managers
             else
             {
                 HandleKeyboard();
-            }            
+            }
 
             // Handle right-click (drag)
             if (Input.GetMouseButtonDown(1))
             {
-                if (mouseRightClickHoldTimer.Enabled == false)
+                if (this.mouseRightClickHoldTimer.Enabled == false)
                 {
-                    mouseRightClickHoldTimer.Start();
+                    this.mouseRightClickHoldTimer.Start();
                     // Wait for mouse up
                     return;
                 }
             }
             else if (Input.GetMouseButtonUp(1))
             {
-                mouseRightClickHoldTimer.Stop();
+                this.mouseRightClickHoldTimer.Stop();
 
-                if (!holdingRightButton)
+                if (!this.holdingRightButton)
                 {
                     HandleRightClick();
                 }
 
-                holdingRightButton = false;
+                this.holdingRightButton = false;
             }
-            
-            UnityManager.Draw();
+
+            this.UnityManager.Draw();
         }
 
         private void HandleKeyboard()
@@ -199,44 +199,44 @@ namespace Assets.Scripts.Managers
             // Army actions
             if (Input.GetKeyDown(KeyCode.M))
             {
-                UnityManager.HandleArmyPicker();
+                this.UnityManager.HandleArmyPicker();
             }
             else if (Input.GetKeyDown(KeyCode.Period) ||
                      Input.GetKeyDown(KeyCode.KeypadPeriod))
             {
-                UnityManager.ToggleMinimap();
+                this.UnityManager.ToggleMinimap();
             }
             else if (Input.GetKeyDown(KeyCode.N))
             {
-                GameManager.SelectNextArmy();
+                this.GameManager.SelectNextArmy();
             }
             else if (Input.GetKeyDown(KeyCode.D))
             {
-                GameManager.DefendSelectedArmies();
+                this.GameManager.DefendSelectedArmies();
             }
             else if (Input.GetKeyDown(KeyCode.Q))
             {
-                GameManager.QuitSelectedArmies();
+                this.GameManager.QuitSelectedArmies();
             }
             else if (Input.GetKeyDown(KeyCode.Z))
             {
-                GameManager.SearchLocation();
-            }            
+                this.GameManager.SearchLocation();
+            }
             // TODO: Add Disband action for armies
             // TODO: Add Find armies action
 
             // Hero actions
             else if (Input.GetKeyDown(KeyCode.T))
             {
-                UnityManager.HandleItemPicker(true);
+                this.UnityManager.HandleItemPicker(true);
             }
             else if (Input.GetKeyDown(KeyCode.O))
             {
-                UnityManager.HandleItemPicker(false);
+                this.UnityManager.HandleItemPicker(false);
             }
             else if (Input.GetKey(KeyCode.C))
             {
-                UnityManager.HandlePetCompanion();
+                this.UnityManager.HandlePetCompanion();
             }
             // TODO: Add Inventory action
             // TODO: Add Find heros (k) action
@@ -244,33 +244,33 @@ namespace Assets.Scripts.Managers
             // City actions
             else if (Input.GetKeyDown(KeyCode.P))
             {
-                UnityManager.SetProductionMode(ProductionMode.SelectCity);
+                this.UnityManager.SetProductionMode(ProductionMode.SelectCity);
             }
             else if (Input.GetKeyDown(KeyCode.R))
             {
-                GameManager.RazeCity();
+                this.GameManager.RazeCity();
             }
             else if (Input.GetKeyDown(KeyCode.B))
             {
-                GameManager.Build();
+                this.GameManager.Build();
             }
 
             // Game actions
             else if (Input.GetKeyDown(KeyCode.E))
             {
-                GameManager.EndTurn();
+                this.GameManager.EndTurn();
             }
             else if (Input.GetKeyDown(KeyCode.S))
             {
-                UnityManager.HandleSaveLoadPicker(true);
+                this.UnityManager.HandleSaveLoadPicker(true);
             }
             else if (Input.GetKeyDown(KeyCode.L))
             {
-                UnityManager.HandleSaveLoadPicker(false);
+                this.UnityManager.HandleSaveLoadPicker(false);
             }
             else if (Input.GetKeyDown(KeyCode.Slash))
             {
-                UnityManager.ToggleHelp();
+                this.UnityManager.ToggleHelp();
             }
             else if (Input.GetKeyDown(KeyCode.X))
             {
@@ -279,6 +279,13 @@ namespace Assets.Scripts.Managers
 #endif
                 Application.Quit();
             }
+            // TODO: Remove temp debug code
+            else if (Input.GetKeyDown(KeyCode.RightBracket))
+            {
+                // Toggle Djikstra pathing vs. A-Star pathing
+                this.UnityManager.TogglePathing();
+
+            }
             // TODO: Add resign action
             // TODO: Add change control action (human, AI)
             // TODO: Add reports actions (winning, cities, gold, etc.)
@@ -286,18 +293,18 @@ namespace Assets.Scripts.Managers
             // Navigation actions
             else if (Input.GetKeyDown(KeyCode.C))
             {
-                UnityManager.GoToCapitol(Game.Current.GetCurrentPlayer());
+                this.UnityManager.GoToCapitol(Game.Current.GetCurrentPlayer());
             }
             // TODO: Add center-on-selected (space?) action
 
             // TODO: Remove these Debug-only actions
             else if (Input.GetKeyDown(KeyCode.Comma))
             {
-                UnityManager.GoToLocation();
+                this.UnityManager.GoToLocation();
             }
             else if (Input.GetKeyDown(KeyCode.Tab))
             {
-                UnityManager.DebugManager.ToggleDebug();
+                this.UnityManager.DebugManager.ToggleDebug();
             }
         }
 
@@ -306,13 +313,13 @@ namespace Assets.Scripts.Managers
             // Cancel object selection
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
-                InputHandler.DeselectObject();
+                this.InputHandler.DeselectObject();
             }
 
             // Cancel city production selection
-            if (UnityManager.ProductionMode == ProductionMode.SelectCity)
+            if (this.UnityManager.ProductionMode == ProductionMode.SelectCity)
             {
-                UnityManager.ProductionMode = ProductionMode.None;
+                this.UnityManager.ProductionMode = ProductionMode.None;
             }
         }
 
@@ -321,8 +328,8 @@ namespace Assets.Scripts.Managers
             var camera = this.unityManager.GetMainCamera();
             Tile clickedTile = this.unityManager.WorldTilemap
                 .GetClickedTile(camera);
-            InputHandler.HandleArmyClick(isDoubleClick, clickedTile);
-            InputHandler.HandleCityClick(clickedTile);
+            this.InputHandler.HandleArmyClick(isDoubleClick, clickedTile);
+            this.InputHandler.HandleCityClick(clickedTile);
         }
 
         public InputMode GetInputMode()
@@ -340,22 +347,22 @@ namespace Assets.Scripts.Managers
                 {
                     this.unityManager.NotifyUser("Saving the game...");
                     saveLoadPicker.Initialize(this.unityManager, true);
-                    this.SetInputMode(InputMode.SaveGamePicker);
+                    SetInputMode(InputMode.SaveGamePicker);
                 }
                 // Cancelled
                 else if (saveLoadPicker.OkCancelResult == OkCancel.Cancel)
                 {
                     saveLoadPicker.Clear();
-                    this.SetInputMode(InputMode.Game);
+                    SetInputMode(InputMode.Game);
                 }
                 // Save the game
                 else if (saveLoadPicker.OkCancelResult == OkCancel.Ok)
                 {
                     var fileName = String.Format(saveLoadPicker.DefaultFilenameFormat, saveLoadPicker.SelectedIndex + 1);
                     var saveName = saveLoadPicker.GetCurrentSaveName();
-                    GameManager.SaveGame(fileName, saveName);
+                    this.GameManager.SaveGame(fileName, saveName);
                     saveLoadPicker.Clear();
-                    this.SetInputMode(InputMode.Game);
+                    SetInputMode(InputMode.Game);
                 }
             }
             else
@@ -365,21 +372,21 @@ namespace Assets.Scripts.Managers
                 {
                     this.unityManager.NotifyUser("Loading the game...");
                     saveLoadPicker.Initialize(this.unityManager, false);
-                    this.SetInputMode(InputMode.LoadGamePicker);
+                    SetInputMode(InputMode.LoadGamePicker);
                 }
                 // Cancelled
                 else if (saveLoadPicker.OkCancelResult == OkCancel.Cancel)
                 {
                     saveLoadPicker.Clear();
-                    this.SetInputMode(InputMode.Game);
+                    SetInputMode(InputMode.Game);
                 }
                 // Load the game
                 else if (saveLoadPicker.OkCancelResult == OkCancel.Ok)
                 {
                     var filename = saveLoadPicker.GetCurrentFilename();
-                    GameManager.LoadGame(filename);
+                    this.GameManager.LoadGame(filename);
                     saveLoadPicker.Clear();
-                    this.SetInputMode(InputMode.Game);
+                    SetInputMode(InputMode.Game);
                 }
             }
         }
@@ -389,7 +396,7 @@ namespace Assets.Scripts.Managers
             if (!Game.Current.ArmiesSelected())
             {
                 this.unityManager.NotifyUser("You must have a hero selected for that!");
-                this.SetInputMode(InputMode.Game);
+                SetInputMode(InputMode.Game);
                 return;
             }
 
@@ -398,7 +405,7 @@ namespace Assets.Scripts.Managers
             if (army == null)
             {
                 this.unityManager.NotifyUser("You must have a hero selected for that!");
-                this.SetInputMode(InputMode.Game);
+                SetInputMode(InputMode.Game);
                 return;
             }
 
@@ -418,16 +425,16 @@ namespace Assets.Scripts.Managers
                 else if (itemPicker.OkCancelResult == OkCancel.Cancel)
                 {
                     itemPicker.Clear();
-                    this.SetInputMode(InputMode.Game);
+                    SetInputMode(InputMode.Game);
                 }
                 // Take the items
                 else if (itemPicker.OkCancelResult == OkCancel.Ok)
                 {
                     var item = itemPicker.GetSelectedItem();
                     var items = new List<Artifact> { (Artifact)item };
-                    GameManager.TakeItems(hero, items);
+                    this.GameManager.TakeItems(hero, items);
                     itemPicker.Clear();
-                    this.SetInputMode(InputMode.Game);
+                    SetInputMode(InputMode.Game);
                 }
             }
             else
@@ -448,16 +455,16 @@ namespace Assets.Scripts.Managers
                 else if (itemPicker.OkCancelResult == OkCancel.Cancel)
                 {
                     itemPicker.Clear();
-                    this.SetInputMode(InputMode.Game);
+                    SetInputMode(InputMode.Game);
                 }
                 // Drop the items
                 else if (itemPicker.OkCancelResult == OkCancel.Ok)
                 {
                     var item = itemPicker.GetSelectedItem();
                     var items = new List<Artifact> { (Artifact)item };
-                    GameManager.DropItems(hero, items);
+                    this.GameManager.DropItems(hero, items);
                     itemPicker.Clear();
-                    this.SetInputMode(InputMode.Game);
+                    SetInputMode(InputMode.Game);
                 }
             }
         }
@@ -482,7 +489,7 @@ namespace Assets.Scripts.Managers
             else if (itemPicker.OkCancelResult == OkCancel.Cancel)
             {
                 itemPicker.Clear();
-                this.SetInputMode(InputMode.Game);
+                SetInputMode(InputMode.Game);
             }
             // Center on the location chosen
             else if (itemPicker.OkCancelResult == OkCancel.Ok)
@@ -491,15 +498,15 @@ namespace Assets.Scripts.Managers
                 itemPicker.Clear();
 
                 this.unityManager.NotifyUser("Going to " + item.DisplayName);
-                InputHandler.CenterOnTile(((Location)item).Tile);                
-                this.SetInputMode(InputMode.Game);
+                this.InputHandler.CenterOnTile(((Location)item).Tile);
+                SetInputMode(InputMode.Game);
             }
             // User is still selecting the item
             else
             {
                 // Do nothing
             }
-            
+
         }
     }
 }

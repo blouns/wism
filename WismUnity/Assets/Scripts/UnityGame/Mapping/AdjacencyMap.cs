@@ -16,10 +16,10 @@ namespace Assets.Scripts.Tilemaps
 
         public AdjacencyMap(bool topLeft, bool topRight, bool bottomLeft, bool bottomRight)
         {
-            TopLeft = topLeft;
-            TopRight = topRight;
-            BottomLeft = bottomLeft;
-            BottomRight = bottomRight;
+            this.TopLeft = topLeft;
+            this.TopRight = topRight;
+            this.BottomLeft = bottomLeft;
+            this.BottomRight = bottomRight;
         }
 
         public override bool Equals(object obj)

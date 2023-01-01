@@ -77,7 +77,7 @@ namespace Wism.Client.Modules
                 }
 
                 var recruitAssembly = Assembly.Load(assemblyName);
-                recruitHeroStrategy =(IRecruitHeroStrategy)recruitAssembly.CreateInstance(typeName);
+                recruitHeroStrategy = (IRecruitHeroStrategy)recruitAssembly.CreateInstance(typeName);
             }
 
             return recruitHeroStrategy;
@@ -333,7 +333,7 @@ namespace Wism.Client.Modules
         {
             string filePath = String.Format(@"{0}\{1}", path, CityInfo.FileName);
             cityInfos = LoadModFiles<CityInfo>(filePath);
-            
+
             return cityInfos;
         }
 

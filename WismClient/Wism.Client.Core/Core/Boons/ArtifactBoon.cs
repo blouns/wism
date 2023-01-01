@@ -8,7 +8,7 @@ namespace Wism.Client.Core
     {
         public ArtifactBoon(Artifact artifact)
         {
-            Artifact = artifact ?? throw new ArgumentNullException(nameof(artifact));
+            this.Artifact = artifact ?? throw new ArgumentNullException(nameof(artifact));
         }
 
         public bool IsDefended => true;
@@ -29,10 +29,10 @@ namespace Wism.Client.Core
                 target.Items = new List<Artifact>();
             }
 
-            target.AddItem(Artifact);
+            target.AddItem(this.Artifact);
 
-            Result = Artifact;
-            return Artifact;
+            this.Result = this.Artifact;
+            return this.Artifact;
         }
     }
 }

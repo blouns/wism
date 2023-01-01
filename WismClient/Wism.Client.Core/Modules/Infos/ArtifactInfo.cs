@@ -8,7 +8,7 @@ namespace Wism.Client.Modules
         public static readonly string FileName = "Artifact.json";
 
         [DataMember]
-        public string DisplayName { get; set; } = "Sword";      
+        public string DisplayName { get; set; } = "Sword";
 
         [DataMember]
         public string ShortName { get; set; } = "Sword";

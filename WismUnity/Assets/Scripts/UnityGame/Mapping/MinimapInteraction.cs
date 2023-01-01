@@ -1,5 +1,4 @@
 using Assets.Scripts.Managers;
-using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Wism.Client.Core;
@@ -48,7 +47,7 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
             this.minimapCamera = GameObject.FindGameObjectWithTag("MinimapCamera")
                 .GetComponent<Camera>();
             this.minimapCamera.gameObject
-                .AddComponent<Physics2DRaycaster>();            
+                .AddComponent<Physics2DRaycaster>();
         }
     }
 
@@ -64,7 +63,7 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
             unityManager.InputManager.SkipInput();
 
             var minimapNormal = GetMinimapNormal();
-            var viewportVector = mainCamera.ScreenToViewportPoint(
+            var viewportVector = this.mainCamera.ScreenToViewportPoint(
                 eventData.pointerCurrentRaycast.screenPosition);
             float miniNormalX = 1 - (1 - viewportVector.x) / minimapNormal.x;
             float miniNormalY = 1 - (1 - viewportVector.y) / minimapNormal.y;

@@ -23,7 +23,7 @@ namespace Wism.Client.Agent
         private readonly List<ICommandProvider> commandProviders;
         private readonly List<ICommandProcessor> commandProcessors;
 
-        public CommandController CommandController => commandController;
+        public CommandController CommandController => this.commandController;
 
         public AsciiGame(ILoggerFactory logFactory, ControllerProvider controllerProvider)
             : base(logFactory, controllerProvider)
@@ -57,8 +57,8 @@ namespace Wism.Client.Agent
                 new CompleteBattleProcessor(logFactory, this),
                 
                 // Search processors
-                new SearchRuinsProcessor(logFactory, this),                
-                new SearchTempleProcessor(logFactory, this),                
+                new SearchRuinsProcessor(logFactory, this),
+                new SearchTempleProcessor(logFactory, this),
                 new SearchSageProcessor(logFactory, this),
                 new SearchLibraryProcessor(logFactory, this),
 
@@ -69,9 +69,9 @@ namespace Wism.Client.Agent
 
         protected override void DoTasks(ref int lastId)
         {
-            foreach (Command command in commandController.GetCommandsAfterId(lastId))
+            foreach (Command command in this.commandController.GetCommandsAfterId(lastId))
             {
-                logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
+                this.logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
 
                 // Run the command
                 var result = ActionState.NotStarted;
@@ -87,17 +87,17 @@ namespace Wism.Client.Agent
                 // Process the result
                 if (result == ActionState.Succeeded)
                 {
-                    logger.LogInformation($"Task successful");
+                    this.logger.LogInformation($"Task successful");
                     lastId = command.Id;
                 }
                 else if (result == ActionState.Failed)
                 {
-                    logger.LogInformation($"Task failed");
+                    this.logger.LogInformation($"Task failed");
                     lastId = command.Id;
                 }
                 else if (result == ActionState.InProgress)
                 {
-                    logger.LogInformation("Task started and in progress");
+                    this.logger.LogInformation("Task started and in progress");
                     // Do NOT advance Command ID
                     break;
                 }
@@ -152,7 +152,7 @@ namespace Wism.Client.Agent
             for (int y = World.Current.Map.GetLength(1) - 1; y >= 0; y--)
             {
                 for (int x = 0; x < World.Current.Map.GetLength(0); x++)
-                {                    
+                {
                     Tile tile = World.Current.Map[x, y];
                     string terrain = tile.Terrain.ShortName;
                     string army = String.Empty;
@@ -194,13 +194,13 @@ namespace Wism.Client.Agent
                     {
                         Console.Write($"{AsciiMapper.GetTerrainSymbol(terrain)}");
                     }
-                    
+
                     // Army
                     beforeColor = Console.ForegroundColor;
                     Console.ForegroundColor = AsciiMapper.GetColorForClan(clan);
                     Console.Write($"{AsciiMapper.GetArmySymbol(army)}");
                     Console.ForegroundColor = beforeColor;
-                    
+
                     // Army Count
                     Console.Write($"{GetArmyCount(tile)}");
 
@@ -213,7 +213,7 @@ namespace Wism.Client.Agent
                     // Buffer
                     Console.Write("\t");
                 }
-                Console.WriteLine();                
+                Console.WriteLine();
             }
             Console.WriteLine("==========================================");
 
@@ -233,10 +233,10 @@ namespace Wism.Client.Agent
                     Console.Write($" | City: {selectedTile.City.DisplayName}");
                 }
                 if (selectedTile.HasLocation())
-                {                    
+                {
                     Console.Write($" | Loc: {selectedTile.Location.DisplayName}");
                 }
-                
+
                 if (selectedTile.HasAnyArmies())
                 {
                     Console.WriteLine();
@@ -254,7 +254,7 @@ namespace Wism.Client.Agent
         }
 
         private string ArmiesToString(List<Army> armies)
-        {            
+        {
             if (armies.Count == 0)
             {
                 return "";

@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
 using NUnit.Framework;
 using System.Collections.Generic;
-using System.IO;
 using Wism.Client.Api;
 using Wism.Client.Api.Commands;
 using Wism.Client.Api.Data.Entities;
@@ -178,7 +176,7 @@ namespace Wism.Client.Test.Controller
             // Assert
             Assert.IsNotNull(commands, "Expected one command");
             Assert.AreEqual(2, commands.Length, "Expected one command");
-            
+
             var command = commands[0] as TurnCommandEntity;
             Assert.IsNotNull(command, "Incorrect command type");
             Assert.IsTrue(command.Starting);

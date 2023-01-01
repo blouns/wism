@@ -18,7 +18,7 @@ namespace Assets.Scripts.Tiles
 
         public override void RefreshTile(Vector3Int position, ITilemap tilemap)
         {
-            TileUtility.RefreshTile(position, tilemap, hasTile);
+            TileUtility.RefreshTile(position, tilemap, this.hasTile);
         }
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
@@ -41,32 +41,32 @@ namespace Assets.Scripts.Tiles
                 }
             }
 
-            tileData.sprite = hillSprites[HillTileDefault];
+            tileData.sprite = this.hillSprites[HillTileDefault];
 
             // 0) Hill bottom-left
             if (composition[1] == 'E' && composition[7] == 'H')
             {
-                tileData.sprite = hillSprites[0];
+                tileData.sprite = this.hillSprites[0];
             }
             // 1) Hill bottom-right
             else if (composition[1] == 'H' && composition[7] == 'E')
             {
-                tileData.sprite = hillSprites[1];
+                tileData.sprite = this.hillSprites[1];
             }
             // 2) Hill middle
             else if (composition[1] == 'H' && composition[7] == 'H')
             {
-                tileData.sprite = hillSprites[2];
+                tileData.sprite = this.hillSprites[2];
             }
             // 3) Hill top-left
             else if (composition[3] == 'H' && composition[7] == 'H')
             {
-                tileData.sprite = hillSprites[3];
+                tileData.sprite = this.hillSprites[3];
             }
             // 4) Hill top-right
             else if (composition[1] == 'H' && composition[3] == 'H')
             {
-                tileData.sprite = hillSprites[4];
+                tileData.sprite = this.hillSprites[4];
             }
         }
 

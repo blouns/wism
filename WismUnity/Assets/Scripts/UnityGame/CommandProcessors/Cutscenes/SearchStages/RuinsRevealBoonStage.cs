@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Managers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Wism.Client.Api.Commands;
 
 namespace Assets.Scripts.CommandProcessors
@@ -22,8 +21,8 @@ namespace Assets.Scripts.CommandProcessors
 
         protected override SceneResult ActionInternal()
         {
-            var searchRuinsCommand = (SearchRuinsCommand)Command;
-            foreach (var identifier in boonIdentifiers)
+            var searchRuinsCommand = (SearchRuinsCommand)this.Command;
+            foreach (var identifier in this.boonIdentifiers)
             {
                 if (identifier.CanIdentify(searchRuinsCommand.Boon))
                 {

@@ -1,7 +1,4 @@
 ﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Wism.Client.Core;
 using Wism.Client.Core.Heros;
 using Wism.Client.MapObjects;
@@ -50,7 +47,7 @@ namespace Wism.Client.Test.Unit
         {
             // Assemble            
             Game.CreateDefaultGame();
-            Player player1 = Game.Current.Players[0];            
+            Player player1 = Game.Current.Players[0];
 
             var tile = World.Current.Map[1, 1];
             player1.HireHero(tile, 0);
@@ -73,7 +70,7 @@ namespace Wism.Client.Test.Unit
             // Assemble            
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
-            player1.Turn = 10;            
+            player1.Turn = 10;
 
             var tile = World.Current.Map[1, 1];
             var city = MapBuilder.FindCity("Marthos");
@@ -92,7 +89,7 @@ namespace Wism.Client.Test.Unit
             Assert.IsNotEmpty(name, "No hero name");
             Assert.AreEqual(city.ShortName, actualCity.ShortName);
             Assert.IsTrue(price > 0, "Price too low");
-            Assert.IsTrue(price < int.MaxValue, "Price too high");           
+            Assert.IsTrue(price < int.MaxValue, "Price too high");
             Assert.AreEqual(0, player1.LastHeroTurn, "Last hero should be never (zero)");
         }
 
@@ -110,7 +107,7 @@ namespace Wism.Client.Test.Unit
             player1.AddCity(city);
             player1.StartTurn();
             player1.HireHero(tile, 0);
-            
+
             // Skip a turn (back to Sirians)
             Game.Current.EndTurn();
             Game.Current.StartTurn();
@@ -177,7 +174,7 @@ namespace Wism.Client.Test.Unit
         {
             // Assemble            
             Game.CreateDefaultGame();
-            Player player1 = Game.Current.Players[0];            
+            Player player1 = Game.Current.Players[0];
 
             var tile = World.Current.Map[1, 1];
             var city = MapBuilder.FindCity("Marthos");

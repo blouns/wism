@@ -23,7 +23,7 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             this.logger = loggerFactory.CreateLogger();
-            this.unityManager = unityGame ?? throw new ArgumentNullException(nameof(unityGame));            
+            this.unityManager = unityGame ?? throw new ArgumentNullException(nameof(unityGame));
         }
 
         public bool CanExecute(ICommandAction command)
@@ -35,25 +35,25 @@ namespace Assets.Scripts.CommandProcessors
         public ActionState Execute(ICommandAction command)
         {
             var ruinsCommand = command as SearchRuinsCommand;
-            if (stager == null)
+            if (this.stager == null)
             {
-                stager = new CutsceneStagerFactory(unityManager)
+                this.stager = new CutsceneStagerFactory(this.unityManager)
                     .CreateRuinsStager(ruinsCommand);
-                if (unityManager.InteractiveUI)
+                if (this.unityManager.InteractiveUI)
                 {
-                    unityManager.InputManager.SetInputMode(InputMode.WaitForKey);
+                    this.unityManager.InputManager.SetInputMode(InputMode.WaitForKey);
                 }
-                unityManager.HideSelectedBox();
+                this.unityManager.HideSelectedBox();
             }
-            
-            var result = stager.Action();
+
+            var result = this.stager.Action();
 
             if (result == ActionState.Failed ||
                 result == ActionState.Succeeded)
             {
-                unityManager.InputManager.SetInputMode(InputMode.Game);
-                unityManager.GameManager.DeselectArmies();
-                stager = null;
+                this.unityManager.InputManager.SetInputMode(InputMode.Game);
+                this.unityManager.GameManager.DeselectArmies();
+                this.stager = null;
             }
 
             return result;

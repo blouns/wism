@@ -6,7 +6,7 @@ using UnityEngine.Tilemaps;
 namespace Assets.Scripts.Tiles
 {
     public class SageTile : LocationTile
-    {        
+    {
         [SerializeField]
         private Sprite sageSprite;
 
@@ -17,7 +17,7 @@ namespace Assets.Scripts.Tiles
 
         protected override void GetTileDataInternal(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            tileData.sprite = sageSprite;
+            tileData.sprite = this.sageSprite;
         }
 
 #if UNITY_EDITOR

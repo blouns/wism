@@ -21,8 +21,8 @@ namespace Wism.Client.Factories
             }
 
             MapBuilder.AddCity(world, snapshot.X, snapshot.Y, snapshot.CityShortName, snapshot.ClanShortName);
-            
-            var city = world.Map[snapshot.X, snapshot.Y].City;            
+
+            var city = world.Map[snapshot.X, snapshot.Y].City;
             city.Defense = snapshot.Defense;
             city.Id = snapshot.Id;
 
@@ -43,7 +43,7 @@ namespace Wism.Client.Factories
                 throw new ArgumentNullException(nameof(world));
             }
 
-            MapBuilder.AddCity(world, cityEntity.X, cityEntity.Y, cityEntity.CityShortName, cityEntity.ClanShortName);            
+            MapBuilder.AddCity(world, cityEntity.X, cityEntity.Y, cityEntity.CityShortName, cityEntity.ClanShortName);
 
             return world.Map[cityEntity.X, cityEntity.Y].City;
         }
@@ -74,7 +74,7 @@ namespace Wism.Client.Factories
 
         private static void LoadProductionDetails(ProductionEntity productionInfo, Barracks barracks)
         {
-            if (productionInfo == null || 
+            if (productionInfo == null ||
                 productionInfo.ArmyNames == null || productionInfo.ArmyNames.Length == 0 ||
                 productionInfo.ProductionNumbers == null || productionInfo.ProductionNumbers.Length == 0)
             {

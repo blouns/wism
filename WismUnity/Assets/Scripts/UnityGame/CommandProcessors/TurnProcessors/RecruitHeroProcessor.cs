@@ -1,6 +1,4 @@
 ﻿using Assets.Scripts.Managers;
-using System;
-using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
@@ -77,7 +75,7 @@ namespace Assets.Scripts.CommandProcessors
 
         private ActionState AcceptFreeHero(RecruitHeroCommand recruitCommand)
         {
-            this.unityGame.NotifyUser(freeHeroMessage, recruitCommand.HeroTile.City.DisplayName);
+            this.unityGame.NotifyUser(this.freeHeroMessage, recruitCommand.HeroTile.City.DisplayName);
             recruitCommand.HeroAccepted = true;
 
             return ActionState.Succeeded;
@@ -94,24 +92,24 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             // Wait for user to accept or reject            
-            if (!yesNoBox.Answer.HasValue)
-            {                
-                if (!yesNoBox.IsActive())
+            if (!this.yesNoBox.Answer.HasValue)
+            {
+                if (!this.yesNoBox.IsActive())
                 {
                     var destinationCity = recruitCommand.HeroTile.City;
                     var player = recruitCommand.Player;
 
-                    yesNoBox.Ask(
+                    this.yesNoBox.Ask(
                         $"A hero in {destinationCity} offers to join you for {recruitCommand.HeroPrice} gp.\n" +
                         $"You have {player.Gold} gp");
 
                     this.unityGame.InputManager.SetInputMode(InputMode.UI);
                 }
-                
+
                 state = ActionState.InProgress;
             }
             // You're hired!
-            else if (yesNoBox.Answer.Value)
+            else if (this.yesNoBox.Answer.Value)
             {
                 this.yesNoBox.Clear();
                 recruitCommand.HeroAccepted = true;

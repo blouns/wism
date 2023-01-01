@@ -17,7 +17,7 @@ namespace Assets.Scripts.Editors
             public GameObject[] row;
         }
 
-        private const int MaxFlagSize = 8; 
+        private const int MaxFlagSize = 8;
 
         public ClanFlag[] rows;
         public int count;
@@ -32,18 +32,18 @@ namespace Assets.Scripts.Editors
             var modPath = GameManager.DefaultModPath;
             var clanInfos = ModFactory.LoadClanInfos(modPath);
 
-            count = clanInfos.Count;
-            rows = new ClanFlag[count];            
-            for (int i = 0; i < count; i++)
+            this.count = clanInfos.Count;
+            this.rows = new ClanFlag[this.count];
+            for (int i = 0; i < this.count; i++)
             {
-                rows[i].name = clanInfos[i].ShortName;
-                rows[i].count = MaxFlagSize;
-                rows[i].row = new GameObject[MaxFlagSize];
-                rows[i].rowNames = new string[MaxFlagSize];
+                this.rows[i].name = clanInfos[i].ShortName;
+                this.rows[i].count = MaxFlagSize;
+                this.rows[i].row = new GameObject[MaxFlagSize];
+                this.rows[i].rowNames = new string[MaxFlagSize];
 
-                for (int j = 0; j < rows[i].rowNames.Length; j++)
+                for (int j = 0; j < this.rows[i].rowNames.Length; j++)
                 {
-                    rows[i].rowNames[j] = $"Flag size: {j + 1}";
+                    this.rows[i].rowNames[j] = $"Flag size: {j + 1}";
                 }
             }
         }

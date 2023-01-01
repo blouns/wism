@@ -26,7 +26,7 @@ namespace Assets.Tests.PlayMode
         {
             get
             {
-                var newCommands = provider.CommandController.GetCommandsAfterId(this.lastCommandIdSeen);
+                var newCommands = this.provider.CommandController.GetCommandsAfterId(this.lastCommandIdSeen);
                 foreach (var command in newCommands)
                 {
                     if (command.GetType() == typeof(T))

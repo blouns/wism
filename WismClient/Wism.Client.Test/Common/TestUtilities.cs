@@ -1,6 +1,9 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using Wism.Client.AI.CommandProviders;
 using Wism.Client.Api;
+using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
@@ -28,8 +31,14 @@ namespace Wism.Client.Test.Common
                 GameController = CreateGameController(),
                 CityController = CreateCityController(),
                 HeroController = CreateHeroController(),
-                LocationController = CreateLocationController()
+                LocationController = CreateLocationController(),
+                PlayerController = CreatePlayerController()
             };
+        }
+
+        private static PlayerController CreatePlayerController()
+        {
+            return new PlayerController(CreateLogFactory());
         }
 
         public static HeroController CreateHeroController()
@@ -39,12 +48,10 @@ namespace Wism.Client.Test.Common
 
         public static CommandController CreateCommandController(IWismClientRepository repo = null)
         {
-            
-            if (repo == null)
-            {
-                var commands = new SortedList<int, Command>();
-                repo = new WismClientInMemoryRepository(commands);
-            }
+            if (repo != null) return new CommandController(CreateLogFactory(), repo);
+
+            var commands = new SortedList<int, Command>();
+            repo = new WismClientInMemoryRepository(commands);
 
             return new CommandController(CreateLogFactory(), repo);
         }
@@ -69,6 +76,11 @@ namespace Wism.Client.Test.Common
             return new LocationController(CreateLogFactory());
         }
 
+        public static ActionState NewGame(ControllerProvider cp, string worldName)
+        {
+            return NewGame(cp.CommandController, cp.GameController, worldName);
+        }
+
         public static ActionState NewGame(CommandController commandController, GameController gameController, string worldName)
         {
             var settings = TestGameFactory.CreateDefaultNewGameSettings(worldName);
@@ -77,10 +89,20 @@ namespace Wism.Client.Test.Common
                 new NewGameCommand(gameController, settings));
         }
 
+        public static ActionState Select(ControllerProvider cp, List<Army> armies)
+        {
+            return Select(cp.CommandController, cp.ArmyController, armies);
+        }
+
         public static ActionState Select(CommandController commandController, ArmyController armyController, List<Army> armies)
         {
             return ExecuteCommandUntilDone(commandController,
                 new SelectArmyCommand(armyController, armies));
+        }
+
+        public static ActionState Deselect(ControllerProvider cp, List<Army> armies)
+        {
+            return Deselect(cp.CommandController, cp.ArmyController, armies);
         }
 
         public static ActionState Deselect(CommandController commandController, ArmyController armyController, List<Army> armies)
@@ -93,7 +115,7 @@ namespace Wism.Client.Test.Common
         {
             var targetTile = World.Current.Map[x, y];
             var originalAttackingArmies = new List<Army>(armies);
-            
+
             var result = armyController.PrepareForBattle();
             if (result != ActionState.Succeeded)
             {
@@ -119,13 +141,18 @@ namespace Wism.Client.Test.Common
                 new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer()));
         }
 
+        public static ActionState StartTurn(ControllerProvider cp)
+        {
+            return StartTurn(cp.CommandController, cp.GameController);
+        }
+
         public static ActionState StartTurn(CommandController commandController, GameController gameController)
         {
             return ExecuteCommandUntilDone(commandController,
                 new StartTurnCommand(gameController, Game.Current.GetNextPlayer()));
         }
 
-        public static ActionState SearchLibrary(CommandController commandController, LocationController locationController, 
+        public static ActionState SearchLibrary(CommandController commandController, LocationController locationController,
             List<Army> armies)
         {
             var location = armies[0].Tile.Location;
@@ -157,11 +184,18 @@ namespace Wism.Client.Test.Common
                 new SearchTempleCommand(locationController, armies, location));
         }
 
-        public static ActionState TakeItems(CommandController commandController, HeroController heroController, 
+        public static ActionState TakeItems(CommandController commandController, HeroController heroController,
             Hero hero)
         {
             return ExecuteCommandUntilDone(commandController,
                 new TakeItemsCommand(heroController, hero));
+        }
+
+        public static ActionState DropItems(CommandController commandController, HeroController heroController,
+            Hero hero, List<Artifact> items)
+        {
+            return ExecuteCommandUntilDone(commandController,
+                new DropItemsCommand(heroController, hero, items));
         }
 
         public static ActionState ExecuteCommandUntilDone(CommandController commandController, Command command)
@@ -177,6 +211,39 @@ namespace Wism.Client.Test.Common
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Executes a full AI-based turn for a player.
+        /// </summary>
+        /// <param name="controller">Controller Provider</param>
+        /// <param name="player">AI Player to run</param>
+        /// <remarks>
+        /// Assumes the turn is already started. Will end turn.
+        /// </remarks>
+        public static void ExecuteCurrentTurnAsAIUntilDone(ControllerProvider controller, ICommandProvider commander)
+        {
+            ActionState actionState;
+
+            // Get AI player
+            var player = Game.Current.GetCurrentPlayer();
+            bool isHuman = player.IsHuman;
+            player.IsHuman = false;
+            int turn = player.Turn;
+            string clanName = Game.Current.GetCurrentPlayer().Clan.ShortName;
+
+            // Generate and execute commands as an AI
+            int lastId = controller.CommandController.GetLastCommand().Id;
+            commander.GenerateCommands();
+            var commands = controller.CommandController.GetCommandsAfterId(lastId);
+            foreach (var command in commands)
+            {
+                actionState = ExecuteCommandUntilDone(controller.CommandController, command);
+                // Log action state?
+            }
+            
+            // Restore player type
+            player.IsHuman = isHuman;
         }
 
         public static void PlotRouteOnMap(Tile[,] map, List<Tile> path)
@@ -210,6 +277,6 @@ namespace Wism.Client.Test.Common
             Location location = MapBuilder.FindLocation(shortName);
             Tile tile = World.Current.Map[x, y];
             World.Current.AddLocation(location, tile);
-        }        
+        }
     }
 }

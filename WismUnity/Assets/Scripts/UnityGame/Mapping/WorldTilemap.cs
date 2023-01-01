@@ -18,7 +18,7 @@ namespace Assets.Scripts.Tilemaps
 
         public void Start()
         {
-            tileMap = transform.GetComponent<Tilemap>();
+            this.tileMap = this.transform.GetComponent<Tilemap>();
         }
 
         public World CreateWorldFromScene()
@@ -76,20 +76,20 @@ namespace Assets.Scripts.Tilemaps
             return World.Current;
         }
 
-        internal List<(int,int)> GetLocationsWithCityTerrain()
+        internal List<(int, int)> GetLocationsWithCityTerrain()
         {
             var tilemapTiles = GetUnityTiles(out int boundsX, out int boundsY);
-            var tiles = new List<(int,int)>();
+            var tiles = new List<(int, int)>();
             for (int y = 0; y < boundsY; y++)
             {
                 for (int x = 0; x < boundsX; x++)
                 {
-                    var unityTile = tilemapTiles[x + y * boundsX];                    
+                    var unityTile = tilemapTiles[x + y * boundsX];
 
-                    if (unityTile != null && 
+                    if (unityTile != null &&
                         unityTile.name.ToLowerInvariant().Contains("castle"))
                     {
-                        tiles.Add((x,y));
+                        tiles.Add((x, y));
                     }
                 }
             }
@@ -100,8 +100,8 @@ namespace Assets.Scripts.Tilemaps
         public void ShowSearchIcon(int x, int y)
         {
             this.searchGO = UnityUtilities.GameObjectHardFind("Search");
-            searchGO.transform.position = ConvertGameToUnityVector(x, y);
-            searchGO.SetActive(true);
+            this.searchGO.transform.position = ConvertGameToUnityVector(x, y);
+            this.searchGO.SetActive(true);
         }
 
         public void HideSearchIcon()
@@ -114,22 +114,22 @@ namespace Assets.Scripts.Tilemaps
 
         internal Tilemap GetTilemap()
         {
-            return tileMap;
+            return this.tileMap;
         }
 
         internal void RefreshTile(Vector3 position)
         {
-            tileMap.RefreshTile(tileMap.WorldToCell(position));
+            this.tileMap.RefreshTile(this.tileMap.WorldToCell(position));
         }
 
         internal void SetTile(Vector3 position, TileBase tile)
         {
-            tileMap.SetTile(tileMap.WorldToCell(position), tile);
+            this.tileMap.SetTile(this.tileMap.WorldToCell(position), tile);
         }
 
         public Vector3 ConvertGameToUnityVector(int gameX, int gameY)
         {
-            return MapUtilities.ConvertGameToUnityVector(gameX, gameY, this);            
+            return MapUtilities.ConvertGameToUnityVector(gameX, gameY, this);
         }
 
         public Vector2Int ConvertUnityToGameVector(Vector3 worldVector)

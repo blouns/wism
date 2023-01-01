@@ -7,7 +7,7 @@ namespace Wism.Client.MapObjects
 {
     public class City : MapObject, IBuildable
     {
-        public const int MaxDefense = 10; 
+        public const int MaxDefense = 10;
 
         private CityInfo info;
 
@@ -15,9 +15,9 @@ namespace Wism.Client.MapObjects
 
         public Clan Clan { get; private set; }
 
-        public int Income { get => Info.Income;  }        
+        public int Income { get => this.Info.Income; }
 
-        public override string ShortName { get => Info.ShortName; }
+        public override string ShortName { get => this.Info.ShortName; }
 
         public Barracks Barracks { get; set; }
 
@@ -30,7 +30,7 @@ namespace Wism.Client.MapObjects
                     this.info = MapBuilder.FindCityInfo(this.ShortName);
                 }
 
-                return info;
+                return this.info;
             }
         }
 
@@ -49,7 +49,7 @@ namespace Wism.Client.MapObjects
 
         public City Clone()
         {
-            return Create(this.Info);            
+            return Create(this.Info);
         }
 
         public List<Army> MusterArmies()
@@ -74,12 +74,12 @@ namespace Wism.Client.MapObjects
         /// <returns>Array contain four tiles</returns>
         public Tile[] GetTiles()
         {
-            if (Tile == null)
+            if (this.Tile == null)
             {
                 throw new InvalidOperationException("Cannot get tiles as the Tile was null.");
             }
 
-            var nineGrid = Tile.GetNineGrid();
+            var nineGrid = this.Tile.GetNineGrid();
 
             return new Tile[4]
             {
@@ -89,19 +89,19 @@ namespace Wism.Client.MapObjects
                 nineGrid[2, 1]
             };
 
-        }    
+        }
 
         public bool TryBuild()
         {
-            if (Defense == MaxDefense)
+            if (this.Defense == MaxDefense)
             {
                 return false;
             }
 
             int cost = GetCostToBuild();
-            if (Player.Gold >= cost)
+            if (this.Player.Gold >= cost)
             {
-                Player.Gold -= cost;
+                this.Player.Gold -= cost;
                 this.Defense++;
                 return true;
             }
@@ -154,11 +154,11 @@ namespace Wism.Client.MapObjects
         /// Reduces the city to ruins! This is irreparable and causes a reputation hit.
         /// </summary>
         public void Raze()
-        {            
+        {
             var tiles = GetTiles();
             for (int i = 0; i < 4; i++)
             {
-                tiles[i].RazeInternal();                
+                tiles[i].RazeInternal();
             }
 
             // Reset production
@@ -171,7 +171,7 @@ namespace Wism.Client.MapObjects
         /// <param name="player">Player to stake claim</param>
         public void Claim(Player player)
         {
-            Claim(player, Tile);
+            Claim(player, this.Tile);
         }
 
         internal void Claim(Player player, Tile tile)
@@ -218,12 +218,12 @@ namespace Wism.Client.MapObjects
             {
                 // Neutral city
                 return;
-            }    
+            }
 
             var cities = this.Player.GetCities();
             foreach (City otherCity in cities)
             {
-                otherCity.Barracks.CancelDelivery(this);                
+                otherCity.Barracks.CancelDelivery(this);
             }
         }
 
@@ -244,7 +244,7 @@ namespace Wism.Client.MapObjects
         }
 
         internal bool CanTraverse(Clan clan)
-        {            
+        {
             if (clan is null)
             {
                 throw new ArgumentNullException(nameof(clan));
@@ -267,13 +267,13 @@ namespace Wism.Client.MapObjects
         {
             City other = (City)obj;
             return
-                (ShortName == other.ShortName) &&
-                (Tile == other.Tile);
+                (this.ShortName == other.ShortName) &&
+                (this.Tile == other.Tile);
         }
 
         public override int GetHashCode()
         {
-            return $"{ShortName}{Tile}".GetHashCode();
+            return $"{this.ShortName}{this.Tile}".GetHashCode();
         }
     }
 }

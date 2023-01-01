@@ -25,31 +25,31 @@ namespace Assets.Scripts.Editors
 
         private void DrawCityDropDownInspector()
         {
-            var cityEntry = target as CityEntry;
+            var cityEntry = this.target as CityEntry;
             string[] cityNames = GetCityNames(cityEntry.cityShortName);
 
             // Set the choice index to the previously selected index
             if (cityEntry.cityShortName != "")
             {
-                cityIndex = Array.IndexOf(cityNames, cityEntry.cityShortName);
-                if (cityIndex < 0)
+                this.cityIndex = Array.IndexOf(cityNames, cityEntry.cityShortName);
+                if (this.cityIndex < 0)
                 {
-                    cityIndex = 0;
+                    this.cityIndex = 0;
                 }
             }
 
-            cityIndex = EditorGUILayout.Popup(cityIndex, cityNames);
+            this.cityIndex = EditorGUILayout.Popup(this.cityIndex, cityNames);
 
             // Update the selected choice in the underlying object
-            cityEntry.cityShortName = cityNames[cityIndex];
+            cityEntry.cityShortName = cityNames[this.cityIndex];
 
             SetCitiesCount();
 
             // Save the changes back to the object
-            EditorUtility.SetDirty(target);
+            EditorUtility.SetDirty(this.target);
         }
 
-        private  void SetCitiesCount()
+        private void SetCitiesCount()
         {
             this.citiesGO.GetComponent<CityContainer>()
                 .TotalCities = this.totalCities;
@@ -57,7 +57,7 @@ namespace Assets.Scripts.Editors
 
         private string[] GetCityNames(string currentName)
         {
-            if (this.cityInfos == null) 
+            if (this.cityInfos == null)
             {
                 // TODO: Temp code: need to select the world dynamically
                 this.cityInfos = new List<CityInfo>(
@@ -65,19 +65,19 @@ namespace Assets.Scripts.Editors
             }
 
             var takenCityNames = GetTakenCityNames();
-           
+
 
             // Add cities from city infos
             List<string> cityList = new List<string>();
             cityList.Add("{Unassigned}");
-            for (int i = 0; i < cityInfos.Count; i++)
-            { 
+            for (int i = 0; i < this.cityInfos.Count; i++)
+            {
                 // Skip taken names except for the current name
-                if (cityInfos[i].ShortName == currentName ||
-                    !takenCityNames.Contains(cityInfos[i].ShortName))
+                if (this.cityInfos[i].ShortName == currentName ||
+                    !takenCityNames.Contains(this.cityInfos[i].ShortName))
                 {
-                    cityList.Add(cityInfos[i].ShortName);
-                    takenCityNames.Add(cityInfos[i].ShortName);
+                    cityList.Add(this.cityInfos[i].ShortName);
+                    takenCityNames.Add(this.cityInfos[i].ShortName);
                 }
             }
             cityList.Sort();
@@ -90,11 +90,11 @@ namespace Assets.Scripts.Editors
             var takenCityNames = new HashSet<string>();
 
             this.citiesGO = UnityUtilities.GameObjectHardFind("Cities");
-            this.totalCities = citiesGO.transform.childCount;
-            var count = citiesGO.transform.childCount;
+            this.totalCities = this.citiesGO.transform.childCount;
+            var count = this.citiesGO.transform.childCount;
             for (int i = 0; i < count; i++)
             {
-                var cityGO = citiesGO.transform.GetChild(i).gameObject;
+                var cityGO = this.citiesGO.transform.GetChild(i).gameObject;
                 takenCityNames.Add(
                     cityGO.GetComponent<CityEntry>()
                         .cityShortName);

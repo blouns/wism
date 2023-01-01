@@ -24,12 +24,12 @@ namespace Assets.Scripts.Tiles
 
         public override void RefreshTile(Vector3Int position, ITilemap tilemap)
         {
-            TileUtility.RefreshTile(position, tilemap, hasTile);
+            TileUtility.RefreshTile(position, tilemap, this.hasTile);
         }
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            int index = TileUtility.FindOverlapping14SpriteIndex(position, tilemap, hasTile, DefaultTileIndex);
-            tileData.sprite = mountainSprites[index];
+            int index = TileUtility.FindOverlapping14SpriteIndex(position, tilemap, this.hasTile, DefaultTileIndex);
+            tileData.sprite = this.mountainSprites[index];
         }
 
 #if UNITY_EDITOR

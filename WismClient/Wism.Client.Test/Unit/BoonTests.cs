@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -30,7 +29,7 @@ namespace Wism.Client.Test.Unit
             // Assemble
             Game.Current.Random.Next();         // Cycle random to get to Listen roll (lazy) - 50% chance
             var tile = World.Current.Map[2, 2];
-            var boon = new ThroneBoon();            
+            var boon = new ThroneBoon();
 
             // Set up hero
             var player1 = Game.Current.Players[0];
@@ -46,7 +45,7 @@ namespace Wism.Client.Test.Unit
             Assert.AreEqual(result, boon.Result);
             Assert.AreEqual(1, result);
 
-            Assert.AreEqual(5+1, hero.Strength);
+            Assert.AreEqual(5 + 1, hero.Strength);
         }
 
         [Test]
@@ -56,8 +55,8 @@ namespace Wism.Client.Test.Unit
             for (int i = 0; i < 8; i++)
             {
                 Game.Current.Random.Next();         // Cycle random to get to Ignore roll (lazy) - 30% chance
-            }            
-            
+            }
+
             var tile = World.Current.Map[2, 2];
             var boon = new ThroneBoon();
 
@@ -158,7 +157,7 @@ namespace Wism.Client.Test.Unit
             Assert.AreEqual(hero.Clan, armies[0].Clan);
             Assert.AreEqual(tile, armies[0].Tile);
             Assert.AreEqual("Dragons", armies[1].ShortName);
-            Assert.AreEqual(hero.Clan, armies[1].Clan);            
+            Assert.AreEqual(hero.Clan, armies[1].Clan);
             Assert.AreEqual(tile, armies[1].Tile);
             Assert.AreEqual(2, tile.Armies.Count);
             Assert.AreEqual(1, tile.VisitingArmies.Count);

@@ -1,7 +1,4 @@
-﻿using Assets.Scripts.UI;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using Wism.Client.Api.Commands;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
@@ -14,7 +11,7 @@ namespace Assets.Scripts.CommandProcessors
         public Tile TargetTile { get; private set; }
         public Player Player { get; private set; }
         public Location Location { get; private set; }
-        public List<Army> Armies { get; private set;  }
+        public List<Army> Armies { get; private set; }
         public Army Hero { get; private set; }
 
         public LocationCutsceneStage(SearchLocationCommand command)
@@ -25,13 +22,13 @@ namespace Assets.Scripts.CommandProcessors
 
         private void UnpackCommand(SearchLocationCommand command)
         {
-            TargetTile = World.Current.Map[command.Location.X, command.Location.Y];
-            Player = command.Armies[0].Player;
-            Location = TargetTile.Location;
-            Armies = command.Armies;
-            Hero = command.Armies.Find(a =>
+            this.TargetTile = World.Current.Map[command.Location.X, command.Location.Y];
+            this.Player = command.Armies[0].Player;
+            this.Location = this.TargetTile.Location;
+            this.Armies = command.Armies;
+            this.Hero = command.Armies.Find(a =>
                 a is Hero &&
-                a.Tile == TargetTile &&
+                a.Tile == this.TargetTile &&
                 a.MovesRemaining > 0);
         }
     }

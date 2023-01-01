@@ -4,11 +4,13 @@ using Assets.Scripts.UI;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Collections.Generic;
+using System.Timers;
 using UnityEngine;
 using Wism.Client.Api.CommandProcessors;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
+using Wism.Client.Pathing;
 using ILogger = Wism.Client.Common.ILogger;
 
 namespace Assets.Scripts.Managers
@@ -36,7 +38,7 @@ namespace Assets.Scripts.Managers
 
         // UI panels
         [SerializeField]
-        private GameObject warPanelPrefab;     
+        private GameObject warPanelPrefab;
         [SerializeField]
         private WarPanel warPanel;
         [SerializeField]
@@ -56,7 +58,7 @@ namespace Assets.Scripts.Managers
         private SelectedArmyBox selectedArmyBox;
         private Camera mainCamera;
         private CameraFollow cameraFollow;
-        
+
         private bool isInitialized;
         private bool showDebugError = false;
         private ExecutionMode executionMode;
@@ -64,19 +66,19 @@ namespace Assets.Scripts.Managers
         private bool interactiveUI = true;
 
         public List<Army> CurrentAttackers { get; set; }
-        public List<Army> CurrentDefenders { get; set; }        
+        public List<Army> CurrentDefenders { get; set; }
 
-        public GameManager GameManager { get => gameManager; set => gameManager = value; }
-        public WorldTilemap WorldTilemap { get => worldTilemap; set => worldTilemap = value; }
-        public WarPanel WarPanel { get => warPanel; set => warPanel = value; }
-        public ProductionMode ProductionMode { get => productionMode; set => productionMode = value; }
-        public ExecutionMode ExecutionMode { get => executionMode; set => executionMode = value; }
-        public InputManager InputManager { get => inputManager; set => inputManager = value; }
-        public ItemPicker ItemPicker { get => itemPicker; set => itemPicker = value; }
-        public SaveLoadPicker SaveLoadPicker { get => saveLoadPicker; set => saveLoadPicker = value; }
-        public int LastCommandId { get => lastCommandId; set => lastCommandId = value; }
-        public DebugManager DebugManager { get => debugManager; set => debugManager = value; }
-        public bool InteractiveUI { get => interactiveUI; set => interactiveUI = value; }
+        public GameManager GameManager { get => this.gameManager; set => this.gameManager = value; }
+        public WorldTilemap WorldTilemap { get => this.worldTilemap; set => this.worldTilemap = value; }
+        public WarPanel WarPanel { get => this.warPanel; set => this.warPanel = value; }
+        public ProductionMode ProductionMode { get => this.productionMode; set => this.productionMode = value; }
+        public ExecutionMode ExecutionMode { get => this.executionMode; set => this.executionMode = value; }
+        public InputManager InputManager { get => this.inputManager; set => this.inputManager = value; }
+        public ItemPicker ItemPicker { get => this.itemPicker; set => this.itemPicker = value; }
+        public SaveLoadPicker SaveLoadPicker { get => this.saveLoadPicker; set => this.saveLoadPicker = value; }
+        public int LastCommandId { get => this.lastCommandId; set => this.lastCommandId = value; }
+        public DebugManager DebugManager { get => this.debugManager; set => this.debugManager = value; }
+        public bool InteractiveUI { get => this.interactiveUI; set => this.interactiveUI = value; }
 
         public void Start()
         {
@@ -97,9 +99,9 @@ namespace Assets.Scripts.Managers
                 this.ExecutionMode == ExecutionMode.NotStarted)
             {
                 if (this.showDebugError)
-                {                    
+                {
                     Debug.LogError("Game not initialized");
-                    DebugManager.LogInformation("Failed to initialize");
+                    this.DebugManager.LogInformation("Failed to initialize");
                     this.showDebugError = false;
                 }
 
@@ -114,7 +116,7 @@ namespace Assets.Scripts.Managers
         {
             IntializeWismApi();
 
-            DebugManager.LogInformation("Editor initialization complete");
+            this.DebugManager.LogInformation("Editor initialization complete");
 
             this.isInitialized = true;
             this.ExecutionMode = ExecutionMode.Editor;
@@ -132,12 +134,12 @@ namespace Assets.Scripts.Managers
             InitializeCommandProcessors();
             InitializeUI();
             IntializeWismGame(gameSettings);
-            
-            DebugManager.LogInformation("Initialization complete");
+
+            this.DebugManager.LogInformation("Initialization complete");
 
             this.isInitialized = true;
             this.ExecutionMode = ExecutionMode.Bootstrap;
-        }        
+        }
 
         private void IntializeWismGame(UnityNewGameEntity gameSettings)
         {
@@ -145,34 +147,34 @@ namespace Assets.Scripts.Managers
             {
                 throw new ArgumentNullException(nameof(gameSettings));
             }
-            
-            
+
+
             if (gameSettings.IsNewGame)
             {
-                DebugManager.LogInformation("Starting a new game...");
+                this.DebugManager.LogInformation("Starting a new game...");
                 GetComponent<UnityGameFactory>().CreateGame(gameSettings);
             }
             else
             {
-                DebugManager.LogInformation("Loading a game...");
+                this.DebugManager.LogInformation("Loading a game...");
                 GetComponent<UnityGameFactory>().LoadNewGame();
             }
         }
 
         private void InitializeUI()
         {
-            SetTime(GameManager.StandardTime);
+            SetTime(this.GameManager.StandardTime);
             SetupCameras();
 
             this.armyManager = GetComponent<ArmyManager>();
             this.inputManager = GetComponent<InputManager>();
 
-            WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
-            armyPicker = this.armyPickerPrefab.GetComponent<ArmyPicker>();
-            ItemPicker = this.itemPickerPrefab.GetComponent<ItemPicker>();
-            SaveLoadPicker = this.saveLoadPickerPrefab.GetComponent<SaveLoadPicker>();
-            productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
-            DebugManager.LogInformation("Initialized UI");
+            this.WarPanel = this.warPanelPrefab.GetComponent<WarPanel>();
+            this.armyPicker = this.armyPickerPrefab.GetComponent<ArmyPicker>();
+            this.ItemPicker = this.itemPickerPrefab.GetComponent<ItemPicker>();
+            this.SaveLoadPicker = this.saveLoadPickerPrefab.GetComponent<SaveLoadPicker>();
+            this.productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
+            this.DebugManager.LogInformation("Initialized UI");
         }
 
         private void InitializeCommandProcessors()
@@ -180,37 +182,37 @@ namespace Assets.Scripts.Managers
             this.commandProcessors = new List<ICommandProcessor>()
             {
                 // General processors
-                new SelectArmyProcessor(GameManager.LoggerFactory, this),
+                new SelectArmyProcessor(this.GameManager.LoggerFactory, this),
                 
                 // Battle processors
-                new PrepareForBattleProcessor(GameManager.LoggerFactory, this),
-                new BattleProcessor(GameManager.LoggerFactory, this),
-                new CompleteBattleProcessor(GameManager.LoggerFactory, this),
+                new PrepareForBattleProcessor(this.GameManager.LoggerFactory, this),
+                new BattleProcessor(this.GameManager.LoggerFactory, this),
+                new CompleteBattleProcessor(this.GameManager.LoggerFactory, this),
                 
                 // Turn processors
-                new StartTurnProcessor(GameManager.LoggerFactory, this),
-                new RecruitHeroProcessor(GameManager.LoggerFactory, this),
-                new HireHeroProcessor(GameManager.LoggerFactory, this),
-                new RenewProductionProcessor(GameManager.LoggerFactory, this),
-                new EndTurnProcessor(GameManager.LoggerFactory, this),
+                new StartTurnProcessor(this.GameManager.LoggerFactory, this),
+                new RecruitHeroProcessor(this.GameManager.LoggerFactory, this),
+                new HireHeroProcessor(this.GameManager.LoggerFactory, this),
+                new RenewProductionProcessor(this.GameManager.LoggerFactory, this),
+                new EndTurnProcessor(this.GameManager.LoggerFactory, this),
 
                 // Search processors
-                new SearchTempleProcessor(GameManager.LoggerFactory, this),
-                new SearchRuinsProcessor(GameManager.LoggerFactory, this),
-                new SearchLibraryProcessor(GameManager.LoggerFactory, this),
-                new SearchSageProcessor(GameManager.LoggerFactory, this),
+                new SearchTempleProcessor(this.GameManager.LoggerFactory, this),
+                new SearchRuinsProcessor(this.GameManager.LoggerFactory, this),
+                new SearchLibraryProcessor(this.GameManager.LoggerFactory, this),
+                new SearchSageProcessor(this.GameManager.LoggerFactory, this),
 
                 // City processors
-                new BuildCityDefensesProcessor(GameManager.LoggerFactory, this),
-                new RazeCityDefensesProcessor(GameManager.LoggerFactory, this),
+                new BuildCityDefensesProcessor(this.GameManager.LoggerFactory, this),
+                new RazeCityDefensesProcessor(this.GameManager.LoggerFactory, this),
 
                 // Game processors
-                new LoadGameProcessor(GameManager.LoggerFactory, this),
+                new LoadGameProcessor(this.GameManager.LoggerFactory, this),
 
                 // Default processor
-                new StandardProcessor(GameManager.LoggerFactory)
+                new StandardProcessor(this.GameManager.LoggerFactory)
             };
-            DebugManager.LogInformation("Initialized Command Processors");
+            this.DebugManager.LogInformation("Initialized Command Processors");
         }
 
         private void IntializeWismApi()
@@ -222,7 +224,7 @@ namespace Assets.Scripts.Managers
 
             this.DebugManager = GetComponent<DebugManager>();
             this.DebugManager.Initialize(this.GameManager.LoggerFactory);
-            DebugManager.LogInformation("Initialized GameManager: " + this.GameManager.ModPath);
+            this.DebugManager.LogInformation("Initialized GameManager: " + this.GameManager.ModPath);
         }
 
         /// <summary>
@@ -230,16 +232,30 @@ namespace Assets.Scripts.Managers
         /// </summary>
         public void Reset()
         {
-            InputManager.SetInputMode(InputMode.Game);
+            this.InputManager.SetInputMode(InputMode.Game);
             this.armyManager.Reset();
             GetComponent<CityManager>().Reset();
             GetComponent<ItemManager>().Reset();
             NotifyUser("Game loaded successfully!");
         }
 
+        internal void TogglePathing()
+        {
+            if (Game.Current.PathingStrategy is DijkstraPathingStrategy)
+            {
+                Game.Current.PathingStrategy = new AStarPathingStrategy();
+                Debug.Log("Switched to A* Pathing Strategy");
+            }
+            else
+            {
+                Game.Current.PathingStrategy = new DijkstraPathingStrategy();
+                Debug.Log("Switched to Dijkstra Pathing Strategy");
+            }
+        }
+
         public void GoToCapitol(Player player)
         {
-            var inputHandler = this.GetComponent<InputManager>().InputHandler;
+            var inputHandler = GetComponent<InputManager>().InputHandler;
             inputHandler.CenterOnTile(player.Capitol.Tile);
         }
 
@@ -263,13 +279,18 @@ namespace Assets.Scripts.Managers
                     case ExecutionMode.Starting:
                         InitializeSelectedArmyBox();
 
+                        // TESTING ONLY //////////
+                        // TODO: Remove                        
+                        Game.Current.PathingStrategy = new AStarPathingStrategy();
+                        //////////////////////////
+
                         // Start first turn
-                        GameManager.StartTurn(Game.Current.GetCurrentPlayer());
+                        this.GameManager.StartTurn(Game.Current.GetCurrentPlayer());
                         this.ExecutionMode = ExecutionMode.Running;
                         break;
 
                     // Standard game loop
-                    case ExecutionMode.Running:                       
+                    case ExecutionMode.Running:
                         Draw();
                         DoTasks();
                         this.armyManager.CleanupArmies();
@@ -279,12 +300,12 @@ namespace Assets.Scripts.Managers
                     default:
                         // Do nothing
                         break;
-                }                
+                }
             }
             catch (Exception ex)
             {
                 Debug.LogException(ex);
-                DebugManager.LogInformation(ex.Message);
+                this.DebugManager.LogInformation(ex.Message);
                 throw;
             }
         }
@@ -292,14 +313,14 @@ namespace Assets.Scripts.Managers
         private void InitializeSelectedArmyBox()
         {
             var startingTile = Game.Current.GetCurrentPlayer().Capitol.Tile;
-            var worldVector = WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
-            this.selectedArmyBox = Instantiate<GameObject>(SelectedBoxPrefab, worldVector, Quaternion.identity, WorldTilemap.transform).GetComponent<SelectedArmyBox>();
+            var worldVector = this.WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
+            this.selectedArmyBox = Instantiate<GameObject>(this.SelectedBoxPrefab, worldVector, Quaternion.identity, this.WorldTilemap.transform).GetComponent<SelectedArmyBox>();
         }
 
         internal void Draw()
         {
             DrawSelectedArmiesBox();
-        }             
+        }
 
         /// <summary>
         /// Execute the commands from the UI, AI, or other devices
@@ -308,41 +329,44 @@ namespace Assets.Scripts.Managers
         {
             ActionState result = ActionState.NotStarted;
 
-            int nextCommand = LastCommandId + 1;
-            if (!provider.CommandController.CommandExists(nextCommand))
+            int nextCommand = this.LastCommandId + 1;
+            if (!this.provider.CommandController.CommandExists(nextCommand))
             {
                 // Nothing to do
                 return;
             }
 
             // Retrieve next command
-            var command = provider.CommandController.GetCommand(nextCommand);
-            DebugManager.LogInformation($"{command}");
+            var command = this.provider.CommandController.GetCommand(nextCommand);
+            this.DebugManager.LogInformation($"{command}");
 
             // Execute next command
             foreach (var processor in this.commandProcessors)
             {
                 if (processor.CanExecute(command))
                 {
+                    var startTime = DateTime.Now;
                     result = processor.Execute(command);
+                    var stopTime = DateTime.Now;
+                    this.logger.LogInformation("Command duration: " + (stopTime - startTime).TotalMilliseconds + "ms");
                     break;
                 }
-            }          
+            }
 
             // Process the result
             if (result == ActionState.Succeeded)
             {
-                logger.LogInformation($"Task successful");
-                LastCommandId = command.Id;
+                this.logger.LogInformation($"Task successful");
+                this.LastCommandId = command.Id;
             }
             else if (result == ActionState.Failed)
             {
-                logger.LogInformation($"Task failed");
-                LastCommandId = command.Id;
+                this.logger.LogInformation($"Task failed");
+                this.LastCommandId = command.Id;
             }
             else if (result == ActionState.InProgress)
             {
-                logger.LogInformation("Task started and in progress");
+                this.logger.LogInformation("Task started and in progress");
                 // Do nothing; do not advance Command ID
             }
         }
@@ -367,9 +391,9 @@ namespace Assets.Scripts.Managers
 
         internal void ShowProductionPanel(City city)
         {
-            productionPanel.GetComponent<CityProduction>()
+            this.productionPanel.GetComponent<CityProduction>()
                             .Initialize(this, city);
-            productionPanel.SetActive(true);
+            this.productionPanel.SetActive(true);
         }
 
         internal Camera GetMainCamera()
@@ -379,7 +403,7 @@ namespace Assets.Scripts.Managers
 
         internal void HideSelectedBox()
         {
-            selectedArmyBox.HideSelectedBox();
+            this.selectedArmyBox.HideSelectedBox();
         }
 
         internal void SetSelectedBoxPosition(Vector3 worldVector, bool isActive)
@@ -390,13 +414,13 @@ namespace Assets.Scripts.Managers
 
         internal Vector2Int GetSelectedBoxGamePosition()
         {
-            return worldTilemap.ConvertUnityToGameVector(this.selectedArmyBox.transform.position);
+            return this.worldTilemap.ConvertUnityToGameVector(this.selectedArmyBox.transform.position);
         }
 
         public void SetTime(float time)
         {
             Time.fixedDeltaTime = time;
-        }        
+        }
 
         public void SetProductionMode(ProductionMode mode)
         {
@@ -438,13 +462,13 @@ namespace Assets.Scripts.Managers
 
             this.selectedArmyBox.Draw(this);
         }
-        
+
         internal void HandleArmyPicker()
         {
             if (Game.Current.GameState == GameState.SelectedArmy)
             {
                 var armiesToPick = Game.Current.GetSelectedArmies()[0].Tile.GetAllArmies();
-                armyPicker.Initialize(this, armiesToPick);
+                this.armyPicker.Initialize(this, armiesToPick);
             }
         }
 
@@ -495,19 +519,19 @@ namespace Assets.Scripts.Managers
             {
                 if (camera.name == "MainCamera")
                 {
-                    mainCamera = camera;
+                    this.mainCamera = camera;
                 }
             }
 
-            if (mainCamera == null)
+            if (this.mainCamera == null)
             {
                 throw new InvalidOperationException("Could not find the MainCamera.");
             }
         }
 
         internal void SetCameraTarget(Transform transform)
-        {     
-            cameraFollow.target = transform;
-        }        
-     }
+        {
+            this.cameraFollow.target = transform;
+        }
+    }
 }

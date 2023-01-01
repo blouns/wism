@@ -38,7 +38,7 @@ namespace Assets.Scripts.UnityGame.Editors
         }
 
         private static WorldEntity BuildWorldFromScene(string worldName, UnityManager unityManager)
-        {   
+        {
             return new UnityWorldFactory(unityManager.DebugManager)
                 .CreateWorld(worldName, unityManager);
         }
@@ -58,7 +58,7 @@ namespace Assets.Scripts.UnityGame.Editors
                 Name = worldEntity.Name
             };
             SerializeMap(path + "/Map.json", mapEntity);
-            
+
         }
 
         private static void SerializeMap(string path, WorldEntity mapEntity)

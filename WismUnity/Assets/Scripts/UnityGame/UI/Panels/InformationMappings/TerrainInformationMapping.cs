@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
@@ -27,12 +25,12 @@ namespace Assets.Scripts.UI
 
         public void GetLabelValuePair(int index, Tile subject, out string label, out string value)
         {
-            if (index >= labels.Length)
+            if (index >= this.labels.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
 
-            label = labels[index];
+            label = this.labels[index];
             value = GetLabelValuePair(index, subject);
         }
 

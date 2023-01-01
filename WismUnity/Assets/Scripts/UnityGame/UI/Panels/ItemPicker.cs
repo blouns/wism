@@ -28,7 +28,7 @@ namespace Assets.Scripts.UI
                 throw new ArgumentNullException(nameof(items));
             }
 
-            this.Clear();
+            Clear();
             this.gameObject.SetActive(true);
             this.items = items;
             RenderItemRows(items);
@@ -49,7 +49,7 @@ namespace Assets.Scripts.UI
 
         public void Ok()
         {
-            if (selectedIndex < 0)
+            if (this.selectedIndex < 0)
             {
                 // Nothing to select
                 Cancel();
@@ -76,16 +76,16 @@ namespace Assets.Scripts.UI
         public MapObject GetSelectedItem()
         {
             MapObject item = null;
-            if (selectedIndex >= 0 && selectedIndex < items.Count)
+            if (this.selectedIndex >= 0 && this.selectedIndex < this.items.Count)
             {
-                item = items[selectedIndex];
+                item = this.items[this.selectedIndex];
             }
 
             return item;
         }
 
         private void RenderItemRows(List<MapObject> items)
-        {            
+        {
             if (items is null || items.Count == 0)
             {
                 return;
@@ -108,7 +108,7 @@ namespace Assets.Scripts.UI
                 var selectedButtonScript = newButton.GetComponent<SelectableButton>();
                 newButton.GetComponent<Button>().onClick.AddListener(selectedButtonScript.OnClick);
                 newButton.SetActive(true);
-            }            
+            }
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Assets.Scripts.UI
                     if (button)
                     {
                         DestroyImmediate(button.gameObject);
-                    }                    
+                    }
                 }
             }
 

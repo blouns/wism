@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Wism.Client.Core.Armies;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
@@ -38,31 +37,31 @@ namespace Wism.Client.Core
         /// </summary>
         public Location Location { get; set; }
 
-        public List<Artifact> Items { get; internal set; }        
+        public List<Artifact> Items { get; internal set; }
 
         public void AddItem(Artifact artifact)
         {
-            if (Items == null)
+            if (this.Items == null)
             {
-                Items = new List<Artifact>();
+                this.Items = new List<Artifact>();
             }
-            Items.Add(artifact);
+            this.Items.Add(artifact);
             artifact.Tile = this;
         }
 
         public void RemoveItem(Artifact artifact)
         {
-            if (Items == null)
+            if (this.Items == null)
             {
-                Items = new List<Artifact>();
+                this.Items = new List<Artifact>();
             }
-            Items.Remove(artifact);
+            this.Items.Remove(artifact);
             artifact.Tile = null;
         }
 
         public bool ContainsItem(Artifact item)
         {
-            return HasItems() && Items.Contains(item);
+            return HasItems() && this.Items.Contains(item);
         }
 
         public bool HasItems()
@@ -88,7 +87,7 @@ namespace Wism.Client.Core
         /// <returns>True if armies are present; otherwise, false</returns>
         public bool HasArmies()
         {
-            return (Armies != null && Armies.Count > 0);
+            return (this.Armies != null && this.Armies.Count > 0);
         }
 
         /// <summary>
@@ -97,7 +96,7 @@ namespace Wism.Client.Core
         /// <returns>True if armies are present; otherwise, false</returns>
         public bool HasVisitingArmies()
         {
-            return (VisitingArmies != null && VisitingArmies.Count > 0);
+            return (this.VisitingArmies != null && this.VisitingArmies.Count > 0);
         }
 
         /// <summary>
@@ -130,17 +129,17 @@ namespace Wism.Client.Core
         internal void RazeInternal()
         {
             // TODO: Raze Tower    
-            if (City == null)
+            if (this.City == null)
             {
                 throw new InvalidOperationException("Cannot raze a tile that has no structures!");
             }
 
-            if (City != null)
+            if (this.City != null)
             {
-                City = null;
-                Terrain = MapBuilder.TerrainKinds["Ruins"];
+                this.City = null;
+                this.Terrain = MapBuilder.TerrainKinds["Ruins"];
                 return;
-            }        
+            }
         }
 
         /// <summary>
@@ -216,12 +215,12 @@ namespace Wism.Client.Core
             var armies = new List<Army>();
             if (HasVisitingArmies())
             {
-                armies.AddRange(VisitingArmies);
+                armies.AddRange(this.VisitingArmies);
             }
 
             if (HasArmies())
             {
-                armies.AddRange(Armies);
+                armies.AddRange(this.Armies);
             }
 
             return armies;
@@ -238,7 +237,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(armiesToRemove));
             }
 
-            if (Armies == null)
+            if (this.Armies == null)
             {
                 throw new InvalidOperationException("Cannot remove armies from a tile with no armies.");
             }
@@ -265,7 +264,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(armiesToRemove));
             }
 
-            if (VisitingArmies == null)
+            if (this.VisitingArmies == null)
             {
                 throw new InvalidOperationException("Cannot remove visiting armies from a tile with no armies.");
             }
@@ -288,8 +287,8 @@ namespace Wism.Client.Core
         /// <returns></returns>
         public bool HasRoom(int newArmyCount)
         {
-            return 
-                (!HasArmies() || 
+            return
+                (!HasArmies() ||
                 ((this.Armies.Count + newArmyCount) <= Army.MaxArmies));
         }
 
@@ -300,29 +299,31 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(armies));
             }
 
-            return (this.HasArmies() && (this.Armies[0].Clan != armies[0].Clan)) ||
-                   (this.HasCity() && (this.City.Clan != armies[0].Clan)) &&
-                   armies.TrueForAll(a => a.MovesRemaining > this.Terrain.MovementCost);            
+            return (HasArmies() && (this.Armies[0].Clan != armies[0].Clan)) ||
+                   (HasCity() && (this.City.Clan != armies[0].Clan)) &&
+                   armies.TrueForAll(a => a.MovesRemaining > this.Terrain.MovementCost);
         }
 
         /// <summary>
         /// Check if the given armies can move onto this tile
         /// </summary>
         /// <param name="armies">Armies to test</param>
+        /// <param name="ignoreClan">Should include clan check?</param>
         /// <returns>True if the armies can move here; otherwise, false</returns>
-        public bool CanTraverseHere(List<Army> armies)
+        public bool CanTraverseHere(List<Army> armies, bool ignoreClan = false)
         {
-            return Game.Current.TraversalStrategy.CanTraverse(armies, this);
+            return Game.Current.TraversalStrategy.CanTraverse(armies, this, ignoreClan);
         }
 
         /// <summary>
         /// Check if the given army can move onto this tile
         /// </summary>
         /// <param name="army">Army to test</param>
+        /// <param name="ignoreClan">Should include clan check?</param>
         /// <returns>True if the army can move here; otherwise, false</returns>
-        public bool CanTraverseHere(Army army)
+        public bool CanTraverseHere(Army army, bool ignoreClan = false)
         {
-            return CanTraverseHere(new List<Army>() { army });
+            return CanTraverseHere(new List<Army>() { army }, ignoreClan);
         }
 
         /// <summary>
@@ -357,14 +358,14 @@ namespace Wism.Client.Core
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append($"({X},{Y}):{Terrain}");
+            sb.Append($"({this.X},{this.Y}):{this.Terrain}");
             if (HasArmies())
             {
-                sb.Append($"[{Armies.Count}:{Armies[0]}]");
+                sb.Append($"[{this.Armies.Count}:{this.Armies[0]}]");
             }
             if (HasLocation())
             {
-                sb.Append($"[{Location}]");
+                sb.Append($"[{this.Location}]");
             }
 
             return sb.ToString();
@@ -392,7 +393,7 @@ namespace Wism.Client.Core
             if (HasCity())
             {
                 // Muster troops from across the city!
-                var tiles = City.GetTiles();
+                var tiles = this.City.GetTiles();
                 for (int i = 0; i < tiles.Length; i++)
                 {
                     if (tiles[i].HasArmies())
@@ -403,7 +404,7 @@ namespace Wism.Client.Core
             }
             else
             {
-                if (this.HasArmies())
+                if (HasArmies())
                 {
                     allArmies.AddRange(this.Armies);
                 }
@@ -423,23 +424,23 @@ namespace Wism.Client.Core
 
             if (!HasArmies())
             {
-                this.Armies = new List<Army>();                
+                this.Armies = new List<Army>();
             }
 
             this.Armies.AddRange(this.VisitingArmies);
             this.Armies.Sort(new ByArmyViewingOrder());
             this.VisitingArmies = null;
         }
-        
+
         /// <summary>
         /// Sets the owner for the tile.
         /// </summary>
         /// <param name="player">Player for which to stake the claim</param>
         public void Claim(Player player)
         {
-            if (City != null)
+            if (this.City != null)
             {
-                City.Claim(player);
+                this.City.Claim(player);
             }
         }
 
@@ -462,16 +463,16 @@ namespace Wism.Client.Core
             {
                 for (int xDelta = -1; xDelta <= 1; xDelta++)
                 {
-                    if (X + xDelta > map.GetUpperBound(0) ||
-                        X + xDelta < map.GetLowerBound(0) ||
-                        Y + yDelta > map.GetUpperBound(1) ||
-                        Y + yDelta < map.GetLowerBound(1))
+                    if (this.X + xDelta > map.GetUpperBound(0) ||
+                        this.X + xDelta < map.GetLowerBound(0) ||
+                        this.Y + yDelta > map.GetUpperBound(1) ||
+                        this.Y + yDelta < map.GetLowerBound(1))
                     {
                         nineGrid[1 + xDelta, 1 + yDelta] = null;
                     }
                     else
                     {
-                        nineGrid[1 + xDelta, 1 + yDelta] = map[X + xDelta, Y + yDelta];
+                        nineGrid[1 + xDelta, 1 + yDelta] = map[this.X + xDelta, this.Y + yDelta];
                     }
                 }
             }

@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Tilemaps;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -22,7 +21,7 @@ namespace Assets.Scripts.Managers
         public void Start()
         {
             Initialize();
-        }        
+        }
 
         public void FixedUpdate()
         {
@@ -37,17 +36,17 @@ namespace Assets.Scripts.Managers
 
         private void RefreshItemGameObjects()
         {
-            var originalItems = new Dictionary<Artifact, GameObject>.KeyCollection(itemGameObjects);
+            var originalItems = new Dictionary<Artifact, GameObject>.KeyCollection(this.itemGameObjects);
 
             // Find items sitting on the ground (not in Locations or with Heros)
             var items = GetItemsOnTiles();
             foreach (var item in items)
             {
                 GameObject itemGO;
-                if (!itemGameObjects.ContainsKey(item))
+                if (!this.itemGameObjects.ContainsKey(item))
                 {
                     itemGO = InstantiateItemGo(item);
-                    itemGameObjects.Add(item, itemGO);
+                    this.itemGameObjects.Add(item, itemGO);
                 }
             }
 
@@ -60,33 +59,33 @@ namespace Assets.Scripts.Managers
         /// <param name="originalItems">Original list</param>
         /// <param name="updatedItems">Updated list</param>
         private void CleanupItems(
-            Dictionary<Artifact, GameObject>.KeyCollection originalItems, 
+            Dictionary<Artifact, GameObject>.KeyCollection originalItems,
             List<Artifact> itemsOnTiles)
         {
             var obsoleteItems = originalItems.Except(itemsOnTiles);
             var items = new List<Artifact>(obsoleteItems);
             for (int i = 0; i < items.Count; i++)
             {
-                Destroy(itemGameObjects[items[i]]);
-                itemGameObjects.Remove(items[i]);
+                Destroy(this.itemGameObjects[items[i]]);
+                this.itemGameObjects.Remove(items[i]);
             }
         }
 
         private GameObject InstantiateItemGo(Artifact item)
         {
-            Vector3 worldVector = worldTilemap.ConvertGameToUnityVector(item.X, item.Y);
+            Vector3 worldVector = this.worldTilemap.ConvertGameToUnityVector(item.X, item.Y);
             GameObject go = null;
-            
+
             if (item.CompanionInteraction != null)
             {
                 // The "Item" is a Companion!
-                go = Instantiate<GameObject>(companionPrefab, worldVector, Quaternion.identity, worldTilemap.transform);
+                go = Instantiate<GameObject>(this.companionPrefab, worldVector, Quaternion.identity, this.worldTilemap.transform);
             }
             else
             {
                 // Normal Item
-                go = Instantiate<GameObject>(itemPrefab, worldVector, Quaternion.identity, worldTilemap.transform);
-            }            
+                go = Instantiate<GameObject>(this.itemPrefab, worldVector, Quaternion.identity, this.worldTilemap.transform);
+            }
 
             return go;
         }
@@ -100,12 +99,12 @@ namespace Assets.Scripts.Managers
 
         public void Reset()
         {
-            itemGameObjects.Clear();
+            this.itemGameObjects.Clear();
         }
 
         private bool IsInitalized()
         {
-            return isInitialized && Game.IsInitialized();
+            return this.isInitialized && Game.IsInitialized();
         }
 
         private List<Artifact> GetItemsOnTiles()

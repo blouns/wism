@@ -6,21 +6,21 @@ namespace Wism.Client.Api.Commands
 {
     public class DeselectArmyCommand : ArmyCommand
     {
-        public DeselectArmyCommand(ArmyController armyController, List<Army> armies) 
+        public DeselectArmyCommand(ArmyController armyController, List<Army> armies)
             : base(armyController, armies)
         {
         }
 
         protected override ActionState ExecuteInternal()
-        { 
-            armyController.DeselectArmy(Armies);
+        {
+            this.armyController.DeselectArmy(this.Armies);
 
             return ActionState.Succeeded;
         }
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(Armies)} deselect";
+            return $"Command: {ArmyUtilities.ArmiesToString(this.Armies)} deselect";
         }
     }
 }

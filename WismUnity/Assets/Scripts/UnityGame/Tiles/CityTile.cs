@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Tilemaps;
-using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -37,7 +36,7 @@ namespace Assets.Scripts.Tiles
         public void OnEnable()
         {
             BuildCityGameObjectCache();
-            isInitialized = true;
+            this.isInitialized = true;
         }
 #endif
 
@@ -48,16 +47,16 @@ namespace Assets.Scripts.Tiles
 
         public override void RefreshTile(Vector3Int position, ITilemap tilemap)
         {
-            TileUtility.RefreshTile(position, tilemap, hasTile);
+            TileUtility.RefreshTile(position, tilemap, this.hasTile);
         }
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {
-            int index = TileUtility.FindOverlapping14SpriteIndex(position, tilemap, hasTile, CityTileDefault);
+            int index = TileUtility.FindOverlapping14SpriteIndex(position, tilemap, this.hasTile, CityTileDefault);
 
             switch (index)
             {
                 case TopLeftAdjacencyIndex:
-                    tileData.sprite = citySprites[TopLeftQuadrantIndex];
+                    tileData.sprite = this.citySprites[TopLeftQuadrantIndex];
 
 #if UNITY_EDITOR
                     // TODO: Pull this out; cohesion issue 
@@ -68,29 +67,29 @@ namespace Assets.Scripts.Tiles
 
                     break;
                 case TopRightAdjacencyIndex:
-                    tileData.sprite = citySprites[TopRightQuadrantIndex];
+                    tileData.sprite = this.citySprites[TopRightQuadrantIndex];
                     break;
                 case BottomLeftAdjacencyIndex:
-                    tileData.sprite = citySprites[BottomLeftQuadrantIndex];
+                    tileData.sprite = this.citySprites[BottomLeftQuadrantIndex];
                     break;
                 case BottomRightAdjacencyIndex:
-                    tileData.sprite = citySprites[BottomRightQuadrantIndex];
+                    tileData.sprite = this.citySprites[BottomRightQuadrantIndex];
                     break;
                 default:
-                    tileData.sprite = citySprites[CityTileDefault];
+                    tileData.sprite = this.citySprites[CityTileDefault];
                     break;
-            }            
+            }
         }
 
 #if UNITY_EDITOR
         public static void ClearCityCache()
         {
-            cityObjects.Clear(); 
+            cityObjects.Clear();
         }
 
         private void CreateCityGameObject(Vector3 worldVector)
-        {            
-            if (!cityObjects.ContainsKey(worldVector) && 
+        {
+            if (!cityObjects.ContainsKey(worldVector) &&
                 this.isInitialized &&
                 ShouldImportCitiesFromTilemap())
             {
@@ -139,7 +138,7 @@ namespace Assets.Scripts.Tiles
             }
             Debug.Log($"City game object cache ready: {cityObjects.Count} cities");
         }
-   
+
         // Add tile type into Unity Editor
         [MenuItem("Assets/Create/Tiles/CityTile")]
         public static void CreateCityTile()

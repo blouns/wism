@@ -19,8 +19,8 @@ namespace Assets.Scripts
 
         private string worldName = GameManager.DefaultWorld;
         private string modPath = GameManager.DefaultModPath;
-        public string WorldName { get => worldName; set => worldName = value; }
-        public string ModPath { get => modPath; set => modPath = value; }
+        public string WorldName { get => this.worldName; set => this.worldName = value; }
+        public string ModPath { get => this.modPath; set => this.modPath = value; }
 
         public void Start()
         {
@@ -29,7 +29,7 @@ namespace Assets.Scripts
 
         private void Initialize()
         {
-            if (!isInitialized)
+            if (!this.isInitialized)
             {
                 this.unityManager = UnityUtilities.GameObjectHardFind("UnityManager")
                     .GetComponent<UnityManager>();
@@ -37,20 +37,20 @@ namespace Assets.Scripts
                     .GetComponent<DebugManager>();
 
                 // Factory uses world name to load ModFactory data (mod path)
-                if (unityManager == null || !unityManager.IsInitalized())
+                if (this.unityManager == null || !this.unityManager.IsInitalized())
                 {
                     this.WorldName = GameManager.DefaultWorld;
                     this.ModPath = GameManager.DefaultModPath;
                 }
                 else
                 {
-                    this.WorldName = unityManager.GameManager.WorldName;
-                    this.ModPath = unityManager.GameManager.ModPath;
+                    this.WorldName = this.unityManager.GameManager.WorldName;
+                    this.ModPath = this.unityManager.GameManager.ModPath;
                 }
 
                 this.isInitialized = true;
             }
-        }       
+        }
 
         public void CreateGame(UnityNewGameEntity newGameEntity)
         {
@@ -87,7 +87,7 @@ namespace Assets.Scripts
 
             this.debugManager.LogInformation("Creating world from scene " + this.WorldName + "...");
             UnityWorldFactory worldFactory = new UnityWorldFactory(this.debugManager);
-            settings.World = worldFactory.CreateWorld(this.WorldName, unityManager);          
+            settings.World = worldFactory.CreateWorld(this.WorldName, this.unityManager);
 
             this.debugManager.LogInformation("Initializing game...");
             this.unityManager.GameManager.NewGame(settings);

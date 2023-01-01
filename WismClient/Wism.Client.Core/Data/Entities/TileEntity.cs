@@ -7,7 +7,7 @@ namespace Wism.Client.Entities
     {
         [DataMember]
         public int X { get; set; }
-        
+
         [DataMember]
         public int Y { get; set; }
 

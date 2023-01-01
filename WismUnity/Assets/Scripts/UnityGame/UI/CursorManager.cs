@@ -8,7 +8,7 @@ public class CursorManager : MonoBehaviour
     [SerializeField]
     private Texture2D info;
     [SerializeField]
-    private Texture2D magnify;    
+    private Texture2D magnify;
     [SerializeField]
     private Texture2D produce;
     [SerializeField]
@@ -35,7 +35,7 @@ public class CursorManager : MonoBehaviour
 
     void Start()
     {
-        SetCursor(info);
+        SetCursor(this.info);
     }
 
     private void SetCursor(Texture2D cursor)
@@ -47,17 +47,17 @@ public class CursorManager : MonoBehaviour
 
     public void AttackCursor()
     {
-        SetCursor(attack);
+        SetCursor(this.attack);
     }
 
     public void InfoCursor()
     {
-        SetCursor(info);
+        SetCursor(this.info);
     }
 
     public void MagnifyCursor()
     {
-        SetCursor(magnify);
+        SetCursor(this.magnify);
     }
 
     public void MoveCursor(Vector3 heading)
@@ -72,42 +72,42 @@ public class CursorManager : MonoBehaviour
         if (degrees >= (360f - midDeg) || degrees <= (0f + midDeg))
         {
             // North
-            moveCursor = moveNorth;
+            moveCursor = this.moveNorth;
         }
         else if (degrees >= (0f + midDeg) && degrees <= (45f + midDeg))
         {
             // North east
-            moveCursor = moveNorthEast;
+            moveCursor = this.moveNorthEast;
         }
         else if (degrees >= (45f + midDeg) && degrees <= (90f + midDeg))
         {
             // East
-            moveCursor = moveEast;
+            moveCursor = this.moveEast;
         }
         else if (degrees >= (90f + midDeg) && degrees <= (135f + midDeg))
         {
             // South-east
-            moveCursor = moveSouthEast;
+            moveCursor = this.moveSouthEast;
         }
         else if (degrees >= (135f + midDeg) && degrees <= (180f + midDeg))
         {
             // South
-            moveCursor = moveSouth;
+            moveCursor = this.moveSouth;
         }
         else if (degrees >= (180f + midDeg) && degrees <= (225f + midDeg))
         {
             // South-west
-            moveCursor = moveSouthWest;
+            moveCursor = this.moveSouthWest;
         }
         else if (degrees >= (225f + midDeg) && degrees <= (270f + midDeg))
         {
             // West
-            moveCursor = moveWest;
+            moveCursor = this.moveWest;
         }
         else if (degrees >= (270f + midDeg) && degrees <= (315f + midDeg))
         {
             // North-west
-            moveCursor = moveNorthWest;
+            moveCursor = this.moveNorthWest;
         }
         else
         {
@@ -119,16 +119,16 @@ public class CursorManager : MonoBehaviour
 
     public void ProduceCursor()
     {
-        SetCursor(produce);
+        SetCursor(this.produce);
     }
 
     public void SelectCursor()
     {
-        SetCursor(select);
+        SetCursor(this.select);
     }
 
     public void PointCursor()
     {
-        SetCursor(point);
+        SetCursor(this.point);
     }
 }

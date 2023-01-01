@@ -35,7 +35,7 @@ namespace Assets.Scripts.CommandProcessors
             var endTurn = (EndTurnCommand)command;
 
             HandleGameOver(endTurn);
-            this.unityGame.ClearInfoPanel();            
+            this.unityGame.ClearInfoPanel();
 
             return command.Execute();
         }

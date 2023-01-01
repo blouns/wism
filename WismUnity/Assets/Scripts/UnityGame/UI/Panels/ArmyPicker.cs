@@ -28,11 +28,11 @@ namespace Assets.Scripts.UI
             List<Army> selectedArmys = GetSelectedArmysFromPanel();
             if (selectedArmys.Count > 0)
             {
-                gameManager.SelectArmies(selectedArmys);
+                this.gameManager.SelectArmies(selectedArmys);
             }
             else
             {
-                gameManager.DeselectArmies();
+                this.gameManager.DeselectArmies();
             }
 
             Teardown();
@@ -43,7 +43,7 @@ namespace Assets.Scripts.UI
             List<Army> selectedArmys = new List<Army>();
             for (int i = 0; i < this.selected.Length; i++)
             {
-                if (selected[i])
+                if (this.selected[i])
                 {
                     selectedArmys.Add(this.armies[i]);
                 }
@@ -112,13 +112,13 @@ namespace Assets.Scripts.UI
                 // Hide rows with no armies
                 if (i >= armies.Count)
                 {
-                    ArmyRows[i].SetActive(false);
-                    selected[i] = false;
+                    this.ArmyRows[i].SetActive(false);
+                    this.selected[i] = false;
                     continue;
                 }
 
                 // Render rows with correct army info
-                foreach (Transform transform in ArmyRows[i].transform)
+                foreach (Transform transform in this.ArmyRows[i].transform)
                 {
                     // Select by default if currently selected in the Game
                     var currentlySelectedArmies = Game.Current.GetSelectedArmies();
@@ -160,7 +160,7 @@ namespace Assets.Scripts.UI
                     }
                 }
 
-                ArmyRows[i].SetActive(true);
+                this.ArmyRows[i].SetActive(true);
             }
 
         }
@@ -181,7 +181,7 @@ namespace Assets.Scripts.UI
 
         private void ReplaceImage(Army army, GameObject armyGo)
         {
-            GameObject armyKind = armyManager.FindGameObjectKind(army);
+            GameObject armyKind = this.armyManager.FindGameObjectKind(army);
             SpriteRenderer spriteRenderer = armyKind.GetComponent<SpriteRenderer>();
             Image image = armyGo.GetComponent<Image>();
             image.sprite = spriteRenderer.sprite;

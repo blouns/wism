@@ -30,7 +30,7 @@ namespace Wism.Client.Test.Controller
             // Assert
             Assert.IsTrue(result);
             Assert.IsTrue(location.Searched);
-            Assert.AreEqual(1, armiesBlessed);           
+            Assert.AreEqual(1, armiesBlessed);
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace Wism.Client.Test.Controller
             LocationController locationController = TestUtilities.CreateLocationController();
             Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
             Player player1 = Game.Current.Players[0];
-            Location location = MapBuilder.FindLocation("CryptKeeper");           
+            Location location = MapBuilder.FindLocation("CryptKeeper");
             Tile tile = World.Current.Map[1, 1];
             World.Current.AddLocation(location, tile);
             TestUtilities.AllocateBoons();
@@ -112,12 +112,12 @@ namespace Wism.Client.Test.Controller
             // Assemble
             LocationController locationController = TestUtilities.CreateLocationController();
             Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
-            Player player1 = Game.Current.Players[0];           
+            Player player1 = Game.Current.Players[0];
             Location location = MapBuilder.FindLocation("SagesHut");
             Tile tile = World.Current.Map[1, 1];
             World.Current.AddLocation(location, tile);
             Army army = player1.HireHero(tile);
-            List<Army> armies = new List<Army>() { army };            
+            List<Army> armies = new List<Army>() { army };
             var success = locationController.SearchSage(armies, location, out int gold);
             Assert.IsTrue(success);
             int expectedGold = player1.Gold;
@@ -127,7 +127,7 @@ namespace Wism.Client.Test.Controller
 
             // Assert
             // Sage can always be searched
-            Assert.IsTrue(success);     
+            Assert.IsTrue(success);
             Assert.AreEqual(0, gold);
             Assert.AreEqual(expectedGold, player1.Gold);
             Assert.IsTrue(location.Searched);

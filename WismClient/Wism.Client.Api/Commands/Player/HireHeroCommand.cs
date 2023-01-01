@@ -10,48 +10,48 @@ namespace Wism.Client.Api.Commands
     public class HireHeroCommand : Command
     {
         private readonly PlayerController playerController;
-       
+
         public Hero Hero { get; set; }
 
         public RecruitHeroCommand RecruitHeroCommand { get; set; }
 
-        public bool HeroAccepted 
-        { 
-            get => RecruitHeroCommand.HeroAccepted.Value;
+        public bool HeroAccepted
+        {
+            get => this.RecruitHeroCommand.HeroAccepted.Value;
         }
 
         public Tile HeroTile
         {
-            get => RecruitHeroCommand.HeroTile;
+            get => this.RecruitHeroCommand.HeroTile;
         }
 
         public string HeroDisplayName
         {
-            get => RecruitHeroCommand.HeroDisplayName;
+            get => this.RecruitHeroCommand.HeroDisplayName;
         }
 
         public int HeroPrice
         {
-            get => RecruitHeroCommand.HeroPrice;
+            get => this.RecruitHeroCommand.HeroPrice;
         }
 
         public List<ArmyInfo> HeroAllies
         {
-            get => RecruitHeroCommand.HeroAllies;
+            get => this.RecruitHeroCommand.HeroAllies;
         }
 
-        public HireHeroCommand(PlayerController playerController, RecruitHeroCommand recruitHeroCommand) 
+        public HireHeroCommand(PlayerController playerController, RecruitHeroCommand recruitHeroCommand)
             : base(recruitHeroCommand.Player)
         {
             this.playerController = playerController ?? throw new ArgumentNullException(nameof(playerController));
-            RecruitHeroCommand = recruitHeroCommand ?? throw new ArgumentNullException(nameof(recruitHeroCommand));
+            this.RecruitHeroCommand = recruitHeroCommand ?? throw new ArgumentNullException(nameof(recruitHeroCommand));
         }
 
         protected override ActionState ExecuteInternal()
         {
             ActionState state = ActionState.Failed;
 
-            if (!RecruitHeroCommand.HeroAccepted.HasValue)
+            if (!this.RecruitHeroCommand.HeroAccepted.HasValue)
             {
                 throw new InvalidOperationException("Hero has not been accepted or rejected.");
             }
@@ -59,7 +59,7 @@ namespace Wism.Client.Api.Commands
             // If hero accepted, hire; otherwise skip
             if (this.HeroAccepted)
             {
-                bool success = playerController.TryHireHero(Player,
+                bool success = this.playerController.TryHireHero(this.Player,
                     this.HeroTile,
                     this.HeroDisplayName,
                     this.HeroPrice,
@@ -67,21 +67,21 @@ namespace Wism.Client.Api.Commands
 
                 if (success)
                 {
-                    Hero = hero;
+                    this.Hero = hero;
                     state = ActionState.Succeeded;
                 }
                 else
                 {
                     state = ActionState.Failed;
                 }
-            }            
+            }
 
             return state;
         }
 
         public override string ToString()
         {
-            return $"Command: {Player.Clan} hiring hero";
+            return $"Command: {this.Player.Clan} hiring hero";
         }
     }
 }

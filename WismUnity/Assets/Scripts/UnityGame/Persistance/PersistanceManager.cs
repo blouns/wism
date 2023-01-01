@@ -29,7 +29,7 @@ namespace Assets.Scripts.Managers
 
             // Persist WISM game state
             snapshot.WismGameEntity = Game.Current.Snapshot();
-            snapshot.WismGameEntity.World.Name = snapshot.WorldName;            
+            snapshot.WismGameEntity.World.Name = snapshot.WorldName;
 
             // Write to disk
             string path = Application.persistentDataPath + "/" + filename;

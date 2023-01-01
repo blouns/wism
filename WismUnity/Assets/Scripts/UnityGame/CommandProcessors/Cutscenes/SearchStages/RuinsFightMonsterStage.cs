@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Managers;
-using Wism.Client.Api.Commands;
+﻿using Wism.Client.Api.Commands;
 
 namespace Assets.Scripts.CommandProcessors
 {
@@ -12,7 +11,7 @@ namespace Assets.Scripts.CommandProcessors
 
         protected override SceneResult ActionInternal()
         {
-            if (Hero.IsDead)
+            if (this.Hero.IsDead)
             {
                 Notify("...and is slain!");
                 // TODO: Draw slain hero sprite

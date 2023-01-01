@@ -42,19 +42,19 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         UnityManager.SetNewGameSettings(settings);
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
-        SceneManager.LoadScene(scenePath, LoadSceneMode.Additive);
+        SceneManager.LoadScene(this.scenePath, LoadSceneMode.Additive);
 
-        yield return new WaitWhile(() => sceneLoaded == false);
+        yield return new WaitWhile(() => this.sceneLoaded == false);
         yield return new WaitForSeconds(2f);
     }
 
     [UnityTearDown]
     public IEnumerator UnityTearDown()
-    {        
-        SceneManager.UnloadSceneAsync(scenePath);
+    {
+        SceneManager.UnloadSceneAsync(this.scenePath);
 
-        yield return new WaitWhile(() => sceneLoaded == true);
-        Game.Unload();        
+        yield return new WaitWhile(() => this.sceneLoaded == true);
+        Game.Unload();
     }
 
 
@@ -232,7 +232,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         var siriansHero = FindFirstHero(siriansPlayer);
         siriansHero.Strength = 9;
 
-        var banesPlayer = Game.Current.Players[1];        
+        var banesPlayer = Game.Current.Players[1];
         var banesCitadel = banesPlayer.Capitol;
         banesPlayer.HireHero(banesCitadel.Tile);
         var banesHero = FindFirstHero(banesPlayer);
@@ -271,7 +271,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
 
         // Get new hero
         yield return WismTestAction.WaitForNewHeroOffer();
-        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");        
+        yield return WismTestAction.AcceptNewHeroOffer("Lowenbrau");
         var siriansHero = FindFirstHero(siriansPlayer);
         siriansHero.Strength = 9;
         var siriansArmies = new List<Army>() { siriansHero };
@@ -282,7 +282,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         yield return WismTestAction.DismissProductionPanel();
 
         var banesPlayer = Game.Current.Players[1];
-        var banesCitadel = banesPlayer.Capitol;                    
+        var banesCitadel = banesPlayer.Capitol;
 
         var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
@@ -326,7 +326,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
 
         // Assert
         Assert.IsTrue(banesHero.IsDead, "Lord Bane's hero was not killed.");
-        Assert.IsFalse(siriansHero.IsDead, "Sirians' hero was killed");        
+        Assert.IsFalse(siriansHero.IsDead, "Sirians' hero was killed");
     }
 
     [UnityTest]
@@ -371,7 +371,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
             gameManager.TakeItems(siriansHero, siriansHero.Tile.Items);
             yield return new WaitForLastCommand(gameManager.ControllerProvider);
         }
-        
+
         // Assert
         Assert.IsTrue(ruins.Searched, "Ruins have not been searched");
         Assert.IsFalse(siriansHero.IsDead, "Sirians' hero was killed");
@@ -433,7 +433,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         Assert.IsFalse(siriansHero.IsDead, "Sirians' hero was killed");
         Assert.IsFalse(siriansHero.Tile.HasItems(), "Hero did not find Cooper");
         Assert.IsTrue(siriansHero.HasItems(), "Hero did not find Cooper");
-        Assert.AreEqual("Cooper", ((Artifact)siriansHero.Items[0]).ShortName, "Hero did not find Cooper");        
+        Assert.AreEqual("Cooper", ((Artifact)siriansHero.Items[0]).ShortName, "Hero did not find Cooper");
         Assert.AreEqual("Cooper layed down and got fur everywhere.",
             siriansHero.GetCompanionInteraction(), "Cooper did not have the expected interaction.");
     }

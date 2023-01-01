@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Core;
 using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
@@ -10,19 +11,19 @@ namespace Wism.Client.MapObjects
         public const int MinGoldToHire = 800;
         public const int MaxGoldToHire = 2000;
 
-        public List<Artifact> Items { get; internal set; }        
+        public List<Artifact> Items { get; internal set; }
 
         internal Hero()
         {
             this.Info = ArmyInfo.GetHeroInfo();
-            this.DisplayName = Info.DisplayName;
+            this.DisplayName = this.Info.DisplayName;
         }
 
         public void TakeAll()
         {
-            if (Tile.HasItems())
+            if (this.Tile.HasItems())
             {
-                Take(Tile.Items);
+                Take(this.Tile.Items);
             }
         }
 
@@ -40,14 +41,14 @@ namespace Wism.Client.MapObjects
         public void Take(List<Artifact> items)
         {
             if (items is null ||
-                !Tile.HasItems())
+                !this.Tile.HasItems())
             {
                 return;
             }
 
             foreach (var item in new List<Artifact>(items))
             {
-                if (!Tile.Items.Contains(item))
+                if (!this.Tile.Items.Contains(item))
                 {
                     throw new ArgumentException("Item was not found on current tile: " + item);
                 }
@@ -63,7 +64,7 @@ namespace Wism.Client.MapObjects
                 return;
             }
 
-            foreach (var item in new List<Artifact>(Items))
+            foreach (var item in new List<Artifact>(this.Items))
             {
                 Drop(item);
             }
@@ -76,11 +77,11 @@ namespace Wism.Client.MapObjects
                 throw new ArgumentNullException(nameof(item));
             }
 
-            if (HasItems() && 
-                Items.Contains(item))
+            if (HasItems() &&
+                this.Items.Contains(item))
             {
                 item.Drop(this);
-                Items.Remove(item);
+                this.Items.Remove(item);
                 RecalculateCombatBonsuses();
             }
         }
@@ -93,7 +94,7 @@ namespace Wism.Client.MapObjects
             }
             else
             {
-                var companion = Items.Find(c => c.CompanionInteraction != null);
+                var companion = this.Items.Find(c => c.CompanionInteraction != null);
 
                 // TODO: Allow only one companion per hero
                 return companion.CompanionInteraction;
@@ -107,15 +108,15 @@ namespace Wism.Client.MapObjects
                 return false;
             }
 
-            var companion = Items.Find(c => c.CompanionInteraction != null);
+            var companion = this.Items.Find(c => c.CompanionInteraction != null);
 
             return companion != null;
         }
 
         private void RecalculateCombatBonsuses()
         {
-            int totalStrength = Info.Strength + BlessedAt.Count;
-            foreach (var item in Items)
+            int totalStrength = this.Info.Strength + this.BlessedAt.Count;
+            foreach (var item in this.Items)
             {
                 totalStrength += item.CombatBonus;
             }
@@ -145,18 +146,18 @@ namespace Wism.Client.MapObjects
             {
                 return bonus;
             }
-            
-            foreach (var item in Items)
+
+            foreach (var item in this.Items)
             {
                 Artifact artifact = item as Artifact;
                 if (artifact == null)
                 {
                     continue;
-                }    
+                }
 
                 bonus += artifact.CommandBonus;
             }
-            
+
             return bonus;
         }
 
@@ -169,7 +170,7 @@ namespace Wism.Client.MapObjects
                 return bonus;
             }
 
-            foreach (var item in Items)
+            foreach (var item in this.Items)
             {
                 Artifact artifact = item as Artifact;
                 if (artifact == null)

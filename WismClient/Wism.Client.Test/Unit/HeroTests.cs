@@ -55,7 +55,7 @@ namespace Wism.Client.Test.Unit
 
             var actualArtifactName = (hero.Items[0]).ShortName;
             Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
-            Assert.AreEqual(5+1, hero.Strength, "Hero did not get the correct Combat Bonus.");
+            Assert.AreEqual(5 + 1, hero.Strength, "Hero did not get the correct Combat Bonus.");
         }
 
         [Test]
@@ -90,7 +90,7 @@ namespace Wism.Client.Test.Unit
             var actualArtifactName2 = (hero.Items[1]).ShortName;
             Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not take the correct object.");
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not take the correct object.");
-            Assert.AreEqual(5+1+1, hero.Strength, "Hero did not get the correct Combat Bonus.");
+            Assert.AreEqual(5 + 1 + 1, hero.Strength, "Hero did not get the correct Combat Bonus.");
         }
 
         [Test]
@@ -162,7 +162,7 @@ namespace Wism.Client.Test.Unit
             var actualArtifactName2 = (hero.Items[1]).ShortName;
             Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not take the correct object.");
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not take the correct object.");
-            Assert.AreEqual(3+2, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
+            Assert.AreEqual(3 + 2, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
         }
 
         [Test]
@@ -289,7 +289,7 @@ namespace Wism.Client.Test.Unit
             Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not drop the correct object.");
             Assert.AreEqual(0, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
             Assert.AreEqual(0, hero.GetCombatBonus(), "Hero did not get the correct Command Bonus.");
-            Assert.AreEqual(5+0, hero.Strength, "Hero did not get the correct Command Bonus.");
+            Assert.AreEqual(5 + 0, hero.Strength, "Hero did not get the correct Command Bonus.");
         }
 
         [Test]

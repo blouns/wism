@@ -1,8 +1,6 @@
-﻿using Assets.Scripts.Managers;
-using Assets.Scripts.Tilemaps;
+﻿using Assets.Scripts.Tilemaps;
 using UnityEngine;
 using Wism.Client.Api.Commands;
-using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {

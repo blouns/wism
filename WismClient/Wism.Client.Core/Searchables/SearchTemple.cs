@@ -20,7 +20,7 @@ namespace Wism.Client.MapObjects
         public bool Search(List<Army> armies, Location location, out object result)
         {
             int blessed = 0;
-         
+
             foreach (var army in armies)
             {
                 if (!army.BlessedAt.Contains(location) &&

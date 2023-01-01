@@ -107,7 +107,7 @@ namespace Wism.Client.War
             {
                 wasSuccessful = AttackOnceInternal(defenders, attackers, compositeAFCM, compositeDFCM);
             }
-            
+
             if (BattleContinues(defenders, attackers))
             {
                 // Keep fighting
@@ -126,7 +126,7 @@ namespace Wism.Client.War
             return (attacker.Count > 0 && defenders.Count > 0);
         }
 
-        private static void PrepareArmiesForAttack(List<Army> attackers, Tile target, 
+        private static void PrepareArmiesForAttack(List<Army> attackers, Tile target,
             out List<Army> defenders, out int compositeAFCM, out int compositeDFCM)
         {
             // Muster all armys from composite tile (i.e. city) to defend

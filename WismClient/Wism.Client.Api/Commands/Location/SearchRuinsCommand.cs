@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
@@ -18,11 +17,11 @@ namespace Wism.Client.Api.Commands
 
         protected override ActionState ExecuteInternal()
         {
-            bool success = LocationController.SearchRuins(Armies, Location, out IBoon boon);
+            bool success = this.LocationController.SearchRuins(this.Armies, this.Location, out IBoon boon);
             if (success)
             {
-                Boon = boon;
-                BoonResult = boon.Result;
+                this.Boon = boon;
+                this.BoonResult = boon.Result;
             }
 
             return (success) ? ActionState.Succeeded : ActionState.Failed;

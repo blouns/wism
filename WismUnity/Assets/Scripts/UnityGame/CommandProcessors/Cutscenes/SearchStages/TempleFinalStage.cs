@@ -11,7 +11,7 @@ namespace Assets.Scripts.CommandProcessors
 
         protected override SceneResult ActionInternal()
         {
-            var templeCommand = (SearchTempleCommand)Command;
+            var templeCommand = (SearchTempleCommand)this.Command;
 
             if (templeCommand.BlessedArmyCount == 1)
             {
@@ -28,7 +28,7 @@ namespace Assets.Scripts.CommandProcessors
             {
                 Notify("You have already received our blessing! Try another temple!");
                 return SceneResult.Failure;
-            }            
+            }
         }
     }
 }

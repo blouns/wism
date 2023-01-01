@@ -49,14 +49,14 @@ namespace Assets.Scripts.CommandProcessors
             else
             {
                 messageBox.Notify($"{name} your turn is starting!");
-            }            
-            
+            }
+
             return command.Execute();
         }
 
         private void CenterOnCapitol(Player player)
         {
-            unityGame.GoToCapitol(player);
-        }       
+            this.unityGame.GoToCapitol(player);
+        }
     }
 }

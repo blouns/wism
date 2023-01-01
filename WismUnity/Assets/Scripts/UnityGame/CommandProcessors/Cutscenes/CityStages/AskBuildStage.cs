@@ -11,8 +11,8 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
 
         protected override SceneResult ActionInternal()
         {
-            var cityCommand = (BuildCityCommand)Command;
-            var city = cityCommand.City;            
+            var cityCommand = (BuildCityCommand)this.Command;
+            var city = cityCommand.City;
 
             bool? answer = AskYesNo(
                $"Improve City Defenses?\n" +

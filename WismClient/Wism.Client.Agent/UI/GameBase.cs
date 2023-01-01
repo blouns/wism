@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.Modules;
-using Wism.Client.Common;
 
 namespace Wism.Client.Agent
 {
@@ -22,9 +22,9 @@ namespace Wism.Client.Agent
 
         public int GameSpeed { get; set; }
 
-        public int LastId { get => lastId; set => lastId = value; }
+        public int LastId { get => this.lastId; set => this.lastId = value; }
 
-        public PlayerController PlayerController => playerController;
+        public PlayerController PlayerController => this.playerController;
 
         public GameBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
         {
@@ -38,7 +38,7 @@ namespace Wism.Client.Agent
                 throw new ArgumentNullException(nameof(controllerProvider));
             }
 
-            logger = loggerFactory.CreateLogger();
+            this.logger = loggerFactory.CreateLogger();
             this.armyController = controllerProvider.ArmyController;
             this.playerController = controllerProvider.PlayerController;
             this.GameSpeed = DefaultGameSpeed;
@@ -46,26 +46,26 @@ namespace Wism.Client.Agent
 
         public async Task RunAsync()
         {
-            logger.LogInformation("WISM successfully started");
+            this.logger.LogInformation("WISM successfully started");
 
             try
             {
                 CreateTestGame();
-                
+
                 while (true)
                 {
                     // Game loop
                     Draw();
                     HandleInput();
-                    DoTasks(ref lastId);
+                    DoTasks(ref this.lastId);
 
-                    await Task.Delay(GameSpeed);
+                    await Task.Delay(this.GameSpeed);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                logger.LogError(ex.ToString());
+                this.logger.LogError(ex.ToString());
                 throw;
             }
         }
@@ -101,7 +101,7 @@ namespace Wism.Client.Agent
                 heroTile);
 
             // Set the player's selected army to a default for testing
-            armyController.SelectArmy(heroTile.Armies);
+            this.armyController.SelectArmy(heroTile.Armies);
 
             // Create an opponent for testing
             var enemyTile1 = map[3, 3];

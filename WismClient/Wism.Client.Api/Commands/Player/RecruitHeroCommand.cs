@@ -31,18 +31,18 @@ namespace Wism.Client.Api.Commands
         {
             ActionState state;
 
-            if (Player.IsDead)
+            if (this.Player.IsDead)
             {
                 return ActionState.Failed;
             }
 
-            if (this.playerController.RecruitHero(Player, 
+            if (this.playerController.RecruitHero(this.Player,
                 out string name, out City city, out int price, out List<ArmyInfo> allies))
             {
-                HeroTile = city.Tile;
-                HeroDisplayName = name;
-                HeroPrice = price;
-                HeroAllies = allies;
+                this.HeroTile = city.Tile;
+                this.HeroDisplayName = name;
+                this.HeroPrice = price;
+                this.HeroAllies = allies;
                 state = ActionState.Succeeded;
             }
             else
@@ -55,7 +55,7 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            return $"Command: {Player.Clan} recruiting a hero";
-        }        
+            return $"Command: {this.Player.Clan} recruiting a hero";
+        }
     }
 }

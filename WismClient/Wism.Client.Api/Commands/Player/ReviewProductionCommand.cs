@@ -21,12 +21,12 @@ namespace Wism.Client.Api.Commands
         {
             var state = ActionState.Failed;
 
-            if (this.cityController.TryGetProducedArmies(Player,
+            if (this.cityController.TryGetProducedArmies(this.Player,
                     out List<ArmyInTraining> armiesProduced,
                     out List<ArmyInTraining> armiesDelivered))
             {
-                ArmiesProducedResult = armiesProduced;
-                ArmiesDeliveredResult = armiesDelivered;
+                this.ArmiesProducedResult = armiesProduced;
+                this.ArmiesDeliveredResult = armiesDelivered;
                 state = ActionState.Succeeded;
             }
 
@@ -35,7 +35,7 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            return $"Command: {Player.Clan} reviewing production";
+            return $"Command: {this.Player.Clan} reviewing production";
         }
     }
 }

@@ -18,11 +18,11 @@ public class ArmyFlagSize : MonoBehaviour
 
     public void UpdateFlagSize()
     {
-        var gameCoords = worldTilemap.ConvertUnityToGameVector(gameObject.transform.position);
+        var gameCoords = this.worldTilemap.ConvertUnityToGameVector(this.gameObject.transform.position);
         var tile = World.Current.Map[gameCoords.x, gameCoords.y];
 
         int flagSize = tile.GetAllArmies().Count;
-        Clan clan = (tile.HasVisitingArmies()) ? 
+        Clan clan = (tile.HasVisitingArmies()) ?
                         tile.VisitingArmies[0].Clan :
                         tile.Armies[0].Clan;
 
@@ -31,8 +31,8 @@ public class ArmyFlagSize : MonoBehaviour
 
     private void UpdateFlagSprite(Clan clan, int flagSize)
     {
-        var newFlagPrefab = flagManager.FindGameObjectKind(clan, flagSize);
+        var newFlagPrefab = this.flagManager.FindGameObjectKind(clan, flagSize);
         var newFlagSpriteRenderer = newFlagPrefab.GetComponent<SpriteRenderer>();
-        gameObject.GetComponent<SpriteRenderer>().sprite = newFlagSpriteRenderer.sprite;
+        this.gameObject.GetComponent<SpriteRenderer>().sprite = newFlagSpriteRenderer.sprite;
     }
 }

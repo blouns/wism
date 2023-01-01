@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Core;
 using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
@@ -8,18 +9,18 @@ namespace Wism.Client.MapObjects
     {
         public Artifact(ArtifactInfo info)
         {
-            Info = info ?? throw new ArgumentNullException(nameof(info));
+            this.Info = info ?? throw new ArgumentNullException(nameof(info));
         }
 
-        public override string ShortName => Info.ShortName;        
+        public override string ShortName => this.Info.ShortName;
 
         public ArtifactInfo Info { get; set; }
 
-        public int CombatBonus { get => Info.CombatBonus; }
+        public int CombatBonus { get => this.Info.CombatBonus; }
 
-        public int CommandBonus { get => Info.CommandBonus; }        
+        public int CommandBonus { get => this.Info.CommandBonus; }
 
-        public string CompanionInteraction { get => Info.Interaction; }
+        public string CompanionInteraction { get => this.Info.Interaction; }
 
         public void Drop(Hero hero)
         {
@@ -28,7 +29,11 @@ namespace Wism.Client.MapObjects
                 throw new ArgumentNullException(nameof(hero));
             }
 
-            hero.Tile.AddItem(this);
+            var tile = hero.Tile;
+            tile.Items.Add(this);
+            
+            // Add for tracking
+            World.Current.AddLooseItem(this, tile);
         }
 
         public void Take(Hero hero)
@@ -40,13 +45,16 @@ namespace Wism.Client.MapObjects
 
             if (hero.Tile.HasItems() &&
                 hero.Tile.ContainsItem(this))
-            {                
+            {
                 if (!hero.HasItems())
                 {
                     hero.Items = new List<Artifact>();
                 }
                 hero.Items.Add(this);
                 hero.Tile.RemoveItem(this);
+
+                // Remove from tracking
+                World.Current.RemoveLooseItem(this, hero.Tile);
             }
         }
 

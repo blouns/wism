@@ -48,20 +48,17 @@ namespace Wism.Client.Core.Heros
             if (specialArmyKinds.Count > 0)
             {
                 // Calculate the chance the hero will bring allies
-                double chance = Game.Current.Random.NextDouble();
+                var chance = Game.Current.Random.NextDouble();
                 if (chance > BringAlliesChance)
                 {
                     // Choose a random special army kind
-                    int specialIndex = Game.Current.Random.Next(specialArmyKinds.Count);
+                    var specialIndex = Game.Current.Random.Next(specialArmyKinds.Count);
 
                     // Add up to MaxAllies of the chosen armies
-                    int allyCount = Game.Current.Random.Next(MinAllies, MaxAllies);
+                    var allyCount = Game.Current.Random.Next(MinAllies, MaxAllies);
 
-                    for (int i = 0; i < allyCount; i++)
-                    {
-                        allies.Add(specialArmyKinds[specialIndex]);
-                    }
-                }                    
+                    for (var i = 0; i < allyCount; i++) allies.Add(specialArmyKinds[specialIndex]);
+                }
             }
 
             return allies;
@@ -73,21 +70,21 @@ namespace Wism.Client.Core.Heros
         /// <returns>Hero name</returns>
         public string GetHeroName()
         {
-            if (heroNames == null)
+            if (this.heroNames == null)
             {
-                string path = ModFactory.ModPath + "\\" + ModFactory.HeroPath;
-                heroNames = RandomizeList<string>(
+                var path = ModFactory.ModPath + "\\" + ModFactory.HeroPath;
+                this.heroNames = RandomizeList<string>(
                     Game.Current.Random,
                     ModFactory.LoadHeroNames(path));
             }
 
-            if (heroNames.Count == 0)
+            if (this.heroNames.Count == 0)
             {
                 return "Branally";
             }
 
-            string name = heroNames[heroNameIndex];
-            heroNameIndex = (heroNameIndex + 1) % heroNames.Count;
+            var name = this.heroNames[this.heroNameIndex];
+            this.heroNameIndex = (this.heroNameIndex + 1) % this.heroNames.Count;
 
             return name;
         }
@@ -109,6 +106,7 @@ namespace Wism.Client.Core.Heros
                     list.Add(temp);
                 }
             }
+
             return list;
         }
 
@@ -134,7 +132,7 @@ namespace Wism.Client.Core.Heros
             else if (player.GetCities().Count == 0)
             {
                 // Must have a city
-                goldToHire = Int32.MaxValue;
+                goldToHire = int.MaxValue;
             }
             else
             {
@@ -196,23 +194,23 @@ namespace Wism.Client.Core.Heros
 
             // Chance goes down based on number of current heros
             var heros = player.GetArmies().FindAll(a => a is Hero);
-            double heroCountChance = 1 - Math.Log10(heros.Count + 1);
+            var heroCountChance = 1 - Math.Log10(heros.Count + 1);
             if (heroCountChance < 0)
             {
                 heroCountChance = 0;
             }
 
             // Chance goes up based on number of turns without a new hero
-            int turnsSinceLastHero = player.Turn - player.LastHeroTurn;
-            double turnsSinceLastHeroChance = Math.Log10(turnsSinceLastHero);
+            var turnsSinceLastHero = player.Turn - player.LastHeroTurn;
+            var turnsSinceLastHeroChance = Math.Log10(turnsSinceLastHero);
             if (turnsSinceLastHeroChance > 1)
             {
                 turnsSinceLastHeroChance = 1;
             }
 
             // Calculate if hero is available
-            double chance = Game.Current.Random.NextDouble();
-            bool isHeroForHire = (chance < (heroCountChance * turnsSinceLastHeroChance));
+            var chance = Game.Current.Random.NextDouble();
+            var isHeroForHire = chance < heroCountChance * turnsSinceLastHeroChance;
 
             return isHeroForHire;
         }

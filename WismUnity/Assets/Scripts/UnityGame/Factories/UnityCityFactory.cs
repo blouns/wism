@@ -1,6 +1,5 @@
 ﻿using Assets.Scripts.Editors;
 using Assets.Scripts.Managers;
-using Assets.Scripts.Tilemaps;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +16,7 @@ namespace Assets.Scripts.UnityGame.Factories
         {
             this.debugManager = debugManager ?? throw new ArgumentNullException(nameof(debugManager));
         }
-        
+
         /// <summary>
         /// Create cities from a scene
         /// </summary>

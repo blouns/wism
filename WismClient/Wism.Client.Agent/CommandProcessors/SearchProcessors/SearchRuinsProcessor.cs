@@ -53,12 +53,12 @@ namespace Wism.Client.Agent.CommandProcessors
                 throw new InvalidOperationException("No location found on this tile: " + targetTile);
             }
 
-            var hero = searchingArmies.Find(a => 
-                a is Hero && 
+            var hero = searchingArmies.Find(a =>
+                a is Hero &&
                 a.Tile == targetTile &&
                 a.MovesRemaining > 0);
 
-            if (hero == null || 
+            if (hero == null ||
                 ruinsCommand.Location.Searched)
             {
                 Notify.DisplayAndWait("You have found nothing!");
@@ -80,7 +80,7 @@ namespace Wism.Client.Agent.CommandProcessors
             if (monster != null)
             {
                 Notify.DisplayAndWait($"{hero.DisplayName} encounters a {monster}...");
-            }            
+            }
 
             // Search the ruins
             var result = ruinsCommand.Execute();
@@ -96,11 +96,11 @@ namespace Wism.Client.Agent.CommandProcessors
             else if (result == ActionState.Failed &&
                      hero.IsDead)
             {
-                Notify.DisplayAndWait("...and is slain!");                
+                Notify.DisplayAndWait("...and is slain!");
             }
             else
             {
-                Notify.DisplayAndWait("You have found nothing!");                
+                Notify.DisplayAndWait("You have found nothing!");
             }
 
             return result;
@@ -108,7 +108,7 @@ namespace Wism.Client.Agent.CommandProcessors
 
         private void DisplayBoon(IBoon boon)
         {
-            foreach (var identifier in boonIdentifiers)
+            foreach (var identifier in this.boonIdentifiers)
             {
                 if (identifier.CanIdentify(boon))
                 {

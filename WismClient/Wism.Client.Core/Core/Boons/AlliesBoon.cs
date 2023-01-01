@@ -17,7 +17,7 @@ namespace Wism.Client.Core
 
         public object Result { get; set; }
 
-        public ArmyInfo ArmyInfo => armyInfo;
+        public ArmyInfo ArmyInfo => this.armyInfo;
 
         /// <summary>
         /// Generates allies for the player in the target tile.
@@ -42,10 +42,10 @@ namespace Wism.Client.Core
             Army[] armies = new Army[numberOfAllies];
             for (int i = 0; i < numberOfAllies; i++)
             {
-                armies[i] = player.ConscriptArmy(this.ArmyInfo, target);                
+                armies[i] = player.ConscriptArmy(this.ArmyInfo, target);
             }
 
-            Result = armies;
+            this.Result = armies;
             return armies;
         }
     }

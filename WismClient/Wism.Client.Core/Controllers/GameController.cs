@@ -26,9 +26,9 @@ namespace Wism.Client.Core.Controllers
 
         public void EndTurn(Game game)
         {
-            logger.LogInformation(
+            this.logger.LogInformation(
                 $"{game.GetCurrentPlayer()} ended their turn.");
-            
+
             game.EndTurn();
         }
 
@@ -39,7 +39,7 @@ namespace Wism.Client.Core.Controllers
 
         public ActionState NewGame(GameEntity settings)
         {
-            logger.LogInformation("Creating new game...");
+            this.logger.LogInformation("Creating new game...");
             try
             {
                 // Load into current game
@@ -47,37 +47,37 @@ namespace Wism.Client.Core.Controllers
             }
             catch
             {
-                logger.LogError("Game creation failed.");
+                this.logger.LogError("Game creation failed.");
                 throw;
             }
 
-            logger.LogInformation("New game successfully created.");
+            this.logger.LogInformation("New game successfully created.");
 
             return ActionState.Succeeded;
         }
 
         public ActionState LoadSnapshot(GameEntity snapshot)
         {
-            logger.LogInformation("Loading game snapshot...");
+            this.logger.LogInformation("Loading game snapshot...");
             try
             {
                 // Load into current game
-                _ = GameFactory.Load(snapshot);                
+                _ = GameFactory.Load(snapshot);
             }
             catch
             {
-                logger.LogError("Snapshot load failed.");
+                this.logger.LogError("Snapshot load failed.");
                 throw;
             }
 
-            logger.LogInformation("Snapshot successfully loaded.");
+            this.logger.LogInformation("Snapshot successfully loaded.");
 
             return ActionState.Succeeded;
         }
 
         public void StartTurn(Game game)
         {
-            logger.LogInformation(
+            this.logger.LogInformation(
                 $"{game.GetCurrentPlayer()} is starting their turn.");
 
             game.StartTurn();

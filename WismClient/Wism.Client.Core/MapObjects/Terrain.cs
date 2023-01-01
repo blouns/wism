@@ -8,8 +8,8 @@ namespace Wism.Client.MapObjects
 
         public int MovementCost { get; set; }
 
-        public override string ShortName { get => Info.ShortName; }
-        public TerrainInfo Info 
+        public override string ShortName { get => this.Info.ShortName; }
+        public TerrainInfo Info
         {
             get
             {
@@ -17,7 +17,7 @@ namespace Wism.Client.MapObjects
                 {
                     this.info = MapBuilder.FindTerrainInfo(this.ShortName);
                 }
-                return info;
+                return this.info;
             }
         }
 
@@ -35,9 +35,9 @@ namespace Wism.Client.MapObjects
 
         public bool CanTraverse(bool canWalk, bool canFloat, bool canFly)
         {
-            return ((canWalk && Info.AllowWalk) ||
-                    (canFloat && Info.AllowFloat) ||
-                    (canFly && Info.AllowFlight));
+            return ((canWalk && this.Info.AllowWalk) ||
+                    (canFloat && this.Info.AllowFloat) ||
+                    (canFly && this.Info.AllowFlight));
         }
     }
 }

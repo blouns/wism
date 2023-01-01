@@ -36,9 +36,9 @@ namespace Wism.Client.Core
 
         public City Capitol { get; set; }
 
-        public int LastHeroTurn { get => lastHeroTurn; internal set => lastHeroTurn = value; }
+        public int LastHeroTurn { get => this.lastHeroTurn; internal set => this.lastHeroTurn = value; }
 
-        public IRecruitHeroStrategy RecruitHeroStrategy => recruitHeroStrategy;
+        public IRecruitHeroStrategy RecruitHeroStrategy => this.recruitHeroStrategy;
 
         private Player(IRecruitHeroStrategy recruitingStrategy)
         {
@@ -100,12 +100,12 @@ namespace Wism.Client.Core
 
         public int GetIncome()
         {
-            return myCities.Sum(city => city.Income);
+            return this.myCities.Sum(city => city.Income);
         }
 
         public int GetUpkeep()
         {
-            return myArmies.Sum(army => army.Upkeep);
+            return this.myArmies.Sum(army => army.Upkeep);
         }
 
         /// <summary>
@@ -125,20 +125,20 @@ namespace Wism.Client.Core
                 return false;
             }
 
-            if (Gold < price)
+            if (this.Gold < price)
             {
                 return false;
             }
 
             // Pay the hero and reset the price
-            Gold -= price;
+            this.Gold -= price;
 
             // Get him a uniform!
             hero = (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
             hero.DisplayName = displayName;
 
             this.myHeros.Add(hero);
-            this.lastHeroTurn = Turn;
+            this.lastHeroTurn = this.Turn;
 
             return true;
         }
@@ -154,24 +154,24 @@ namespace Wism.Client.Core
             if (this.myHeros.Count >= Hero.MaxHeros)
             {
                 throw new InvalidOperationException("Reached max hero limit.");
-            }            
+            }
 
-            if (Gold < price)
+            if (this.Gold < price)
             {
                 throw new InvalidOperationException("Cannot afford a new hero!");
             }
 
             // Pay the hero and reset the price
-            Gold -= price;
+            this.Gold -= price;
 
             // Get him a uniform!
             var hero = (Hero)ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
-            
+
             // Get a random name
-            hero.DisplayName = RecruitHeroStrategy.GetHeroName();
+            hero.DisplayName = this.RecruitHeroStrategy.GetHeroName();
 
             this.myHeros.Add(hero);
-            this.lastHeroTurn = Turn;
+            this.lastHeroTurn = this.Turn;
 
             return hero;
         }
@@ -215,12 +215,12 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(city));
             }
 
-            if (myCities.Contains(city))
+            if (this.myCities.Contains(city))
             {
                 return;
             }
 
-            myCities.Add(city);
+            this.myCities.Add(city);
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Wism.Client.Core
             if (tile == null)
             {
                 throw new ArgumentNullException(nameof(tile));
-            }            
+            }
 
             Army newArmy = ArmyFactory.CreateArmy(this, armyInfo);
             var newArmies = new List<Army>() { newArmy };
@@ -300,7 +300,7 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot end turn; it's not my turn!");
             }
 
-            Turn++;
+            this.Turn++;
             ResetArmies();
             this.armiesProduced.Clear();
             this.armiesDelivered.Clear();
@@ -328,7 +328,7 @@ namespace Wism.Client.Core
 
         internal void DeliverArmies()
         {
-            foreach (var city in myCities)
+            foreach (var city in this.myCities)
             {
                 if (city.Barracks.Deliver(out ArmyInTraining newArmy))
                 {
@@ -354,7 +354,7 @@ namespace Wism.Client.Core
 
         internal void ProduceArmies()
         {
-            foreach (var city in myCities)
+            foreach (var city in this.myCities)
             {
                 if (city.Barracks.Produce(out ArmyInTraining newArmy))
                 {
@@ -383,10 +383,10 @@ namespace Wism.Client.Core
         /// </summary>
         private void DoTheBooks()
         {
-            Gold += GetIncome() - GetUpkeep();
-            if (Gold < 0)
-            {               
-                Gold = 0;
+            this.Gold += GetIncome() - GetUpkeep();
+            if (this.Gold < 0)
+            {
+                this.Gold = 0;
             }
         }
 
@@ -415,7 +415,7 @@ namespace Wism.Client.Core
             if (tile.ContainsArmies(armies))
             {
                 tile.RemoveArmies(armies);
-            }                 
+            }
             else
             {
                 // It was an attacking army                
@@ -423,11 +423,11 @@ namespace Wism.Client.Core
             }
 
             // Remove from player armies for tracking
-            myArmies.Remove(army);
+            this.myArmies.Remove(army);
             var hero = army as Hero;
             if (hero != null)
             {
-                myHeros.Remove(hero);
+                this.myHeros.Remove(hero);
             }
         }
 
@@ -456,7 +456,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(city));
             }
 
-            ClaimCity(city, city.Tile);            
+            ClaimCity(city, city.Tile);
         }
 
         /// <summary>
@@ -484,13 +484,13 @@ namespace Wism.Client.Core
                 city.Clan.Player.RemoveCity(city);
             }
 
-            city.Claim(this, tile);                        
+            city.Claim(this, tile);
 
             // Add city to Player for tracking
             this.myCities.Add(city);
-            if (Capitol == null)
+            if (this.Capitol == null)
             {
-                Capitol = city;
+                this.Capitol = city;
             }
         }
 
@@ -528,7 +528,7 @@ namespace Wism.Client.Core
             // Assume player-to-pillage's cities will be > 0 as we haven't claimed it yet
             int cityCoffers = playerToPillage.Gold / playerToPillage.GetCities().Count;
             int goldToPillage = (playerToPillage.Gold / playerToPillage.GetCities().Count) / 2;
-            Gold += goldToPillage;
+            this.Gold += goldToPillage;
 
             playerToPillage.Gold -= cityCoffers;
             if (playerToPillage.Gold < 0)
@@ -539,7 +539,7 @@ namespace Wism.Client.Core
 
         public void RazeCity(City city)
         {
-            if (city.Clan != Clan)
+            if (city.Clan != this.Clan)
             {
                 throw new ArgumentException($"Cannot raze a city not owned by the player. Player: {this}, City: {city}");
             }

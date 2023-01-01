@@ -25,31 +25,31 @@ namespace Assets.Scripts.Editors
 
         private void DrawLocationDropDownInspector()
         {
-            var locationEntry = target as LocationEntry;
+            var locationEntry = this.target as LocationEntry;
             string[] locationNames = GetLocationNames(locationEntry.locationShortName);
 
             // Set the choice index to the previously selected index
             if (locationEntry.locationShortName != "")
             {
-                locationIndex = Array.IndexOf(locationNames, locationEntry.locationShortName);
-                if (locationIndex < 0)
+                this.locationIndex = Array.IndexOf(locationNames, locationEntry.locationShortName);
+                if (this.locationIndex < 0)
                 {
-                    locationIndex = 0;
+                    this.locationIndex = 0;
                 }
             }
 
-            locationIndex = EditorGUILayout.Popup(locationIndex, locationNames);
+            this.locationIndex = EditorGUILayout.Popup(this.locationIndex, locationNames);
 
             // Update the selected choice in the underlying object
-            locationEntry.locationShortName = locationNames[locationIndex];
+            locationEntry.locationShortName = locationNames[this.locationIndex];
 
-            SetLocationsCount(); 
+            SetLocationsCount();
 
             // Save the changes back to the object
-            EditorUtility.SetDirty(target);
+            EditorUtility.SetDirty(this.target);
         }
 
-        private  void SetLocationsCount()
+        private void SetLocationsCount()
         {
             this.locationsGO.GetComponent<LocationContainer>()
                 .TotalLocations = this.totalLocations;
@@ -57,7 +57,7 @@ namespace Assets.Scripts.Editors
 
         private string[] GetLocationNames(string currentName)
         {
-            if (this.locationInfos == null) 
+            if (this.locationInfos == null)
             {
                 // TODO: Temp code: need to select the world dynamically
                 this.locationInfos = new List<LocationInfo>(
@@ -65,19 +65,19 @@ namespace Assets.Scripts.Editors
             }
 
             var takenLocationNames = GetTakenLocationNames();
-           
+
 
             // Add locations from location infos
             List<string> locationList = new List<string>();
             locationList.Add("{Unassigned}");
-            for (int i = 0; i < locationInfos.Count; i++)
-            { 
+            for (int i = 0; i < this.locationInfos.Count; i++)
+            {
                 // Skip taken names except for the current name
-                if (locationInfos[i].ShortName == currentName ||
-                    !takenLocationNames.Contains(locationInfos[i].ShortName))
+                if (this.locationInfos[i].ShortName == currentName ||
+                    !takenLocationNames.Contains(this.locationInfos[i].ShortName))
                 {
-                    locationList.Add(locationInfos[i].ShortName);
-                    takenLocationNames.Add(locationInfos[i].ShortName);
+                    locationList.Add(this.locationInfos[i].ShortName);
+                    takenLocationNames.Add(this.locationInfos[i].ShortName);
                 }
             }
             locationList.Sort();
@@ -90,11 +90,11 @@ namespace Assets.Scripts.Editors
             var takenLocationNames = new HashSet<string>();
 
             this.locationsGO = UnityUtilities.GameObjectHardFind("Locations");
-            this.totalLocations = locationsGO.transform.childCount;
-            var count = locationsGO.transform.childCount;
+            this.totalLocations = this.locationsGO.transform.childCount;
+            var count = this.locationsGO.transform.childCount;
             for (int i = 0; i < count; i++)
             {
-                var locationGO = locationsGO.transform.GetChild(i).gameObject;
+                var locationGO = this.locationsGO.transform.GetChild(i).gameObject;
                 takenLocationNames.Add(
                     locationGO.GetComponent<LocationEntry>()
                         .locationShortName);

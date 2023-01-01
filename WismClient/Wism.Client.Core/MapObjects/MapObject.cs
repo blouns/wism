@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Wism.Client.Core;
-using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
 {
@@ -11,8 +10,8 @@ namespace Wism.Client.MapObjects
         public abstract string ShortName { get; }
         public Tile Tile { get; set; }
         public Player Player { get; set; }
-        public int X { get => (Tile == null) ? 0 : Tile.X; }
-        public int Y { get => (Tile == null) ? 0 : Tile.Y; }
+        public int X { get => (this.Tile == null) ? 0 : this.Tile.X; }
+        public int Y { get => (this.Tile == null) ? 0 : this.Tile.Y; }
 
         public override bool Equals(object obj)
         {
@@ -25,17 +24,17 @@ namespace Wism.Client.MapObjects
 
         public override int GetHashCode()
         {
-            return $"{this.GetType()}({this.Id})".GetHashCode();
+            return $"{GetType()}({this.Id})".GetHashCode();
         }
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            if (Player != null)
+            if (this.Player != null)
             {
-                sb.Append(Player.Clan);
+                sb.Append(this.Player.Clan);
             }
 
-            sb.Append($"{ShortName}({Id})");
+            sb.Append($"{this.ShortName}({this.Id})");
 
             return sb.ToString();
         }

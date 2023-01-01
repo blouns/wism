@@ -29,11 +29,11 @@ namespace Assets.Scripts.UI
                 .GetComponent<InputManager>();
 
             // Add in order of precendence            
-            informationMappings.Add(new ArmyInformationMapping());
-            informationMappings.Add(new CityInformationMapping());
-            informationMappings.Add(new LocationInformationMapping());
-            informationMappings.Add(new TerrainInformationMapping());
-            informationMappings.Add(new PlayerInformationMapping());
+            this.informationMappings.Add(new ArmyInformationMapping());
+            this.informationMappings.Add(new CityInformationMapping());
+            this.informationMappings.Add(new LocationInformationMapping());
+            this.informationMappings.Add(new TerrainInformationMapping());
+            this.informationMappings.Add(new PlayerInformationMapping());
         }
 
         /// <summary>
@@ -58,12 +58,12 @@ namespace Assets.Scripts.UI
                 this.inputHandler.SetCurrentTile(World.Current.Map[gamePosition.x, gamePosition.y]);
             }
 
-            UpdateInformationPanel(this.inputHandler.GetCurrentTile());            
+            UpdateInformationPanel(this.inputHandler.GetCurrentTile());
         }
 
         private void UpdateInformationPanel(Tile subject)
         {
-            foreach (var mapping in informationMappings)
+            foreach (var mapping in this.informationMappings)
             {
                 if (mapping.CanMapSubject(subject))
                 {
@@ -73,13 +73,13 @@ namespace Assets.Scripts.UI
                         string value;
 
                         // Get the correct panel based on game/command state
-                
+
                         mapping.GetLabelValuePair(i, subject, out label, out value);
 
                         // Update each field from the map
-                        var labelText = gameObject.transform.Find("Label" + (i + 1))
+                        var labelText = this.gameObject.transform.Find("Label" + (i + 1))
                             .GetComponent<Text>();
-                        var valueText = gameObject.transform.Find("Value" + (i + 1))
+                        var valueText = this.gameObject.transform.Find("Value" + (i + 1))
                             .GetComponent<Text>();
 
                         labelText.text = label;

@@ -13,7 +13,7 @@ namespace Wism.Client.Common
             Warning,
             Error,
             Critical
-        }            
+        }
 
         static Log()
         {

@@ -112,7 +112,7 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             MapBuilder.AllocateBoons(World.Current.GetLocations());
             var player1 = Game.Current.Players[0];
-            var hero = player1.HireHero(tile);            
+            var hero = player1.HireHero(tile);
             Game.Current.SelectArmies(new List<Army>() { hero });
             IBoon boon = tile.Location.Boon;
 
@@ -216,12 +216,12 @@ namespace Wism.Client.Test.Unit
             World.Current.AddLocation(location, tile);
             MapBuilder.AllocateBoons(World.Current.GetLocations());
             var player1 = Game.Current.Players[0];
-            var hero = player1.HireHero(tile);           
+            var hero = player1.HireHero(tile);
             Game.Current.SelectArmies(new List<Army>() { hero });
 
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
             Assert.IsTrue(success, "Setup failed");
-            
+
             // Act
             success = tile.Location.Search(new List<Army>() { hero }, out result);
 
@@ -282,7 +282,7 @@ namespace Wism.Client.Test.Unit
             var tile = World.Current.Map[2, 2];
             var location = MapBuilder.FindLocation("SagesHut");
             World.Current.AddLocation(location, tile);
-            var player1 = Game.Current.Players[0];            
+            var player1 = Game.Current.Players[0];
             var hero = player1.HireHero(tile);
             var success = tile.Location.Search(new List<Army>() { hero }, out var result);
             int originalGold = player1.Gold;

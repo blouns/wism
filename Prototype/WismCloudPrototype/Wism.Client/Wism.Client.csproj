@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Wism.Client</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wism.Model\Wism.Model.csproj" />
+    <ProjectReference Include="..\Wism.Proxy\Wism.Proxy.csproj" />
+  </ItemGroup>
+
+</Project>

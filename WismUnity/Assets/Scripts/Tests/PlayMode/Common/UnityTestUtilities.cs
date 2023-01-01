@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.UI;
 using Assets.Tests.PlayMode;
-using System;
 using System.Collections;
 using UnityEngine;
 using Wism.Client.Api.Commands;
@@ -43,7 +42,7 @@ namespace Assets.Scripts.Tests.PlayMode.Common
             if (productionPanelGO != null)
             {
                 productionPanelGO.GetComponent<CityProduction>()
-                    .OnExitClick();                
+                    .OnExitClick();
             }
 
             yield return new WaitForInteractivePanel(productionPanelGO, false);

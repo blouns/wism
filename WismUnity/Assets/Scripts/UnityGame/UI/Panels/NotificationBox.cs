@@ -24,8 +24,8 @@ namespace Assets.Scripts.UI
 
         public void Update()
         {
-            timer += Time.deltaTime;
-            if (timer > waitTime)
+            this.timer += Time.deltaTime;
+            if (this.timer > this.waitTime)
             {
                 ClearNotification();
             }
@@ -37,13 +37,13 @@ namespace Assets.Scripts.UI
 
         private void ShowNotifications()
         {
-            infoPanelGroup.alpha = 0f;
+            this.infoPanelGroup.alpha = 0f;
         }
 
         public void ClearNotification()
         {
             this.notificationText.text = "";
-            infoPanelGroup.alpha = 1f;
+            this.infoPanelGroup.alpha = 1f;
         }
 
         public void Notify(string message, double interval = DefaultInterval)
@@ -55,7 +55,7 @@ namespace Assets.Scripts.UI
 
             this.infoPanelGroup.alpha = 0f;
             this.notificationText.text = message;
-            timer = 0f;
+            this.timer = 0f;
             ShowNotifications();
         }
     }

@@ -17,7 +17,7 @@ namespace Wism.Client.Api.Commands
 
         public Command(Player player)
         {
-            Player = player ?? throw new System.ArgumentNullException(nameof(player));
+            this.Player = player ?? throw new System.ArgumentNullException(nameof(player));
         }
 
         public ActionState Execute()
@@ -31,7 +31,7 @@ namespace Wism.Client.Api.Commands
 
         protected bool PlayerIsAlive()
         {
-            return (Player == null || Player.IsDead);
+            return (this.Player == null || this.Player.IsDead);
         }
     }
 }

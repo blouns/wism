@@ -49,7 +49,7 @@ namespace Wism.Client.Core
                 target.VisitingArmies[0].Strength = 1;
             }
 
-            Result = strengthBoon;
+            this.Result = strengthBoon;
             return strengthBoon;
         }
     }

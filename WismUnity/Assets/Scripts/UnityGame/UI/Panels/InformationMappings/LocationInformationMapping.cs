@@ -1,8 +1,8 @@
 ﻿using Assets.Scripts.Managers;
 using System;
+using UnityEngine;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
-using UnityEngine;
 
 namespace Assets.Scripts.UI
 {
@@ -27,12 +27,12 @@ namespace Assets.Scripts.UI
 
         public void GetLabelValuePair(int index, Tile subject, out string label, out string value)
         {
-            if (index >= labels.Length)
+            if (index >= this.labels.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
 
-            label = labels[index];
+            label = this.labels[index];
             value = GetLabelValuePair(index, subject);
         }
 
@@ -40,7 +40,7 @@ namespace Assets.Scripts.UI
         {
             string value;
             Player player = Game.Current.GetCurrentPlayer();
-            Location location = subject.Location;            
+            Location location = subject.Location;
             string worldName = GameObject.FindGameObjectWithTag("UnityManager")
                 .GetComponent<GameManager>().WorldName;
 

@@ -39,17 +39,17 @@ namespace Assets.Scripts.UnityGame.Factories
             entity.MapXUpperBound = xUpperBound;
             entity.MapYUpperBound = yUpperBound;
 
-            var cityFactory = new UnityCityFactory(debugManager);
+            var cityFactory = new UnityCityFactory(this.debugManager);
             entity.Cities = cityFactory.CreateCities(worldName, unityManager);
 
-            var locationFactory = new UnityLocationFactory(debugManager);
+            var locationFactory = new UnityLocationFactory(this.debugManager);
             entity.Locations = locationFactory.CreateLocations(worldName, unityManager);
 
             return entity;
         }
 
         private TileEntity[] CreateTiles(WorldTilemap tilemap, out int xUpperBound, out int yUpperBound)
-        {            
+        {
             var map = tilemap.CreateWorldFromScene().Map;
             xUpperBound = map.GetUpperBound(0);
             yUpperBound = map.GetUpperBound(1);
@@ -72,6 +72,6 @@ namespace Assets.Scripts.UnityGame.Factories
             }
 
             return tiles;
-        }        
+        }
     }
 }

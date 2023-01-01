@@ -12,7 +12,7 @@ namespace Wism.Client.Core.Armies
     {
         private List<ITraversalStrategy> traversalStrategies;
 
-        public List<ITraversalStrategy> Strategies { get => traversalStrategies; set => traversalStrategies = value; }
+        public List<ITraversalStrategy> Strategies { get => this.traversalStrategies; set => this.traversalStrategies = value; }
 
         /// <summary>
         /// Create the default traversal strategy
@@ -33,16 +33,16 @@ namespace Wism.Client.Core.Armies
             this.Strategies = new List<ITraversalStrategy>(strategies);
         }
 
-        public bool CanTraverse(List<Army> armies, Tile tile)
+        public bool CanTraverse(List<Army> armies, Tile tile, bool ignoreClan = false)
         {
-            var strategy = this.Strategies.Find(s => s.CanTraverse(armies, tile));
+            var strategy = this.Strategies.Find(s => s.CanTraverse(armies, tile, ignoreClan));
 
             return strategy != null;
         }
 
-        public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile)
+        public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile, bool ignoreClan = false)
         {
-            var strategy = this.Strategies.Find(s => s.CanTraverse(clan, armyInfo, tile));
+            var strategy = this.Strategies.Find(s => s.CanTraverse(clan, armyInfo, tile, ignoreClan));
 
             return strategy != null;
         }

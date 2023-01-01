@@ -14,13 +14,13 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
 
         protected override SceneResult ActionInternal()
         {
-            var razeCommand = (RazeCityCommand)Command;
+            var razeCommand = (RazeCityCommand)this.Command;
             var city = razeCommand.City;
 
             var cityManager = GameObject.FindGameObjectWithTag("UnityManager")
-                .GetComponent<CityManager>();            
+                .GetComponent<CityManager>();
 
-            var state = Command.Execute();
+            var state = this.Command.Execute();
             if (state != ActionState.Succeeded)
             {
                 // Should never happen

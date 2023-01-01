@@ -11,7 +11,7 @@ namespace Assets.Scripts.CommandProcessors
 
         protected override SceneResult ActionInternal()
         {
-            var knowledge = ((SearchLibraryCommand)Command).Knowledge;
+            var knowledge = ((SearchLibraryCommand)this.Command).Knowledge;
 
             Notify(knowledge);
             return ContinueOnKeyPress();

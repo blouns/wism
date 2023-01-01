@@ -11,7 +11,7 @@ namespace Assets.Scripts.CommandProcessors
 
         protected override SceneResult ActionInternal()
         {
-            if (!Location.Searched)
+            if (!this.Location.Searched)
             {
                 Notify("The seer gives you a gem...");
                 return ContinueOnKeyPress();

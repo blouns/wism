@@ -3,7 +3,7 @@
 namespace Wism.Client.Api.Commands
 {
     public interface ICommandAction
-    { 
+    {
         ActionState Execute();
     }
 }

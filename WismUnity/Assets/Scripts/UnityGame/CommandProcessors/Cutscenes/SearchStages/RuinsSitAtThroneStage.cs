@@ -18,6 +18,6 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             return SceneResult.Wait;
-        }        
+        }
     }
 }

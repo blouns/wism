@@ -65,28 +65,28 @@ namespace Assets.Scripts.UI
                 return;
             }
 
-            SelectedIndex = index;
+            this.SelectedIndex = index;
             this.okButton.interactable = true;
         }
 
         public string GetCurrentFilename()
         {
-            if (SelectedIndex < 0)
+            if (this.SelectedIndex < 0)
             {
                 return null;
             }
 
-            return this.filenames[SelectedIndex];
+            return this.filenames[this.SelectedIndex];
         }
 
         public string GetCurrentSaveName()
         {
-            if (SelectedIndex < 0)
+            if (this.SelectedIndex < 0)
             {
                 return null;
             }
 
-            return transform.Find("Filename" + (SelectedIndex + 1))
+            return this.transform.Find("Filename" + (this.SelectedIndex + 1))
                     .transform
                     .GetComponentInChildren<InputField>()
                     .text;
@@ -94,7 +94,7 @@ namespace Assets.Scripts.UI
 
         public void Ok()
         {
-            if (SelectedIndex < 0)
+            if (this.SelectedIndex < 0)
             {
                 // Nothing to select
                 Cancel();
@@ -111,13 +111,13 @@ namespace Assets.Scripts.UI
             this.OkCancelResult = OkCancel.Cancel;
             Close();
         }
-        
+
         public void OnFieldSelect(int index)
         {
             SetCurrentItem(index);
             var filenameInput = GetFilenameInputbox(index);
 
-            if (isSaving)
+            if (this.isSaving)
             {
                 // Select the input field for this row
                 EventSystem.current.SetSelectedGameObject(filenameInput.gameObject);
@@ -126,7 +126,7 @@ namespace Assets.Scripts.UI
 
         private Transform GetFilenameInputbox(int index)
         {
-            return transform.Find("Filename" + (index + 1));
+            return this.transform.Find("Filename" + (index + 1));
         }
 
         private void Close()
@@ -136,17 +136,17 @@ namespace Assets.Scripts.UI
         }
 
         private void RenderRows()
-        {            
+        {
             for (int i = 0; i < 8; i++)
             {
                 var rowButton = GetRowButton(i);
                 var filenameInput = GetFilenameInputbox(i);
                 var inputField = filenameInput.GetComponent<InputField>();
 
-                inputField.enabled = isSaving;
-                rowButton.interactable = isSaving;
+                inputField.enabled = this.isSaving;
+                rowButton.interactable = this.isSaving;
 
-                if (i < filenames.Length)
+                if (i < this.filenames.Length)
                 {
                     // Existing file for this slot
                     SetSaveName(i, inputField);
@@ -160,12 +160,12 @@ namespace Assets.Scripts.UI
                     inputField.SendMessage("Reset");
                     rowButton.interactable = false;
                 }
-            }            
+            }
         }
 
         private Button GetRowButton(int index)
         {
-            var button = transform.Find("Button" + (index + 1));
+            var button = this.transform.Find("Button" + (index + 1));
             if (button == null)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, "Row not found.");
@@ -180,7 +180,7 @@ namespace Assets.Scripts.UI
 
             try
             {
-                saveName = GetSaveNameFromFile(filenames[i]);
+                saveName = GetSaveNameFromFile(this.filenames[i]);
             }
             catch (Exception ex)
             {
@@ -231,7 +231,7 @@ namespace Assets.Scripts.UI
         private string[] GetSavedFileNames()
         {
             var path = Application.persistentDataPath;
-            var pattern = String.Format(DefaultFilenameFormat, "?");
+            var pattern = String.Format(this.DefaultFilenameFormat, "?");
             return Directory.GetFiles(path, pattern, SearchOption.TopDirectoryOnly);
         }
 

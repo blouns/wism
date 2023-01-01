@@ -38,28 +38,28 @@ namespace Assets.Scripts.Managers
         private CommandController commandController;
         private UnityManager unityManager;
 
-        public ControllerProvider ControllerProvider { get => provider; set => provider = value; }
+        public ControllerProvider ControllerProvider { get => this.provider; set => this.provider = value; }
         public ILoggerFactory LoggerFactory { get; set; }
-        
-        public string WorldName { get => worldName; set => worldName = value; }
-        public string ModPath { get => modPath; set => modPath = value; }
+
+        public string WorldName { get => this.worldName; set => this.worldName = value; }
+        public string ModPath { get => this.modPath; set => this.modPath = value; }
 
         public void Initialize()
         {
             // WISM API Command Controller setup
-            LoggerFactory = new WismLoggerFactory();
+            this.LoggerFactory = new WismLoggerFactory();
             var repo = new WismClientInMemoryRepository(new SortedList<int, Command>());
-            provider = new ControllerProvider()
+            this.provider = new ControllerProvider()
             {
-                ArmyController = new ArmyController(LoggerFactory),
-                CityController = new CityController(LoggerFactory),
-                CommandController = new CommandController(LoggerFactory, repo),
-                GameController = new GameController(LoggerFactory),
-                LocationController = new LocationController(LoggerFactory),
-                HeroController = new HeroController(LoggerFactory),
-                PlayerController = new PlayerController(LoggerFactory)
+                ArmyController = new ArmyController(this.LoggerFactory),
+                CityController = new CityController(this.LoggerFactory),
+                CommandController = new CommandController(this.LoggerFactory, repo),
+                GameController = new GameController(this.LoggerFactory),
+                LocationController = new LocationController(this.LoggerFactory),
+                HeroController = new HeroController(this.LoggerFactory),
+                PlayerController = new PlayerController(this.LoggerFactory)
             };
-            commandController = provider.CommandController;
+            this.commandController = this.provider.CommandController;
         }
 
         public void SelectArmies(List<Army> armies)
@@ -69,26 +69,26 @@ namespace Assets.Scripts.Managers
                 throw new System.ArgumentNullException(nameof(armies));
             }
 
-            commandController.AddCommand(
-                new SelectArmyCommand(provider.ArmyController, armies));
+            this.commandController.AddCommand(
+                new SelectArmyCommand(this.provider.ArmyController, armies));
         }
 
         public void DeselectArmies()
         {
-            commandController.AddCommand(
-                new DeselectArmyCommand(provider.ArmyController, Game.Current.GetSelectedArmies()));
+            this.commandController.AddCommand(
+                new DeselectArmyCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies()));
         }
 
         public void ConscriptArmies(Player player, Tile tile, List<ArmyInfo> armyKinds)
         {
-            commandController.AddCommand(
-                new ConscriptArmiesCommand(provider.PlayerController, player, tile, armyKinds));
+            this.commandController.AddCommand(
+                new ConscriptArmiesCommand(this.provider.PlayerController, player, tile, armyKinds));
         }
 
         public void PrepareForBattle(int x, int y)
         {
-            commandController.AddCommand(
-                new PrepareForBattleCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
+            this.commandController.AddCommand(
+                new PrepareForBattleCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
         }
 
         /// <summary>
@@ -106,47 +106,47 @@ namespace Assets.Scripts.Managers
         {
             PrepareForBattle(x, y);
 
-            var attackCommand = new AttackOnceCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y);
-            commandController.AddCommand(attackCommand);
+            var attackCommand = new AttackOnceCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies(), x, y);
+            this.commandController.AddCommand(attackCommand);
 
-            commandController.AddCommand(
-                new CompleteBattleCommand(provider.ArmyController, attackCommand));
+            this.commandController.AddCommand(
+                new CompleteBattleCommand(this.provider.ArmyController, attackCommand));
         }
 
         public void MoveSelectedArmies(int x, int y)
         {
-            commandController.AddCommand(
-                new MoveOnceCommand(provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
+            this.commandController.AddCommand(
+                new MoveOnceCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies(), x, y));
         }
 
         public void DefendSelectedArmies()
         {
-            commandController.AddCommand(
-                new DefendCommand(provider.ArmyController, Game.Current.GetSelectedArmies()));
+            this.commandController.AddCommand(
+                new DefendCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies()));
         }
 
         public void QuitSelectedArmies()
         {
-            commandController.AddCommand(
-                new QuitArmyCommand(provider.ArmyController, Game.Current.GetSelectedArmies()));
+            this.commandController.AddCommand(
+                new QuitArmyCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies()));
         }
 
         public void SelectNextArmy()
         {
-            commandController.AddCommand(
-                new SelectNextArmyCommand(provider.ArmyController));
+            this.commandController.AddCommand(
+                new SelectNextArmyCommand(this.provider.ArmyController));
         }
 
         public void StartProduction(City productionCity, ArmyInfo armyKind, City destinationCity = null)
         {
-            commandController.AddCommand(
-                new StartProductionCommand(provider.CityController, productionCity, armyKind, destinationCity));
+            this.commandController.AddCommand(
+                new StartProductionCommand(this.provider.CityController, productionCity, armyKind, destinationCity));
         }
 
         public void StopProduction(City productionCity)
         {
-            commandController.AddCommand(
-                new StopProductionCommand(provider.CityController, productionCity));
+            this.commandController.AddCommand(
+                new StopProductionCommand(this.provider.CityController, productionCity));
         }
 
         public void StartTurn()
@@ -167,29 +167,29 @@ namespace Assets.Scripts.Managers
         /// </remarks>
         public void StartTurn(Player player)
         {
-            commandController.AddCommand(
-                new StartTurnCommand(provider.GameController, player));
+            this.commandController.AddCommand(
+                new StartTurnCommand(this.provider.GameController, player));
 
             // Check for and hire any new heros
-            var recruitHeroCommand = new RecruitHeroCommand(provider.PlayerController, player);
-            commandController.AddCommand(
+            var recruitHeroCommand = new RecruitHeroCommand(this.provider.PlayerController, player);
+            this.commandController.AddCommand(
                 recruitHeroCommand);
-            commandController.AddCommand(
-                new HireHeroCommand(provider.PlayerController, recruitHeroCommand));
+            this.commandController.AddCommand(
+                new HireHeroCommand(this.provider.PlayerController, recruitHeroCommand));
 
             // Renew production
-            var reviewProductionCommand = new ReviewProductionCommand(provider.CityController, player);
-            commandController.AddCommand(
+            var reviewProductionCommand = new ReviewProductionCommand(this.provider.CityController, player);
+            this.commandController.AddCommand(
                 reviewProductionCommand);
-            commandController.AddCommand(
-                new RenewProductionCommand(provider.CityController, player, reviewProductionCommand));
+            this.commandController.AddCommand(
+                new RenewProductionCommand(this.provider.CityController, player, reviewProductionCommand));
         }
 
         public void EndTurn()
         {
-            commandController.AddCommand(
-                new EndTurnCommand(provider.GameController, Game.Current.GetCurrentPlayer()));
-            
+            this.commandController.AddCommand(
+                new EndTurnCommand(this.provider.GameController, Game.Current.GetCurrentPlayer()));
+
             // Start the next turn
             StartTurn();
         }
@@ -213,22 +213,22 @@ namespace Assets.Scripts.Managers
             switch (location.Kind)
             {
                 case "Library":
-                    command = new SearchLibraryCommand(provider.LocationController, armies, location);
+                    command = new SearchLibraryCommand(this.provider.LocationController, armies, location);
                     break;
                 case "Ruins":
                 case "Tomb":
-                    command = new SearchRuinsCommand(provider.LocationController, armies, location);
+                    command = new SearchRuinsCommand(this.provider.LocationController, armies, location);
                     break;
                 case "Sage":
-                    command = new SearchSageCommand(provider.LocationController, armies, location);
+                    command = new SearchSageCommand(this.provider.LocationController, armies, location);
                     break;
                 case "Temple":
-                    command = new SearchTempleCommand(provider.LocationController, armies, location);
+                    command = new SearchTempleCommand(this.provider.LocationController, armies, location);
                     break;
                 default:
                     throw new InvalidOperationException("No location to search.");
             }
-            commandController.AddCommand(command);
+            this.commandController.AddCommand(command);
         }
 
         internal void Build()
@@ -247,8 +247,8 @@ namespace Assets.Scripts.Managers
                 return;
             }
 
-            commandController.AddCommand(
-                new BuildCityCommand(provider.CityController, city));
+            this.commandController.AddCommand(
+                new BuildCityCommand(this.provider.CityController, city));
         }
 
         internal void RazeCity()
@@ -264,22 +264,22 @@ namespace Assets.Scripts.Managers
             {
                 NotifyUser("Only cities can only be razed.");
                 return;
-            }            
+            }
 
-            commandController.AddCommand(
-                new RazeCityCommand(provider.CityController, city));
+            this.commandController.AddCommand(
+                new RazeCityCommand(this.provider.CityController, city));
         }
 
         public void TakeItems(Hero hero, List<Artifact> items)
         {
-            commandController.AddCommand(
-                new TakeItemsCommand(provider.HeroController, hero, items));
+            this.commandController.AddCommand(
+                new TakeItemsCommand(this.provider.HeroController, hero, items));
         }
 
         public void DropItems(Hero hero, List<Artifact> items)
         {
-            commandController.AddCommand(
-                new DropItemsCommand(provider.HeroController, hero, items));
+            this.commandController.AddCommand(
+                new DropItemsCommand(this.provider.HeroController, hero, items));
         }
 
         public void NewGame(GameEntity settings)
@@ -287,8 +287,8 @@ namespace Assets.Scripts.Managers
             var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
 
-            commandController.AddCommand(
-                new NewGameCommand(provider.GameController, settings));
+            this.commandController.AddCommand(
+                new NewGameCommand(this.provider.GameController, settings));
 
             // TODO: Clear the persistence snapshots?
         }
@@ -299,8 +299,8 @@ namespace Assets.Scripts.Managers
                 .GetComponent<UnityManager>();
             var snapshot = PersistanceManager.LoadEntities(filename, unityGame);
 
-            commandController.AddCommand(
-                new LoadGameCommand(provider.GameController, snapshot.WismGameEntity));
+            this.commandController.AddCommand(
+                new LoadGameCommand(this.provider.GameController, snapshot.WismGameEntity));
 
             // TODO: Ensure the Unity and Wism snapshots do not get out of sync
             PersistanceManager.SetLastSnapshot(snapshot);
