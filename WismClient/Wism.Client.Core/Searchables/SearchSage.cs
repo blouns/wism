@@ -3,21 +3,18 @@ using Wism.Client.Core;
 
 namespace Wism.Client.MapObjects
 {
-
     public class SearchSage : ISearchable
     {
         private const int MovesToSearch = 4;
 
-        private static readonly SearchSage instance = new SearchSage();
-
-        public static SearchSage Instance => instance;
+        public const int MaxGold = 4000;
+        public const int MinGold = 2000;
 
         private SearchSage()
         {
         }
 
-        public const int MaxGold = 4000;
-        public const int MinGold = 2000;
+        public static SearchSage Instance { get; } = new SearchSage();
 
         public bool CanSearchKind(string kind)
         {
@@ -27,7 +24,7 @@ namespace Wism.Client.MapObjects
         public bool Search(List<Army> armies, Location location, out object result)
         {
             result = null;
-            Army hero = armies.Find(a =>
+            var hero = armies.Find(a =>
                 a is Hero &&
                 a.Tile == location.Tile &&
                 a.MovesRemaining >= MovesToSearch);
@@ -40,7 +37,7 @@ namespace Wism.Client.MapObjects
             // First hero to search gets the gem!
             if (!location.Searched)
             {
-                int gold = Game.Current.Random.Next(MinGold, MaxGold + 1);
+                var gold = Game.Current.Random.Next(MinGold, MaxGold + 1);
                 armies[0].Player.Gold += gold;
                 result = gold;
                 location.Searched = true;

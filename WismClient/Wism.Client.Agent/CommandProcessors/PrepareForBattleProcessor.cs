@@ -8,69 +8,69 @@ using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors
+namespace Wism.Client.Agent.CommandProcessors;
+
+public class PrepareForBattleProcessor : ICommandProcessor
 {
-    public class PrepareForBattleProcessor : ICommandProcessor
+    private readonly AsciiGame asciiGame;
+    private ILogger logger;
+
+    public PrepareForBattleProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
     {
-        private ILogger logger;
-        private readonly AsciiGame asciiGame;
-
-        public PrepareForBattleProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
+        if (loggerFactory is null)
         {
-            if (loggerFactory is null)
-            {
-                throw new ArgumentNullException(nameof(loggerFactory));
-            }
-
-            this.logger = loggerFactory.CreateLogger();
-            this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
+            throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        public bool CanExecute(ICommandAction command)
+        this.logger = loggerFactory.CreateLogger();
+        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
+    }
+
+    public bool CanExecute(ICommandAction command)
+    {
+        return command is PrepareForBattleCommand;
+    }
+
+    public ActionState Execute(ICommandAction command)
+    {
+        var battleCommand = (PrepareForBattleCommand)command;
+        var targetTile = World.Current.Map[battleCommand.X, battleCommand.Y];
+        var attackingPlayer = battleCommand.Armies[0].Player;
+        var attackingArmies = new List<Army>(battleCommand.Armies);
+        attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
+
+        Player defendingPlayer;
+        List<Army> defendingArmies;
+        if (battleCommand.Defenders != null && battleCommand.Defenders.Count > 0)
         {
-            return command is PrepareForBattleCommand;
+            defendingPlayer = battleCommand.Defenders[0].Player;
+            defendingArmies = targetTile.MusterArmy();
+            defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
+        }
+        else
+        {
+            // Attacking an empty city
+            defendingPlayer = targetTile.City.Player;
+            defendingArmies = new List<Army>();
         }
 
-        public ActionState Execute(ICommandAction command)
+        DrawBattleSetupSequence(attackingPlayer, defendingPlayer);
+        BattleProcessor.DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
+
+        this.asciiGame.GameSpeed = GameBase.DefaultAttackSpeed;
+
+        return command.Execute();
+    }
+
+    private static void DrawBattleSetupSequence(Player attacker, Player defender)
+    {
+        Console.Clear();
+        Notify.Information("War! ...in a senseless mind.");
+        Notify.Display($"{attacker.Clan.DisplayName} is attacking {defender.Clan.DisplayName}!");
+        for (var i = 0; i < 3; i++)
         {
-            var battleCommand = (PrepareForBattleCommand)command;
-            var targetTile = World.Current.Map[battleCommand.X, battleCommand.Y];
-            var attackingPlayer = battleCommand.Armies[0].Player;
-            var attackingArmies = new List<Army>(battleCommand.Armies);
-            attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
-
-            Player defendingPlayer;
-            List<Army> defendingArmies;
-            if (battleCommand.Defenders != null && battleCommand.Defenders.Count > 0)
-            {
-                defendingPlayer = battleCommand.Defenders[0].Player;
-                defendingArmies = targetTile.MusterArmy();
-                defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
-            }
-            else
-            {
-                // Attacking an empty city
-                defendingPlayer = targetTile.City.Player;
-                defendingArmies = new List<Army>();
-            }
-            DrawBattleSetupSequence(attackingPlayer, defendingPlayer);
-            BattleProcessor.DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
-
-            this.asciiGame.GameSpeed = AsciiGame.DefaultAttackSpeed;
-
-            return command.Execute();
-        }
-
-        private static void DrawBattleSetupSequence(Player attacker, Player defender)
-        {
-            Console.Clear();
-            Notify.Information("War! ...in a senseless mind.");
-            Notify.Display($"{attacker.Clan.DisplayName} is attacking {defender.Clan.DisplayName}!");
-            for (int i = 0; i < 3; i++)
-            {
-                Console.Beep();
-                Thread.Sleep(750);
-            }
+            Console.Beep();
+            Thread.Sleep(750);
         }
     }
 }

@@ -8,26 +8,25 @@ namespace Wism.Client.Core
 {
     public class World
     {
-        private List<City> cities = new List<City>();
-        private List<Location> locations = new List<Location>();
-        private List<Artifact> looseItems = new List<Artifact>();
+        private static World current;
+        private readonly List<City> cities = new List<City>();
+        private readonly List<Location> locations = new List<Location>();
+        private readonly List<Artifact> looseItems = new List<Artifact>();
 
         public Tile[,] Map { get; protected set; }
 
         public string Name { get; set; }
 
-        private static World current;
-
         public static World Current
         {
             get
             {
-                if (World.current == null)
+                if (current == null)
                 {
                     throw new InvalidOperationException("No current world exists.");
                 }
 
-                return World.current;
+                return current;
             }
         }
 
@@ -43,34 +42,34 @@ namespace Wism.Client.Core
                 throw new ArgumentException($"'{nameof(worldName)}' cannot be null or whitespace", nameof(worldName));
             }
 
-            World oldWorld = World.current;
+            var oldWorld = current;
             try
             {
                 MapBuilder.Initialize(ModFactory.ModPath, worldName);
-                World.current = new World();
-                World.current.Name = worldName;
-                World.current.Reset();
+                current = new World();
+                current.Name = worldName;
+                current.Reset();
             }
             catch
             {
                 Log.WriteLine(Log.TraceLevel.Critical, "Unable to create the default world.");
-                World.current = oldWorld;
+                current = oldWorld;
                 throw;
             }
         }
 
         public static void CreateWorld(Tile[,] map)
         {
-            World oldWorld = World.current;
+            var oldWorld = current;
             try
             {
-                World.current = new World();
-                World.current.Reset(map);
+                current = new World();
+                current.Reset(map);
             }
             catch
             {
                 Log.WriteLine(Log.TraceLevel.Critical, "Unable to create the world from the given map.");
-                World.current = oldWorld;
+                current = oldWorld;
                 throw;
             }
         }
@@ -93,20 +92,20 @@ namespace Wism.Client.Core
                 throw new ArgumentException($"{city} already exists in the world.");
             }
 
-            int x = tile.X;
-            int y = tile.Y;
+            var x = tile.X;
+            var y = tile.Y;
 
             // Add to map at top-left tile (4x4 grid)
-            city.Tile = World.Current.Map[x, y];
-            var tiles = new Tile[]
+            city.Tile = Current.Map[x, y];
+            var tiles = new[]
             {
-                World.Current.Map[x,y],
-                World.Current.Map[x,y-1],
-                World.Current.Map[x+1,y],
-                World.Current.Map[x+1,y-1]
+                Current.Map[x, y],
+                Current.Map[x, y - 1],
+                Current.Map[x + 1, y],
+                Current.Map[x + 1, y - 1]
             };
 
-            for (int i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 tiles[i].City = city;
                 tiles[i].Terrain = MapBuilder.TerrainKinds["Castle"];
@@ -160,7 +159,7 @@ namespace Wism.Client.Core
 
             // Add loose item for tracking
             this.looseItems.Add(item);
-        }       
+        }
 
         public List<City> GetCities()
         {
@@ -176,7 +175,7 @@ namespace Wism.Client.Core
 
             return this.cities.Find(c => c.ShortName == shortName);
         }
-       
+
         public List<Location> GetLocations()
         {
             return new List<Location>(this.locations);
@@ -201,7 +200,7 @@ namespace Wism.Client.Core
 
             if (this.looseItems.Contains(artifact))
             {
-                this.looseItems.Remove(artifact);                
+                this.looseItems.Remove(artifact);
             }
         }
 
@@ -210,13 +209,13 @@ namespace Wism.Client.Core
             // Factory reset
             ArmyFactory.LastId = 0;
 
-            Tile[,] map = MapBuilder.CreateDefaultMap();
-            Reset(map);
+            var map = MapBuilder.CreateDefaultMap();
+            this.Reset(map);
         }
 
         public void Reset(Tile[,] map)
         {
-            Validate(map);
+            this.Validate(map);
             this.Map = map;
         }
 
@@ -227,40 +226,42 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(map));
             }
 
-            for (int x = 0; x < map.GetLength(0); x++)
+            for (var x = 0; x < map.GetLength(0); x++)
             {
-                for (int y = 0; y < map.GetLength(1); y++)
+                for (var y = 0; y < map.GetLength(1); y++)
                 {
                     if (map[x, y] == null)
                     {
                         throw new ArgumentException(
-                            String.Format("Map tile is null at ({0}, {1})", x, y));
+                            string.Format("Map tile is null at ({0}, {1})", x, y));
                     }
 
                     if (!(map[x, y] is Tile))
                     {
                         throw new ArgumentException(
-                            String.Format("Map contains element not of type Tile at ({0}, {1})", x, y));
+                            string.Format("Map contains element not of type Tile at ({0}, {1})", x, y));
                     }
 
                     if (map[x, y].Terrain == null)
                     {
                         throw new ArgumentException(
-                            String.Format("Map contains null Terrain at ({0}, {1})", x, y));
+                            string.Format("Map contains null Terrain at ({0}, {1})", x, y));
                     }
 
                     if (!MapBuilder.TerrainKinds.ContainsKey(map[x, y].Terrain.ShortName))
                     {
                         throw new ArgumentException(
-                            String.Format("Map contains unknown Terrain '{2}' at ({0}, {1})", x, y, map[x, y].Terrain.ShortName));
+                            string.Format("Map contains unknown Terrain '{2}' at ({0}, {1})", x, y,
+                                map[x, y].Terrain.ShortName));
                     }
 
                     // Valid units; units are optional
-                    if ((map[x, y].HasArmies()) &&
-                        (!MapBuilder.ArmyKinds.ContainsKey(map[x, y].Armies[0].ShortName)))
+                    if (map[x, y].HasArmies() &&
+                        !MapBuilder.ArmyKinds.ContainsKey(map[x, y].Armies[0].ShortName))
                     {
                         throw new ArgumentException(
-                            String.Format("Map tile contains unknown Army type '{2}' at ({0}, {1})", x, y, map[x, y].Armies[0].ShortName));
+                            string.Format("Map tile contains unknown Army type '{2}' at ({0}, {1})", x, y,
+                                map[x, y].Armies[0].ShortName));
                     }
                 }
             }

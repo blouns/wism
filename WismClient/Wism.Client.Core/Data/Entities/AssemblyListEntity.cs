@@ -5,7 +5,6 @@ namespace Wism.Client.Entities
     [DataContract]
     public class AssemblyListEntity
     {
-        [DataMember]
-        public AssemblyEntity[] Strategies { get; set; }
+        [DataMember] public AssemblyEntity[] Strategies { get; set; }
     }
 }

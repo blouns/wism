@@ -9,7 +9,7 @@ namespace Wism.Client.Core.Armies.MovementStrategies
         {
             var armiesThatMatter = new List<Army>();
 
-            foreach (Army army in armiesToMove)
+            foreach (var army in armiesToMove)
             {
                 if (army.CanFly)
                 {
@@ -22,8 +22,8 @@ namespace Wism.Client.Core.Armies.MovementStrategies
 
         public bool IsRelevant(List<Army> armiesToMove, Tile nextTile)
         {
-            bool hasFlying = false;
-            bool hasHero = false;
+            var hasFlying = false;
+            var hasHero = false;
 
             foreach (var army in armiesToMove)
             {

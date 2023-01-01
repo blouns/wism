@@ -1,11 +1,10 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Heros;
@@ -13,14 +12,8 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Modules
 {
-
     public static class ModFactory
     {
-        private static string modPath = "mod";
-        private static string worldsPath = "worlds";
-        private static string worldPath = "Illuria";
-        private static string herosPath = "hero.json";
-
         // Module info
         private static IList<ArmyInfo> armyInfos;
         private static IList<TerrainInfo> terrainInfos;
@@ -33,33 +26,34 @@ namespace Wism.Client.Modules
         private static IList<string> heroNames;
         private static IRecruitHeroStrategy recruitHeroStrategy;
 
-        public static string ModPath { get => modPath; set => modPath = value; }
-        public static string WorldPath { get => worldPath; set => worldPath = value; }
-        public static string WorldsPath { get => worldsPath; set => worldsPath = value; }
-        public static string HeroPath { get => herosPath; set => herosPath = value; }
+        public static string ModPath { get; set; } = "mod";
+        public static string WorldPath { get; set; } = "Illuria";
+        public static string WorldsPath { get; set; } = "worlds";
+        public static string HeroPath { get; set; } = "hero.json";
 
         public static IList<T> LoadModFiles<T>(string path)
         {
             // Load JSON file containing mod object array
             object obj;
-            using (FileStream ms = File.OpenRead(path))
+            using (var ms = File.OpenRead(path))
             {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T[]));
+                var serializer = new DataContractJsonSerializer(typeof(T[]));
                 obj = serializer.ReadObject(ms);
             }
 
             // Convert to T array
-            T[] infos = obj as T[];
+            var infos = obj as T[];
             if (infos == null || infos.Length == 0)
             {
-                Log.WriteLine(Log.TraceLevel.Critical, "Could not load mod file as '{0}' from '{1}'", infos.GetType(), path);
+                Log.WriteLine(Log.TraceLevel.Critical, "Could not load mod file as '{0}' from '{1}'", infos.GetType(),
+                    path);
             }
 
-            return infos.ToList<T>();
+            return infos.ToList();
         }
 
         /// <summary>
-        /// Load the hero recruiting strategy.
+        ///     Load the hero recruiting strategy.
         /// </summary>
         /// <returns>Recruiting strategy for heros</returns>
         public static IRecruitHeroStrategy LoadRecruitHeroStrategy(string path)
@@ -69,9 +63,9 @@ namespace Wism.Client.Modules
                 // Load JSON file containing strategy info
                 string assemblyName;
                 string typeName;
-                using (StreamReader reader = File.OpenText(path))
+                using (var reader = File.OpenText(path))
                 {
-                    JObject jObj = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+                    var jObj = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
                     assemblyName = (string)jObj["RecruitingStrategy"]["AssemblyName"];
                     typeName = (string)jObj["RecruitingStrategy"]["TypeName"];
                 }
@@ -84,7 +78,7 @@ namespace Wism.Client.Modules
         }
 
         /// <summary>
-        /// Load the hero names.
+        ///     Load the hero names.
         /// </summary>
         /// <returns>List of hero names</returns>
         public static IList<string> LoadHeroNames(string path)
@@ -92,9 +86,9 @@ namespace Wism.Client.Modules
             if (heroNames == null)
             {
                 // Load JSON file containing hero names
-                using (StreamReader reader = File.OpenText(path))
+                using (var reader = File.OpenText(path))
                 {
-                    JObject jObj = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+                    var jObj = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
                     var names = (JArray)jObj["HeroNames"];
                     heroNames = names.Select(name => (string)name).ToList();
                 }
@@ -105,11 +99,13 @@ namespace Wism.Client.Modules
 
         public static ClanInfo FindClanInfo(string shortName)
         {
-            IList<ClanInfo> infos = LoadClanInfos(ModPath);
-            foreach (ClanInfo info in infos)
+            var infos = LoadClanInfos(ModPath);
+            foreach (var info in infos)
             {
                 if (info.ShortName == shortName)
+                {
                     return info;
+                }
             }
 
             return null; // ID not found
@@ -119,8 +115,8 @@ namespace Wism.Client.Modules
         {
             IList<Artifact> locations = new List<Artifact>();
 
-            IList<ArtifactInfo> infos = LoadArtifactInfos(path);
-            foreach (ArtifactInfo info in infos)
+            var infos = LoadArtifactInfos(path);
+            foreach (var info in infos)
             {
                 locations.Add(Artifact.Create(info));
             }
@@ -132,8 +128,8 @@ namespace Wism.Client.Modules
         {
             IList<Location> locations = new List<Location>();
 
-            IList<LocationInfo> infos = LoadLocationInfos(path);
-            foreach (LocationInfo info in infos)
+            var infos = LoadLocationInfos(path);
+            foreach (var info in infos)
             {
                 locations.Add(Location.Create(info));
             }
@@ -145,8 +141,8 @@ namespace Wism.Client.Modules
         {
             IList<City> cities = new List<City>();
 
-            IList<CityInfo> infos = LoadCityInfos(path);
-            foreach (CityInfo info in infos)
+            var infos = LoadCityInfos(path);
+            foreach (var info in infos)
             {
                 cities.Add(City.Create(info));
             }
@@ -156,25 +152,26 @@ namespace Wism.Client.Modules
 
         public static IList<Clan> LoadClans(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, ClanInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, ClanInfo.FileName);
             clanInfos = LoadModFiles<ClanInfo>(filePath);
 
-            IList<Clan> Clans = new List<Clan>();
-            foreach (ClanInfo ci in clanInfos)
+            var clans = new List<Clan>();
+            foreach (var ci in clanInfos)
             {
-                Clan Clan = Clan.Create(ci);
-                IList<ClanTerrainModifierInfo> terrainModifiers = LoadClanTerrainMappingInfos(path);
-                foreach (ClanTerrainModifierInfo modifier in terrainModifiers)
+                var clan = Clan.Create(ci);
+                var terrainModifiers = LoadClanTerrainMappingInfos(path);
+                foreach (var modifier in terrainModifiers)
                 {
-                    if (modifier.ClanName == Clan.ShortName)
+                    if (modifier.ClanName == clan.ShortName)
                     {
-                        Clan.AddTerrainModifier(modifier);
+                        clan.AddTerrainModifier(modifier);
                     }
                 }
-                Clans.Add(Clan);
+
+                clans.Add(clan);
             }
 
-            return Clans;
+            return clans;
         }
 
         public static List<ArmyInfo> FindSpecialArmyInfos()
@@ -184,11 +181,13 @@ namespace Wism.Client.Modules
 
         public static ArmyInfo FindArmyInfo(string shortName)
         {
-            IList<ArmyInfo> infos = LoadArmyInfos(ModPath);
-            foreach (ArmyInfo info in infos)
+            var infos = LoadArmyInfos(ModPath);
+            foreach (var info in infos)
             {
                 if (info.ShortName == shortName)
+                {
                     return info;
+                }
             }
 
             return null; // ID not found
@@ -196,11 +195,13 @@ namespace Wism.Client.Modules
 
         public static TerrainInfo FindTerrainInfo(string shortName)
         {
-            IList<TerrainInfo> infos = LoadTerrainInfos(ModPath);
-            foreach (TerrainInfo info in infos)
+            var infos = LoadTerrainInfos(ModPath);
+            foreach (var info in infos)
             {
                 if (info.ShortName == shortName)
+                {
                     return info;
+                }
             }
 
             return null; // ID not found
@@ -208,11 +209,13 @@ namespace Wism.Client.Modules
 
         public static CityInfo FindCityInfo(string shortName)
         {
-            IList<CityInfo> infos = LoadCityInfos(ModPath);
-            foreach (CityInfo info in infos)
+            var infos = LoadCityInfos(ModPath);
+            foreach (var info in infos)
             {
                 if (info.ShortName == shortName)
+                {
                     return info;
+                }
             }
 
             return null; // ID not found
@@ -220,11 +223,13 @@ namespace Wism.Client.Modules
 
         public static LocationInfo FindLocationInfo(string shortName)
         {
-            IList<LocationInfo> infos = LoadLocationInfos(ModPath);
-            foreach (LocationInfo info in infos)
+            var infos = LoadLocationInfos(ModPath);
+            foreach (var info in infos)
             {
                 if (info.ShortName == shortName)
+                {
                     return info;
+                }
             }
 
             return null; // ID not found
@@ -232,11 +237,13 @@ namespace Wism.Client.Modules
 
         public static ArtifactInfo FindArtifactInfo(string shortName)
         {
-            IList<ArtifactInfo> infos = LoadArtifactInfos(ModPath);
-            foreach (ArtifactInfo info in infos)
+            var infos = LoadArtifactInfos(ModPath);
+            foreach (var info in infos)
             {
                 if (info.ShortName == shortName)
+                {
                     return info;
+                }
             }
 
             return null; // ID not found
@@ -246,8 +253,8 @@ namespace Wism.Client.Modules
         {
             IList<ClanTerrainModifierInfo> terrainModifiers = new List<ClanTerrainModifierInfo>();
 
-            IList<ClanTerrainModifierInfo> infos = LoadClanTerrainMappingInfos(ModPath);
-            foreach (ClanTerrainModifierInfo info in infos)
+            var infos = LoadClanTerrainMappingInfos(ModPath);
+            foreach (var info in infos)
             {
                 if (info.ClanName == clanName)
                 {
@@ -262,8 +269,8 @@ namespace Wism.Client.Modules
         {
             IList<Army> armies = new List<Army>();
 
-            IList<ArmyInfo> infos = LoadArmyInfos(path);
-            foreach (ArmyInfo info in infos)
+            var infos = LoadArmyInfos(path);
+            foreach (var info in infos)
             {
                 armies.Add(ArmyFactory.CreateArmy(info));
             }
@@ -273,7 +280,7 @@ namespace Wism.Client.Modules
 
         public static IList<ArmyInfo> LoadArmyInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, ArmyInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, ArmyInfo.FileName);
             if (armyInfos == null)
             {
                 armyInfos = LoadModFiles<ArmyInfo>(filePath);
@@ -284,7 +291,7 @@ namespace Wism.Client.Modules
 
         public static IList<ClanInfo> LoadClanInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, ClanInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, ClanInfo.FileName);
             if (clanInfos == null)
             {
                 clanInfos = LoadModFiles<ClanInfo>(filePath);
@@ -295,7 +302,7 @@ namespace Wism.Client.Modules
 
         public static IList<TerrainInfo> LoadTerrainInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, TerrainInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, TerrainInfo.FileName);
             if (terrainInfos == null)
             {
                 terrainInfos = LoadModFiles<TerrainInfo>(filePath);
@@ -306,11 +313,11 @@ namespace Wism.Client.Modules
 
         public static IList<Terrain> LoadTerrains(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, TerrainInfo.FileName);
-            IList<Terrain> terrains = new List<Terrain>();
+            var filePath = $@"{path}\{TerrainInfo.FileName}";
+            var terrains = new List<Terrain>();
 
-            IList<TerrainInfo> modInfos = LoadModFiles<TerrainInfo>(filePath);
-            foreach (TerrainInfo info in modInfos)
+            var modInfos = LoadModFiles<TerrainInfo>(filePath);
+            foreach (var info in modInfos)
             {
                 terrains.Add(Terrain.Create(info));
             }
@@ -320,7 +327,7 @@ namespace Wism.Client.Modules
 
         public static IList<ClanTerrainModifierInfo> LoadClanTerrainMappingInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, ClanTerrainModifierInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, ClanTerrainModifierInfo.FileName);
             if (clanTerrainMappingInfos == null)
             {
                 clanTerrainMappingInfos = LoadModFiles<ClanTerrainModifierInfo>(filePath);
@@ -331,7 +338,7 @@ namespace Wism.Client.Modules
 
         public static IList<CityInfo> LoadCityInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, CityInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, CityInfo.FileName);
             cityInfos = LoadModFiles<CityInfo>(filePath);
 
             return cityInfos;
@@ -339,7 +346,7 @@ namespace Wism.Client.Modules
 
         public static IList<LocationInfo> LoadLocationInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, LocationInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, LocationInfo.FileName);
             locationInfos = LoadModFiles<LocationInfo>(filePath);
 
             return locationInfos;
@@ -347,7 +354,7 @@ namespace Wism.Client.Modules
 
         private static IList<ArtifactInfo> LoadArtifactInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, ArtifactInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, ArtifactInfo.FileName);
             artifactInfos = LoadModFiles<ArtifactInfo>(filePath);
 
             return artifactInfos;

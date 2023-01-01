@@ -7,22 +7,16 @@ namespace Wism.Client.Modules
     {
         public static readonly string FileName = "Terrain.json";
 
-        [DataMember]
-        public string DisplayName { get; set; } = "Void";
+        [DataMember] public int Movement = 99;
 
-        [DataMember]
-        public string ShortName { get; set; } = "V";
+        [DataMember] public string DisplayName { get; set; } = "Void";
 
-        [DataMember]
-        public bool AllowFlight { get; set; } = false;
+        [DataMember] public string ShortName { get; set; } = "V";
 
-        [DataMember]
-        public bool AllowFloat { get; set; } = false;
+        [DataMember] public bool AllowFlight { get; set; }
 
-        [DataMember]
-        public bool AllowWalk { get; set; } = false;
+        [DataMember] public bool AllowFloat { get; set; }
 
-        [DataMember]
-        public int Movement = 99;
+        [DataMember] public bool AllowWalk { get; set; }
     }
 }

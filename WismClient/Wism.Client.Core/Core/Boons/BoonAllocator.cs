@@ -11,13 +11,8 @@ namespace Wism.Client.Core
         private const float DefaultArtifactPercent = 0.6f;
         private const float DefaultThronePercent = 0.05f;
         private const float DefaultGoldPercent = 0.05f;
-        readonly List<IBoon> boonLibrary = new List<IBoon>();
-        int[] boonOrder;
-
-        public float AlliesPercent { get; set; }
-        public float ArtifactPercent { get; set; }
-        public float ThronePercent { get; set; }
-        public float GoldPercent { get; set; }
+        private readonly List<IBoon> boonLibrary = new List<IBoon>();
+        private int[] boonOrder;
 
         public BoonAllocator()
         {
@@ -28,25 +23,30 @@ namespace Wism.Client.Core
             this.GoldPercent = DefaultGoldPercent;
         }
 
+        public float AlliesPercent { get; set; }
+        public float ArtifactPercent { get; set; }
+        public float ThronePercent { get; set; }
+        public float GoldPercent { get; set; }
+
         /// <summary>
-        /// Allocate boons to all locations that support boons.
+        ///     Allocate boons to all locations that support boons.
         /// </summary>
         /// <remarks>
-        /// Allocations based off percentages defined, but may be scaled up or down 
-        /// to fit the number of locations in need of boons.
+        ///     Allocations based off percentages defined, but may be scaled up or down
+        ///     to fit the number of locations in need of boons.
         /// </remarks>
         public void Allocate(List<Location> worldLocations)
         {
             //ValidateAllocationPercentages();
 
-            List<Location> locations = GetLocationsToAllocate(worldLocations);
-            BuildBoonLibrary(ModFactory.ModPath, locations.Count);
-            RandomizeBoons();
-            AllocateInternal(locations);
+            var locations = GetLocationsToAllocate(worldLocations);
+            this.BuildBoonLibrary(ModFactory.ModPath, locations.Count);
+            this.RandomizeBoons();
+            this.AllocateInternal(locations);
         }
 
         /// <summary>
-        /// Filter the locations to those that support boons
+        ///     Filter the locations to those that support boons
         /// </summary>
         /// <param name="worldPath">World path to artifacts</param>
         /// <returns></returns>
@@ -57,13 +57,13 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Validate that the allocations add up to 100%
+        ///     Validate that the allocations add up to 100%
         /// </summary>
         private void ValidateAllocationPercentages()
         {
-            if ((this.AlliesPercent + this.ArtifactPercent + this.ThronePercent + this.GoldPercent) > 1f)
+            if (this.AlliesPercent + this.ArtifactPercent + this.ThronePercent + this.GoldPercent > 1f)
             {
-                throw new InvalidOperationException(String.Format(
+                throw new InvalidOperationException(string.Format(
                     "Allocations must equal 100%: Allies: {0}%, Artifact: {1}%, Throne: {2}%, Gold: {3}%",
                     this.AlliesPercent * 100f,
                     this.ArtifactPercent * 100f,
@@ -73,23 +73,23 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Randomize the order for boon selection
+        ///     Randomize the order for boon selection
         /// </summary>
         private void RandomizeBoons()
         {
             var boonPool = new List<IBoon>(this.boonLibrary);
             var random = Game.Current.Random;
             this.boonOrder = new int[this.boonLibrary.Count];
-            for (int i = 0; i < this.boonLibrary.Count; i++)
+            for (var i = 0; i < this.boonLibrary.Count; i++)
             {
-                int index = random.Next(0, boonPool.Count);
+                var index = random.Next(0, boonPool.Count);
                 this.boonOrder[i] = this.boonLibrary.IndexOf(boonPool[index]);
                 boonPool.RemoveAt(index);
             }
         }
 
         /// <summary>
-        /// Build the library of boons to allocate
+        ///     Build the library of boons to allocate
         /// </summary>
         /// <param name="modPath">Mode path</param>
         /// <param name="boonCount">Total boons to create</param>
@@ -97,17 +97,18 @@ namespace Wism.Client.Core
         {
             var artifacts = ModFactory.LoadArtifacts(modPath);
             float artifactActual, alliesActual, throneActual, goldActual;
-            CalculateActualAllocationPercent(boonCount, artifacts, out artifactActual, out alliesActual, out throneActual, out goldActual);
+            this.CalculateActualAllocationPercent(boonCount, artifacts, out artifactActual, out alliesActual,
+                out throneActual, out goldActual);
 
-            AddArtifacts(artifacts, boonCount, artifactActual);
-            AddAllies(boonCount, alliesActual);
-            AddGold(boonCount, goldActual);
-            AddThrone(boonCount, throneActual);
+            this.AddArtifacts(artifacts, boonCount, artifactActual);
+            this.AddAllies(boonCount, alliesActual);
+            this.AddGold(boonCount, goldActual);
+            this.AddThrone(boonCount, throneActual);
         }
 
         /// <summary>
-        /// Calculate needed allocations for non-artifacts based on number of artifacts.
-        /// If too few artifacts then scale up other boons accordingly.
+        ///     Calculate needed allocations for non-artifacts based on number of artifacts.
+        ///     If too few artifacts then scale up other boons accordingly.
         /// </summary>
         /// <param name="boonCount">Total boons needed</param>
         /// <param name="artifacts">Artifacts available</param>
@@ -115,17 +116,18 @@ namespace Wism.Client.Core
         /// <param name="alliesActual">Actual % of allies boons</param>
         /// <param name="throneActual">Actual % of throne boons</param>
         /// <param name="goldActual">Actual % of gold boons</param>
-        private void CalculateActualAllocationPercent(int boonCount, IList<Artifact> artifacts, out float artifactActual, out float alliesActual, out float throneActual, out float goldActual)
+        private void CalculateActualAllocationPercent(int boonCount, IList<Artifact> artifacts,
+            out float artifactActual, out float alliesActual, out float throneActual, out float goldActual)
         {
-            float artifactsPerBoon = ((float)artifacts.Count) / ((float)boonCount);
-            artifactActual = (artifactsPerBoon > this.ArtifactPercent) ? this.ArtifactPercent : artifactsPerBoon;
+            var artifactsPerBoon = artifacts.Count / (float)boonCount;
+            artifactActual = artifactsPerBoon > this.ArtifactPercent ? this.ArtifactPercent : artifactsPerBoon;
 
             if (artifactActual < this.ArtifactPercent)
             {
-                float artifactPercentDelta = (this.ArtifactPercent - artifactActual) / artifactActual;
-                alliesActual = (artifactPercentDelta * this.AlliesPercent) + this.AlliesPercent;
-                throneActual = (artifactPercentDelta * this.ThronePercent) + this.ThronePercent;
-                goldActual = (artifactPercentDelta * this.GoldPercent) + this.GoldPercent;
+                var artifactPercentDelta = (this.ArtifactPercent - artifactActual) / artifactActual;
+                alliesActual = artifactPercentDelta * this.AlliesPercent + this.AlliesPercent;
+                throneActual = artifactPercentDelta * this.ThronePercent + this.ThronePercent;
+                goldActual = artifactPercentDelta * this.GoldPercent + this.GoldPercent;
             }
             else
             {
@@ -137,40 +139,40 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Add % of Throne boons
+        ///     Add % of Throne boons
         /// </summary>
         /// <param name="boonCount">Total boons</param>
         /// <param name="throneActual">% of Throne boons desired</param>
         private void AddThrone(int boonCount, float throneActual)
         {
-            for (int i = 0; i < boonCount * throneActual; i++)
+            for (var i = 0; i < boonCount * throneActual; i++)
             {
                 this.boonLibrary.Add(new ThroneBoon());
             }
         }
 
         /// <summary>
-        /// Add % of Gold boons
+        ///     Add % of Gold boons
         /// </summary>
         /// <param name="boonCount">Total boons</param>
         /// <param name="goldActual">% of Gold boons desired</param>
         private void AddGold(int boonCount, float goldActual)
         {
-            for (int i = 0; i < boonCount * goldActual; i++)
+            for (var i = 0; i < boonCount * goldActual; i++)
             {
                 this.boonLibrary.Add(new GoldBoon());
             }
         }
 
         /// <summary>
-        /// Add % of Allies across random set of special armies
+        ///     Add % of Allies across random set of special armies
         /// </summary>
         /// <param name="boonCount">Total boons</param>
         /// <param name="alliesActual">% of Allies boons desired</param>
         private void AddAllies(int boonCount, float alliesActual)
         {
-            List<ArmyInfo> allies = GetSpecialAllies();
-            for (int i = 0; i < boonCount * alliesActual; i++)
+            var allies = GetSpecialAllies();
+            for (var i = 0; i < boonCount * alliesActual; i++)
             {
                 var armyInfo = allies[Game.Current.Random.Next(0, allies.Count)];
                 this.boonLibrary.Add(new AlliesBoon(armyInfo));
@@ -178,7 +180,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Add % of artifact boons. Scale down if too many.
+        ///     Add % of artifact boons. Scale down if too many.
         /// </summary>
         /// <param name="artifacts">List of Artifacts to add</param>
         /// <param name="artifactActual">% of Artifacts desired</param>
@@ -188,17 +190,17 @@ namespace Wism.Client.Core
             {
                 // If too many artifacts then pick a random set that fits
                 var artifactPool = new List<Artifact>(artifacts);
-                int artifactFitCount = (int)(boonCount * this.ArtifactPercent);
+                var artifactFitCount = (int)(boonCount * this.ArtifactPercent);
                 var artifactOrder = new int[artifactFitCount];
-                for (int i = 0; i < artifactFitCount; i++)
+                for (var i = 0; i < artifactFitCount; i++)
                 {
-                    int index = Game.Current.Random.Next(0, artifactPool.Count);
+                    var index = Game.Current.Random.Next(0, artifactPool.Count);
                     artifactOrder[i] = artifacts.IndexOf(artifactPool[index]);
                     artifactPool.RemoveAt(index);
                 }
 
                 // Add to the library in random order
-                for (int i = 0; i < artifactFitCount; i++)
+                for (var i = 0; i < artifactFitCount; i++)
                 {
                     var randomArtifact = artifacts[artifactOrder[i]];
                     this.boonLibrary.Add(new ArtifactBoon(randomArtifact));
@@ -215,7 +217,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Get a list of the ArmyInfos to include in the AlliesBoon
+        ///     Get a list of the ArmyInfos to include in the AlliesBoon
         /// </summary>
         /// <returns>Ally list</returns>
         private static List<ArmyInfo> GetSpecialAllies()
@@ -234,30 +236,30 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Allocate the boons across the locations
+        ///     Allocate the boons across the locations
         /// </summary>
         /// <param name="locations">Locations to allocate boons into</param>
         private void AllocateInternal(IList<Location> locations)
         {
-            for (int i = 0; i < locations.Count; i++)
+            for (var i = 0; i < locations.Count; i++)
             {
                 // Assign a random boon
                 locations[i].Boon = this.boonLibrary[this.boonOrder[i]];
 
                 if (locations[i].Boon.IsDefended)
                 {
-                    locations[i].Monster = GetRandomMonster();
+                    locations[i].Monster = this.GetRandomMonster();
                 }
             }
         }
 
         /// <summary>
-        /// Select a random monster
+        ///     Select a random monster
         /// </summary>
         /// <returns>Monster name</returns>
         private string GetRandomMonster()
         {
-            var monsters = new string[]
+            var monsters = new[]
             {
                 "Ghost",
                 "Dragon",

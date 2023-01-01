@@ -6,13 +6,13 @@ using Wism.Client.Modules;
 namespace Wism.Client.Core.Armies
 {
     /// <summary>
-    /// Allows boarding a boat and traversal at sea while on a boat.
+    ///     Allows boarding a boat and traversal at sea while on a boat.
     /// </summary>
     public class NavalTraversalStrategy : ITraversalStrategy
     {
         /// <summary>
-        /// Check if the armies have a boat or if they are moving onto a boat.
-        /// If so then check if the terrain supports
+        ///     Check if the armies have a boat or if they are moving onto a boat.
+        ///     If so then check if the terrain supports
         /// </summary>
         /// <param name="armies"></param>
         /// <param name="tile"></param>
@@ -40,16 +40,16 @@ namespace Wism.Client.Core.Armies
             var armyHasNavy = armies.Find(a => a.Info.CanFloat) != null;
 
             // Or the target must have Navy of same clan
-            var targetHasNavy = (tile.HasArmies() &&
-                 (tile.Armies[0].Clan == armies[0].Clan || ignoreClan) &&
-                 tile.Armies.Find(a => a.CanFloat) != null);
+            var targetHasNavy = tile.HasArmies() &&
+                                (tile.Armies[0].Clan == armies[0].Clan || ignoreClan) &&
+                                tile.Armies.Find(a => a.CanFloat) != null;
 
 
             return armyHasNavy || targetHasNavy;
         }
 
         public bool CanTraverse(Clan clan, ArmyInfo armyInfo, Tile tile, bool ignoreClan = false)
-        { 
+        {
             if (armyInfo is null)
             {
                 throw new ArgumentNullException(nameof(armyInfo));
@@ -67,11 +67,11 @@ namespace Wism.Client.Core.Armies
             }
 
             var targetHasNavy =
-                (tile.HasArmies() &&
-                 (tile.Armies[0].Clan == clan && !ignoreClan) &&
-                 tile.Armies.Find(a => a.CanFloat) != null);
+                tile.HasArmies() &&
+                tile.Armies[0].Clan == clan && !ignoreClan &&
+                tile.Armies.Find(a => a.CanFloat) != null;
 
-            return (armyInfo.CanFloat || targetHasNavy);
+            return armyInfo.CanFloat || targetHasNavy;
         }
     }
 }

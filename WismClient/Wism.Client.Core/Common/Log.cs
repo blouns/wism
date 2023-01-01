@@ -5,15 +5,15 @@ namespace Wism.Client.Common
 {
     public static class Log
     {
-        private static readonly string logFile = @"logs\wism_" + Guid.NewGuid();
-
-        public enum TraceLevel : int
+        public enum TraceLevel
         {
             Information = 0,
             Warning,
             Error,
             Critical
         }
+
+        private static readonly string logFile = @"logs\wism_" + Guid.NewGuid();
 
         static Log()
         {
@@ -30,10 +30,10 @@ namespace Wism.Client.Common
         {
             // Log always for now
             Trace.WriteLine(
-                String.Format("{0}, {1}, \"{2}\"",
+                string.Format("{0}, {1}, \"{2}\"",
                     DateTime.Now.ToShortTimeString(),
                     level.ToString(),
-                    String.Format(message, args)));
+                    string.Format(message, args)));
         }
     }
 }

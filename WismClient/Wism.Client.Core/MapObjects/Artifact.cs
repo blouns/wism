@@ -16,11 +16,11 @@ namespace Wism.Client.MapObjects
 
         public ArtifactInfo Info { get; set; }
 
-        public int CombatBonus { get => this.Info.CombatBonus; }
+        public int CombatBonus => this.Info.CombatBonus;
 
-        public int CommandBonus { get => this.Info.CommandBonus; }
+        public int CommandBonus => this.Info.CommandBonus;
 
-        public string CompanionInteraction { get => this.Info.Interaction; }
+        public string CompanionInteraction => this.Info.Interaction;
 
         public void Drop(Hero hero)
         {
@@ -31,7 +31,7 @@ namespace Wism.Client.MapObjects
 
             var tile = hero.Tile;
             tile.Items.Add(this);
-            
+
             // Add for tracking
             World.Current.AddLooseItem(this, tile);
         }
@@ -50,6 +50,7 @@ namespace Wism.Client.MapObjects
                 {
                     hero.Items = new List<Artifact>();
                 }
+
                 hero.Items.Add(this);
                 hero.Tile.RemoveItem(this);
 

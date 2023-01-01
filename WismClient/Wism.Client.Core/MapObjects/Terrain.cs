@@ -1,4 +1,5 @@
-﻿using Wism.Client.Modules;
+﻿using System;
+using Wism.Client.Modules;
 
 namespace Wism.Client.MapObjects
 {
@@ -6,9 +7,17 @@ namespace Wism.Client.MapObjects
     {
         private TerrainInfo info;
 
+        private Terrain(TerrainInfo info)
+        {
+            this.info = info ?? throw new ArgumentNullException(nameof(info));
+            this.MovementCost = info.Movement;
+            this.DisplayName = info.DisplayName;
+        }
+
         public int MovementCost { get; set; }
 
-        public override string ShortName { get => this.Info.ShortName; }
+        public override string ShortName => this.Info.ShortName;
+
         public TerrainInfo Info
         {
             get
@@ -17,15 +26,9 @@ namespace Wism.Client.MapObjects
                 {
                     this.info = MapBuilder.FindTerrainInfo(this.ShortName);
                 }
+
                 return this.info;
             }
-        }
-
-        private Terrain(TerrainInfo info)
-        {
-            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
-            this.MovementCost = info.Movement;
-            this.DisplayName = info.DisplayName;
         }
 
         public static Terrain Create(TerrainInfo info)
@@ -35,9 +38,9 @@ namespace Wism.Client.MapObjects
 
         public bool CanTraverse(bool canWalk, bool canFloat, bool canFly)
         {
-            return ((canWalk && this.Info.AllowWalk) ||
-                    (canFloat && this.Info.AllowFloat) ||
-                    (canFly && this.Info.AllowFlight));
+            return (canWalk && this.Info.AllowWalk) ||
+                   (canFloat && this.Info.AllowFloat) ||
+                   (canFly && this.Info.AllowFlight);
         }
     }
 }

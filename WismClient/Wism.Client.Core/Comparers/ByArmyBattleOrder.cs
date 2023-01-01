@@ -14,10 +14,10 @@ namespace Wism.Client.MapObjects
 
         public override int Compare(Army x, Army y)
         {
-            int compare = 0;
+            var compare = 0;
 
             // Heros stack to bottom
-            if ((x is Hero) && !(y is Hero))
+            if (x is Hero && !(y is Hero))
             {
                 compare = 1;
             }
@@ -48,8 +48,8 @@ namespace Wism.Client.MapObjects
             if (compare == 0)
             {
                 // Differentiate on modified battlefield strength
-                int modifiedStrengthX = x.GetAttackModifier(this.battlefieldTile) + x.Strength;
-                int modifiedStrengthY = y.GetAttackModifier(this.battlefieldTile) + y.Strength;
+                var modifiedStrengthX = x.GetAttackModifier(this.battlefieldTile) + x.Strength;
+                var modifiedStrengthY = y.GetAttackModifier(this.battlefieldTile) + y.Strength;
 
                 // Stack in reverse order of strength
                 compare = modifiedStrengthX.CompareTo(modifiedStrengthY);

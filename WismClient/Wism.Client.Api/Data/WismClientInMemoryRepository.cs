@@ -8,12 +8,11 @@ namespace Wism.Client.Api
 {
     public class WismClientInMemoryRepository : IWismClientRepository
     {
-        private object sync = new object();
-
-        private int lastId;
-
         // Key: CommandId, Value: Command
         private readonly SortedList<int, Command> commands;
+        private readonly object sync = new object();
+
+        private int lastId;
 
         public WismClientInMemoryRepository(SortedList<int, Command> commands)
         {
@@ -45,7 +44,7 @@ namespace Wism.Client.Api
 
         public async Task<bool> CommandExistsAsync(int commandId)
         {
-            return await Task<bool>.Run(() =>
+            return await Task.Run(() =>
             {
                 lock (this.sync)
                 {
@@ -81,7 +80,7 @@ namespace Wism.Client.Api
         public async Task<Command> GetCommandAsync(int commandId)
         {
             Command commandToReturn = null;
-            return await Task<Command>.Run(() =>
+            return await Task.Run(() =>
             {
                 lock (this.sync)
                 {
@@ -95,7 +94,7 @@ namespace Wism.Client.Api
 
         public List<Command> GetCommandsAfterId(int lastSeenCommandId)
         {
-            List<Command> commandsToReturn = new List<Command>();
+            var commandsToReturn = new List<Command>();
             IEnumerable<KeyValuePair<int, Command>> sortedCommands;
 
             lock (this.sync)
@@ -113,10 +112,10 @@ namespace Wism.Client.Api
 
         public async Task<List<Command>> GetCommandsAfterIdAsync(int lastSeenCommandId)
         {
-            List<Command> commandsToReturn = new List<Command>();
+            var commandsToReturn = new List<Command>();
             IEnumerable<KeyValuePair<int, Command>> sortedCommands;
 
-            return await Task<List<Command>>.Run(() =>
+            return await Task.Run(() =>
             {
                 lock (this.sync)
                 {
@@ -136,17 +135,17 @@ namespace Wism.Client.Api
         {
             lock (this.sync)
             {
-                return this.commands.Values.ToList<Command>();
+                return this.commands.Values.ToList();
             }
         }
 
         public async Task<List<Command>> GetCommandsAsync()
         {
-            return await Task<List<Command>>.Run(() =>
+            return await Task.Run(() =>
             {
                 lock (this.sync)
                 {
-                    return this.commands.Values.ToList<Command>();
+                    return this.commands.Values.ToList();
                 }
             });
         }

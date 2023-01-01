@@ -2,88 +2,81 @@
 using System.Collections.Generic;
 using Wism.Client.Core;
 
-namespace Wism.Client.Agent.UI
+namespace Wism.Client.Agent.UI;
+
+public static class AsciiMapper
 {
-    public static class AsciiMapper
+    public static IDictionary<string, ConsoleColor> ClanColorsMap { get; } = new Dictionary<string, ConsoleColor>
     {
-        private static readonly IDictionary<string, char> armyMap = new Dictionary<string, char>
+        { "Sirians", ConsoleColor.White },
+        { "StormGiants", ConsoleColor.Yellow },
+        { "GreyDwarves", ConsoleColor.DarkYellow },
+        { "OrcsOfKor", ConsoleColor.Red },
+        { "Elvallie", ConsoleColor.Green },
+        { "Selentines", ConsoleColor.DarkBlue },
+        { "HorseLords", ConsoleColor.Blue },
+        { "LordBane", ConsoleColor.DarkRed },
+        { "Neutral", ConsoleColor.Gray }
+    };
+
+    public static IDictionary<string, char> TerrainMap { get; } = new Dictionary<string, char>
+    {
+        { "Forest", '¶' },
+        { "Mountain", '^' },
+        { "Grass", '.' },
+        { "Water", '~' },
+        { "Hill", 'n' },
+        { "Marsh", '%' },
+        { "Road", '=' },
+        { "Bridge", '=' },
+        { "Castle", '$' },
+        { "Ruins", '¥' },
+        { "Temple", '†' },
+        { "Tomb", '&' },
+        { "Tower", '#' },
+        { "Void", '*' }
+    };
+
+    public static IDictionary<string, char> ArmyMap { get; } = new Dictionary<string, char>
+    {
+        { "Hero", 'H' },
+        { "LightInfantry", 'i' },
+        { "HeavyInfantry", 'I' },
+        { "Cavalry", 'c' },
+        { "Pegasus", 'p' },
+        { "WolfRiders", 'r' },
+        { "GiantWarriors", 'w' },
+        { "DwarvenLegions", 'a' },
+        { "Griffins", 'g' },
+        { "ElvenArchers", 'a' },
+        { "Wizards", 'Z' },
+        { "Undead", 'U' },
+        { "Demons", 'd' },
+        { "Devils", 'D' }
+    };
+
+    public static ConsoleColor GetColorForClan(Clan clan)
+    {
+        if (clan == null)
         {
-            { "Hero", 'H' },
-            { "LightInfantry", 'i' },
-            { "HeavyInfantry", 'I' },
-            { "Cavalry", 'c' },
-            { "Pegasus", 'p' },
-            { "WolfRiders", 'r' },
-            { "GiantWarriors", 'w' },
-            { "DwarvenLegions", 'a' },
-            { "Griffins", 'g' },
-            { "ElvenArchers", 'a' },
-            { "Wizards", 'Z' },
-            { "Undead", 'U' },
-            { "Demons", 'd' },
-            { "Devils", 'D' },
-        };
-
-        private static readonly IDictionary<string, char> terrainMap = new Dictionary<string, char>
-        {
-            { "Forest", '¶' },
-            { "Mountain", '^' },
-            { "Grass", '.' },
-            { "Water", '~' },
-            { "Hill", 'n' },
-            { "Marsh", '%' },
-            { "Road", '=' },
-            { "Bridge", '=' },
-            { "Castle", '$' },
-            { "Ruins", '¥' },
-            { "Temple", '†' },
-            { "Tomb", '&' },
-            { "Tower", '#' },
-            { "Void", '*' }
-        };
-
-        private static readonly IDictionary<string, ConsoleColor> clanColorsMap = new Dictionary<string, ConsoleColor>
-        {
-            { "Sirians", ConsoleColor.White },
-            { "StormGiants", ConsoleColor.Yellow },
-            { "GreyDwarves", ConsoleColor.DarkYellow },
-            { "OrcsOfKor", ConsoleColor.Red },
-            { "Elvallie", ConsoleColor.Green },
-            { "Selentines", ConsoleColor.DarkBlue },
-            { "HorseLords", ConsoleColor.Blue },
-            { "LordBane", ConsoleColor.DarkRed },
-            { "Neutral", ConsoleColor.Gray }
-        };
-
-        public static IDictionary<string, ConsoleColor> ClanColorsMap => clanColorsMap;
-
-        public static IDictionary<string, char> TerrainMap => terrainMap;
-
-        public static IDictionary<string, char> ArmyMap => armyMap;
-
-        public static ConsoleColor GetColorForClan(Clan clan)
-        {
-            if (clan == null)
-            {
-                return ConsoleColor.Gray;
-            }
-
-            return clanColorsMap.Keys.Contains(clan.ShortName) ? clanColorsMap[clan.ShortName] : ConsoleColor.Gray;
+            return ConsoleColor.Gray;
         }
 
-        public static char GetTerrainSymbol(string terrain)
-        {
-            return (terrainMap.Keys.Contains(terrain)) ? terrainMap[terrain] : '?';
-        }
+        return ClanColorsMap.Keys.Contains(clan.ShortName) ? ClanColorsMap[clan.ShortName] : ConsoleColor.Gray;
+    }
 
-        public static char GetArmySymbol(string army)
-        {
-            return (armyMap.Keys.Contains(army)) ? armyMap[army] : ' ';
-        }
+    public static char GetTerrainSymbol(string terrain)
+    {
+        return TerrainMap.Keys.Contains(terrain) ? TerrainMap[terrain] : '?';
+    }
 
-        internal static char GetItemSymbol()
-        {
-            return '!';
-        }
+    public static char GetArmySymbol(string army)
+    {
+        return ArmyMap.Keys.Contains(army) ? ArmyMap[army] : ' ';
+    }
+
+    internal static char GetItemSymbol()
+    {
+        return '!';
     }
 }

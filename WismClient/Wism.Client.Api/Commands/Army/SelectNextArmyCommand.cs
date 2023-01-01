@@ -7,7 +7,7 @@ namespace Wism.Client.Api.Commands
     {
         private readonly ArmyController armyController;
 
-        public SelectNextArmyCommand(ArmyController armyController) : base()
+        public SelectNextArmyCommand(ArmyController armyController)
         {
             this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
         }
@@ -21,7 +21,7 @@ namespace Wism.Client.Api.Commands
 
         public override string ToString()
         {
-            return $"Command: Select next";
+            return "Command: Select next";
         }
     }
 }

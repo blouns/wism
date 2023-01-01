@@ -4,12 +4,12 @@ using Wism.Client.MapObjects;
 namespace Wism.Client.War
 {
     /// <summary>
-    /// Interface to define combat modifiers for calculating bonuses.
+    ///     Interface to define combat modifiers for calculating bonuses.
     /// </summary>
-    interface ICombatModifier
+    internal interface ICombatModifier
     {
         /// <summary>
-        /// Calculate the bonus modifer for the attacker in the target terrain
+        ///     Calculate the bonus modifer for the attacker in the target terrain
         /// </summary>
         /// <param name="attacker">Attacking army of an army</param>
         /// <param name="target">Tile being attacked</param>

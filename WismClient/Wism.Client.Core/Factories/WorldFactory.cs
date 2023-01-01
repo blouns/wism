@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using Wism.Client.Core;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
@@ -14,21 +13,21 @@ namespace Wism.Client.Factories
             out Dictionary<int, Tile> visitingNameTileDict)
         {
             // Load Tiles            
-            int xMax = snapshot.MapXUpperBound;
-            int yMax = snapshot.MapYUpperBound;
-            Tile[,] map = new Tile[xMax, yMax];
+            var xMax = snapshot.MapXUpperBound;
+            var yMax = snapshot.MapYUpperBound;
+            var map = new Tile[xMax, yMax];
 
             armiesNameTileDict = new Dictionary<int, Tile>();
             visitingNameTileDict = new Dictionary<int, Tile>();
 
-            for (int y = 0; y < yMax; y++)
+            for (var y = 0; y < yMax; y++)
             {
-                for (int x = 0; x < xMax; x++)
+                for (var x = 0; x < xMax; x++)
                 {
                     var tileEntity = snapshot.Tiles[x + y * xMax];
 
                     // Tile details
-                    Tile tile = new Tile();
+                    var tile = new Tile();
                     tile.X = tileEntity.X;
                     tile.Y = tileEntity.Y;
                     tile.Terrain = MapBuilder.TerrainKinds[tileEntity.TerrainShortName];
@@ -85,7 +84,7 @@ namespace Wism.Client.Factories
                 foreach (var locationEntity in snapshot.Locations)
                 {
                     var location = LocationFactory.Load(locationEntity, world);
-                }                
+                }
             }
 
             return world;
@@ -98,18 +97,18 @@ namespace Wism.Client.Factories
             MapBuilder.Initialize(ModFactory.ModPath, worldEntity.Name);
 
             // Create Tiles            
-            int xMax = worldEntity.MapXUpperBound;
-            int yMax = worldEntity.MapYUpperBound;
-            Tile[,] map = new Tile[xMax, yMax];
+            var xMax = worldEntity.MapXUpperBound;
+            var yMax = worldEntity.MapYUpperBound;
+            var map = new Tile[xMax, yMax];
 
-            for (int y = 0; y < yMax; y++)
+            for (var y = 0; y < yMax; y++)
             {
-                for (int x = 0; x < xMax; x++)
+                for (var x = 0; x < xMax; x++)
                 {
                     var tileEntity = worldEntity.Tiles[x + y * xMax];
 
                     // Tile details
-                    Tile tile = new Tile();
+                    var tile = new Tile();
                     tile.X = tileEntity.X;
                     tile.Y = tileEntity.Y;
                     tile.Terrain = MapBuilder.TerrainKinds[tileEntity.TerrainShortName];

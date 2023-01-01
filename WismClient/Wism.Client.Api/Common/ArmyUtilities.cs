@@ -18,7 +18,8 @@ namespace Wism.Client.Api
                     throw new ArgumentException(
                         $"Selected armies must originate from the same location. Expected: {tile}, Actual: {army.Tile} | {army}");
                 }
-                else if (army.IsDead)
+
+                if (army.IsDead)
                 {
                     throw new InvalidOperationException($"Cannot operate on a dead army: {army}");
                 }

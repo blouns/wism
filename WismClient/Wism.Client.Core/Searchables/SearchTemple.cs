@@ -4,29 +4,27 @@ namespace Wism.Client.MapObjects
 {
     public class SearchTemple : ISearchable
     {
-        private static readonly SearchTemple instance = new SearchTemple();
+        private SearchTemple()
+        {
+        }
 
-        public static SearchTemple Instance => instance;
+        public static SearchTemple Instance { get; } = new SearchTemple();
 
         public bool CanSearchKind(string kind)
         {
             return kind == "Temple";
         }
 
-        private SearchTemple()
-        {
-        }
-
         public bool Search(List<Army> armies, Location location, out object result)
         {
-            int blessed = 0;
+            var blessed = 0;
 
             foreach (var army in armies)
             {
                 if (!army.BlessedAt.Contains(location) &&
                     army.MovesRemaining > 0)
                 {
-                    army.Strength += (army.Strength == Army.MaxStrength) ? 0 : 1;
+                    army.Strength += army.Strength == Army.MaxStrength ? 0 : 1;
                     army.BlessedAt.Add(location);
                     blessed++;
                 }

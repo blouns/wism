@@ -7,15 +7,6 @@ namespace Wism.Client.Api.Commands
 {
     public class AttackOnceCommand : ArmyCommand
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-
-        public List<Army> Defenders { get; set; }
-
-        public List<Army> OriginalAttackingArmies { get; set; }
-        public List<Army> OriginalDefendingArmies { get; set; }
-
-
         public AttackOnceCommand(ArmyController armyController, List<Army> armies, int x, int y)
             : base(armyController, armies)
         {
@@ -31,8 +22,15 @@ namespace Wism.Client.Api.Commands
 
             this.OriginalAttackingArmies = new List<Army>(armies);
             this.OriginalAttackingArmies.Sort(new ByArmyBattleOrder(targetTile));
-
         }
+
+        public int X { get; set; }
+        public int Y { get; set; }
+
+        public List<Army> Defenders { get; set; }
+
+        public List<Army> OriginalAttackingArmies { get; set; }
+        public List<Army> OriginalDefendingArmies { get; set; }
 
         protected override ActionState ExecuteInternal()
         {
@@ -43,23 +41,23 @@ namespace Wism.Client.Api.Commands
             {
                 return ActionState.Failed;
             }
-            else if (result == AttackResult.AttackerWinsBattle)
+
+            if (result == AttackResult.AttackerWinsBattle)
             {
                 // Refresh defenders
                 this.Defenders = targetTile.MusterArmy();
                 return ActionState.Succeeded;
             }
-            else
-            {
-                // Refresh defenders
-                this.Defenders = targetTile.MusterArmy();
-                return ActionState.InProgress;
-            }
+
+            // Refresh defenders
+            this.Defenders = targetTile.MusterArmy();
+            return ActionState.InProgress;
         }
 
         public override string ToString()
         {
-            return $"Command: {ArmyUtilities.ArmiesToString(this.OriginalAttackingArmies)} attack ({World.Current.Map[this.X, this.Y]}";
+            return
+                $"Command: {ArmyUtilities.ArmiesToString(this.OriginalAttackingArmies)} attack ({World.Current.Map[this.X, this.Y]}";
         }
     }
 }

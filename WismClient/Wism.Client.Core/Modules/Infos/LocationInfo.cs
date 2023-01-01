@@ -7,22 +7,16 @@ namespace Wism.Client.Modules
     {
         public static readonly string FileName = "Location.json";
 
-        [DataMember]
-        public string DisplayName { get; set; } = "Old Ruins";
+        [DataMember] public string DisplayName { get; set; } = "Old Ruins";
 
-        [DataMember]
-        public string ShortName { get; set; } = "OldRuins";
+        [DataMember] public string ShortName { get; set; } = "OldRuins";
 
-        [DataMember]
-        public int X { get; set; }
+        [DataMember] public int X { get; set; }
 
-        [DataMember]
-        public int Y { get; set; }
+        [DataMember] public int Y { get; set; }
 
-        [DataMember]
-        public string Kind { get; set; } = "Ruins";
+        [DataMember] public string Kind { get; set; } = "Ruins";
 
-        [DataMember]
-        public string Terrain { get; set; } = "Ruins";
+        [DataMember] public string Terrain { get; set; } = "Ruins";
     }
 }

@@ -16,15 +16,16 @@ namespace Wism.Client.Factories
             }
 
             var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world.Name}";
-            LocationBuilder builder = new LocationBuilder(path);
+            var builder = new LocationBuilder(path);
             builder.AddLocation(world, locationEntity.X, locationEntity.Y, locationEntity.LocationShortName);
 
-            Location location = world.Map[locationEntity.X, locationEntity.Y].Location;
+            var location = world.Map[locationEntity.X, locationEntity.Y].Location;
             location.Id = locationEntity.Id;
             if (locationEntity.Boon != null)
             {
                 location.Boon = BoonFactory.Load(locationEntity.Boon);
             }
+
             location.Monster = locationEntity.Monster;
             location.Searched = locationEntity.Searched;
 
@@ -39,7 +40,7 @@ namespace Wism.Client.Factories
             }
 
             var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world.Name}";
-            LocationBuilder builder = new LocationBuilder(path);
+            var builder = new LocationBuilder(path);
             builder.AddLocation(world, locationEntity.X, locationEntity.Y, locationEntity.LocationShortName);
 
             return world.Map[locationEntity.X, locationEntity.Y].Location;

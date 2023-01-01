@@ -10,6 +10,7 @@
 //  Copyright (C) 2006 Franco, Gustavo 
 //
 //  Source code adapted from: https://www.codeproject.com/Articles/15307/A-algorithm-implementation-in-C
+
 using System;
 
 namespace Wism.Client.Pathing.External
@@ -17,9 +18,11 @@ namespace Wism.Client.Pathing.External
     internal class AuthorAttribute : Attribute
     {
         #region Constructors
+
         public AuthorAttribute(string authorName)
         {
         }
+
         #endregion
     }
 }

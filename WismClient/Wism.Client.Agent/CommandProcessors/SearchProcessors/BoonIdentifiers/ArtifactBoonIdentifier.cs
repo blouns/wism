@@ -2,24 +2,23 @@
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors
+namespace Wism.Client.Agent.CommandProcessors;
+
+public class ArtifactBoonIdentifier : IBoonIdentfier
 {
-    public class ArtifactBoonIdentifier : IBoonIdentfier
+    public bool CanIdentify(IBoon boon)
     {
-        public bool CanIdentify(IBoon boon)
+        return boon is ArtifactBoon;
+    }
+
+    public void Identify(IBoon boon)
+    {
+        if (!this.CanIdentify(boon))
         {
-            return boon is ArtifactBoon;
+            throw new ArgumentException("Cannot identify " + boon);
         }
 
-        public void Identify(IBoon boon)
-        {
-            if (!CanIdentify(boon))
-            {
-                throw new ArgumentException("Cannot identify " + boon);
-            }
-
-            var artifact = (Artifact)boon.Result;
-            Notify.DisplayAndWait($"You have found the {artifact.DisplayName}!");
-        }
+        var artifact = (Artifact)boon.Result;
+        Notify.DisplayAndWait($"You have found the {artifact.DisplayName}!");
     }
 }

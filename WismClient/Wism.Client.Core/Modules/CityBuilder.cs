@@ -7,35 +7,31 @@ namespace Wism.Client.Modules
 {
     public class CityBuilder
     {
-        private readonly string worldPath;
-
         private static IList<CityInfo> cityInfos;
-
-        // Mutable objects; do not expose directly; use Find
-        public Dictionary<string, City> CityKinds { get => this.cityKinds; }
-
-        public string WorldPath => this.worldPath;
 
         public CityBuilder(string worldPath)
         {
-            this.worldPath = worldPath;
-            LoadCityKinds(worldPath);
+            this.WorldPath = worldPath;
+            this.LoadCityKinds(worldPath);
         }
 
-        private readonly Dictionary<string, City> cityKinds = new Dictionary<string, City>();
+        // Mutable objects; do not expose directly; use Find
+        public Dictionary<string, City> CityKinds { get; } = new Dictionary<string, City>();
+
+        public string WorldPath { get; }
 
         public void AddCitiesFromWorldPath(World world, string worldName)
         {
             var worldPath = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
 
-            AddCities(world, LoadCityInfos(worldPath));
+            this.AddCities(world, this.LoadCityInfos(worldPath));
         }
 
         public void AddCities(World world, IList<CityInfo> cityInfos)
         {
             foreach (var cityInfo in cityInfos)
             {
-                AddCity(world, cityInfo);
+                this.AddCity(world, cityInfo);
             }
         }
 
@@ -46,11 +42,11 @@ namespace Wism.Client.Modules
                 throw new ArgumentNullException(nameof(info));
             }
 
-            AddCity(world, info.X, info.Y, info.ShortName, info.ClanName);
+            this.AddCity(world, info.X, info.Y, info.ShortName, info.ClanName);
         }
 
         /// <summary>
-        /// Add a city to the map
+        ///     Add a city to the map
         /// </summary>
         /// <param name="map">World map to add the city to</param>
         /// <param name="x">Top-left X coordinate of tile for the city</param>
@@ -75,6 +71,7 @@ namespace Wism.Client.Modules
             {
                 throw new ArgumentException($"{shortName} not found in city modules.");
             }
+
             city = city.Clone();
             world.AddCity(city, world.Map[x, y]);
 
@@ -94,9 +91,9 @@ namespace Wism.Client.Modules
 
         private static void AddNeutralCityGarrison(City city)
         {
-            Army garrison = ArmyFactory.CreateArmy(
-                                Player.GetNeutralPlayer(),
-                                ModFactory.FindArmyInfo("LightInfantry"));
+            var garrison = ArmyFactory.CreateArmy(
+                Player.GetNeutralPlayer(),
+                ModFactory.FindArmyInfo("LightInfantry"));
             garrison.Strength = city.Defense;
             city.Tile.AddArmy(garrison);
         }
@@ -107,7 +104,7 @@ namespace Wism.Client.Modules
         }
 
         /// <summary>
-        /// Find a city matching the shortName given
+        ///     Find a city matching the shortName given
         /// </summary>
         /// <param name="shortName">Name to match</param>
         /// <returns>City matching the name; otherwise, null</returns>
@@ -125,7 +122,7 @@ namespace Wism.Client.Modules
 
         private IList<CityInfo> LoadCityInfos(string path)
         {
-            string filePath = String.Format(@"{0}\{1}", path, CityInfo.FileName);
+            var filePath = string.Format(@"{0}\{1}", path, CityInfo.FileName);
             cityInfos = ModFactory.LoadModFiles<CityInfo>(filePath);
 
             return cityInfos;
@@ -134,8 +131,8 @@ namespace Wism.Client.Modules
         private void LoadCityKinds(string path)
         {
             this.CityKinds.Clear();
-            IList<City> cities = ModFactory.LoadCities(path);
-            foreach (City city in cities)
+            var cities = ModFactory.LoadCities(path);
+            foreach (var city in cities)
             {
                 this.CityKinds.Add(city.ShortName, city);
             }

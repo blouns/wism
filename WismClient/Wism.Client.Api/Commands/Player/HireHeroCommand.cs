@@ -11,35 +11,6 @@ namespace Wism.Client.Api.Commands
     {
         private readonly PlayerController playerController;
 
-        public Hero Hero { get; set; }
-
-        public RecruitHeroCommand RecruitHeroCommand { get; set; }
-
-        public bool HeroAccepted
-        {
-            get => this.RecruitHeroCommand.HeroAccepted.Value;
-        }
-
-        public Tile HeroTile
-        {
-            get => this.RecruitHeroCommand.HeroTile;
-        }
-
-        public string HeroDisplayName
-        {
-            get => this.RecruitHeroCommand.HeroDisplayName;
-        }
-
-        public int HeroPrice
-        {
-            get => this.RecruitHeroCommand.HeroPrice;
-        }
-
-        public List<ArmyInfo> HeroAllies
-        {
-            get => this.RecruitHeroCommand.HeroAllies;
-        }
-
         public HireHeroCommand(PlayerController playerController, RecruitHeroCommand recruitHeroCommand)
             : base(recruitHeroCommand.Player)
         {
@@ -47,9 +18,23 @@ namespace Wism.Client.Api.Commands
             this.RecruitHeroCommand = recruitHeroCommand ?? throw new ArgumentNullException(nameof(recruitHeroCommand));
         }
 
+        public Hero Hero { get; set; }
+
+        public RecruitHeroCommand RecruitHeroCommand { get; set; }
+
+        public bool HeroAccepted => this.RecruitHeroCommand.HeroAccepted.Value;
+
+        public Tile HeroTile => this.RecruitHeroCommand.HeroTile;
+
+        public string HeroDisplayName => this.RecruitHeroCommand.HeroDisplayName;
+
+        public int HeroPrice => this.RecruitHeroCommand.HeroPrice;
+
+        public List<ArmyInfo> HeroAllies => this.RecruitHeroCommand.HeroAllies;
+
         protected override ActionState ExecuteInternal()
         {
-            ActionState state = ActionState.Failed;
+            var state = ActionState.Failed;
 
             if (!this.RecruitHeroCommand.HeroAccepted.HasValue)
             {
@@ -59,11 +44,11 @@ namespace Wism.Client.Api.Commands
             // If hero accepted, hire; otherwise skip
             if (this.HeroAccepted)
             {
-                bool success = this.playerController.TryHireHero(this.Player,
+                var success = this.playerController.TryHireHero(this.Player,
                     this.HeroTile,
                     this.HeroDisplayName,
                     this.HeroPrice,
-                    out Hero hero);
+                    out var hero);
 
                 if (success)
                 {

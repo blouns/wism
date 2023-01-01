@@ -6,19 +6,19 @@ namespace Wism.Client.Api.Commands
 {
     public class SearchSageCommand : SearchLocationCommand
     {
-        public int Gold { get; private set; }
-
         public SearchSageCommand(LocationController locationController, List<Army> armies, Location location)
             : base(locationController, armies, location)
         {
         }
 
+        public int Gold { get; private set; }
+
         protected override ActionState ExecuteInternal()
         {
-            bool success = this.LocationController.SearchSage(this.Armies, this.Location, out int gold);
+            var success = this.LocationController.SearchSage(this.Armies, this.Location, out var gold);
 
             this.Gold = gold;
-            return (success) ? ActionState.Succeeded : ActionState.Failed;
+            return success ? ActionState.Succeeded : ActionState.Failed;
         }
     }
 }

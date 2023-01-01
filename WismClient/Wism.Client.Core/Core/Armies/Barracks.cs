@@ -12,18 +12,12 @@ namespace Wism.Client.Core
         private const int DefaultTurnsToDeliver = 3;
 
         private readonly City city;
-        private readonly Dictionary<ProductionInfo, int> productionInfoDictionary;
         private readonly IDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
-
-        public ArmyInTraining ArmyInTraining { get; set; }
-
-        public Queue<ArmyInTraining> ArmiesToDeliver { get; set; }
-
-        public Player Player { get => this.city.Player; }
+        private readonly Dictionary<ProductionInfo, int> productionInfoDictionary;
 
         public Barracks(City city, ProductionInfo[] productionInfos)
         {
-            this.city = city ?? throw new System.ArgumentNullException(nameof(city));
+            this.city = city ?? throw new ArgumentNullException(nameof(city));
 
             if (productionInfos is null)
             {
@@ -31,17 +25,24 @@ namespace Wism.Client.Core
             }
 
             this.productionInfoDictionary = new Dictionary<ProductionInfo, int>();
-            for (int i = 0; i < productionInfos.Length; i++)
+            for (var i = 0; i < productionInfos.Length; i++)
             {
                 this.productionInfoDictionary.Add(productionInfos[i], 0);
             }
         }
 
+        public ArmyInTraining ArmyInTraining { get; set; }
+
+        public Queue<ArmyInTraining> ArmiesToDeliver { get; set; }
+
+        public Player Player => this.city.Player;
+
         public int GetProductionNumber(string armyInfoName)
         {
             if (string.IsNullOrWhiteSpace(armyInfoName))
             {
-                throw new ArgumentException($"'{nameof(armyInfoName)}' cannot be null or whitespace", nameof(armyInfoName));
+                throw new ArgumentException($"'{nameof(armyInfoName)}' cannot be null or whitespace",
+                    nameof(armyInfoName));
             }
 
             foreach (var pi in this.productionInfoDictionary.Keys)
@@ -59,7 +60,8 @@ namespace Wism.Client.Core
         {
             if (string.IsNullOrWhiteSpace(armyInfoName))
             {
-                throw new ArgumentException($"'{nameof(armyInfoName)}' cannot be null or whitespace", nameof(armyInfoName));
+                throw new ArgumentException($"'{nameof(armyInfoName)}' cannot be null or whitespace",
+                    nameof(armyInfoName));
             }
 
             ProductionInfo slot = null;
@@ -85,7 +87,7 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Start producing an army in the destination city
+        ///     Start producing an army in the destination city
         /// </summary>
         /// <param name="armyInfo">Army kind to produce</param>
         /// <param name="destinationCity">City to deliver to (or null for current city)</param>
@@ -94,28 +96,26 @@ namespace Wism.Client.Core
         {
             if (armyInfo is null)
             {
-                throw new System.ArgumentNullException(nameof(armyInfo));
+                throw new ArgumentNullException(nameof(armyInfo));
             }
 
-            if (!CanProduce(armyInfo))
+            if (!this.CanProduce(armyInfo))
             {
                 throw new ArgumentException($"This barracks cannot create {armyInfo.ShortName}");
             }
 
-            if (!PlayerHasSufficientGold(armyInfo))
+            if (!this.PlayerHasSufficientGold(armyInfo))
             {
                 return false;
             }
-            else
-            {
-                ChargePlayerForProductionCosts(armyInfo);
-            }
+
+            this.ChargePlayerForProductionCosts(armyInfo);
 
             // Increment the number of armies of this type built
-            var pi = FindProductionInfo(armyInfo);
+            var pi = this.FindProductionInfo(armyInfo);
             this.productionInfoDictionary[pi]++;
 
-            this.ArmyInTraining = new ArmyInTraining()
+            this.ArmyInTraining = new ArmyInTraining
             {
                 ArmyInfo = armyInfo,
                 DestinationCity = destinationCity,
@@ -132,14 +132,14 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Perform beginning-of-turn production
+        ///     Perform beginning-of-turn production
         /// </summary>
         /// <returns>True if a new army has been produced; otherwise false</returns>
         public bool Produce(out ArmyInTraining armyProduced)
         {
             armyProduced = null;
 
-            if (!ProducingArmy())
+            if (!this.ProducingArmy())
             {
                 return false;
             }
@@ -159,11 +159,12 @@ namespace Wism.Client.Core
                     {
                         this.ArmiesToDeliver = new Queue<ArmyInTraining>();
                     }
+
                     this.ArmiesToDeliver.Enqueue(this.ArmyInTraining);
                 }
                 else
                 {
-                    Deploy(this.ArmyInTraining);
+                    this.Deploy(this.ArmyInTraining);
                 }
 
                 this.ArmyInTraining = null;
@@ -188,22 +189,23 @@ namespace Wism.Client.Core
             {
                 targetTile = army.DestinationCity.Tile;
             }
+
             // Select the next open tile if army cannot be placed here (full, navy)
             targetTile = this.deploymentStrategy.FindNextOpenTile(this.Player, army.ArmyInfo, targetTile);
 
-            army.DisplayName = GetArmyDisplayName(army.ArmyInfo);
+            army.DisplayName = this.GetArmyDisplayName(army.ArmyInfo);
 
             this.Player.ConscriptArmy(army, targetTile);
         }
 
         /// <summary>
-        /// Display name is a combo of army type and city of origin.
+        ///     Display name is a combo of army type and city of origin.
         /// </summary>
         /// <returns>Army name</returns>
         /// <remarks>Example: Marthos 1st Cavalry</remarks>
         private string GetArmyDisplayName(ArmyInfo info)
         {
-            var pi = FindProductionInfo(info);
+            var pi = this.FindProductionInfo(info);
             var numberCreated = this.productionInfoDictionary[pi];
             string suffix;
 
@@ -228,15 +230,15 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        /// Delivers armies to their destination.
+        ///     Delivers armies to their destination.
         /// </summary>
         /// <returns>True if an army has been delivered; otherwise, False</returns>
         public bool Deliver(out ArmyInTraining armyDelivered)
         {
             armyDelivered = null;
-            bool delivered = false;
+            var delivered = false;
 
-            if (!HasDeliveries())
+            if (!this.HasDeliveries())
             {
                 return false;
             }
@@ -248,11 +250,11 @@ namespace Wism.Client.Core
             }
 
             // Deliver if armies have reached their destination
-            if (HasDeliveries() &&
+            if (this.HasDeliveries() &&
                 this.ArmiesToDeliver.Peek().TurnsToDeliver == 0)
             {
                 var armyInTraining = this.ArmiesToDeliver.Dequeue();
-                Deploy(armyInTraining);
+                this.Deploy(armyInTraining);
                 armyDelivered = armyInTraining;
                 delivered = true;
             }
@@ -267,21 +269,21 @@ namespace Wism.Client.Core
 
         private bool PlayerHasSufficientGold(ArmyInfo armyInfo)
         {
-            var pi = FindProductionInfo(armyInfo);
+            var pi = this.FindProductionInfo(armyInfo);
             return this.Player.Gold >= pi.Upkeep;
         }
 
         private void ChargePlayerForProductionCosts(ArmyInfo armyInfo)
         {
-            var pi = FindProductionInfo(armyInfo);
+            var pi = this.FindProductionInfo(armyInfo);
             this.Player.Gold -= pi.Upkeep;
         }
 
         internal void Reset()
         {
-            if (ProducingArmy())
+            if (this.ProducingArmy())
             {
-                StopProduction();
+                this.StopProduction();
             }
 
             this.ArmiesToDeliver = null;
@@ -295,7 +297,7 @@ namespace Wism.Client.Core
 
         internal void CancelDelivery(City city)
         {
-            if (HasDeliveries() &&
+            if (this.HasDeliveries() &&
                 this.ArmiesToDeliver.Any(a => a.DestinationCity == city))
             {
                 // Cancel deliveries to city
@@ -309,7 +311,7 @@ namespace Wism.Client.Core
                     }
                 }
 
-                this.ArmiesToDeliver = (newQueue.Count == 0) ? null : newQueue;
+                this.ArmiesToDeliver = newQueue.Count == 0 ? null : newQueue;
             }
         }
 
@@ -320,7 +322,7 @@ namespace Wism.Client.Core
 
         public bool ProducingArmy()
         {
-            return (this.ArmyInTraining != null);
+            return this.ArmyInTraining != null;
         }
 
         private ProductionInfo FindProductionInfo(ArmyInfo armyInfo)
