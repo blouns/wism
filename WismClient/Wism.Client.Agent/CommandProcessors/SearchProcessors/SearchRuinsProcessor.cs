@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Agent.CommandProcessors.SearchProcessors.BoonIdentifiers;
-using Wism.Client.Agent.Common;
 using Wism.Client.Agent.UI;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
@@ -12,7 +10,7 @@ using Wism.Client.Core;
 using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
 
 public class SearchRuinsProcessor : ICommandProcessor
 {
@@ -40,7 +38,7 @@ public class SearchRuinsProcessor : ICommandProcessor
 
     public bool CanExecute(ICommandAction command)
     {
-        // Ruins and tombs are interchangable
+        // Ruins and tombs are interchangeable
         return command is SearchRuinsCommand;
     }
 

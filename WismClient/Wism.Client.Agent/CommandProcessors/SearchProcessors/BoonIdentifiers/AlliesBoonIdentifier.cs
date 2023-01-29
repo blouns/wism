@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Agent.Common;
 using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 

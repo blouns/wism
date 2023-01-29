@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
+using Wism.Client.Common;
+using Wism.Client.Comparers;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Army
 {
     public class PrepareForBattleCommand : ArmyCommand
     {
-        public PrepareForBattleCommand(ArmyController armyController, List<Army> armies, int x, int y)
+        public PrepareForBattleCommand(ArmyController armyController, List<MapObjects.Army> armies, int x, int y)
             : base(armyController, armies)
         {
             this.X = x;
@@ -20,11 +21,11 @@ namespace Wism.Client.Api.Commands
         public int X { get; set; }
         public int Y { get; set; }
 
-        public List<Army> Defenders { get; set; }
+        public List<MapObjects.Army> Defenders { get; set; }
 
         protected override ActionState ExecuteInternal()
         {
-            return this.armyController.PrepareForBattle();
+            return this.ArmyController.PrepareForBattle();
         }
 
         public override string ToString()

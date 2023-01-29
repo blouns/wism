@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
-using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Player
 {
     public class RecruitHeroCommand : Command
     {
         private readonly PlayerController playerController;
 
-        public RecruitHeroCommand(PlayerController playerController, Player player)
+        public RecruitHeroCommand(PlayerController playerController, Core.Player player)
             : base(player)
         {
             this.playerController = playerController ?? throw new ArgumentNullException(nameof(playerController));

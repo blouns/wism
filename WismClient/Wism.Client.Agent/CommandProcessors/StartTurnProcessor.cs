@@ -1,5 +1,4 @@
 ﻿using System;
-using Wism.Client.Agent.Common;
 using Wism.Client.Agent.UI;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;

@@ -1,14 +1,13 @@
 ﻿using System;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
-using Wism.Client.Modules;
+using Wism.Client.Controllers;
+using Wism.Client.Modules.Infos;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.City
 {
     public class StartProductionCommand : Command
     {
         public StartProductionCommand(CityController cityController,
-            City productionCity, ArmyInfo armyInfo, City destinationCity = null)
+            MapObjects.City productionCity, ArmyInfo armyInfo, MapObjects.City destinationCity = null)
         {
             this.CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
             this.ProductionCity = productionCity ?? throw new ArgumentNullException(nameof(productionCity));
@@ -17,9 +16,9 @@ namespace Wism.Client.Api.Commands
         }
 
         public CityController CityController { get; }
-        public City ProductionCity { get; }
+        public MapObjects.City ProductionCity { get; }
         public ArmyInfo ArmyInfo { get; }
-        public City DestinationCity { get; }
+        public MapObjects.City DestinationCity { get; }
 
         protected override ActionState ExecuteInternal()
         {

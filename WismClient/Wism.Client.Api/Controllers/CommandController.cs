@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Wism.Client.Api;
-using Wism.Client.Api.Commands;
-using Wism.Client.Api.Data;
+using Wism.Client.Commands;
 using Wism.Client.Common;
+using Wism.Client.Data;
 
 namespace Wism.Client.Core.Controllers
 {
@@ -61,7 +60,7 @@ namespace Wism.Client.Core.Controllers
         }
 
         /// <summary>
-        ///     Gets all commands that occured after the given command ID
+        ///     Gets all commands that occurred after the given command ID
         /// </summary>
         /// <param name="lastSeenCommandId"></param>
         /// <returns>All commands after <c>lastSeenCommandId</c></returns>
@@ -117,7 +116,7 @@ namespace Wism.Client.Core.Controllers
             //       What about 'observers' or remotes? Perhaps need only
             //       to persist back to oldest 'last command ID' across all
             //       remotes.
-            var commands = CommandPersistance.SnapshotCommands(this.wismClientRepository.GetCommands());
+            var commands = CommandPersistence.SnapshotCommands(this.wismClientRepository.GetCommands());
 
             return JsonConvert.SerializeObject(commands, settings);
         }

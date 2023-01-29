@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Api.Commands;
+using Wism.Client.Controllers;
+using Wism.Client.Core.Armies;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Player
 {
     public class RenewProductionCommand : Command
     {
         private readonly CityController cityController;
 
-        public RenewProductionCommand(CityController cityController, Player player,
+        public RenewProductionCommand(CityController cityController, Core.Player player,
             ReviewProductionCommand reviewProductionCommand)
             : base(player)
         {

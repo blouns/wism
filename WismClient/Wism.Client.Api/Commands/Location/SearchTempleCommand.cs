@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using Wism.Client.Api.Commands;
+using Wism.Client.Controllers;
 using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Location
 {
     public class SearchTempleCommand : SearchLocationCommand
     {
-        public SearchTempleCommand(LocationController locationController, List<Army> armies, Location location)
+        public SearchTempleCommand(LocationController locationController, List<MapObjects.Army> armies, MapObjects.Location location)
             : base(locationController, armies, location)
         {
         }

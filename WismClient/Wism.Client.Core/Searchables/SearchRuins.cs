@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
-namespace Wism.Client.MapObjects
+namespace Wism.Client.Searchables
 {
     public class SearchRuins : ISearchable
     {
-        private const float oddsToDefeatMonster = 0.9f;
+        private const float OddsToDefeatMonster = 0.9f;
 
         private SearchRuins()
         {
@@ -59,7 +60,7 @@ namespace Wism.Client.MapObjects
         /// <returns>True if monster is defeated; otherwise False</returns>
         private bool DefeatedMonster()
         {
-            return Game.Current.Random.Next(0, 10) / 10 < oddsToDefeatMonster;
+            return Game.Current.Random.Next(0, 10) / 10 < OddsToDefeatMonster;
         }
     }
 }

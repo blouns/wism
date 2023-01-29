@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Common;
+using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Core.Controllers

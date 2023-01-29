@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Common;
-using Wism.Client.Core;
+using Wism.Client.Comparers;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.War
+namespace Wism.Client.Core.Armies.WarStrategies
 {
     /// <summary>
     ///     Default Warlords combat rules.
@@ -16,8 +16,8 @@ namespace Wism.Client.War
         ///     Combat is resolved. Attacking and Defending armies are sorted on the display with
         ///     the most valuable armies on the right hand side.Combat is a series of one-on-one
         ///     engagements between the left-most army of each side.Each combat is fought to the
-        ///     death with the survivor going on to fight his opponents's next army. The battle
-        ///     ends when one side is eliminated.The battle mecanics work like this. Each army
+        ///     death with the survivor going on to fight his opponents' next army. The battle
+        ///     ends when one side is eliminated.The battle mechanics work like this. Each army
         ///     rolls a ten-sided die (1-10). The result is low if the die roll is less than or
         ///     equal to his opponent's AS (or DS as the case may be). The result is high if the
         ///     die roll is greater than his opponent's AS (or DS).

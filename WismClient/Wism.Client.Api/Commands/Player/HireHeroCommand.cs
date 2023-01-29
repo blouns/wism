@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Api.Commands;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
-using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Player
 {
     public class HireHeroCommand : Command
     {
@@ -18,7 +18,7 @@ namespace Wism.Client.Api.Commands
             this.RecruitHeroCommand = recruitHeroCommand ?? throw new ArgumentNullException(nameof(recruitHeroCommand));
         }
 
-        public Hero Hero { get; set; }
+        public MapObjects.Hero Hero { get; set; }
 
         public RecruitHeroCommand RecruitHeroCommand { get; set; }
 

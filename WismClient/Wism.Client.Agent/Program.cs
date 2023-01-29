@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Wism.Client.Api;
-using Wism.Client.Api.Commands;
+using Wism.Client.Agent.Services;
+using Wism.Client.Agent.UI;
+using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
+using Wism.Client.Core.Controllers;
 using Wism.Client.Data;
 
 namespace Wism.Client.Agent;

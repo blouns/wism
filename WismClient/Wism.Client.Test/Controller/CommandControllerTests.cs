@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Wism.Client.Api;
-using Wism.Client.Api.Commands;
-using Wism.Client.Api.Data.Entities;
+using Wism.Client.Commands;
+using Wism.Client.Commands.Army;
+using Wism.Client.Commands.Player;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Data;
+using Wism.Client.Data.Entities;
+using Wism.Client.Data.Entities.Player;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Controller;

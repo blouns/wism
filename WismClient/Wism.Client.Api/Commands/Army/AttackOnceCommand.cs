@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
+using Wism.Client.Api.Commands;
+using Wism.Client.Common;
+using Wism.Client.Comparers;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Army
 {
     public class AttackOnceCommand : ArmyCommand
     {
-        public AttackOnceCommand(ArmyController armyController, List<Army> armies, int x, int y)
+        public AttackOnceCommand(ArmyController armyController, List<MapObjects.Army> armies, int x, int y)
             : base(armyController, armies)
         {
             this.X = x;
@@ -17,25 +19,25 @@ namespace Wism.Client.Api.Commands
             this.Defenders = targetTile.MusterArmy();
             this.Defenders.Sort(new ByArmyBattleOrder(targetTile));
 
-            this.OriginalDefendingArmies = new List<Army>(this.Defenders);
+            this.OriginalDefendingArmies = new List<MapObjects.Army>(this.Defenders);
             this.OriginalDefendingArmies.Sort(new ByArmyBattleOrder(targetTile));
 
-            this.OriginalAttackingArmies = new List<Army>(armies);
+            this.OriginalAttackingArmies = new List<MapObjects.Army>(armies);
             this.OriginalAttackingArmies.Sort(new ByArmyBattleOrder(targetTile));
         }
 
         public int X { get; set; }
         public int Y { get; set; }
 
-        public List<Army> Defenders { get; set; }
+        public List<MapObjects.Army> Defenders { get; set; }
 
-        public List<Army> OriginalAttackingArmies { get; set; }
-        public List<Army> OriginalDefendingArmies { get; set; }
+        public List<MapObjects.Army> OriginalAttackingArmies { get; set; }
+        public List<MapObjects.Army> OriginalDefendingArmies { get; set; }
 
         protected override ActionState ExecuteInternal()
         {
             var targetTile = World.Current.Map[this.X, this.Y];
-            var result = this.armyController.AttackOnce(this.Armies, targetTile);
+            var result = this.ArmyController.AttackOnce(this.Armies, targetTile);
 
             if (result == AttackResult.DefenderWinBattle)
             {

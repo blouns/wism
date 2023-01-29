@@ -1,5 +1,4 @@
 ﻿using System;
-using Wism.Client.Agent.Common;
 using Wism.Client.Agent.UI;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
@@ -8,7 +7,7 @@ using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
 
 public class SearchSageProcessor : ICommandProcessor
 {

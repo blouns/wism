@@ -27,7 +27,7 @@ namespace Wism.Client.Commands.Army
 
         protected override ActionState ExecuteInternal()
         {
-            return this.armyController.MoveOneStep(this.Armies, World.Current.Map[this.X, this.Y], ref this.path,
+            return this.ArmyController.MoveOneStep(this.Armies, World.Current.Map[this.X, this.Y], ref this.path,
                 out _);
         }
 

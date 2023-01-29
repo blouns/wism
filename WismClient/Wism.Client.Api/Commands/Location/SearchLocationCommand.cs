@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Commands;
+using Wism.Client.Common;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
@@ -7,7 +9,7 @@ namespace Wism.Client.Api.Commands
 {
     public abstract class SearchLocationCommand : Command
     {
-        public SearchLocationCommand(LocationController locationController, List<Army> armies, Location location)
+        protected SearchLocationCommand(LocationController locationController, List<Army> armies, Location location)
         {
             this.LocationController = locationController ?? throw new ArgumentNullException(nameof(locationController));
             this.Armies = armies ?? throw new ArgumentNullException(nameof(armies));

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.AI.Adapta.Strategic.UtilityValuation;
+using Wism.Client.AI.Adapta.StrategicModules.ValuationStrategies;
 using Wism.Client.AI.Adapta.TacticalModules;
 using Wism.Client.Common;
 using Wism.Client.Core;

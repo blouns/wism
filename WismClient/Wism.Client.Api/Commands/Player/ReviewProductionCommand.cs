@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
+using Wism.Client.Core.Armies;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Player
 {
     public class ReviewProductionCommand : Command
     {
         private readonly CityController cityController;
 
-        public ReviewProductionCommand(CityController cityController, Player player)
+        public ReviewProductionCommand(CityController cityController, Core.Player player)
             : base(player)
         {
             this.cityController = cityController ?? throw new ArgumentNullException(nameof(cityController));

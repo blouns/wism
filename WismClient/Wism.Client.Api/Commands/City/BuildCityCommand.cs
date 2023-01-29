@@ -1,12 +1,11 @@
 ﻿using System;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.City
 {
     public class BuildCityCommand : Command
     {
-        public BuildCityCommand(CityController cityController, City city)
+        public BuildCityCommand(CityController cityController, MapObjects.City city)
             : base(city.Player)
         {
             this.CityController = cityController ?? throw new ArgumentNullException(nameof(cityController));
@@ -15,7 +14,7 @@ namespace Wism.Client.Api.Commands
 
         public CityController CityController { get; }
 
-        public City City { get; }
+        public MapObjects.City City { get; }
 
         protected override ActionState ExecuteInternal()
         {

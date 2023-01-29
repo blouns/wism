@@ -1,8 +1,7 @@
 ﻿using System;
-using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands
 {
     public abstract class Command : ICommandAction
     {
@@ -10,14 +9,14 @@ namespace Wism.Client.Api.Commands
         {
         }
 
-        public Command(Player player)
+        public Command(Core.Player player)
         {
             this.Player = player ?? throw new ArgumentNullException(nameof(player));
         }
 
         public int Id { get; set; }
 
-        public Player Player { get; set; }
+        public Core.Player Player { get; set; }
 
         public ActionState Result { get; private set; }
 

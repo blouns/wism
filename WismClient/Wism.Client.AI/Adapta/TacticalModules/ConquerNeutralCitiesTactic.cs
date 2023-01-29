@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.AI.Task;
-using Wism.Client.Api.Commands;
+using Wism.Client.AI.Intelligence;
+using Wism.Client.Commands.Army;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
@@ -16,8 +17,7 @@ namespace Wism.Client.AI.Adapta.TacticalModules
 
         //private readonly SimplePriorityQueue<Bid> bidQueue = new SimplePriorityQueue<Bid>();
 
-        public override Dictionary<Army, Bid> GenerateArmyBids(List<Army> myArmies, List<City> myCities,
-            TargetPortfolio targets)
+        public override Dictionary<Army, Bid> GenerateArmyBids(List<Army> myArmies, List<City> myCities, TargetPortfolio targets)
         {
             var armyBidMap = new Dictionary<Army, Bid>();
 

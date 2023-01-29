@@ -1,8 +1,10 @@
 ﻿using System;
 using NUnit.Framework;
 using Wism.Client.Core;
+using Wism.Client.Core.Armies;
+using Wism.Client.Core.Armies.WarStrategies;
 using Wism.Client.Modules;
-using Wism.Client.War;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Test.Unit;
 

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using Wism.Client.Core;
-using Wism.Client.Entities;
+using Wism.Client.Core.Armies;
+using Wism.Client.Core.Boons;
+using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Test.Common;

@@ -13,7 +13,7 @@ namespace Wism.Client.Commands.Army
 
         protected override ActionState ExecuteInternal()
         {
-            this.armyController.SelectArmy(this.Armies);
+            this.ArmyController.SelectArmy(this.Armies);
 
             return ActionState.Succeeded;
         }

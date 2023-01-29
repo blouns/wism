@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.AI.Task;
-using Wism.Client.Core.Controllers;
+using Wism.Client.AI.Intelligence;
+using Wism.Client.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.AI.Adapta.TacticalModules
@@ -10,7 +10,7 @@ namespace Wism.Client.AI.Adapta.TacticalModules
     {
         public const int MaxBids = 100;
 
-        public TacticalModule(ControllerProvider cp)
+        protected TacticalModule(ControllerProvider cp)
         {
             this.ControllerProvider = cp ?? throw new ArgumentNullException(nameof(cp));
         }

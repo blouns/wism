@@ -1,7 +1,7 @@
 ﻿using System;
 using Wism.Client.Core;
 
-namespace Wism.Client.AI.Task
+namespace Wism.Client.AI.Intelligence
 {
     /// <summary>
     ///     Detect MapObjects to action on.
@@ -16,7 +16,7 @@ namespace Wism.Client.AI.Task
         public World World { get; }
 
         /// <summary>
-        ///     Find objects on map relavant to player and stuff them in the bag.
+        ///     Find objects on map relevant to player and stuff them in the bag.
         /// </summary>
         /// <param name="player">Player to search on behalf of</param>
         /// <returns>Bag of objects</returns>

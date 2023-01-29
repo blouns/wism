@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
+using Wism.Client.Api.Commands;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Army
 {
     public abstract class ArmyCommand : Command
     {
-        protected readonly ArmyController armyController;
+        protected readonly ArmyController ArmyController;
 
-        public ArmyCommand(ArmyController armyController, List<Army> armies)
+        protected ArmyCommand(ArmyController armyController, List<MapObjects.Army> armies)
         {
-            this.armyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
+            this.ArmyController = armyController ?? throw new ArgumentNullException(nameof(armyController));
             this.Armies = armies ?? throw new ArgumentNullException(nameof(armies));
             this.Player = this.Armies[0].Player;
         }
 
-        public List<Army> Armies { get; set; }
+        public List<MapObjects.Army> Armies { get; set; }
     }
 }

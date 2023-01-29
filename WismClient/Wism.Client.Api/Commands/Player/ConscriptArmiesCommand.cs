@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
-using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Player
 {
     public class ConscriptArmiesCommand : Command
     {
         private readonly PlayerController playerController;
 
-        public ConscriptArmiesCommand(PlayerController playerController, Player player, Tile tile,
+        public ConscriptArmiesCommand(PlayerController playerController, Core.Player player, Tile tile,
             List<ArmyInfo> armyKinds)
             : base(player)
         {
@@ -29,7 +28,7 @@ namespace Wism.Client.Api.Commands
 
         public List<ArmyInfo> ArmyKinds { get; set; }
 
-        public List<Army> ArmiesResult { get; private set; }
+        public List<MapObjects.Army> ArmiesResult { get; private set; }
 
         protected override ActionState ExecuteInternal()
         {
@@ -38,7 +37,7 @@ namespace Wism.Client.Api.Commands
 
             if (state == ActionState.Succeeded)
             {
-                this.ArmiesResult = new List<Army>(armies);
+                this.ArmiesResult = new List<MapObjects.Army>(armies);
             }
 
             return state;

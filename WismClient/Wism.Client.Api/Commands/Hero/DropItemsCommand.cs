@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Hero
 {
     public class DropItemsCommand : Command
     {
@@ -15,7 +15,7 @@ namespace Wism.Client.Api.Commands
         /// <param name="heroController">Hero controller</param>
         /// <param name="hero">Hero to drop items</param>
         /// <param name="items">Items to drop</param>
-        public DropItemsCommand(HeroController heroController, Hero hero, List<Artifact> items)
+        public DropItemsCommand(HeroController heroController, MapObjects.Hero hero, List<Artifact> items)
         {
             this.heroController = heroController ?? throw new ArgumentNullException(nameof(heroController));
             this.Hero = hero ?? throw new ArgumentNullException(nameof(hero));
@@ -27,12 +27,12 @@ namespace Wism.Client.Api.Commands
         /// </summary>
         /// <param name="heroController">Hero controller</param>
         /// <param name="hero">Hero to drop the items</param>
-        public DropItemsCommand(HeroController heroController, Hero hero)
+        public DropItemsCommand(HeroController heroController, MapObjects.Hero hero)
             : this(heroController, hero, hero.Items)
         {
         }
 
-        public Hero Hero { get; set; }
+        public MapObjects.Hero Hero { get; set; }
         public List<Artifact> Items { get; }
 
         protected override ActionState ExecuteInternal()

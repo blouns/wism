@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Common;
+using Wism.Client.Comparers;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
-using Wism.Client.MapObjects;
 
-namespace Wism.Client.Api.Commands
+namespace Wism.Client.Commands.Army
 {
     public class CompleteBattleCommand : ArmyCommand
     {
@@ -22,14 +23,14 @@ namespace Wism.Client.Api.Commands
         public int X { get; }
         public int Y { get; }
 
-        public List<Army> Defenders { get; }
+        public List<MapObjects.Army> Defenders { get; }
         public AttackOnceCommand AttackCommand { get; }
         public Tile TargetTile { get; }
 
 
         protected override ActionState ExecuteInternal()
         {
-            return this.armyController.CompleteBattle(
+            return this.ArmyController.CompleteBattle(
                 this.AttackCommand.OriginalAttackingArmies,
                 this.TargetTile,
                 this.AttackCommand.Result == ActionState.Succeeded);

@@ -2,11 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
-using Wism.Client.Api.CommandProviders;
 using Wism.Client.Api.Commands;
+using Wism.Client.CommandProviders;
+using Wism.Client.Commands;
+using Wism.Client.Commands.Army;
+using Wism.Client.Commands.City;
+using Wism.Client.Commands.Hero;
+using Wism.Client.Commands.Location;
+using Wism.Client.Commands.Player;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Controllers;
 using Wism.Client.Data;
 using Wism.Client.Data.Entities;
 using Wism.Client.Factories;
@@ -14,7 +21,7 @@ using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Modules.Infos;
 
-namespace Wism.Client.Agent;
+namespace Wism.Client.Agent.CommandProviders;
 
 public class ConsoleCommandProvider : ICommandProvider
 {

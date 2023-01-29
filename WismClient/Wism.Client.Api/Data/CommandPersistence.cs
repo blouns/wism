@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Wism.Client.Api.Commands;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Army;
 using Wism.Client.Commands.Game;
@@ -17,7 +18,7 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Data
 {
-    public static class CommandPersistance
+    public static class CommandPersistence
     {
         public static CommandEntity[] SnapshotCommands(List<Command> commands)
         {

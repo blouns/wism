@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Wism.Client.Api.Commands;
+using Wism.Client.Commands;
+using Wism.Client.Commands.Army;
+using Wism.Client.Commands.Location;
+using Wism.Client.Commands.Player;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
