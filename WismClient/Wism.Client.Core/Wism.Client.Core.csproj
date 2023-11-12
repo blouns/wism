@@ -11,7 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -82,8 +82,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec
-			Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netstandard2.0\mod\*&quot; &quot;$(ProjectDir)..\bin\Debug\netcoreapp3.1\mod\*&quot;" />
+		<Exec Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netstandard2.0\mod\*&quot; &quot;$(ProjectDir)..\bin\Debug\netcoreapp3.1\mod\*&quot;" />
 	</Target>
 
 </Project>
