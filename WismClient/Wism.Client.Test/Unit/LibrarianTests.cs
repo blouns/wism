@@ -405,7 +405,7 @@ public class LibrarianTests
         artifact = librarian.GetArtifact("Firesword");
 
         // Assert
-        Assert.AreEqual("Firesword", artifact.DisplayName);
+        Assert.That(artifact.DisplayName, Is.EqualTo("Firesword"));
     }
 
     [Test]
@@ -491,7 +491,7 @@ public class LibrarianTests
         location = librarian.GetLocation("CryptKeeper");
 
         // Assert
-        Assert.AreEqual("Crypt Keeper's Lair", location.DisplayName);
+        Assert.That(location.DisplayName, Is.EqualTo("Crypt Keeper's Lair"));
     }
 
     [Test]

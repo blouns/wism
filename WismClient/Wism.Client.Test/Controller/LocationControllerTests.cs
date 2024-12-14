@@ -29,7 +29,7 @@ public class LocationControllerTests
         // Assert
         Assert.IsTrue(result);
         Assert.IsTrue(location.Searched);
-        Assert.AreEqual(1, armiesBlessed);
+        Assert.That(armiesBlessed, Is.EqualTo(1));
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class LocationControllerTests
 
         // Assert
         Assert.IsTrue(success);
-        Assert.AreEqual(player1.Gold, gold + initialGold);
+        Assert.That(gold + initialGold, Is.EqualTo(player1.Gold));
         Assert.IsTrue(player1.Gold > initialGold);
         Assert.IsTrue(location.Searched);
     }
@@ -75,7 +75,7 @@ public class LocationControllerTests
 
         // Assert
         Assert.IsTrue(success);
-        Assert.AreEqual(expectedKnowledge, knowledge);
+        Assert.That(knowledge, Is.EqualTo(expectedKnowledge));
         Assert.IsTrue(location.Searched);
     }
 
@@ -127,8 +127,8 @@ public class LocationControllerTests
         // Assert
         // Sage can always be searched
         Assert.IsTrue(success);
-        Assert.AreEqual(0, gold);
-        Assert.AreEqual(expectedGold, player1.Gold);
+        Assert.That(gold, Is.EqualTo(0));
+        Assert.That(player1.Gold, Is.EqualTo(expectedGold));
         Assert.IsTrue(location.Searched);
     }
 }

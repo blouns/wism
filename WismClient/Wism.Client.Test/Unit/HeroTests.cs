@@ -50,13 +50,13 @@ public class HeroTests
 
         // Assert
         Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
-        Assert.AreEqual(1, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(1), "Hero does not have correct items.");
         Assert.IsTrue(hero.Items[0] is Artifact);
         Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
         var actualArtifactName = hero.Items[0].ShortName;
-        Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
-        Assert.AreEqual(5 + 1, hero.Strength, "Hero did not get the correct Combat Bonus.");
+        Assert.That(actualArtifactName, Is.EqualTo(artifact.ShortName), "Did not take the correct object.");
+        Assert.That(hero.Strength, Is.EqualTo(5 + 1), "Hero did not get the correct Combat Bonus.");
     }
 
     [Test]
@@ -82,16 +82,16 @@ public class HeroTests
 
         // Assert
         Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
-        Assert.AreEqual(2, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(2), "Hero does not have correct items.");
         Assert.IsTrue(hero.Items[0] is Artifact);
         Assert.IsTrue(hero.Items[1] is Artifact);
         Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
         var actualArtifactName1 = hero.Items[0].ShortName;
         var actualArtifactName2 = hero.Items[1].ShortName;
-        Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not take the correct object.");
-        Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not take the correct object.");
-        Assert.AreEqual(5 + 1 + 1, hero.Strength, "Hero did not get the correct Combat Bonus.");
+        Assert.That(actualArtifactName1, Is.EqualTo(artifact1.ShortName), "Did not take the correct object.");
+        Assert.That(actualArtifactName2, Is.EqualTo(artifact2.ShortName), "Did not take the correct object.");
+        Assert.That(hero.Strength, Is.EqualTo(5 + 1 + 1), "Hero did not get the correct Combat Bonus.");
     }
 
     [Test]
@@ -120,13 +120,13 @@ public class HeroTests
 
         // Assert
         Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
-        Assert.AreEqual(1, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(1), "Hero does not have correct items.");
         Assert.IsTrue(hero.Items[0] is Artifact);
         Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
         var actualArtifactName = hero.Items[0].ShortName;
-        Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
-        Assert.AreEqual(3, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
+        Assert.That(actualArtifactName, Is.EqualTo(artifact.ShortName), "Did not take the correct object.");
+        Assert.That(hero.GetCommandBonus(), Is.EqualTo(3), "Hero did not get the correct Command Bonus.");
     }
 
     [Test]
@@ -154,16 +154,16 @@ public class HeroTests
 
         // Assert
         Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
-        Assert.AreEqual(2, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(2), "Hero does not have correct items.");
         Assert.IsTrue(hero.Items[0] is Artifact);
         Assert.IsTrue(hero.Items[1] is Artifact);
         Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
         var actualArtifactName1 = hero.Items[0].ShortName;
         var actualArtifactName2 = hero.Items[1].ShortName;
-        Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not take the correct object.");
-        Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not take the correct object.");
-        Assert.AreEqual(3 + 2, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
+        Assert.That(actualArtifactName1, Is.EqualTo(artifact1.ShortName), "Did not take the correct object.");
+        Assert.That(actualArtifactName2, Is.EqualTo(artifact2.ShortName), "Did not take the correct object.");
+        Assert.That(hero.GetCommandBonus(), Is.EqualTo(3 + 2), "Hero did not get the correct Command Bonus.");
     }
 
     [Test]
@@ -191,18 +191,18 @@ public class HeroTests
 
         // Assert
         Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
-        Assert.AreEqual(2, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(2), "Hero does not have correct items.");
         Assert.IsTrue(hero.Items[0] is Artifact);
         Assert.IsTrue(hero.Items[1] is Artifact);
         Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
         var actualArtifactName1 = hero.Items[0].ShortName;
         var actualArtifactName2 = hero.Items[1].ShortName;
-        Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not take the correct object.");
-        Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not take the correct object.");
-        Assert.AreEqual(3, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual(1, hero.GetCombatBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual(6, hero.Strength, "Hero did not get the correct Command Bonus.");
+        Assert.That(actualArtifactName1, Is.EqualTo(artifact1.ShortName), "Did not take the correct object.");
+        Assert.That(actualArtifactName2, Is.EqualTo(artifact2.ShortName), "Did not take the correct object.");
+        Assert.That(hero.GetCommandBonus(), Is.EqualTo(3), "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.GetCombatBonus(), Is.EqualTo(1), "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.Strength, Is.EqualTo(6), "Hero did not get the correct Command Bonus.");
     }
 
     [Test]
@@ -247,12 +247,12 @@ public class HeroTests
 
         // Assert
         Assert.IsFalse(hero.HasItems(), "Hero should have dropped the item.");
-        Assert.AreEqual(0, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(0), "Hero does not have correct items.");
         Assert.IsTrue(tile.HasItems(), "Tile did not get the item.");
         Assert.IsTrue(tile.Items[0] is Artifact);
         var actualArtifactName = tile.Items[0].ShortName;
-        Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not drop the correct object.");
-        Assert.AreEqual(5 + 0, hero.Strength, "Hero did not get the correct Combat Bonus.");
+        Assert.That(actualArtifactName, Is.EqualTo(artifact.ShortName), "Did not drop the correct object.");
+        Assert.That(hero.Strength, Is.EqualTo(5 + 0), "Hero did not get the correct Combat Bonus.");
     }
 
     [Test]
@@ -280,17 +280,17 @@ public class HeroTests
 
         // Assert
         Assert.IsFalse(hero.HasItems(), "Hero should have dropped the item.");
-        Assert.AreEqual(2, tile.Items.Count, "Tile does not have correct items.");
+        Assert.That(tile.Items.Count, Is.EqualTo(2), "Tile does not have correct items.");
         Assert.IsTrue(tile.Items[0] is Artifact);
         Assert.IsTrue(tile.Items[1] is Artifact);
 
         var actualArtifactName1 = tile.Items[0].ShortName;
         var actualArtifactName2 = tile.Items[1].ShortName;
-        Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not drop the correct object.");
-        Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not drop the correct object.");
-        Assert.AreEqual(0, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual(0, hero.GetCombatBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual(5 + 0, hero.Strength, "Hero did not get the correct Command Bonus.");
+        Assert.That(actualArtifactName1, Is.EqualTo(artifact1.ShortName), "Did not drop the correct object.");
+        Assert.That(actualArtifactName2, Is.EqualTo(artifact2.ShortName), "Did not drop the correct object.");
+        Assert.That(hero.GetCommandBonus(), Is.EqualTo(0), "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.GetCombatBonus(), Is.EqualTo(0), "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.Strength, Is.EqualTo(5 + 0), "Hero did not get the correct Command Bonus.");
     }
 
     [Test]
@@ -322,28 +322,28 @@ public class HeroTests
 
         // Assert
         Assert.IsTrue(hero.HasItems(), "Hero should have items.");
-        Assert.AreEqual(2, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(2), "Hero does not have correct items.");
         Assert.IsTrue(hero.Items[0] is Artifact);
         Assert.IsTrue(hero.Items[1] is Artifact);
 
         Assert.IsTrue(tile.HasItems(), "Tile should have items.");
-        Assert.AreEqual(2, tile.Items.Count, "Hero does not have correct items.");
+        Assert.That(tile.Items.Count, Is.EqualTo(2), "Hero does not have correct items.");
         Assert.IsTrue(tile.Items[0] is Artifact);
         Assert.IsTrue(tile.Items[1] is Artifact);
 
         var actualArtifactName2 = hero.Items[0].ShortName;
         var actualArtifactName4 = hero.Items[1].ShortName;
-        Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not drop the correct object.");
-        Assert.AreEqual(artifact4.ShortName, actualArtifactName4, "Did not drop the correct object.");
+        Assert.That(actualArtifactName2, Is.EqualTo(artifact2.ShortName), "Did not drop the correct object.");
+        Assert.That(actualArtifactName4, Is.EqualTo(artifact4.ShortName), "Did not drop the correct object.");
 
         var actualArtifactName1 = tile.Items[0].ShortName;
         var actualArtifactName3 = tile.Items[1].ShortName;
-        Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not drop the correct object.");
-        Assert.AreEqual(artifact3.ShortName, actualArtifactName3, "Did not drop the correct object.");
+        Assert.That(actualArtifactName1, Is.EqualTo(artifact1.ShortName), "Did not drop the correct object.");
+        Assert.That(actualArtifactName3, Is.EqualTo(artifact3.ShortName), "Did not drop the correct object.");
 
-        Assert.AreEqual(2, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual(1, hero.GetCombatBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual(5 + 1, hero.Strength, "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.GetCommandBonus(), Is.EqualTo(2), "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.GetCombatBonus(), Is.EqualTo(1), "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.Strength, Is.EqualTo(5 + 1), "Hero did not get the correct Command Bonus.");
     }
 
     [Test]
@@ -368,17 +368,17 @@ public class HeroTests
 
         // Assert
         Assert.IsFalse(hero.HasItems(), "Hero should have dropped the item.");
-        Assert.AreEqual(2, tile.Items.Count, "Tile does not have correct items.");
+        Assert.That(tile.Items.Count, Is.EqualTo(2), "Tile does not have correct items.");
         Assert.IsTrue(tile.Items[0] is Artifact);
         Assert.IsTrue(tile.Items[1] is Artifact);
 
         var actualArtifactName1 = tile.Items[0].ShortName;
         var actualArtifactName2 = tile.Items[1].ShortName;
-        Assert.AreEqual(artifact1.ShortName, actualArtifactName1, "Did not drop the correct object.");
-        Assert.AreEqual(artifact2.ShortName, actualArtifactName2, "Did not drop the correct object.");
-        Assert.AreEqual(0, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual(0, hero.GetCombatBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual(5 + 0, hero.Strength, "Hero did not get the correct Command Bonus.");
+        Assert.That(actualArtifactName1, Is.EqualTo(artifact1.ShortName), "Did not drop the correct object.");
+        Assert.That(actualArtifactName2, Is.EqualTo(artifact2.ShortName), "Did not drop the correct object.");
+        Assert.That(hero.GetCommandBonus(), Is.EqualTo(0), "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.GetCombatBonus(), Is.EqualTo(0), "Hero did not get the correct Command Bonus.");
+        Assert.That(hero.Strength, Is.EqualTo(5 + 0), "Hero did not get the correct Command Bonus.");
         Assert.IsTrue(hero.IsDead, "Hero has been resurrected and is haunting you.");
     }
 
@@ -409,14 +409,14 @@ public class HeroTests
 
         // Assert
         Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
-        Assert.AreEqual(1, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(1), "Hero does not have correct items.");
         Assert.IsTrue(hero.Items[0] is Artifact);
         Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
         var actualArtifactName = hero.Items[0].ShortName;
-        Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
-        Assert.AreEqual(1, hero.GetCommandBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual("Cooper layed down and got fur everywhere.", interaction,
+        Assert.That(actualArtifactName, Is.EqualTo(artifact.ShortName), "Did not take the correct object.");
+        Assert.That(hero.GetCommandBonus(), Is.EqualTo(1), "Hero did not get the correct Command Bonus.");
+        Assert.That(interaction, Is.EqualTo("Cooper layed down and got fur everywhere."),
             "Cooper did not have the expected reaction");
     }
 
@@ -447,14 +447,14 @@ public class HeroTests
 
         // Assert
         Assert.IsTrue(hero.HasItems(), "Hero should have taken the item.");
-        Assert.AreEqual(1, hero.Items.Count, "Hero does not have correct items.");
+        Assert.That(hero.Items.Count, Is.EqualTo(1), "Hero does not have correct items.");
         Assert.IsTrue(hero.Items[0] is Artifact);
         Assert.IsFalse(tile.HasItems(), "Tile still has item(s)");
 
         var actualArtifactName = hero.Items[0].ShortName;
-        Assert.AreEqual(artifact.ShortName, actualArtifactName, "Did not take the correct object.");
-        Assert.AreEqual(1, hero.GetCombatBonus(), "Hero did not get the correct Command Bonus.");
-        Assert.AreEqual("Wilson sat down and farted.", interaction, "Wilson did not have the expected reaction");
+        Assert.That(actualArtifactName, Is.EqualTo(artifact.ShortName), "Did not take the correct object.");
+        Assert.That(hero.GetCombatBonus(), Is.EqualTo(1), "Hero did not get the correct Command Bonus.");
+        Assert.That(interaction, Is.EqualTo("Wilson sat down and farted."), "Wilson did not have the expected reaction");
     }
 
     private static Artifact FindArtifact(string artifactName)

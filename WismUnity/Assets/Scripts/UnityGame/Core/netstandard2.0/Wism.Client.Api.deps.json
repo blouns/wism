@@ -36,7 +36,10 @@
           "Newtonsoft.Json": "13.0.3"
         },
         "runtime": {
-          "Wism.Client.Core.dll": {}
+          "Wism.Client.Core.dll": {
+            "assemblyVersion": "0.2.0",
+            "fileVersion": "0.2.0.0"
+          }
         }
       }
     }

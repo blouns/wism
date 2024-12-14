@@ -60,11 +60,11 @@ public class ModFactoryTest
             if (clan.DisplayName == "Orcs of Kor")
             {
                 foundOrcs = true;
-                Assert.AreEqual(1, clan.GetTerrainModifier("Marsh"));
-                Assert.AreEqual(-1, clan.GetTerrainModifier("Forest"));
-                Assert.AreEqual(0, clan.GetTerrainModifier("Grass"));
-                Assert.AreEqual(0, clan.GetTerrainModifier("Hill"));
-                Assert.AreEqual(0, clan.GetTerrainModifier("OuterSpace"));
+                Assert.That(clan.GetTerrainModifier("Marsh"), Is.EqualTo(1));
+                Assert.That(clan.GetTerrainModifier("Forest"), Is.EqualTo(-1));
+                Assert.That(clan.GetTerrainModifier("Grass"), Is.EqualTo(0));
+                Assert.That(clan.GetTerrainModifier("Hill"), Is.EqualTo(0));
+                Assert.That(clan.GetTerrainModifier("OuterSpace"), Is.EqualTo(0));
             }
         }
 

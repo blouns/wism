@@ -18,7 +18,7 @@ public class GameTests
         Game.Current.EndTurn();
 
         // Assert
-        Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.EqualTo(player2),
             "Current player is incorrect.");
     }
 
@@ -35,7 +35,7 @@ public class GameTests
         Game.Current.StartTurn();
 
         // Assert
-        Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.EqualTo(player2),
             "Current player is incorrect.");
         Assert.IsTrue(player2.IsDead, "Player should be dead.");
     }

@@ -53,11 +53,11 @@ public class TargetIntelligenceTests
 
         // Assert
         Assert.NotNull(taskableObjects.OpposingArmies, "Should have found at least one army.");
-        Assert.AreEqual(2, taskableObjects.OpposingArmies.Count, "Should have found two opposing armies.");
-        Assert.AreEqual(siriansHero1[0].ShortName, "Hero", "Did not find hero.");
-        Assert.AreEqual(siriansHero1[0].Clan.ShortName, "Sirians", "Was not opposing army.");
-        Assert.AreEqual(siriansHero2[0].ShortName, "Hero", "Did not find hero.");
-        Assert.AreEqual(siriansHero2[0].Clan.ShortName, "Sirians", "Was not opposing army.");
+        Assert.That(taskableObjects.OpposingArmies.Count, Is.EqualTo(2), "Should have found two opposing armies.");
+        Assert.That("Hero", Is.EqualTo(siriansHero1[0].ShortName), "Did not find hero.");
+        Assert.That("Sirians", Is.EqualTo(siriansHero1[0].Clan.ShortName), "Was not opposing army.");
+        Assert.That("Hero", Is.EqualTo(siriansHero2[0].ShortName), "Did not find hero.");
+        Assert.That("Sirians", Is.EqualTo(siriansHero2[0].Clan.ShortName), "Was not opposing army.");
     }
 
     [Test]
@@ -114,9 +114,9 @@ public class TargetIntelligenceTests
 
         // Assert            
         Assert.NotNull(targets.OpposingCities, "Should be a valid list.");
-        Assert.AreEqual(1, targets.OpposingCities.Count, "Did not find expected number of cities.");
+        Assert.That(targets.OpposingCities.Count, Is.EqualTo(1), "Did not find expected number of cities.");
         var expectedCity = targets.OpposingCities[0];
-        Assert.AreEqual("Marthos", expectedCity.ShortName, "Did not find expected city.");
+        Assert.That(expectedCity.ShortName, Is.EqualTo("Marthos"), "Did not find expected city.");
     }
 
     [Test]
@@ -139,9 +139,9 @@ public class TargetIntelligenceTests
 
         // Assert            
         Assert.NotNull(taskableObjects.OpposingCities, "Should be a valid list.");
-        Assert.AreEqual(1, taskableObjects.OpposingCities.Count, "Did not find expected number of cities.");
+        Assert.That(taskableObjects.OpposingCities.Count, Is.EqualTo(1), "Did not find expected number of cities.");
         var expectedCity = taskableObjects.NeutralCities[0];
-        Assert.AreEqual("Deserton", expectedCity.ShortName, "Did not find expected city.");
+        Assert.That(expectedCity.ShortName, Is.EqualTo("Deserton"), "Did not find expected city.");
     }
 
     [Test]
@@ -164,7 +164,7 @@ public class TargetIntelligenceTests
 
         // Assert
         Assert.NotNull(taskableObjects.UnsearchedLocations, "Should be a valid list.");
-        Assert.AreEqual(3, taskableObjects.UnsearchedLocations.Count,
+        Assert.That(taskableObjects.UnsearchedLocations.Count, Is.EqualTo(3),
             "Did not find expected number of unsearched locations.");
     }
 
@@ -197,7 +197,7 @@ public class TargetIntelligenceTests
 
         // Assert
         Assert.NotNull(taskableObjects.UnsearchedLocations, "Should be a valid list.");
-        Assert.AreEqual(2, taskableObjects.UnsearchedLocations.Count,
+        Assert.That(taskableObjects.UnsearchedLocations.Count, Is.EqualTo(2),
             "Did not find expected number of unsearched locations.");
     }
 
@@ -273,7 +273,7 @@ public class TargetIntelligenceTests
 
         // Assert
         Assert.NotNull(taskableObjects.LooseItems, "Should be a valid list.");
-        Assert.AreEqual(1, taskableObjects.LooseItems.Count, "Did not find expected number of loose items.");
+        Assert.That(taskableObjects.LooseItems.Count, Is.EqualTo(1), "Did not find expected number of loose items.");
     }
 
     [Test]

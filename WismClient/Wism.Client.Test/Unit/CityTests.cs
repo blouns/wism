@@ -34,19 +34,19 @@ public class CityTests
         World.Current.AddCity(city, tile);
 
         // Assert
-        Assert.AreEqual(tile, city.Tile);
-        Assert.AreEqual("Marthos", city.DisplayName);
+        Assert.That(city.Tile, Is.EqualTo(tile));
+        Assert.That(city.DisplayName, Is.EqualTo("Marthos"));
 
         var tiles = city.GetTiles();
         Assert.IsNotNull(tiles);
         for (var i = 0; i < 4; i++)
         {
             Assert.IsNotNull(tiles[i]);
-            Assert.AreEqual(expectedTerrain, tiles[i].Terrain);
-            Assert.AreEqual(city, tiles[i].City);
+            Assert.That(tiles[i].Terrain, Is.EqualTo(expectedTerrain));
+            Assert.That(tiles[i].City, Is.EqualTo(city));
         }
 
-        Assert.AreEqual(0, city.MusterArmies().Count, "Did not expect any armies.");
+        Assert.That(city.MusterArmies().Count, Is.EqualTo(0), "Did not expect any armies.");
     }
 
     [Test]
@@ -67,8 +67,8 @@ public class CityTests
 
         // Assert
         Assert.IsTrue(result, $"Build unsuccessful on city: {city}");
-        Assert.AreEqual(0, player.Gold, "Player should be out of money");
-        Assert.AreEqual(defense + 1, city.Defense, "Defense value did not increase after successful build.");
+        Assert.That(player.Gold, Is.EqualTo(0), "Player should be out of money");
+        Assert.That(city.Defense, Is.EqualTo(defense + 1), "Defense value did not increase after successful build.");
     }
 
     [Test]
@@ -89,8 +89,8 @@ public class CityTests
 
         // Assert
         Assert.IsFalse(result, $"Build successful on city: {city}");
-        Assert.AreEqual(174, player.Gold, "Player should not have been charged");
-        Assert.AreEqual(defense, city.Defense, "Defense value did not increase after successful build.");
+        Assert.That(player.Gold, Is.EqualTo(174), "Player should not have been charged");
+        Assert.That(city.Defense, Is.EqualTo(defense), "Defense value did not increase after successful build.");
     }
 
     [Test]
@@ -117,8 +117,8 @@ public class CityTests
 
         // Assert
         Assert.IsTrue(result, $"Build unsuccessful on city: {city}");
-        Assert.AreEqual(0, player.Gold, "Player should be out of money");
-        Assert.AreEqual(City.MaxDefense, city.Defense, "Defense value did not increase after successful build.");
+        Assert.That(player.Gold, Is.EqualTo(0), "Player should be out of money");
+        Assert.That(city.Defense, Is.EqualTo(City.MaxDefense), "Defense value did not increase after successful build.");
         Assert.IsFalse(overMaxResult, "Succeeding in building beyond legendary defenses!");
     }
 
@@ -138,7 +138,7 @@ public class CityTests
         var tiles = city.GetTiles();
         for (var i = 0; i < 4; i++)
         {
-            Assert.AreEqual(expectedTerrain, tiles[i].Terrain);
+            Assert.That(tiles[i].Terrain, Is.EqualTo(expectedTerrain));
             Assert.IsNull(tiles[i].City);
         }
     }
@@ -162,10 +162,10 @@ public class CityTests
         for (var i = 0; i < 4; i++)
         {
             Assert.IsNotNull(tiles[i]);
-            Assert.AreEqual(tiles[i].City.Clan, city.Clan);
+            Assert.That(city.Clan, Is.EqualTo(tiles[i].City.Clan));
         }
 
-        Assert.AreEqual(expectedPlayer.Clan, city.Clan);
+        Assert.That(city.Clan, Is.EqualTo(expectedPlayer.Clan));
     }
 
     [Test]
@@ -192,9 +192,9 @@ public class CityTests
         Assert.IsFalse(city.Barracks.HasDeliveries());
 
         var ait = city.Barracks.ArmyInTraining;
-        Assert.AreEqual(armyInfo, ait.ArmyInfo);
-        Assert.AreEqual(1, ait.TurnsToProduce, "Turns to produce are off expectation");
-        Assert.AreEqual(gold - 4, expectedPlayer.Gold, "Player's gold was off expectation.");
+        Assert.That(ait.ArmyInfo, Is.EqualTo(armyInfo));
+        Assert.That(ait.TurnsToProduce, Is.EqualTo(1), "Turns to produce are off expectation");
+        Assert.That(expectedPlayer.Gold, Is.EqualTo(gold - 4), "Player's gold was off expectation.");
     }
 
     [Test]
@@ -258,7 +258,7 @@ public class CityTests
 
         // Assert           
         Assert.IsTrue(result, "Production failed to start.");
-        Assert.AreEqual(startingGold - 4, player.Gold, "Gold should have reflected the production costs.");
+        Assert.That(player.Gold, Is.EqualTo(startingGold - 4), "Gold should have reflected the production costs.");
         Assert.IsNull(city.Barracks.ArmyInTraining);
         Assert.IsFalse(city.Barracks.ProducingArmy());
     }
@@ -289,16 +289,16 @@ public class CityTests
         Assert.IsFalse(city.Barracks.ProducingArmy());
         Assert.IsFalse(city.Barracks.HasDeliveries());
 
-        Assert.AreEqual(1, player.GetArmies().Count, "Army was not deployed.");
+        Assert.That(player.GetArmies().Count, Is.EqualTo(1), "Army was not deployed.");
         Assert.IsNotNull(tile.Armies, "Army was not deployed");
-        Assert.AreEqual(1, tile.Armies.Count);
+        Assert.That(tile.Armies.Count, Is.EqualTo(1));
 
         // Army validation
         var army = tile.Armies[0];
-        Assert.AreEqual(armyInfo.ShortName, army.ShortName, "Did not produce the correct army.");
-        Assert.AreEqual(10, army.Moves);
-        Assert.AreEqual(3, army.Strength);
-        Assert.AreEqual(4, army.Upkeep);
+        Assert.That(army.ShortName, Is.EqualTo(armyInfo.ShortName), "Did not produce the correct army.");
+        Assert.That(army.Moves, Is.EqualTo(10));
+        Assert.That(army.Strength, Is.EqualTo(3));
+        Assert.That(army.Upkeep, Is.EqualTo(4));
     }
 
     [Test]
@@ -336,23 +336,23 @@ public class CityTests
 
         // Assert    
         Assert.IsTrue(result, "Production failed to start.");
-        Assert.AreEqual(1, turnsToProduce, "Took an unexpected amount of time to produce.");
-        Assert.AreEqual(3, turnsToDeliver, "Took an unexpected amount of time to deliver.");
+        Assert.That(turnsToProduce, Is.EqualTo(1), "Took an unexpected amount of time to produce.");
+        Assert.That(turnsToDeliver, Is.EqualTo(3), "Took an unexpected amount of time to deliver.");
         Assert.IsFalse(marthos.Barracks.ProducingArmy());
         Assert.IsFalse(marthos.Barracks.HasDeliveries());
 
-        Assert.AreEqual(1, player.GetArmies().Count, "Army was not deployed.");
+        Assert.That(player.GetArmies().Count, Is.EqualTo(1), "Army was not deployed.");
         Assert.IsNotNull(stormheim.Tile.Armies, "Army was not deployed.");
-        Assert.AreEqual(1, stormheim.Tile.Armies.Count);
+        Assert.That(stormheim.Tile.Armies.Count, Is.EqualTo(1));
         Assert.IsNull(marthos.Tile.Armies, "Army was deployed to wrong city.");
 
         // Army validation
         var army = stormheim.Tile.Armies[0];
-        Assert.AreEqual(armyInfo.ShortName, army.ShortName, "Did not produce the correct army.");
-        Assert.AreEqual(10, army.Moves);
-        Assert.AreEqual(3, army.Strength);
-        Assert.AreEqual(4, army.Upkeep);
-        Assert.AreEqual("Marthos 1st Light Infantry", army.DisplayName);
+        Assert.That(army.ShortName, Is.EqualTo(armyInfo.ShortName), "Did not produce the correct army.");
+        Assert.That(army.Moves, Is.EqualTo(10));
+        Assert.That(army.Strength, Is.EqualTo(3));
+        Assert.That(army.Upkeep, Is.EqualTo(4));
+        Assert.That(army.DisplayName, Is.EqualTo("Marthos 1st Light Infantry"));
     }
 
 
@@ -387,21 +387,21 @@ public class CityTests
         }
 
         // Assert                         
-        Assert.AreEqual(NumberOfArmiesToProduce, player.GetArmies().Count, "Not all armies were deployed");
+        Assert.That(player.GetArmies().Count, Is.EqualTo(NumberOfArmiesToProduce), "Not all armies were deployed");
         Assert.IsNotNull(tile.Armies, "Army was not deployed");
-        Assert.AreEqual(8, tile.Armies.Count);
+        Assert.That(tile.Armies.Count, Is.EqualTo(8));
 
         // City tiles should be full (8 x 4)
         var tiles = city.GetTiles();
         for (var i = 0; i < tiles.Length; i++)
         {
-            Assert.AreEqual(8, tiles[i].Armies.Count, "Unexpected number of armies deployed to city tile");
+            Assert.That(tiles[i].Armies.Count, Is.EqualTo(8), "Unexpected number of armies deployed to city tile");
         }
 
         // Surrounding tiles should have one tile full (8) and one tile with one (1) army
         Assert.IsNotNull(World.Current.Map[1, 3].Armies.Count);
-        Assert.AreEqual(8, World.Current.Map[1, 3].Armies.Count);
+        Assert.That(World.Current.Map[1, 3].Armies.Count, Is.EqualTo(8));
         Assert.IsNotNull(World.Current.Map[2, 3].Armies.Count);
-        Assert.AreEqual(1, World.Current.Map[2, 3].Armies.Count);
+        Assert.That(World.Current.Map[2, 3].Armies.Count, Is.EqualTo(1));
     }
 }

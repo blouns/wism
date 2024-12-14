@@ -19,7 +19,7 @@ public class PlayerTests
         player1.StartTurn();
 
         // Assert
-        Assert.AreEqual(0, player1.LastHeroTurn);
+        Assert.That(player1.LastHeroTurn, Is.EqualTo(0));
     }
 
     [Test]
@@ -38,7 +38,7 @@ public class PlayerTests
         player1.StartTurn();
 
         // Assert
-        Assert.AreEqual(0, player1.LastHeroTurn);
+        Assert.That(player1.LastHeroTurn, Is.EqualTo(0));
     }
 
     [Test]
@@ -60,7 +60,7 @@ public class PlayerTests
         player1.StartTurn();
 
         // Assert
-        Assert.AreEqual(1, player1.LastHeroTurn, "Last hero turn not set");
+        Assert.That(player1.LastHeroTurn, Is.EqualTo(1), "Last hero turn not set");
     }
 
     [Test]
@@ -86,10 +86,10 @@ public class PlayerTests
         // Assert
         Assert.IsTrue(success, "No hero was available");
         Assert.IsNotEmpty(name, "No hero name");
-        Assert.AreEqual(city.ShortName, actualCity.ShortName);
+        Assert.That(actualCity.ShortName, Is.EqualTo(city.ShortName));
         Assert.IsTrue(price > 0, "Price too low");
         Assert.IsTrue(price < int.MaxValue, "Price too high");
-        Assert.AreEqual(0, player1.LastHeroTurn, "Last hero should be never (zero)");
+        Assert.That(player1.LastHeroTurn, Is.EqualTo(0), "Last hero should be never (zero)");
     }
 
     [Test]
@@ -118,7 +118,7 @@ public class PlayerTests
         player1.StartTurn();
 
         // Assert
-        Assert.AreEqual(10, player1.LastHeroTurn, "Last hero should be 10");
+        Assert.That(player1.LastHeroTurn, Is.EqualTo(10), "Last hero should be 10");
     }
 
     [Test]
@@ -158,12 +158,12 @@ public class PlayerTests
         var hired = player1.TryHireHero(tile, price, name, out var hero);
 
         // Assert
-        Assert.AreEqual(21, player1.LastHeroTurn, "Last hero should be 10");
+        Assert.That(player1.LastHeroTurn, Is.EqualTo(21), "Last hero should be 10");
         Assert.IsTrue(hired, "Did not hire the hero");
         Assert.IsNotNull(hero, "Here was null");
         Assert.IsTrue(success, "No hero was available");
         Assert.IsNotEmpty(name, "No hero name");
-        Assert.AreEqual(city.ShortName, actualCity.ShortName);
+        Assert.That(actualCity.ShortName, Is.EqualTo(city.ShortName));
         Assert.IsTrue(price > 0, "Price too low");
         Assert.IsTrue(price < int.MaxValue, "Price too high");
     }
@@ -195,7 +195,7 @@ public class PlayerTests
         player1.StartTurn();
 
         // Assert
-        Assert.AreEqual(1, player1.LastHeroTurn, "Last hero turn not set");
+        Assert.That(player1.LastHeroTurn, Is.EqualTo(1), "Last hero turn not set");
     }
 
     private static IRecruitHeroStrategy GetRecruitHeroStrategy()

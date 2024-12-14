@@ -38,8 +38,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(2, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(3, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(2), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(3), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -57,8 +57,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(1, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(2, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(1), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(2), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -76,8 +76,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(3, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(4, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(3), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(4), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -95,8 +95,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(4, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(5, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(4), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(5), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -117,8 +117,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(7, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(7), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(7), "Did not find the correct number of steps.");
     }
 
     [Test]
@@ -138,8 +138,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(12, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(12), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(7), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -160,8 +160,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(7, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(7), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(7), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -182,8 +182,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(8, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(8), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(7), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -215,7 +215,7 @@ public class PathingStrategyTests
 
         // Assert
         this.PlotRouteOnMatrix(matrix, new List<Tile>(shortestRoute));
-        Assert.AreEqual(8, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(8), "Did not find the correct number of steps.");
     }
 
     [Test]
@@ -232,8 +232,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(3, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(3, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(3), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(3), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -251,8 +251,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(2, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(2, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(2), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(2), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -270,8 +270,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(4, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(4, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(4), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(4), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -295,8 +295,8 @@ public class PathingStrategyTests
         //         Note: Includes starting point movement cost in total distance.
         //         QUESTION: Is this a limitation of the algorithm (i.e. expected with current tuning) or a bug? 
         //                   This will require more study but in practice this is not causing major issues.
-        Assert.AreEqual(6, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(3, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(6), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(3), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -317,8 +317,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(7, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(7), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(7), "Did not find the correct number of steps.");
     }
 
     [Test]
@@ -338,8 +338,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(12, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(12), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(7), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -360,8 +360,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(7, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(7), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(7), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -382,8 +382,8 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.AreEqual(8, (int)distance, "Did not find the shortest route.");
-        Assert.AreEqual(7, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(8), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(7), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
@@ -415,7 +415,7 @@ public class PathingStrategyTests
 
         // Assert
         this.PlotRouteOnMatrix(matrix, new List<Tile>(shortestRoute));
-        Assert.AreEqual(8, shortestRoute.Count, "Did not find the correct number of steps.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(8), "Did not find the correct number of steps.");
     }
 
     private void PlotRouteOnMatrix(string[,] matrix, List<Tile> path)
@@ -455,8 +455,8 @@ public class PathingStrategyTests
 
     private void AssertPathStartsWithHeroEndsWithTower(IList<Tile> shortestRoute)
     {
-        Assert.AreEqual("Hero", shortestRoute[0].Armies[0].ShortName, "Shortest path did not start with hero.");
-        Assert.AreEqual("Tower", shortestRoute.Last().Terrain.ShortName, "Shortest path did not end with tower.");
+        Assert.That(shortestRoute[0].Armies[0].ShortName, Is.EqualTo("Hero"), "Shortest path did not start with hero.");
+        Assert.That(shortestRoute.Last().Terrain.ShortName, Is.EqualTo("Tower"), "Shortest path did not end with tower.");
     }
 
     /// <summary>

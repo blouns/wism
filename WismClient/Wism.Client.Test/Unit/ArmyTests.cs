@@ -40,7 +40,7 @@ public class ArmyTests
         tile.Armies.Sort(new ByArmyViewingOrder());
 
         // Assert
-        Assert.AreEqual(tile.Armies[0].ShortName, "Hero");
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("Hero"));
     }
 
     [Test]
@@ -56,7 +56,7 @@ public class ArmyTests
         tile.Armies.Sort(new ByArmyViewingOrder());
 
         // Assert
-        Assert.AreEqual("Hero", tile.Armies[0].ShortName);
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("Hero"));
     }
 
     [Test]
@@ -73,7 +73,7 @@ public class ArmyTests
         tile.Armies.Sort(new ByArmyViewingOrder());
 
         // Assert
-        Assert.AreEqual("Hero", tile.Armies[0].ShortName);
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("Hero"));
     }
 
     [Test]
@@ -83,7 +83,7 @@ public class ArmyTests
         var tile = World.Current.Map[2, 2];
         player1.HireHero(tile);
         tile.Armies.Sort(new ByArmyBattleOrder(tile));
-        Assert.AreEqual("Hero", tile.Armies[0].ShortName);
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("Hero"));
     }
 
     [Test]
@@ -95,8 +95,8 @@ public class ArmyTests
         player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
 
         tile.Armies.Sort(new ByArmyBattleOrder(tile));
-        Assert.AreEqual("Hero", tile.Armies[1].ShortName);
-        Assert.AreEqual("LightInfantry", tile.Armies[0].ShortName);
+        Assert.That(tile.Armies[1].ShortName, Is.EqualTo("Hero"));
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("LightInfantry"));
     }
 
     [Test]
@@ -109,9 +109,9 @@ public class ArmyTests
         player1.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), tile);
 
         tile.Armies.Sort(new ByArmyBattleOrder(tile));
-        Assert.AreEqual("LightInfantry", tile.Armies[0].ShortName);
-        Assert.AreEqual("LightInfantry", tile.Armies[1].ShortName);
-        Assert.AreEqual("Hero", tile.Armies[2].ShortName);
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("LightInfantry"));
+        Assert.That(tile.Armies[1].ShortName, Is.EqualTo("LightInfantry"));
+        Assert.That(tile.Armies[2].ShortName, Is.EqualTo("Hero"));
     }
 
     [Test]
@@ -126,10 +126,10 @@ public class ArmyTests
         player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
 
         tile.Armies.Sort(new ByArmyBattleOrder(tile));
-        Assert.AreEqual("Hero", tile.Armies[3].ShortName, "Hero out of order");
-        Assert.AreEqual("Pegasus", tile.Armies[2].ShortName, "Pegasus out of order");
-        Assert.AreEqual("Pegasus", tile.Armies[1].ShortName, "Pegasus out of order");
-        Assert.AreEqual("Cavalry", tile.Armies[0].ShortName, "Cavalry out of order");
+        Assert.That(tile.Armies[3].ShortName, Is.EqualTo("Hero"), "Hero out of order");
+        Assert.That(tile.Armies[2].ShortName, Is.EqualTo("Pegasus"), "Pegasus out of order");
+        Assert.That(tile.Armies[1].ShortName, Is.EqualTo("Pegasus"), "Pegasus out of order");
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("Cavalry"), "Cavalry out of order");
     }
 
     [Test]
@@ -141,8 +141,8 @@ public class ArmyTests
         player1.HireHero(tile);
 
         tile.Armies.Sort(new ByArmyBattleOrder(tile));
-        Assert.AreEqual("Hero", tile.Armies[0].ShortName);
-        Assert.AreEqual("Hero", tile.Armies[1].ShortName);
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("Hero"));
+        Assert.That(tile.Armies[1].ShortName, Is.EqualTo("Hero"));
     }
 
     public void StackBattleOrder_TwoHeroesAndSomeArmiesTest()
@@ -159,14 +159,14 @@ public class ArmyTests
         player1.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), tile);
 
         tile.Armies.Sort(new ByArmyBattleOrder(tile));
-        Assert.AreEqual("Hero", tile.Armies[7].ShortName, "Hero out of order");
-        Assert.AreEqual("Hero", tile.Armies[6].ShortName, "Hero out of order");
-        Assert.AreEqual("Pegasus", tile.Armies[5].ShortName, "Pegasus out of order");
-        Assert.AreEqual("Pegasus", tile.Armies[4].ShortName, "Pegasus out of order");
-        Assert.AreEqual("Cavalry", tile.Armies[3].ShortName, "Cavalry out of order");
-        Assert.AreEqual("HeavyInfantry", tile.Armies[2].ShortName, "Heavy infantry out of order");
-        Assert.AreEqual("LightInfantry", tile.Armies[1].ShortName, "Light infantry out of order");
-        Assert.AreEqual("LightInfantry", tile.Armies[0].ShortName, "Light infantry out of order");
+        Assert.That(tile.Armies[7].ShortName, Is.EqualTo("Hero"), "Hero out of order");
+        Assert.That(tile.Armies[6].ShortName, Is.EqualTo("Hero"), "Hero out of order");
+        Assert.That(tile.Armies[5].ShortName, Is.EqualTo("Pegasus"), "Pegasus out of order");
+        Assert.That(tile.Armies[4].ShortName, Is.EqualTo("Pegasus"), "Pegasus out of order");
+        Assert.That(tile.Armies[3].ShortName, Is.EqualTo("Cavalry"), "Cavalry out of order");
+        Assert.That(tile.Armies[2].ShortName, Is.EqualTo("HeavyInfantry"), "Heavy infantry out of order");
+        Assert.That(tile.Armies[1].ShortName, Is.EqualTo("LightInfantry"), "Light infantry out of order");
+        Assert.That(tile.Armies[0].ShortName, Is.EqualTo("LightInfantry"), "Light infantry out of order");
     }
 
     public void StackBattleOrder_NoHeroesTest()
@@ -182,12 +182,12 @@ public class ArmyTests
 
         var battleSortedArmies = player1.GetArmies();
         battleSortedArmies.Sort(new ByArmyBattleOrder(tile));
-        Assert.AreEqual("Pegasus", battleSortedArmies[5].ShortName, "Pegasus out of order");
-        Assert.AreEqual("Pegasus", battleSortedArmies[4].ShortName, "Pegasus out of order");
-        Assert.AreEqual("Cavalry", battleSortedArmies[3].ShortName, "Cavalry out of order");
-        Assert.AreEqual("HeavyInfantry", battleSortedArmies[2].ShortName, "Heavy infantry out of order");
-        Assert.AreEqual("LightInfantry", battleSortedArmies[1].ShortName, "Light infantry out of order");
-        Assert.AreEqual("LightInfantry", battleSortedArmies[0].ShortName, "Light infantry out of order");
+        Assert.That(battleSortedArmies[5].ShortName, Is.EqualTo("Pegasus"), "Pegasus out of order");
+        Assert.That(battleSortedArmies[4].ShortName, Is.EqualTo("Pegasus"), "Pegasus out of order");
+        Assert.That(battleSortedArmies[3].ShortName, Is.EqualTo("Cavalry"), "Cavalry out of order");
+        Assert.That(battleSortedArmies[2].ShortName, Is.EqualTo("HeavyInfantry"), "Heavy infantry out of order");
+        Assert.That(battleSortedArmies[1].ShortName, Is.EqualTo("LightInfantry"), "Light infantry out of order");
+        Assert.That(battleSortedArmies[0].ShortName, Is.EqualTo("LightInfantry"), "Light infantry out of order");
     }
 
     [Test]
@@ -206,10 +206,10 @@ public class ArmyTests
         battleSortedArmies.Sort(new ByArmyBattleOrder(tile));
 
         // Assert
-        Assert.AreEqual("Cavalry", battleSortedArmies[3].ShortName, "Cavalry out of order");
-        Assert.AreEqual("Cavalry", battleSortedArmies[2].ShortName, "Cavalry out of order");
-        Assert.AreEqual("HeavyInfantry", battleSortedArmies[1].ShortName, "Heavy infantry out of order");
-        Assert.AreEqual("LightInfantry", battleSortedArmies[0].ShortName, "Light infantry out of order");
+        Assert.That(battleSortedArmies[3].ShortName, Is.EqualTo("Cavalry"), "Cavalry out of order");
+        Assert.That(battleSortedArmies[2].ShortName, Is.EqualTo("Cavalry"), "Cavalry out of order");
+        Assert.That(battleSortedArmies[1].ShortName, Is.EqualTo("HeavyInfantry"), "Heavy infantry out of order");
+        Assert.That(battleSortedArmies[0].ShortName, Is.EqualTo("LightInfantry"), "Light infantry out of order");
     }
 
 
@@ -255,12 +255,12 @@ public class ArmyTests
         IList<Tile> path = null;
         while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
         {
-            Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
+            Assert.That(path.Count, Is.EqualTo(expectedCount--), "Mismatch on the number of expected moves remaining.");
         }
 
         Assert.IsNotNull(path, "Failed to traverse the route.");
-        Assert.AreEqual(0, path.Count, "Mismatch on the number of expected moves remaining.");
-        Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        Assert.That(path.Count, Is.EqualTo(0), "Mismatch on the number of expected moves remaining.");
+        Assert.That(path.Count, Is.EqualTo(expectedCount), "Mismatch of expected moves.");
     }
 
     [Test]
@@ -284,11 +284,11 @@ public class ArmyTests
         IList<Tile> path = null;
         while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
         {
-            Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
+            Assert.That(path.Count, Is.EqualTo(expectedCount--), "Mismatch on the number of expected moves remaining.");
         }
 
         Assert.IsNotNull(path, "Failed to traverse the route.");
-        Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        Assert.That(path.Count, Is.EqualTo(expectedCount), "Mismatch of expected moves.");
     }
 
     [Test]
@@ -315,11 +315,11 @@ public class ArmyTests
         IList<Tile> path = null;
         while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
         {
-            Assert.AreEqual(expectedCount--, path.Count, "Mismatch on the number of expected moves remaining.");
+            Assert.That(path.Count, Is.EqualTo(expectedCount--), "Mismatch on the number of expected moves remaining.");
         }
 
         Assert.IsNotNull(path, "Failed to traverse the route.");
-        Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        Assert.That(path.Count, Is.EqualTo(expectedCount), "Mismatch of expected moves.");
     }
 
     [Test]
@@ -344,11 +344,11 @@ public class ArmyTests
         IList<Tile> path = null;
         while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
         {
-            Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
+            Assert.That(path.Count, Is.EqualTo(expectedCount--), "Mismatch of expected moves.");
         }
 
         Assert.IsNotNull(path, "Failed to traverse the route.");
-        Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        Assert.That(path.Count, Is.EqualTo(expectedCount), "Mismatch of expected moves.");
     }
 
     [Test]
@@ -376,11 +376,11 @@ public class ArmyTests
         IList<Tile> path = null;
         while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
         {
-            Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
+            Assert.That(path.Count, Is.EqualTo(expectedCount--), "Mismatch of expected moves.");
         }
 
         Assert.IsNotNull(path, "Failed to traverse the route.");
-        Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        Assert.That(path.Count, Is.EqualTo(expectedCount), "Mismatch of expected moves.");
     }
 
     [Test]
@@ -409,11 +409,11 @@ public class ArmyTests
         IList<Tile> path = null;
         while (this.armyController.MoveOneStep(armies, target, ref path, out _) == ActionState.InProgress)
         {
-            Assert.AreEqual(expectedCount--, path.Count, "Mismatch of expected moves.");
+            Assert.That(path.Count, Is.EqualTo(expectedCount--), "Mismatch of expected moves.");
         }
 
         Assert.IsNotNull(path, "Failed to traverse the route.");
-        Assert.AreEqual(expectedCount, path.Count, "Mismatch of expected moves.");
+        Assert.That(path.Count, Is.EqualTo(expectedCount), "Mismatch of expected moves.");
     }
 
     [Test]
@@ -442,7 +442,7 @@ public class ArmyTests
         IList<Tile> path = null;
         var result = this.armyController.MoveOneStep(armies, target, ref path, out _);
 
-        Assert.AreEqual(ActionState.Failed, result, "Infantry was able to ride the dragon!");
+        Assert.That(result, Is.EqualTo(ActionState.Failed), "Infantry was able to ride the dragon!");
     }
 
     [Test]
@@ -473,7 +473,7 @@ public class ArmyTests
         }
 
         // ASSERT
-        Assert.AreEqual(initialMoves - expectedCost, armies[0].MovesRemaining,
+        Assert.That(armies[0].MovesRemaining, Is.EqualTo(initialMoves - expectedCost),
             "Mismatch on the number of expected moves remaining.");
     }
 
@@ -504,7 +504,7 @@ public class ArmyTests
         }
 
         // ASSERT
-        Assert.AreEqual(0, armies[0].MovesRemaining, "Mismatch on the number of expected moves remaining.");
+        Assert.That(armies[0].MovesRemaining, Is.EqualTo(0), "Mismatch on the number of expected moves remaining.");
     }
 
     [Test]
@@ -549,14 +549,14 @@ public class ArmyTests
         var newTile = selectedArmies[0].Tile;
         Assert.IsNotNull(newTile.Armies, "Army should be set on new tile");
         Assert.IsNotNull(newTile.Armies[0].Tile, "Army's tile should be set on new tile");
-        Assert.AreEqual(selectedArmies.Count, newTile.Armies.Count,
+        Assert.That(newTile.Armies.Count, Is.EqualTo(selectedArmies.Count),
             "Selected army does not have the expected number of armies.");
-        Assert.AreEqual(originalArmies.Count, originalTile.Armies.Count,
+        Assert.That(originalTile.Armies.Count, Is.EqualTo(originalArmies.Count),
             "Standing army does not have the expect number of armies.");
-        Assert.AreEqual(expectedX, newTile.X, "Selected armies did not move as expected.");
-        Assert.AreEqual(expectedY, newTile.Y, "Selected armies did not move as expected.");
-        Assert.AreEqual(originalTile.X, originalArmies[0].X, "Standing army did not stay as expected.");
-        Assert.AreEqual(originalTile.Y, originalArmies[0].Y, "Standing army did not stay as expected.");
+        Assert.That(newTile.X, Is.EqualTo(expectedX), "Selected armies did not move as expected.");
+        Assert.That(newTile.Y, Is.EqualTo(expectedY), "Selected armies did not move as expected.");
+        Assert.That(originalArmies[0].X, Is.EqualTo(originalTile.X), "Standing army did not stay as expected.");
+        Assert.That(originalArmies[0].Y, Is.EqualTo(originalTile.Y), "Standing army did not stay as expected.");
     }
 
     [Test]
@@ -611,16 +611,16 @@ public class ArmyTests
 
         // ASSERT
         var newTile = selectedArmies[0].Tile;
-        Assert.AreEqual(expectedX, newTile.X, "Army is not in the expected position.");
-        Assert.AreEqual(expectedY, newTile.Y, "Army is not in the expected position.");
+        Assert.That(newTile.X, Is.EqualTo(expectedX), "Army is not in the expected position.");
+        Assert.That(newTile.Y, Is.EqualTo(expectedY), "Army is not in the expected position.");
         Assert.IsNotNull(newTile.Armies, "Army should be set on new tile");
         Assert.IsNotNull(newTile.Armies[0].Tile, "Army's tile should be set on new tile");
-        Assert.AreEqual(selectedArmies.Count, newTile.Armies.Count,
+        Assert.That(newTile.Armies.Count, Is.EqualTo(selectedArmies.Count),
             "Selected army does not have the expected number of armies.");
-        Assert.AreEqual(originalArmies.Count, originalTile.Armies.Count,
+        Assert.That(originalTile.Armies.Count, Is.EqualTo(originalArmies.Count),
             "Standing army does not have the expect number of armies.");
-        Assert.AreEqual(originalTile.X, originalArmies[0].X, "Standing army did not stay as expected.");
-        Assert.AreEqual(originalTile.Y, originalArmies[0].Y, "Standing army did not stay as expected.");
+        Assert.That(originalArmies[0].X, Is.EqualTo(originalTile.X), "Standing army did not stay as expected.");
+        Assert.That(originalArmies[0].Y, Is.EqualTo(originalTile.Y), "Standing army did not stay as expected.");
     }
 
     [Test]
@@ -669,10 +669,10 @@ public class ArmyTests
         var newTile = selectedArmies[0].Tile;
         Assert.IsNull(newTile.VisitingArmies, "Visiting Army should not be set on new tile");
         Assert.IsNull(originalTile.VisitingArmies, "Visiting Army should not be set on original tile");
-        Assert.AreEqual(selectedArmies.Count + mergeArmies.Count, newTile.Armies.Count,
+        Assert.That(newTile.Armies.Count, Is.EqualTo(selectedArmies.Count + mergeArmies.Count),
             "Selected army does not have the expected number of armies.");
-        Assert.AreEqual(expectedX, newTile.X, "Selected armies did not move as expected.");
-        Assert.AreEqual(expectedY, newTile.Y, "Selected armies did not move as expected.");
+        Assert.That(newTile.X, Is.EqualTo(expectedX), "Selected armies did not move as expected.");
+        Assert.That(newTile.Y, Is.EqualTo(expectedY), "Selected armies did not move as expected.");
     }
 
     [Test]
@@ -721,10 +721,10 @@ public class ArmyTests
         Assert.IsNull(newTile.VisitingArmies, "Visiting Army should not be set on new tile");
         Assert.IsNull(originalTile.VisitingArmies, "Visiting Army should not be set on original tile");
         Assert.IsNull(mergeTile.VisitingArmies, "Visiting Army should not be set on merge tile");
-        Assert.AreEqual(originalArmies.Count, newTile.Armies.Count,
+        Assert.That(newTile.Armies.Count, Is.EqualTo(originalArmies.Count),
             "Selected army does not have the expected number of armies.");
-        Assert.AreEqual(expectedX, newTile.X, "Selected armies did not move as expected.");
-        Assert.AreEqual(expectedY, newTile.Y, "Selected armies did not move as expected.");
+        Assert.That(newTile.X, Is.EqualTo(expectedX), "Selected armies did not move as expected.");
+        Assert.That(newTile.Y, Is.EqualTo(expectedY), "Selected armies did not move as expected.");
     }
 
     [Test]
@@ -758,7 +758,7 @@ public class ArmyTests
         // Attack: Should win but not advance
         this.armyController.PrepareForBattle();
         var result = this.armyController.AttackOnce(selectedArmies, enemyTile);
-        Assert.AreEqual(AttackResult.AttackerWinsRound, result, "Attacker did not win round.");
+        Assert.That(result, Is.EqualTo(AttackResult.AttackerWinsRound), "Attacker did not win round.");
         result = this.armyController.AttackOnce(selectedArmies, enemyTile);
 
         // Deselect the armies
@@ -766,14 +766,14 @@ public class ArmyTests
 
         // ASSERT
         var newTile = selectedArmies[0].Tile;
-        Assert.AreEqual(AttackResult.AttackerWinsBattle, result, "Original army was defeated.");
-        Assert.AreEqual(3, selectedArmies.Count, "Selected army does not have the expected number of armies.");
+        Assert.That(result, Is.EqualTo(AttackResult.AttackerWinsBattle), "Original army was defeated.");
+        Assert.That(selectedArmies.Count, Is.EqualTo(3), "Selected army does not have the expected number of armies.");
         Assert.IsNull(enemyTile.Armies, "Enemy army still exists.");
-        Assert.AreEqual(expectedX, originalArmies[0].X, "Selected armies moved unexpectedly.");
-        Assert.AreEqual(expectedY, originalArmies[0].Y, "Selected armies moved unexpectedly.");
+        Assert.That(originalArmies[0].X, Is.EqualTo(expectedX), "Selected armies moved unexpectedly.");
+        Assert.That(originalArmies[0].Y, Is.EqualTo(expectedY), "Selected armies moved unexpectedly.");
         enemyArmies.ForEach(e => Assert.IsTrue(e.IsDead, "Enemy is not dead."));
-        Assert.AreEqual(expectedHumanArmies, player1.GetArmies().Count, "Human player has incorrect army count.");
-        Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
+        Assert.That(player1.GetArmies().Count, Is.EqualTo(expectedHumanArmies), "Human player has incorrect army count.");
+        Assert.That(player2.GetArmies().Count, Is.EqualTo(expectedEnemyArmies), "Enemy still has armies.");
     }
 
     [Test]
@@ -811,13 +811,13 @@ public class ArmyTests
 
         // ASSERT
         var newTile = selectedArmies[0].Tile;
-        Assert.AreEqual(AttackResult.AttackerWinsBattle, result, "Original army was defeated.");
+        Assert.That(result, Is.EqualTo(AttackResult.AttackerWinsBattle), "Original army was defeated.");
         Assert.IsNull(enemyTile.Armies, "Enemy army still exists.");
-        Assert.AreEqual(expectedX, originalArmies[0].X, "Selected armies moved unexpectedly.");
-        Assert.AreEqual(expectedY, originalArmies[0].Y, "Selected armies moved unexpectedly.");
+        Assert.That(originalArmies[0].X, Is.EqualTo(expectedX), "Selected armies moved unexpectedly.");
+        Assert.That(originalArmies[0].Y, Is.EqualTo(expectedY), "Selected armies moved unexpectedly.");
         enemyArmies.ForEach(e => Assert.IsTrue(e.IsDead, "Enemy is not dead."));
-        Assert.AreEqual(expectedHumanArmies, player1.GetArmies().Count, "Human player has incorrect army count.");
-        Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
+        Assert.That(player1.GetArmies().Count, Is.EqualTo(expectedHumanArmies), "Human player has incorrect army count.");
+        Assert.That(player2.GetArmies().Count, Is.EqualTo(expectedEnemyArmies), "Enemy still has armies.");
     }
 
     [Test]
@@ -858,12 +858,12 @@ public class ArmyTests
         var result = this.armyController.AttackOnce(selectedArmies, enemyTile);
 
         // ASSERT
-        Assert.AreEqual(AttackResult.DefenderWinBattle, result, "Original army was defeated.");
+        Assert.That(result, Is.EqualTo(AttackResult.DefenderWinBattle), "Original army was defeated.");
         Assert.IsNull(originalTile.Armies, "Attacking army still exists.");
         Assert.IsNull(originalTile.VisitingArmies, "Attacking army still exists.");
         originalArmies.ForEach(e => Assert.IsTrue(e.IsDead, "Attacker is not dead."));
-        Assert.AreEqual(expectedHumanArmies, player1.GetArmies().Count, "Human player has incorrect army count.");
-        Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
+        Assert.That(player1.GetArmies().Count, Is.EqualTo(expectedHumanArmies), "Human player has incorrect army count.");
+        Assert.That(player2.GetArmies().Count, Is.EqualTo(expectedEnemyArmies), "Enemy still has armies.");
     }
 
     [Test]
@@ -919,13 +919,13 @@ public class ArmyTests
 
         // ASSERT
         var newTile = selectedArmies[0].Tile;
-        Assert.AreEqual(AttackResult.AttackerWinsBattle, result, "Original army was defeated.");
+        Assert.That(result, Is.EqualTo(AttackResult.AttackerWinsBattle), "Original army was defeated.");
         Assert.IsNull(enemyTile.Armies, "Enemy army still exists.");
-        Assert.AreEqual(expectedX, originalArmies[0].X, "Selected armies moved unexpectedly.");
-        Assert.AreEqual(expectedY, originalArmies[0].Y, "Selected armies moved unexpectedly.");
+        Assert.That(originalArmies[0].X, Is.EqualTo(expectedX), "Selected armies moved unexpectedly.");
+        Assert.That(originalArmies[0].Y, Is.EqualTo(expectedY), "Selected armies moved unexpectedly.");
         enemyArmies.ForEach(e => Assert.IsTrue(e.IsDead, "Enemy is not dead."));
-        Assert.AreEqual(expectedHumanArmies, player1.GetArmies().Count, "Human player has incorrect army count.");
-        Assert.AreEqual(expectedEnemyArmies, player2.GetArmies().Count, "Enemy still has armies.");
+        Assert.That(player1.GetArmies().Count, Is.EqualTo(expectedHumanArmies), "Human player has incorrect army count.");
+        Assert.That(player2.GetArmies().Count, Is.EqualTo(expectedEnemyArmies), "Enemy still has armies.");
     }
 
     public static Army GetFirstHero()

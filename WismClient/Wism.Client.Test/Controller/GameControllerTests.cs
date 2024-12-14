@@ -21,7 +21,7 @@ public class GameControllerTests
         gameController.EndTurn();
 
         // Assert
-        Assert.AreEqual(player2, Game.Current.GetCurrentPlayer(),
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.EqualTo(player2),
             "Current player is incorrect.");
     }
 
@@ -39,7 +39,7 @@ public class GameControllerTests
         gameController.EndTurn();
 
         // Assert
-        Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(),
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.EqualTo(player1),
             "Current player is incorrect.");
     }
 
@@ -57,9 +57,9 @@ public class GameControllerTests
         gameController.EndTurn();
 
         // Assert
-        Assert.AreEqual(player1, Game.Current.GetCurrentPlayer(),
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.EqualTo(player1),
             "Current player is incorrect.");
-        Assert.AreEqual(GameState.GameOver, Game.Current.GameState,
+        Assert.That(Game.Current.GameState, Is.EqualTo(GameState.GameOver),
             "Game should be over after last player dies (one player left).");
     }
 }

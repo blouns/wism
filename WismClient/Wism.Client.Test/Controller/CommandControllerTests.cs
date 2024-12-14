@@ -42,8 +42,8 @@ public class CommandControllerTests
         var command = repo.GetCommandAsync(1).Result;
         Assert.IsTrue(command is MoveOnceCommand, "Command was not a MoveOnceCommand.");
         var moveCommand = command as MoveOnceCommand;
-        Assert.AreEqual(3, moveCommand.X);
-        Assert.AreEqual(4, moveCommand.Y);
+        Assert.That(moveCommand.X, Is.EqualTo(3));
+        Assert.That(moveCommand.Y, Is.EqualTo(4));
     }
 
     [Test]
@@ -66,15 +66,15 @@ public class CommandControllerTests
         var commands = new List<Command>(commandController.GetCommands());
 
         // Assert
-        Assert.AreEqual(3, commands.Count);
-        Assert.AreEqual(1, commands[0].Id);
-        Assert.AreEqual(2, commands[1].Id);
-        Assert.AreEqual(3, commands[2].Id);
+        Assert.That(commands.Count, Is.EqualTo(3));
+        Assert.That(commands[0].Id, Is.EqualTo(1));
+        Assert.That(commands[1].Id, Is.EqualTo(2));
+        Assert.That(commands[2].Id, Is.EqualTo(3));
 
         Assert.IsAssignableFrom<MoveOnceCommand>(commands[0]);
         var armyMoveOnceCommand = (MoveOnceCommand)commands[0];
-        Assert.AreEqual(0, armyMoveOnceCommand.X);
-        Assert.AreEqual(1, armyMoveOnceCommand.Y);
+        Assert.That(armyMoveOnceCommand.X, Is.EqualTo(0));
+        Assert.That(armyMoveOnceCommand.Y, Is.EqualTo(1));
         Assert.IsAssignableFrom<AttackOnceCommand>(commands[2]);
     }
 
@@ -99,8 +99,8 @@ public class CommandControllerTests
         var commands = new List<Command>(commandController.GetCommandsAfterId(2));
 
         // Assert
-        Assert.AreEqual(1, commands.Count, "More than one command returned.");
-        Assert.AreEqual(3, commands[0].Id, "Id was unexpected.");
+        Assert.That(commands.Count, Is.EqualTo(1), "More than one command returned.");
+        Assert.That(commands[0].Id, Is.EqualTo(3), "Id was unexpected.");
     }
 
     [Test]
@@ -115,7 +115,7 @@ public class CommandControllerTests
         var commandsJSON = commandController.GetCommandsJSON();
 
         // Assert
-        Assert.AreEqual("{}", commandsJSON);
+        Assert.That(commandsJSON, Is.EqualTo("{}"));
     }
 
     [Test]
@@ -142,13 +142,13 @@ public class CommandControllerTests
 
         // Assert
         Assert.IsNotNull(commands, "Expected one command");
-        Assert.AreEqual(1, commands.Length, "Expected one command");
+        Assert.That(commands.Length, Is.EqualTo(1), "Expected one command");
         var command = commands[0] as TurnCommandEntity;
         Assert.IsNotNull(command, "Incorrect command type");
         Assert.IsTrue(command.Starting);
-        Assert.AreEqual(1, command.Id);
-        Assert.AreEqual(0, command.PlayerIndex);
-        Assert.AreEqual(ActionState.NotStarted, command.Result);
+        Assert.That(command.Id, Is.EqualTo(1));
+        Assert.That(command.PlayerIndex, Is.EqualTo(0));
+        Assert.That(command.Result, Is.EqualTo(ActionState.NotStarted));
     }
 
     [Test]
@@ -178,20 +178,20 @@ public class CommandControllerTests
 
         // Assert
         Assert.IsNotNull(commands, "Expected one command");
-        Assert.AreEqual(2, commands.Length, "Expected one command");
+        Assert.That(commands.Length, Is.EqualTo(2), "Expected one command");
 
         var command = commands[0] as TurnCommandEntity;
         Assert.IsNotNull(command, "Incorrect command type");
         Assert.IsTrue(command.Starting);
-        Assert.AreEqual(1, command.Id);
-        Assert.AreEqual(0, command.PlayerIndex);
-        Assert.AreEqual(actionState, command.Result);
+        Assert.That(command.Id, Is.EqualTo(1));
+        Assert.That(command.PlayerIndex, Is.EqualTo(0));
+        Assert.That(command.Result, Is.EqualTo(actionState));
 
         command = commands[1] as TurnCommandEntity;
         Assert.IsNotNull(command, "Incorrect command type");
         Assert.IsFalse(command.Starting);
-        Assert.AreEqual(2, command.Id);
-        Assert.AreEqual(0, command.PlayerIndex);
-        Assert.AreEqual(ActionState.NotStarted, command.Result);
+        Assert.That(command.Id, Is.EqualTo(2));
+        Assert.That(command.PlayerIndex, Is.EqualTo(0));
+        Assert.That(command.Result, Is.EqualTo(ActionState.NotStarted));
     }
 }

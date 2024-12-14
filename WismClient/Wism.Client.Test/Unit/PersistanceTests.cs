@@ -37,13 +37,13 @@ public class PersistanceTests
 
         // Basic properties
         Assert.IsNotNull(gameSnapshot);
-        Assert.AreEqual(0, gameSnapshot.CurrentPlayerIndex);
-        Assert.AreEqual(GameState.Ready, gameSnapshot.GameState);
-        Assert.AreEqual(0, gameSnapshot.LastArmyId);
+        Assert.That(gameSnapshot.CurrentPlayerIndex, Is.EqualTo(0));
+        Assert.That(gameSnapshot.GameState, Is.EqualTo(GameState.Ready));
+        Assert.That(gameSnapshot.LastArmyId, Is.EqualTo(0));
 
         // Random
         Assert.IsNotNull(gameSnapshot.Random);
-        Assert.AreEqual(Game.DefaultRandomSeed, gameSnapshot.Random.Seed);
+        Assert.That(gameSnapshot.Random.Seed, Is.EqualTo(Game.DefaultRandomSeed));
         Assert.IsNull(gameSnapshot.Random.SeedArray);
 
         // War Strategy
@@ -53,15 +53,15 @@ public class PersistanceTests
 
         // Players
         Assert.IsNotNull(gameSnapshot.Players);
-        Assert.AreEqual(Game.Current.Players.Count, gameSnapshot.Players.Length);
+        Assert.That(gameSnapshot.Players.Length, Is.EqualTo(Game.Current.Players.Count));
 
         // World
         Assert.IsNotNull(gameSnapshot.World);
         Assert.IsNull(gameSnapshot.World.Cities);
         Assert.IsNull(gameSnapshot.World.Locations);
-        Assert.AreEqual(World.Current.Map.GetUpperBound(0) + 1, gameSnapshot.World.MapXUpperBound);
-        Assert.AreEqual(World.Current.Map.GetUpperBound(1) + 1, gameSnapshot.World.MapYUpperBound);
-        Assert.AreEqual(World.Current.Name, gameSnapshot.World.Name);
+        Assert.That(gameSnapshot.World.MapXUpperBound, Is.EqualTo(World.Current.Map.GetUpperBound(0) + 1));
+        Assert.That(gameSnapshot.World.MapYUpperBound, Is.EqualTo(World.Current.Map.GetUpperBound(1) + 1));
+        Assert.That(gameSnapshot.World.Name, Is.EqualTo(World.Current.Name));
 
         // Tiles
         Assert.IsNotNull(gameSnapshot.World.Tiles);
@@ -83,7 +83,7 @@ public class PersistanceTests
 
         // Assert
         Assert.IsNotNull(gameSnapshot);
-        Assert.AreEqual(2, gameSnapshot.LastArmyId);
+        Assert.That(gameSnapshot.LastArmyId, Is.EqualTo(2));
         Assert.IsNotNull(gameSnapshot.World);
 
         // Tiles
@@ -111,8 +111,8 @@ public class PersistanceTests
 
         // Assert
         Assert.IsNotNull(gameSnapshot);
-        Assert.AreEqual(4, gameSnapshot.LastArmyId);
-        Assert.AreEqual(Game.Current.Players.Count, gameSnapshot.Players.Length);
+        Assert.That(gameSnapshot.LastArmyId, Is.EqualTo(4));
+        Assert.That(gameSnapshot.Players.Length, Is.EqualTo(Game.Current.Players.Count));
         Assert.IsNotNull(gameSnapshot.World);
 
         // Tiles
@@ -275,7 +275,7 @@ public class PersistanceTests
         // Assert
         for (var i = 0; i < 100; i++)
         {
-            Assert.AreEqual(history1[i], history2[i]);
+            Assert.That(history2[i], Is.EqualTo(history1[i]));
         }
     }
 }
