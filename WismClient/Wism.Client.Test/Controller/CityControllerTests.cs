@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Wism.Client.Core.Controllers;
@@ -10,14 +9,14 @@ using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Controller
 {
-    [TestFixture]
+    [TestFixture2z]
     public class CityControllerTests
     {
         [Test]
         public void ClaimCity_FromNeutral()
         {
             // Assemble
-            CityController cityController = TestUtilities.CreateCityController();
+            CityController cityController = TestUtilities.CreateCityController()
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
             Player player2 = Game.Current.Players[1];

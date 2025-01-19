@@ -7,6 +7,7 @@ public static class Notify
 {
     public const int SleepDuration = 2000;
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     public static void Alert(string message, params object[] args)
     {
         Console.Beep(1000, 500);
