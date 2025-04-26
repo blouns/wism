@@ -84,11 +84,11 @@ public class PlayerTests
         var price = player1.RecruitHeroStrategy.GetHeroPrice(player1);
 
         // Assert
-        Assert.IsTrue(success, "No hero was available");
-        Assert.IsNotEmpty(name, "No hero name");
+        Assert.That(success, Is.True, "No hero was available");
+        Assert.That(name, Is.Not.Empty, "No hero name");
         Assert.That(actualCity.ShortName, Is.EqualTo(city.ShortName));
-        Assert.IsTrue(price > 0, "Price too low");
-        Assert.IsTrue(price < int.MaxValue, "Price too high");
+        Assert.That(price, Is.GreaterThan(0), "Price too low");
+        Assert.That(price, Is.LessThan(int.MaxValue), "Price too high");
         Assert.That(player1.LastHeroTurn, Is.EqualTo(0), "Last hero should be never (zero)");
     }
 
@@ -159,13 +159,13 @@ public class PlayerTests
 
         // Assert
         Assert.That(player1.LastHeroTurn, Is.EqualTo(21), "Last hero should be 10");
-        Assert.IsTrue(hired, "Did not hire the hero");
-        Assert.IsNotNull(hero, "Here was null");
-        Assert.IsTrue(success, "No hero was available");
-        Assert.IsNotEmpty(name, "No hero name");
+        Assert.That(hired, Is.True, "Did not hire the hero");
+        Assert.That(hero, Is.Not.Null, "Hero was null");
+        Assert.That(success, Is.True, "No hero was available");
+        Assert.That(name, Is.Not.Empty, "No hero name");
         Assert.That(actualCity.ShortName, Is.EqualTo(city.ShortName));
-        Assert.IsTrue(price > 0, "Price too low");
-        Assert.IsTrue(price < int.MaxValue, "Price too high");
+        Assert.That(price, Is.GreaterThan(0), "Price too low");
+        Assert.That(price, Is.LessThan(int.MaxValue), "Price too high");
     }
 
     [Test]

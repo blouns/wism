@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Wism.Client.Api;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;
 using Wism.Client.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
-using Command = Wism.Client.Api.Commands.Command;
+using Command = using Wism.Client.Commands.Command;
 
 namespace Assets.Scripts.Managers
 {

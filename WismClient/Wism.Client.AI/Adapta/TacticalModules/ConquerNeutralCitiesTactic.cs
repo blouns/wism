@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.AI.Intelligence;
-using Wism.Client.Commands.Army;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.AI.Adapta.TacticalModules

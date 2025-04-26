@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.Managers;
-using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Api.Commands;
+using Wism.Client.CommandProcessors;
+using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core.Controllers;
 using ILogger = Wism.Client.Common.ILogger;

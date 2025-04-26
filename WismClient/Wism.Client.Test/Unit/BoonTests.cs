@@ -41,11 +41,10 @@ public class BoonTests
         var result = boon.Redeem(tile);
 
         // Assert
-        Assert.IsNotNull(boon.Result);
-        Assert.IsNotNull(result);
+        Assert.That(boon.Result, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
         Assert.That(boon.Result, Is.EqualTo(result));
         Assert.That(result, Is.EqualTo(1));
-
         Assert.That(hero.Strength, Is.EqualTo(5 + 1));
     }
 
@@ -70,11 +69,10 @@ public class BoonTests
         var result = boon.Redeem(tile);
 
         // Assert
-        Assert.IsNotNull(boon.Result);
-        Assert.IsNotNull(result);
+        Assert.That(boon.Result, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
         Assert.That(boon.Result, Is.EqualTo(result));
         Assert.That(result, Is.EqualTo(0));
-
         Assert.That(hero.Strength, Is.EqualTo(5 + 0));
     }
 
@@ -94,11 +92,10 @@ public class BoonTests
         var result = boon.Redeem(tile);
 
         // Assert
-        Assert.IsNotNull(boon.Result);
-        Assert.IsNotNull(result);
+        Assert.That(boon.Result, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
         Assert.That(boon.Result, Is.EqualTo(result));
         Assert.That(result, Is.EqualTo(-1));
-
         Assert.That(hero.Strength, Is.EqualTo(5 - 1));
     }
 
@@ -118,10 +115,10 @@ public class BoonTests
         var result = boon.Redeem(tile);
 
         // Assert
-        Assert.IsNotNull(boon.Result);
-        Assert.IsNotNull(result);
+        Assert.That(boon.Result, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
         Assert.That(boon.Result, Is.EqualTo(result));
-        Assert.IsTrue(result is Army[]);
+        Assert.That(result, Is.InstanceOf<Army[]>());
         var armies = result as Army[];
         Assert.That(armies.Length, Is.EqualTo(1));
         Assert.That(armies[0].ShortName, Is.EqualTo("Devils"));
@@ -148,10 +145,10 @@ public class BoonTests
         var result = boon.Redeem(tile);
 
         // Assert
-        Assert.IsNotNull(boon.Result);
-        Assert.IsNotNull(result);
+        Assert.That(boon.Result, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
         Assert.That(boon.Result, Is.EqualTo(result));
-        Assert.IsTrue(result is Army[]);
+        Assert.That(result, Is.InstanceOf<Army[]>());
         var armies = result as Army[];
         Assert.That(armies.Length, Is.EqualTo(2));
         Assert.That(armies[0].ShortName, Is.EqualTo("Dragons"));
@@ -163,7 +160,6 @@ public class BoonTests
         Assert.That(tile.Armies.Count, Is.EqualTo(2));
         Assert.That(tile.VisitingArmies.Count, Is.EqualTo(1));
     }
-
 
     [Test]
     public void Redeem_Artifact_Firesword()
@@ -180,14 +176,13 @@ public class BoonTests
         var result = boon.Redeem(tile);
 
         // Assert
-        Assert.IsNotNull(boon.Result);
-        Assert.IsNotNull(result);
+        Assert.That(boon.Result, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
         Assert.That(boon.Result, Is.EqualTo(result));
         Assert.That(result, Is.EqualTo(artifact));
         Assert.That(result, Is.EqualTo(boon.Artifact));
         Assert.That(artifact.Tile, Is.EqualTo(tile));
     }
-
 
     [Test]
     public void Redeem_Gold_Player1()
@@ -209,10 +204,10 @@ public class BoonTests
         var result = boon.Redeem(tile);
 
         // Assert
-        Assert.IsNotNull(boon.Result);
-        Assert.IsNotNull(result);
+        Assert.That(boon.Result, Is.Not.Null);
+        Assert.That(result, Is.Not.Null);
         Assert.That(boon.Result, Is.EqualTo(result));
-        Assert.IsTrue(result is int);
-        Assert.IsTrue(initialGold < player1.Gold);
+        Assert.That(result, Is.InstanceOf<int>());
+        Assert.That(player1.Gold, Is.GreaterThan(initialGold));
     }
 }

@@ -2,7 +2,7 @@
 using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands;
 using Wism.Client.Core;
 
 namespace Assets.Scripts.CommandProcessors.Cutscenes

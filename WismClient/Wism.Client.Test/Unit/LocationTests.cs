@@ -36,7 +36,7 @@ public class LocationTests
         World.Current.AddLocation(location, tile);
 
         // Assert
-        Assert.IsTrue(tile.HasLocation(), "No location found.");
+        Assert.That(tile.HasLocation(), Is.True, "No location found.");
         Assert.That(tile.Location.DisplayName, Is.EqualTo("Crypt Keeper's Lair"));
         Assert.That(tile.Location.Kind, Is.EqualTo("Tomb"));
     }
@@ -52,7 +52,7 @@ public class LocationTests
         World.Current.AddLocation(location, tile);
 
         // Assert
-        Assert.IsTrue(tile.HasLocation(), "No location found.");
+        Assert.That(tile.HasLocation(), Is.True, "No location found.");
         Assert.That(tile.Location.DisplayName, Is.EqualTo("Stonehenge"));
         Assert.That(tile.Location.Kind, Is.EqualTo("Ruins"));
     }
@@ -68,7 +68,7 @@ public class LocationTests
         World.Current.AddLocation(location, tile);
 
         // Assert
-        Assert.IsTrue(tile.HasLocation(), "No location found.");
+        Assert.That(tile.HasLocation(), Is.True, "No location found.");
         Assert.That(tile.Location.DisplayName, Is.EqualTo("Suzzallo"));
         Assert.That(tile.Location.Kind, Is.EqualTo("Library"));
     }
@@ -84,7 +84,7 @@ public class LocationTests
         World.Current.AddLocation(location, tile);
 
         // Assert
-        Assert.IsTrue(tile.HasLocation(), "No location found.");
+        Assert.That(tile.HasLocation(), Is.True, "No location found.");
         Assert.That(tile.Location.DisplayName, Is.EqualTo("Sage's Hut"));
         Assert.That(tile.Location.Kind, Is.EqualTo("Sage"));
     }
@@ -100,7 +100,7 @@ public class LocationTests
         World.Current.AddLocation(location, tile);
 
         // Assert
-        Assert.IsTrue(tile.HasLocation(), "No location found.");
+        Assert.That(tile.HasLocation(), Is.True, "No location found.");
         Assert.That(tile.Location.DisplayName, Is.EqualTo("Temple of the Dog"));
         Assert.That(tile.Location.Kind, Is.EqualTo("Temple"));
     }
@@ -122,9 +122,9 @@ public class LocationTests
         var success = tile.Location.Search(new List<Army> { hero }, out var result);
 
         // Assert
-        Assert.IsTrue(success, "Failed to search the location.");
-        Assert.IsNull(tile.Location.Boon, "Boon not redeemed.");
-        Assert.IsNotNull(boon.Result, "Did not get a boon.");
+        Assert.That(success, Is.True, "Failed to search the location.");
+        Assert.That(tile.Location.Boon, Is.Null, "Boon not redeemed.");
+        Assert.That(boon.Result, Is.Not.Null, "Did not get a boon.");
     }
 
     [Test]
@@ -144,9 +144,9 @@ public class LocationTests
         var success = tile.Location.Search(new List<Army> { hero }, out var result);
 
         // Assert            
-        Assert.IsTrue(success, "Failed to search the location.");
-        Assert.IsNull(tile.Location.Boon, "Boon not redeemed.");
-        Assert.IsNotNull(boon.Result, "Did not get a boon.");
+        Assert.That(success, Is.True, "Failed to search the location.");
+        Assert.That(tile.Location.Boon, Is.Null, "Boon not redeemed.");
+        Assert.That(boon.Result, Is.Not.Null, "Did not get a boon.");
     }
 
     [Test]
@@ -165,7 +165,7 @@ public class LocationTests
 
         // Assert
         var knowledge = result as string;
-        Assert.IsTrue(success, "Failed to search the location.");
+        Assert.That(success, Is.True, "Failed to search the location.");
         Assert.That(knowledge, Is.EqualTo(expectedKnowledge), "Did not find the expected knowledge.");
     }
 
@@ -184,8 +184,8 @@ public class LocationTests
 
         // Assert
         var gold = result as int?;
-        Assert.IsTrue(success, "Failed to search the location.");
-        Assert.IsTrue(gold >= SearchSage.MinGold && gold <= SearchSage.MaxGold, "Did not find the expected item.");
+        Assert.That(success, Is.True, "Failed to search the location.");
+        Assert.That(gold >= SearchSage.MinGold && gold <= SearchSage.MaxGold, Is.True, "Did not find the expected item.");
     }
 
     [Test]
@@ -204,7 +204,7 @@ public class LocationTests
 
         // Assert
         var blessed = result as int?;
-        Assert.IsTrue(success, "Failed to search the location.");
+        Assert.That(success, Is.True, "Failed to search the location.");
         Assert.That(hero.Strength, Is.EqualTo(expectedStrength), "Army was not blessed.");
         Assert.That(blessed, Is.EqualTo(1), "Expected one army to be blessed.");
     }
@@ -222,14 +222,14 @@ public class LocationTests
         Game.Current.SelectArmies(new List<Army> { hero });
 
         var success = tile.Location.Search(new List<Army> { hero }, out var result);
-        Assert.IsTrue(success, "Setup failed");
+        Assert.That(success, Is.True, "Setup failed");
 
         // Act
         success = tile.Location.Search(new List<Army> { hero }, out result);
 
         // Assert
-        Assert.IsFalse(success, "Successfully searched an explored location.");
-        Assert.IsNull(result, "Found an item in explored location.");
+        Assert.That(success, Is.False, "Successfully searched an explored location.");
+        Assert.That(result, Is.Null, "Found an item in explored location.");
     }
 
     [Test]
@@ -245,14 +245,14 @@ public class LocationTests
         Game.Current.SelectArmies(new List<Army> { hero });
 
         var success = tile.Location.Search(new List<Army> { hero }, out var result);
-        Assert.IsTrue(success, "Setup failed");
+        Assert.That(success, Is.True, "Setup failed");
 
         // Act
         success = tile.Location.Search(new List<Army> { hero }, out result);
 
         // Assert
-        Assert.IsFalse(success, "Successfully searched an explored location.");
-        Assert.IsNull(result, "Found an item in explored location.");
+        Assert.That(success, Is.False, "Successfully searched an explored location.");
+        Assert.That(result, Is.Null, "Found an item in explored location.");
     }
 
     [Test]
@@ -265,7 +265,7 @@ public class LocationTests
         var player1 = Game.Current.Players[0];
         var hero = player1.HireHero(tile);
         var success = tile.Location.Search(new List<Army> { hero }, out var result);
-        Assert.IsTrue(success, "Setup failed");
+        Assert.That(success, Is.True, "Setup failed");
         var expectedKnowledge = "Branally the Fist is the great creator!";
 
         // Act            
@@ -273,7 +273,7 @@ public class LocationTests
 
         // Assert
         var knowledge = result as string;
-        Assert.IsTrue(success, "Failed to search the location.");
+        Assert.That(success, Is.True, "Failed to search the location.");
         Assert.That(knowledge, Is.EqualTo(expectedKnowledge), "Did not find the expected knowledge.");
     }
 
@@ -288,14 +288,14 @@ public class LocationTests
         var hero = player1.HireHero(tile);
         var success = tile.Location.Search(new List<Army> { hero }, out var result);
         var originalGold = player1.Gold;
-        Assert.IsTrue(success, "Setup failed");
+        Assert.That(success, Is.True, "Setup failed");
 
         // Act
         success = tile.Location.Search(new List<Army> { hero }, out result);
 
         // Assert
-        Assert.IsTrue(success, "Sages can always be explored.");
-        Assert.IsNull(result, "Found an item in explored location.");
+        Assert.That(success, Is.True, "Sages can always be explored.");
+        Assert.That(result, Is.Null, "Found an item in explored location.");
         Assert.That(player1.Gold, Is.EqualTo(originalGold), "Should not receive a second gem.");
     }
 
@@ -310,14 +310,14 @@ public class LocationTests
         var hero = player1.HireHero(tile);
         var expectedStrength = hero.Strength + 1;
         var success = tile.Location.Search(new List<Army> { hero }, out var result);
-        Assert.IsTrue(success, "Setup failed");
+        Assert.That(success, Is.True, "Setup failed");
 
         // Act
         success = tile.Location.Search(new List<Army> { hero }, out result);
 
         // Assert
         var blessed = result as int?;
-        Assert.IsFalse(success, "Successfully searched an explored location.");
+        Assert.That(success, Is.False, "Successfully searched an explored location.");
         Assert.That(hero.Strength, Is.EqualTo(expectedStrength), "Army was blessed twice.");
         Assert.That(blessed, Is.EqualTo(0), "Expected one army to be blessed.");
     }
@@ -337,8 +337,8 @@ public class LocationTests
         var success = tile.Location.Search(new List<Army> { lightInfantry }, out var result);
 
         // Assert
-        Assert.IsFalse(success, "Army searched a location only for heros.");
-        Assert.IsNull(result, "item", "Army found an item only for heros.");
+        Assert.That(success, Is.False, "Army searched a location only for heros.");
+        Assert.That(result, Is.Null, "Army found an item only for heros.");
     }
 
     [Test]
@@ -356,8 +356,8 @@ public class LocationTests
         var success = tile.Location.Search(new List<Army> { lightInfantry }, out var result);
 
         // Assert
-        Assert.IsFalse(success, "Army searched a location only for heros.");
-        Assert.IsNull(result, "item", "Army found an item only for heros.");
+        Assert.That(success, Is.False, "Army searched a location only for heros.");
+        Assert.That(result, Is.Null, "Army found an item only for heros.");
     }
 
     [Test]
@@ -374,8 +374,8 @@ public class LocationTests
         var success = tile.Location.Search(new List<Army> { lightInfantry }, out var result);
 
         // Assert
-        Assert.IsFalse(success, "Army searched a location only for heros.");
-        Assert.IsNull(result, "item", "Army found an item only for heros.");
+        Assert.That(success, Is.False, "Army searched a location only for heros.");
+        Assert.That(result, Is.Null, "Army found an item only for heros.");
     }
 
     [Test]
@@ -392,8 +392,8 @@ public class LocationTests
         var success = tile.Location.Search(new List<Army> { lightInfantry }, out var result);
 
         // Assert
-        Assert.IsFalse(success, "Army searched a location only for heros.");
-        Assert.IsNull(result, "item", "Army found an item only for heros.");
+        Assert.That(success, Is.False, "Army searched a location only for heros.");
+        Assert.That(result, Is.Null, "Army found an item only for heros.");
     }
 
     [Test]
@@ -412,7 +412,7 @@ public class LocationTests
 
         // Assert
         var blessed = result as int?;
-        Assert.IsTrue(success, "Failed to search the location.");
+        Assert.That(success, Is.True, "Failed to search the location.");
         Assert.That(lightInfantry.Strength, Is.EqualTo(expectedStrength), "Army was not blessed.");
         Assert.That(blessed, Is.EqualTo(1), "Expected one army to be blessed.");
     }

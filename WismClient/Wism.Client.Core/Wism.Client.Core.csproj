@@ -21,11 +21,20 @@
 		<None Update="mod\Hero.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="mod\Worlds\AITestWorld\Map.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="mod\Worlds\Mini-Illuria\City.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="mod\Worlds\Mini-Illuria\Location.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="mod\Worlds\AITestWorld\City.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="mod\Worlds\AITestWorld\Location.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="mod\Worlds\UnitTestWorld\City.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -75,14 +84,13 @@
 		<None Update="mod\Worlds\Illuria\Location.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="mod\Worlds\UnitTestWorld\Map.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
 		<Folder Include="Pathing\External\" />
 	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netstandard2.0\mod\*&quot; &quot;$(ProjectDir)..\bin\Debug\netcoreapp3.1\mod\*&quot;" />
-	</Target>
 
 </Project>

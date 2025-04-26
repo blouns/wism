@@ -3,7 +3,7 @@ using Assets.Scripts.UI;
 using Assets.Tests.PlayMode;
 using System.Collections;
 using UnityEngine;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands;
 
 namespace Assets.Scripts.Tests.PlayMode.Common
 {

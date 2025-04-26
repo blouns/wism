@@ -10,17 +10,10 @@
     <OutputPath>bin\debug</OutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Controller\CityControllerTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Data\UnitTestWorld\City.json" />
-    <None Remove="Data\UnitTestWorld\Location.json" />
-    <None Remove="Data\UnitTestWorld\Map.json" />
-  </ItemGroup>
-
-  <ItemGroup>
+	<ItemGroup>
+    <Content Include="Data\AITestWorld\Map.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\UnitTestWorld\City.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -37,20 +30,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Include="Controller\CityControllerTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.4" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="4.0.1" />
-    <PackageReference Include="NUnit" Version="3.14.0" />
-    <PackageReference Include="NUnit.Analyzers" Version="4.4.0">
+    <PackageReference Include="NUnit" Version="4.3.2" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.7.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="Data\AITestWorld\City.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>
@@ -59,8 +54,10 @@
     <ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netcoreapp3.1\mod\*&quot; &quot;$(TargetDir)&quot;" />
-  </Target>
+  <ItemGroup>
+    <None Update="Data\AITestWorld\Location.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

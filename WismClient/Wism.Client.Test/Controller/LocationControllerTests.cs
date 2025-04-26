@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using NUnit.Framework;
+using NUnit.Framework.Internal.Execution;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -27,8 +30,8 @@ public class LocationControllerTests
         var result = locationController.SearchTemple(armies, location, out var armiesBlessed);
 
         // Assert
-        Assert.IsTrue(result);
-        Assert.IsTrue(location.Searched);
+        Assert.That(result, Is.True);
+        Assert.That(location.Searched, Is.True);
         Assert.That(armiesBlessed, Is.EqualTo(1));
     }
 
@@ -50,10 +53,10 @@ public class LocationControllerTests
         var success = locationController.SearchSage(armies, location, out var gold);
 
         // Assert
-        Assert.IsTrue(success);
+            Assert.That(success, Is.True);
         Assert.That(gold + initialGold, Is.EqualTo(player1.Gold));
-        Assert.IsTrue(player1.Gold > initialGold);
-        Assert.IsTrue(location.Searched);
+        Assert.That(player1.Gold > initialGold, Is.True    );
+        Assert.That(location.Searched, Is.True);
     }
 
     [Test]
@@ -68,15 +71,15 @@ public class LocationControllerTests
         World.Current.AddLocation(location, tile);
         Army army = player1.HireHero(tile);
         var armies = new List<Army> { army };
-        var expectedKnowledge = "Lord Lowenbrau will return!";
+        var expectedKnowledge = "Never give a Sirian an even break!";
 
         // Act
         var success = locationController.SearchLibrary(armies, location, out var knowledge);
 
         // Assert
-        Assert.IsTrue(success);
+        Assert.That(success, Is.True);
         Assert.That(knowledge, Is.EqualTo(expectedKnowledge));
-        Assert.IsTrue(location.Searched);
+        Assert.That(location.Searched, Is.True);
     }
 
     [Test]
@@ -98,11 +101,11 @@ public class LocationControllerTests
         var success = locationController.SearchTomb(armies, location, out var boon);
 
         // Assert
-        Assert.IsTrue(success);
-        Assert.IsNotNull(boon);
-        Assert.IsTrue(location.Searched);
-        Assert.IsFalse(location.HasMonster());
-        Assert.IsFalse(location.HasBoon());
+        Assert.That(success, Is.True);
+        Assert.That(boon, Is.Not.Null);
+        Assert.That(location.Searched, Is.True);
+        Assert.That(location.HasMonster(), Is.False);
+        Assert.That(location.HasBoon(), Is.False);
     }
 
     [Test]
@@ -118,7 +121,7 @@ public class LocationControllerTests
         Army army = player1.HireHero(tile);
         var armies = new List<Army> { army };
         var success = locationController.SearchSage(armies, location, out var gold);
-        Assert.IsTrue(success);
+        Assert.That(success, Is.True);
         var expectedGold = player1.Gold;
 
         // Act
@@ -126,9 +129,9 @@ public class LocationControllerTests
 
         // Assert
         // Sage can always be searched
-        Assert.IsTrue(success);
+        Assert.That(success, Is.True   );
         Assert.That(gold, Is.EqualTo(0));
         Assert.That(player1.Gold, Is.EqualTo(expectedGold));
-        Assert.IsTrue(location.Searched);
+        Assert.That(location.Searched, Is.True);
     }
 }

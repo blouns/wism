@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
-using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.CommandProcessors; // Updated
+using Wism.Client.Commands; // Updated
+using Wism.Client.Controllers; // Updated
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
 using ILogger = Wism.Client.Common.ILogger;

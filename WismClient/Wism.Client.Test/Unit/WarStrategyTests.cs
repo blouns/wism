@@ -43,7 +43,7 @@ public class WarStrategyTests
         var tile = World.Current.Map[3, 2];
 
         IWarStrategy war = new DefaultWarStrategy();
-        Assert.IsTrue(war.Attack(attackers, tile));
+        Assert.That(war.Attack(attackers, tile), Is.True);
     }
 
     [Test]
@@ -64,7 +64,7 @@ public class WarStrategyTests
 
         var attackers = Game.Current.Players[0].GetArmies();
         IWarStrategy war = new DefaultWarStrategy();
-        Assert.IsTrue(war.AttackOnce(attackers, tile));
+        Assert.That(war.AttackOnce(attackers, tile), Is.True);
     }
 
     [Test]
@@ -88,7 +88,7 @@ public class WarStrategyTests
 
         var attackers = Game.Current.Players[0].GetArmies();
         IWarStrategy war = new DefaultWarStrategy();
-        Assert.IsFalse(war.AttackOnce(attackers, tile));
+        Assert.That(war.AttackOnce(attackers, tile), Is.False);
     }
 
     [Test]
@@ -126,7 +126,7 @@ public class WarStrategyTests
             var won = war.AttackOnce(attackers, tile);
         }
 
-        Assert.IsTrue(attackers.Count > 0, "Defender was not supposed to win.");
+        Assert.That(attackers.Count > 0, Is.True, "Defender was not supposed to win.");
     }
 
     [Test]
@@ -159,7 +159,7 @@ public class WarStrategyTests
             var won = war.AttackOnce(attackers, tile);
         }
 
-        Assert.IsTrue(attackers.Count == 0, "Attacker was not supposed to win.");
+        Assert.That(attackers.Count == 0, Is.True, "Attacker was not supposed to win.");
     }
 
     private static Player CreatePlayer(string clanName)

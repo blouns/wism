@@ -68,7 +68,7 @@ public class ModFactoryTest
             }
         }
 
-        Assert.IsTrue(foundOrcs);
+        Assert.That(foundOrcs, Is.True, "Clan Orcs of Kor not found in mod.");
     }
 
 
@@ -87,7 +87,7 @@ public class ModFactoryTest
             }
         }
 
-        Assert.IsTrue(foundHero);
+        Assert.That(foundHero, Is.True, "Army Hero not found in mod.");
     }
 
     [Test]
@@ -104,7 +104,7 @@ public class ModFactoryTest
             }
         }
 
-        Assert.IsTrue(foundMeadow);
+        Assert.That(foundMeadow, Is.True, "Terrain Grass not found in mod.");
     }
 
     private void CleanupTestFiles()

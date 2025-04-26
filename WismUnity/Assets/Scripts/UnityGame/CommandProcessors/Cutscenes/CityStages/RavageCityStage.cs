@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands;
 
 namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
 {

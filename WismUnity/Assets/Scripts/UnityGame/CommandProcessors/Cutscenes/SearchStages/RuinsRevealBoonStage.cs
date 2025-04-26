@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands;
 
 namespace Assets.Scripts.CommandProcessors
 {

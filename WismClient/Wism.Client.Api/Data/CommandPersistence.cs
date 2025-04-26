@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using Wism.Client.Api.Commands;
 using Wism.Client.Commands;
-using Wism.Client.Commands.Army;
-using Wism.Client.Commands.Game;
-using Wism.Client.Commands.Hero;
-using Wism.Client.Commands.Location;
-using Wism.Client.Commands.Player;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Games;
+using Wism.Client.Commands.Heros;
+using Wism.Client.Commands.Locations;
+using Wism.Client.Commands.Players;
 using Wism.Client.Core;
 using Wism.Client.Core.Boons;
 using Wism.Client.Data.Entities;

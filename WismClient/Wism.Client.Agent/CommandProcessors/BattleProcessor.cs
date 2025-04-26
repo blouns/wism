@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Wism.Client.Agent.UI;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
-using Wism.Client.Commands.Army;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Common;
 using Wism.Client.Comparers;
 using Wism.Client.Controllers;

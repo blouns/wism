@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Core.Boons;
@@ -14,15 +15,15 @@ public static class EntityValidator
     {
         if (locations == null || locations.Count == 0)
         {
-            Assert.IsNull(locationEntities);
+            Assert.That(locationEntities, Is.Not.Null);
             return;
         }
 
-        Assert.IsNotNull(locationEntities);
+        Assert.That(locationEntities, Is.Not.Null);
         Assert.That(locationEntities.Length, Is.EqualTo(locations.Count));
         for (var i = 0; i < locationEntities.Length; i++)
         {
-            Assert.IsNotNull(locationEntities[i]);
+            Assert.That(locationEntities[i], Is.Not.Null);
             Assert.That(locationEntities[i].Boon != null, Is.EqualTo(locations[i].HasBoon()));
             if (locations[i].HasBoon())
             {
@@ -40,8 +41,9 @@ public static class EntityValidator
 
     public static void ValidateBoon(IBoon boon, BoonEntity boonEntity)
     {
-        Assert.IsFalse(string.IsNullOrWhiteSpace(boonEntity.BoonAssemblyName));
-        Assert.IsFalse(string.IsNullOrWhiteSpace(boonEntity.BoonTypeName));
+
+        Assert.That(string.IsNullOrWhiteSpace(boonEntity.BoonAssemblyName), Is.False);
+        Assert.That(string.IsNullOrWhiteSpace(boonEntity.BoonTypeName), Is.False);
         if (boon is AlliesBoon)
         {
             Assert.That(boonEntity.AlliesShortName, Is.EqualTo(((AlliesBoon)boon).ArmyInfo.ShortName));
@@ -56,15 +58,15 @@ public static class EntityValidator
     {
         if (cities == null || cities.Count == 0)
         {
-            Assert.IsNull(cityEntities);
+            Assert.That(cityEntities, Is.Not.Null);
             return;
         }
 
-        Assert.IsNotNull(cityEntities);
+        Assert.That(cityEntities, Is.Not.Null);
         Assert.That(cityEntities.Length, Is.EqualTo(cities.Count));
         for (var i = 0; i < cities.Count; i++)
         {
-            Assert.IsNotNull(cityEntities[i]);
+            Assert.That(cityEntities[i], Is.Not.Null);
             if (cities[i].Clan != null)
             {
                 Assert.That(cityEntities[i].ClanShortName, Is.EqualTo(cities[i].Clan.ShortName));
@@ -88,8 +90,8 @@ public static class EntityValidator
         Assert.That(cityEntity.ProductionInfo != null, Is.EqualTo(productionSlots.Count > 0));
         if (productionSlots.Count > 0)
         {
-            Assert.IsNotNull(cityEntity.ProductionInfo.ArmyNames);
-            Assert.IsNotNull(cityEntity.ProductionInfo.ProductionNumbers);
+            Assert.That(cityEntity.ProductionInfo.ArmyNames, Is.Not.Null);
+            Assert.That(cityEntity.ProductionInfo.ProductionNumbers, Is.Not.Null);
             for (var i = 0; i < productionSlots.Count; i++)
             {
                 Assert.That(cityEntity.ProductionInfo.ArmyNames[i], Is.EqualTo(productionSlots[i].ArmyInfoName));
@@ -101,10 +103,10 @@ public static class EntityValidator
         // Armies to deliver
         if (barracks.HasDeliveries())
         {
-            Assert.IsNotNull(cityEntity.ArmiesToDeliver);
+            Assert.That(cityEntity.ArmiesToDeliver, Is.Not.Null);
             for (var i = 0; i < cityEntity.ArmiesToDeliver.Length; i++)
             {
-                Assert.IsNotNull(cityEntity.ArmiesToDeliver[i]);
+                Assert.That(cityEntity.ArmiesToDeliver[i], Is.Not.Null);
                 foreach (var ait in barracks.ArmiesToDeliver)
                 {
                     var aitEntity = cityEntity.ArmiesToDeliver[i];
@@ -117,7 +119,7 @@ public static class EntityValidator
         Assert.That(cityEntity.ArmyInTraining != null, Is.EqualTo(barracks.ProducingArmy()));
         if (barracks.ProducingArmy())
         {
-            Assert.IsNotNull(cityEntity.ArmyInTraining);
+            Assert.That(cityEntity.ArmyInTraining, Is.Not.Null);
             ValidateArmyInTraining(barracks.ArmyInTraining, cityEntity.ArmyInTraining);
         }
     }

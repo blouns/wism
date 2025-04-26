@@ -564,13 +564,13 @@ public class SavedGameScenarioTests
             TestUtilities.EndTurn(commandController, gameController);
 
             // Assert
-            Assert.IsTrue(((Hero)siriansHero1[0]).HasItems(), "Hero had a hole in his pocket!");
+            Assert.That(((Hero)siriansHero1[0]).HasItems(), Is.True,"Hero had a hole in his pocket!");
             Assert.That(((Hero)siriansHero1[0]).Items[0].ShortName, Is.EqualTo("CrownOfLoriel"),
                 "Hero had a hole in his pocket!");
             Assert.That(siriansHero1[0].Strength, Is.EqualTo(9), "Hero was not pias enough!");
             Assert.That(siriansHero1[1].Strength, Is.EqualTo(9), "Griffins were not pias enough!");
             Assert.That(siriansHero1[2].Strength, Is.EqualTo(7), "Light infantry was not pias enough!");
-            Assert.IsTrue(Game.Current.Players[0].Gold > 1000, "Sage was super cheap!");
+            Assert.That(Game.Current.Players[0].Gold, Is.GreaterThan(1000), "Sage was super cheap!");
             Assert.That(sirians.Turn, Is.EqualTo(6), "Unexpected player's turn");
             Assert.That(Game.Current.GetCurrentPlayer().Clan.ShortName, Is.EqualTo("LordBane"), "Unexpected player's turn");
         }

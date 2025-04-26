@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
-using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.Agent.Services;
 

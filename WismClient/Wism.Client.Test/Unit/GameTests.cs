@@ -37,6 +37,6 @@ public class GameTests
         // Assert
         Assert.That(Game.Current.GetCurrentPlayer(), Is.EqualTo(player2),
             "Current player is incorrect.");
-        Assert.IsTrue(player2.IsDead, "Player should be dead.");
+        Assert.That(player2.IsDead, Is.True,"Player should be dead.");
     }
 }

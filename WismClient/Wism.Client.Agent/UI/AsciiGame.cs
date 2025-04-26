@@ -9,7 +9,6 @@ using Wism.Client.CommandProviders;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.UI;

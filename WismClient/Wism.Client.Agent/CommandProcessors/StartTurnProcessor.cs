@@ -2,7 +2,7 @@
 using Wism.Client.Agent.UI;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
-using Wism.Client.Commands.Player;
+using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 

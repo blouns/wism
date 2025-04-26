@@ -1,4 +1,4 @@
-﻿using Wism.Client.Api.Commands;
+﻿using Wism.Client.Commands;
 using Wism.Client.Core.Controllers;
 
 namespace Assets.Scripts.CommandProcessors

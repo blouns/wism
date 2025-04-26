@@ -5,7 +5,7 @@ using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Data;
 
-namespace Wism.Client.Core.Controllers
+namespace Wism.Client.Controllers
 {
     public class CommandController
     {

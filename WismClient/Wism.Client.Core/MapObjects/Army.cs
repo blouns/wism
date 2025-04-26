@@ -3,7 +3,6 @@ using System.Text;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies.WarStrategies.CombatModifiers;
 using Wism.Client.Factories;
-using Wism.Client.Modules;
 using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.MapObjects

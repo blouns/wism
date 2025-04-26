@@ -1,8 +1,8 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.UI;
 using System.Collections.Generic;
-using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Api.Commands;
+using Wism.Client.CommandProcessors;
+using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Controllers;

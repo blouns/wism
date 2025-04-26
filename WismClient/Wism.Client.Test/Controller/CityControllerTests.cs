@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Wism.Client.Core.Controllers;
+﻿using NUnit.Framework;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -9,26 +7,26 @@ using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Controller
 {
-    [TestFixture2z]
+    [TestFixture]
     public class CityControllerTests
     {
         [Test]
         public void ClaimCity_FromNeutral()
         {
             // Assemble
-            CityController cityController = TestUtilities.CreateCityController()
+            CityController cityController = TestUtilities.CreateCityController();
             Game.CreateDefaultGame();
             Player player1 = Game.Current.Players[0];
             Player player2 = Game.Current.Players[1];
             City marthos = MapBuilder.FindCity("Marthos");
-            World.Current.AddCity(marthos, World.Current.Map[1,1]);
+            World.Current.AddCity(marthos, World.Current.Map[1, 1]);
 
             // Act
             cityController.ClaimCity(marthos, player1);
 
             // Assert
-            Assert.AreEqual(player1.Clan, marthos.Clan);
-            Assert.AreNotEqual(player2.Clan, marthos.Clan);
+            Assert.That(marthos.Clan, Is.EqualTo(player1.Clan));
+            Assert.That(marthos.Clan, Is.Not.EqualTo(player2.Clan));
         }
 
         [Test]
@@ -47,8 +45,8 @@ namespace Wism.Client.Test.Controller
             cityController.ClaimCity(marthos, player2);
 
             // Assert
-            Assert.AreEqual(player2.Clan, marthos.Clan);
-            Assert.AreNotEqual(player1.Clan, marthos.Clan);
+            Assert.That(marthos.Clan, Is.EqualTo(player2.Clan));
+            Assert.That(marthos.Clan, Is.Not.EqualTo(player1.Clan));
         }
 
         [Test]
@@ -59,6 +57,9 @@ namespace Wism.Client.Test.Controller
             Game.CreateDefaultGame();
             City marthos = MapBuilder.FindCity("Marthos");
             World.Current.AddCity(marthos, World.Current.Map[1, 1]);
+            Player player1 = Game.Current.Players[0];
+            player1.Gold = 10000;
+            cityController.ClaimCity(marthos, player1);
 
             int expectedDefense = 9;
 
@@ -84,7 +85,7 @@ namespace Wism.Client.Test.Controller
             }
 
             // Assert
-            Assert.AreEqual(expectedDefense, marthos.Defense);
+            Assert.That(marthos.Defense, Is.EqualTo(expectedDefense));
         }
 
 

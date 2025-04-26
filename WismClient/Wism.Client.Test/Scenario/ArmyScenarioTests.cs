@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Wism.Client.Api.Commands;
 using Wism.Client.Commands;
-using Wism.Client.Commands.Army;
-using Wism.Client.Commands.Location;
-using Wism.Client.Commands.Player;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Locations;
+using Wism.Client.Commands.Players;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Test.Common;
 
@@ -341,7 +339,7 @@ public class ArmyScenarioTests
         Assert.That(armiesToMove[0].Tile.Armies.Count, Is.EqualTo(8), "Incorrect army count at destination.");
         Assert.That(player1.GetArmies().Count, Is.EqualTo(8), "Incorrect army count for player 1.");
         Assert.That(player2.GetArmies().Count, Is.EqualTo(0), "Incorrect army count for player 2.");
-        Assert.IsNull(enemyTile.Armies, "Incorrect army count at enemy tile.");
+        Assert.That(enemyTile.Armies, Is.Null, "Incorrect army count at enemy tile.");
     }
 
     /// <summary>
@@ -447,7 +445,7 @@ public class ArmyScenarioTests
         }
 
         // Assert
-        Assert.IsTrue(gold1 < player1.Gold, "No money from the seer.");
+        Assert.That(gold1, Is.LessThan(player1.Gold), "No money from the seer.");
         // Strength should be +3 thanks to 2 temples and one successful throne boon
         Assert.That(armiesToMove1[0].Strength, Is.EqualTo(strength1 + 3), "Too weak or too strong.");
 

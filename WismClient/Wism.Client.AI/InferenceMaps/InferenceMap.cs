@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Wism.Client.Core;
-
-namespace Wism.Client.AI.InferenceMaps
+﻿namespace Wism.Client.AI.InferenceMaps
 {
     public class InferenceMap
     {

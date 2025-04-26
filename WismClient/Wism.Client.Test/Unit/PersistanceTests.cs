@@ -36,35 +36,35 @@ public class PersistanceTests
         // Assert
 
         // Basic properties
-        Assert.IsNotNull(gameSnapshot);
+        Assert.That(gameSnapshot, Is.Not.Null);
         Assert.That(gameSnapshot.CurrentPlayerIndex, Is.EqualTo(0));
         Assert.That(gameSnapshot.GameState, Is.EqualTo(GameState.Ready));
         Assert.That(gameSnapshot.LastArmyId, Is.EqualTo(0));
 
         // Random
-        Assert.IsNotNull(gameSnapshot.Random);
+        Assert.That(gameSnapshot.Random, Is.Not.Null);
         Assert.That(gameSnapshot.Random.Seed, Is.EqualTo(Game.DefaultRandomSeed));
-        Assert.IsNull(gameSnapshot.Random.SeedArray);
+        Assert.That(gameSnapshot.Random.SeedArray, Is.Null);
 
         // War Strategy
-        Assert.IsNotNull(gameSnapshot.WarStrategy);
-        Assert.IsFalse(string.IsNullOrWhiteSpace(gameSnapshot.WarStrategy.AssemblyName));
-        Assert.IsFalse(string.IsNullOrWhiteSpace(gameSnapshot.WarStrategy.TypeName));
+        Assert.That(gameSnapshot.WarStrategy, Is.Not.Null);
+        Assert.That(string.IsNullOrWhiteSpace(gameSnapshot.WarStrategy.AssemblyName), Is.False);
+        Assert.That(string.IsNullOrWhiteSpace(gameSnapshot.WarStrategy.TypeName), Is.False);
 
         // Players
-        Assert.IsNotNull(gameSnapshot.Players);
+        Assert.That(gameSnapshot.Players, Is.Not.Null);
         Assert.That(gameSnapshot.Players.Length, Is.EqualTo(Game.Current.Players.Count));
 
         // World
-        Assert.IsNotNull(gameSnapshot.World);
-        Assert.IsNull(gameSnapshot.World.Cities);
-        Assert.IsNull(gameSnapshot.World.Locations);
+        Assert.That(gameSnapshot.World, Is.Not.Null);
+        Assert.That(gameSnapshot.World.Cities, Is.Null);
+        Assert.That(gameSnapshot.World.Locations, Is.Null);
         Assert.That(gameSnapshot.World.MapXUpperBound, Is.EqualTo(World.Current.Map.GetUpperBound(0) + 1));
         Assert.That(gameSnapshot.World.MapYUpperBound, Is.EqualTo(World.Current.Map.GetUpperBound(1) + 1));
         Assert.That(gameSnapshot.World.Name, Is.EqualTo(World.Current.Name));
 
         // Tiles
-        Assert.IsNotNull(gameSnapshot.World.Tiles);
+        Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
     }
@@ -82,12 +82,12 @@ public class PersistanceTests
         var gameSnapshot = Game.Current.Snapshot();
 
         // Assert
-        Assert.IsNotNull(gameSnapshot);
+        Assert.That(gameSnapshot, Is.Not.Null);
         Assert.That(gameSnapshot.LastArmyId, Is.EqualTo(2));
-        Assert.IsNotNull(gameSnapshot.World);
+        Assert.That(gameSnapshot.World, Is.Not.Null);
 
         // Tiles
-        Assert.IsNotNull(gameSnapshot.World.Tiles);
+        Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
     }
@@ -110,13 +110,13 @@ public class PersistanceTests
         var gameSnapshot = Game.Current.Snapshot();
 
         // Assert
-        Assert.IsNotNull(gameSnapshot);
+        Assert.That(gameSnapshot, Is.Not.Null);
         Assert.That(gameSnapshot.LastArmyId, Is.EqualTo(4));
         Assert.That(gameSnapshot.Players.Length, Is.EqualTo(Game.Current.Players.Count));
-        Assert.IsNotNull(gameSnapshot.World);
+        Assert.That(gameSnapshot.World, Is.Not.Null);
 
         // Tiles
-        Assert.IsNotNull(gameSnapshot.World.Tiles);
+        Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
     }
@@ -137,15 +137,15 @@ public class PersistanceTests
         var gameSnapshot = Game.Current.Snapshot();
 
         // Assert
-        Assert.IsNotNull(gameSnapshot);
-        Assert.IsNotNull(gameSnapshot.World);
+        Assert.That(gameSnapshot, Is.Not.Null);
+        Assert.That(gameSnapshot.World, Is.Not.Null);
 
         // Cities
-        Assert.IsNotNull(gameSnapshot.World.Cities);
+        Assert.That(gameSnapshot.World.Cities, Is.Not.Null);
         EntityValidator.ValidateCities(World.Current.GetCities(), gameSnapshot.World.Cities);
 
         // Tiles
-        Assert.IsNotNull(gameSnapshot.World.Tiles);
+        Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
     }
@@ -171,11 +171,11 @@ public class PersistanceTests
 
         // Assert            
         // Locations
-        Assert.IsNotNull(gameSnapshot.World.Locations);
+        Assert.That(gameSnapshot.World.Locations, Is.Not.Null);
         EntityValidator.ValidateLocations(World.Current.GetLocations(), gameSnapshot.World.Locations);
 
         // Tiles
-        Assert.IsNotNull(gameSnapshot.World.Tiles);
+        Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
     }
@@ -193,11 +193,11 @@ public class PersistanceTests
 
         // Assert            
         // Locations
-        Assert.IsNotNull(gameSnapshot.World.Locations);
+        Assert.That(gameSnapshot.World.Locations, Is.Not.Null);
         EntityValidator.ValidateLocations(World.Current.GetLocations(), gameSnapshot.World.Locations);
 
         // Tiles
-        Assert.IsNotNull(gameSnapshot.World.Tiles);
+        Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
     }
@@ -215,11 +215,11 @@ public class PersistanceTests
 
         // Assert            
         // Locations
-        Assert.IsNotNull(gameSnapshot.World.Locations);
+        Assert.That(gameSnapshot.World.Locations, Is.Not.Null);
         EntityValidator.ValidateLocations(World.Current.GetLocations(), gameSnapshot.World.Locations);
 
         // Tiles
-        Assert.IsNotNull(gameSnapshot.World.Tiles);
+        Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
     }
@@ -240,11 +240,11 @@ public class PersistanceTests
 
         // Assert            
         // Locations
-        Assert.IsNotNull(gameSnapshot.World.Locations);
+        Assert.That(gameSnapshot.World.Locations, Is.Not.Null);
         EntityValidator.ValidateLocations(World.Current.GetLocations(), gameSnapshot.World.Locations);
 
         // Tiles
-        Assert.IsNotNull(gameSnapshot.World.Tiles);
+        Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
     }

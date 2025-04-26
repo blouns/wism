@@ -9,7 +9,7 @@ namespace Wism.Client.MapObjects
 {
     public class City : MapObject, IBuildable
     {
-        public const int MaxDefense = 10;
+        public const int MaxDefense = 9;
 
         private CityInfo info;
 

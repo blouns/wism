@@ -37,7 +37,7 @@
         },
         "runtime": {
           "Wism.Client.Core.dll": {
-            "assemblyVersion": "0.2.0",
+            "assemblyVersion": "0.2.0.0",
             "fileVersion": "0.2.0.0"
           }
         }

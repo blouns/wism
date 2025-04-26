@@ -2,8 +2,8 @@
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Wism.Client.Commands;
-using Wism.Client.Commands.Army;
-using Wism.Client.Commands.Player;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Players;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Data;
@@ -40,7 +40,7 @@ public class CommandControllerTests
 
         // Assert
         var command = repo.GetCommandAsync(1).Result;
-        Assert.IsTrue(command is MoveOnceCommand, "Command was not a MoveOnceCommand.");
+        Assert.That(command, Is.InstanceOf<MoveOnceCommand>(), "Command was not a MoveOnceCommand.");
         var moveCommand = command as MoveOnceCommand;
         Assert.That(moveCommand.X, Is.EqualTo(3));
         Assert.That(moveCommand.Y, Is.EqualTo(4));
@@ -71,11 +71,14 @@ public class CommandControllerTests
         Assert.That(commands[1].Id, Is.EqualTo(2));
         Assert.That(commands[2].Id, Is.EqualTo(3));
 
-        Assert.IsAssignableFrom<MoveOnceCommand>(commands[0]);
+        Assert.That(commands[0], Is.InstanceOf<MoveOnceCommand>());        
+        Assert.That(commands[0], Is.InstanceOf<MoveOnceCommand>());
+
         var armyMoveOnceCommand = (MoveOnceCommand)commands[0];
         Assert.That(armyMoveOnceCommand.X, Is.EqualTo(0));
         Assert.That(armyMoveOnceCommand.Y, Is.EqualTo(1));
-        Assert.IsAssignableFrom<AttackOnceCommand>(commands[2]);
+        Assert.That(commands[2], Is.InstanceOf<AttackOnceCommand>());
+
     }
 
     [Test]
@@ -141,11 +144,11 @@ public class CommandControllerTests
         var commands = JsonConvert.DeserializeObject<CommandEntity[]>(json, settings);
 
         // Assert
-        Assert.IsNotNull(commands, "Expected one command");
+        Assert.That(commands, Is.Not.Null, "Expected one command");
         Assert.That(commands.Length, Is.EqualTo(1), "Expected one command");
         var command = commands[0] as TurnCommandEntity;
-        Assert.IsNotNull(command, "Incorrect command type");
-        Assert.IsTrue(command.Starting);
+        Assert.That(command, Is.Not.Null, "Incorrect command type");
+        Assert.That(command.Starting, Is.True);
         Assert.That(command.Id, Is.EqualTo(1));
         Assert.That(command.PlayerIndex, Is.EqualTo(0));
         Assert.That(command.Result, Is.EqualTo(ActionState.NotStarted));
@@ -177,19 +180,19 @@ public class CommandControllerTests
         var commands = JsonConvert.DeserializeObject<CommandEntity[]>(json, settings);
 
         // Assert
-        Assert.IsNotNull(commands, "Expected one command");
+        Assert.That(commands, Is.Not.Null, "Expected one command");
         Assert.That(commands.Length, Is.EqualTo(2), "Expected one command");
 
         var command = commands[0] as TurnCommandEntity;
-        Assert.IsNotNull(command, "Incorrect command type");
-        Assert.IsTrue(command.Starting);
+        Assert.That(command, Is.Not.Null, "Incorrect command type");
+        Assert.That(command.Starting, Is.True);
         Assert.That(command.Id, Is.EqualTo(1));
         Assert.That(command.PlayerIndex, Is.EqualTo(0));
         Assert.That(command.Result, Is.EqualTo(actionState));
 
         command = commands[1] as TurnCommandEntity;
-        Assert.IsNotNull(command, "Incorrect command type");
-        Assert.IsFalse(command.Starting);
+        Assert.That(command, Is.Not.Null, "Incorrect command type");
+        Assert.That(command.Starting, Is.False);
         Assert.That(command.Id, Is.EqualTo(2));
         Assert.That(command.PlayerIndex, Is.EqualTo(0));
         Assert.That(command.Result, Is.EqualTo(ActionState.NotStarted));
