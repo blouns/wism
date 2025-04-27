@@ -3,7 +3,7 @@ using Wism.Client.Core.Boons;
 
 namespace Wism.Client.Agent.CommandProcessors;
 
-public class GoldBoonIdentifier : IBoonIdentfier
+public class GoldBoonIdentifier : IBoonIdentifier
 {
     public bool CanIdentify(IBoon boon)
     {

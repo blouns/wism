@@ -2,8 +2,9 @@
 using UnityEngine;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
+using Wism.Client.Commands.Games;
 using Wism.Client.Common;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 using ILogger = Wism.Client.Common.ILogger;
 
 namespace Assets.Scripts.CommandProcessors

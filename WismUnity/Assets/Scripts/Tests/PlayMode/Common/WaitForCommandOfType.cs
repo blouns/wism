@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 
 namespace Assets.Tests.PlayMode
 {

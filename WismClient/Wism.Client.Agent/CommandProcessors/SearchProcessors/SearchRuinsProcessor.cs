@@ -15,7 +15,7 @@ namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
 public class SearchRuinsProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
-    private readonly List<IBoonIdentfier> boonIdentifiers;
+    private readonly List<IBoonIdentifier> boonIdentifiers;
     private ILogger logger;
 
     public SearchRuinsProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
@@ -27,7 +27,7 @@ public class SearchRuinsProcessor : ICommandProcessor
 
         this.logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
-        this.boonIdentifiers = new List<IBoonIdentfier>
+        this.boonIdentifiers = new List<IBoonIdentifier>
         {
             new AlliesBoonIdentifier(),
             new ThroneBoonIdentifier(),

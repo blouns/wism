@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 using Toggle = UnityEngine.UI.Toggle;
 
 public class GameSetup : MonoBehaviour

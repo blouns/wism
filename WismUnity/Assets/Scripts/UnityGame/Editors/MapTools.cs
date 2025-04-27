@@ -3,7 +3,8 @@ using UnityEngine;
 using Assets.Scripts.UnityGame.Factories;
 using Assets.Scripts.Managers;
 using Newtonsoft.Json;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
+
 
 #if UNITY_EDITOR
 using UnityEditor;

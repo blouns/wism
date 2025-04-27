@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
-using Wism.Client.Commands;
+using Wism.Client.Commands.Locations;
 
 namespace Assets.Scripts.CommandProcessors
 {
     public class RuinsRevealBoonStage : LocationCutsceneStage
     {
-        private List<IBoonIdentfier> boonIdentifiers;
+        private List<IBoonIdentifier> boonIdentifiers;
 
         public RuinsRevealBoonStage(SearchLocationCommand command)
             : base(command)
         {
-            this.boonIdentifiers = new List<IBoonIdentfier>()
+            this.boonIdentifiers = new List<IBoonIdentifier>()
             {
                 new AlliesBoonIdentifier(),
                 new ThroneBoonIdentifier(),

@@ -1,5 +1,4 @@
-﻿using Wism.Client.Commands;
-
+﻿using Wism.Client.Commands.Locations;
 namespace Assets.Scripts.CommandProcessors
 {
     public class LibraryFinalStage : LocationCutsceneStage

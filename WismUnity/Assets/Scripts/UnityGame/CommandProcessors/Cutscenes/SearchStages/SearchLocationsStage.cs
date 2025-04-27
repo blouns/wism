@@ -1,5 +1,5 @@
-﻿using Wism.Client.Commands;
-using Wism.Client.Core.Controllers;
+﻿using Wism.Client.Commands.Locations;
+using Wism.Client.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {

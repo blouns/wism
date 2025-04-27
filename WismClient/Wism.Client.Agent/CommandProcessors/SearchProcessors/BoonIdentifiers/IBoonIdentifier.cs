@@ -2,7 +2,7 @@
 
 namespace Wism.Client.Agent.CommandProcessors;
 
-public interface IBoonIdentfier
+public interface IBoonIdentifier
 {
     bool CanIdentify(IBoon boon);
 

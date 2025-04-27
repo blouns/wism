@@ -1,7 +1,7 @@
 ﻿using Assets.Scripts.Managers;
 using UnityEngine;
-using Wism.Client.Commands;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Commands.Cities;
+using Wism.Client.Controllers;
 
 namespace Assets.Scripts.CommandProcessors.Cutscenes.CityStages
 {

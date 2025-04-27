@@ -1,9 +1,11 @@
-﻿using Wism.Client.Commands;
+﻿using Wism.Client.Commands.Locations;
 
 namespace Assets.Scripts.CommandProcessors
 {
     public class LibraryEnterStage : LocationCutsceneStage
     {
+        private SearchLibraryCommand command;
+
         public LibraryEnterStage(SearchLocationCommand command)
             : base(command)
         {

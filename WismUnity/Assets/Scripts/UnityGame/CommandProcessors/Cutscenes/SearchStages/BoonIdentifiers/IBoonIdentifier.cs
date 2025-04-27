@@ -1,8 +1,8 @@
-﻿using Wism.Client.Core;
+﻿using Wism.Client.Core.Boons;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public interface IBoonIdentfier
+    public interface IBoonIdentifier
     {
         bool CanIdentify(IBoon boon);
 

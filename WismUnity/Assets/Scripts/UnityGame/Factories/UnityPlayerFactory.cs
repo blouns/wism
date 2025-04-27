@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
 using Wism.Client.Modules;
 
 namespace Assets.Scripts.UnityGame.Factories

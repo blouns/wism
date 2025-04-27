@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 

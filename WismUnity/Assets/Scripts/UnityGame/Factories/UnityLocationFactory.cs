@@ -2,9 +2,10 @@
 using Assets.Scripts.Managers;
 using System.Collections.Generic;
 using UnityEngine;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
 using Wism.Client.Modules;
-using LocationInfo = Wism.Client.Modules.LocationInfo;
+using Wism.Client.Modules.Infos;
+using LocationInfo = Wism.Client.Modules.Infos.LocationInfo;
 
 namespace Assets.Scripts.UnityGame.Factories
 {
@@ -47,7 +48,7 @@ namespace Assets.Scripts.UnityGame.Factories
             // Set the coordinates for the locations
             var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
             var locationInfos = new List<LocationInfo>(
-                ModFactory.LoadLocationInfos(path));
+                (IEnumerable<LocationInfo>)ModFactory.LoadLocationInfos(path));
             this.debugManager.LogInformation("Loaded LocationInfos: " + path);
 
             var locations = new LocationEntity[locationNames.Count];

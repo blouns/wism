@@ -5,7 +5,7 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors;
 
-public class AlliesBoonIdentifier : IBoonIdentfier
+public class AlliesBoonIdentifier : IBoonIdentifier
 {
     public bool CanIdentify(IBoon boon)
     {
