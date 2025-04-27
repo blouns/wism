@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {

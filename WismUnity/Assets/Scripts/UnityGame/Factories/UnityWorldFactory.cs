@@ -1,7 +1,7 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.Tilemaps;
 using System;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
 
 namespace Assets.Scripts.UnityGame.Factories
 {

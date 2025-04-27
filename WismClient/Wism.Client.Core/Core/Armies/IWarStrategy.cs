@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.War
+namespace Wism.Client.Core.Armies
 {
     public interface IWarStrategy
     {

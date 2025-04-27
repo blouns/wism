@@ -1,7 +1,7 @@
 ﻿using Assets.Scripts.Tilemaps;
 using System;
 using UnityEngine;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands.Locations;
 
 namespace Assets.Scripts.CommandProcessors
 {

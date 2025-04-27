@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
-namespace Wism.Client.MapObjects
+namespace Wism.Client.Searchables
 {
     public class SearchSage : ISearchable
     {

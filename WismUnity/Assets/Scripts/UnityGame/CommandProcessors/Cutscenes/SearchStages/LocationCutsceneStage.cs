@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands.Locations;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 

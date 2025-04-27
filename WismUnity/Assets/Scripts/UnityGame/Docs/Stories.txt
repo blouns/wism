@@ -34,11 +34,11 @@ Bugs:
 Bug 14 Details:
 NullReferenceException: Object reference not set to an instance of an object
 Wism.Client.Pathing.DijkstraPathingStrategy.FindShortestRoute (Wism.Client.Core.Tile[,] map, System.Collections.Generic.List`1[T] armiesToMove, Wism.Client.Core.Tile target, System.Collections.Generic.IList`1[Wism.Client.Core.Tile]& fastestRoute, System.Single& distance) (at C:/source/wism/WismClient/Wism.Client.Core/Pathing/DijkstraPathingStrategy.cs:39)
-Wism.Client.Core.Controllers.ArmyController.FindPath (System.Collections.Generic.List`1[T] armiesToMove, Wism.Client.Core.Tile targetTile, System.Single& distance) (at C:/source/wism/WismClient/Wism.Client.Core/Controllers/ArmyController.cs:220)
-Wism.Client.Core.Controllers.ArmyController.MoveOneStep (System.Collections.Generic.List`1[T] armiesToMove, Wism.Client.Core.Tile targetTile, System.Collections.Generic.IList`1[Wism.Client.Core.Tile]& path, System.Single& distance) (at C:/source/wism/WismClient/Wism.Client.Core/Controllers/ArmyController.cs:174)
-Wism.Client.Api.Commands.MoveOnceCommand.ExecuteInternal () (at C:/source/wism/WismClient/Wism.Client.Api/Commands/Army/MoveOnceCommand.cs:24)
-Wism.Client.Api.Commands.Command.Execute () (at C:/source/wism/WismClient/Wism.Client.Api/Commands/Command.cs:25)
-Wism.Client.Api.CommandProcessors.StandardProcessor.Execute (Wism.Client.Api.Commands.ICommandAction command) (at C:/source/wism/WismClient/Wism.Client.Api/CommandProcessors/StandardProcessor.cs:34)
+Wism.Client.Controllers.ArmyController.FindPath (System.Collections.Generic.List`1[T] armiesToMove, Wism.Client.Core.Tile targetTile, System.Single& distance) (at C:/source/wism/WismClient/Wism.Client.Core/Controllers/ArmyController.cs:220)
+Wism.Client.Controllers.ArmyController.MoveOneStep (System.Collections.Generic.List`1[T] armiesToMove, Wism.Client.Core.Tile targetTile, System.Collections.Generic.IList`1[Wism.Client.Core.Tile]& path, System.Single& distance) (at C:/source/wism/WismClient/Wism.Client.Core/Controllers/ArmyController.cs:174)
+using Wism.Client.Commands.MoveOnceCommand.ExecuteInternal () (at C:/source/wism/WismClient/Wism.Client.Api/Commands/Army/MoveOnceCommand.cs:24)
+using Wism.Client.Commands.Command.Execute () (at C:/source/wism/WismClient/Wism.Client.Api/Commands/Command.cs:25)
+Wism.Client.Api.CommandProcessors.StandardProcessor.Execute (using Wism.Client.Commands.ICommandAction command) (at C:/source/wism/WismClient/Wism.Client.Api/CommandProcessors/StandardProcessor.cs:34)
 Assets.Scripts.Managers.UnityManager.DoTasks () (at Assets/Scripts/UnityGame/Managers/UnityManager.cs:327)
 Assets.Scripts.Managers.UnityManager.FixedUpdate () (at Assets/Scripts/UnityGame/Managers/UnityManager.cs:274)
 UnityEngine.Debug:LogException(Exception)

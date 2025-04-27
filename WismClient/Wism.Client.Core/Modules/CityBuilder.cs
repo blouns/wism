@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Core;
+using Wism.Client.Factories;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Modules
 {

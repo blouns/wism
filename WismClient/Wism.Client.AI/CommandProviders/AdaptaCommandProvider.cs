@@ -1,10 +1,11 @@
 ﻿using System;
 using Wism.Client.AI.Adapta.Strategic;
-using Wism.Client.Api.CommandProviders;
-using Wism.Client.Api.Commands;
+using Wism.Client.AI.Adapta.StrategicModules;
+using Wism.Client.CommandProviders;
+using Wism.Client.Commands.Players;
 using Wism.Client.Common;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 
 namespace Wism.Client.AI.CommandProviders
 {

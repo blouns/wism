@@ -1,11 +1,11 @@
 ﻿using Assets.Scripts.UI;
 using System;
 using UnityEngine;
-using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class ThroneBoonIdentifier : IBoonIdentfier
+    public class ThroneBoonIdentifier : IBoonIdentifier
     {
         public bool CanIdentify(IBoon boon)
         {

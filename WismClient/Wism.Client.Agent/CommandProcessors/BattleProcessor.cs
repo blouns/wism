@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Agent.UI;
-using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Api.Commands;
+using Wism.Client.CommandProcessors;
+using Wism.Client.Commands;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Common;
+using Wism.Client.Comparers;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors;

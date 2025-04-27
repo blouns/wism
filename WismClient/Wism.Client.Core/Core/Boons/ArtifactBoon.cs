@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Core
+namespace Wism.Client.Core.Boons
 {
     public class ArtifactBoon : IBoon
     {

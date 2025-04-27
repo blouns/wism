@@ -1,0 +1,98 @@
+[
+  {
+    "ShortName": "Marthos",
+    "DisplayName": "Marthos",
+    "Defense": 6,
+    "Income": 32,
+    "X": 3,
+    "Y": 4,
+    "ClanName": "Sirians",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "BanesCitadel",
+    "DisplayName": "Bane's Citadel",
+    "X": 7,
+    "Y": 4,
+    "ClanName": "LordBane",
+    "Defense": 6,
+    "Income": 30,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 10,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 8
+      }
+    ]
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Deserton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      }
+    ],
+    "ShortName": "Deserton",
+    "X": 5,
+    "Y": 7
+  }
+]

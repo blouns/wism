@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Core;
-using Wism.Client.Entities;
+using Wism.Client.Core.Armies;
+using Wism.Client.Core.Boons;
+using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Test.Common;
@@ -12,41 +15,42 @@ public static class EntityValidator
     {
         if (locations == null || locations.Count == 0)
         {
-            Assert.IsNull(locationEntities);
+            Assert.That(locationEntities, Is.Not.Null);
             return;
         }
 
-        Assert.IsNotNull(locationEntities);
-        Assert.AreEqual(locations.Count, locationEntities.Length);
+        Assert.That(locationEntities, Is.Not.Null);
+        Assert.That(locationEntities.Length, Is.EqualTo(locations.Count));
         for (var i = 0; i < locationEntities.Length; i++)
         {
-            Assert.IsNotNull(locationEntities[i]);
-            Assert.AreEqual(locations[i].HasBoon(), locationEntities[i].Boon != null);
+            Assert.That(locationEntities[i], Is.Not.Null);
+            Assert.That(locationEntities[i].Boon != null, Is.EqualTo(locations[i].HasBoon()));
             if (locations[i].HasBoon())
             {
                 ValidateBoon(locations[i].Boon, locationEntities[i].Boon);
             }
 
-            Assert.AreEqual(locations[i].Id, locationEntities[i].Id);
-            Assert.AreEqual(locations[i].ShortName, locationEntities[i].LocationShortName);
-            Assert.AreEqual(locations[i].Monster, locationEntities[i].Monster);
-            Assert.AreEqual(locations[i].Searched, locationEntities[i].Searched);
-            Assert.AreEqual(locations[i].X, locationEntities[i].X);
-            Assert.AreEqual(locations[i].Y, locationEntities[i].Y);
+            Assert.That(locationEntities[i].Id, Is.EqualTo(locations[i].Id));
+            Assert.That(locationEntities[i].LocationShortName, Is.EqualTo(locations[i].ShortName));
+            Assert.That(locationEntities[i].Monster, Is.EqualTo(locations[i].Monster));
+            Assert.That(locationEntities[i].Searched, Is.EqualTo(locations[i].Searched));
+            Assert.That(locationEntities[i].X, Is.EqualTo(locations[i].X));
+            Assert.That(locationEntities[i].Y, Is.EqualTo(locations[i].Y));
         }
     }
 
     public static void ValidateBoon(IBoon boon, BoonEntity boonEntity)
     {
-        Assert.IsFalse(string.IsNullOrWhiteSpace(boonEntity.BoonAssemblyName));
-        Assert.IsFalse(string.IsNullOrWhiteSpace(boonEntity.BoonTypeName));
+
+        Assert.That(string.IsNullOrWhiteSpace(boonEntity.BoonAssemblyName), Is.False);
+        Assert.That(string.IsNullOrWhiteSpace(boonEntity.BoonTypeName), Is.False);
         if (boon is AlliesBoon)
         {
-            Assert.AreEqual(((AlliesBoon)boon).ArmyInfo.ShortName, boonEntity.AlliesShortName);
+            Assert.That(boonEntity.AlliesShortName, Is.EqualTo(((AlliesBoon)boon).ArmyInfo.ShortName));
         }
         else if (boon is ArtifactBoon)
         {
-            Assert.AreEqual(((ArtifactBoon)boon).Artifact.ShortName, boonEntity.ArtifactShortName);
+            Assert.That(boonEntity.ArtifactShortName, Is.EqualTo(((ArtifactBoon)boon).Artifact.ShortName));
         }
     }
 
@@ -54,24 +58,24 @@ public static class EntityValidator
     {
         if (cities == null || cities.Count == 0)
         {
-            Assert.IsNull(cityEntities);
+            Assert.That(cityEntities, Is.Not.Null);
             return;
         }
 
-        Assert.IsNotNull(cityEntities);
-        Assert.AreEqual(cities.Count, cityEntities.Length);
+        Assert.That(cityEntities, Is.Not.Null);
+        Assert.That(cityEntities.Length, Is.EqualTo(cities.Count));
         for (var i = 0; i < cities.Count; i++)
         {
-            Assert.IsNotNull(cityEntities[i]);
+            Assert.That(cityEntities[i], Is.Not.Null);
             if (cities[i].Clan != null)
             {
-                Assert.AreEqual(cities[i].Clan.ShortName, cityEntities[i].ClanShortName);
+                Assert.That(cityEntities[i].ClanShortName, Is.EqualTo(cities[i].Clan.ShortName));
             }
 
-            Assert.AreEqual(cities[i].Defense, cityEntities[i].Defense);
-            Assert.AreEqual(cities[i].Id, cityEntities[i].Id);
-            Assert.AreEqual(cities[i].X, cityEntities[i].X);
-            Assert.AreEqual(cities[i].Y, cityEntities[i].Y);
+            Assert.That(cityEntities[i].Defense, Is.EqualTo(cities[i].Defense));
+            Assert.That(cityEntities[i].Id, Is.EqualTo(cities[i].Id));
+            Assert.That(cityEntities[i].X, Is.EqualTo(cities[i].X));
+            Assert.That(cityEntities[i].Y, Is.EqualTo(cities[i].Y));
 
             ValidateProduction(cities[i].Barracks, cityEntities[i]);
         }
@@ -79,31 +83,30 @@ public static class EntityValidator
 
     public static void ValidateProduction(Barracks barracks, CityEntity cityEntity)
     {
-        Assert.AreEqual(barracks.HasDeliveries(), cityEntity.ArmiesToDeliver != null);
+        Assert.That(cityEntity.ArmiesToDeliver != null, Is.EqualTo(barracks.HasDeliveries()));
 
         // Production slots
         var productionSlots = barracks.GetProductionKinds();
-        Assert.AreEqual(productionSlots.Count > 0, cityEntity.ProductionInfo != null);
+        Assert.That(cityEntity.ProductionInfo != null, Is.EqualTo(productionSlots.Count > 0));
         if (productionSlots.Count > 0)
         {
-            Assert.IsNotNull(cityEntity.ProductionInfo.ArmyNames);
-            Assert.IsNotNull(cityEntity.ProductionInfo.ProductionNumbers);
+            Assert.That(cityEntity.ProductionInfo.ArmyNames, Is.Not.Null);
+            Assert.That(cityEntity.ProductionInfo.ProductionNumbers, Is.Not.Null);
             for (var i = 0; i < productionSlots.Count; i++)
             {
-                Assert.AreEqual(productionSlots[i].ArmyInfoName, cityEntity.ProductionInfo.ArmyNames[i]);
-                Assert.AreEqual(
-                    barracks.GetProductionNumber(productionSlots[i].ArmyInfoName),
-                    cityEntity.ProductionInfo.ProductionNumbers[i]);
+                Assert.That(cityEntity.ProductionInfo.ArmyNames[i], Is.EqualTo(productionSlots[i].ArmyInfoName));
+                Assert.That(
+                    cityEntity.ProductionInfo.ProductionNumbers[i], Is.EqualTo(barracks.GetProductionNumber(productionSlots[i].ArmyInfoName)));
             }
         }
 
         // Armies to deliver
         if (barracks.HasDeliveries())
         {
-            Assert.IsNotNull(cityEntity.ArmiesToDeliver);
+            Assert.That(cityEntity.ArmiesToDeliver, Is.Not.Null);
             for (var i = 0; i < cityEntity.ArmiesToDeliver.Length; i++)
             {
-                Assert.IsNotNull(cityEntity.ArmiesToDeliver[i]);
+                Assert.That(cityEntity.ArmiesToDeliver[i], Is.Not.Null);
                 foreach (var ait in barracks.ArmiesToDeliver)
                 {
                     var aitEntity = cityEntity.ArmiesToDeliver[i];
@@ -113,25 +116,25 @@ public static class EntityValidator
         }
 
         // Army in training
-        Assert.AreEqual(barracks.ProducingArmy(), cityEntity.ArmyInTraining != null);
+        Assert.That(cityEntity.ArmyInTraining != null, Is.EqualTo(barracks.ProducingArmy()));
         if (barracks.ProducingArmy())
         {
-            Assert.IsNotNull(cityEntity.ArmyInTraining);
+            Assert.That(cityEntity.ArmyInTraining, Is.Not.Null);
             ValidateArmyInTraining(barracks.ArmyInTraining, cityEntity.ArmyInTraining);
         }
     }
 
     public static void ValidateArmyInTraining(ArmyInTraining ait, ArmyInTrainingEntity aitEntity)
     {
-        Assert.AreEqual(ait.ArmyInfo.ShortName, aitEntity.ArmyShortName);
-        Assert.AreEqual(ait.DestinationCity.ShortName, aitEntity.DestinationCityShortName);
-        Assert.AreEqual(ait.DisplayName, aitEntity.DisplayName);
-        Assert.AreEqual(ait.Moves, aitEntity.Moves);
-        Assert.AreEqual(ait.ProductionCity.ShortName, aitEntity.ProductionCityShortName);
-        Assert.AreEqual(ait.Strength, aitEntity.Strength);
-        Assert.AreEqual(ait.TurnsToDeliver, aitEntity.TurnsToDeliver);
-        Assert.AreEqual(ait.TurnsToProduce, aitEntity.TurnsToProduce);
-        Assert.AreEqual(ait.Upkeep, aitEntity.Upkeep);
+        Assert.That(aitEntity.ArmyShortName, Is.EqualTo(ait.ArmyInfo.ShortName));
+        Assert.That(aitEntity.DestinationCityShortName, Is.EqualTo(ait.DestinationCity.ShortName));
+        Assert.That(aitEntity.DisplayName, Is.EqualTo(ait.DisplayName));
+        Assert.That(aitEntity.Moves, Is.EqualTo(ait.Moves));
+        Assert.That(aitEntity.ProductionCityShortName, Is.EqualTo(ait.ProductionCity.ShortName));
+        Assert.That(aitEntity.Strength, Is.EqualTo(ait.Strength));
+        Assert.That(aitEntity.TurnsToDeliver, Is.EqualTo(ait.TurnsToDeliver));
+        Assert.That(aitEntity.TurnsToProduce, Is.EqualTo(ait.TurnsToProduce));
+        Assert.That(aitEntity.Upkeep, Is.EqualTo(ait.Upkeep));
     }
 
     public static void ValidateTiles(World world, TileEntity[] tiles, int xBound, int yBound)
@@ -144,57 +147,57 @@ public static class EntityValidator
                 var entityTile = tiles[x + y * xBound];
 
                 // Verify position
-                Assert.AreEqual(worldTile.X, entityTile.X);
-                Assert.AreEqual(worldTile.Y, entityTile.Y);
+                Assert.That(entityTile.X, Is.EqualTo(worldTile.X));
+                Assert.That(entityTile.Y, Is.EqualTo(worldTile.Y));
 
                 // Verify terrain
-                Assert.AreEqual(worldTile.Terrain.ShortName, entityTile.TerrainShortName);
+                Assert.That(entityTile.TerrainShortName, Is.EqualTo(worldTile.Terrain.ShortName));
 
                 // Verify armies
-                Assert.AreEqual(worldTile.HasArmies(), entityTile.ArmyIds != null);
+                Assert.That(entityTile.ArmyIds != null, Is.EqualTo(worldTile.HasArmies()));
                 if (worldTile.HasArmies())
                 {
-                    Assert.AreEqual(worldTile.Armies.Count, entityTile.ArmyIds.Length);
+                    Assert.That(entityTile.ArmyIds.Length, Is.EqualTo(worldTile.Armies.Count));
                     for (var j = 0; j < entityTile.ArmyIds.Length; j++)
                     {
-                        Assert.AreEqual(worldTile.Armies[j].Id, entityTile.ArmyIds[j]);
+                        Assert.That(entityTile.ArmyIds[j], Is.EqualTo(worldTile.Armies[j].Id));
                     }
                 }
 
                 // Verify visiting armies
-                Assert.AreEqual(worldTile.HasVisitingArmies(), entityTile.VisitingArmyIds != null);
+                Assert.That(entityTile.VisitingArmyIds != null, Is.EqualTo(worldTile.HasVisitingArmies()));
                 if (worldTile.HasVisitingArmies())
                 {
-                    Assert.AreEqual(worldTile.VisitingArmies.Count, entityTile.VisitingArmyIds.Length);
+                    Assert.That(entityTile.VisitingArmyIds.Length, Is.EqualTo(worldTile.VisitingArmies.Count));
                     for (var j = 0; j < entityTile.VisitingArmyIds.Length; j++)
                     {
-                        Assert.AreEqual(worldTile.VisitingArmies[j].Id, entityTile.VisitingArmyIds[j]);
+                        Assert.That(entityTile.VisitingArmyIds[j], Is.EqualTo(worldTile.VisitingArmies[j].Id));
                     }
                 }
 
                 // Verify locations
-                Assert.AreEqual(worldTile.HasLocation(), entityTile.LocationShortName != null);
+                Assert.That(entityTile.LocationShortName != null, Is.EqualTo(worldTile.HasLocation()));
                 if (worldTile.HasLocation())
                 {
-                    Assert.AreEqual(worldTile.Location.ShortName, entityTile.LocationShortName);
+                    Assert.That(entityTile.LocationShortName, Is.EqualTo(worldTile.Location.ShortName));
                 }
 
                 // Verify cities
-                Assert.AreEqual(worldTile.HasCity(), entityTile.CityShortName != null);
+                Assert.That(entityTile.CityShortName != null, Is.EqualTo(worldTile.HasCity()));
                 if (worldTile.HasCity())
                 {
-                    Assert.AreEqual(worldTile.City.ShortName, entityTile.CityShortName);
+                    Assert.That(entityTile.CityShortName, Is.EqualTo(worldTile.City.ShortName));
                 }
 
                 // Verify items
-                Assert.AreEqual(worldTile.HasItems(), entityTile.Items != null);
+                Assert.That(entityTile.Items != null, Is.EqualTo(worldTile.HasItems()));
                 if (worldTile.HasItems())
                 {
-                    Assert.AreEqual(worldTile.Items.Count, entityTile.Items.Length);
+                    Assert.That(entityTile.Items.Length, Is.EqualTo(worldTile.Items.Count));
                     for (var j = 0; j < entityTile.Items.Length; j++)
                     {
-                        Assert.AreEqual(worldTile.Items[j].Id, entityTile.Items[j].Id);
-                        Assert.AreEqual(worldTile.Items[j].ShortName, entityTile.Items[j].ArtifactShortName);
+                        Assert.That(entityTile.Items[j].Id, Is.EqualTo(worldTile.Items[j].Id));
+                        Assert.That(entityTile.Items[j].ArtifactShortName, Is.EqualTo(worldTile.Items[j].ShortName));
                     }
                 }
             }

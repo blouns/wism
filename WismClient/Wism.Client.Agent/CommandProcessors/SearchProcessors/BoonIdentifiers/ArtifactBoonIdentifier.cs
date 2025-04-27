@@ -1,10 +1,10 @@
 ﻿using System;
-using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors;
 
-public class ArtifactBoonIdentifier : IBoonIdentfier
+public class ArtifactBoonIdentifier : IBoonIdentifier
 {
     public bool CanIdentify(IBoon boon)
     {

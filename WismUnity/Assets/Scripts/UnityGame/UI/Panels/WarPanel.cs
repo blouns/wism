@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Wism.Client.Comparers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 

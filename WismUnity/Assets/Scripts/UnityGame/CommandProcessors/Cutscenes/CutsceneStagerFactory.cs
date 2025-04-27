@@ -2,8 +2,9 @@
 using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
-using Wism.Client.Api.Commands;
-using Wism.Client.Core;
+using Wism.Client.Commands.Cities;
+using Wism.Client.Commands.Locations;
+using Wism.Client.Core.Boons;
 
 namespace Assets.Scripts.CommandProcessors.Cutscenes
 {

@@ -8,7 +8,9 @@ using Newtonsoft.Json.Linq;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Core.Heros;
+using Wism.Client.Factories;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Modules
 {

@@ -1,0 +1,275 @@
+[
+  {
+    "ShortName": "NorthHold",
+    "DisplayName": "NorthHold",
+    "Defense": 3,
+    "Income": 20,
+    "X": 1,
+    "Y": 1,
+    "ClanName": "Player1",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "EastGate",
+    "DisplayName": "EastGate",
+    "Defense": 2,
+    "Income": 18,
+    "X": 6,
+    "Y": 1,
+    "ClanName": "Player1",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "DarkSpire",
+    "DisplayName": "DarkSpire",
+    "Defense": 4,
+    "Income": 24,
+    "X": 1,
+    "Y": 10,
+    "ClanName": "Player2",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "ShadowGlen",
+    "DisplayName": "ShadowGlen",
+    "Defense": 2,
+    "Income": 16,
+    "X": 6,
+    "Y": 10,
+    "ClanName": "Player2",
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "FreeTown",
+    "DisplayName": "FreeTown",
+    "Defense": 1,
+    "Income": 14,
+    "X": 12,
+    "Y": 3,
+    "ClanName": null,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "LostHaven",
+    "DisplayName": "LostHaven",
+    "Defense": 1,
+    "Income": 15,
+    "X": 12,
+    "Y": 12,
+    "ClanName": null,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  },
+  {
+    "ShortName": "Khamar",
+    "DisplayName": "Khamar",
+    "Defense": 2,
+    "Income": 22,
+    "X": 9,
+    "Y": 18,
+    "ClanName": null,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
+      }
+    ]
+  }
+]

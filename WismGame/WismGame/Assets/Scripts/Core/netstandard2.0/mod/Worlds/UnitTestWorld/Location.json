@@ -1,0 +1,50 @@
+[
+  {
+    "ShortName": "Stonehenge",
+    "DisplayName": "Stonehenge",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "CryptKeeper",
+    "DisplayName": "Crypt Keeper's Lair",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "SagesHut",
+    "DisplayName": "Sage's Hut",
+    "Kind": "Sage",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "Suzzallo",
+    "DisplayName": "Suzzallo",
+    "Kind": "Library",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "TempleDog",
+    "DisplayName": "Temple of the Dog",
+    "Kind": "Temple",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "TempleCat",
+    "DisplayName": "Temple of the Cat",
+    "Kind": "Temple",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "Doghouse",
+    "DisplayName": "Cooper's Doghouse",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "Yakima",
+    "DisplayName": "The Streets of Yakima",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  }
+]

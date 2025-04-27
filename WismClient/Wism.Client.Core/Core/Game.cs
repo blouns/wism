@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Common;
+using Wism.Client.Comparers;
 using Wism.Client.Core.Armies;
+using Wism.Client.Core.Armies.MovementStrategies;
+using Wism.Client.Core.Armies.TerrainTraversalStrategies;
+using Wism.Client.Core.Armies.WarStrategies;
 using Wism.Client.Data;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 using Wism.Client.Pathing;
-using Wism.Client.War;
 
 namespace Wism.Client.Core
 {

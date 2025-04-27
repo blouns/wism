@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.AI.Adapta.TacticalModules;
-using Wism.Client.AI.Task;
+using Wism.Client.AI.Intelligence;
 using Wism.Client.Common;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.AI.Adapta.Strategic
+namespace Wism.Client.AI.Adapta.StrategicModules
 {
     public class AssetAllocationModule
     {

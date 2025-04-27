@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.War
+namespace Wism.Client.Core.Armies.WarStrategies.CombatModifiers
 {
     /// <summary>
     ///     COMBAT MECHANICS

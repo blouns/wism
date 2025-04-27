@@ -45,16 +45,16 @@ public class AiExpandAndConquerTests
         TestUtilities.ExecuteCurrentTurnAsAIUntilDone(controller, commander);
 
         // Turn 1: Sirians: End
-        Assert.AreEqual(1, lordBane.Turn, "Expected to be on turn zero for next player.");
-        Assert.AreEqual(lordBane, Game.Current.GetCurrentPlayer(), "Expected to be next player's turn.");
-        Assert.AreEqual(2, sirians.GetCities().Count, "Expected to have conquered Deserton.");
+        Assert.That(lordBane.Turn, Is.EqualTo(1), "Expected to be on turn zero for next player.");
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.EqualTo(lordBane), "Expected to be next player's turn.");
+        Assert.That(sirians.GetCities().Count, Is.EqualTo(2), "Expected to have conquered Deserton.");
 
         // Turn 1: Lord Bane: Start
         TestUtilities.StartTurn(controller);
         TestUtilities.ExecuteCurrentTurnAsAIUntilDone(controller, commander);
 
         // Turn 1: Lord Bane: End
-        Assert.AreEqual(2, sirians.Turn, "Expected to be on next turn for next player.");
-        Assert.AreEqual(sirians, Game.Current.GetCurrentPlayer(), "Expected to be next player's turn.");
+        Assert.That(sirians.Turn, Is.EqualTo(2), "Expected to be on next turn for next player.");
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.EqualTo(sirians), "Expected to be next player's turn.");
     }
 }

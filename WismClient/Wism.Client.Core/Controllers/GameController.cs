@@ -1,9 +1,10 @@
 ﻿using System;
 using Wism.Client.Common;
-using Wism.Client.Entities;
+using Wism.Client.Core;
+using Wism.Client.Data.Entities;
 using Wism.Client.Factories;
 
-namespace Wism.Client.Core.Controllers
+namespace Wism.Client.Controllers
 {
     public class GameController
     {

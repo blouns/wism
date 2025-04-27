@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Assets.Scripts.Editors
 {

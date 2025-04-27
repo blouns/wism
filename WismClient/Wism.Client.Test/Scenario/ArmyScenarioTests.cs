@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Locations;
+using Wism.Client.Commands.Players;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Test.Common;
 
@@ -63,8 +66,8 @@ public class ArmyScenarioTests
         }
 
         // Assert
-        Assert.AreEqual(expectedX, armiesToMove[0].Tile.X, "Army not in expected location.");
-        Assert.AreEqual(expectedY, armiesToMove[0].Tile.Y, "Army not in expected location.");
+        Assert.That(armiesToMove[0].Tile.X, Is.EqualTo(expectedX), "Army not in expected location.");
+        Assert.That(armiesToMove[0].Tile.Y, Is.EqualTo(expectedY), "Army not in expected location.");
     }
 
     [Test]
@@ -186,9 +189,9 @@ public class ArmyScenarioTests
         }
 
         // Assert
-        Assert.AreEqual(expectedX, armiesToMove[0].Tile.X, "Army not in expected location.");
-        Assert.AreEqual(expectedY, armiesToMove[0].Tile.Y, "Army not in expected location.");
-        Assert.AreEqual(1, armiesToMove[0].Tile.Armies.Count, "Incorrect army count at destination.");
+        Assert.That(armiesToMove[0].Tile.X, Is.EqualTo(expectedX), "Army not in expected location.");
+        Assert.That(armiesToMove[0].Tile.Y, Is.EqualTo(expectedY), "Army not in expected location.");
+        Assert.That(armiesToMove[0].Tile.Armies.Count, Is.EqualTo(1), "Incorrect army count at destination.");
     }
 
     [Test]
@@ -254,10 +257,10 @@ public class ArmyScenarioTests
         }
 
         // Assert
-        Assert.AreEqual(expectedX, armiesToMove[0].Tile.X, "Army not in expected location.");
-        Assert.AreEqual(expectedY, armiesToMove[0].Tile.Y, "Army not in expected location.");
-        Assert.AreEqual(4, armiesToMove[0].Tile.Armies.Count, "Incorrect army count at destination.");
-        Assert.AreEqual(0, player2.GetArmies().Count, "Incorrect army count at destination.");
+        Assert.That(armiesToMove[0].Tile.X, Is.EqualTo(expectedX), "Army not in expected location.");
+        Assert.That(armiesToMove[0].Tile.Y, Is.EqualTo(expectedY), "Army not in expected location.");
+        Assert.That(armiesToMove[0].Tile.Armies.Count, Is.EqualTo(4), "Incorrect army count at destination.");
+        Assert.That(player2.GetArmies().Count, Is.EqualTo(0), "Incorrect army count at destination.");
     }
 
     [Test]
@@ -331,12 +334,12 @@ public class ArmyScenarioTests
         }
 
         // Assert
-        Assert.AreEqual(expectedX, armiesToMove[0].Tile.X, "Army not in expected location.");
-        Assert.AreEqual(expectedY, armiesToMove[0].Tile.Y, "Army not in expected location.");
-        Assert.AreEqual(8, armiesToMove[0].Tile.Armies.Count, "Incorrect army count at destination.");
-        Assert.AreEqual(8, player1.GetArmies().Count, "Incorrect army count for player 1.");
-        Assert.AreEqual(0, player2.GetArmies().Count, "Incorrect army count for player 2.");
-        Assert.IsNull(enemyTile.Armies, "Incorrect army count at enemy tile.");
+        Assert.That(armiesToMove[0].Tile.X, Is.EqualTo(expectedX), "Army not in expected location.");
+        Assert.That(armiesToMove[0].Tile.Y, Is.EqualTo(expectedY), "Army not in expected location.");
+        Assert.That(armiesToMove[0].Tile.Armies.Count, Is.EqualTo(8), "Incorrect army count at destination.");
+        Assert.That(player1.GetArmies().Count, Is.EqualTo(8), "Incorrect army count for player 1.");
+        Assert.That(player2.GetArmies().Count, Is.EqualTo(0), "Incorrect army count for player 2.");
+        Assert.That(enemyTile.Armies, Is.Null, "Incorrect army count at enemy tile.");
     }
 
     /// <summary>
@@ -442,9 +445,9 @@ public class ArmyScenarioTests
         }
 
         // Assert
-        Assert.IsTrue(gold1 < player1.Gold, "No money from the seer.");
+        Assert.That(gold1, Is.LessThan(player1.Gold), "No money from the seer.");
         // Strength should be +3 thanks to 2 temples and one successful throne boon
-        Assert.AreEqual(strength1 + 3, armiesToMove1[0].Strength, "Too weak or too strong.");
+        Assert.That(armiesToMove1[0].Strength, Is.EqualTo(strength1 + 3), "Too weak or too strong.");
 
         // Assemble 2
         commandsToAdd = new List<Command>
@@ -502,7 +505,7 @@ public class ArmyScenarioTests
 
         // Assert 2
         // TODO: Verify items
-        Assert.AreEqual(gold2, player2.Gold, "Seer was generous.");
-        Assert.AreEqual(strength2 + 2, armiesToMove2[0].Strength, "Too weak.");
+        Assert.That(player2.Gold, Is.EqualTo(gold2), "Seer was generous.");
+        Assert.That(armiesToMove2[0].Strength, Is.EqualTo(strength2 + 2), "Too weak.");
     }
 }

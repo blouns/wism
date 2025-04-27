@@ -1,7 +1,7 @@
-﻿using Wism.Client.Api.Commands;
-using Wism.Client.Core.Controllers;
+﻿using Wism.Client.Commands;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.CommandProcessors
+namespace Wism.Client.CommandProcessors
 {
     public interface ICommandProcessor
     {

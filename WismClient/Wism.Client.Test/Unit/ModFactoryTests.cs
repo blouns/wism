@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.Serialization.Json;
 using NUnit.Framework;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Test.Unit;
 
@@ -59,15 +60,15 @@ public class ModFactoryTest
             if (clan.DisplayName == "Orcs of Kor")
             {
                 foundOrcs = true;
-                Assert.AreEqual(1, clan.GetTerrainModifier("Marsh"));
-                Assert.AreEqual(-1, clan.GetTerrainModifier("Forest"));
-                Assert.AreEqual(0, clan.GetTerrainModifier("Grass"));
-                Assert.AreEqual(0, clan.GetTerrainModifier("Hill"));
-                Assert.AreEqual(0, clan.GetTerrainModifier("OuterSpace"));
+                Assert.That(clan.GetTerrainModifier("Marsh"), Is.EqualTo(1));
+                Assert.That(clan.GetTerrainModifier("Forest"), Is.EqualTo(-1));
+                Assert.That(clan.GetTerrainModifier("Grass"), Is.EqualTo(0));
+                Assert.That(clan.GetTerrainModifier("Hill"), Is.EqualTo(0));
+                Assert.That(clan.GetTerrainModifier("OuterSpace"), Is.EqualTo(0));
             }
         }
 
-        Assert.IsTrue(foundOrcs);
+        Assert.That(foundOrcs, Is.True, "Clan Orcs of Kor not found in mod.");
     }
 
 
@@ -86,7 +87,7 @@ public class ModFactoryTest
             }
         }
 
-        Assert.IsTrue(foundHero);
+        Assert.That(foundHero, Is.True, "Army Hero not found in mod.");
     }
 
     [Test]
@@ -103,7 +104,7 @@ public class ModFactoryTest
             }
         }
 
-        Assert.IsTrue(foundMeadow);
+        Assert.That(foundMeadow, Is.True, "Terrain Grass not found in mod.");
     }
 
     private void CleanupTestFiles()

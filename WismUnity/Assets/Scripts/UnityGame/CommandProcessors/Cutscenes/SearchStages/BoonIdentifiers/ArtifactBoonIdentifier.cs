@@ -1,12 +1,12 @@
 ﻿using Assets.Scripts.UI;
 using System;
 using UnityEngine;
-using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.CommandProcessors
 {
-    public class ArtifactBoonIdentifier : IBoonIdentfier
+    public class ArtifactBoonIdentifier : IBoonIdentifier
     {
         public bool CanIdentify(IBoon boon)
         {

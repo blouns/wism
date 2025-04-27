@@ -1,6 +1,6 @@
 ﻿using System;
 using Wism.Client.Core;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 

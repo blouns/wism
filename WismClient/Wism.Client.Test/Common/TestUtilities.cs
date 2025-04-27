@@ -1,11 +1,16 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
-using Wism.Client.Api;
-using Wism.Client.Api.CommandProviders;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands;
+using Wism.Client.CommandProviders;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Games;
+using Wism.Client.Commands.Heros;
+using Wism.Client.Commands.Locations;
+using Wism.Client.Commands.Players;
 using Wism.Client.Common;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Data;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 

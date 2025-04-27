@@ -3,8 +3,9 @@ using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Assets.Scripts.UnityGame.Factories
 {

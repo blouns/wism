@@ -1,6 +1,6 @@
-﻿using Wism.Client.Core.Controllers;
+﻿using Wism.Client.Controllers;
 
-namespace Wism.Client.Api.Data.Entities
+namespace Wism.Client.Data.Entities
 {
     public abstract class CommandEntity
     {

@@ -1,10 +1,12 @@
 ﻿using System;
-using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Api.Commands;
+using Wism.Client.Agent.UI;
+using Wism.Client.CommandProcessors;
+using Wism.Client.Commands;
+using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
 
 public class SearchLibraryProcessor : ICommandProcessor
 {

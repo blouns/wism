@@ -1,15 +1,21 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Wism.Client.Api;
-using Wism.Client.Api.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
-using Wism.Client.Entities;
+using Wism.Client.Controllers;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
-using Command = Wism.Client.Api.Commands.Command;
+using Command = Wism.Client.Commands.Command;
+using Wism.Client.Modules.Infos;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Players;
+using Wism.Client.Commands.Cities;
+using Wism.Client.Commands.Heros;
+using Wism.Client.Data.Entities;
+using Wism.Client.Commands.Games;
+using Wism.Client.Commands.Locations;
+using Wism.Client.Data;
 
 namespace Assets.Scripts.Managers
 {

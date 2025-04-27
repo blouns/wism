@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.Tilemaps;
 using UnityEngine;
-using Wism.Client.Api.Commands;
+using Wism.Client.Commands.Locations;
 
 namespace Assets.Scripts.CommandProcessors
 {

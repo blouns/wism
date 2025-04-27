@@ -4,6 +4,7 @@ using Wism.Client.Core;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Scenario;
@@ -172,10 +173,10 @@ public class SavedGameScenarioTests
             TestUtilities.EndTurn(commandController, gameController);
 
             // Assert
-            Assert.AreEqual(0, lordBane.GetArmies().Count, "Lord Bane is not yet defeated!");
-            Assert.AreEqual(2, sirians.GetArmies().Count, "Sirians army took more losses than expected!");
-            Assert.AreEqual(3, sirians.Turn, "Unexpected player's turn");
-            Assert.AreEqual("LordBane", Game.Current.GetCurrentPlayer().Clan.ShortName, "Unexpected player's turn");
+            Assert.That(lordBane.GetArmies().Count, Is.EqualTo(0), "Lord Bane is not yet defeated!");
+            Assert.That(sirians.GetArmies().Count, Is.EqualTo(2), "Sirians army took more losses than expected!");
+            Assert.That(sirians.Turn, Is.EqualTo(3), "Unexpected player's turn");
+            Assert.That(Game.Current.GetCurrentPlayer().Clan.ShortName, Is.EqualTo("LordBane"), "Unexpected player's turn");
         }
     }
 
@@ -236,8 +237,8 @@ public class SavedGameScenarioTests
             }
 
             // Assert
-            Assert.AreEqual(startingGold + 216 + 100 * 62, sirians.Gold, "Sirians have a sketchy accountant");
-            Assert.AreEqual(0, lordBane.Gold, "Lord Bane has a great accountant.");
+            Assert.That(sirians.Gold, Is.EqualTo(startingGold + 216 + 100 * 62), "Sirians have a sketchy accountant");
+            Assert.That(lordBane.Gold, Is.EqualTo(0), "Lord Bane has a great accountant.");
         }
     }
 
@@ -332,13 +333,13 @@ public class SavedGameScenarioTests
                 siriansHero1, 2, 2);
 
             // Assert
-            Assert.AreEqual(8, sirians.GetArmies().Count, "More heros fell than expected.");
-            Assert.AreEqual(0, bane.GetArmies().Count, "Unexpected number of armies remaining.");
-            Assert.AreEqual(1, sirians.GetCities().Count, "Unexpected number of cities.");
-            Assert.AreEqual(0, bane.GetCities().Count, "Unexpected number of cities.");
-            Assert.AreEqual(2, siriansHero1[0].X, "Army didn't actually move into the city.");
-            Assert.AreEqual(2, siriansHero1[0].Y, "Army didn't actually move into the city.");
-            Assert.AreEqual(sirians.Clan, World.Current.Map[2, 2].City.Clan,
+            Assert.That(sirians.GetArmies().Count, Is.EqualTo(8), "More heros fell than expected.");
+            Assert.That(bane.GetArmies().Count, Is.EqualTo(0), "Unexpected number of armies remaining.");
+            Assert.That(sirians.GetCities().Count, Is.EqualTo(1), "Unexpected number of cities.");
+            Assert.That(bane.GetCities().Count, Is.EqualTo(0), "Unexpected number of cities.");
+            Assert.That(siriansHero1[0].X, Is.EqualTo(2), "Army didn't actually move into the city.");
+            Assert.That(siriansHero1[0].Y, Is.EqualTo(2), "Army didn't actually move into the city.");
+            Assert.That(World.Current.Map[2, 2].City.Clan, Is.EqualTo(sirians.Clan),
                 "Sirian's couldn't take the city.");
         }
     }
@@ -563,15 +564,15 @@ public class SavedGameScenarioTests
             TestUtilities.EndTurn(commandController, gameController);
 
             // Assert
-            Assert.IsTrue(((Hero)siriansHero1[0]).HasItems(), "Hero had a hole in his pocket!");
-            Assert.AreEqual("CrownOfLoriel", ((Hero)siriansHero1[0]).Items[0].ShortName,
+            Assert.That(((Hero)siriansHero1[0]).HasItems(), Is.True,"Hero had a hole in his pocket!");
+            Assert.That(((Hero)siriansHero1[0]).Items[0].ShortName, Is.EqualTo("CrownOfLoriel"),
                 "Hero had a hole in his pocket!");
-            Assert.AreEqual(9, siriansHero1[0].Strength, "Hero was not pias enough!");
-            Assert.AreEqual(9, siriansHero1[1].Strength, "Griffins were not pias enough!");
-            Assert.AreEqual(7, siriansHero1[2].Strength, "Light infantry was not pias enough!");
-            Assert.IsTrue(Game.Current.Players[0].Gold > 1000, "Sage was super cheap!");
-            Assert.AreEqual(6, sirians.Turn, "Unexpected player's turn");
-            Assert.AreEqual("LordBane", Game.Current.GetCurrentPlayer().Clan.ShortName, "Unexpected player's turn");
+            Assert.That(siriansHero1[0].Strength, Is.EqualTo(9), "Hero was not pias enough!");
+            Assert.That(siriansHero1[1].Strength, Is.EqualTo(9), "Griffins were not pias enough!");
+            Assert.That(siriansHero1[2].Strength, Is.EqualTo(7), "Light infantry was not pias enough!");
+            Assert.That(Game.Current.Players[0].Gold, Is.GreaterThan(1000), "Sage was super cheap!");
+            Assert.That(sirians.Turn, Is.EqualTo(6), "Unexpected player's turn");
+            Assert.That(Game.Current.GetCurrentPlayer().Clan.ShortName, Is.EqualTo("LordBane"), "Unexpected player's turn");
         }
     }
 }

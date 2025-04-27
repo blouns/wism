@@ -1,0 +1,102 @@
+[
+  {
+    "ShortName": "Firesword",
+    "DisplayName": "Firesword",
+    "CommandBonus": 0,
+    "CombatBonus": 1
+  },
+  {
+    "ShortName": "Icesword",
+    "DisplayName": "Icesword",
+    "CommandBonus": 0,
+    "CombatBonus": 1
+  },
+  {
+    "ShortName": "Lightsword",
+    "DisplayName": "Lightsword",
+    "CommandBonus": 0,
+    "CombatBonus": 2
+  },
+  {
+    "ShortName": "Darksword",
+    "DisplayName": "Darksword",
+    "CommandBonus": 0,
+    "CombatBonus": 2
+  },
+  {
+    "ShortName": "StaffOfMight",
+    "DisplayName": "Staff of Might",
+    "CommandBonus": 0,
+    "CombatBonus": 3
+  },
+  {
+    "ShortName": "CrownOfLoriel",
+    "DisplayName": "Crown of Loriel",
+    "CommandBonus": 1,
+    "CombatBonus": 0
+  },
+  {
+    "ShortName": "SceptreOfLoriel",
+    "DisplayName": "Sceptre of Loriel",
+    "CommandBonus": 1,
+    "CombatBonus": 0
+  },
+  {
+    "ShortName": "OrbOfLoriel",
+    "DisplayName": "Orb of Loriel",
+    "CommandBonus": 1,
+    "CombatBonus": 0
+  },
+  {
+    "ShortName": "RingOfPower",
+    "DisplayName": "Ring of Power",
+    "CommandBonus": 2,
+    "CombatBonus": 0
+  },
+  {
+    "ShortName": "StaffOfRuling",
+    "DisplayName": "Staff of Ruling",
+    "CommandBonus": 3,
+    "CombatBonus": 0
+  },
+  {
+    "ShortName": "SpearOfAnk",
+    "DisplayName": "Spear of Ank",
+    "CommandBonus": 0,
+    "CombatBonus": 1
+  },
+  {
+    "ShortName": "BowOfEldros",
+    "DisplayName": "Bow of Eldros",
+    "CommandBonus": 0,
+    "CombatBonus": 2
+  },
+  {
+    "ShortName": "HornOfAges",
+    "DisplayName": "Horn of Ages",
+    "CommandBonus": 2,
+    "CombatBonus": 0
+  },
+  {
+    "ShortName": "CrimsonBanner",
+    "DisplayName": "Crimson Banner",
+    "CommandBonus": 1,
+    "CombatBonus": 0
+  },
+  {
+    "ShortName": "Cooper",
+    "DisplayName": "Cooper",
+    "CommandBonus": 1,
+    "CombatBonus": 0,
+    "IsCompanion": true,
+    "Interaction": "Cooper layed down and got fur everywhere."
+  },
+  {
+    "ShortName": "Wilson",
+    "DisplayName": "Wilson",
+    "CommandBonus": 0,
+    "CombatBonus": 1,
+    "IsCompanion": true,
+    "Interaction": "Wilson sat down and farted."
+  }
+]

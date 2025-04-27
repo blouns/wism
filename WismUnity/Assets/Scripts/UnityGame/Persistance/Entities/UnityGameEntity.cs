@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.Managers;
 using System;
-using Wism.Client.Entities;
+using Wism.Client.Data.Entities;
 
 namespace Assets.Scripts.Persistance.Entities
 {

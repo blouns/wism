@@ -2,6 +2,7 @@
 using Assets.Scripts.Tilemaps;
 using System.Collections.Generic;
 using UnityEngine;
+using Wism.Client.Comparers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 

@@ -6,8 +6,9 @@ using System.Reflection;
 using UnityEngine;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
-using Wism.Client.Entities;
-using Wism.Client.War;
+using Wism.Client.Core.Armies.TerrainTraversalStrategies;
+using Wism.Client.Core.Armies.WarStrategies;
+using Wism.Client.Data.Entities;
 
 namespace Assets.Scripts
 {

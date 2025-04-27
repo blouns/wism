@@ -1,12 +1,13 @@
 ﻿using Assets.Scripts.CommandProcessors.Cutscenes;
 using Assets.Scripts.Managers;
 using System;
-using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Api.Commands;
+using Wism.Client.CommandProcessors;
+using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 using ILogger = Wism.Client.Common.ILogger;
+using Wism.Client.Commands.Locations;
 
 namespace Assets.Scripts.CommandProcessors
 {

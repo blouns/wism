@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Wism.Client.Modules
+namespace Wism.Client.Modules.Infos
 {
     /// Terrain Modifier. Troops from the different Empires have their likes
     /// and dislikes in regard to where they prefer to fight.For example, the

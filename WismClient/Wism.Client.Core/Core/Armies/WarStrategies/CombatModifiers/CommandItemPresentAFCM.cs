@@ -1,7 +1,6 @@
-﻿using Wism.Client.Core;
-using Wism.Client.MapObjects;
+﻿using Wism.Client.MapObjects;
 
-namespace Wism.Client.War
+namespace Wism.Client.Core.Armies.WarStrategies.CombatModifiers
 {
     /// Command Item Present. If a hero (or heroes) with command item(s) are
     /// present, the value of the command item(s) is added. For example, the Crimson

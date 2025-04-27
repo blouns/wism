@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Core.Armies;
+using Wism.Client.Core.Armies.DeploymentStrategies;
 using Wism.Client.MapObjects;
-using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Core
 {

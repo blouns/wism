@@ -43,16 +43,16 @@ public class LibrarianTests
         var locationNames = librarian.GetAllLocationNames();
 
         // Assert
-        Assert.IsNotNull(locationNames);
-        Assert.IsTrue(locationNames.Length > 0);
+        Assert.That(locationNames, Is.Not.Null);
+        Assert.That(locationNames.Length, Is.GreaterThan(0));
         TestContext.WriteLine("Locations:");
         foreach (var name in locationNames)
         {
             TestContext.WriteLine(name);
-            Assert.IsTrue(
-                "Crypt Keeper's Lair" == name ||
-                "Suzzallo" == name ||
-                "Stonehenge" == name);
+            Assert.That(
+                name == "Crypt Keeper's Lair" ||
+                name == "Suzzallo" ||
+                name == "Stonehenge", Is.True);
         }
     }
 
@@ -75,8 +75,8 @@ public class LibrarianTests
         var artifactNames = librarian.GetAllArtifactNames();
 
         // Assert
-        Assert.IsNotNull(artifactNames);
-        Assert.IsTrue(artifactNames.Length > 0);
+        Assert.That(artifactNames, Is.Not.Null);
+        Assert.That(artifactNames.Length, Is.GreaterThan(0));
         TestContext.WriteLine("Artifacts:");
         var found = false;
         foreach (var name in artifactNames)
@@ -88,7 +88,7 @@ public class LibrarianTests
             }
         }
 
-        Assert.IsTrue(found, "Did not find the artifact");
+        Assert.That(found, Is.True, "Did not find the artifact");
     }
 
     [Test]
@@ -113,8 +113,8 @@ public class LibrarianTests
         var artifactNames = librarian.GetAllArtifactNames();
 
         // Assert
-        Assert.IsNotNull(artifactNames);
-        Assert.IsTrue(artifactNames.Length > 0);
+        Assert.That(artifactNames, Is.Not.Null);
+        Assert.That(artifactNames.Length, Is.GreaterThan(0));
         TestContext.WriteLine("Artifacts:");
         var found = false;
         foreach (var name in artifactNames)
@@ -126,7 +126,7 @@ public class LibrarianTests
             }
         }
 
-        Assert.IsTrue(found, "Did not find the artifact");
+        Assert.That(found, Is.True, "Did not find the artifact");
     }
 
     [Test]
@@ -145,8 +145,8 @@ public class LibrarianTests
         var artifactNames = librarian.GetAllArtifactNames();
 
         // Assert
-        Assert.IsNotNull(artifactNames);
-        Assert.IsTrue(artifactNames.Length > 0);
+        Assert.That(artifactNames, Is.Not.Null);
+        Assert.That(artifactNames.Length, Is.GreaterThan(0));
         TestContext.WriteLine("Artifacts:");
         var found = false;
         foreach (var name in artifactNames)
@@ -158,7 +158,7 @@ public class LibrarianTests
             }
         }
 
-        Assert.IsTrue(found, "Did not find the artifact");
+        Assert.That(found, Is.True, "Did not find the artifact");
     }
 
     [Test]
@@ -201,8 +201,8 @@ public class LibrarianTests
         var artifactNames = librarian.GetAllArtifactNames();
 
         // Assert
-        Assert.IsNotNull(artifactNames);
-        Assert.IsTrue(artifactNames.Length > 0);
+        Assert.That(artifactNames, Is.Not.Null);
+        Assert.That(artifactNames.Length, Is.GreaterThan(0));
         TestContext.WriteLine("Artifacts:");
         var found = false;
         foreach (var name in artifactNames)
@@ -216,7 +216,7 @@ public class LibrarianTests
             }
         }
 
-        Assert.IsTrue(found, "Did not find the artifact");
+        Assert.That(found, Is.True, "Did not find the artifact");
     }
 
     [Test]
@@ -257,8 +257,8 @@ public class LibrarianTests
         var artifactNames = librarian.GetAllArtifactNames();
 
         // Assert
-        Assert.IsNotNull(artifactNames);
-        Assert.IsTrue(artifactNames.Length > 0);
+        Assert.That(artifactNames, Is.Not.Null);
+        Assert.That(artifactNames.Length, Is.GreaterThan(0));
         TestContext.WriteLine("Artifacts:");
         var found = false;
         foreach (var name in artifactNames)
@@ -270,7 +270,7 @@ public class LibrarianTests
             }
         }
 
-        Assert.IsTrue(found, "Did not find the artifact");
+        Assert.That(found, Is.True, "Did not find the artifact");
     }
 
     [Test]
@@ -325,7 +325,7 @@ public class LibrarianTests
         // Assert
         for (var i = 0; i < knowledge.Length; i++)
         {
-            Assert.IsNotNull(knowledge[i]);
+            Assert.That(knowledge[i], Is.Not.Null);
             TestContext.WriteLine(knowledge[i]);
         }
     }
@@ -360,7 +360,7 @@ public class LibrarianTests
         // Assert
         for (var i = 0; i < knowledge.Length; i++)
         {
-            Assert.IsNotNull(knowledge[i]);
+            Assert.That(knowledge[i], Is.Not.Null);
             TestContext.WriteLine(knowledge[i]);
         }
     }
@@ -405,7 +405,7 @@ public class LibrarianTests
         artifact = librarian.GetArtifact("Firesword");
 
         // Assert
-        Assert.AreEqual("Firesword", artifact.DisplayName);
+        Assert.That(artifact.DisplayName, Is.EqualTo("Firesword"));
     }
 
     [Test]
@@ -448,7 +448,7 @@ public class LibrarianTests
         artifact = librarian.GetArtifact("SpearOfAnk");
 
         // Assert
-        Assert.IsNull(artifact);
+        Assert.That(artifact, Is.Null);
     }
 
     [Test]
@@ -491,7 +491,7 @@ public class LibrarianTests
         location = librarian.GetLocation("CryptKeeper");
 
         // Assert
-        Assert.AreEqual("Crypt Keeper's Lair", location.DisplayName);
+        Assert.That(location.DisplayName, Is.EqualTo("Crypt Keeper's Lair"));
     }
 
     [Test]
@@ -534,7 +534,7 @@ public class LibrarianTests
         location = librarian.GetLocation("SagesHut");
 
         // Assert
-        Assert.IsNull(location);
+        Assert.That(location, Is.Null);
     }
 
     private static Artifact GetArtifact(string shortName)

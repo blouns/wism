@@ -1,4 +1,4 @@
-﻿using Wism.Client.Api.Commands;
+﻿using Wism.Client.Commands.Locations;
 
 namespace Assets.Scripts.CommandProcessors
 {

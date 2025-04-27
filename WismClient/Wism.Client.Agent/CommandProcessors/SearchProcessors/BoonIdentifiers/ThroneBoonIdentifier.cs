@@ -1,9 +1,9 @@
 ﻿using System;
-using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 
 namespace Wism.Client.Agent.CommandProcessors;
 
-public class ThroneBoonIdentifier : IBoonIdentfier
+public class ThroneBoonIdentifier : IBoonIdentifier
 {
     public bool CanIdentify(IBoon boon)
     {

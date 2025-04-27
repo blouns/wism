@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using Wism.Client.Agent.CommandProcessors;
-using Wism.Client.Agent.UI;
-using Wism.Client.Api.CommandProcessors;
-using Wism.Client.Api.CommandProviders;
+using Wism.Client.Agent.CommandProcessors.SearchProcessors;
+using Wism.Client.Agent.CommandProviders;
+using Wism.Client.CommandProcessors;
+using Wism.Client.CommandProviders;
 using Wism.Client.Common;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Core.Controllers;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent;
+namespace Wism.Client.Agent.UI;
 
 /// <summary>
 ///     Basic ASCII Console-based UI for testing

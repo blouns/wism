@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors;
 
-public class AlliesBoonIdentifier : IBoonIdentfier
+public class AlliesBoonIdentifier : IBoonIdentifier
 {
     public bool CanIdentify(IBoon boon)
     {
         return boon is AlliesBoon;
     }
 
-    public void Identify(IBoon boon)
-    {
-        if (!this.CanIdentify(boon))
+        public void Identify(IBoon boon)
         {
-            throw new ArgumentException("Cannot identify " + boon);
-        }
+            if (!CanIdentify(boon))
+            {
+                throw new ArgumentException("Cannot identify " + boon);
+            }
 
         var armies = (List<Army>)boon.Result;
         if (armies.Count > 1)

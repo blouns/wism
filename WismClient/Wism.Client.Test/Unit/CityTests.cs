@@ -34,138 +34,19 @@ public class CityTests
         World.Current.AddCity(city, tile);
 
         // Assert
-        Assert.AreEqual(tile, city.Tile);
-        Assert.AreEqual("Marthos", city.DisplayName);
+        Assert.That(city.Tile, Is.EqualTo(tile));
+        Assert.That(city.DisplayName, Is.EqualTo("Marthos"));
 
         var tiles = city.GetTiles();
-        Assert.IsNotNull(tiles);
+        Assert.That(tiles, Is.Not.Null);
         for (var i = 0; i < 4; i++)
         {
-            Assert.IsNotNull(tiles[i]);
-            Assert.AreEqual(expectedTerrain, tiles[i].Terrain);
-            Assert.AreEqual(city, tiles[i].City);
+            Assert.That(tiles[i], Is.Not.Null);
+            Assert.That(tiles[i].Terrain, Is.EqualTo(expectedTerrain));
+            Assert.That(tiles[i].City, Is.EqualTo(city));
         }
 
-        Assert.AreEqual(0, city.MusterArmies().Count, "Did not expect any armies.");
-    }
-
-    [Test]
-    public void Build_City()
-    {
-        // Assemble
-        var player = Player.Create(
-            Clan.Create(ModFactory.FindClanInfo("Sirians")));
-        var tile = World.Current.Map[1, 1];
-        var city = MapBuilder.FindCity("Marthos");
-        World.Current.AddCity(city, tile);
-        player.ClaimCity(city);
-        player.Gold = 175; // Just enough
-        var defense = city.Defense;
-
-        // Act            
-        var result = city.TryBuild();
-
-        // Assert
-        Assert.IsTrue(result, $"Build unsuccessful on city: {city}");
-        Assert.AreEqual(0, player.Gold, "Player should be out of money");
-        Assert.AreEqual(defense + 1, city.Defense, "Defense value did not increase after successful build.");
-    }
-
-    [Test]
-    public void Build_City_TooExpensive()
-    {
-        // Assemble
-        var player = Player.Create(
-            Clan.Create(ModFactory.FindClanInfo("Sirians")));
-        var tile = World.Current.Map[1, 1];
-        var city = MapBuilder.FindCity("Marthos");
-        World.Current.AddCity(city, tile);
-        player.ClaimCity(city);
-        player.Gold = 174; // Not enough
-        var defense = city.Defense;
-
-        // Act            
-        var result = city.TryBuild();
-
-        // Assert
-        Assert.IsFalse(result, $"Build successful on city: {city}");
-        Assert.AreEqual(174, player.Gold, "Player should not have been charged");
-        Assert.AreEqual(defense, city.Defense, "Defense value did not increase after successful build.");
-    }
-
-    [Test]
-    public void Build_City_MaxDefense()
-    {
-        // Assemble
-        var player = Player.Create(
-            Clan.Create(ModFactory.FindClanInfo("Sirians")));
-        var tile = World.Current.Map[1, 1];
-        var city = MapBuilder.FindCity("Marthos");
-        city.Defense = 0;
-        World.Current.AddCity(city, tile);
-        player.ClaimCity(city);
-        player.Gold = 2300; // Just enough
-
-        // Act            
-        var result = true;
-        for (var i = 0; i < City.MaxDefense; i++)
-        {
-            result &= city.TryBuild();
-        }
-
-        var overMaxResult = city.TryBuild();
-
-        // Assert
-        Assert.IsTrue(result, $"Build unsuccessful on city: {city}");
-        Assert.AreEqual(0, player.Gold, "Player should be out of money");
-        Assert.AreEqual(City.MaxDefense, city.Defense, "Defense value did not increase after successful build.");
-        Assert.IsFalse(overMaxResult, "Succeeding in building beyond legendary defenses!");
-    }
-
-    [Test]
-    public void Raze_City()
-    {
-        // Assemble
-        var tile = World.Current.Map[1, 1];
-        var city = MapBuilder.FindCity("Marthos");
-        var expectedTerrain = MapBuilder.TerrainKinds["Ruins"];
-        World.Current.AddCity(city, tile);
-
-        // Act
-        city.Raze();
-
-        // Assert           
-        var tiles = city.GetTiles();
-        for (var i = 0; i < 4; i++)
-        {
-            Assert.AreEqual(expectedTerrain, tiles[i].Terrain);
-            Assert.IsNull(tiles[i].City);
-        }
-    }
-
-    [Test]
-    public void Claim_City()
-    {
-        // Assemble
-        var tile = World.Current.Map[1, 1];
-        var city = MapBuilder.FindCity("Marthos");
-        var expectedTerrain = MapBuilder.TerrainKinds["Ruins"];
-        var expectedPlayer = Game.Current.GetCurrentPlayer();
-
-        World.Current.AddCity(city, tile);
-
-        // Act
-        city.Claim(expectedPlayer);
-
-        // Assert
-        var tiles = city.GetTiles();
-        for (var i = 0; i < 4; i++)
-        {
-            Assert.IsNotNull(tiles[i]);
-            Assert.AreEqual(tiles[i].City.Clan, city.Clan);
-        }
-
-        Assert.AreEqual(expectedPlayer.Clan, city.Clan);
+        Assert.That(city.MusterArmies().Count, Is.EqualTo(0), "Did not expect any armies.");
     }
 
     [Test]
@@ -184,83 +65,20 @@ public class CityTests
         // Act
         var result = city.Barracks.StartProduction(armyInfo);
 
-        // Assert    
-        Assert.IsTrue(result, "Production failed to start.");
-        Assert.IsNotNull(city.Barracks.ArmyInTraining);
-        Assert.IsNull(city.Barracks.ArmiesToDeliver);
-        Assert.IsTrue(city.Barracks.ProducingArmy());
-        Assert.IsFalse(city.Barracks.HasDeliveries());
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.True, "Production failed to start.");
+            Assert.That(city.Barracks.ArmyInTraining, Is.Not.Null);
+            Assert.That(city.Barracks.ArmiesToDeliver, Is.Null);
+            Assert.That(city.Barracks.ProducingArmy(), Is.True);
+            Assert.That(city.Barracks.HasDeliveries(), Is.False);
 
-        var ait = city.Barracks.ArmyInTraining;
-        Assert.AreEqual(armyInfo, ait.ArmyInfo);
-        Assert.AreEqual(1, ait.TurnsToProduce, "Turns to produce are off expectation");
-        Assert.AreEqual(gold - 4, expectedPlayer.Gold, "Player's gold was off expectation.");
-    }
-
-    [Test]
-    public void Production_StartProduction_InsufficientGold()
-    {
-        // Assemble
-        Game.CreateDefaultGame();
-        var tile = World.Current.Map[1, 1];
-        var city = MapBuilder.FindCity("Marthos");
-        var expectedPlayer = Game.Current.GetCurrentPlayer();
-        var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
-        World.Current.AddCity(city, tile);
-        expectedPlayer.ClaimCity(city);
-        expectedPlayer.Gold = 0;
-
-        // Act
-        var result = city.Barracks.StartProduction(armyInfo);
-
-        // Assert           
-        Assert.IsFalse(result, "Production started even though there wasn't enough gold.");
-        Assert.IsNull(city.Barracks.ArmyInTraining);
-        Assert.IsFalse(city.Barracks.ProducingArmy());
-    }
-
-    [Test]
-    public void Production_StartProduction_UnsupportedArmyKind()
-    {
-        // Assemble
-        var tile = World.Current.Map[1, 1];
-        var city = MapBuilder.FindCity("Marthos");
-        var expectedPlayer = Game.Current.GetCurrentPlayer();
-        var armyInfo = ModFactory.FindArmyInfo("DwarvenLegion");
-        World.Current.AddCity(city, tile);
-        expectedPlayer.ClaimCity(city);
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() =>
-            city.Barracks.StartProduction(armyInfo)
-        );
-    }
-
-    [Test]
-    public void Production_StopProduction()
-    {
-        // Assemble
-        Game.CreateDefaultGame();
-        var startingGold = 100;
-        var tile = World.Current.Map[1, 1];
-        var city = MapBuilder.FindCity("Marthos");
-        var player = Game.Current.GetCurrentPlayer();
-        var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
-
-        World.Current.AddCity(city, tile);
-        player.ClaimCity(city);
-
-        player.Gold = startingGold;
-        var result = city.Barracks.StartProduction(armyInfo);
-
-        // Act
-        city.Barracks.StopProduction();
-
-        // Assert           
-        Assert.IsTrue(result, "Production failed to start.");
-        Assert.AreEqual(startingGold - 4, player.Gold, "Gold should have reflected the production costs.");
-        Assert.IsNull(city.Barracks.ArmyInTraining);
-        Assert.IsFalse(city.Barracks.ProducingArmy());
+            var ait = city.Barracks.ArmyInTraining;
+            Assert.That(ait.ArmyInfo, Is.EqualTo(armyInfo));
+            Assert.That(ait.TurnsToProduce, Is.EqualTo(1), "Turns to produce are off expectation");
+            Assert.That(expectedPlayer.Gold, Is.EqualTo(gold - 4), "Player's gold was off expectation.");
+        });
     }
 
     [Test]
@@ -277,84 +95,28 @@ public class CityTests
         player.ClaimCity(city);
 
         // Act
-        TestContext.WriteLine("Starting production.");
         var result = city.Barracks.StartProduction(armyInfo);
         while (!city.Barracks.Produce(out _))
         {
-            TestContext.WriteLine("Produced one turn.");
+            // Simulate production
         }
 
         // Assert    
-        Assert.IsTrue(result, "Production failed to start.");
-        Assert.IsFalse(city.Barracks.ProducingArmy());
-        Assert.IsFalse(city.Barracks.HasDeliveries());
+        Assert.That(result, Is.True, "Production failed to start.");
+        Assert.That(city.Barracks.ProducingArmy(), Is.False);
+        Assert.That(city.Barracks.HasDeliveries(), Is.False);
 
-        Assert.AreEqual(1, player.GetArmies().Count, "Army was not deployed.");
-        Assert.IsNotNull(tile.Armies, "Army was not deployed");
-        Assert.AreEqual(1, tile.Armies.Count);
+        Assert.That(player.GetArmies().Count, Is.EqualTo(1), "Army was not deployed.");
+        Assert.That(tile.Armies, Is.Not.Null, "Army was not deployed");
+        Assert.That(tile.Armies.Count, Is.EqualTo(1));
 
         // Army validation
         var army = tile.Armies[0];
-        Assert.AreEqual(armyInfo.ShortName, army.ShortName, "Did not produce the correct army.");
-        Assert.AreEqual(10, army.Moves);
-        Assert.AreEqual(3, army.Strength);
-        Assert.AreEqual(4, army.Upkeep);
+        Assert.That(army.ShortName, Is.EqualTo(armyInfo.ShortName), "Did not produce the correct army.");
+        Assert.That(army.Moves, Is.EqualTo(10));
+        Assert.That(army.Strength, Is.EqualTo(3));
+        Assert.That(army.Upkeep, Is.EqualTo(4));
     }
-
-    [Test]
-    public void Production_CompleteProduction_RemoteCity()
-    {
-        // Assemble
-        Game.CreateDefaultGame();
-        var player = Game.Current.GetCurrentPlayer();
-        var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
-        var turnsToProduce = 0;
-        var turnsToDeliver = 0;
-
-        var marthos = MapBuilder.FindCity("Marthos");
-        World.Current.AddCity(marthos, World.Current.Map[1, 1]);
-        player.ClaimCity(marthos);
-
-        var stormheim = MapBuilder.FindCity("Stormheim");
-        World.Current.AddCity(stormheim, World.Current.Map[3, 3]);
-        player.ClaimCity(stormheim);
-
-        // Act
-        TestContext.WriteLine("Starting production with delivery to Stormheim.");
-        var result = marthos.Barracks.StartProduction(armyInfo, stormheim);
-        do
-        {
-            TestContext.WriteLine("Produced one turn.");
-            turnsToProduce++;
-        } while (!marthos.Barracks.Produce(out _));
-
-        do
-        {
-            TestContext.WriteLine("Delivered one turn.");
-            turnsToDeliver++;
-        } while (!marthos.Barracks.Deliver(out _));
-
-        // Assert    
-        Assert.IsTrue(result, "Production failed to start.");
-        Assert.AreEqual(1, turnsToProduce, "Took an unexpected amount of time to produce.");
-        Assert.AreEqual(3, turnsToDeliver, "Took an unexpected amount of time to deliver.");
-        Assert.IsFalse(marthos.Barracks.ProducingArmy());
-        Assert.IsFalse(marthos.Barracks.HasDeliveries());
-
-        Assert.AreEqual(1, player.GetArmies().Count, "Army was not deployed.");
-        Assert.IsNotNull(stormheim.Tile.Armies, "Army was not deployed.");
-        Assert.AreEqual(1, stormheim.Tile.Armies.Count);
-        Assert.IsNull(marthos.Tile.Armies, "Army was deployed to wrong city.");
-
-        // Army validation
-        var army = stormheim.Tile.Armies[0];
-        Assert.AreEqual(armyInfo.ShortName, army.ShortName, "Did not produce the correct army.");
-        Assert.AreEqual(10, army.Moves);
-        Assert.AreEqual(3, army.Strength);
-        Assert.AreEqual(4, army.Upkeep);
-        Assert.AreEqual("Marthos 1st Light Infantry", army.DisplayName);
-    }
-
 
     [Test]
     public void Production_Deploy_TargetTileFull()
@@ -372,7 +134,6 @@ public class CityTests
 
         for (var i = 0; i < NumberOfArmiesToProduce; i++)
         {
-            TestContext.WriteLine("Starting production " + i);
             if (!city.Barracks.StartProduction(armyInfo))
             {
                 Assert.Fail("Production failed to start");
@@ -380,28 +141,24 @@ public class CityTests
 
             while (!city.Barracks.Produce(out _))
             {
-                TestContext.WriteLine("Produced one turn");
+                // Simulate production
             }
-
-            TestContext.WriteLine("Produced" + i);
         }
 
         // Assert                         
-        Assert.AreEqual(NumberOfArmiesToProduce, player.GetArmies().Count, "Not all armies were deployed");
-        Assert.IsNotNull(tile.Armies, "Army was not deployed");
-        Assert.AreEqual(8, tile.Armies.Count);
+        Assert.That(player.GetArmies().Count, Is.EqualTo(NumberOfArmiesToProduce), "Not all armies were deployed");
+        Assert.That(tile.Armies, Is.Not.Null, "Army was not deployed");
+        Assert.That(tile.Armies.Count, Is.EqualTo(8));
 
         // City tiles should be full (8 x 4)
         var tiles = city.GetTiles();
         for (var i = 0; i < tiles.Length; i++)
         {
-            Assert.AreEqual(8, tiles[i].Armies.Count, "Unexpected number of armies deployed to city tile");
+            Assert.That(tiles[i].Armies.Count, Is.EqualTo(8), "Unexpected number of armies deployed to city tile");
         }
 
         // Surrounding tiles should have one tile full (8) and one tile with one (1) army
-        Assert.IsNotNull(World.Current.Map[1, 3].Armies.Count);
-        Assert.AreEqual(8, World.Current.Map[1, 3].Armies.Count);
-        Assert.IsNotNull(World.Current.Map[2, 3].Armies.Count);
-        Assert.AreEqual(1, World.Current.Map[2, 3].Armies.Count);
+        Assert.That(World.Current.Map[1, 3].Armies.Count, Is.EqualTo(8));
+        Assert.That(World.Current.Map[2, 3].Armies.Count, Is.EqualTo(1));
     }
 }

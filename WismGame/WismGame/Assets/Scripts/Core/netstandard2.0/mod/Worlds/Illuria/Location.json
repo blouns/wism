@@ -1,0 +1,242 @@
+[
+  {
+    "ShortName": "TempleIris",
+    "DisplayName": "Temple of Iris",
+    "Kind": "Temple",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "SeerRiver",
+    "DisplayName": "Seer of the River",
+    "Kind": "Sage",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "TempleEmrik",
+    "DisplayName": "Temple of Emrik",
+    "Kind": "Temple",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "GoldenLibrary",
+    "DisplayName": "Golden Library",
+    "Kind": "Library",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "GreatLibrary",
+    "DisplayName": "Great Library",
+    "Kind": "Library",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "TempleMiridine",
+    "DisplayName": "Temple of Miridine",
+    "Kind": "Temple",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "TempleLurinth",
+    "DisplayName": "Temple of Lurinth",
+    "Kind": "Temple",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "GrandOracle",
+    "DisplayName": "Grand Oracle",
+    "Kind": "Sage",
+    "Terrain": "Temple"
+  },
+  {
+    "ShortName": "GreyportRuins",
+    "DisplayName": "Greyport Ruins",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "EmperorsCrypt",
+    "DisplayName": "Emperors' Crypt",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "HarvestStone",
+    "DisplayName": "Harvest Stone",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "OldWoodsTower",
+    "DisplayName": "Old Woods Tower",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "DruidsTemple",
+    "DisplayName": "Druids' Temple",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "NirnsCrypt",
+    "DisplayName": "Nirn's Crypt",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "NirnsDeep",
+    "DisplayName": "Nirn's Deep",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "MirkDecay",
+    "DisplayName": "Mirk's Decay",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "WizardsHearth",
+    "DisplayName": "Wizard's Hearth",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "DragonHalls",
+    "DisplayName": "Dragon Halls",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "Bridgetower",
+    "DisplayName": "Bridgetower",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "CryptMolok",
+    "DisplayName": "Crypt of Molok",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "HallsChaos",
+    "DisplayName": "Halls of Chaos",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "DragontowerRuins",
+    "DisplayName": "Dragontower Ruins",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "NevDolar",
+    "DisplayName": "Nev Dolar",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "OldInn",
+    "DisplayName": "The Old Inn",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "ThroneHoran",
+    "DisplayName": "Throne of Horan",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "ThroneBalnor",
+    "DisplayName": "Throne of Balnor",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "GiantsTomb",
+    "DisplayName": "Giant's Tomb",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "TowerDeath",
+    "DisplayName": "Tower of Death",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "RuinsHaviel",
+    "DisplayName": "Ruins of Haviel",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "DuskStone",
+    "DisplayName": "Dusk Stone",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "DawnStone",
+    "DisplayName": "Dawn Stone",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "Gemhold",
+    "DisplayName": "Gemhold",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "DarkBarrows",
+    "DisplayName": "Dark Barrows",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "DwarfHalls",
+    "DisplayName": "Dwarf Halls",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "Guardian",
+    "DisplayName": "Guardian",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "TowerNight",
+    "DisplayName": "Tower of Night",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "CryptBaal",
+    "DisplayName": "Crypt of Baal",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "TombNaar",
+    "DisplayName": "Tomb of Naar",
+    "Kind": "Tomb",
+    "Terrain": "Tomb"
+  },
+  {
+    "ShortName": "Monolyth",
+    "DisplayName": "Monolyth",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  },
+  {
+    "ShortName": "RuinsKabor",
+    "DisplayName": "Ruins of Kabor",
+    "Kind": "Ruins",
+    "Terrain": "Ruins"
+  }
+]

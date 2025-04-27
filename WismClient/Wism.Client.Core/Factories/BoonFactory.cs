@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Reflection;
 using Wism.Client.Core;
-using Wism.Client.Entities;
+using Wism.Client.Core.Boons;
+using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 

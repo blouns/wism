@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Wism.Client.Common;
-using Wism.Client.Core.Controllers;
+using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent;
+namespace Wism.Client.Agent.Services;
 
 public class WismAgent : BackgroundService
 {

@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using Wism.Client.Core;
 
-namespace Wism.Client.Entities
+namespace Wism.Client.Data.Entities
 {
     [DataContract]
     public class GameEntity
