@@ -9,10 +9,10 @@ namespace Wism.Client.Controllers
 {
     public class CommandController
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly IWismClientRepository wismClientRepository;
 
-        public CommandController(ILoggerFactory loggerFactory, IWismClientRepository wismClientRepository)
+        public CommandController(IWismLoggerFactory loggerFactory, IWismClientRepository wismClientRepository)
         {
             if (loggerFactory is null)
             {

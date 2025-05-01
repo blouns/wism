@@ -7,9 +7,9 @@ namespace Wism.Client.CommandProcessors
 {
     public class StandardProcessor : ICommandProcessor
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
 
-        public StandardProcessor(ILoggerFactory loggerFactory)
+        public StandardProcessor(IWismLoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
             {

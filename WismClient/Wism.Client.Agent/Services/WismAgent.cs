@@ -10,9 +10,9 @@ namespace Wism.Client.Agent.Services;
 public class WismAgent : BackgroundService
 {
     private readonly CommandController commandController;
-    private readonly ILogger logger;
+    private readonly IWismLogger logger;
 
-    public WismAgent(ILoggerFactory loggerFactory, ControllerProvider wismController)
+    public WismAgent(IWismLoggerFactory loggerFactory, ControllerProvider wismController)
     {
         if (loggerFactory is null)
         {

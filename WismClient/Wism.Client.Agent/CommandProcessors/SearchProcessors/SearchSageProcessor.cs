@@ -13,9 +13,9 @@ public class SearchSageProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
     private readonly Librarian librarian = new();
-    private ILogger logger;
+    private IWismLogger logger;
 
-    public SearchSageProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
+    public SearchSageProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {

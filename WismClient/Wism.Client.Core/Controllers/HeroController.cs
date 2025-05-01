@@ -8,9 +8,9 @@ namespace Wism.Client.Controllers
 {
     public class HeroController
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
 
-        public HeroController(ILoggerFactory loggerFactory)
+        public HeroController(IWismLoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
             {

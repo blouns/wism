@@ -16,9 +16,9 @@ public class SearchRuinsProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
     private readonly List<IBoonIdentifier> boonIdentifiers;
-    private ILogger logger;
+    private IWismLogger logger;
 
-    public SearchRuinsProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
+    public SearchRuinsProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {

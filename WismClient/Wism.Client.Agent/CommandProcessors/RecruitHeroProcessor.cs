@@ -11,9 +11,9 @@ namespace Wism.Client.Agent.CommandProcessors;
 public class RecruitHeroProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
-    private ILogger logger;
+    private IWismLogger logger;
 
-    public RecruitHeroProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
+    public RecruitHeroProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {

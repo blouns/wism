@@ -1,68 +1,59 @@
 ﻿using System;
-using Wism.Client.AI.Adapta.Strategic;
-using Wism.Client.AI.Adapta.StrategicModules;
-using Wism.Client.CommandProviders;
-using Wism.Client.Commands.Players;
-using Wism.Client.Common;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Wism.Client.AI.Framework;
+using Wism.Client.Commands;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Common;
+using Wism.Client.CommandProviders;
 
 namespace Wism.Client.AI.CommandProviders
 {
     public class AdaptaCommandProvider : ICommandProvider
     {
-        private readonly ArmyController armyController;
-        private readonly CityController cityController;
-        private readonly CommandController commandController;
+        private readonly AiController aiController;
         private readonly ControllerProvider controllerProvider;
-        private readonly GameController gameController;
-        private readonly HeroController heroController;
-        private readonly LocationController locationController;
-        private readonly ILogger logger;
-        private readonly PlayerController playerController;
+        private readonly IWismLogger logger;
+        private readonly CommandController commandController;
+        private readonly List<ICommandAction> bufferedCommands = new List<ICommandAction>();
 
-        public AdaptaCommandProvider(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
+        public AdaptaCommandProvider(
+                        IWismLogger logger,
+                        AiController aiController,                        
+                        ControllerProvider controllerProvider)
         {
-            if (loggerFactory is null)
-            {
-                throw new ArgumentNullException(nameof(loggerFactory));
-            }
-
-            if (controllerProvider is null)
-            {
-                throw new ArgumentNullException(nameof(controllerProvider));
-            }
-
-            this.logger = loggerFactory.CreateLogger();
+            this.aiController = aiController ?? throw new ArgumentNullException(nameof(aiController));
+            this.controllerProvider = controllerProvider ?? throw new ArgumentNullException(nameof(controllerProvider));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.commandController = controllerProvider.CommandController;
-            this.armyController = controllerProvider.ArmyController;
-            this.gameController = controllerProvider.GameController;
-            this.cityController = controllerProvider.CityController;
-            this.locationController = controllerProvider.LocationController;
-            this.heroController = controllerProvider.HeroController;
-            this.playerController = controllerProvider.PlayerController;
-            this.controllerProvider = controllerProvider;
         }
 
         public void GenerateCommands()
         {
-            var currentPlayer = Game.Current.GetCurrentPlayer();
+            logger.LogInformation("AdaptaCommandProvider: Generating AI commands.");
+            bufferedCommands.Clear();
 
-            // 1. Asset Allocation: Allocate all available armies to bids
-            var allocator =
-                AssetAllocationModule.CreateDefault(this.controllerProvider, World.Current, currentPlayer, this.logger);
-            var bidsByModule = allocator.Allocate();
+            var commands = aiController.ExecuteTurnAndReturnCommands(World.Current);
+            if (commands != null && commands.Count > 0)
+            {
+                foreach (var command in commands)
+                {
+                    bufferedCommands.Add(command);
+                    commandController.AddCommand((Command)command);
+                }
 
-            // 2. Utility Valuation: Select winning bids across modules
-            var valuator = BidValuationModule.CreateDefault(World.Current, currentPlayer, this.logger);
-            var winningBids = valuator.SelectWinners(bidsByModule);
+                logger.LogInformation($"[Adapta] Queued {commands.Count} command(s).");
+            }
+            else
+            {
+                logger.LogInformation("[Adapta] No commands generated. AI is either done or waiting.");
+            }
+        }
 
-            // 3. Movement Order: Create commands in optimal order
-            var orderer = BidOrderModule.CreateDefault();
-            orderer.AssignTasks(winningBids);
-
-            // End the turn
-            this.commandController.AddCommand(new EndTurnCommand(this.gameController, currentPlayer));
+        public List<ICommandAction> GetBufferedCommands()
+        {
+            return bufferedCommands;
         }
     }
 }

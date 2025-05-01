@@ -12,9 +12,9 @@ public class HireHeroProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
     private string heroName;
-    private ILogger logger;
+    private IWismLogger logger;
 
-    public HireHeroProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
+    public HireHeroProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {

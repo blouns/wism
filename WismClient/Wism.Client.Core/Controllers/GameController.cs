@@ -8,9 +8,9 @@ namespace Wism.Client.Controllers
 {
     public class GameController
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
 
-        public GameController(ILoggerFactory loggerFactory)
+        public GameController(IWismLoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
             {

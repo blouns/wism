@@ -14,9 +14,9 @@ namespace Wism.Client.Agent.CommandProcessors;
 
 public class BattleProcessor : ICommandProcessor
 {
-    private ILogger logger;
+    private IWismLogger logger;
 
-    public BattleProcessor(ILoggerFactory loggerFactory)
+    public BattleProcessor(IWismLoggerFactory loggerFactory)
     {
         this.logger = loggerFactory.CreateLogger();
     }

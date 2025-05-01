@@ -13,6 +13,9 @@ using Wism.Client.Core;
 using Wism.Client.Data;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using System;
+using Wism.Client.AI.Framework;
+using System.Linq;
 
 namespace Wism.Client.Test.Common;
 
@@ -20,7 +23,7 @@ public static class TestUtilities
 {
     internal static readonly string DefaultTestWorld = "UnitTestWorld";
 
-    public static ILoggerFactory CreateLogFactory()
+    public static IWismLoggerFactory CreateLogFactory()
     {
         return new WismLoggerFactory();
     }
@@ -224,38 +227,70 @@ public static class TestUtilities
         return result;
     }
 
-    /// <summary>
-    ///     Executes a full AI-based turn for a player.
-    /// </summary>
-    /// <param name="controller">Controller Provider</param>
-    /// <param name="player">AI Player to run</param>
-    /// <remarks>
-    ///     Assumes the turn is already started. Will end turn.
-    /// </remarks>
-    public static void ExecuteCurrentTurnAsAIUntilDone(ControllerProvider controller, ICommandProvider commander)
+    public static void ExecuteCommandsUntilDone(
+    ICommandProvider commander,
+    CommandController commandController,
+    ref int lastId,
+    bool simulateAIPlayer = false)
     {
-        ActionState actionState;
-
-        // Get AI player
         var player = Game.Current.GetCurrentPlayer();
-        var isHuman = player.IsHuman;
-        player.IsHuman = false;
-        var turn = player.Turn;
-        var clanName = Game.Current.GetCurrentPlayer().Clan.ShortName;
+        var originalIsHuman = player.IsHuman;
+        if (simulateAIPlayer)
+            player.IsHuman = false;
 
-        // Generate and execute commands as an AI
-        var lastId = controller.CommandController.GetLastCommand().Id;
-        commander.GenerateCommands();
-        var commands = controller.CommandController.GetCommandsAfterId(lastId);
-        foreach (var command in commands)
+        bool continueLoop = true;
+
+        while (continueLoop)
         {
-            actionState = ExecuteCommandUntilDone(controller.CommandController, command);
-            // Log action state?
+            // Get all commands after the last one we fully completed
+            var commands = commandController.GetCommandsAfterId(lastId);
+            bool anyInProgress = false;
+
+            if (commands != null)
+            {
+                foreach (var command in commands)
+                {
+                    var result = command.Execute();
+
+                    while (result == ActionState.InProgress)
+                    {
+                        result = command.Execute();
+                    }
+
+                    if (result == ActionState.Succeeded || result == ActionState.Failed)
+                    {
+                        lastId = command.Id;
+                    }
+                    else if (result == ActionState.InProgress)
+                    {
+                        anyInProgress = true;
+                        break; // don’t generate new commands while something is still running
+                    }
+                }
+            }
+
+            // If no commands are currently in progress, generate the next set
+            if (!anyInProgress)
+            {
+                commander.GenerateCommands();
+
+                // Check if any new commands were added after lastId
+                var nextCommands = commandController.GetCommandsAfterId(lastId);
+                if (nextCommands == null || !nextCommands.Any())
+                {
+                    continueLoop = false; // All done
+                }
+            }
+            else
+            {
+                continueLoop = false; // Wait until the next outer loop/frame
+            }
         }
 
-        // Restore player type
-        player.IsHuman = isHuman;
+        if (simulateAIPlayer)
+            player.IsHuman = originalIsHuman;
     }
+
 
     public static void PlotRouteOnMap(Tile[,] map, List<Tile> path)
     {

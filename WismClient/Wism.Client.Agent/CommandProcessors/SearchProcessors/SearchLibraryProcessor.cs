@@ -11,9 +11,9 @@ namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
 public class SearchLibraryProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
-    private ILogger logger;
+    private IWismLogger logger;
 
-    public SearchLibraryProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
+    public SearchLibraryProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {

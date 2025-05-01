@@ -11,9 +11,9 @@ namespace Wism.Client.Agent.CommandProcessors;
 public class StartTurnProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
-    private ILogger logger;
+    private IWismLogger logger;
 
-    public StartTurnProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
+    public StartTurnProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {

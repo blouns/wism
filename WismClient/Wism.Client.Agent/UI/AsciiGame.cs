@@ -20,9 +20,9 @@ public class AsciiGame : GameBase
 {
     private readonly List<ICommandProcessor> commandProcessors;
     private readonly List<ICommandProvider> commandProviders;
-    private readonly ILogger logger;
+    private readonly IWismLogger logger;
 
-    public AsciiGame(ILoggerFactory logFactory, ControllerProvider controllerProvider)
+    public AsciiGame(IWismLoggerFactory logFactory, ControllerProvider controllerProvider)
         : base(logFactory, controllerProvider)
     {
         if (logFactory is null)

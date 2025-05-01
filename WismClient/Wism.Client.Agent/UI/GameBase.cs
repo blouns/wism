@@ -15,10 +15,10 @@ public abstract class GameBase
     public const int DefaultGameSpeed = 100;
     public const int DefaultAttackSpeed = 750;
     private readonly ArmyController armyController;
-    private readonly ILogger logger;
+    private readonly IWismLogger logger;
     private int lastId;
 
-    public GameBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
+    public GameBase(IWismLoggerFactory loggerFactory, ControllerProvider controllerProvider)
     {
         if (loggerFactory is null)
         {

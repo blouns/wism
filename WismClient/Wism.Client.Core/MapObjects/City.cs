@@ -104,7 +104,7 @@ namespace Wism.Client.MapObjects
         }
 
         /// <summary>
-        ///     Gets the tiles for the city (4x4)
+        ///     Gets the tiles for the city (2x2)
         /// </summary>
         /// <returns>Array contain four tiles</returns>
         public Tile[] GetTiles()

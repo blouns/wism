@@ -16,9 +16,9 @@ namespace Wism.Client.Agent.CommandProcessors;
 public class PrepareForBattleProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
-    private ILogger logger;
+    private IWismLogger logger;
 
-    public PrepareForBattleProcessor(ILoggerFactory loggerFactory, AsciiGame asciiGame)
+    public PrepareForBattleProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {
