@@ -6,21 +6,21 @@ using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Ai;
 
-public class StartTurnProcessor : ICommandProcessor
+public class StartTurnAiProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
     private IWismLogger logger;
 
-    public StartTurnProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public StartTurnAiProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
@@ -36,12 +36,12 @@ public class StartTurnProcessor : ICommandProcessor
         if (startTurnCommand.Player.GetCities().Count == 0)
         {
             // Player has died                
-            Notify.DisplayAndWait($"Wretched {player.Clan.DisplayName}, for you the war is over...");
+            Notify.Display($"Wretched {player.Clan.DisplayName}, for you the war is over...");
         }
         else
         {
             // Start the turn
-            Notify.DisplayAndWait($"{player.Clan.DisplayName} your turn is starting...");
+            Notify.Display($"{player.Clan.DisplayName} your turn is starting...");
         }
 
         var state = command.Execute();

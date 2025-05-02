@@ -2,9 +2,9 @@
 using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Ai.SearchProcessors.BoonIdentifiers;
 
-public class ArtifactBoonIdentifier : IBoonIdentifier
+public class ArtifactAiBoonIdentifier : IBoonIdentifier
 {
     public bool CanIdentify(IBoon boon)
     {
@@ -13,7 +13,7 @@ public class ArtifactBoonIdentifier : IBoonIdentifier
 
     public void Identify(IBoon boon)
     {
-        if (!this.CanIdentify(boon))
+        if (!CanIdentify(boon))
         {
             throw new ArgumentException("Cannot identify " + boon);
         }

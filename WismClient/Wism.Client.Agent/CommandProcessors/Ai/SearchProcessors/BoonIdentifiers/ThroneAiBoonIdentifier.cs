@@ -1,9 +1,9 @@
 ﻿using System;
 using Wism.Client.Core.Boons;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Ai.SearchProcessors.BoonIdentifiers;
 
-public class ThroneBoonIdentifier : IBoonIdentifier
+public class ThroneAiBoonIdentifier : IBoonIdentifier
 {
     public bool CanIdentify(IBoon boon)
     {
@@ -12,7 +12,7 @@ public class ThroneBoonIdentifier : IBoonIdentifier
 
     public void Identify(IBoon boon)
     {
-        if (!this.CanIdentify(boon))
+        if (!CanIdentify(boon))
         {
             throw new ArgumentException("Cannot identify " + boon);
         }

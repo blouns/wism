@@ -7,6 +7,7 @@ using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Common;
 using Wism.Client.CommandProviders;
+using Wism.Client.Commands.Players;
 
 namespace Wism.Client.AI.CommandProviders
 {
@@ -16,6 +17,7 @@ namespace Wism.Client.AI.CommandProviders
         private readonly ControllerProvider controllerProvider;
         private readonly IWismLogger logger;
         private readonly CommandController commandController;
+        private readonly GameController gameController;
         private readonly List<ICommandAction> bufferedCommands = new List<ICommandAction>();
 
         public AdaptaCommandProvider(
@@ -27,6 +29,7 @@ namespace Wism.Client.AI.CommandProviders
             this.controllerProvider = controllerProvider ?? throw new ArgumentNullException(nameof(controllerProvider));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.commandController = controllerProvider.CommandController;
+            this.gameController = controllerProvider.GameController;
         }
 
         public void GenerateCommands()
@@ -47,7 +50,10 @@ namespace Wism.Client.AI.CommandProviders
             }
             else
             {
-                logger.LogInformation("[Adapta] No commands generated. AI is either done or waiting.");
+                var endTurn = new EndTurnCommand(gameController, Game.Current.GetCurrentPlayer());
+                bufferedCommands.Add(endTurn);
+                commandController.AddCommand(endTurn);
+                logger.LogInformation("[Adapta] No tactical commands. Queued EndTurnCommand.");
             }
         }
 

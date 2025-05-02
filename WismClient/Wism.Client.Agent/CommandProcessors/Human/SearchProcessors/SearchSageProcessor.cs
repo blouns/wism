@@ -7,7 +7,7 @@ using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 
-namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
 
 public class SearchSageProcessor : ICommandProcessor
 {
@@ -22,7 +22,7 @@ public class SearchSageProcessor : ICommandProcessor
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
@@ -45,7 +45,7 @@ public class SearchSageProcessor : ICommandProcessor
 
         if (result == ActionState.Succeeded)
         {
-            this.DoSagesAdvice();
+            DoSagesAdvice();
         }
         else
         {
@@ -71,10 +71,10 @@ public class SearchSageProcessor : ICommandProcessor
         switch (key.Key)
         {
             case ConsoleKey.I:
-                this.DoItemAdvice();
+                DoItemAdvice();
                 break;
             case ConsoleKey.L:
-                this.DoLocationAdvice();
+                DoLocationAdvice();
                 break;
             default:
                 // TODO: Cancel should not debit moves for searching
@@ -84,7 +84,7 @@ public class SearchSageProcessor : ICommandProcessor
 
     private void DoItemAdvice()
     {
-        var names = this.librarian.GetAllArtifactNames();
+        var names = librarian.GetAllArtifactNames();
         for (var i = 0; i < names.Length; i++)
         {
             Notify.Information("({0}) {1}", i, names[i]);
@@ -100,16 +100,16 @@ public class SearchSageProcessor : ICommandProcessor
             Console.Write("Select which [#]: ");
             var response = Console.ReadLine();
             Console.WriteLine();
-            if ((!int.TryParse(response, out var index) &&
-                 index < 0) || index >= names.Length)
+            if (!int.TryParse(response, out var index) &&
+                 index < 0 || index >= names.Length)
             {
                 Notify.Alert("Must enter a valid number.");
             }
             else
             {
                 valid = true;
-                var artifact = this.librarian.GetArtifact(index);
-                var knowledge = this.librarian.GetSageArtifactKnowledge(artifact, false);
+                var artifact = librarian.GetArtifact(index);
+                var knowledge = librarian.GetSageArtifactKnowledge(artifact, false);
                 foreach (var message in knowledge)
                 {
                     Notify.DisplayAndWait(message);
@@ -120,7 +120,7 @@ public class SearchSageProcessor : ICommandProcessor
 
     private void DoLocationAdvice()
     {
-        var names = this.librarian.GetAllLocationNames();
+        var names = librarian.GetAllLocationNames();
         for (var i = 0; i < names.Length; i++)
         {
             Notify.Information("({0}) {1}", i, names[i]);
@@ -136,16 +136,16 @@ public class SearchSageProcessor : ICommandProcessor
             Console.WriteLine("Select which [#]: ");
             var response = Console.ReadLine();
             Console.WriteLine();
-            if ((!int.TryParse(response, out var index) &&
-                 index < 0) || index >= names.Length)
+            if (!int.TryParse(response, out var index) &&
+                 index < 0 || index >= names.Length)
             {
                 Notify.Alert("Must enter a valid number.");
             }
             else
             {
                 valid = true;
-                var location = this.librarian.GetLocation(index);
-                var knowledge = this.librarian.GetSageLocationKnowledge(location);
+                var location = librarian.GetLocation(index);
+                var knowledge = librarian.GetSageLocationKnowledge(location);
                 foreach (var message in knowledge)
                 {
                     Notify.DisplayAndWait(message);

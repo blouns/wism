@@ -1,7 +1,7 @@
 ﻿using System;
 using Wism.Client.Core.Boons;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors.BoonIdentifiers;
 
 public class GoldBoonIdentifier : IBoonIdentifier
 {
@@ -12,7 +12,7 @@ public class GoldBoonIdentifier : IBoonIdentifier
 
     public void Identify(IBoon boon)
     {
-        if (!this.CanIdentify(boon))
+        if (!CanIdentify(boon))
         {
             throw new ArgumentException("Cannot identify " + boon);
         }

@@ -8,7 +8,6 @@ using Wism.Client.Agent.UI;
 using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
-using Wism.Client.Controllers;
 using Wism.Client.Data;
 
 namespace Wism.Client.Agent;

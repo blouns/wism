@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Wism.Client.Agent.CommandProcessors;
-using Wism.Client.Agent.CommandProcessors.SearchProcessors;
+using Wism.Client.Agent.CommandProcessors.Factories;
 using Wism.Client.Agent.CommandProviders;
+using Wism.Client.AI.CommandProviders;
+using Wism.Client.AI.Framework;
+using Wism.Client.AI.Services;
+using Wism.Client.AI.Strategic;
+using Wism.Client.AI.Tactical;
 using Wism.Client.CommandProcessors;
 using Wism.Client.CommandProviders;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules;
+using Wism.Client.Pathing;
 
 namespace Wism.Client.Agent.UI;
 
@@ -18,9 +24,10 @@ namespace Wism.Client.Agent.UI;
 /// </summary>
 public class AsciiGame : GameBase
 {
-    private readonly List<ICommandProcessor> commandProcessors;
     private readonly List<ICommandProvider> commandProviders;
     private readonly IWismLogger logger;
+    private List<ICommandProcessor> humanCommandProcessors;
+    private List<ICommandProcessor> aiCommandProcessors;
 
     public AsciiGame(IWismLoggerFactory logFactory, ControllerProvider controllerProvider)
         : base(logFactory, controllerProvider)
@@ -37,44 +44,116 @@ public class AsciiGame : GameBase
 
         this.logger = logFactory.CreateLogger();
         this.CommandController = controllerProvider.CommandController;
-        this.commandProviders = new List<ICommandProvider>
-        {
-            new ConsoleCommandProvider(logFactory, controllerProvider)
-        };
-        this.commandProcessors = new List<ICommandProcessor>
-        {
-            // Player processors
-            new StartTurnProcessor(logFactory, this),
-            new RecruitHeroProcessor(logFactory, this),
-            new HireHeroProcessor(logFactory, this),
-
-            // Battle processors
-            new PrepareForBattleProcessor(logFactory, this),
-            new BattleProcessor(logFactory),
-            new CompleteBattleProcessor(logFactory, this),
-
-            // Search processors
-            new SearchRuinsProcessor(logFactory, this),
-            new SearchTempleProcessor(logFactory, this),
-            new SearchSageProcessor(logFactory, this),
-            new SearchLibraryProcessor(logFactory, this),
-
-            // Default processor
-            new StandardProcessor(logFactory)
-        };
     }
 
     public CommandController CommandController { get; }
+
+    /// <summary>
+    ///     For testing purposes only. Creates a default world for testing.
+    /// </summary>
+    protected override void CreateGame()
+    {
+        var worldName = "AsciiWorld";
+
+        Game.CreateDefaultGame(worldName);
+        var world = World.Current;
+        var map = world.Map;
+
+        SetupHumanAndAiPlayers(ControllerProvider);
+
+        // Some walking around money
+        Game.Current.Players[0].Gold = 2000;
+
+        // Create a default hero for testing
+        var heroTile = map[1, 1];
+        Game.Current.Players[0].HireHero(heroTile);
+        Game.Current.Players[0].ConscriptArmy(
+            ModFactory.FindArmyInfo("HeavyInfantry"),
+            heroTile);
+        Game.Current.Players[0].ConscriptArmy(
+            ModFactory.FindArmyInfo("Pegasus"),
+            heroTile);
+
+        // Set the player's selected army to a default for testing
+        this.ControllerProvider.ArmyController.SelectArmy(heroTile.Armies);
+
+        // Create an opponent for testing
+        var enemyTile1 = map[3, 3];
+        Game.Current.Players[1].HireHero(enemyTile1);
+        Game.Current.Players[1].ConscriptArmy(
+            ModFactory.FindArmyInfo("LightInfantry"),
+            enemyTile1);
+        Game.Current.Players[1].ConscriptArmy(
+            ModFactory.FindArmyInfo("LightInfantry"),
+            enemyTile1);
+        Game.Current.Players[1].ConscriptArmy(
+            ModFactory.FindArmyInfo("LightInfantry"),
+            enemyTile1);
+        Game.Current.Players[1].ConscriptArmy(
+            ModFactory.FindArmyInfo("LightInfantry"),
+            enemyTile1);
+
+        var enemyTile2 = map[3, 2];
+        Game.Current.Players[1].ConscriptArmy(
+            ModFactory.FindArmyInfo("LightInfantry"),
+            enemyTile2);
+
+        // Add cities and locations
+        MapBuilder.AddCitiesFromWorldPath(world, worldName);
+        MapBuilder.AddLocationsFromWorldPath(world, worldName);
+        MapBuilder.AllocateBoons(world.GetLocations());
+    }
+
+    private void SetupHumanAndAiPlayers(ControllerProvider controllerProvider)
+    {
+        // Set up human and AI players
+        var humanPlayer = Game.Current.Players[0];
+        var aiPlayer = Game.Current.Players[1];
+
+        humanPlayer.IsHuman = true;
+        aiPlayer.IsHuman = false;
+
+        var humanCommander = new ConsoleCommandProvider(LoggerFactory, controllerProvider);
+
+        var pathingStrategy = new AStarPathingStrategy();
+        var pathfinder = new PathfindingService(pathingStrategy);
+        var armyController = controllerProvider.ArmyController;
+
+        var exterminationLogger = new WismLoggerAdapter<ExterminationModule>(LoggerFactory.CreateLogger());
+        var exterminationModule = new ExterminationModule(pathfinder, pathingStrategy, armyController, exterminationLogger);
+
+        var aiController = new AiController(
+            new SimpleStrategicModule(),
+            new List<ITacticalModule> { exterminationModule });
+
+        var aiLogger = LoggerFactory.CreateLogger();
+        var aiCommander = new AdaptaCommandProvider(aiLogger, aiController, controllerProvider);
+
+        this.PlayerCommanders = new Dictionary<Player, ICommandProvider>
+        {
+            { humanPlayer, humanCommander },
+            { aiPlayer, aiCommander }
+        };
+
+        // Abstract Factory Pattern to create the human and AI command processors
+        this.humanCommandProcessors = new HumanCommandProcessorFactory(LoggerFactory).CreateProcessors(this);
+        this.aiCommandProcessors = new AiCommandProcessorFactory(LoggerFactory).CreateProcessors(this);
+    }
 
     protected override void DoTasks(ref int lastId)
     {
         foreach (var command in this.CommandController.GetCommandsAfterId(lastId))
         {
-            this.logger.LogInformation($"Task executing: {command.Id}: {command.GetType()}");
+            var isHuman = Game.Current.GetCurrentPlayer().IsHuman;
+
+            var playerKind = (isHuman) ? "Human" : "AI";
+            this.logger.LogInformation($"{playerKind} task executing: {command.Id}: {command.GetType()}");
+
+            var processors = (isHuman) ? this.humanCommandProcessors : this.aiCommandProcessors;
 
             // Run the command
             var result = ActionState.NotStarted;
-            foreach (var processor in this.commandProcessors)
+            foreach (var processor in processors)
             {
                 if (processor.CanExecute(command))
                 {
@@ -108,15 +187,19 @@ public class AsciiGame : GameBase
         if (Game.Current.GameState != GameState.Ready &&
             Game.Current.GameState != GameState.SelectedArmy)
         {
-            // Do not solicit additional input
             return;
         }
 
-        foreach (var provider in this.commandProviders)
+        var player = Game.Current.GetCurrentPlayer();
+
+        if (!PlayerCommanders.TryGetValue(player, out var commander) || commander == null)
         {
-            provider.GenerateCommands();
+            throw new InvalidOperationException($"No ICommandProvider registered for player: {player.Clan?.DisplayName ?? "Unknown"}");
         }
+
+        commander.GenerateCommands();
     }
+
 
     protected override void Draw()
     {

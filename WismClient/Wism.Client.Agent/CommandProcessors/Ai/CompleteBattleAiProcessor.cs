@@ -10,21 +10,21 @@ using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Ai;
 
-public class CompleteBattleProcessor : ICommandProcessor
+public class CompleteBattleAiProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
     private IWismLogger logger;
 
-    public CompleteBattleProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public CompleteBattleAiProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
@@ -52,18 +52,18 @@ public class CompleteBattleProcessor : ICommandProcessor
         var battleResult = battleCompleteCommand.AttackCommand.Result;
         if (battleResult == ActionState.Succeeded)
         {
-            Notify.DisplayAndWait($"{name} {presentVerb} victorious!");
+            Notify.Display($"{name} {presentVerb} victorious!");
         }
         else if (battleResult == ActionState.Failed)
         {
-            Notify.DisplayAndWait($"{name} {pastVerb} been defeated!");
+            Notify.Display($"{name} {pastVerb} been defeated!");
         }
         else
         {
             Notify.Alert("Error: Unexpected game state" + battleResult);
         }
 
-        this.asciiGame.GameSpeed = GameBase.DefaultGameSpeed;
+        asciiGame.GameSpeed = GameBase.DefaultGameSpeed;
 
         return command.Execute();
     }

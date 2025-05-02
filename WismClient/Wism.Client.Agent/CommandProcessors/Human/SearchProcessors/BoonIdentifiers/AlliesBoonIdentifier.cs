@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors.BoonIdentifiers;
 
 public class AlliesBoonIdentifier : IBoonIdentifier
 {

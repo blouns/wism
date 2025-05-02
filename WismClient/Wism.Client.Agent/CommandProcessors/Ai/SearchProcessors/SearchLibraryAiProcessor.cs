@@ -6,21 +6,21 @@ using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Ai.SearchProcessors;
 
-public class SearchLibraryProcessor : ICommandProcessor
+public class SearchLibraryAiProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
     private IWismLogger logger;
 
-    public SearchLibraryProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public SearchLibraryAiProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 

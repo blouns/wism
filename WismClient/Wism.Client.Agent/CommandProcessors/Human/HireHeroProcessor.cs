@@ -6,7 +6,7 @@ using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Human;
 
 public class HireHeroProcessor : ICommandProcessor
 {
@@ -21,7 +21,7 @@ public class HireHeroProcessor : ICommandProcessor
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
@@ -42,20 +42,20 @@ public class HireHeroProcessor : ICommandProcessor
         }
 
         if (hireCommand.HeroAccepted &&
-            this.heroName == null)
+            heroName == null)
         {
             // Wait for user to name the hero
-            this.heroName = this.GetHeroName(hireCommand);
+            heroName = GetHeroName(hireCommand);
             state = ActionState.InProgress;
         }
         else if (hireCommand.HeroAccepted)
         {
             // Hire the hero
             state = hireCommand.Execute();
-            hireCommand.Hero.DisplayName = this.heroName;
+            hireCommand.Hero.DisplayName = heroName;
 
             // Create any allies that will join the hero
-            this.CreateAnyAllies(hireCommand);
+            CreateAnyAllies(hireCommand);
         }
         else
         {
@@ -73,8 +73,8 @@ public class HireHeroProcessor : ICommandProcessor
         if (allies != null && allies.Count > 0)
         {
             Notify.DisplayAndWait($"And the hero brings {allies.Count} allies!");
-            this.asciiGame.CommandController.AddCommand(
-                new ConscriptArmiesCommand(this.asciiGame.PlayerController,
+            asciiGame.CommandController.AddCommand(
+                new ConscriptArmiesCommand(asciiGame.PlayerController,
                     command.Player, command.HeroTile, command.HeroAllies));
         }
     }

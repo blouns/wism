@@ -10,7 +10,7 @@ using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Human;
 
 public class BattleProcessor : ICommandProcessor
 {
@@ -18,7 +18,7 @@ public class BattleProcessor : ICommandProcessor
 
     public BattleProcessor(IWismLoggerFactory loggerFactory)
     {
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
     }
 
     public bool CanExecute(ICommandAction command)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors.BoonIdentifiers;
 using Wism.Client.Agent.UI;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
@@ -10,7 +11,7 @@ using Wism.Client.Core;
 using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
 
 public class SearchRuinsProcessor : ICommandProcessor
 {
@@ -25,9 +26,9 @@ public class SearchRuinsProcessor : ICommandProcessor
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
-        this.boonIdentifiers = new List<IBoonIdentifier>
+        boonIdentifiers = new List<IBoonIdentifier>
         {
             new AlliesBoonIdentifier(),
             new ThroneBoonIdentifier(),
@@ -95,7 +96,7 @@ public class SearchRuinsProcessor : ICommandProcessor
                 Notify.DisplayAndWait("...and is victorious!");
             }
 
-            this.DisplayBoon(ruinsCommand.Boon);
+            DisplayBoon(ruinsCommand.Boon);
         }
         else if (result == ActionState.Failed &&
                  hero.IsDead)
@@ -112,7 +113,7 @@ public class SearchRuinsProcessor : ICommandProcessor
 
     private void DisplayBoon(IBoon boon)
     {
-        foreach (var identifier in this.boonIdentifiers)
+        foreach (var identifier in boonIdentifiers)
         {
             if (identifier.CanIdentify(boon))
             {

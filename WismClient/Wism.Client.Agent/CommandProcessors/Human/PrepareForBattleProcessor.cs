@@ -11,7 +11,7 @@ using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Human;
 
 public class PrepareForBattleProcessor : ICommandProcessor
 {
@@ -25,7 +25,7 @@ public class PrepareForBattleProcessor : ICommandProcessor
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
@@ -60,7 +60,7 @@ public class PrepareForBattleProcessor : ICommandProcessor
         DrawBattleSetupSequence(attackingPlayer, defendingPlayer);
         BattleProcessor.DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
 
-        this.asciiGame.GameSpeed = GameBase.DefaultAttackSpeed;
+        asciiGame.GameSpeed = GameBase.DefaultAttackSpeed;
 
         return command.Execute();
     }

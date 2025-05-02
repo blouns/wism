@@ -6,21 +6,21 @@ using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent.CommandProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Ai;
 
-public class RecruitHeroProcessor : ICommandProcessor
+public class RecruitHeroAiProcessor : ICommandProcessor
 {
     private readonly AsciiGame asciiGame;
     private IWismLogger logger;
 
-    public RecruitHeroProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public RecruitHeroAiProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
@@ -51,7 +51,9 @@ public class RecruitHeroProcessor : ICommandProcessor
             // Here is available; offer to player if enough money
             if (player.Gold >= recruitCommand.HeroPrice)
             {
-                state = this.OfferHeroToPlayer(recruitCommand);
+                // Auto-accept the hero
+                recruitCommand.HeroAccepted = true;
+                state = ActionState.Succeeded;
             }
             else
             {
@@ -59,34 +61,6 @@ public class RecruitHeroProcessor : ICommandProcessor
                 state = ActionState.Failed;
             }
         }
-
-        return state;
-    }
-
-    private ActionState OfferHeroToPlayer(RecruitHeroCommand command)
-    {
-        ActionState state;
-
-        var player = command.Player;
-        var city = command.HeroTile.City;
-        var gold = command.HeroPrice;
-
-        Notify.Information($"A hero in {city.DisplayName} offers to join you for {gold} gp!");
-        Notify.Information($"You have {player.Gold} gp.");
-        Notify.Information("[A]ccept or [r]eject?");
-        var key = Console.ReadKey();
-        if (key.Key != ConsoleKey.A)
-        {
-            command.HeroAccepted = false;
-            state = ActionState.Failed;
-        }
-        else
-        {
-            command.HeroAccepted = true;
-            state = ActionState.Succeeded;
-        }
-
-        Console.WriteLine();
 
         return state;
     }

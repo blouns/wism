@@ -6,7 +6,7 @@ using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
+namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
 
 public class SearchTempleProcessor : ICommandProcessor
 {
@@ -20,7 +20,7 @@ public class SearchTempleProcessor : ICommandProcessor
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
         this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 

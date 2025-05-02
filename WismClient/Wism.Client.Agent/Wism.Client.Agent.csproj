@@ -35,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Wism.Client.AI\Wism.Client.AI.csproj" />
     <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
     <ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
   </ItemGroup>
