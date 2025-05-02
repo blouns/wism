@@ -27,7 +27,7 @@ public class CaptureModule : ITacticalModule
         var player = Game.Current.GetCurrentPlayer();
 
         var cities = world.GetCities()
-            .Where(c => c.Clan != player.Clan) // Target only neutral or enemy cities
+            .Where(c => c.Clan != player.Clan)
             .ToList();
 
         if (cities.Count == 0)
@@ -41,31 +41,36 @@ public class CaptureModule : ITacticalModule
             logger.LogInformation($"[Capture] Found city at ({city.Tile.X},{city.Tile.Y}) owned by {city.Clan?.ShortName ?? "Neutral"}.");
         }
 
-        foreach (var army in player.GetArmies())
-        {
-            if (army.MovesRemaining <= 0)
-            {
-                logger.LogInformation($"[Capture] Skipping army at ({army.Tile.X},{army.Tile.Y}) — no moves remaining.");
-                continue;
-            }
+        var stacks = player.GetArmies()
+            .Where(a => a.MovesRemaining > 0)
+            .GroupBy(a => (a.Tile.X, a.Tile.Y));
 
-            var targetCity = FindNearestCapturableCity(army, cities);
+        foreach (var group in stacks)
+        {
+            var stack = group.ToList();
+            if (stack.Count == 0)
+                continue;
+
+            var leader = stack[0];
+
+            var targetCity = FindNearestCapturableCity(leader, cities);
             if (targetCity == null)
             {
-                logger.LogInformation($"[Capture] No reachable cities found for army at ({army.Tile.X},{army.Tile.Y}).");
+                logger.LogInformation($"[Capture] No reachable cities found for stack at ({leader.Tile.X},{leader.Tile.Y}).");
                 continue;
             }
 
-            var distance = AiUtilities.GetManhattanDistance(army.Tile, targetCity.Tile);
+            var distance = AiUtilities.GetManhattanDistance(leader.Tile, targetCity.Tile);
             var utility = 1.0 / (distance + 1);
 
-            logger.LogInformation($"[Capture] Bidding army at ({army.Tile.X},{army.Tile.Y}) to target city at ({targetCity.Tile.X},{targetCity.Tile.Y}) with utility {utility:0.000}.");
+            logger.LogInformation($"[Capture] Bidding army stack at ({leader.Tile.X},{leader.Tile.Y}) to target city at ({targetCity.Tile.X},{targetCity.Tile.Y}) with utility {utility:0.000}.");
 
-            bids.Add(new SimpleBid(new List<Army> { army }, this, utility));
+            bids.Add(new SimpleBid(stack, this, utility));
         }
 
         return bids;
     }
+
 
 
     public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)

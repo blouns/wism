@@ -11,6 +11,7 @@ using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
 using System;
 using Wism.Client.AI.Framework;
+using System.Linq;
 
 namespace Wism.Client.AI.Tactical
 {
@@ -32,21 +33,32 @@ namespace Wism.Client.AI.Tactical
         public IEnumerable<IBid> GenerateBids(World world)
         {
             var bids = new List<IBid>();
-            var playerArmies = Game.Current.GetCurrentPlayer().GetArmies();
+            var currentPlayer = Game.Current.GetCurrentPlayer();
             var enemies = AiUtilities.GetAllEnemyArmies();
 
-            foreach (var army in playerArmies)
+            // Group armies into stacks by tile
+            var stacks = currentPlayer.GetArmies()
+                .Where(a => a.MovesRemaining > 0)
+                .GroupBy(a => (a.Tile.X, a.Tile.Y));
+
+            foreach (var stack in stacks)
             {
-                var closestEnemyTile = pathfindingService.FindClosestEnemyTile(army, enemies, true);
+                var stackList = stack.ToList();
+                if (stackList.Count == 0)
+                    continue;
+
+                var leader = stackList[0];
+                var closestEnemyTile = pathfindingService.FindClosestEnemyTile(leader, enemies, true);
                 if (closestEnemyTile != null)
                 {
-                    double influence = 1.0 / (AiUtilities.GetManhattanDistance(army.Tile, closestEnemyTile) + 1);
-                    bids.Add(new SimpleBid(new List<Army> { army }, this, influence));
+                    double influence = 1.0 / (AiUtilities.GetManhattanDistance(leader.Tile, closestEnemyTile) + 1);
+                    bids.Add(new SimpleBid(stackList, this, influence));
                 }
             }
 
             return bids;
         }
+
 
         public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
         {

@@ -203,6 +203,75 @@ namespace Wism.Client.Test.AI
             Assert.That(victory, Is.True, "One player should have defeated the other through combat.");
         }
 
+        [Test]
+        public void ExterminationAI_StackedArmy_AttacksSmallerEnemyStack()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = new WismLoggerAdapter<AdaptaCommandProvider>(TestUtilities.CreateLogFactory().CreateLogger());
+            var gameLogger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var sirians = Game.Current.Players[0];
+            var lordBane = Game.Current.Players[1];
+
+            var siriansTile = World.Current.Map[3, 4]; // Marthos
+            var lordBaneTile = World.Current.Map[7, 4]; // Near BanesCitadel
+
+            // Sirians stack: 8 light infantry
+            for (int i = 0; i < 8; i++)
+            {
+                sirians.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), siriansTile);
+            }
+
+            // Lord Bane stack: 2 light infantry
+            for (int i = 0; i < 2; i++)
+            {
+                lordBane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), lordBaneTile);
+            }
+
+            var commander = SetupAIController(controllerProvider, gameLogger);
+
+            TestUtilities.StartTurn(controllerProvider);
+            int lastId = controllerProvider.CommandController.GetLastCommand().Id;
+
+            for (int attempts = 0; attempts < 30; attempts++)
+            {
+                if (Game.Current.GameState == GameState.Ready || Game.Current.GameState == GameState.SelectedArmy)
+                {
+                    commander.GenerateCommands();
+                }
+
+                var commands = controllerProvider.CommandController.GetCommandsAfterId(lastId);
+                foreach (var command in commands)
+                {
+                    logger.LogInformation($"Command executing: {command.Id}: {command.GetType()}");
+
+                    var result = command.Execute();
+                    while (result == ActionState.InProgress)
+                    {
+                        result = command.Execute();
+                    }
+
+                    if (result == ActionState.Succeeded || result == ActionState.Failed)
+                    {
+                        logger.LogInformation($"Command completed: {command}");
+                        lastId = command.Id;
+                    }
+                }
+
+                if (sirians.GetArmies().Count == 0 || lordBane.GetArmies().Count == 0)
+                {
+                    break;
+                }
+            }
+
+            Assert.That(
+                sirians.GetArmies().Count == 0 || lordBane.GetArmies().Count == 0,
+                "One side should have been defeated in the stacked army battle.");
+        }
+
+
         #region Helper Methods
 
 
