@@ -8,9 +8,9 @@ namespace Wism.Client.Controllers
 {
     public class LocationController
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
 
-        public LocationController(ILoggerFactory loggerFactory)
+        public LocationController(IWismLoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
             {

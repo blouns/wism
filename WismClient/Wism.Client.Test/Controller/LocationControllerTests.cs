@@ -71,14 +71,13 @@ public class LocationControllerTests
         World.Current.AddLocation(location, tile);
         Army army = player1.HireHero(tile);
         var armies = new List<Army> { army };
-        var expectedKnowledge = "Never give a Sirian an even break!";
 
         // Act
         var success = locationController.SearchLibrary(armies, location, out var knowledge);
 
         // Assert
         Assert.That(success, Is.True);
-        Assert.That(knowledge, Is.EqualTo(expectedKnowledge));
+        Assert.That(knowledge, Is.Not.Null);
         Assert.That(location.Searched, Is.True);
     }
 

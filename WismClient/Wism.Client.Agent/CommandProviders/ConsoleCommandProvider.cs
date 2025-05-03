@@ -31,10 +31,10 @@ public class ConsoleCommandProvider : ICommandProvider
     private readonly GameController gameController;
     private readonly HeroController heroController;
     private readonly LocationController locationController;
-    private readonly ILogger logger;
+    private readonly IWismLogger logger;
     private readonly PlayerController playerController;
 
-    public ConsoleCommandProvider(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
+    public ConsoleCommandProvider(IWismLoggerFactory loggerFactory, ControllerProvider controllerProvider)
     {
         if (loggerFactory is null)
         {

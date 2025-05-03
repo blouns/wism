@@ -10,9 +10,9 @@ namespace Wism.Client.Controllers
 {
     public class CityController
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
 
-        public CityController(ILoggerFactory loggerFactory)
+        public CityController(IWismLoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
             {

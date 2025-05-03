@@ -4,7 +4,6 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
-using Wism.Client.Core.Armies.MovementStrategies;
 using Wism.Client.Core.Armies.TerrainTraversalStrategies;
 using Wism.Client.Core.Armies.WarStrategies;
 using Wism.Client.Data;

@@ -6,7 +6,7 @@ namespace Wism.Client.Common
 {
     public static class ArmyUtilities
     {
-        public static void VerifyArmies(ILogger logger, List<Army> armies)
+        public static void VerifyArmies(IWismLogger logger, List<Army> armies)
         {
 #if DEBUG
             var tile = armies[0].Tile;

@@ -1,7 +1,7 @@
 ﻿namespace Wism.Client.Common
 {
-    public interface ILoggerFactory
+    public interface IWismLoggerFactory
     {
-        ILogger CreateLogger();
+        IWismLogger CreateLogger();
     }
 }

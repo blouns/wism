@@ -26,9 +26,9 @@ namespace Wism.Client.Controllers
 
     public class ArmyController
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
 
-        public ArmyController(ILoggerFactory loggerFactory)
+        public ArmyController(IWismLoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
             {

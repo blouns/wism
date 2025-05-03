@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Wism.Client.CommandProviders;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Modules;
 
 namespace Wism.Client.Agent;
 
@@ -15,10 +16,13 @@ public abstract class GameBase
     public const int DefaultGameSpeed = 100;
     public const int DefaultAttackSpeed = 750;
     private readonly ArmyController armyController;
-    private readonly ILogger logger;
+    private readonly IWismLogger logger;
+    private readonly IWismLoggerFactory loggerFactory;
+    private readonly ControllerProvider controllerProvider;
     private int lastId;
+    private Dictionary<Player, ICommandProvider> playerCommandersDictionary;
 
-    public GameBase(ILoggerFactory loggerFactory, ControllerProvider controllerProvider)
+    public GameBase(IWismLoggerFactory loggerFactory, ControllerProvider controllerProvider)
     {
         if (loggerFactory is null)
         {
@@ -34,6 +38,8 @@ public abstract class GameBase
         this.armyController = controllerProvider.ArmyController;
         this.PlayerController = controllerProvider.PlayerController;
         this.GameSpeed = DefaultGameSpeed;
+        this.loggerFactory = loggerFactory;
+        this.controllerProvider = controllerProvider;
     }
 
     public int GameSpeed { get; set; }
@@ -45,6 +51,11 @@ public abstract class GameBase
     }
 
     public PlayerController PlayerController { get; }
+    public Dictionary<Player, ICommandProvider> PlayerCommanders { get => playerCommandersDictionary; set => playerCommandersDictionary = value; }
+
+    public IWismLoggerFactory LoggerFactory => loggerFactory;
+
+    public ControllerProvider ControllerProvider => controllerProvider;
 
     public async Task RunAsync()
     {
@@ -52,7 +63,7 @@ public abstract class GameBase
 
         try
         {
-            this.CreateTestGame();
+            this.CreateGame();
 
             while (true)
             {
@@ -78,57 +89,5 @@ public abstract class GameBase
 
     protected abstract void Draw();
 
-    /// <summary>
-    ///     For testing purposes only. Creates a default world for testing.
-    /// </summary>
-    private void CreateTestGame()
-    {
-        var worldName = "AsciiWorld";
-
-        Game.CreateDefaultGame(worldName);
-        var world = World.Current;
-        var map = world.Map;
-
-        // Some walking around money
-        Game.Current.Players[0].Gold = 2000;
-
-        // Create a default hero for testing
-        var heroTile = map[1, 1];
-        Game.Current.Players[0].HireHero(heroTile);
-        Game.Current.Players[0].ConscriptArmy(
-            ModFactory.FindArmyInfo("HeavyInfantry"),
-            heroTile);
-        Game.Current.Players[0].ConscriptArmy(
-            ModFactory.FindArmyInfo("Pegasus"),
-            heroTile);
-
-        // Set the player's selected army to a default for testing
-        this.armyController.SelectArmy(heroTile.Armies);
-
-        // Create an opponent for testing
-        var enemyTile1 = map[3, 3];
-        Game.Current.Players[1].HireHero(enemyTile1);
-        Game.Current.Players[1].ConscriptArmy(
-            ModFactory.FindArmyInfo("LightInfantry"),
-            enemyTile1);
-        Game.Current.Players[1].ConscriptArmy(
-            ModFactory.FindArmyInfo("LightInfantry"),
-            enemyTile1);
-        Game.Current.Players[1].ConscriptArmy(
-            ModFactory.FindArmyInfo("LightInfantry"),
-            enemyTile1);
-        Game.Current.Players[1].ConscriptArmy(
-            ModFactory.FindArmyInfo("LightInfantry"),
-            enemyTile1);
-
-        var enemyTile2 = map[3, 2];
-        Game.Current.Players[1].ConscriptArmy(
-            ModFactory.FindArmyInfo("LightInfantry"),
-            enemyTile2);
-
-        // Add cities and locations
-        MapBuilder.AddCitiesFromWorldPath(world, worldName);
-        MapBuilder.AddLocationsFromWorldPath(world, worldName);
-        MapBuilder.AllocateBoons(world.GetLocations());
-    }
+    protected abstract void CreateGame();
 }

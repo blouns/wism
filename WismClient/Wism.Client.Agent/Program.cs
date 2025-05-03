@@ -8,7 +8,6 @@ using Wism.Client.Agent.UI;
 using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
-using Wism.Client.Controllers;
 using Wism.Client.Data;
 
 namespace Wism.Client.Agent;
@@ -70,39 +69,39 @@ public class Program
                     new WismClientInMemoryRepository(new SortedList<int, Command>())
                 );
 
-                services.AddSingleton<ILoggerFactory, WismLoggerFactory>();
+                services.AddSingleton<IWismLoggerFactory, WismLoggerFactory>();
 
                 // Add controllers
                 services.AddSingleton(provider =>
                     new ControllerProvider
                     {
                         ArmyController = new ArmyController(
-                            provider.GetService<ILoggerFactory>()),
+                            provider.GetService<IWismLoggerFactory>()),
                         CommandController = new CommandController(
-                            provider.GetService<ILoggerFactory>(),
+                            provider.GetService<IWismLoggerFactory>(),
                             provider.GetService<IWismClientRepository>()),
                         GameController = new GameController(
-                            provider.GetService<ILoggerFactory>()),
+                            provider.GetService<IWismLoggerFactory>()),
                         CityController = new CityController(
-                            provider.GetService<ILoggerFactory>()),
+                            provider.GetService<IWismLoggerFactory>()),
                         LocationController = new LocationController(
-                            provider.GetService<ILoggerFactory>()),
+                            provider.GetService<IWismLoggerFactory>()),
                         HeroController = new HeroController(
-                            provider.GetService<ILoggerFactory>()),
+                            provider.GetService<IWismLoggerFactory>()),
                         PlayerController = new PlayerController(
-                            provider.GetService<ILoggerFactory>())
+                            provider.GetService<IWismLoggerFactory>())
                     });
 
                 // Add command agent
                 services.AddSingleton<IHostedService>(provider =>
                     new WismAgent(
-                        provider.GetService<ILoggerFactory>(),
+                        provider.GetService<IWismLoggerFactory>(),
                         provider.GetService<ControllerProvider>()));
 
                 // Add view
                 services.AddTransient<GameBase, AsciiGame>(provider =>
                     new AsciiGame(
-                        provider.GetService<ILoggerFactory>(),
+                        provider.GetService<IWismLoggerFactory>(),
                         provider.GetService<ControllerProvider>()));
             });
     }
