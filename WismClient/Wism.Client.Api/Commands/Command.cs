@@ -5,6 +5,10 @@ namespace Wism.Client.Commands
 {
     public abstract class Command : ICommandAction
     {
+        private readonly IEventBus eventBus;
+
+        protected Command(IEventBus eventBus) => this.eventBus = eventBus;
+
         public Command()
         {
         }
@@ -22,7 +26,7 @@ namespace Wism.Client.Commands
 
         public ActionState Execute()
         {
-            this.Result = this.ExecuteInternal();
+            this.Result = this.ExecuteInternal();            
 
             return this.Result;
         }

@@ -3,14 +3,14 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using Wism.Client.Common;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 
 namespace Assets.Scripts.Managers
 {
     public class DebugManager : MonoBehaviour
     {
         private const int maxLines = 50;
-        private ILogger logger;
+        private IWismLogger logger;
         private Text debugText;
         private string lastMessage;
         private bool debug;
@@ -40,7 +40,7 @@ namespace Assets.Scripts.Managers
             this.debugText.text = this.logBuilder.ToString();
         }
 
-        public void Initialize(ILoggerFactory loggerFactory)
+        public void Initialize(IWismLoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
             {

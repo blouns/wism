@@ -13,8 +13,6 @@ using Wism.Client.Core;
 using Wism.Client.Data;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
-using System;
-using Wism.Client.AI.Framework;
 using System.Linq;
 
 namespace Wism.Client.Test.Common;

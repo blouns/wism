@@ -24,7 +24,6 @@ namespace Wism.Client.Agent.UI;
 /// </summary>
 public class AsciiGame : GameBase
 {
-    private readonly List<ICommandProvider> commandProviders;
     private readonly IWismLogger logger;
     private List<ICommandProcessor> humanCommandProcessors;
     private List<ICommandProcessor> aiCommandProcessors;
@@ -113,21 +112,20 @@ public class AsciiGame : GameBase
         humanPlayer.IsHuman = true;
         aiPlayer.IsHuman = false;
 
+        var logger = LoggerFactory.CreateLogger();
         var humanCommander = new ConsoleCommandProvider(LoggerFactory, controllerProvider);
 
         var pathingStrategy = new AStarPathingStrategy();
         var pathfinder = new PathfindingService(pathingStrategy);
         var armyController = controllerProvider.ArmyController;
 
-        var exterminationLogger = new WismLoggerAdapter<ExterminationModule>(LoggerFactory.CreateLogger());
-        var exterminationModule = new ExterminationModule(pathfinder, pathingStrategy, armyController, exterminationLogger);
+        var exterminationModule = new ExterminationModule(pathfinder, pathingStrategy, armyController, logger);
 
         var aiController = new AiController(
             new SimpleStrategicModule(),
             new List<ITacticalModule> { exterminationModule });
-
-        var aiLogger = LoggerFactory.CreateLogger();
-        var aiCommander = new AdaptaCommandProvider(aiLogger, aiController, controllerProvider);
+        
+        var aiCommander = new AdaptaCommandProvider(logger, aiController, controllerProvider);
 
         this.PlayerCommanders = new Dictionary<Player, ICommandProvider>
         {

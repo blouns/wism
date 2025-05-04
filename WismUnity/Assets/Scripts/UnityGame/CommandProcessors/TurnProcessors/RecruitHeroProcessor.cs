@@ -4,7 +4,7 @@ using Wism.Client.Commands;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 
 namespace Assets.Scripts.CommandProcessors
 {
@@ -12,12 +12,12 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly string freeHeroMessage = "In {0}, a hero emerges!";
 
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
 
         private YesNoBox yesNoBox;
 
-        public RecruitHeroProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public RecruitHeroProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

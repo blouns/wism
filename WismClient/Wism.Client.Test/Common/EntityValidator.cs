@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
-using Wism.Client.Commands.Armies;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Core.Boons;

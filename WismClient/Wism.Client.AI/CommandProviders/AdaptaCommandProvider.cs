@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using Wism.Client.AI.Framework;
 using Wism.Client.Commands;
 using Wism.Client.Controllers;

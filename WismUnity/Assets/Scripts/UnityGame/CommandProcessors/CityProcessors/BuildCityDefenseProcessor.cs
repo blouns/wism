@@ -5,17 +5,17 @@ using Wism.Client.Commands;
 using Wism.Client.Commands.Cities;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 
 namespace Assets.Scripts.CommandProcessors
 {
     public class BuildCityDefensesProcessor : ICommandProcessor
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
         private CutsceneStager stager;
 
-        public BuildCityDefensesProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public BuildCityDefensesProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

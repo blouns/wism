@@ -45,7 +45,7 @@ namespace Assets.Scripts.Managers
         private UnityManager unityManager;
 
         public ControllerProvider ControllerProvider { get => this.provider; set => this.provider = value; }
-        public ILoggerFactory LoggerFactory { get; set; }
+        public IWismLoggerFactory LoggerFactory { get; set; }
 
         public string WorldName { get => this.worldName; set => this.worldName = value; }
         public string ModPath { get => this.modPath; set => this.modPath = value; }

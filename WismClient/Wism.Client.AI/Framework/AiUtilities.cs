@@ -6,7 +6,7 @@ using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
-using Microsoft.Extensions.Logging;
+using Wism.Client.Common;
 
 namespace Wism.Client.AI.Framework
 {
@@ -34,7 +34,7 @@ namespace Wism.Client.AI.Framework
         }
 
 
-        internal static void LogAttackPositionInfo<T>(Army enemy, Tile attackPosition, ILogger<T> logger)
+        internal static void LogAttackPositionInfo(Army enemy, Tile attackPosition, IWismLogger logger)
         {
             logger.LogInformation($"AttackPosition = ({attackPosition.X},{attackPosition.Y})");
             logger.LogInformation($"EnemyPosition  = ({enemy.Tile.X},{enemy.Tile.Y})");
@@ -49,11 +49,11 @@ namespace Wism.Client.AI.Framework
             }
         }
 
-        internal static Tile FindAttackPosition<T>(
+        internal static Tile FindAttackPosition(
                                 Tile targetTile,
                                 List<Army> armies,
                                 IPathingStrategy pathingStrategy,
-                                ILogger<T> logger)
+                                IWismLogger logger)
         {
             float distance;
             pathingStrategy.FindShortestRoute(World.Current.Map, armies, targetTile, out var path, out distance, ignoreClan: true);

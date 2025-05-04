@@ -6,17 +6,17 @@ using Wism.Client.Commands;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 
 namespace Assets.Scripts.CommandProcessors
 {
     public class SearchTempleProcessor : ICommandProcessor
     {
-        private ILogger logger;
+        private IWismLogger logger;
         private readonly UnityManager unityGame;
         private CutsceneStager stager;
 
-        public SearchTempleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public SearchTempleProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

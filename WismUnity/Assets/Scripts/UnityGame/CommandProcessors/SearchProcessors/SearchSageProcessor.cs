@@ -6,19 +6,19 @@ using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Controllers;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 using Wism.Client.Commands.Locations;
 
 namespace Assets.Scripts.CommandProcessors
 {
     public class SearchSageProcessor : ICommandProcessor
     {
-        private ILogger logger;
+        private IWismLogger logger;
         private readonly UnityManager unityGame;
         private Librarian librarian = new Librarian();
         private CutsceneStager stager;
 
-        public SearchSageProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public SearchSageProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

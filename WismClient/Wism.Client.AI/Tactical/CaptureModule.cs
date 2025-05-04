@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
 using Wism.Client.AI.Tactical;
 using Wism.Client.Commands.Armies;
@@ -9,13 +8,14 @@ using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using System.Linq;
 using Wism.Client.AI.Framework;
+using Wism.Client.Common;
 
 public class CaptureModule : ITacticalModule
 {
     private readonly ArmyController armyController;
-    private readonly ILogger<CaptureModule> logger;
+    private readonly IWismLogger logger;
 
-    public CaptureModule(ArmyController armyController, ILogger<CaptureModule> logger)
+    public CaptureModule(ArmyController armyController, IWismLogger logger)
     {
         this.armyController = armyController;
         this.logger = logger;

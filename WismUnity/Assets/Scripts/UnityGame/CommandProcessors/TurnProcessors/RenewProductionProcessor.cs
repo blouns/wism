@@ -6,7 +6,7 @@ using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Controllers;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 using Wism.Client.Core.Armies;
 using Wism.Client.Commands.Players;
 
@@ -14,7 +14,7 @@ namespace Assets.Scripts.CommandProcessors
 {
     public class RenewProductionProcessor : ICommandProcessor
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
         private YesNoBox okCancelBox;
         private YesNoBox yesNoCancelBox;
@@ -28,7 +28,7 @@ namespace Assets.Scripts.CommandProcessors
             Cancel
         }
 
-        public RenewProductionProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public RenewProductionProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

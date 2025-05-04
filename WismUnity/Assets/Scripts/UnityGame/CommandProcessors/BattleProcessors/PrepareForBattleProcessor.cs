@@ -11,7 +11,7 @@ using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Controllers;
 using Wism.Client.MapObjects;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 using Wism.Client.Comparers;
 using Wism.Client.Commands.Armies;
 
@@ -19,14 +19,14 @@ namespace Assets.Scripts.CommandProcessors
 {
     public class PrepareForBattleProcessor : ICommandProcessor
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
 
         private const double DefaultInterval = 3000d;
         private Timer timer;
         private bool timerElapsed;
 
-        public PrepareForBattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public PrepareForBattleProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {
