@@ -4,9 +4,6 @@ using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
 using Wism.Client.Core;
 using Wism.Client.Commands;
-using Wism.Client.MapObjects;
-using System;
-using Wism.Client.Controllers;
 
 namespace Wism.Client.AI.Framework
 {

@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using NUnit.Framework;
-using NUnit.Framework.Internal.Execution;
-using Wism.Client.Commands.Armies;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;

@@ -10,7 +10,7 @@ using Wism.Client.Controllers; // Updated
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 
 namespace Assets.Scripts.Managers
 {
@@ -20,7 +20,7 @@ namespace Assets.Scripts.Managers
     public class UnityManager : MonoBehaviour
     {
         private int lastCommandId = 0;
-        private ILogger logger;
+        private IWismLogger logger;
         private ControllerProvider provider;
         private List<ICommandProcessor> commandProcessors;
 

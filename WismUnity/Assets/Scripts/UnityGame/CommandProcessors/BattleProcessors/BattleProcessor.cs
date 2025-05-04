@@ -9,10 +9,10 @@ namespace Assets.Scripts.CommandProcessors
 {
     public class BattleProcessor : ICommandProcessor
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
 
-        public BattleProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public BattleProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

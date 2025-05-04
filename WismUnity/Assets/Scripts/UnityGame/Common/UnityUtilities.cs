@@ -2,45 +2,55 @@
 
 public static class UnityUtilities
 {
-    static public GameObject GameObjectHardFind(string str)
+    // Public method to find by name across all root objects
+    public static GameObject GameObjectHardFind(string str, int maxDepth = 10)
     {
-        GameObject result = null;
-        foreach (GameObject root in GameObject.FindObjectsOfType(typeof(GameObject)))
+        foreach (GameObject root in GameObject.FindObjectsOfType<GameObject>())
         {
-            if (root.transform.parent == null)
+            if (root.transform.parent == null) // Only check root objects
             {
-                // Root GameObject
-                result = GameObjectHardFind(root, str, 0);
-                if (result != null) break;
+                GameObject result = FindInChildren(root, str, 0, maxDepth);
+                if (result != null) return result;
             }
         }
-        return result;
-    }
-    static public GameObject GameObjectHardFind(string str, string tag)
-    {
-        GameObject result = null;
-        foreach (GameObject parent in GameObject.FindGameObjectsWithTag(tag))
-        {
-            result = GameObjectHardFind(parent, str, 0);
-            if (result != null) break;
-        }
-        return result;
-    }
-    static private GameObject GameObjectHardFind(GameObject item, string str, int index)
-    {
-        if (index == 0 && item.name == str) return item;
-        if (index < item.transform.childCount)
-        {
-            GameObject result = GameObjectHardFind(item.transform.GetChild(index).gameObject, str, 0);
-            if (result == null)
-            {
-                return GameObjectHardFind(item, str, ++index);
-            }
-            else
-            {
-                return result;
-            }
-        }
+        Debug.LogWarning($"GameObject '{str}' not found in scene.");
         return null;
+    }
+
+    // Public method to find by name under a specific tag
+    public static GameObject GameObjectHardFind(string str, string tag, int maxDepth = 10)
+    {
+        GameObject[] parents = GameObject.FindGameObjectsWithTag(tag);
+        foreach (GameObject parent in parents)
+        {
+            GameObject result = FindInChildren(parent, str, 0, maxDepth);
+            if (result != null) return result;
+        }
+        Debug.LogWarning($"GameObject '{str}' not found under tag '{tag}'.");
+        return null;
+    }
+
+    // Recursive search with null safety and depth limit
+    private static GameObject FindInChildren(GameObject parent, string targetName, int depth, int maxDepth)
+    {
+        if (parent == null || string.IsNullOrEmpty(targetName) || depth > maxDepth)
+            return null;
+
+        // Check current object
+        if (parent.name == targetName)
+            return parent;
+
+        // Check children
+        Transform transform = parent.transform;
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+            if (child == null) continue; // Skip destroyed/null children
+
+            GameObject result = FindInChildren(child.gameObject, targetName, depth + 1, maxDepth);
+            if (result != null) return result;
+        }
+
+        return null; // Not found
     }
 }

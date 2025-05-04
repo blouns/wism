@@ -6,17 +6,15 @@ using Wism.Client.Test.Common;
 using Wism.Client.AI.Framework;
 using Wism.Client.AI.Tactical;
 using Wism.Client.AI.Services;
-using Microsoft.Extensions.Logging;
 using Wism.Client.AI.Strategic;
-using Wism.Client.CommandProviders;
 using Wism.Client.Modules.Infos;
 using Wism.Client.Pathing;
 using Wism.Client.Common;
 using System.Linq;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Commands;
-using System;
 using Wism.Client.AI.CommandProviders;
+using System.Reflection;
 
 namespace Wism.Client.Test.AI
 {
@@ -38,7 +36,7 @@ namespace Wism.Client.Test.AI
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), playerTile);
             enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyTile);
 
-            var logger = new WismLoggerAdapter<ExterminationModule>(TestUtilities.CreateLogFactory().CreateLogger());
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
             var module = new ExterminationModule(new PathfindingService(new AStarPathingStrategy()), new AStarPathingStrategy(), controllerProvider.ArmyController, logger);
 
             var commands = GetTestCommands(module, World.Current, logger);
@@ -58,7 +56,7 @@ namespace Wism.Client.Test.AI
             var playerTile = World.Current.Map[6, 4];
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), playerTile);
 
-            var logger = new WismLoggerAdapter<ExterminationModule>(TestUtilities.CreateLogFactory().CreateLogger());
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
             var module = new ExterminationModule(new PathfindingService(new AStarPathingStrategy()), new AStarPathingStrategy(), controllerProvider.ArmyController, logger);
 
             var commands = GetTestCommands(module, World.Current, logger);
@@ -80,7 +78,7 @@ namespace Wism.Client.Test.AI
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), playerTile);
             enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyTile);
 
-            var logger = new WismLoggerAdapter<ExterminationModule>(TestUtilities.CreateLogFactory().CreateLogger());
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
             var module = new ExterminationModule(new PathfindingService(new AStarPathingStrategy()), new AStarPathingStrategy(), controllerProvider.ArmyController, logger);
 
             var commands = GetTestCommands(module, World.Current, logger);
@@ -107,7 +105,7 @@ namespace Wism.Client.Test.AI
             var farArmy = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), farTile);
             enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyTile);
 
-            var logger = new WismLoggerAdapter<ExterminationModule>(TestUtilities.CreateLogFactory().CreateLogger());
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
             var module = new ExterminationModule(new PathfindingService(new AStarPathingStrategy()), new AStarPathingStrategy(), controllerProvider.ArmyController, logger);
 
             var bids = module.GenerateBids(World.Current).OrderByDescending(b => b.Utility).ToList();
@@ -134,7 +132,7 @@ namespace Wism.Client.Test.AI
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), playerTile);
             enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyTile);
 
-            var logger = new WismLoggerAdapter<ExterminationModule>(TestUtilities.CreateLogFactory().CreateLogger());
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
             var module = new ExterminationModule(new PathfindingService(new AStarPathingStrategy()), new AStarPathingStrategy(), controllerProvider.ArmyController, logger);
 
             var commands = GetTestCommands(module, World.Current, logger);
@@ -148,8 +146,7 @@ namespace Wism.Client.Test.AI
         public void ExterminationAI_DefeatsOrDies_TwoPlayers()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
-            var logger = CreateLoggerAdapter();
-            var gameLogger = TestUtilities.CreateLogFactory().CreateLogger();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
 
             TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
 
@@ -162,7 +159,7 @@ namespace Wism.Client.Test.AI
             attacker.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), attackerTile);
             defender.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), defenderTile);
 
-            var commander = SetupAIController(controllerProvider, gameLogger);
+            var commander = SetupAIController(controllerProvider, logger);
 
             TestUtilities.StartTurn(controllerProvider);
 
@@ -206,9 +203,16 @@ namespace Wism.Client.Test.AI
         [Test]
         public void ExterminationAI_StackedArmy_AttacksSmallerEnemyStack()
         {
+            // Debugging visualization attribute
+            var method = MethodBase.GetCurrentMethod();
+            var attr = method.GetCustomAttribute<AsciiVisualizerAttribute>();
+            if (attr != null)
+            {
+                AsciiTestVisualizer.Enable(attr.DelayMilliseconds);
+            }
+
             var controllerProvider = TestUtilities.CreateControllerProvider();
-            var logger = new WismLoggerAdapter<AdaptaCommandProvider>(TestUtilities.CreateLogFactory().CreateLogger());
-            var gameLogger = TestUtilities.CreateLogFactory().CreateLogger();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
 
             TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
 
@@ -230,7 +234,7 @@ namespace Wism.Client.Test.AI
                 lordBane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), lordBaneTile);
             }
 
-            var commander = SetupAIController(controllerProvider, gameLogger);
+            var commander = SetupAIController(controllerProvider, logger);
 
             TestUtilities.StartTurn(controllerProvider);
             int lastId = controllerProvider.CommandController.GetLastCommand().Id;
@@ -246,6 +250,7 @@ namespace Wism.Client.Test.AI
                 foreach (var command in commands)
                 {
                     logger.LogInformation($"Command executing: {command.Id}: {command.GetType()}");
+                    AsciiTestVisualizer.Draw();
 
                     var result = command.Execute();
                     while (result == ActionState.InProgress)
@@ -279,22 +284,15 @@ namespace Wism.Client.Test.AI
         {
             var pathingStrategy = new AStarPathingStrategy();
             var pathfinder = new PathfindingService(pathingStrategy);
-            var armyController = controllerProvider.ArmyController;
+            var armyController = controllerProvider.ArmyController;            
 
-            var exterminationLogger = new WismLoggerAdapter<ExterminationModule>(TestUtilities.CreateLogFactory().CreateLogger());
-
-            var exterminationModule = new ExterminationModule(pathfinder, pathingStrategy, armyController, exterminationLogger);
+            var exterminationModule = new ExterminationModule(pathfinder, pathingStrategy, armyController, logger);
             var aiController = new AiController(new SimpleStrategicModule(), new List<ITacticalModule> { exterminationModule });
 
             return new AdaptaCommandProvider(logger, aiController, controllerProvider);
         }
 
-        private static WismLoggerAdapter<AdaptaCommandProvider> CreateLoggerAdapter()
-        {
-            return new WismLoggerAdapter<AdaptaCommandProvider>(TestUtilities.CreateLogFactory().CreateLogger());
-        }
-
-        private static List<ICommandAction> GetTestCommands(ITacticalModule module, World world, ILogger logger = null)
+        private static List<ICommandAction> GetTestCommands(ITacticalModule module, World world, IWismLogger logger = null)
         {
             var bids = module.GenerateBids(world).OrderByDescending(b => b.Utility).ToList();
             var bestBid = bids.FirstOrDefault();

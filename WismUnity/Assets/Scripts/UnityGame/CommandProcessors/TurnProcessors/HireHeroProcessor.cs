@@ -9,7 +9,7 @@ namespace Assets.Scripts.CommandProcessors
 {
     public class HireHeroProcessor : ICommandProcessor
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
 
         private readonly string enterHeroNameMsg = "Name of Hero:";
@@ -18,7 +18,7 @@ namespace Assets.Scripts.CommandProcessors
         private SolicitInput input;
         private string heroName;
 
-        public HireHeroProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public HireHeroProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

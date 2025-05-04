@@ -6,7 +6,6 @@ using Wism.Client.Test.Common;
 using Wism.Client.AI.Framework;
 using Wism.Client.AI.Tactical;
 using Wism.Client.AI.Services;
-using Microsoft.Extensions.Logging;
 using Wism.Client.AI.Strategic;
 using Wism.Client.Modules.Infos;
 using Wism.Client.Pathing;
@@ -23,8 +22,7 @@ namespace Wism.Client.Test.AI
         public void CaptureAI_CapturesClosestCity_FromPlayerCity_Valid()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
-            var logger = CreateLoggerAdapter();
-            var gameLogger = TestUtilities.CreateLogFactory().CreateLogger();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
 
             TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
 
@@ -34,7 +32,7 @@ namespace Wism.Client.Test.AI
 
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), armyTile);
 
-            var commander = SetupAIController(controllerProvider, gameLogger);
+            var commander = SetupAIController(controllerProvider, logger);
 
             TestUtilities.StartTurn(controllerProvider);
 
@@ -91,8 +89,7 @@ namespace Wism.Client.Test.AI
         public void CaptureAI_StackedArmy_CapturesEnemyCity()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
-            var logger = new WismLoggerAdapter<AdaptaCommandProvider>(TestUtilities.CreateLogFactory().CreateLogger());
-            var gameLogger = TestUtilities.CreateLogFactory().CreateLogger();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
 
             TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
 
@@ -110,7 +107,7 @@ namespace Wism.Client.Test.AI
 
             // Do NOT place defenders in BanesCitadel
 
-            var commander = SetupAIController(controllerProvider, gameLogger);
+            var commander = SetupAIController(controllerProvider, logger);
 
             TestUtilities.StartTurn(controllerProvider);
             int lastId = controllerProvider.CommandController.GetLastCommand().Id;
@@ -158,18 +155,11 @@ namespace Wism.Client.Test.AI
             var pathfinder = new PathfindingService(pathingStrategy);
             var armyController = controllerProvider.ArmyController;
 
-            var captureLogger = new WismLoggerAdapter<CaptureModule>(TestUtilities.CreateLogFactory().CreateLogger());
-
-            var captureModule = new CaptureModule(armyController, captureLogger);
+            var captureModule = new CaptureModule(armyController, logger);
             var aiController = new AiController(new SimpleStrategicModule(), new List<ITacticalModule> { captureModule });
 
             var myLogger = TestUtilities.CreateLogFactory().CreateLogger();
             return new AdaptaCommandProvider(logger, aiController, controllerProvider);
-        }
-
-        private static WismLoggerAdapter<AdaptaCommandProvider> CreateLoggerAdapter()
-        {
-            return new WismLoggerAdapter<AdaptaCommandProvider>(TestUtilities.CreateLogFactory().CreateLogger());
         }
 
         #endregion

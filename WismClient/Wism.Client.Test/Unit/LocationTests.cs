@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Wism.Client.Core;
-using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Searchables;

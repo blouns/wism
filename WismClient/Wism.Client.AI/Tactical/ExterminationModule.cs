@@ -1,7 +1,6 @@
 // File: Wism.Client.AI/Tactical/ExterminationModule.cs
 
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using Wism.Client.Core;
 using Wism.Client.AI.Services;
 using Wism.Client.Commands.Armies;
@@ -9,9 +8,9 @@ using Wism.Client.Controllers;
 using Wism.Client.Commands;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
-using System;
 using Wism.Client.AI.Framework;
 using System.Linq;
+using Wism.Client.Common;
 
 namespace Wism.Client.AI.Tactical
 {
@@ -20,9 +19,9 @@ namespace Wism.Client.AI.Tactical
         private readonly PathfindingService pathfindingService;
         private readonly IPathingStrategy pathingStrategy;
         private readonly ArmyController armyController;
-        private readonly ILogger<ExterminationModule> logger;
+        private readonly IWismLogger logger;
 
-        public ExterminationModule(PathfindingService pathfindingService, IPathingStrategy pathingStrategy, ArmyController armyController, ILogger<ExterminationModule> logger)
+        public ExterminationModule(PathfindingService pathfindingService, IPathingStrategy pathingStrategy, ArmyController armyController, IWismLogger logger)
         {
             this.pathfindingService = pathfindingService;
             this.pathingStrategy = pathingStrategy;

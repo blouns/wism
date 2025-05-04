@@ -10,10 +10,10 @@ namespace Assets.Scripts.CommandProcessors
 {
     public class SelectArmyProcessor : ICommandProcessor
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
 
-        public SelectArmyProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public SelectArmyProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {

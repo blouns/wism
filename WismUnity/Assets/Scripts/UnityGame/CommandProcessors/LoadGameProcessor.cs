@@ -5,16 +5,16 @@ using Wism.Client.Commands;
 using Wism.Client.Commands.Games;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
-using ILogger = Wism.Client.Common.ILogger;
+using IWismLogger = Wism.Client.Common.IWismLogger;
 
 namespace Assets.Scripts.CommandProcessors
 {
     public class LoadGameProcessor : ICommandProcessor
     {
-        private readonly ILogger logger;
+        private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
 
-        public LoadGameProcessor(ILoggerFactory loggerFactory, UnityManager unityGame)
+        public LoadGameProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
             if (loggerFactory is null)
             {
