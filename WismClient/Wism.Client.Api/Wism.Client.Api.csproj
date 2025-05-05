@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<AssemblyName>Wism.Client.Api</AssemblyName>
 		<RootNamespace>Wism.Client</RootNamespace>
 	</PropertyGroup>
@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netstandard2.0\&quot; $(ProjectDir)..\..\WismUnity\Assets\Plugins\WismClient" />
+		<Exec Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netstandard2.1\&quot; $(ProjectDir)..\..\WismUnity\Assets\Plugins\WismClient" />
 	</Target>
 
 </Project>

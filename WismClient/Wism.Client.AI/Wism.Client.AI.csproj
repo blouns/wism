@@ -1,12 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
+	<AssemblyName>Wism.Client.Ai</AssemblyName>
+	<RootNamespace>Wism.Client</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
   </ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<OutputPath>..\bin\debug</OutputPath>
+		<Optimize>False</Optimize>
+	</PropertyGroup>
 
   <ItemGroup>
     <Folder Include="InfluenceMaps\" />
