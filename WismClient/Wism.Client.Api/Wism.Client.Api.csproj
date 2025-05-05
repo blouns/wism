@@ -8,7 +8,7 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<OutputPath>..\bin\debug</OutputPath>
-		<Optimize>False</Optimize>
+		<UnityPluginDir>$(SolutionDir)../WismUnity/Assets/Plugins/WismClient/</UnityPluginDir>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -19,8 +19,19 @@
 		<ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
 	</ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="xcopy /Y /S /i &quot;$(ProjectDir)..\bin\Debug\netstandard2.1\&quot; $(ProjectDir)..\..\WismUnity\Assets\Plugins\WismClient" />
+	<ItemGroup>
+		<!-- Include DLL and PDB explicitly -->
+		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).dll" />
+		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+	</ItemGroup>
+
+	<Target Name="CopyBinariesToUnity" AfterTargets="Build">
+		<Message Importance="high" Text="Copying $(AssemblyName) outputs to $(UnityPluginDir)" />
+
+		<Copy
+		  SourceFiles="@(UnityClientOutput)"
+		  DestinationFolder="$(UnityPluginDir)"
+		  SkipUnchangedFiles="true" />		
 	</Target>
 
 </Project>

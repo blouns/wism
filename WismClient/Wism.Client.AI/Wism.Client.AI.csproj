@@ -12,13 +12,28 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<OutputPath>..\bin\debug</OutputPath>
-		<Optimize>False</Optimize>
+		<UnityPluginDir>$(SolutionDir)../WismUnity/Assets/Plugins/WismClient/</UnityPluginDir>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Include DLL and PDB explicitly -->
+		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).dll" />
+		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+	</ItemGroup>
 
   <ItemGroup>
     <Folder Include="InfluenceMaps\" />
     <Folder Include="Services\" />
     <Folder Include="Strategic\" />
   </ItemGroup>
+
+	<Target Name="CopyBinariesToUnity" AfterTargets="Build">
+		<Message Importance="high" Text="Copying $(AssemblyName) outputs to $(UnityPluginDir)" />
+
+		<Copy
+		  SourceFiles="@(UnityClientOutput)"
+		  DestinationFolder="$(UnityPluginDir)"
+		  SkipUnchangedFiles="true" />
+	</Target>
 
 </Project>
