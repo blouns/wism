@@ -1,0 +1,53 @@
+name: WISM CI
+
+on:
+  push:
+    branches:
+      - '**'  # Build everything
+    tags:
+      - 'v*'  # Only publish builds on version tags
+
+jobs:
+  build-client:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.x'
+
+    - name: Build WismClient
+      run: dotnet build WismClient/WismClient.sln --configuration Release
+
+    - name: Test WismClient
+      run: dotnet test WismClient/WismClient.sln --configuration Release
+
+  build-unity:
+    runs-on: windows-latest
+    needs: build-client
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Unity Activation Stub
+      uses: game-ci/unity-activate@v3
+      with:
+        unityVersion: '6000.0.34f1'
+
+    - name: Build Unity project
+      run: |
+        "C:\Program Files\Unity\Hub\Editor\6000.0.34f1\Editor\Unity.exe" ^
+          -batchmode -quit ^
+          -projectPath WismUnity ^
+          -executeMethod BuildScripts.CIBuilder.Build ^
+          -logFile WismUnity\Builds\BuildLog.txt
+
+    - name: Upload build artifact
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-artifact@v3
+      with:
+        name: wism-windows-build
+        path: WismUnity/Builds/Windows/
