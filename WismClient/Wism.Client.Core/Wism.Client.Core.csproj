@@ -10,10 +10,6 @@
 		<OutputPath>..\bin\debug</OutputPath>
 	</PropertyGroup>
 
-	<ItemGroup>		
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-	</ItemGroup>
-
 	<ItemGroup>
 		<None Update="mod\Artifact.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -91,6 +87,10 @@
 
 	<ItemGroup>
 		<Folder Include="Pathing\External\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
 </Project>

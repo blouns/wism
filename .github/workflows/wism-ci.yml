@@ -19,6 +19,9 @@ jobs:
       with:
         dotnet-version: '8.x'
 
+    - name: List directory contents
+      run: ls -R
+
     - name: Build WismClient
       run: dotnet build WismClient/WismClient.sln --configuration Release
 
