@@ -1,0 +1,32 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <UnityPluginDir Condition="'$(UnityPluginDir)' == ''">$(SolutionDir)..\WismUnity\Assets\Plugins\WismClient\</UnityPluginDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <UnityClientOutput Include="$(OutputPath)$(AssemblyName).dll" />
+    <UnityClientOutput Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+    
+    <UnityModFiles Include="$(OutputPath)mod\\**\\*" Condition="'$(IncludeModFiles)' == 'true'" />   
+
+  </ItemGroup>
+
+  <Target Name="CopyBinariesAndModsToUnity" AfterTargets="Build">
+    <Message Text="Publishing $(AssemblyName) to Unity: $(UnityPluginDir)" Importance="high" />
+
+    <Copy
+      SourceFiles="@(UnityClientOutput)"
+      DestinationFolder="$(UnityPluginDir)"
+      SkipUnchangedFiles="true" />
+
+    <Error Text="No mod files found to publish!" Condition="'$(IncludeModFiles)' == 'true' and '@(UnityModFiles)' == ''" />
+
+    <Copy
+      SourceFiles="@(UnityModFiles)"
+      DestinationFiles="@(UnityModFiles->'$(UnityPluginDir)Mods\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true"
+      Condition="'$(IncludeModFiles)' == 'true'" />
+  </Target>
+
+</Project>
