@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Wism.Client.Controllers;
-using Wism.Client.Controllers;
 
 namespace Wism.Client.Commands.Locations
 {

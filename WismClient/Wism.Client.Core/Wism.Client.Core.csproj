@@ -3,44 +3,17 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<AssemblyName>Wism.Client.Core</AssemblyName>
-		<RootNamespace>Wism.Client</RootNamespace>
-		<UnityPluginDir>$(SolutionDir)../WismUnity/Assets/Plugins/WismClient/</UnityPluginDir>
+		<RootNamespace>Wism.Client</RootNamespace>		
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<OutputPath>..\bin\debug</OutputPath>
+		<IncludeModFiles>true</IncludeModFiles>
 	</PropertyGroup>
 
-	<Target Name="CopyBinariesToUnity" AfterTargets="Build">
-		<Message Importance="high" Text="Copying Wism.Client.Core output to Unity: $(TargetPath) -> $(UnityPluginDir)" />
-		<Copy
-		  SourceFiles="$(TargetPath)"
-		  DestinationFolder="$(UnityPluginDir)"
-		  SkipUnchangedFiles="true" />
-	</Target>
-
 	<ItemGroup>
-		<!-- Include DLL and PDB explicitly -->
-		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).dll" />
-		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
-
-		<!-- For Core only: Mod files are not under OutputPath -->
-		<UnityModFiles Include="$(OutputPath)mod\**\*" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
-
-	<Target Name="CopyBinariesAndModsToUnity" AfterTargets="Build">
-		<Message Importance="high" Text="Copying $(AssemblyName) outputs to $(UnityPluginDir)" />
-
-		<Copy
-		  SourceFiles="@(UnityClientOutput)"
-		  DestinationFolder="$(UnityPluginDir)"
-		  SkipUnchangedFiles="true" />
-
-		<Copy
-		  SourceFiles="@(UnityModFiles)"
-		  DestinationFiles="@(UnityModFiles->'$(UnityPluginDir)mod\%(RecursiveDir)%(Filename)%(Extension)')"
-		  SkipUnchangedFiles="true" />
-	</Target>
 
 	<ItemGroup>
 		<None Update="mod\Artifact.json">
@@ -121,8 +94,6 @@
 		<Folder Include="Pathing\External\" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-	</ItemGroup>
+	<Import Project="..\Build\Wism.PublishToUnity.targets" />
 
 </Project>

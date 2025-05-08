@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-	<AssemblyName>Wism.Client.Ai</AssemblyName>
+	<AssemblyName>Wism.Client.AI</AssemblyName>
 	<RootNamespace>Wism.Client</RootNamespace>
   </PropertyGroup>
 
@@ -12,28 +12,14 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<OutputPath>..\bin\debug</OutputPath>
-		<UnityPluginDir>$(SolutionDir)../WismUnity/Assets/Plugins/WismClient/</UnityPluginDir>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<!-- Include DLL and PDB explicitly -->
-		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).dll" />
-		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
-	</ItemGroup>
-
-  <ItemGroup>
+	  <ItemGroup>
     <Folder Include="InfluenceMaps\" />
     <Folder Include="Services\" />
     <Folder Include="Strategic\" />
   </ItemGroup>
 
-	<Target Name="CopyBinariesToUnity" AfterTargets="Build">
-		<Message Importance="high" Text="Copying $(AssemblyName) outputs to $(UnityPluginDir)" />
-
-		<Copy
-		  SourceFiles="@(UnityClientOutput)"
-		  DestinationFolder="$(UnityPluginDir)"
-		  SkipUnchangedFiles="true" />
-	</Target>
+  <Import Project="..\Build\Wism.PublishToUnity.targets" />
 
 </Project>

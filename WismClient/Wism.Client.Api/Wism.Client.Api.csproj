@@ -8,7 +8,6 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<OutputPath>..\bin\debug</OutputPath>
-		<UnityPluginDir>$(SolutionDir)../WismUnity/Assets/Plugins/WismClient/</UnityPluginDir>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -19,19 +18,6 @@
 		<ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<!-- Include DLL and PDB explicitly -->
-		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).dll" />
-		<UnityClientOutput Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
-	</ItemGroup>
-
-	<Target Name="CopyBinariesToUnity" AfterTargets="Build">
-		<Message Importance="high" Text="Copying $(AssemblyName) outputs to $(UnityPluginDir)" />
-
-		<Copy
-		  SourceFiles="@(UnityClientOutput)"
-		  DestinationFolder="$(UnityPluginDir)"
-		  SkipUnchangedFiles="true" />		
-	</Target>
+	<Import Project="..\Build\Wism.PublishToUnity.targets" />
 
 </Project>
