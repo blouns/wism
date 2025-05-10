@@ -14,11 +14,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wism.Client.Agent", "Wism.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wism.Client.Api", "Wism.Client.Api\Wism.Client.Api.csproj", "{EB8B4D6F-6656-4696-9E73-C075D95962FB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{06EF5CF6-4FF5-4415-A198-FC84A62DFE63}"
-	ProjectSection(SolutionItems) = preProject
-		Directory.Build.props = Directory.Build.props
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wism.Client.AI", "Wism.Client.AI\Wism.Client.AI.csproj", "{AFB406EC-442B-4B67-90FC-C0DF028A3866}"
 EndProject
 Global
