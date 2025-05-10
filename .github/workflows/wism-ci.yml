@@ -61,16 +61,23 @@ jobs:
         checkName: ${{ matrix.testMode }} Test Results
         coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+WismUnity.*'
 
+    - name: Check Artifacts Path
+      run: |
+        if [ ! -d "artifacts/${{ matrix.testMode }}" ]; then
+          echo "Artifacts path does not exist: artifacts/${{ matrix.testMode }}"
+          exit 1
+        fi
+
     - name: Upload Test Results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Test results for ${{ matrix.testMode }}
-        path: ${{ steps.tests.outputs.artifactsPath }}
+        path: artifacts/${{ matrix.testMode }}
 
     - name: Upload Coverage Report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Coverage results for ${{ matrix.testMode }}
         path: ${{ steps.tests.outputs.coveragePath }}
