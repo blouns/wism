@@ -3,9 +3,9 @@ name: WISM CI
 on:
   push:
     branches:
-      - '**'  # Build everything
+      - '**'
     tags:
-      - 'v*'  # Only publish builds on version tags
+      - 'v*'
 
 jobs:
   build-client:
@@ -25,24 +25,30 @@ jobs:
     - name: Test WismClient
       run: dotnet test WismClient/WismClient.sln --configuration Release
 
-  build-unity:
+  test-unity:
     runs-on: windows-latest
     needs: build-client
+    strategy:
+      matrix:
+        testMode: [editmode, playmode]
+        projectPath: [WismUnity]
 
     steps:
     - uses: actions/checkout@v4
-  
-    - uses: actions/checkout@v4
       with:
-            lfs: true
-    - uses: actions/cache@v3
-      with:
-            path: ${{ matrix.projectPath }}/Library
-            key: Library-${{ matrix.projectPath }}
-            restore-keys: |
-              Library-
+        lfs: true
 
-    - uses: game-ci/unity-test-runner@v4
+    - name: Cache Unity Library
+      uses: actions/cache@v3
+      with:
+        path: ${{ matrix.projectPath }}/Library
+        key: Library-${{ matrix.projectPath }}-${{ matrix.testMode }}
+        restore-keys: |
+          Library-
+
+    - name: Run Unity Tests
+      id: tests
+      uses: game-ci/unity-test-runner@v4
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -53,20 +59,48 @@ jobs:
         artifactsPath: ${{ matrix.testMode }}-artifacts
         githubToken: ${{ secrets.GITHUB_TOKEN }}
         checkName: ${{ matrix.testMode }} Test Results
-        coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
-    - uses: actions/upload-artifact@v3
+        coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+WismUnity.*'
+
+    - name: Upload Test Results
       if: always()
+      uses: actions/upload-artifact@v3
       with:
         name: Test results for ${{ matrix.testMode }}
         path: ${{ steps.tests.outputs.artifactsPath }}
-    - uses: actions/upload-artifact@v3
+
+    - name: Upload Coverage Report
       if: always()
+      uses: actions/upload-artifact@v3
       with:
         name: Coverage results for ${{ matrix.testMode }}
         path: ${{ steps.tests.outputs.coveragePath }}
-    - name: Upload build artifact
+
+  build-unity:
+    runs-on: windows-latest
+    needs: test-unity
+    strategy:
+      matrix:
+        projectPath: [WismUnity]
+        targetPlatform: [StandaloneWindows64]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Build Unity Project
+      uses: game-ci/unity-builder@v4
+      env:
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+        UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      with:
+        projectPath: ${{ matrix.projectPath }}
+        targetPlatform: ${{ matrix.targetPlatform }}
+
+    - name: Upload Build Artifact
       if: startsWith(github.ref, 'refs/tags/v')
       uses: actions/upload-artifact@v3
       with:
-        name: wism-windows-build
-        path: WismUnity/Builds/Windows/
+        name: wism-${{ matrix.targetPlatform }}-build
+        path: build/${{ matrix.targetPlatform }}
