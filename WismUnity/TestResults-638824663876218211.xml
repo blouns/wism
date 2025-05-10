@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="11" result="Passed" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2025-05-10 16:32:06Z" end-time="2025-05-10 16:33:07Z" duration="61.4712925">
+  <test-suite type="TestSuite" id="1017" name="WISM" fullname="WISM" runstate="Runnable" testcasecount="11" result="Passed" start-time="2025-05-10 16:32:06Z" end-time="2025-05-10 16:33:07Z" duration="61.471293" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1015" name="PlayModeTests.dll" fullname="C:/source/wism/WismUnity/Library/ScriptAssemblies/PlayModeTests.dll" runstate="Runnable" testcasecount="11" result="Passed" start-time="2025-05-10 16:32:06Z" end-time="2025-05-10 16:33:07Z" duration="61.464064" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="96088" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestFixture" id="1001" name="ArmyActionTests" fullname="ArmyActionTests" classname="ArmyActionTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2025-05-10 16:32:06Z" end-time="2025-05-10 16:32:56Z" duration="50.575288" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1007" name="Hero_Attack_CaptureCity" fullname="ArmyActionTests.Hero_Attack_CaptureCity" methodname="Hero_Attack_CaptureCity" classname="ArmyActionTests" runstate="Runnable" seed="434094735" result="Passed" start-time="2025-05-10 16:32:06Z" end-time="2025-05-10 16:32:16Z" duration="10.120009" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Armies[1:SiriansHero(34)] select
+Command: Armies[1:SiriansHero(34)] move to ((6,4):Grass(0)
+Command: Armies[1:SiriansHero(34)] move to ((6,4):Grass(0)
+Command: Armies[1:SiriansHero(34)] move to ((6,4):Grass(0)
+Command: Armies[1:SiriansHero(34)] move to ((6,4):Grass(0)
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Prepare for battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)[1:LordBaneHero(35)]
+The Sirians are attacking Lord Bane!
+Command: Armies[1:SiriansHero(34)] attack ((7,4):Castle(0)[1:LordBaneHero(35)]
+Command: Complete battle of Armies[1:SiriansHero(34)] against (7,4):Castle(0)
+]]></output>
+        </test-case>
+        <test-case id="1008" name="Hero_Attack_PlayerLoses" fullname="ArmyActionTests.Hero_Attack_PlayerLoses" methodname="Hero_Attack_PlayerLoses" classname="ArmyActionTests" runstate="Runnable" seed="631740636" result="Passed" start-time="2025-05-10 16:32:16Z" end-time="2025-05-10 16:32:26Z" duration="10.194709" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Armies[1:SiriansHero(69)] select
+Command: Armies[1:SiriansHero(69)] move to ((6,4):Grass(0)
+Command: Armies[1:SiriansHero(69)] move to ((6,4):Grass(0)
+Command: Armies[1:SiriansHero(69)] move to ((6,4):Grass(0)
+Command: Armies[1:SiriansHero(69)] move to ((6,4):Grass(0)
+Command: Sirians end turn
+Command: LordBane start turn
+Command: LordBane recruiting a hero
+Command: LordBane hiring hero
+Command: LordBane hiring hero
+Command: LordBane reviewing production
+Command: LordBane renewing production
+Command: Armies[1:LordBaneHero(70)] select
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Command: Prepare for battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+Lord Bane is attacking The Sirians!
+Command: Armies[1:LordBaneHero(70)] attack ((6,4):Grass(0)[1:SiriansHero(69)]
+Command: Complete battle of Armies[1:LordBaneHero(70)] against (6,4):Grass(0)[1:SiriansHero(69)]
+]]></output>
+        </test-case>
+        <test-case id="1002" name="Hero_HiredInCapitol_Pass" fullname="ArmyActionTests.Hero_HiredInCapitol_Pass" methodname="Hero_HiredInCapitol_Pass" classname="ArmyActionTests" runstate="Runnable" seed="632147646" result="Passed" start-time="2025-05-10 16:32:26Z" end-time="2025-05-10 16:32:28Z" duration="2.500343" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+]]></output>
+        </test-case>
+        <test-case id="1005" name="Hero_MoveEast_Pass" fullname="ArmyActionTests.Hero_MoveEast_Pass" methodname="Hero_MoveEast_Pass" classname="ArmyActionTests" runstate="Runnable" seed="1283969963" result="Passed" start-time="2025-05-10 16:32:28Z" end-time="2025-05-10 16:32:32Z" duration="3.748600" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Armies[1:SiriansHero(138)] select
+Command: Armies[1:SiriansHero(138)] move to ((4,4):Castle(0)
+Command: Armies[1:SiriansHero(138)] move to ((4,4):Castle(0)
+]]></output>
+        </test-case>
+        <test-case id="1003" name="Hero_MoveNorth_Pass" fullname="ArmyActionTests.Hero_MoveNorth_Pass" methodname="Hero_MoveNorth_Pass" classname="ArmyActionTests" runstate="Runnable" seed="1333435891" result="Passed" start-time="2025-05-10 16:32:32Z" end-time="2025-05-10 16:32:36Z" duration="3.750703" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Armies[1:SiriansHero(172)] select
+Command: Armies[1:SiriansHero(172)] move to ((3,5):Marsh(0)
+Command: Armies[1:SiriansHero(172)] move to ((3,5):Marsh(0)
+]]></output>
+        </test-case>
+        <test-case id="1004" name="Hero_MoveSouth_Pass" fullname="ArmyActionTests.Hero_MoveSouth_Pass" methodname="Hero_MoveSouth_Pass" classname="ArmyActionTests" runstate="Runnable" seed="1028398559" result="Passed" start-time="2025-05-10 16:32:36Z" end-time="2025-05-10 16:32:40Z" duration="3.751225" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Armies[1:SiriansHero(206)] select
+Command: Armies[1:SiriansHero(206)] move to ((3,3):Castle(0)
+Command: Armies[1:SiriansHero(206)] move to ((3,3):Castle(0)
+]]></output>
+        </test-case>
+        <test-case id="1006" name="Hero_MoveWest_Pass" fullname="ArmyActionTests.Hero_MoveWest_Pass" methodname="Hero_MoveWest_Pass" classname="ArmyActionTests" runstate="Runnable" seed="2073935669" result="Passed" start-time="2025-05-10 16:32:40Z" end-time="2025-05-10 16:32:43Z" duration="3.748466" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Armies[1:SiriansHero(240)] select
+Command: Armies[1:SiriansHero(240)] move to ((2,4):Marsh(0)
+Command: Armies[1:SiriansHero(240)] move to ((2,4):Marsh(0)
+]]></output>
+        </test-case>
+        <test-case id="1010" name="Hero_PetCompanion_HasCompanion" fullname="ArmyActionTests.Hero_PetCompanion_HasCompanion" methodname="Hero_PetCompanion_HasCompanion" classname="ArmyActionTests" runstate="Runnable" seed="1569264958" result="Passed" start-time="2025-05-10 16:32:43Z" end-time="2025-05-10 16:32:50Z" duration="6.500436" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Armies[1:SiriansHero(274)] select
+Command: Armies[1:SiriansHero(274)] move to ((5,3):Tomb(0)[CryptKeeper-Tomb(0)]
+Command: Armies[1:SiriansHero(274)] move to ((5,3):Tomb(0)[CryptKeeper-Tomb(0)]
+Command: Armies[1:SiriansHero(274)] move to ((5,3):Tomb(0)[CryptKeeper-Tomb(0)]
+Command: Armies[1:SiriansHero(274)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(274)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(274)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(274)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(274)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(274)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(274)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(274)] deselect
+Command: SiriansHero(274) taking item(s) System.Collections.Generic.List`1[Wism.Client.MapObjects.Artifact]
+Command: Armies[1:SiriansHero(274)] select
+]]></output>
+        </test-case>
+        <test-case id="1009" name="Hero_SearchRuins_StaffOfMight" fullname="ArmyActionTests.Hero_SearchRuins_StaffOfMight" methodname="Hero_SearchRuins_StaffOfMight" classname="ArmyActionTests" runstate="Runnable" seed="1802160862" result="Passed" start-time="2025-05-10 16:32:50Z" end-time="2025-05-10 16:32:56Z" duration="6.248786" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Armies[1:SiriansHero(308)] select
+Command: Armies[1:SiriansHero(308)] move to ((5,3):Tomb(0)[CryptKeeper-Tomb(0)]
+Command: Armies[1:SiriansHero(308)] move to ((5,3):Tomb(0)[CryptKeeper-Tomb(0)]
+Command: Armies[1:SiriansHero(308)] move to ((5,3):Tomb(0)[CryptKeeper-Tomb(0)]
+Command: Armies[1:SiriansHero(308)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(308)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(308)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(308)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(308)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(308)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(308)] search CryptKeeper-Tomb(0)
+Command: Armies[1:SiriansHero(308)] deselect
+Command: SiriansHero(308) taking item(s) System.Collections.Generic.List`1[Wism.Client.MapObjects.Artifact]
+]]></output>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1011" name="CityActionTests" fullname="CityActionTests" classname="CityActionTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2025-05-10 16:32:56Z" end-time="2025-05-10 16:33:07Z" duration="10.748857" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1012" name="City_ProduceLightInfantry_2Armies" fullname="CityActionTests.City_ProduceLightInfantry_2Armies" methodname="City_ProduceLightInfantry_2Armies" classname="CityActionTests" runstate="Runnable" seed="265155062" result="Passed" start-time="2025-05-10 16:32:56Z" end-time="2025-05-10 16:33:07Z" duration="10.748198" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Wism.Client.Commands.Games.NewGameCommand
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Marthos start production of Light Infantry at Marthos
+Command: Sirians end turn
+Command: LordBane start turn
+Command: LordBane recruiting a hero
+Command: LordBane hiring hero
+Command: LordBane hiring hero
+Command: LordBane reviewing production
+Command: LordBane renewing production
+Command: LordBane end turn
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Sirians renewing production
+Command: Sirians renewing production
+Marthos start production of Light Infantry at Marthos
+Command: Sirians end turn
+Command: LordBane start turn
+Command: LordBane recruiting a hero
+Command: LordBane hiring hero
+Command: LordBane reviewing production
+Command: LordBane renewing production
+Command: LordBane end turn
+Command: Sirians start turn
+Command: Sirians recruiting a hero
+Command: Sirians hiring hero
+Command: Sirians reviewing production
+Command: Sirians renewing production
+Command: Sirians renewing production
+Command: Sirians renewing production
+]]></output>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1013" name="GameInitializationTests" fullname="GameInitializationTests" classname="GameInitializationTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2025-05-10 16:33:07Z" end-time="2025-05-10 16:33:07Z" duration="0.138495" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1014" name="LoadTestScenePasses" fullname="GameInitializationTests.LoadTestScenePasses" methodname="LoadTestScenePasses" classname="GameInitializationTests" runstate="Runnable" seed="1102830020" result="Passed" start-time="2025-05-10 16:33:07Z" end-time="2025-05-10 16:33:07Z" duration="0.137649" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Initialized GameManager: Assets\Mod
+Initialized Command Processors
+Initialized UI
+Starting a new game...
+Creating new game in TestWorld...
+Creating new game settings...
+Creating 2 players...
+Creating world from scene TestWorld...
+Initialized MapBuilder
+Loaded map from Unity Tiles
+Affixed map objects
+Created world from game map
+Initialized City GameObjects: 3
+Loaded CityInfos: Assets\Mod\worlds\TestWorld
+Updated cities with coordinates from scene
+Initialized Location GameObjects: 3
+Loaded LocationInfos: Assets\Mod\worlds\TestWorld
+Updated locations with coordinates from scene
+Initializing game...
+Initialization complete
+Saving results to: C:\source\wism\WismUnity\TestResults-638824663876218211.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

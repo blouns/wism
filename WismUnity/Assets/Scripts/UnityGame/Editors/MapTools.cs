@@ -2,7 +2,7 @@
 using UnityEngine;
 using Assets.Scripts.UnityGame.Factories;
 using Assets.Scripts.Managers;
-using Newtonsoft.Json;
+using Unity.Plastic.Newtonsoft.Json;
 using Wism.Client.Data.Entities;
 
 

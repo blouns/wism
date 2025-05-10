@@ -15,3 +15,4 @@ EditorBuildSettings:
     path: Assets/Scenes/Mini-Illuria.unity
     guid: c4da893a9cdd87049bd417e7c178b013
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

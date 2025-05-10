@@ -1,17 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
+	<AssemblyName>Wism.Client.AI</AssemblyName>
+	<RootNamespace>Wism.Client</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<OutputPath>..\bin\debug</OutputPath>
+	</PropertyGroup>
+
+	  <ItemGroup>
     <Folder Include="InfluenceMaps\" />
     <Folder Include="Services\" />
     <Folder Include="Strategic\" />
   </ItemGroup>
+
+  <Import Project="..\Build\Wism.PublishToUnity.targets" />
 
 </Project>

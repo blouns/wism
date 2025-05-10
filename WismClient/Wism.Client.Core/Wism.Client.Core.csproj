@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<AssemblyName>Wism.Client.Core</AssemblyName>
-		<RootNamespace>Wism.Client</RootNamespace>
+		<RootNamespace>Wism.Client</RootNamespace>		
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<OutputPath>..\bin\debug</OutputPath>
+		<IncludeModFiles>true</IncludeModFiles>
 	</PropertyGroup>
 
-	<ItemGroup>		
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -92,5 +93,7 @@
 	<ItemGroup>
 		<Folder Include="Pathing\External\" />
 	</ItemGroup>
+
+	<Import Project="..\Build\Wism.PublishToUnity.targets" />
 
 </Project>

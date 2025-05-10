@@ -1,5 +1,5 @@
 ﻿using Assets.Scripts.Persistance.Entities;
-using Newtonsoft.Json;
+using Unity.Plastic.Newtonsoft.Json;
 using System;
 using System.IO;
 using UnityEngine;
@@ -33,7 +33,7 @@ namespace Assets.Scripts.Managers
 
             // Write to disk
             string path = Application.persistentDataPath + "/" + filename;
-            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            var settings = new JsonSerializerSettings { ContractResolver = new Unity.Plastic.Newtonsoft.Json.Serialization.DefaultContractResolver() };
             var json = JsonConvert.SerializeObject(snapshot, settings);
             using (StreamWriter writer = new StreamWriter(path, false))
             {
@@ -77,7 +77,7 @@ namespace Assets.Scripts.Managers
 
             var json = File.ReadAllText(path);
 
-            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            var settings = new JsonSerializerSettings { ContractResolver = new Unity.Plastic.Newtonsoft.Json.Serialization.DefaultContractResolver() };
             snapshot = JsonConvert.DeserializeObject<UnityGameEntity>(json, settings);
             return snapshot;
         }
