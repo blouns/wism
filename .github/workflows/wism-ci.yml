@@ -116,7 +116,7 @@ jobs:
 
     - name: Upload Build Artifact
       if: startsWith(github.ref, 'refs/tags/v')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: wism-${{ matrix.targetPlatform }}-build
         path: build/${{ matrix.targetPlatform }}
