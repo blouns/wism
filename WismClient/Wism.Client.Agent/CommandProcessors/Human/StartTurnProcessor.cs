@@ -1,6 +1,5 @@
 ﻿using System;
-using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.CommandPublisher;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
@@ -8,12 +7,12 @@ using Wism.Client.Controllers;
 
 namespace Wism.Client.Agent.CommandProcessors.Human;
 
-public class StartTurnProcessor : ICommandProcessor
+public class StartTurnProcessor : InstrumentedProcessor
 {
-    private readonly AsciiGame asciiGame;
     private IWismLogger logger;
 
-    public StartTurnProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public StartTurnProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher)
+        : base(publisher)
     {
         if (loggerFactory is null)
         {
@@ -21,27 +20,41 @@ public class StartTurnProcessor : ICommandProcessor
         }
 
         logger = loggerFactory.CreateLogger();
-        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
-    public bool CanExecute(ICommandAction command)
+    public override bool CanExecute(ICommandAction command)
     {
         return command is StartTurnCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         var startTurnCommand = (StartTurnCommand)command;
         var player = startTurnCommand.Player;
         if (startTurnCommand.Player.GetCities().Count == 0)
         {
-            // Player has died                
-            Notify.DisplayAndWait($"Wretched {player.Clan.DisplayName}, for you the war is over...");
+            // Player has died
+            if (IsHuman)
+            {
+                Notify.DisplayAndWait($"Wretched {player.Clan.DisplayName}, for you the war is over...");
+            }
+            else
+            {
+                Notify.Display($"Wretched {player.Clan.DisplayName}, for you the war is over...");
+            }
         }
         else
         {
             // Start the turn
-            Notify.DisplayAndWait($"{player.Clan.DisplayName} your turn is starting...");
+            if (IsHuman)
+            {
+                Notify.DisplayAndWait($"{player.Clan.DisplayName} your turn is starting...");
+            }
+            else
+            // AI
+            {
+                Notify.Display($"{player.Clan.DisplayName} your turn is starting...");
+            }
         }
 
         var state = command.Execute();

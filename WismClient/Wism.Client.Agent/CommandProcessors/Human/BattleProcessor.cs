@@ -31,7 +31,7 @@ public class BattleProcessor : InstrumentedProcessor
     {
         var battleCommand = (AttackOnceCommand)command;
 
-        logger.LogInformation("Executing BattleProcessor logic for AttackOnceCommand");
+        logger.LogInformation("Executing BattleProcessor for AttackOnceCommand");
 
         var result = battleCommand.Execute();
 
@@ -45,7 +45,11 @@ public class BattleProcessor : InstrumentedProcessor
         if (battleCommand.OriginalDefendingArmies == null || battleCommand.OriginalDefendingArmies.Count == 0)
         {
             logger.LogInformation("No defenders found on target tile.");
-            Notify.DisplayAndWait("Press any key to continue...");
+
+            if (IsHuman)
+            {
+                Notify.DisplayAndWait("Press any key to continue...");
+            }
         }
         else
         {

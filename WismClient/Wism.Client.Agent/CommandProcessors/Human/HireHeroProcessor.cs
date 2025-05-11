@@ -1,6 +1,6 @@
 ﻿using System;
 using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.CommandPublisher;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
@@ -8,29 +8,30 @@ using Wism.Client.Controllers;
 
 namespace Wism.Client.Agent.CommandProcessors.Human;
 
-public class HireHeroProcessor : ICommandProcessor
+public class HireHeroProcessor : InstrumentedProcessor
 {
-    private readonly AsciiGame asciiGame;
     private string heroName;
     private IWismLogger logger;
+    private AsciiGame game;
 
-    public HireHeroProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public HireHeroProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher, AsciiGame game)
+        :base(publisher)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        logger = loggerFactory.CreateLogger();
-        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
+        this.logger = loggerFactory.CreateLogger();
+        this.game = game ?? throw new ArgumentNullException(nameof(game));
     }
 
-    public bool CanExecute(ICommandAction command)
+    public override bool CanExecute(ICommandAction command)
     {
         return command is HireHeroCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         ActionState state;
 
@@ -72,9 +73,13 @@ public class HireHeroProcessor : ICommandProcessor
         var allies = command.HeroAllies;
         if (allies != null && allies.Count > 0)
         {
-            Notify.DisplayAndWait($"And the hero brings {allies.Count} allies!");
-            asciiGame.CommandController.AddCommand(
-                new ConscriptArmiesCommand(asciiGame.PlayerController,
+            if (IsHuman)
+            {
+                Notify.DisplayAndWait($"And the hero brings {allies.Count} allies!");
+            }
+            
+            game.CommandController.AddCommand(
+                new ConscriptArmiesCommand(game.PlayerController,
                     command.Player, command.HeroTile, command.HeroAllies));
         }
     }
@@ -83,13 +88,15 @@ public class HireHeroProcessor : ICommandProcessor
     {
         var heroName = command.HeroDisplayName;
 
-        Notify.Information($"Enter a name [Default: {heroName}]:");
-        var newName = Console.ReadLine();
-        if (!string.IsNullOrWhiteSpace(newName))
+        if (IsHuman)
         {
-            heroName = newName;
+            Notify.Information($"Enter a name [Default: {heroName}]:");
+            var newName = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(newName))
+            {
+                heroName = newName;
+            }
         }
-
         return heroName;
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors.BoonIdentifiers;
-using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.CommandPublisher;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
@@ -13,21 +12,20 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
 
-public class SearchRuinsProcessor : ICommandProcessor
+public class SearchRuinsProcessor : InstrumentedProcessor
 {
-    private readonly AsciiGame asciiGame;
     private readonly List<IBoonIdentifier> boonIdentifiers;
     private IWismLogger logger;
 
-    public SearchRuinsProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public SearchRuinsProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher)
+        : base(publisher)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
-
         logger = loggerFactory.CreateLogger();
-        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
+  
         boonIdentifiers = new List<IBoonIdentifier>
         {
             new AlliesBoonIdentifier(),
@@ -37,13 +35,13 @@ public class SearchRuinsProcessor : ICommandProcessor
         };
     }
 
-    public bool CanExecute(ICommandAction command)
+    public override bool CanExecute(ICommandAction command)
     {
         // Ruins and tombs are interchangeable
         return command is SearchRuinsCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         var ruinsCommand = command as SearchRuinsCommand;
 
@@ -65,47 +63,66 @@ public class SearchRuinsProcessor : ICommandProcessor
         if (hero == null ||
             ruinsCommand.Location.Searched)
         {
-            Notify.DisplayAndWait("You have found nothing!");
+            if (IsHuman)
+            {
+                Notify.DisplayAndWait("You have found nothing!");
+            }
+
             return ActionState.Failed;
         }
 
         if (location.Boon is ThroneBoon)
         {
-            Notify.Information("A throne stands before you. Will you sit in the throne?");
-            var key = Console.ReadKey();
-            if (key.Key != ConsoleKey.Y)
+            if (IsHuman)
             {
-                return ActionState.Failed;
-            }
+                Notify.DisplayAndWait("You have found a throne! Press any key to sit on it.");
+                var key = Console.ReadKey();
+                if (key.Key != ConsoleKey.Y)
+                {
+                    return ActionState.Failed;
+                }
 
-            Console.WriteLine();
+                Console.WriteLine();
+            }
+            else
+            {
+                // Automatically accept for AI players
+            }
         }
 
         var monster = location.Monster;
-        if (monster != null)
+        if (IsHuman && monster != null)
         {
             Notify.DisplayAndWait($"{hero.DisplayName} encounters a {monster}...");
         }
 
         // Search the ruins
         var result = ruinsCommand.Execute();
-        if (result == ActionState.Succeeded)
-        {
-            if (monster != null)
-            {
-                Notify.DisplayAndWait("...and is victorious!");
-            }
 
-            DisplayBoon(ruinsCommand.Boon);
-        }
-        else if (result == ActionState.Failed &&
-                 hero.IsDead)
+        if (IsHuman)
         {
-            Notify.DisplayAndWait("...and is slain!");
+            if (result == ActionState.Succeeded)
+            {
+                if (monster != null)
+                {
+                    Notify.DisplayAndWait("...and is victorious!");
+                }
+
+                DisplayBoon(ruinsCommand.Boon);
+            }
+            else if (result == ActionState.Failed &&
+                     hero.IsDead)
+            {
+                Notify.DisplayAndWait("...and is slain!");
+            }
+            else
+            {
+                Notify.DisplayAndWait("You have found nothing!");
+            }
         }
         else
         {
-            Notify.DisplayAndWait("You have found nothing!");
+            // Display nothing for AI players
         }
 
         return result;

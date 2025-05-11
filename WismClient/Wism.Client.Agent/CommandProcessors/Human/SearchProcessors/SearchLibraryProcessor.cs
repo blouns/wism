@@ -1,6 +1,5 @@
 ﻿using System;
-using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.CommandPublisher;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
@@ -8,33 +7,34 @@ using Wism.Client.Controllers;
 
 namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
 
-public class SearchLibraryProcessor : ICommandProcessor
+public class SearchLibraryProcessor : InstrumentedProcessor
 {
-    private readonly AsciiGame asciiGame;
     private IWismLogger logger;
 
-    public SearchLibraryProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public SearchLibraryProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher)
+        : base(publisher)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
-
         logger = loggerFactory.CreateLogger();
-        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
-    public bool CanExecute(ICommandAction command)
+    public override bool CanExecute(ICommandAction command)
     {
         return command is SearchLibraryCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         var searchCommand = (SearchLibraryCommand)command;
 
-        Notify.DisplayAndWait("You enter a great Library...");
-        Notify.DisplayAndWait("Searching through the books, you find...");
+        if (IsHuman)
+        {
+            Notify.DisplayAndWait("You enter a great Library...");
+            Notify.DisplayAndWait("Searching through the books, you find...");
+        }
 
         var result = searchCommand.Execute();
 
@@ -44,7 +44,14 @@ public class SearchLibraryProcessor : ICommandProcessor
             knowledge = searchCommand.Knowledge;
         }
 
-        Notify.DisplayAndWait(knowledge);
+        if (IsHuman)
+        {
+            Notify.DisplayAndWait(knowledge);
+        }
+        else
+        {
+            // TODO: AI players should 'learn' from the library
+        }
 
         return result;
     }

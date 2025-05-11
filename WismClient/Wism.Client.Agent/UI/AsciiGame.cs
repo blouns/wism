@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Wism.Client.Agent.CommandProcessors.Factories;
 using Wism.Client.Agent.CommandProviders;
 using Wism.Client.AI.CommandProviders;
 using Wism.Client.AI.Framework;
 using Wism.Client.AI.Services;
 using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
-using Wism.Client.Api.CommandPublisher;
 using Wism.Client.CommandProcessors;
 using Wism.Client.CommandProviders;
 using Wism.Client.Common;
@@ -26,15 +24,13 @@ namespace Wism.Client.Agent.UI;
 public class AsciiGame : GameBase
 {
     private readonly IWismLogger logger;
-    private List<ICommandProcessor> humanCommandProcessors;
-    private List<ICommandProcessor> aiCommandProcessors;
+    private List<ICommandProcessor> commandProcessors;
 
     public AsciiGame(
         IWismLoggerFactory logFactory, 
-        ControllerProvider controllerProvider, 
-        ICommandProcessor commandProcessor,
-        CommandIpcPublisher commandIpcPublisher)
-        : base(logFactory, controllerProvider, commandProcessor, commandIpcPublisher)
+        ControllerProvider controllerProvider,
+        ICommandProcessorFactory commandProcessorFactory)
+            : base(logFactory, controllerProvider, commandProcessorFactory)
     {
         if (logFactory is null)
         {
@@ -138,10 +134,7 @@ public class AsciiGame : GameBase
             { aiPlayer, aiCommander }
         };
 
-        // Abstract Factory Pattern to create the human and AI command processors
-        this.humanCommandProcessors = new HumanCommandProcessorFactory(LoggerFactory, CommandProcessor, CommandIpcPublisher)
-            .CreateProcessors(this);
-        this.aiCommandProcessors = new AiCommandProcessorFactory(LoggerFactory, CommandProcessor).CreateProcessors(this);
+        this.commandProcessors = ProcessorFactory.CreateProcessors(this);
     }
 
     protected override void DoTasks(ref int lastId)
@@ -153,11 +146,9 @@ public class AsciiGame : GameBase
             var playerKind = (isHuman) ? "Human" : "AI";
             this.logger.LogInformation($"{playerKind} task executing: {command.Id}: {command.GetType()}");
 
-            var processors = (isHuman) ? this.humanCommandProcessors : this.aiCommandProcessors;
-
             // Run the command
             var result = ActionState.NotStarted;
-            foreach (var processor in processors)
+            foreach (var processor in this.commandProcessors)
             {
                 if (processor.CanExecute(command))
                 {

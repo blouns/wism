@@ -8,19 +8,16 @@ using Wism.Client.Common;
 
 namespace Wism.Client.Agent.CommandProcessors.Factories
 {
-    public class HumanCommandProcessorFactory : ICommandProcessorFactory
+    public class CommandProcessorFactory : ICommandProcessorFactory
     {
         private readonly IWismLoggerFactory loggerFactory;
-        private readonly ICommandProcessor standardProcessor;
         private readonly CommandIpcPublisher publisher;
 
-        public HumanCommandProcessorFactory(
+        public CommandProcessorFactory(
             IWismLoggerFactory loggerFactory, 
-            ICommandProcessor standardProcessor, 
             CommandIpcPublisher publisher)
         {
             this.loggerFactory = loggerFactory;
-            this.standardProcessor = standardProcessor;
             this.publisher = publisher;
         }
 
@@ -29,23 +26,23 @@ namespace Wism.Client.Agent.CommandProcessors.Factories
             return new List<ICommandProcessor>
 {
                 // Player processors
-                new StartTurnProcessor(loggerFactory, game),
-                new RecruitHeroProcessor(loggerFactory, game),
-                new HireHeroProcessor(loggerFactory, game),
+                new StartTurnProcessor(loggerFactory, publisher),
+                new RecruitHeroProcessor(loggerFactory, publisher),
+                new HireHeroProcessor(loggerFactory, publisher, game),
 
                 // Battle processors
-                new PrepareForBattleProcessor(loggerFactory, game),
+                new PrepareForBattleProcessor(loggerFactory, publisher, game),
                 new BattleProcessor(loggerFactory, publisher),
-                new CompleteBattleProcessor(loggerFactory, game),
+                new CompleteBattleProcessor(loggerFactory, publisher),
 
                 // Search processors
-                new SearchRuinsProcessor(loggerFactory, game),
-                new SearchTempleProcessor(loggerFactory, game),
-                new SearchSageProcessor(loggerFactory, game),
-                new SearchLibraryProcessor(loggerFactory, game),
+                new SearchRuinsProcessor(loggerFactory, publisher),
+                new SearchTempleProcessor(loggerFactory, publisher),
+                new SearchSageProcessor(loggerFactory, publisher),
+                new SearchLibraryProcessor(loggerFactory, publisher),
 
                 // Default processor
-                standardProcessor
+                new StandardProcessor(loggerFactory, publisher)
             };
         }
     }

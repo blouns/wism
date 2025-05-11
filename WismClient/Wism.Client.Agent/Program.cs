@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Wism.Client.Agent.CommandProcessors.Factories;
-using Wism.Client.Agent.CommandProcessors.Human;
 using Wism.Client.Agent.Services;
 using Wism.Client.Agent.UI;
 using Wism.Client.Api.CommandPublisher;
-using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
@@ -25,8 +24,9 @@ public class Program
             MainAsync(args).Wait();
             return 0;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.ToString());
             return 1;
         }
     }
@@ -94,34 +94,28 @@ public class Program
                             provider.GetService<IWismLoggerFactory>()),
                         PlayerController = new PlayerController(
                             provider.GetService<IWismLoggerFactory>())
-                    });
-
-                // Add command agent
-                services.AddSingleton<IHostedService>(provider =>
-                    new WismAgent(
-                        provider.GetService<IWismLoggerFactory>(),
-                        provider.GetService<ControllerProvider>()));
+                    });                
 
                 // Optional: For companion app
-                services.AddSingleton<CommandIpcPublisher>();   
+                services.AddSingleton<CommandIpcPublisher>();
                 services.AddSingleton<MapSnapshotEmitter>();
                 services.AddSingleton<MapSnapshotBuilder>();
 
                 // Add command processors
-                services.AddSingleton<StandardProcessor>();
-                services.AddSingleton<ICommandProcessor>(provider => provider.GetRequiredService<StandardProcessor>());
-                services.AddSingleton<BattleProcessor>();
-
-                services.AddSingleton<AiCommandProcessorFactory>();
-                services.AddSingleton<HumanCommandProcessorFactory>();
+                services.AddSingleton<CommandProcessorFactory>();
 
                 // Add view
                 services.AddTransient<GameBase>(provider =>
                     new AsciiGame(
                         provider.GetRequiredService<IWismLoggerFactory>(),
                         provider.GetRequiredService<ControllerProvider>(),
-                        provider.GetRequiredService<StandardProcessor>(),
-                        provider.GetRequiredService<CommandIpcPublisher>())); ;                
-                            });
+                        provider.GetRequiredService<CommandProcessorFactory>()));
+
+                // Add command agent
+                services.AddSingleton<IHostedService>(provider =>
+                    new WismAgent(
+                        provider.GetService<IWismLoggerFactory>(),
+                        provider.GetService<ControllerProvider>()));
+            });
     }
 }

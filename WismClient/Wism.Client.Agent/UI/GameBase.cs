@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Wism.Client.Api.CommandPublisher;
-using Wism.Client.CommandProcessors;
 using Wism.Client.CommandProviders;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
@@ -20,39 +18,26 @@ public abstract class GameBase
     private readonly IWismLogger logger;
     private readonly IWismLoggerFactory loggerFactory;
     private readonly ControllerProvider controllerProvider;
-    private readonly ICommandProcessor commandProcessor;
-    private readonly CommandIpcPublisher commandIpcPublisher;
+    private readonly ICommandProcessorFactory processorFactory;
     private int lastId;
     private Dictionary<Player, ICommandProvider> playerCommandersDictionary;
 
     public GameBase(
         IWismLoggerFactory loggerFactory, 
-        ControllerProvider controllerProvider, 
-        ICommandProcessor commandProcessor,
-        CommandIpcPublisher commandIpcPublisher)
+        ControllerProvider controllerProvider,
+        ICommandProcessorFactory processorFactory)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        if (controllerProvider is null)
-        {
-            throw new ArgumentNullException(nameof(controllerProvider));
-        }
-
-        if (commandProcessor is null)
-        {
-            throw new ArgumentNullException(nameof(commandProcessor));
-        }
-
+        this.controllerProvider = controllerProvider ?? throw new ArgumentNullException(nameof(controllerProvider));
+        this.processorFactory = processorFactory ?? throw new ArgumentNullException(nameof(processorFactory));
         this.logger = loggerFactory.CreateLogger();
         this.PlayerController = controllerProvider.PlayerController;
         this.GameSpeed = DefaultGameSpeed;
-        this.loggerFactory = loggerFactory;
-        this.controllerProvider = controllerProvider;
-        this.commandProcessor = commandProcessor;
-        this.commandIpcPublisher = commandIpcPublisher;
+        this.loggerFactory = loggerFactory;      
     }
 
     public int GameSpeed { get; set; }
@@ -70,9 +55,7 @@ public abstract class GameBase
 
     public ControllerProvider ControllerProvider => controllerProvider;
 
-    public ICommandProcessor CommandProcessor => commandProcessor;
-
-    public CommandIpcPublisher CommandIpcPublisher => commandIpcPublisher;
+    public ICommandProcessorFactory ProcessorFactory => processorFactory;
 
     public async Task RunAsync()
     {

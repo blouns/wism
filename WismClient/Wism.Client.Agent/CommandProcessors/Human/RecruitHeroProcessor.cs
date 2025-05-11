@@ -1,6 +1,5 @@
 ﻿using System;
-using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.CommandPublisher;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
@@ -8,12 +7,12 @@ using Wism.Client.Controllers;
 
 namespace Wism.Client.Agent.CommandProcessors.Human;
 
-public class RecruitHeroProcessor : ICommandProcessor
+public class RecruitHeroProcessor : InstrumentedProcessor
 {
-    private readonly AsciiGame asciiGame;
     private IWismLogger logger;
 
-    public RecruitHeroProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public RecruitHeroProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher)
+        : base(publisher)
     {
         if (loggerFactory is null)
         {
@@ -21,15 +20,14 @@ public class RecruitHeroProcessor : ICommandProcessor
         }
 
         logger = loggerFactory.CreateLogger();
-        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
-    public bool CanExecute(ICommandAction command)
+    public override bool CanExecute(ICommandAction command)
     {
         return command is RecruitHeroCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         var state = ActionState.Failed;
 
@@ -51,7 +49,17 @@ public class RecruitHeroProcessor : ICommandProcessor
             // Here is available; offer to player if enough money
             if (player.Gold >= recruitCommand.HeroPrice)
             {
-                state = OfferHeroToPlayer(recruitCommand);
+                if (IsHuman)
+                {
+                    // Offer to player
+                    state = OfferHeroToPlayer(recruitCommand);
+                }
+                else
+                {
+                    // Auto-accept the hero
+                    recruitCommand.HeroAccepted = true;
+                    state = ActionState.Succeeded;
+                }
             }
             else
             {

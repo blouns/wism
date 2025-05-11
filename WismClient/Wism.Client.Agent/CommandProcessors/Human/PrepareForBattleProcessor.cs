@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.CommandPublisher;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Common;
@@ -13,28 +13,29 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors.Human;
 
-public class PrepareForBattleProcessor : ICommandProcessor
+public class PrepareForBattleProcessor : InstrumentedProcessor
 {
-    private readonly AsciiGame asciiGame;
     private IWismLogger logger;
+    private AsciiGame game;
 
-    public PrepareForBattleProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public PrepareForBattleProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher, AsciiGame game)
+        :base(publisher)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        logger = loggerFactory.CreateLogger();
-        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
+        this.logger = loggerFactory.CreateLogger();
+        this.game = game ?? throw new ArgumentNullException(nameof(game));
     }
 
-    public bool CanExecute(ICommandAction command)
+    public override bool CanExecute(ICommandAction command)
     {
         return command is PrepareForBattleCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         var battleCommand = (PrepareForBattleCommand)command;
         var targetTile = World.Current.Map[battleCommand.X, battleCommand.Y];
@@ -60,7 +61,7 @@ public class PrepareForBattleProcessor : ICommandProcessor
         DrawBattleSetupSequence(attackingPlayer, defendingPlayer);
         BattleProcessor.DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
 
-        asciiGame.GameSpeed = GameBase.DefaultAttackSpeed;
+        game.GameSpeed = GameBase.DefaultAttackSpeed;
 
         return command.Execute();
     }
@@ -68,7 +69,7 @@ public class PrepareForBattleProcessor : ICommandProcessor
     private static void DrawBattleSetupSequence(Player attacker, Player defender)
     {
         Console.Clear();
-        Notify.Information("War! ...in a senseless mind.");
+        Notify.Information("War... in a senseless mind.");
         Notify.Display($"{attacker.Clan.DisplayName} is attacking {defender.Clan.DisplayName}!");
         for (var i = 0; i < 3; i++)
         {

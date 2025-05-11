@@ -7,6 +7,9 @@ using Wism.Client.Controllers;
 public abstract class InstrumentedProcessor : ICommandProcessor
 {
     private readonly CommandIpcPublisher publisher;
+    private bool isHuman;
+
+    public bool IsHuman { get => isHuman; set => isHuman = value; }
 
     protected InstrumentedProcessor(CommandIpcPublisher publisher)
     {
@@ -19,6 +22,8 @@ public abstract class InstrumentedProcessor : ICommandProcessor
 
     public ActionState Execute(ICommandAction command)
     {
+        this.IsHuman = IsPlayerHuman(command as Command);
+
         var result = ExecuteInternal(command);
 
         if (command is IReplayableCommand replayable)
@@ -35,5 +40,15 @@ public abstract class InstrumentedProcessor : ICommandProcessor
         }
 
         return result;
+    }
+
+    private static bool IsPlayerHuman(Command command)
+    {
+        if (command == null)
+        {
+            return true;
+        }
+
+        return command.Player.IsHuman;
     }
 }
