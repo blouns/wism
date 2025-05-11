@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Controllers;
 using Wism.Client.MapObjects;
+using Wism.Companion.Shared.Events;
+using Wism.Companion.Shared.Models;
 
 namespace Wism.Client.Commands.Locations
 {
@@ -20,6 +23,15 @@ namespace Wism.Client.Commands.Locations
 
             this.Knowledge = item;
             return success ? ActionState.Succeeded : ActionState.Failed;
+        }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            var evt = base.ToExecutedEvent(result);
+
+            evt.Parameters["Knowledge"] = Knowledge ?? "None";
+
+            return evt;
         }
     }
 }

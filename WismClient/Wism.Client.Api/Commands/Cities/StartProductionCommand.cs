@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Wism.Client.Controllers;
 using Wism.Client.Modules.Infos;
+using Wism.Companion.Shared.Events;
+using Wism.Companion.Shared.Models;
 
 namespace Wism.Client.Commands.Cities
 {
@@ -42,6 +45,31 @@ namespace Wism.Client.Commands.Cities
                 ? this.ProductionCity.DisplayName
                 : this.DestinationCity.DisplayName;
             return $"{this.ProductionCity.DisplayName} start production of {this.ArmyInfo.DisplayName} at {dest}";
+        }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            var tile = ProductionCity?.Tile;
+
+            return new CommandExecutedEvent
+            {
+                CommandType = nameof(StartProductionCommand),
+                ActorId = Player?.Clan?.ShortName ?? "Unknown",
+                TargetId = ArmyInfo?.ShortName ?? "UnknownUnit",
+                TargetPosition = tile != null
+                    ? new PositionDto { X = tile.X, Y = tile.Y }
+                    : null,
+                Result = result.ToString(),
+                Timestamp = DateTime.UtcNow,
+                Parameters = new Dictionary<string, object>
+                {
+                    { "ProductionCity", ProductionCity?.ShortName ?? "Unknown" },
+                    { "UnitType", ArmyInfo?.ShortName ?? "Unknown" },
+                    { "UnitDisplayName", ArmyInfo?.DisplayName ?? ArmyInfo?.ShortName ?? "Unknown" },
+                    { "DestinationCity", DestinationCity?.ShortName ?? "SameCity" },
+                    { "Terrain", tile?.Terrain?.ToString() ?? "Unknown" }
+                }
+            };
         }
     }
 }

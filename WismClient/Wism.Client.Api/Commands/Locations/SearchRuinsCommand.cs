@@ -2,6 +2,7 @@
 using Wism.Client.Controllers;
 using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
+using Wism.Companion.Shared.Events;
 
 namespace Wism.Client.Commands.Locations
 {
@@ -25,6 +26,16 @@ namespace Wism.Client.Commands.Locations
             }
 
             return success ? ActionState.Succeeded : ActionState.Failed;
+        }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            var evt = base.ToExecutedEvent(result);
+
+            evt.Parameters["BoonType"] = Boon?.GetType().Name ?? "None";
+            evt.Parameters["BoonResult"] = BoonResult?.ToString() ?? "None";
+
+            return evt;
         }
     }
 }

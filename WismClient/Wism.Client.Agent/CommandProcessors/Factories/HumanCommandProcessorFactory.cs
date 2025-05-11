@@ -2,6 +2,7 @@
 using Wism.Client.Agent.CommandProcessors.Human;
 using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
 using Wism.Client.Agent.UI;
+using Wism.Client.Api.CommandPublisher;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Common;
 
@@ -10,10 +11,17 @@ namespace Wism.Client.Agent.CommandProcessors.Factories
     public class HumanCommandProcessorFactory : ICommandProcessorFactory
     {
         private readonly IWismLoggerFactory loggerFactory;
+        private readonly ICommandProcessor standardProcessor;
+        private readonly CommandIpcPublisher publisher;
 
-        public HumanCommandProcessorFactory(IWismLoggerFactory loggerFactory)
+        public HumanCommandProcessorFactory(
+            IWismLoggerFactory loggerFactory, 
+            ICommandProcessor standardProcessor, 
+            CommandIpcPublisher publisher)
         {
             this.loggerFactory = loggerFactory;
+            this.standardProcessor = standardProcessor;
+            this.publisher = publisher;
         }
 
         public List<ICommandProcessor> CreateProcessors(AsciiGame game)
@@ -27,7 +35,7 @@ namespace Wism.Client.Agent.CommandProcessors.Factories
 
                 // Battle processors
                 new PrepareForBattleProcessor(loggerFactory, game),
-                new BattleProcessor(loggerFactory),
+                new BattleProcessor(loggerFactory, publisher),
                 new CompleteBattleProcessor(loggerFactory, game),
 
                 // Search processors
@@ -37,7 +45,7 @@ namespace Wism.Client.Agent.CommandProcessors.Factories
                 new SearchLibraryProcessor(loggerFactory, game),
 
                 // Default processor
-                new StandardProcessor(loggerFactory)
+                standardProcessor
             };
         }
     }

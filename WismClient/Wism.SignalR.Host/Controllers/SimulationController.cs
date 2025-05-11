@@ -22,11 +22,16 @@ namespace Wism.SignalR.Host.Controllers
         {
             var simulated = new CommandExecutedEvent
             {
-                CommandType = "Move",
-                Actor = "Hero1",
-                Target = "Tile[2,3]",
+                CommandType = "MoveCommand",
+                ActorId = "Hero123",
+                TargetPosition = new PositionDto { X = 3, Y = 4 },
                 Result = "Success",
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                Parameters = new Dictionary<string, object>
+                {
+                    { "Speed", 2 },
+                    { "Direction", "NE" }
+                }
             };
 
             await _hub.Clients.All.SendAsync("OnCommandExecuted", simulated);
@@ -45,16 +50,15 @@ namespace Wism.SignalR.Host.Controllers
                 {
                     new HeroDto
                     {
-                        Name = "Aralon",
-                        Position = new PositionDto { X = 2, Y = 2 },
+                        Name = "TestHero",
+                        Owner = "Red",
                         Health = 100,
-                        Owner = "Blue"
+                        Position = new PositionDto { X = 2, Y = 2 }
                     }
                 },
                 Timestamp = DateTime.UtcNow
             };
 
-            // Fill in some tiles
             for (int x = 0; x < 5; x++)
             {
                 for (int y = 0; y < 5; y++)
@@ -64,7 +68,7 @@ namespace Wism.SignalR.Host.Controllers
                         X = x,
                         Y = y,
                         TerrainType = (x + y) % 2 == 0 ? "Grass" : "Forest",
-                        HasCity = (x == 1 && y == 1)
+                        HasCity = (x == 2 && y == 2)
                     });
                 }
             }

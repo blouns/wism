@@ -10,10 +10,12 @@ namespace Wism.Client.Agent.CommandProcessors.Factories
     public class AiCommandProcessorFactory : ICommandProcessorFactory
     {
         private readonly IWismLoggerFactory loggerFactory;
+        private readonly ICommandProcessor standardProcessor;
 
-        public AiCommandProcessorFactory(IWismLoggerFactory loggerFactory)
+        public AiCommandProcessorFactory(IWismLoggerFactory loggerFactory, ICommandProcessor standardProcessor)
         {
             this.loggerFactory = loggerFactory;
+            this.standardProcessor = standardProcessor;
         }
 
         public List<ICommandProcessor> CreateProcessors(AsciiGame game)
@@ -37,7 +39,7 @@ namespace Wism.Client.Agent.CommandProcessors.Factories
                 new SearchLibraryAiProcessor(loggerFactory, game),
 
                 // Default processor
-                new StandardProcessor(loggerFactory)
+                standardProcessor
             };
         }
     }

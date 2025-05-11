@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Wism.Client.Api.CommandPublisher;
+using Wism.Client.CommandProcessors;
 using Wism.Client.CommandProviders;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
@@ -15,14 +17,19 @@ public abstract class GameBase
 {
     public const int DefaultGameSpeed = 100;
     public const int DefaultAttackSpeed = 750;
-    private readonly ArmyController armyController;
     private readonly IWismLogger logger;
     private readonly IWismLoggerFactory loggerFactory;
     private readonly ControllerProvider controllerProvider;
+    private readonly ICommandProcessor commandProcessor;
+    private readonly CommandIpcPublisher commandIpcPublisher;
     private int lastId;
     private Dictionary<Player, ICommandProvider> playerCommandersDictionary;
 
-    public GameBase(IWismLoggerFactory loggerFactory, ControllerProvider controllerProvider)
+    public GameBase(
+        IWismLoggerFactory loggerFactory, 
+        ControllerProvider controllerProvider, 
+        ICommandProcessor commandProcessor,
+        CommandIpcPublisher commandIpcPublisher)
     {
         if (loggerFactory is null)
         {
@@ -34,12 +41,18 @@ public abstract class GameBase
             throw new ArgumentNullException(nameof(controllerProvider));
         }
 
+        if (commandProcessor is null)
+        {
+            throw new ArgumentNullException(nameof(commandProcessor));
+        }
+
         this.logger = loggerFactory.CreateLogger();
-        this.armyController = controllerProvider.ArmyController;
         this.PlayerController = controllerProvider.PlayerController;
         this.GameSpeed = DefaultGameSpeed;
         this.loggerFactory = loggerFactory;
         this.controllerProvider = controllerProvider;
+        this.commandProcessor = commandProcessor;
+        this.commandIpcPublisher = commandIpcPublisher;
     }
 
     public int GameSpeed { get; set; }
@@ -56,6 +69,10 @@ public abstract class GameBase
     public IWismLoggerFactory LoggerFactory => loggerFactory;
 
     public ControllerProvider ControllerProvider => controllerProvider;
+
+    public ICommandProcessor CommandProcessor => commandProcessor;
+
+    public CommandIpcPublisher CommandIpcPublisher => commandIpcPublisher;
 
     public async Task RunAsync()
     {

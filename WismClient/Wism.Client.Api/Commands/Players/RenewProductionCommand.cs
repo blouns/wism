@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Controllers;
 using Wism.Client.Core.Armies;
+using Wism.Companion.Shared.Events;
 
 namespace Wism.Client.Commands.Players
 {
@@ -43,6 +45,25 @@ namespace Wism.Client.Commands.Players
         public override string ToString()
         {
             return $"Command: {this.Player.Clan} renewing production";
+        }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            return new CommandExecutedEvent
+            {
+                CommandType = nameof(RenewProductionCommand),
+                ActorId = Player?.Clan?.ShortName ?? "Unknown",
+                TargetId = null,
+                TargetPosition = null,
+                Result = result.ToString(),
+                Timestamp = DateTime.UtcNow,
+                Parameters = new Dictionary<string, object>
+                {
+                    { "RenewedCount", ArmiesToRenew?.Count ?? 0 },
+                    { "UnitTypes", string.Join(", ", ArmiesToRenew?.Select(a => a.ArmyInfo?.ShortName) ?? Enumerable.Empty<string>()) },
+                    { "FromReview", ReviewProductionCommand?.GetType().Name ?? "Unknown" }
+                }
+            };
         }
     }
 }

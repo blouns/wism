@@ -16,6 +16,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
+		<ProjectReference Include="..\Wism.Companion.Shared\Wism.Companion.Shared.csproj" />
 	</ItemGroup>
 
 	<Import Project="..\Build\Wism.PublishToUnity.targets" />

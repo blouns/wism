@@ -8,6 +8,7 @@ using Wism.Client.AI.Framework;
 using Wism.Client.AI.Services;
 using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
+using Wism.Client.Api.CommandPublisher;
 using Wism.Client.CommandProcessors;
 using Wism.Client.CommandProviders;
 using Wism.Client.Common;
@@ -28,8 +29,12 @@ public class AsciiGame : GameBase
     private List<ICommandProcessor> humanCommandProcessors;
     private List<ICommandProcessor> aiCommandProcessors;
 
-    public AsciiGame(IWismLoggerFactory logFactory, ControllerProvider controllerProvider)
-        : base(logFactory, controllerProvider)
+    public AsciiGame(
+        IWismLoggerFactory logFactory, 
+        ControllerProvider controllerProvider, 
+        ICommandProcessor commandProcessor,
+        CommandIpcPublisher commandIpcPublisher)
+        : base(logFactory, controllerProvider, commandProcessor, commandIpcPublisher)
     {
         if (logFactory is null)
         {
@@ -134,8 +139,9 @@ public class AsciiGame : GameBase
         };
 
         // Abstract Factory Pattern to create the human and AI command processors
-        this.humanCommandProcessors = new HumanCommandProcessorFactory(LoggerFactory).CreateProcessors(this);
-        this.aiCommandProcessors = new AiCommandProcessorFactory(LoggerFactory).CreateProcessors(this);
+        this.humanCommandProcessors = new HumanCommandProcessorFactory(LoggerFactory, CommandProcessor, CommandIpcPublisher)
+            .CreateProcessors(this);
+        this.aiCommandProcessors = new AiCommandProcessorFactory(LoggerFactory, CommandProcessor).CreateProcessors(this);
     }
 
     protected override void DoTasks(ref int lastId)

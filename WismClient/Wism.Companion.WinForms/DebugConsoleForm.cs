@@ -76,7 +76,16 @@ namespace Wism.Companion.WinForms
         {
             if (evt is Wism.Companion.Shared.Events.CommandExecutedEvent cmd)
             {
-                LogMessage($"[REPLAY:COMMAND] {cmd.CommandType} → {cmd.Result} @ {cmd.Timestamp:T}");
+                string actor = cmd.ActorId ?? "Unknown";
+                string target = cmd.TargetPosition != null
+                    ? $"({cmd.TargetPosition.X},{cmd.TargetPosition.Y})"
+                    : cmd.TargetId ?? "None";
+
+                string details = cmd.Parameters.Count > 0
+                    ? string.Join(", ", cmd.Parameters.Select(kvp => $"{kvp.Key}={kvp.Value}"))
+                    : "no params";
+
+                LogMessage($"[REPLAY:{cmd.CommandType}] {actor} → {target} [{details}] → {cmd.Result}");
             }
             else if (evt is Wism.Companion.Shared.Events.MapSnapshot map)
             {
@@ -88,6 +97,7 @@ namespace Wism.Companion.WinForms
                 LogMessage("[REPLAY] Unknown event type");
             }
         }
+
 
     }
 }

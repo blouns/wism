@@ -1,14 +1,11 @@
 ﻿using System;
 using Wism.Client.Controllers;
+using Wism.Companion.Shared.Events;
 
 namespace Wism.Client.Commands
 {
-    public abstract class Command : ICommandAction
-    {
-        private readonly IEventBus eventBus;
-
-        protected Command(IEventBus eventBus) => this.eventBus = eventBus;
-
+    public abstract class Command : ICommandAction, IReplayableCommand
+    {   
         public Command()
         {
         }
@@ -37,5 +34,16 @@ namespace Wism.Client.Commands
         {
             return this.Player == null || this.Player.IsDead;
         }
+
+        public virtual CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            return new CommandExecutedEvent
+            {
+                CommandType = GetType().Name,
+                Result = result.ToString(),
+                Timestamp = DateTime.UtcNow
+            };
+        }
+
     }
 }
