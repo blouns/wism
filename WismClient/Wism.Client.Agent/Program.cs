@@ -5,9 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Wism.Client.Agent.CommandProcessors.Factories;
+using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
+using Wism.Client.Agent.CommandProcessors.Human;
 using Wism.Client.Agent.Services;
 using Wism.Client.Agent.UI;
 using Wism.Client.Api.CommandPublisher;
+using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
@@ -102,14 +105,30 @@ public class Program
                 services.AddSingleton<MapSnapshotBuilder>();
 
                 // Add command processors
-                services.AddSingleton<CommandProcessorFactory>();
+                services.AddSingleton<StartTurnProcessor>();
+                services.AddSingleton<RecruitHeroProcessor>();
+                services.AddSingleton<HireHeroProcessor>(provider =>
+                    new HireHeroProcessor(
+                        provider.GetRequiredService<IWismLoggerFactory>(),
+                        provider.GetService<CommandIpcPublisher>(),
+                        provider.GetRequiredService<ControllerProvider>()));
+                services.AddSingleton<PrepareForBattleProcessor>();
+                services.AddSingleton<BattleProcessor>();
+                services.AddSingleton<CompleteBattleProcessor>();
+                services.AddSingleton<SearchRuinsProcessor>();
+                services.AddSingleton<SearchTempleProcessor>();
+                services.AddSingleton<SearchSageProcessor>();
+                services.AddSingleton<SearchLibraryProcessor>();
+                services.AddSingleton<StandardProcessor>();
+
+                services.AddSingleton<ICommandProcessorFactory, CommandProcessorFactory>();
 
                 // Add view
                 services.AddTransient<GameBase>(provider =>
                     new AsciiGame(
                         provider.GetRequiredService<IWismLoggerFactory>(),
                         provider.GetRequiredService<ControllerProvider>(),
-                        provider.GetRequiredService<CommandProcessorFactory>()));
+                        provider.GetRequiredService<ICommandProcessorFactory>()));
 
                 // Add command agent
                 services.AddSingleton<IHostedService>(provider =>

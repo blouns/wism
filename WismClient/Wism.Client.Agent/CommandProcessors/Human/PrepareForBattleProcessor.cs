@@ -16,9 +16,8 @@ namespace Wism.Client.Agent.CommandProcessors.Human;
 public class PrepareForBattleProcessor : InstrumentedProcessor
 {
     private IWismLogger logger;
-    private AsciiGame game;
 
-    public PrepareForBattleProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher, AsciiGame game)
+    public PrepareForBattleProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher)
         :base(publisher)
     {
         if (loggerFactory is null)
@@ -27,7 +26,6 @@ public class PrepareForBattleProcessor : InstrumentedProcessor
         }
 
         this.logger = loggerFactory.CreateLogger();
-        this.game = game ?? throw new ArgumentNullException(nameof(game));
     }
 
     public override bool CanExecute(ICommandAction command)
@@ -60,9 +58,7 @@ public class PrepareForBattleProcessor : InstrumentedProcessor
 
         DrawBattleSetupSequence(attackingPlayer, defendingPlayer);
         BattleProcessor.DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
-
-        game.GameSpeed = GameBase.DefaultAttackSpeed;
-
+    
         return command.Execute();
     }
 

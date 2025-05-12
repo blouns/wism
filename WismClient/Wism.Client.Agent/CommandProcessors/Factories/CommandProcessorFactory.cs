@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
 using Wism.Client.Agent.CommandProcessors.Human;
 using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
-using Wism.Client.Agent.UI;
 using Wism.Client.Api.CommandPublisher;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Common;
+using Wism.Client.Controllers;
 
 namespace Wism.Client.Agent.CommandProcessors.Factories
 {
@@ -13,37 +15,48 @@ namespace Wism.Client.Agent.CommandProcessors.Factories
         private readonly IWismLoggerFactory loggerFactory;
         private readonly CommandIpcPublisher publisher;
 
+        // Inject ICommandProcessor implementations dynamically from DI container
+        private readonly IServiceProvider serviceProvider;
+
         public CommandProcessorFactory(
-            IWismLoggerFactory loggerFactory, 
-            CommandIpcPublisher publisher)
+            IWismLoggerFactory loggerFactory,
+            CommandIpcPublisher publisher,
+            IServiceProvider serviceProvider) // Inject IServiceProvider for dynamic resolution
         {
             this.loggerFactory = loggerFactory;
             this.publisher = publisher;
+            this.serviceProvider = serviceProvider;  // Store IServiceProvider to resolve processors dynamically
         }
 
-        public List<ICommandProcessor> CreateProcessors(AsciiGame game)
+        public List<ICommandProcessor> CreateProcessors()
         {
             return new List<ICommandProcessor>
-{
+            {
                 // Player processors
-                new StartTurnProcessor(loggerFactory, publisher),
-                new RecruitHeroProcessor(loggerFactory, publisher),
-                new HireHeroProcessor(loggerFactory, publisher, game),
+                this.ResolveProcessor<StartTurnProcessor>(),
+                this.ResolveProcessor<RecruitHeroProcessor>(),
+                this.ResolveProcessor<HireHeroProcessor>(),
 
                 // Battle processors
-                new PrepareForBattleProcessor(loggerFactory, publisher, game),
-                new BattleProcessor(loggerFactory, publisher),
-                new CompleteBattleProcessor(loggerFactory, publisher),
+                this.ResolveProcessor<PrepareForBattleProcessor>(),
+                this.ResolveProcessor<BattleProcessor>(),
+                this.ResolveProcessor<CompleteBattleProcessor>(),
 
                 // Search processors
-                new SearchRuinsProcessor(loggerFactory, publisher),
-                new SearchTempleProcessor(loggerFactory, publisher),
-                new SearchSageProcessor(loggerFactory, publisher),
-                new SearchLibraryProcessor(loggerFactory, publisher),
+                this.ResolveProcessor<SearchRuinsProcessor>(),
+                this.ResolveProcessor<SearchTempleProcessor>(),
+                this.ResolveProcessor<SearchSageProcessor>(),
+                this.ResolveProcessor<SearchLibraryProcessor>(),
 
                 // Default processor
-                new StandardProcessor(loggerFactory, publisher)
+                this.ResolveProcessor<StandardProcessor>()
             };
+        }
+
+        // Helper method to resolve processors dynamically from DI container
+        private ICommandProcessor ResolveProcessor<TProcessor>() where TProcessor : ICommandProcessor
+        {
+            return (ICommandProcessor)serviceProvider.GetRequiredService<TProcessor>();
         }
     }
 }

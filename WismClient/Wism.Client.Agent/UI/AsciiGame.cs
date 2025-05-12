@@ -134,7 +134,7 @@ public class AsciiGame : GameBase
             { aiPlayer, aiCommander }
         };
 
-        this.commandProcessors = ProcessorFactory.CreateProcessors(this);
+        this.commandProcessors = ProcessorFactory.CreateProcessors();
     }
 
     protected override void DoTasks(ref int lastId)

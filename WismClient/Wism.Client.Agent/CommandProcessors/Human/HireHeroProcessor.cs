@@ -1,5 +1,4 @@
 ﻿using System;
-using Wism.Client.Agent.UI;
 using Wism.Client.Api.CommandPublisher;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Players;
@@ -12,9 +11,9 @@ public class HireHeroProcessor : InstrumentedProcessor
 {
     private string heroName;
     private IWismLogger logger;
-    private AsciiGame game;
+    private ControllerProvider provider;
 
-    public HireHeroProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher, AsciiGame game)
+    public HireHeroProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher, ControllerProvider provider)
         :base(publisher)
     {
         if (loggerFactory is null)
@@ -23,7 +22,7 @@ public class HireHeroProcessor : InstrumentedProcessor
         }
 
         this.logger = loggerFactory.CreateLogger();
-        this.game = game ?? throw new ArgumentNullException(nameof(game));
+        this.provider = provider ?? throw new ArgumentNullException(nameof(provider));
     }
 
     public override bool CanExecute(ICommandAction command)
@@ -78,8 +77,8 @@ public class HireHeroProcessor : InstrumentedProcessor
                 Notify.DisplayAndWait($"And the hero brings {allies.Count} allies!");
             }
             
-            game.CommandController.AddCommand(
-                new ConscriptArmiesCommand(game.PlayerController,
+            provider.CommandController.AddCommand(
+                new ConscriptArmiesCommand(provider.PlayerController,
                     command.Player, command.HeroTile, command.HeroAllies));
         }
     }
