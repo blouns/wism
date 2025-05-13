@@ -76,6 +76,12 @@ namespace Wism.Companion.WinForms
         {
             if (evt is Wism.Companion.Shared.Events.CommandExecutedEvent cmd)
             {
+                if (cmd.TargetPosition != null)
+                {
+                    // Center map on target
+                    mapRenderer.TrackArmyAt(cmd.TargetPosition);
+                }
+
                 string actor = cmd.ActorId ?? "Unknown";
                 string target = cmd.TargetPosition != null
                     ? $"({cmd.TargetPosition.X},{cmd.TargetPosition.Y})"
@@ -90,7 +96,7 @@ namespace Wism.Companion.WinForms
             else if (evt is Wism.Companion.Shared.Events.MapSnapshot map)
             {
                 mapRenderer.UpdateMap(map);
-                LogMessage($"[REPLAY:MAP] {map.Width}x{map.Height} with {map.Heroes.Count} heroes");
+                LogMessage($"[REPLAY:MAP] {map.Width}x{map.Height} with {map.Armies.Count} armies");
             }
             else
             {

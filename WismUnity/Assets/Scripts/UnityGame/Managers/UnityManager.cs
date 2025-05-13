@@ -1,13 +1,16 @@
 ﻿using Assets.Scripts.CommandProcessors;
+using Assets.Scripts.Telemetry;
 using Assets.Scripts.Tilemaps;
 using Assets.Scripts.UI;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.CommandProcessors; // Updated
 using Wism.Client.Controllers; // Updated
 using Wism.Client.Core;
+using Wism.Client.Core.Telemetry;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
 using IWismLogger = Wism.Client.Common.IWismLogger;
@@ -26,6 +29,11 @@ namespace Assets.Scripts.Managers
 
         // Bootstrapping
         private static UnityNewGameEntity gameSettings;
+
+        // Telemetry
+        private IMapSnapshotBroadcaster snapshotBroadcaster;
+        private float nextSnapshotTime = 0f;
+        private const float snapshotInterval = 0.5f; // in seconds
 
         // Game managers
         [SerializeField]
@@ -132,15 +140,23 @@ namespace Assets.Scripts.Managers
             IntializeWismApi();
             InitializeCommandProcessors();
             InitializeUI();
-            IntializeWismGame(gameSettings);
-
+            InitializeWismGame(gameSettings);
+            InitializeSnapshotBroadcaster();
+            
             this.DebugManager.LogInformation("Initialization complete");
 
             this.isInitialized = true;
             this.ExecutionMode = ExecutionMode.Bootstrap;
         }
 
-        private void IntializeWismGame(UnityNewGameEntity gameSettings)
+        private void InitializeSnapshotBroadcaster()
+        {
+            var builder = new MapSnapshotBuilder();
+            var emitter = new MapSnapshotEmitter(this.GameManager.LoggerFactory);
+            this.snapshotBroadcaster = new UnityMapSnapshotBroadcaster(builder, emitter);
+        }
+
+        private void InitializeWismGame(UnityNewGameEntity gameSettings)
         {
             if (gameSettings == null)
             {
@@ -318,7 +334,7 @@ namespace Assets.Scripts.Managers
 
         internal void Draw()
         {
-            DrawSelectedArmiesBox();
+            DrawSelectedArmiesBox();            
         }
 
         /// <summary>
@@ -348,6 +364,9 @@ namespace Assets.Scripts.Managers
                     result = processor.Execute(command);
                     var stopTime = DateTime.Now;
                     this.logger.LogInformation("Command duration: " + (stopTime - startTime).TotalMilliseconds + "ms");
+
+                    // Emit snapshot if the command is a game state change
+                    EmitSnapshot();
                     break;
                 }
             }
@@ -367,6 +386,15 @@ namespace Assets.Scripts.Managers
             {
                 this.logger.LogInformation("Task started and in progress");
                 // Do nothing; do not advance Command ID
+            }
+        }
+
+        private void EmitSnapshot()
+        {
+            if (Time.time >= nextSnapshotTime)
+            {
+                snapshotBroadcaster.TryEmitSnapshot();
+                nextSnapshotTime = Time.time + snapshotInterval;
             }
         }
 

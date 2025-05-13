@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Agent.UI;
-using Wism.Client.Api.CommandPublisher;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Common;

@@ -12,6 +12,7 @@ using Wism.Client.CommandProviders;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Telemetry;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Pathing;
@@ -25,11 +26,13 @@ public class AsciiGame : GameBase
 {
     private readonly IWismLogger logger;
     private List<ICommandProcessor> commandProcessors;
+    private IMapSnapshotBroadcaster mapSnapshotBroadcaster;
 
     public AsciiGame(
         IWismLoggerFactory logFactory, 
         ControllerProvider controllerProvider,
-        ICommandProcessorFactory commandProcessorFactory)
+        ICommandProcessorFactory commandProcessorFactory,
+        IMapSnapshotBroadcaster snapshotBroadcaster)
             : base(logFactory, controllerProvider, commandProcessorFactory)
     {
         if (logFactory is null)
@@ -44,6 +47,7 @@ public class AsciiGame : GameBase
 
         this.logger = logFactory.CreateLogger();
         this.CommandController = controllerProvider.CommandController;
+        this.mapSnapshotBroadcaster = snapshotBroadcaster;
     }
 
     public CommandController CommandController { get; }
@@ -214,6 +218,9 @@ public class AsciiGame : GameBase
             Notify.Alert($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
             Environment.Exit(1);
         }
+
+        // Update map for listeners (e.g. companion app)
+        mapSnapshotBroadcaster.TryEmitSnapshot();
 
         // Attack cut scene is handled by attack processors
         if (Game.Current.GameState == GameState.AttackingArmy ||

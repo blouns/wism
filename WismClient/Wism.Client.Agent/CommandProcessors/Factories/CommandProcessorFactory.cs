@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using Wism.Client.Agent.CommandProcessors.Human;
 using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
-using Wism.Client.Api.CommandPublisher;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Common;
 using Wism.Client.Controllers;

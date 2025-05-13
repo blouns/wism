@@ -46,9 +46,9 @@ namespace Wism.SignalR.Host.Controllers
                 Width = 5,
                 Height = 5,
                 Tiles = new List<TileDto>(),
-                Heroes = new List<HeroDto>
+                Armies = new List<ArmyDto>
                 {
-                    new HeroDto
+                    new ArmyDto
                     {
                         Name = "TestHero",
                         Owner = "Red",

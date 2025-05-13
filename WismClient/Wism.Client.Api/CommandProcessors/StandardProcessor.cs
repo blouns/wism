@@ -1,5 +1,5 @@
 ﻿using System;
-using Wism.Client.Api.CommandPublisher;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
@@ -11,19 +11,13 @@ namespace Wism.Client.CommandProcessors
     {
         private readonly IWismLogger logger;
         private readonly CommandIpcPublisher? commandPublisher;
-        private readonly MapSnapshotEmitter? mapEmitter;
-        private readonly MapSnapshotBuilder? mapBuilder;
 
         public StandardProcessor(
             IWismLoggerFactory loggerFactory,
-            CommandIpcPublisher? commandPublisher = null,
-            MapSnapshotEmitter? mapEmitter = null,
-            MapSnapshotBuilder? mapBuilder = null)
+            CommandIpcPublisher? commandPublisher = null)
         {
             this.logger = loggerFactory.CreateLogger();
             this.commandPublisher = commandPublisher;
-            this.mapEmitter = mapEmitter;
-            this.mapBuilder = mapBuilder;
         }
 
         public bool CanExecute(ICommandAction command)
@@ -41,26 +35,9 @@ namespace Wism.Client.CommandProcessors
             var result = command.Execute();
 
             EmitCommandEvent(command, result);
-            EmitMapSnapshot();
 
             return result;
         }
-
-        private void EmitMapSnapshot()
-        {
-            try
-            {
-                if (mapEmitter != null && mapBuilder?.TryBuild(out var snapshot) == true)
-                {
-                    mapEmitter.Publish(snapshot);
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning($"Failed to emit map snapshot: {ex.Message}");
-            }
-        }
-
 
         private void EmitCommandEvent(ICommandAction command, ActionState result)
         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors.BoonIdentifiers;
-using Wism.Client.Api.CommandPublisher;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Common;

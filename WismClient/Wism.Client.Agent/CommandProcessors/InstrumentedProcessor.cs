@@ -1,5 +1,5 @@
 ﻿using System;
-using Wism.Client.Api.CommandPublisher;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
 using Wism.Client.Controllers;

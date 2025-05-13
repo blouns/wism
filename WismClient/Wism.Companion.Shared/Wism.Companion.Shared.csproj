@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\Build\Wism.PublishToUnity.targets" />
+	
 </Project>

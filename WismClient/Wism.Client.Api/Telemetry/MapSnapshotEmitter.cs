@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Wism.Client.Common;
 using Wism.Companion.Shared.Events;
 
-namespace Wism.Client.Api.CommandPublisher
+namespace Wism.Client.Api.Telemetry
 {
     public class MapSnapshotEmitter
     {
@@ -26,7 +26,7 @@ namespace Wism.Client.Api.CommandPublisher
             try
             {
                 _pipe = new NamedPipeClientStream(".", "wism-commands", PipeDirection.Out);
-                _pipe.Connect(200);
+                //_pipe.Connect(200);
                 _writer = new StreamWriter(_pipe) { AutoFlush = true };
                 _connected = true;
                 _logger.LogInformation("Connected to named pipe for map snapshots.");

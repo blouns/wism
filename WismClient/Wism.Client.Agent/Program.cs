@@ -9,12 +9,14 @@ using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
 using Wism.Client.Agent.CommandProcessors.Human;
 using Wism.Client.Agent.Services;
 using Wism.Client.Agent.UI;
-using Wism.Client.Api.CommandPublisher;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Data;
+using Wism.Client.Agent.Telemetry;
+using Wism.Client.Core.Telemetry;
 
 namespace Wism.Client.Agent;
 
@@ -123,12 +125,16 @@ public class Program
 
                 services.AddSingleton<ICommandProcessorFactory, CommandProcessorFactory>();
 
+                // Add telemetry
+                services.AddSingleton<IMapSnapshotBroadcaster, AsciiGameMapSnapshotBroadcaster>();
+
                 // Add view
                 services.AddTransient<GameBase>(provider =>
                     new AsciiGame(
                         provider.GetRequiredService<IWismLoggerFactory>(),
                         provider.GetRequiredService<ControllerProvider>(),
-                        provider.GetRequiredService<ICommandProcessorFactory>()));
+                        provider.GetRequiredService<ICommandProcessorFactory>(),
+                        provider.GetRequiredService<IMapSnapshotBroadcaster>()));
 
                 // Add command agent
                 services.AddSingleton<IHostedService>(provider =>

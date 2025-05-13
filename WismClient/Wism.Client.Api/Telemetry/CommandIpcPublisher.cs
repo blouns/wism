@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Wism.Companion.Shared.Events;
 using Wism.Client.Common;
 
-namespace Wism.Client.Api.CommandPublisher
+namespace Wism.Client.Api.Telemetry
 {
     public class CommandIpcPublisher
     {

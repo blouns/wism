@@ -33,7 +33,7 @@ namespace Wism.CompanionApp.WinForms
 
             _hub.On<MapSnapshot>("OnMapSnapshot", (map) =>
             {
-                _logCallback?.Invoke($"[MAP] {map.Width}x{map.Height} with {map.Heroes.Count} heroes");
+                _logCallback?.Invoke($"[MAP] {map.Width}x{map.Height} with {map.Armies.Count} armies");
                 _recordCallback?.Invoke(map);
                 _mapCallback?.Invoke(map);
             });
