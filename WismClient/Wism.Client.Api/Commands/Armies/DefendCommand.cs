@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
+using Wism.Companion.Shared.Events;
+using Wism.Companion.Shared.Models;
 
 namespace Wism.Client.Commands.Armies
 {
@@ -21,6 +25,13 @@ namespace Wism.Client.Commands.Armies
         public override string ToString()
         {
             return $"Command: {ArmyUtilities.ArmiesToString(this.Armies)} defend";
+        }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            var evt = base.ToExecutedEvent(result);
+            evt.Parameters["Defending"] = true;
+            return evt;
         }
     }
 }

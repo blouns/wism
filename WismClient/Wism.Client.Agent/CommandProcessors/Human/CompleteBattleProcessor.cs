@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Common;
@@ -12,12 +11,12 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors.Human;
 
-public class CompleteBattleProcessor : ICommandProcessor
+public class CompleteBattleProcessor : InstrumentedProcessor
 {
-    private readonly AsciiGame asciiGame;
     private IWismLogger logger;
 
-    public CompleteBattleProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public CompleteBattleProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher)
+        : base(publisher)
     {
         if (loggerFactory is null)
         {
@@ -25,15 +24,14 @@ public class CompleteBattleProcessor : ICommandProcessor
         }
 
         logger = loggerFactory.CreateLogger();
-        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
 
-    public bool CanExecute(ICommandAction command)
+    public override bool CanExecute(ICommandAction command)
     {
         return command is CompleteBattleCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         var battleCompleteCommand = (CompleteBattleCommand)command;
         var targetTile = World.Current.Map[battleCompleteCommand.X, battleCompleteCommand.Y];
@@ -52,18 +50,30 @@ public class CompleteBattleProcessor : ICommandProcessor
         var battleResult = battleCompleteCommand.AttackCommand.Result;
         if (battleResult == ActionState.Succeeded)
         {
-            Notify.DisplayAndWait($"{name} {presentVerb} victorious!");
+            if (IsHuman)
+            {
+                Notify.DisplayAndWait($"{name} {presentVerb} victorious!");
+            }
+            else
+            {
+                Notify.Display($"{name} {pastVerb} victorious!");
+            }
         }
         else if (battleResult == ActionState.Failed)
         {
-            Notify.DisplayAndWait($"{name} {pastVerb} been defeated!");
+            if (IsHuman)
+            {
+                Notify.DisplayAndWait($"{name} {pastVerb} been defeated!");
+            }
+            else
+            {
+                Notify.Display($"{name} {pastVerb} been defeated!");
+            }
         }
         else
         {
             Notify.Alert("Error: Unexpected game state" + battleResult);
-        }
-
-        asciiGame.GameSpeed = GameBase.DefaultGameSpeed;
+        }        
 
         return command.Execute();
     }

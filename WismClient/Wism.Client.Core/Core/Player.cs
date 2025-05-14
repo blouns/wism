@@ -69,6 +69,11 @@ namespace Wism.Client.Core
             return player;
         }
 
+        public string GetDisplayName()
+        {
+            return this.Clan.DisplayName;
+        }
+
         public static Player GetNeutralPlayer()
         {
             var clanInfo = ClanInfo.GetClanInfo("Neutral");

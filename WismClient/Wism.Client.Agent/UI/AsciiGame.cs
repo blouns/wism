@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Wism.Client.Agent.CommandProcessors.Factories;
 using Wism.Client.Agent.CommandProviders;
 using Wism.Client.AI.CommandProviders;
 using Wism.Client.AI.Framework;
@@ -13,6 +12,7 @@ using Wism.Client.CommandProviders;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Telemetry;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Pathing;
@@ -25,11 +25,15 @@ namespace Wism.Client.Agent.UI;
 public class AsciiGame : GameBase
 {
     private readonly IWismLogger logger;
-    private List<ICommandProcessor> humanCommandProcessors;
-    private List<ICommandProcessor> aiCommandProcessors;
+    private List<ICommandProcessor> commandProcessors;
+    private IMapSnapshotBroadcaster mapSnapshotBroadcaster;
 
-    public AsciiGame(IWismLoggerFactory logFactory, ControllerProvider controllerProvider)
-        : base(logFactory, controllerProvider)
+    public AsciiGame(
+        IWismLoggerFactory logFactory, 
+        ControllerProvider controllerProvider,
+        ICommandProcessorFactory commandProcessorFactory,
+        IMapSnapshotBroadcaster snapshotBroadcaster)
+            : base(logFactory, controllerProvider, commandProcessorFactory)
     {
         if (logFactory is null)
         {
@@ -43,6 +47,7 @@ public class AsciiGame : GameBase
 
         this.logger = logFactory.CreateLogger();
         this.CommandController = controllerProvider.CommandController;
+        this.mapSnapshotBroadcaster = snapshotBroadcaster;
     }
 
     public CommandController CommandController { get; }
@@ -133,9 +138,7 @@ public class AsciiGame : GameBase
             { aiPlayer, aiCommander }
         };
 
-        // Abstract Factory Pattern to create the human and AI command processors
-        this.humanCommandProcessors = new HumanCommandProcessorFactory(LoggerFactory).CreateProcessors(this);
-        this.aiCommandProcessors = new AiCommandProcessorFactory(LoggerFactory).CreateProcessors(this);
+        this.commandProcessors = ProcessorFactory.CreateProcessors();
     }
 
     protected override void DoTasks(ref int lastId)
@@ -147,15 +150,16 @@ public class AsciiGame : GameBase
             var playerKind = (isHuman) ? "Human" : "AI";
             this.logger.LogInformation($"{playerKind} task executing: {command.Id}: {command.GetType()}");
 
-            var processors = (isHuman) ? this.humanCommandProcessors : this.aiCommandProcessors;
-
             // Run the command
             var result = ActionState.NotStarted;
-            foreach (var processor in processors)
+            foreach (var processor in this.commandProcessors)
             {
                 if (processor.CanExecute(command))
                 {
                     result = processor.Execute(command);
+
+                    // Update map for listeners (e.g. companion app)
+                    mapSnapshotBroadcaster.TryEmitSnapshot();
                     break;
                 }
             }
@@ -216,7 +220,7 @@ public class AsciiGame : GameBase
             // Game over
             Notify.Alert($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
             Environment.Exit(1);
-        }
+        }        
 
         // Attack cut scene is handled by attack processors
         if (Game.Current.GameState == GameState.AttackingArmy ||

@@ -1,6 +1,5 @@
 ﻿using System;
-using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
@@ -9,34 +8,32 @@ using Wism.Client.Core;
 
 namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
 
-public class SearchSageProcessor : ICommandProcessor
+public class SearchSageProcessor : InstrumentedProcessor
 {
-    private readonly AsciiGame asciiGame;
     private readonly Librarian librarian = new();
     private IWismLogger logger;
 
-    public SearchSageProcessor(IWismLoggerFactory loggerFactory, AsciiGame asciiGame)
+    public SearchSageProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher)
+        : base(publisher)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
-
         logger = loggerFactory.CreateLogger();
-        this.asciiGame = asciiGame ?? throw new ArgumentNullException(nameof(asciiGame));
     }
-
-    public bool CanExecute(ICommandAction command)
+     
+    public override bool CanExecute(ICommandAction command)
     {
         return command is SearchSageCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         var searchCommand = (SearchSageCommand)command;
 
         var result = searchCommand.Execute();
-        if (searchCommand.Gold > 0)
+        if (IsHuman && searchCommand.Gold > 0)
         {
             Notify.DisplayAndWait("You are greeted warmly...");
             Notify.DisplayAndWait("...the Seer gives you a gem...");
@@ -57,6 +54,10 @@ public class SearchSageProcessor : ICommandProcessor
 
     private void DoSagesAdvice()
     {
+        // TODO: AI players should 'learn' from the sage
+        if (!IsHuman)
+            return;
+
         Notify.Information("A sign says:");
         Notify.Information("\t\"The Great Sage Master of Wisdom,");
         Notify.Information("\tInformation on Magical Items and Locations.\"");

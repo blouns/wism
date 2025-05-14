@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace Wism.Client.Common
 {
@@ -13,13 +14,20 @@ namespace Wism.Client.Common
             Critical
         }
 
-        private static readonly string logFile = @"logs\wism_" + Guid.NewGuid();
+        private static readonly string logFile = @"logs\wism_" + Guid.NewGuid() + ".log";
 
         static Log()
         {
+            var logDir = Path.GetDirectoryName(logFile);
+            if (!Directory.Exists(logDir))
+            {
+                Directory.CreateDirectory(logDir);
+            }
+
             Trace.Listeners.Add(new TextWriterTraceListener(logFile));
             Trace.AutoFlush = true;
         }
+
 
         public static void WriteLine(TraceLevel level, string message, params object[] args)
         {

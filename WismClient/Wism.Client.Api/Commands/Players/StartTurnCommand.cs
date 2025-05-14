@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Wism.Client.Controllers;
+using Wism.Client.Core;
+using Wism.Companion.Shared.Events;
 
 namespace Wism.Client.Commands.Players
 {
@@ -28,6 +31,24 @@ namespace Wism.Client.Commands.Players
         public override string ToString()
         {
             return $"Command: {this.Player.Clan} start turn";
+        }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            return new CommandExecutedEvent
+            {
+                CommandType = nameof(StartTurnCommand),
+                ActorId = Player?.Clan?.ShortName ?? "Unknown",
+                TargetId = null,
+                TargetPosition = null,
+                Result = result.ToString(),
+                Timestamp = DateTime.UtcNow,
+                Parameters = new Dictionary<string, object>
+                {
+                    { "Player", Player?.Clan?.ShortName ?? "Unknown" },
+                    { "Turn", Player?.Turn ?? -1 }
+                }
+            };
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Controllers;
+using Wism.Companion.Shared.Events;
+using Wism.Companion.Shared.Models;
 
 namespace Wism.Client.Commands.Armies
 {
@@ -16,5 +18,27 @@ namespace Wism.Client.Commands.Armies
         }
 
         public List<MapObjects.Army> Armies { get; set; }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            var first = Armies.Count > 0 ? Armies[0] : null;
+
+            return new CommandExecutedEvent
+            {
+                CommandType = GetType().Name,
+                ActorId = first?.DisplayName ?? "Unknown Army",
+                TargetId = null,
+                TargetPosition = first?.Tile != null
+                    ? new PositionDto { X = first.Tile.X, Y = first.Tile.Y }
+                    : null,
+                Result = result.ToString(),
+                Timestamp = DateTime.UtcNow,
+                Parameters = new Dictionary<string, object>
+                {
+                    { "ArmyCount", Armies.Count },
+                    { "Owner", Player?.GetDisplayName() ?? "Unknown" }
+                }
+            };
+        }
     }
 }

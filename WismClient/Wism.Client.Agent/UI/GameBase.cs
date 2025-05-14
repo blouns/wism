@@ -15,31 +15,29 @@ public abstract class GameBase
 {
     public const int DefaultGameSpeed = 100;
     public const int DefaultAttackSpeed = 750;
-    private readonly ArmyController armyController;
     private readonly IWismLogger logger;
     private readonly IWismLoggerFactory loggerFactory;
     private readonly ControllerProvider controllerProvider;
+    private readonly ICommandProcessorFactory processorFactory;
     private int lastId;
     private Dictionary<Player, ICommandProvider> playerCommandersDictionary;
 
-    public GameBase(IWismLoggerFactory loggerFactory, ControllerProvider controllerProvider)
+    public GameBase(
+        IWismLoggerFactory loggerFactory, 
+        ControllerProvider controllerProvider,
+        ICommandProcessorFactory processorFactory)
     {
         if (loggerFactory is null)
         {
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        if (controllerProvider is null)
-        {
-            throw new ArgumentNullException(nameof(controllerProvider));
-        }
-
+        this.controllerProvider = controllerProvider ?? throw new ArgumentNullException(nameof(controllerProvider));
+        this.processorFactory = processorFactory ?? throw new ArgumentNullException(nameof(processorFactory));
         this.logger = loggerFactory.CreateLogger();
-        this.armyController = controllerProvider.ArmyController;
         this.PlayerController = controllerProvider.PlayerController;
         this.GameSpeed = DefaultGameSpeed;
-        this.loggerFactory = loggerFactory;
-        this.controllerProvider = controllerProvider;
+        this.loggerFactory = loggerFactory;      
     }
 
     public int GameSpeed { get; set; }
@@ -56,6 +54,8 @@ public abstract class GameBase
     public IWismLoggerFactory LoggerFactory => loggerFactory;
 
     public ControllerProvider ControllerProvider => controllerProvider;
+
+    public ICommandProcessorFactory ProcessorFactory => processorFactory;
 
     public async Task RunAsync()
     {

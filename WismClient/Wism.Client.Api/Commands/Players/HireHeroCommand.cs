@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Modules.Infos;
+using Wism.Companion.Shared.Events;
+using Wism.Companion.Shared.Models;
 
 namespace Wism.Client.Commands.Players
 {
@@ -66,6 +69,29 @@ namespace Wism.Client.Commands.Players
         public override string ToString()
         {
             return $"Command: {this.Player.Clan} hiring hero";
+        }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            return new CommandExecutedEvent
+            {
+                CommandType = nameof(HireHeroCommand),
+                ActorId = Player?.Clan?.ShortName ?? "Unknown",
+                TargetId = Hero?.ShortName ?? HeroDisplayName ?? "UnknownHero",
+                TargetPosition = HeroTile != null
+                    ? new PositionDto { X = HeroTile.X, Y = HeroTile.Y }
+                    : null,
+                Result = result.ToString(),
+                Timestamp = DateTime.UtcNow,
+                Parameters = new Dictionary<string, object>
+                {
+                    { "HeroName", HeroDisplayName ?? "Unknown" },
+                    { "HeroAccepted", HeroAccepted },
+                    { "HeroPrice", HeroPrice },
+                    { "HeroAllies", string.Join(", ", HeroAllies.Select(a => a.ShortName)) },
+                    { "Tile", HeroTile?.ToString() ?? "Unknown" }
+                }
+            };
         }
     }
 }

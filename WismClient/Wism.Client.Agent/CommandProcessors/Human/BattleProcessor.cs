@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.Agent.UI;
-using Wism.Client.CommandProcessors;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Common;
@@ -12,50 +12,59 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Agent.CommandProcessors.Human;
 
-public class BattleProcessor : ICommandProcessor
+public class BattleProcessor : InstrumentedProcessor
 {
-    private IWismLogger logger;
+    private readonly IWismLogger logger;
 
-    public BattleProcessor(IWismLoggerFactory loggerFactory)
+    public BattleProcessor(IWismLoggerFactory loggerFactory, CommandIpcPublisher publisher)
+        : base(publisher)
     {
-        logger = loggerFactory.CreateLogger();
+        this.logger = loggerFactory.CreateLogger();
     }
 
-    public bool CanExecute(ICommandAction command)
+    public override bool CanExecute(ICommandAction command)
     {
         return command is AttackOnceCommand;
     }
 
-    public ActionState Execute(ICommandAction command)
+    public override ActionState ExecuteInternal(ICommandAction command)
     {
         var battleCommand = (AttackOnceCommand)command;
+
+        logger.LogInformation("Executing BattleProcessor for AttackOnceCommand");
+
         var result = battleCommand.Execute();
+
+        logger.LogInformation($"Battle result: {result}");
 
         var targetTile = World.Current.Map[battleCommand.X, battleCommand.Y];
         var attackingPlayer = battleCommand.OriginalAttackingArmies[0].Player;
         var attackingArmies = battleCommand.OriginalAttackingArmies;
         attackingArmies.Sort(new ByArmyBattleOrder(targetTile));
 
-        Player defendingPlayer;
-        List<Army> defendingArmies;
-        if (battleCommand.OriginalDefendingArmies == null ||
-            battleCommand.OriginalDefendingArmies.Count == 0)
+        if (battleCommand.OriginalDefendingArmies == null || battleCommand.OriginalDefendingArmies.Count == 0)
         {
-            // Attacking empty city
-            Notify.DisplayAndWait("Press any key to continue...");
-            return ActionState.Succeeded;
+            logger.LogInformation("No defenders found on target tile.");
+
+            if (IsHuman)
+            {
+                Notify.DisplayAndWait("Press any key to continue...");
+            }
         }
+        else
+        {
+            var defendingPlayer = battleCommand.OriginalDefendingArmies[0].Player;
+            var defendingArmies = battleCommand.OriginalDefendingArmies;
+            defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
 
-        defendingPlayer = battleCommand.OriginalDefendingArmies[0].Player;
-        defendingArmies = battleCommand.OriginalDefendingArmies;
-        defendingArmies.Sort(new ByArmyBattleOrder(targetTile));
-
-        DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
+            logger.LogInformation($"Battle between {attackingPlayer.Clan} and {defendingPlayer.Clan}");
+            DrawBattleUpdate(attackingPlayer.Clan, attackingArmies, defendingPlayer.Clan, defendingArmies);
+        }
 
         return result;
     }
 
-    public static void DrawBattleUpdate(Clan attackingClan, List<Army> attackingArmies, Clan defendingClan,
+    internal static void DrawBattleUpdate(Clan attackingClan, List<Army> attackingArmies, Clan defendingClan,
         List<Army> defendingArmies)
     {
         var color = Console.ForegroundColor;
@@ -88,7 +97,6 @@ public class BattleProcessor : ICommandProcessor
             foreach (var army in armies)
             {
                 Console.ForegroundColor = AsciiMapper.GetColorForClan(army.Clan);
-
                 Console.Write(army.DisplayName);
                 if (army.IsDead)
                 {

@@ -1,14 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Wism.Client.Agent.CommandProcessors.Factories;
+using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
+using Wism.Client.Agent.CommandProcessors.Human;
 using Wism.Client.Agent.Services;
 using Wism.Client.Agent.UI;
+using Wism.Client.Api.Telemetry;
+using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Data;
+using Wism.Client.Agent.Telemetry;
+using Wism.Client.Core.Telemetry;
 
 namespace Wism.Client.Agent;
 
@@ -21,8 +29,9 @@ public class Program
             MainAsync(args).Wait();
             return 0;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.ToString());
             return 1;
         }
     }
@@ -90,17 +99,46 @@ public class Program
                             provider.GetService<IWismLoggerFactory>()),
                         PlayerController = new PlayerController(
                             provider.GetService<IWismLoggerFactory>())
-                    });
+                    });                
+
+                // Optional: For companion app
+                services.AddSingleton<CommandIpcPublisher>();
+                services.AddSingleton<MapSnapshotEmitter>();
+                services.AddSingleton<MapSnapshotBuilder>();
+
+                // Add command processors
+                services.AddSingleton<StartTurnProcessor>();
+                services.AddSingleton<RecruitHeroProcessor>();
+                services.AddSingleton<HireHeroProcessor>(provider =>
+                    new HireHeroProcessor(
+                        provider.GetRequiredService<IWismLoggerFactory>(),
+                        provider.GetService<CommandIpcPublisher>(),
+                        provider.GetRequiredService<ControllerProvider>()));
+                services.AddSingleton<PrepareForBattleProcessor>();
+                services.AddSingleton<BattleProcessor>();
+                services.AddSingleton<CompleteBattleProcessor>();
+                services.AddSingleton<SearchRuinsProcessor>();
+                services.AddSingleton<SearchTempleProcessor>();
+                services.AddSingleton<SearchSageProcessor>();
+                services.AddSingleton<SearchLibraryProcessor>();
+                services.AddSingleton<StandardProcessor>();
+
+                services.AddSingleton<ICommandProcessorFactory, CommandProcessorFactory>();
+
+                // Add telemetry
+                services.AddSingleton<IMapSnapshotBroadcaster, AsciiGameMapSnapshotBroadcaster>();
+
+                // Add view
+                services.AddTransient<GameBase>(provider =>
+                    new AsciiGame(
+                        provider.GetRequiredService<IWismLoggerFactory>(),
+                        provider.GetRequiredService<ControllerProvider>(),
+                        provider.GetRequiredService<ICommandProcessorFactory>(),
+                        provider.GetRequiredService<IMapSnapshotBroadcaster>()));
 
                 // Add command agent
                 services.AddSingleton<IHostedService>(provider =>
                     new WismAgent(
-                        provider.GetService<IWismLoggerFactory>(),
-                        provider.GetService<ControllerProvider>()));
-
-                // Add view
-                services.AddTransient<GameBase, AsciiGame>(provider =>
-                    new AsciiGame(
                         provider.GetService<IWismLoggerFactory>(),
                         provider.GetService<ControllerProvider>()));
             });

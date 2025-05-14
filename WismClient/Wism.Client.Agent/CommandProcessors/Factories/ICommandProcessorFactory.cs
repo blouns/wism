@@ -4,5 +4,5 @@ using Wism.Client.CommandProcessors;
 
 public interface ICommandProcessorFactory
 {
-    List<ICommandProcessor> CreateProcessors(AsciiGame game);
+    List<ICommandProcessor> CreateProcessors();
 }

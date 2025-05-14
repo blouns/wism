@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Wism.Client.Controllers;
+using Wism.Companion.Shared.Events;
 
 namespace Wism.Client.Commands.Locations
 {
@@ -18,6 +19,15 @@ namespace Wism.Client.Commands.Locations
 
             this.Gold = gold;
             return success ? ActionState.Succeeded : ActionState.Failed;
+        }
+
+        public override CommandExecutedEvent ToExecutedEvent(ActionState result)
+        {
+            var evt = base.ToExecutedEvent(result);
+
+            evt.Parameters["Gold"] = Gold;
+
+            return evt;
         }
     }
 }
