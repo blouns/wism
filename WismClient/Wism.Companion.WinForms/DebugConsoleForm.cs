@@ -11,7 +11,15 @@ namespace Wism.Companion.WinForms
         public DebugConsoleForm()
         {
             InitializeComponent();
-            _client = new SignalRClient(LogMessage, _logger.Log, mapRenderer.UpdateMap);
+            _client = new SignalRClient(
+                    LogMessage,
+                    _logger.Log,
+                    snapshot =>
+                    {
+                        mapRenderer.InvertYAxis = snapshot.InvertYAxis;
+                        mapRenderer.UpdateMap(snapshot);
+                    }
+                );
         }
 
         private async void DebugConsoleForm_Load(object sender, EventArgs e)

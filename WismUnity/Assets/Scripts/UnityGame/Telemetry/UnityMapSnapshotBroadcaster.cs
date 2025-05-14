@@ -18,6 +18,8 @@ namespace Assets.Scripts.Telemetry
         {
             if (builder.TryBuild(out var snapshot))
             {
+                snapshot.InvertYAxis = true;
+
                 emitter.Publish(snapshot);
             }
         }

@@ -28,6 +28,9 @@ namespace Wism.Client.Core.Telemetry
             Game.Current.Players.SelectMany(p => p.GetArmies());
 
         public static IEnumerable<City> GetCities() =>
-            Game.Current.Players.SelectMany(p => p.GetCities());
+            GetAllTiles()
+                .Where(t => t.HasCity())
+                .Select(t => t.City)
+                .Distinct();
     }
 }

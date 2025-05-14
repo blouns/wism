@@ -18,8 +18,9 @@ namespace Wism.Client.Agent.Telemetry
         {
             if (builder.TryBuild(out var snapshot))
             {
-                // flip only in ASCII due to flipped coordinate system
-                snapshot = snapshot.FlipYAxis();
+                // Mark for inversion in the companion renderer
+                snapshot.InvertYAxis = true;
+
                 emitter.Publish(snapshot);
             }
         }

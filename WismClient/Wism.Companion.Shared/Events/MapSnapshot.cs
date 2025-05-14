@@ -14,7 +14,7 @@ namespace Wism.Companion.Shared.Events
         public List<ItemDto> Items { get; set; } = new();
         public List<LocationDto> Locations { get; set; } = new();
         public ArmyDto? SelectedArmy { get; set; }
-
+        public bool InvertYAxis { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 

@@ -157,6 +157,9 @@ public class AsciiGame : GameBase
                 if (processor.CanExecute(command))
                 {
                     result = processor.Execute(command);
+
+                    // Update map for listeners (e.g. companion app)
+                    mapSnapshotBroadcaster.TryEmitSnapshot();
                     break;
                 }
             }
@@ -217,10 +220,7 @@ public class AsciiGame : GameBase
             // Game over
             Notify.Alert($"{currentPlayer.Clan.DisplayName} is no longer in the fight!");
             Environment.Exit(1);
-        }
-
-        // Update map for listeners (e.g. companion app)
-        mapSnapshotBroadcaster.TryEmitSnapshot();
+        }        
 
         // Attack cut scene is handled by attack processors
         if (Game.Current.GameState == GameState.AttackingArmy ||
