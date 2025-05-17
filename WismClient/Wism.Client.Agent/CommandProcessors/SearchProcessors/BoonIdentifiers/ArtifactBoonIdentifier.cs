@@ -2,7 +2,7 @@
 using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors.BoonIdentifiers;
+namespace Wism.Client.Agent.CommandProcessors.SearchProcessors.BoonIdentifiers;
 
 public class ArtifactBoonIdentifier : IBoonIdentifier
 {

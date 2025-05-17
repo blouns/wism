@@ -1,7 +1,7 @@
 ﻿using System;
 using Wism.Client.Core.Boons;
 
-namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors.BoonIdentifiers;
+namespace Wism.Client.Agent.CommandProcessors.SearchProcessors.BoonIdentifiers;
 
 public class ThroneBoonIdentifier : IBoonIdentifier
 {

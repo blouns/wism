@@ -1,16 +1,18 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
-using Wism.Client.Core;
-using Wism.Client.Controllers;
-using Wism.Client.Test.Common;
+using System.Linq;
+using Wism.Client.AI.CommandProviders;
 using Wism.Client.AI.Framework;
-using Wism.Client.AI.Tactical;
 using Wism.Client.AI.Services;
 using Wism.Client.AI.Strategic;
+using Wism.Client.AI.Tactical;
+using Wism.Client.Commands.Players;
+using Wism.Client.Common;
+using Wism.Client.Controllers;
+using Wism.Client.Core;
 using Wism.Client.Modules.Infos;
 using Wism.Client.Pathing;
-using Wism.Client.Common;
-using Wism.Client.AI.CommandProviders;
+using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.AI
 {
@@ -146,7 +148,7 @@ namespace Wism.Client.Test.AI
             Assert.That(targetTile.City.Clan, Is.EqualTo(sirians.Clan), "Player should have captured the enemy city with a full stack.");
         }
 
-
+       
         #region Helper Methods
 
         private AdaptaCommandProvider SetupAIController(ControllerProvider controllerProvider, IWismLogger logger)

@@ -39,6 +39,7 @@ namespace Assets.Scripts.CommandProcessors
 
             var recruitCommand = (RecruitHeroCommand)command;
             var player = recruitCommand.Player;
+            var isHuman = player.IsHuman;
 
             if (player.IsDead)
             {
@@ -47,7 +48,7 @@ namespace Assets.Scripts.CommandProcessors
 
             if (recruitCommand.Result == ActionState.NotStarted)
             {
-                // Find's a hero if one is available
+                // Finds a hero if one is available
                 state = command.Execute();
                 if (state == ActionState.Failed)
                 {
@@ -55,23 +56,30 @@ namespace Assets.Scripts.CommandProcessors
                 }
             }
 
-            // Here is available; offer to player if enough money
-            if (recruitCommand.HeroPrice == 0)
+            // Hero is available; offer to player if enough money
+            if (recruitCommand.HeroPrice > player.Gold)
             {
-                // Always accept a free hero!
-                state = AcceptFreeHero(recruitCommand);
+                return ActionState.Failed;
             }
-            else if (player.Gold >= recruitCommand.HeroPrice)
+            if (isHuman)
             {
-                state = OfferHeroToPlayer(recruitCommand);
+                // Humans pay attention to price: free vs paid
+                return (recruitCommand.HeroPrice == 0)
+                    ? AcceptFreeHero(recruitCommand)
+                    : OfferHeroToPlayer(recruitCommand);
             }
             else
             {
-                // Not enough money
-                state = ActionState.Failed;
+                // AI always just accepts
+                return AcceptAiHero(recruitCommand);
             }
+        }
 
-            return state;
+        private ActionState AcceptAiHero(RecruitHeroCommand recruitCommand)
+        {
+            recruitCommand.HeroAccepted = true;
+
+            return ActionState.Succeeded;
         }
 
         private ActionState AcceptFreeHero(RecruitHeroCommand recruitCommand)

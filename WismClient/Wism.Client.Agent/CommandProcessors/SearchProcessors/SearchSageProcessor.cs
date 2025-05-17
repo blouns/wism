@@ -6,7 +6,7 @@ using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 
-namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
+namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
 
 public class SearchSageProcessor : InstrumentedProcessor
 {

@@ -12,6 +12,7 @@ namespace Wism.Client.Commands.Locations
     public abstract class SearchLocationCommand : Command
     {
         protected SearchLocationCommand(LocationController locationController, List<Army> armies, Location location)
+            : base(armies.FirstOrDefault()?.Player)
         {
             LocationController = locationController ?? throw new ArgumentNullException(nameof(locationController));
             Armies = armies ?? throw new ArgumentNullException(nameof(armies));

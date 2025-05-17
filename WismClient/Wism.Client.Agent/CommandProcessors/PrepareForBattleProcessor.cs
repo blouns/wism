@@ -11,7 +11,7 @@ using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors.Human;
+namespace Wism.Client.Agent.CommandProcessors;
 
 public class PrepareForBattleProcessor : InstrumentedProcessor
 {
@@ -25,7 +25,7 @@ public class PrepareForBattleProcessor : InstrumentedProcessor
             throw new ArgumentNullException(nameof(loggerFactory));
         }
 
-        this.logger = loggerFactory.CreateLogger();
+        logger = loggerFactory.CreateLogger();
     }
 
     public override bool CanExecute(ICommandAction command)

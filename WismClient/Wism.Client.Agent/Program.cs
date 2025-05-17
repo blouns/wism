@@ -5,8 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Wism.Client.Agent.CommandProcessors.Factories;
-using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
-using Wism.Client.Agent.CommandProcessors.Human;
 using Wism.Client.Agent.Services;
 using Wism.Client.Agent.UI;
 using Wism.Client.Api.Telemetry;
@@ -17,6 +15,8 @@ using Wism.Client.Controllers;
 using Wism.Client.Data;
 using Wism.Client.Agent.Telemetry;
 using Wism.Client.Core.Telemetry;
+using Wism.Client.Agent.CommandProcessors;
+using Wism.Client.Agent.CommandProcessors.SearchProcessors;
 
 namespace Wism.Client.Agent;
 

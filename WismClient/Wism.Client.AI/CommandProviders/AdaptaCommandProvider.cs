@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Wism.Client.AI.Framework;
+using Wism.Client.CommandProviders;
 using Wism.Client.Commands;
+using Wism.Client.Commands.Players;
+using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
-using Wism.Client.Common;
-using Wism.Client.CommandProviders;
-using Wism.Client.Commands.Players;
+using Wism.Client.MapObjects;
 
 namespace Wism.Client.AI.CommandProviders
 {
@@ -35,6 +36,11 @@ namespace Wism.Client.AI.CommandProviders
         {
             logger.LogInformation("AdaptaCommandProvider: Generating AI commands.");
             bufferedCommands.Clear();
+
+            // live selection snapshot
+            var current = Game.Current.ArmiesSelected()
+                ? Game.Current.GetSelectedArmies()
+                : new List<Army>();
 
             var commands = aiController.ExecuteTurnAndReturnCommands(World.Current);
             if (commands != null && commands.Count > 0)

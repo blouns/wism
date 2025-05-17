@@ -9,7 +9,7 @@ using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors.Human;
+namespace Wism.Client.Agent.CommandProcessors;
 
 public class CompleteBattleProcessor : InstrumentedProcessor
 {

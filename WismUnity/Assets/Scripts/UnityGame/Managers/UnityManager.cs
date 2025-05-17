@@ -6,8 +6,15 @@ using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Wism.Client.AI.CommandProviders;
+using Wism.Client.AI.Framework;
+using Wism.Client.AI.Services;
+using Wism.Client.AI.Strategic;
+using Wism.Client.AI.Tactical;
 using Wism.Client.Api.Telemetry;
 using Wism.Client.CommandProcessors; // Updated
+using Wism.Client.Commands;
+using Wism.Client.Commands.Players;
 using Wism.Client.Controllers; // Updated
 using Wism.Client.Core;
 using Wism.Client.Core.Telemetry;
@@ -71,6 +78,9 @@ namespace Assets.Scripts.Managers
         private ExecutionMode executionMode;
         private ProductionMode productionMode;
         private bool interactiveUI = true;
+
+        // AI
+        private AdaptaCommandProvider adaptaProvider;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
@@ -137,16 +147,40 @@ namespace Assets.Scripts.Managers
                 gameSettings = UnityGameFactory.CreateDefaultGameSettings();
             }
 
-            IntializeWismApi();
+            IntializeWismApi();            
             InitializeCommandProcessors();
             InitializeUI();
             InitializeWismGame(gameSettings);
+            InitializeAI();
             InitializeSnapshotBroadcaster();
             
             this.DebugManager.LogInformation("Initialization complete");
 
             this.isInitialized = true;
             this.ExecutionMode = ExecutionMode.Bootstrap;
+        }
+
+        private void InitializeAI()
+        {
+            //var aiPlayer = Game.Current.Players.FirstOrDefault(p => !p.IsHuman);
+            //if (aiPlayer == null)
+            //{
+            //    // No AI player found, skipping AI initialization
+            //    return;
+            //}
+
+            var pathingStrategy = new AStarPathingStrategy();
+            var pathfinder = new PathfindingService(pathingStrategy);
+            var armyController = provider.ArmyController;
+            var exterminationModule = new ExterminationModule(pathfinder, pathingStrategy, armyController, logger);
+            var captureModule = new CaptureModule(armyController, logger);
+
+            var aiController = new AiController(
+                new SimpleStrategicModule(),
+                new List<ITacticalModule> { exterminationModule, captureModule });
+
+            this.adaptaProvider = new AdaptaCommandProvider(this.logger, aiController, this.provider);
+            this.DebugManager.LogInformation($"ADAPTA AI initialized.");
         }
 
         private void InitializeSnapshotBroadcaster()
@@ -294,11 +328,6 @@ namespace Assets.Scripts.Managers
                     case ExecutionMode.Starting:
                         InitializeSelectedArmyBox();
 
-                        // TESTING ONLY //////////
-                        // TODO: Remove                        
-                        Game.Current.PathingStrategy = new AStarPathingStrategy();
-                        //////////////////////////
-
                         // Start first turn
                         this.GameManager.StartTurn(Game.Current.GetCurrentPlayer());
                         this.ExecutionMode = ExecutionMode.Running;
@@ -307,6 +336,7 @@ namespace Assets.Scripts.Managers
                     // Standard game loop
                     case ExecutionMode.Running:
                         Draw();
+                        GenerateAICommands();
                         DoTasks();
                         this.armyManager.CleanupArmies();
                         break;
@@ -322,6 +352,23 @@ namespace Assets.Scripts.Managers
                 Debug.LogException(ex);
                 this.DebugManager.LogInformation(ex.Message);
                 throw;
+            }
+        }
+
+        private void GenerateAICommands()
+        {
+            var currentPlayer = Game.Current.GetCurrentPlayer();
+            if (!currentPlayer.IsHuman)
+            {
+                if (this.InputManager.InputMode != InputMode.AITurn)
+                {
+                    this.InputManager.SetInputMode(InputMode.AITurn);
+                }
+
+                if (!this.provider.CommandController.CommandExists(this.LastCommandId + 1))
+                {
+                    this.adaptaProvider.GenerateCommands();
+                }
             }
         }
 
@@ -342,7 +389,7 @@ namespace Assets.Scripts.Managers
         /// </summary>
         private void DoTasks()
         {
-            ActionState result = ActionState.NotStarted;
+            ActionState result = ActionState.NotStarted;            
 
             int nextCommand = this.LastCommandId + 1;
             if (!this.provider.CommandController.CommandExists(nextCommand))
@@ -354,6 +401,7 @@ namespace Assets.Scripts.Managers
             // Retrieve next command
             var command = this.provider.CommandController.GetCommand(nextCommand);
             this.DebugManager.LogInformation($"{command}");
+            //LogPlayerKind(command);
 
             // Execute next command
             foreach (var processor in this.commandProcessors)
@@ -372,21 +420,51 @@ namespace Assets.Scripts.Managers
             }
 
             // Process the result
-            if (result == ActionState.Succeeded)
+            switch (result)
             {
-                this.logger.LogInformation($"Task successful");
-                this.LastCommandId = command.Id;
+                case ActionState.Succeeded:
+                    this.logger.LogInformation("Task successful");
+                    AdvanceCommand(command);
+                    break;
+
+                case ActionState.Failed:
+                    this.logger.LogInformation("Task failed");
+                    AdvanceCommand(command);
+                    break;
+
+                case ActionState.InProgress:
+                    this.logger.LogInformation("Task started and in progress");
+                    // Do not advance command ID
+                    break;
             }
-            else if (result == ActionState.Failed)
+        }
+
+        /// <summary>
+        /// Advances the game state based on the specified command.
+        /// </summary>
+        /// <remarks>If the command is an <see cref="EndTurnCommand"/>, the method transitions the game to
+        /// the next player's turn. If the next player is human and the current input mode is set to AI turn, the input
+        /// mode is switched to game mode.</remarks>
+        /// <param name="command">The command to process, which determines the next game action.</param>
+        void AdvanceCommand(Command command)
+        {
+            this.LastCommandId = command.Id;
+
+            if (command is EndTurnCommand)
             {
-                this.logger.LogInformation($"Task failed");
-                this.LastCommandId = command.Id;
+                var nextPlayer = Game.Current.GetCurrentPlayer();
+                if (nextPlayer.IsHuman && this.InputManager.GetInputMode() == InputMode.AITurn)
+                {
+                    this.InputManager.SetInputMode(InputMode.Game);
+                }
             }
-            else if (result == ActionState.InProgress)
-            {
-                this.logger.LogInformation("Task started and in progress");
-                // Do nothing; do not advance Command ID
-            }
+        }
+
+        private void LogPlayerKind(Command command)
+        {
+            var isHuman = Game.Current.GetCurrentPlayer().IsHuman;
+            var playerKind = (isHuman) ? "Human" : "AI";
+            this.logger.LogInformation($"{playerKind} task executing: {command.Id}: {command.GetType()}");
         }
 
         private void EmitSnapshot()

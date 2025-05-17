@@ -35,11 +35,22 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            var ruinsCommand = command as SearchRuinsCommand;
+            var searchCommand = command as SearchRuinsCommand;
+            var player = searchCommand.Player;
+
+            if (!player.IsHuman)
+            {
+                // AI path: skip UI entirely
+                var aiState = searchCommand.Execute();
+                this.unityManager.GameManager.DeselectArmies();
+                return aiState;
+            }
+
+            // Human path: show UI
             if (this.stager == null)
             {
                 this.stager = new CutsceneStagerFactory(this.unityManager)
-                    .CreateRuinsStager(ruinsCommand);
+                    .CreateRuinsStager(searchCommand);
                 if (this.unityManager.InteractiveUI)
                 {
                     this.unityManager.InputManager.SetInputMode(InputMode.WaitForKey);

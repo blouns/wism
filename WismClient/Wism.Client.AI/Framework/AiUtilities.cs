@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Commands.Armies;
+using System.Linq;
 using Wism.Client.Commands;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
-using Wism.Client.Common;
 
 namespace Wism.Client.AI.Framework
 {
@@ -18,19 +19,45 @@ namespace Wism.Client.AI.Framework
             List<ICommandAction> commands,
             Tile targetTile)
         {
-            var select = new SelectArmyCommand(armyController, armies);
-            var prepare = new PrepareForBattleCommand(armyController, armies, targetTile.X, targetTile.Y);
-            var attack = new AttackOnceCommand(armyController, armies, targetTile.X, targetTile.Y);
-            var complete = new CompleteBattleCommand(armyController, attack);
-            var deselect = new DeselectArmyCommand(armyController, armies);
+            // Select the armies if not selected
+            var current = Game.Current.ArmiesSelected()
+                ? Game.Current.GetSelectedArmies()
+                : new List<Army>();
 
-            commands.Add(select);
-            commands.Add(prepare);
+            // If the sets differ, clear then re‐select
+            if (!AreSameSelection(current, armies))
+            {
+                if (current.Any())
+                {
+                    commands.Add(new DeselectArmyCommand(armyController, current));
+                }
+
+                commands.Add(new SelectArmyCommand(armyController, armies));
+            }
+
+            // Set up attack sequence
+            commands.Add(
+                new PrepareForBattleCommand(armyController, armies, targetTile.X, targetTile.Y));
+
+            var attack = new AttackOnceCommand(armyController, armies, targetTile.X, targetTile.Y);
             commands.Add(attack);
-            commands.Add(complete);
-            commands.Add(deselect);
+
+            commands.Add(
+                new CompleteBattleCommand(armyController, attack));
 
             return commands;
+        }
+
+        // Compare two lists by Army Id to avoid duplicate selects
+        private static bool AreSameSelection(
+            IList<Army> a, IList<Army> b)
+        {
+            if (a.Count != b.Count)
+                return false;
+
+            var aIds = a.Select(x => x.Id).OrderBy(id => id);
+            var bIds = b.Select(x => x.Id).OrderBy(id => id);
+            return aIds.SequenceEqual(bIds);
         }
 
 

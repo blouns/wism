@@ -17,7 +17,8 @@ namespace Assets.Scripts.Managers
         LoadGamePicker,
         SaveGamePicker,
         UI,
-        WaitForKey
+        WaitForKey,
+        AITurn
     }
 
     public class InputManager : MonoBehaviour

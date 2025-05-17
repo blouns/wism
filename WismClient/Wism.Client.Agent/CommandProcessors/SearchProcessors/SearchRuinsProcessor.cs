@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors.BoonIdentifiers;
+using Wism.Client.Agent.CommandProcessors.SearchProcessors.BoonIdentifiers;
 using Wism.Client.Api.Telemetry;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Locations;
@@ -10,7 +10,7 @@ using Wism.Client.Core;
 using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 
-namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
+namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
 
 public class SearchRuinsProcessor : InstrumentedProcessor
 {

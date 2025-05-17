@@ -5,7 +5,7 @@ using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
+namespace Wism.Client.Agent.CommandProcessors.SearchProcessors;
 
 public class SearchTempleProcessor : InstrumentedProcessor
 {

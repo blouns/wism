@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Common;
 using Wism.Client.Comparers;
 using Wism.Client.Core.Armies;
@@ -316,56 +317,57 @@ namespace Wism.Client.Core
         /// </remarks>
         public void SelectArmies(List<Army> armies)
         {
-            if (armies is null)
-            {
+            if (armies == null)
                 throw new ArgumentNullException(nameof(armies));
-            }
 
-            if (this.GameState != GameState.Ready &&
+            if (this.GameState != GameState.Ready && 
                 this.GameState != GameState.SelectedArmy)
-            {
                 return;
-            }
 
-            if (!armies.TrueForAll(army => this.GetCurrentPlayer().Clan.ShortName == army.Player.Clan.ShortName))
+            var player = this.GetCurrentPlayer();
+            if (!armies.TrueForAll(a => a.Player.Clan == player.Clan))
+                throw new InvalidOperationException("Only current player's armies can be selected.");
+
+            var tile = armies[0].Tile;
+
+            // Resolve conflict or restore selection if matching
+            // HACK: Potential for VisitingArmies to get out of sync with SelectedArmies
+            //       This is a workaround for now; but should be fixed in the future.
+            if (tile.HasVisitingArmies())
             {
-                throw new InvalidOperationException("Only the current player can select an army.");
+                var visiting = tile.VisitingArmies;
+                if (visiting.Count == armies.Count && !armies.Except(visiting).Any())
+                {
+                    // Sync selectedArmies if desynced
+                    if (!this.ArmiesSelected())
+                        this.SelectArmiesInternal(visiting);
+
+                    this.Transition(GameState.SelectedArmy);
+                    return;
+                }
+
+                throw new InvalidOperationException(
+                    $"Tile already has different visiting armies: {ArmiesToString(visiting)}");
             }
 
+            // Deselect current selection if switching
             if (this.ArmiesSelected())
             {
                 this.DeselectArmies();
             }
 
-            var tile = armies[0].Tile;
-            if (tile.HasVisitingArmies())
-            {
-                throw new InvalidOperationException(
-                    $"Tile already has visiting armies: {ArmiesToString(tile.VisitingArmies)}");
-            }
-
-            // Move selected armies to Visiting Armies
-            Log.WriteLine(Log.TraceLevel.Information, $"Selecting army: {ArmiesToString(armies)}");
+            // Perform the transfer
             tile.VisitingArmies = new List<Army>(armies);
             tile.VisitingArmies.Sort(new ByArmyViewingOrder());
             foreach (var army in tile.VisitingArmies)
-            {
                 tile.Armies.Remove(army);
-            }
 
-            // Clean up tile's unselected armies
-            if (tile.HasArmies())
-            {
-                tile.Armies.Sort(new ByArmyViewingOrder());
-            }
-            else
-            {
-                tile.Armies = null;
-            }
+            tile.Armies = tile.HasArmies() ? tile.Armies : null;
 
             this.SelectArmiesInternal(tile.VisitingArmies);
             this.Transition(GameState.SelectedArmy);
         }
+
 
         internal void SelectArmiesInternal(List<Army> armies)
         {

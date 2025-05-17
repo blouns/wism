@@ -5,7 +5,7 @@ using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 
-namespace Wism.Client.Agent.CommandProcessors.Human;
+namespace Wism.Client.Agent.CommandProcessors;
 
 public class RecruitHeroProcessor : InstrumentedProcessor
 {
