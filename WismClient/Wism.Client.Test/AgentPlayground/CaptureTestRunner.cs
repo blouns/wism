@@ -2,7 +2,15 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Newtonsoft.Json;
 using NUnit.Framework;
+using Wism.Client.Commands.Games;
+using Wism.Client.Common;
+using Wism.Client.Controllers;
+using Wism.Client.Core;
+using Wism.Client.Data;
+using Wism.Client.Data.Entities;
+using Wism.Client.Modules;
 
 namespace Wism.Client.Test.AgentPlayground;
 
@@ -41,6 +49,20 @@ public static class CaptureTestRunner
                 return CaptureVerificationResult.Fail($"Expected final status {expectedStatus}, got {actualStatus}.");
             }
 
+            if (root.TryGetProperty("StartingSnapshotFile", out var snapshotFileProperty) &&
+                snapshotFileProperty.ValueKind == JsonValueKind.String)
+            {
+                var snapshotFile = snapshotFileProperty.GetString();
+                if (!string.IsNullOrWhiteSpace(snapshotFile))
+                {
+                    var snapshotResult = VerifyStartingSnapshot(Path.Combine(captureDirectory, snapshotFile));
+                    if (!snapshotResult.Passed)
+                    {
+                        return snapshotResult;
+                    }
+                }
+            }
+
             var eventsPath = Path.Combine(captureDirectory, eventFile);
             var counters = CountEvents(eventsPath, noUnexpectedFailures);
             if (!counters.Passed)
@@ -64,6 +86,59 @@ public static class CaptureTestRunner
         {
             return CaptureVerificationResult.Fail(ex.Message);
         }
+    }
+
+    private static CaptureVerificationResult VerifyStartingSnapshot(string snapshotPath)
+    {
+        if (!File.Exists(snapshotPath))
+        {
+            return CaptureVerificationResult.Fail($"Missing starting snapshot: {snapshotPath}");
+        }
+
+        var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+        var snapshot = JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(snapshotPath), settings);
+        if (snapshot is null)
+        {
+            return CaptureVerificationResult.Fail($"Could not deserialize starting snapshot: {snapshotPath}");
+        }
+
+        var modRoot = ConfigureModPath(snapshot.World.Name);
+        MapBuilder.Initialize(modRoot, snapshot.World.Name);
+
+        var command = new LoadGameCommand(new GameController(new WismLoggerFactory()), snapshot);
+        var result = command.Execute();
+        if (result != ActionState.Succeeded || !Game.IsInitialized())
+        {
+            return CaptureVerificationResult.Fail($"Could not load starting snapshot: {snapshotPath}");
+        }
+
+        return Game.Current.Players.Count > 0
+            ? CaptureVerificationResult.Ok(0, 0)
+            : CaptureVerificationResult.Fail($"Starting snapshot loaded without players: {snapshotPath}");
+    }
+
+    private static string ConfigureModPath(string worldName)
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var candidates = new[]
+        {
+            Path.Combine(TestContext.CurrentContext.TestDirectory, "mod"),
+            Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "..", "..", "Wism.Client.Core", "mod")),
+            Path.Combine(repositoryRoot, "WismClient", "Wism.Client.Core", "mod"),
+            Path.Combine(Environment.CurrentDirectory, "WismClient", "Wism.Client.Core", "mod")
+        };
+
+        var modRoot = candidates.FirstOrDefault(path =>
+            File.Exists(Path.Combine(path, "Clan.json")) &&
+            Directory.Exists(Path.Combine(path, "Worlds", worldName)));
+        if (modRoot is null)
+        {
+            throw new DirectoryNotFoundException($"Could not find WISM mod root for captured world {worldName}.");
+        }
+
+        ModFactory.ModPath = modRoot;
+        ModFactory.WorldsPath = "Worlds";
+        return modRoot;
     }
 
     private static CaptureVerificationResult CountEvents(string eventsPath, bool noUnexpectedFailures)

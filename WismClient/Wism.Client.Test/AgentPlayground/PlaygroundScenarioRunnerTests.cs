@@ -81,6 +81,7 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(result.Status, Is.EqualTo("Passed"), result.FinalReport.Outcome);
         Assert.That(File.Exists(result.ManifestPath), Is.True);
         Assert.That(File.Exists(result.EventsPath), Is.True);
+        Assert.That(File.Exists(result.StartingSnapshotPath), Is.True);
         Assert.That(File.Exists(result.FinalReportPath), Is.True);
         Assert.That(File.Exists(result.GeneratedTestPath), Is.True);
 

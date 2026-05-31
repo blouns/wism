@@ -153,6 +153,7 @@ public sealed class PlaygroundScenarioRunner
             _ => Win()
         };
 
+        captureRecorder.CaptureStartingSnapshot();
         return captureRecorder.Save(report, generateTest);
     }
 
@@ -421,6 +422,7 @@ public sealed class PlaygroundScenarioRunner
 
     private ActionState ExecuteCommand(Command command)
     {
+        captureRecorder?.CaptureStartingSnapshot();
         var result = companionProcessor?.Execute(command) ?? command.Execute();
         captureRecorder?.RecordCommand(command, result);
         PublishMapSnapshot();

@@ -5,7 +5,12 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Wism.Client.Commands;
 using Wism.Client.Controllers;
+using Wism.Client.Core;
+using Wism.Client.Data;
+using Wism.Client.Data.Entities;
 using Wism.Companion.Shared.Events;
+using Newtonsoft.Json;
+using SystemTextJsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Wism.Agent.Playground;
 
@@ -16,6 +21,7 @@ public sealed record CaptureResult(
     string OutputDirectory,
     string ManifestPath,
     string EventsPath,
+    string? StartingSnapshotPath,
     string FinalReportPath,
     string? GeneratedTestPath,
     PlaygroundReport FinalReport);
@@ -26,6 +32,7 @@ public sealed record CaptureManifest(
     string Scenario,
     DateTime CreatedUtc,
     string EventFile,
+    string? StartingSnapshotFile,
     string FinalReportFile,
     CaptureExpected Expected);
 
@@ -49,6 +56,7 @@ public sealed class CaptureRecorder
     };
 
     private readonly List<string> eventLines = new();
+    private GameEntity? startingSnapshot;
 
     public CaptureRecorder(string name, string scenario, string outputRoot)
     {
@@ -67,10 +75,18 @@ public sealed class CaptureRecorder
 
     public int MapSnapshotCount { get; private set; }
 
+    public void CaptureStartingSnapshot()
+    {
+        if (startingSnapshot is null && Game.IsInitialized())
+        {
+            startingSnapshot = Game.Current.Snapshot();
+        }
+    }
+
     public void RecordCommand(Command command, ActionState result)
     {
         var executed = command.ToExecutedEvent(result);
-        eventLines.Add(JsonSerializer.Serialize(new CaptureEvent<CommandExecutedEvent>(
+        eventLines.Add(SystemTextJsonSerializer.Serialize(new CaptureEvent<CommandExecutedEvent>(
             nameof(CommandExecutedEvent),
             executed), EventJsonOptions));
         CommandCount++;
@@ -78,7 +94,7 @@ public sealed class CaptureRecorder
 
     public void RecordMapSnapshot(MapSnapshot snapshot)
     {
-        eventLines.Add(JsonSerializer.Serialize(new CaptureEvent<MapSnapshot>(
+        eventLines.Add(SystemTextJsonSerializer.Serialize(new CaptureEvent<MapSnapshot>(
             nameof(MapSnapshot),
             snapshot), EventJsonOptions));
         MapSnapshotCount++;
@@ -90,6 +106,7 @@ public sealed class CaptureRecorder
 
         var manifestPath = Path.Combine(OutputDirectory, "capture.json");
         var eventsPath = Path.Combine(OutputDirectory, "events.jsonl");
+        var startingSnapshotPath = startingSnapshot is not null ? Path.Combine(OutputDirectory, "starting-snapshot.json") : null;
         var reportPath = Path.Combine(OutputDirectory, "final-report.json");
         var testPath = generateTest ? Path.Combine(OutputDirectory, $"{Name}Tests.cs") : null;
 
@@ -99,6 +116,7 @@ public sealed class CaptureRecorder
             Scenario: Scenario,
             CreatedUtc: DateTime.UtcNow,
             EventFile: "events.jsonl",
+            StartingSnapshotFile: startingSnapshotPath is not null ? "starting-snapshot.json" : null,
             FinalReportFile: "final-report.json",
             Expected: new CaptureExpected(
                 Status: report.Status,
@@ -107,9 +125,15 @@ public sealed class CaptureRecorder
                 MapSnapshotCountMin: MapSnapshotCount,
                 NoUnexpectedCommandFailures: true));
 
-        File.WriteAllText(manifestPath, JsonSerializer.Serialize(manifest, JsonOptions));
+        File.WriteAllText(manifestPath, SystemTextJsonSerializer.Serialize(manifest, JsonOptions));
         File.WriteAllText(eventsPath, string.Join(Environment.NewLine, eventLines) + Environment.NewLine);
-        File.WriteAllText(reportPath, JsonSerializer.Serialize(report, JsonOptions));
+        if (startingSnapshotPath is not null)
+        {
+            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            File.WriteAllText(startingSnapshotPath, JsonConvert.SerializeObject(startingSnapshot, settings));
+        }
+
+        File.WriteAllText(reportPath, SystemTextJsonSerializer.Serialize(report, JsonOptions));
 
         if (testPath is not null)
         {
@@ -123,6 +147,7 @@ public sealed class CaptureRecorder
             OutputDirectory,
             manifestPath,
             eventsPath,
+            startingSnapshotPath,
             reportPath,
             testPath,
             report);
