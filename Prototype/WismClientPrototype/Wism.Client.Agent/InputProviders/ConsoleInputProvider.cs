@@ -1,21 +1,19 @@
-﻿using AutoMapper;
+using BranallyGames.Wism;
 using Microsoft.Extensions.Logging;
 using System;
 using Wism.Client.Agent.Controllers;
-using Wism.Client.Model;
-using BranallyGames.Wism;
+using Wism.Client.Agent.Mapping;
 using Wism.Client.Model.Commands;
-using System.Collections.Generic;
 
 namespace Wism.Client.Agent.InputProviders
 {
     public class ConsoleInputProvider : IInputProvider
     {
         private readonly CommandController commandController;
-        private readonly IMapper mapper;
+        private readonly CommandMapper mapper;
         private readonly ILogger logger;
 
-        public ConsoleInputProvider(ILoggerFactory loggerFactory, CommandController commandController, IMapper mapper)
+        public ConsoleInputProvider(ILoggerFactory loggerFactory, CommandController commandController, CommandMapper mapper)
         {
             logger = loggerFactory.CreateLogger<ConsoleInputProvider>();
             this.commandController = commandController;
@@ -28,7 +26,7 @@ namespace Wism.Client.Agent.InputProviders
 
             Console.Write("Enter a command: ");
             var keyInfo = Console.ReadKey();
-            var army = mapper.Map<ArmyDto>(selectedArmy);
+            var army = mapper.ToDto(selectedArmy);
 
             switch (keyInfo.Key)
             {

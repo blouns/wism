@@ -2,21 +2,19 @@
 using System.Collections.Generic;
 using Wism.Client.Model.Commands;
 using Wism.Client.Data.Services;
-using Wism.Client.Data;
-using AutoMapper;
 using Wism.Client.Data.Entities;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
+using Wism.Client.Agent.Mapping;
 
 namespace Wism.Client.Agent.Controllers
 {
     public class CommandController
     {
         private readonly IWismClientRepository wismClientRepository;
-        private readonly IMapper mapper;
+        private readonly CommandMapper mapper;
         private readonly ILogger logger;
 
-        public CommandController(ILoggerFactory loggerFactory, IWismClientRepository wismClientRepository, IMapper mapper)
+        public CommandController(ILoggerFactory loggerFactory, IWismClientRepository wismClientRepository, CommandMapper mapper)
         {
             if (loggerFactory is null)
             {
@@ -35,7 +33,7 @@ namespace Wism.Client.Agent.Controllers
                 throw new ArgumentNullException(nameof(command));
             }
 
-            var commandToAdd = mapper.Map<Command>(command);
+            var commandToAdd = mapper.ToEntity(command);
             wismClientRepository.AddCommand(commandToAdd);
             wismClientRepository.Save();
         }
@@ -54,7 +52,7 @@ namespace Wism.Client.Agent.Controllers
 
             var commandFromRepo = wismClientRepository.GetCommandAsync(commandId).Result;
 
-            return mapper.Map<CommandDto>(commandFromRepo);
+            return mapper.ToDto(commandFromRepo);
         }
 
         /// <summary>
@@ -64,7 +62,7 @@ namespace Wism.Client.Agent.Controllers
         public IEnumerable<CommandDto> GetCommands()
         {
             var commandsFromRepo = wismClientRepository.GetCommandsAsync().Result;
-            return mapper.Map<IEnumerable<CommandDto>>(commandsFromRepo);
+            return mapper.ToDtos(commandsFromRepo);
         }
 
         /// <summary>
@@ -75,7 +73,7 @@ namespace Wism.Client.Agent.Controllers
         public IEnumerable<CommandDto> GetCommandsAfterId(int lastSeenCommandId)
         {
             var commandsFromRepo = wismClientRepository.GetCommandsAfterIdAsync(lastSeenCommandId).Result;
-            return mapper.Map<IEnumerable<CommandDto>>(commandsFromRepo);
+            return mapper.ToDtos(commandsFromRepo);
         }
     }
 }

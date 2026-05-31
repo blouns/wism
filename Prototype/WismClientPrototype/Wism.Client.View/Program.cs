@@ -4,13 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using AutoMapper;
 using Serilog;
 using System.Threading.Tasks;
 using Wism.Client.Agent;
 using Wism.Client.Data.DbContexts;
 using Wism.Client.Data.Services;
 using Wism.Client.Agent.Controllers;
+using Wism.Client.Agent.Mapping;
 
 namespace Wism.Client.View
 {
@@ -126,28 +126,27 @@ namespace Wism.Client.View
                         options.EnableSensitiveDataLogging();
                     });
 
-                    services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+                    services.AddSingleton<CommandMapper>();
 
                     // Add controllers
                     services.AddScoped<CommandController>(provider =>
                         new CommandController(
                                 provider.GetService<ILoggerFactory>(),
                                 provider.GetService<IWismClientRepository>(),
-                                provider.GetService<IMapper>()));
+                                provider.GetService<CommandMapper>()));
 
                     // Add agent
                     services.AddSingleton<IHostedService>(provider =>
                         new WismAgent(
                             provider.GetService<ILoggerFactory>(),
-                            provider.GetService<CommandController>(),
-                            provider.GetService<IMapper>()));
+                            provider.GetService<CommandController>()));                           
 
                     // Add view
                     services.AddTransient<WismViewBase, WismAsciiView>(provider =>
                         new WismAsciiView(
                             provider.GetService<ILoggerFactory>(),
                             provider.GetService<CommandController>(),
-                            provider.GetService<IMapper>()));
+                            provider.GetService<CommandMapper>()));
                 });
     }
  }

@@ -1,12 +1,11 @@
-﻿using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Agent.Controllers;
-using Wism.Client.Agent.Profiles;
+using Wism.Client.Agent.Mapping;
 using Wism.Client.Data.DbContexts;
 using Wism.Client.Data.Entities;
 using Wism.Client.Data.Services;
@@ -27,11 +26,7 @@ namespace Wism.Client.Test
                 .UseSqlite(connection)
                 .Options;
 
-            var config = new MapperConfiguration(opts =>
-            {
-                opts.AddProfile(new CommandProfile());
-            });
-            var mapper = config.CreateMapper();
+            var mapper = new CommandMapper();
 
             using (var context = new WismClientDbContext(options))
             {
@@ -53,8 +48,8 @@ namespace Wism.Client.Test
             using (var context = new WismClientDbContext(options))
             {
                 var commandFromRepo = context.Commands.FirstOrDefaultAsync(a => a.Id == 1).Result;
-                var command = mapper.Map<MoveCommandDto>(commandFromRepo);
-                
+                var command = (MoveCommandDto)mapper.ToDto(commandFromRepo);
+
                 Assert.Equal(3, command.X);
                 Assert.Equal(4, command.Y);
             }
@@ -70,11 +65,7 @@ namespace Wism.Client.Test
                 .UseSqlite(connection)
                 .Options;
 
-            var config = new MapperConfiguration(opts =>
-            {
-                opts.AddProfile(new CommandProfile());
-            });
-            var mapper = config.CreateMapper();
+            var mapper = new CommandMapper();
 
             using (var context = new WismClientDbContext(options))
             {
@@ -104,7 +95,7 @@ namespace Wism.Client.Test
             }
 
             using (var context = new WismClientDbContext(options))
-            {                
+            {
                 var wismRepository = new WismClientSqliteRepository(context);
                 CommandController commandController = new CommandController(CreateLogFactory(), wismRepository, mapper);
 
@@ -113,15 +104,9 @@ namespace Wism.Client.Test
 
                 // Assert
                 Assert.Equal(3, commands.Count);
-                Assert.Equal(1, commands[0].Id);
-                Assert.Equal(2, commands[1].Id);
-                Assert.Equal(3, commands[2].Id);
-
-                Assert.IsAssignableFrom<MoveCommandDto>(commands[0]);
-                MoveCommandDto armyMoveCommand = (MoveCommandDto)commands[0];
-                Assert.Equal(0, armyMoveCommand.X);
-                Assert.Equal(1, armyMoveCommand.Y);
-            }          
+                Assert.Equal(new[] { 1, 2, 3 }, commands.Select(command => command.Id).OrderBy(id => id).ToArray());
+                Assert.Contains(commands, command => command is MoveCommandDto move && move.X == 0 && move.Y == 1);
+            }
         }
 
         [Fact]
@@ -134,11 +119,7 @@ namespace Wism.Client.Test
                 .UseSqlite(connection)
                 .Options;
 
-            var config = new MapperConfiguration(opts =>
-            {
-                opts.AddProfile(new CommandProfile());
-            });
-            var mapper = config.CreateMapper();
+            var mapper = new CommandMapper();
 
             using (var context = new WismClientDbContext(options))
             {

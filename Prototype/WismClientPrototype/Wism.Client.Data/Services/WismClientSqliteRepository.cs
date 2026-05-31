@@ -39,18 +39,27 @@ namespace Wism.Client.Data.Services
 
         public async Task<Command> GetCommandAsync(int commandId)
         {
-            return await context.Commands.FirstOrDefaultAsync(a => a.Id == commandId);
+            return await context.Commands
+                .Include(command => command.ArmyCommands)
+                .FirstOrDefaultAsync(a => a.Id == commandId);
         }
 
         public async Task<List<Command>> GetCommandsAsync()
         {
-            return await context.Commands.ToListAsync();
+            return await context.Commands
+                .Include(command => command.ArmyCommands)
+                .OrderBy(command => command.Id)
+                .ToListAsync();
         }
 
         public async Task<List<Command>> GetCommandsAfterIdAsync(int lastSeenCommandId)
         {
             // TODO: Do we need pagination for large requests?
-            return await context.Commands.Where(c => c.Id > lastSeenCommandId).ToListAsync();
+            return await context.Commands
+                .Include(command => command.ArmyCommands)
+                .Where(c => c.Id > lastSeenCommandId)
+                .OrderBy(command => command.Id)
+                .ToListAsync();
         }
 
         public bool Save()

@@ -1,11 +1,10 @@
-﻿using AutoMapper;
 using BranallyGames.Wism;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Wism.Client.Agent.Controllers;
 using Wism.Client.Agent.InputProviders;
+using Wism.Client.Agent.Mapping;
 using Wism.Client.Model.Commands;
 
 namespace Wism.Client.View
@@ -17,7 +16,7 @@ namespace Wism.Client.View
     {
         private readonly ILogger logger;
         private readonly CommandController commandController;
-        private readonly IMapper mapper;
+        private readonly CommandMapper mapper;
         private readonly List<IInputProvider> inputProviders;
 
         IDictionary<string, char> unitMap = new Dictionary<string, char>
@@ -47,7 +46,7 @@ namespace Wism.Client.View
             { "Void", 'v' }
         };
 
-        public WismAsciiView(ILoggerFactory logFactory, CommandController commandController, IMapper mapper)
+        public WismAsciiView(ILoggerFactory logFactory, CommandController commandController, CommandMapper mapper)
             : base(logFactory, commandController, mapper)
         {
             if (logFactory is null)
@@ -62,6 +61,7 @@ namespace Wism.Client.View
 
             this.logger = logFactory.CreateLogger<WismAsciiView>();
             this.commandController = commandController ?? throw new ArgumentNullException(nameof(commandController));
+            this.mapper = mapper;
 
             this.inputProviders = new List<IInputProvider>()
             {
@@ -90,7 +90,6 @@ namespace Wism.Client.View
                 if (command is MoveCommandDto)
                 {
                     MoveCommandDto armyMoveCommand = (MoveCommandDto)command;
-                    // REVIEW: Should we instead use the mapper (ArmyDto --> Army)?
                     var army = FindArmyByGuid(armyMoveCommand.Army.Guid);
                     if (!army.TryMove(new Coordinates(armyMoveCommand.X, armyMoveCommand.Y)))
                     {

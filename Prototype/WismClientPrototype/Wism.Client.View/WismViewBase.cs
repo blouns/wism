@@ -1,9 +1,9 @@
-﻿using AutoMapper;
 using BranallyGames.Wism;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using Wism.Client.Agent.Controllers;
+using Wism.Client.Agent.Mapping;
 using Wism.Client.Model;
 using Wism.Client.Model.Commands;
 
@@ -18,9 +18,9 @@ namespace Wism.Client.View
 
         protected BranallyGames.Wism.Army selectedArmy;
         private readonly CommandController commandController;
-        private readonly IMapper mapper;
+        private readonly CommandMapper mapper;
 
-        public WismViewBase(ILoggerFactory loggerFactory, CommandController commandController, IMapper mapper)
+        public WismViewBase(ILoggerFactory loggerFactory, CommandController commandController, CommandMapper mapper)
         {
             if (loggerFactory is null)
             {
@@ -31,6 +31,7 @@ namespace Wism.Client.View
             this.commandController = commandController ?? throw new ArgumentNullException(nameof(commandController));
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
+
         public async Task RunAsync()
         {
             logger.LogInformation("WISM View successfully started");
@@ -68,13 +69,20 @@ namespace Wism.Client.View
             //         Must change to only create objects through the controller (impl Hire/Conscript)
             World.CreateDefaultWorld();
 
+            var hero = new ArmyDto()
+            {
+                ShortName = "Hero",
+                X = 1,
+                Y = 1
+            };
+
             // Create a hero
             commandController.AddCommand(
                 new HireHeroCommandDto()
                 {
-                    ShortName = "Hero",
-                    X = 1,
-                    Y = 1
+                    ShortName = hero.ShortName,
+                    X = hero.X,
+                    Y = hero.Y
                 });
 
             // BUGBUG: Hack to mirror the change; needs to be ported to Consumer
@@ -97,13 +105,13 @@ namespace Wism.Client.View
             commandController.AddCommand(
                 new ConscriptArmyCommandDto()
                 {
-                    Army = hero
+                    Army = lightInfantry
                 });
 
             // BUGBUG: Hack to mirror the change; needs to be ported to Consumer
             World.Current.Players[1].ConscriptArmy(
-                ModFactory.FindUnitInfo(lightInfantry.ShortName), 
-                World.Current.Map[lightInfantry.X, lightInfantry.Y]);            
+                ModFactory.FindUnitInfo(lightInfantry.ShortName),
+                World.Current.Map[lightInfantry.X, lightInfantry.Y]);
         }
     }
 }
