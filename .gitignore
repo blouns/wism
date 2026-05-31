@@ -1,3 +1,7 @@
+## Claude Code
+# Local settings overrides — machine-specific, not for sharing
+.claude/settings.local.json
+
 ## Unity ignores
 [Ll]ibrary/
 [Tt]emp/
