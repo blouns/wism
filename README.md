@@ -19,6 +19,9 @@ The Client API is the local contract for a UI, AI, or remote player interface. S
 
 Further, this layer is designed such that all game state changes driven by a controller are replayable deterministically. This allows for any controller set to the same random seed to stay in sync without copying or replicating game state other than the Command objects. This is also a key design principle and must not be violated. There may be additional non-game state, such as user information, chat, or similar state that may be managed outside of the command channel.
 
+Command lifecycle:
+All gameplay mutations should enter the system as Command objects. A controller creates a command, the API records it in command order, a processor executes it against the core model, and replay consumers can reapply the same ordered command stream from the same starting state and random seed. New gameplay features should preserve this path instead of mutating core game state directly from a UI, AI, network, or companion surface.
+
 Core:
 The Core model contains the entities like Army, Terrain, and Items; though it also contains business logic for the core game states and operations such as private IWarStrategy and IPathingStrategy implementations to be consumed or extended by the API. It may be extended either directly or via the Module interfaces. This layer is designed for mods to be created as new army types, cities, or other items are added. Examples are found under "/mod" in the form of JSON files.
 
