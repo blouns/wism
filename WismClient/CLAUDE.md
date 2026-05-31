@@ -6,12 +6,12 @@ C# game engine for a Warlords (1990, SSG) clone. No Unity dependency — this so
 
 ```
 WismClient/
-├── Wism.Client.Core/        # Entities, controllers, strategies, mod system (netstandard2.1)
-├── Wism.Client.Api/         # Command pattern, repository, CommandProcessor (netstandard2.1)
-├── Wism.Client.AI/          # AiController, strategic/tactical modules, pathfinding (netstandard2.1)
+├── Wism.Client.Core/        # Entities, controllers, strategies, mod system (netstandard2.1 for Unity 6)
+├── Wism.Client.Api/         # Command pattern, repository, CommandProcessor (netstandard2.1 for Unity 6)
+├── Wism.Client.AI/          # AiController, strategic/tactical modules, pathfinding (netstandard2.1 for Unity 6)
 ├── Wism.Client.Agent/       # Console entry point, DI, Serilog (net8.0)
 ├── Wism.Client.Test/        # NUnit tests (net8.0)
-├── Wism.Companion.Shared/   # DTOs: MapSnapshot, TileDto, ArmyDto, CityDto (netstandard2.1)
+├── Wism.Companion.Shared/   # DTOs: MapSnapshot, TileDto, ArmyDto, CityDto (netstandard2.1 for Unity 6)
 ├── Wism.Companion.WinForms/ # Live map companion app via SignalR (net8.0-windows)
 ├── Wism.SignalR.Host/       # GameHub: BroadcastCommand, BroadcastMapSnapshot (net8.0)
 └── Wism.Performance.Test/   # NBench benchmarks (net6.0)
@@ -50,6 +50,8 @@ After building, copy these 4 DLLs to `../WismUnity/Assets/Plugins/WismClient/`:
 - `Wism.Companion.Shared.dll`
 
 Use `/project:deploy-unity` to do this automatically.
+
+These four projects import `Build/Wism.PublishToUnity.targets` and are directly loaded by Unity from `WismUnity/Assets/Plugins/WismClient/`. WismUnity is currently Unity 6000.0.34f1 with the .NET Standard 2.1 API profile, so keep these projects on `netstandard2.1`. Do not raise them to `net8.0` or add dependencies that require newer TFMs unless the Unity baseline is deliberately changed first. If WismUnity is migrated backward to an older Unity profile, re-check this boundary before changing dependencies. Tooling-only projects such as Agent, AgentPlayground, Companion WinForms, SignalR Host, and tests may use modern .NET.
 
 ## Key Architecture Patterns
 
