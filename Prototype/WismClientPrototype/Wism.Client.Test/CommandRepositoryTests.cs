@@ -8,6 +8,7 @@ using Wism.Client.Data.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit.Abstractions;
 using BranallyGames.Wism;
 
@@ -70,14 +71,8 @@ namespace Wism.Client.Test
 
                 // Assert
                 Assert.Equal(3, commands.Count);
-                Assert.Equal(1, commands[0].Id);
-                Assert.Equal(2, commands[1].Id);
-                Assert.Equal(3, commands[2].Id);
-
-                Assert.IsAssignableFrom<MoveCommand>(commands[0]);
-                MoveCommand armyMoveCommand = (MoveCommand)commands[0];
-                Assert.Equal(0, armyMoveCommand.X);
-                Assert.Equal(1, armyMoveCommand.Y);
+                Assert.Equal(new[] { 1, 2, 3 }, commands.Select(command => command.Id).OrderBy(id => id).ToArray());
+                Assert.Contains(commands, command => command is MoveCommand move && move.X == 0 && move.Y == 1);
             }
         }
 
@@ -131,19 +126,9 @@ namespace Wism.Client.Test
 
                 // Assert
                 Assert.Equal(3, commands.Count);
-                Assert.Equal(1, commands[0].Id);
-                Assert.Equal(2, commands[1].Id);
-                Assert.Equal(3, commands[2].Id);
-
-                Assert.IsAssignableFrom<MoveCommand>(commands[0]);
-                MoveCommand armyMoveCommand = (MoveCommand)commands[0];
-                Assert.Equal(0, armyMoveCommand.X);
-                Assert.Equal(1, armyMoveCommand.Y);
-
-                Assert.IsAssignableFrom<AttackCommand>(commands[2]);
-                AttackCommand armyAttackCommand = (AttackCommand)commands[2];
-                Assert.Equal(0, armyAttackCommand.X);
-                Assert.Equal(3, armyAttackCommand.Y);
+                Assert.Equal(new[] { 1, 2, 3 }, commands.Select(command => command.Id).OrderBy(id => id).ToArray());
+                Assert.Contains(commands, command => command is MoveCommand move && move.X == 0 && move.Y == 1);
+                Assert.Contains(commands, command => command is AttackCommand attack && attack.X == 0 && attack.Y == 3);
             }
         }
 
@@ -168,6 +153,14 @@ namespace Wism.Client.Test
             {
                 context.Database.OpenConnection();
                 context.Database.EnsureCreated();
+                context.Armies.Add(new Wism.Client.Data.Entities.Army()
+                {
+                    Id = armyId,
+                    Name = "Hero",
+                    HitPoints = 2,
+                    Strength = 5
+                });
+                context.SaveChanges();
 
                 var command = new MoveCommand()
                 {

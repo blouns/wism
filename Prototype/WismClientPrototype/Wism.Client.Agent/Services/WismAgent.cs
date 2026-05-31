@@ -1,4 +1,3 @@
-﻿using AutoMapper;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,23 +11,21 @@ namespace Wism.Client.Agent
     {
         private readonly ILogger<WismAgent> logger;
         private readonly CommandController commandController;
-        private readonly IMapper mapper;
 
-        public WismAgent(ILoggerFactory loggerFactory, CommandController commandController, IMapper mapper)
+        public WismAgent(ILoggerFactory loggerFactory, CommandController commandController)
         {
             this.logger = loggerFactory.CreateLogger<WismAgent>();
             this.commandController = commandController;
-            this.mapper = mapper;
-        }        
-       
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            try 
+            try
             {
                 logger.LogInformation("WISM Agent is alive");
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    // TODO: Poll cloud API for updates   
+                    // TODO: Poll cloud API for updates
 
                     await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
                 }

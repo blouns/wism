@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Wism.Client.Model.Commands
 {
-    public class HireHeroCommandDto
+    public class HireHeroCommandDto : CommandDto
     {
         public string ShortName { get; set; }
 

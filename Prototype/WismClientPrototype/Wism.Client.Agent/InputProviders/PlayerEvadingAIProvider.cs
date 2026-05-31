@@ -1,11 +1,7 @@
-﻿using AutoMapper;
 using BranallyGames.Wism;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Wism.Client.Agent.Controllers;
-using Wism.Client.Model;
+using Wism.Client.Agent.Mapping;
 using Wism.Client.Model.Commands;
 
 namespace Wism.Client.Agent.InputProviders
@@ -13,10 +9,10 @@ namespace Wism.Client.Agent.InputProviders
     public class PlayerEvadingAIProvider : IInputProvider
     {
         private readonly CommandController commandController;
-        private readonly IMapper mapper;
+        private readonly CommandMapper mapper;
         private readonly ILogger logger;
 
-        public PlayerEvadingAIProvider(ILoggerFactory loggerFactory, CommandController commandController, IMapper mapper)
+        public PlayerEvadingAIProvider(ILoggerFactory loggerFactory, CommandController commandController, CommandMapper mapper)
         {
             logger = loggerFactory.CreateLogger<PlayerEvadingAIProvider>();
             this.commandController = commandController;
@@ -27,7 +23,7 @@ namespace Wism.Client.Agent.InputProviders
         public void ProcessInput()
         {
             var myArmy = World.Current.Players[1]
-                .GetArmies()[0];            
+                .GetArmies()[0];
             int myX = myArmy.GetCoordinates().X;
             int myY = myArmy.GetCoordinates().Y;
             int targetX = World.Current.Players[0]
@@ -56,7 +52,7 @@ namespace Wism.Client.Agent.InputProviders
             }
 
             // Queue the command in the agent
-            var armyToCommand = mapper.Map<ArmyDto>(myArmy);
+            var armyToCommand = mapper.ToDto(myArmy);
             var command = new MoveCommandDto()
             {
                 Army = armyToCommand,
