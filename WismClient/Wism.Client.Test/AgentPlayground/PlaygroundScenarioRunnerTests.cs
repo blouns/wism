@@ -49,4 +49,25 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(plan.Agents.Select(agent => agent.Branch), Is.Unique);
         Assert.That(plan.Agents.Select(agent => agent.Path), Is.Unique);
     }
+
+    [Test]
+    public void WorldSample_LoadsTestWorldAsCompleteModUnit()
+    {
+        var report = new PlaygroundScenarioRunner().WorldSample("TestWorld");
+
+        Assert.That(report.Status, Is.EqualTo("Passed"), report.Outcome);
+        Assert.That(report.Scenario, Is.EqualTo("world:TestWorld"));
+        Assert.That(report.Events, Has.Some.Contains("39x17"));
+        Assert.That(report.Events, Has.Some.Contains("3 cities"));
+    }
+
+    [Test]
+    public void WorldSample_LoadsMiniIlluriaTileArrayMap()
+    {
+        var report = new PlaygroundScenarioRunner().WorldSample("Mini-Illuria");
+
+        Assert.That(report.Status, Is.EqualTo("Failed"), report.Outcome);
+        Assert.That(report.Scenario, Is.EqualTo("world:Mini-Illuria"));
+        Assert.That(report.Outcome, Does.Contain("Unity scene placement export"));
+    }
 }

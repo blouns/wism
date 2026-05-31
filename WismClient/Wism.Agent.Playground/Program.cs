@@ -21,12 +21,16 @@ try
             var reports = runner.ParallelSmoke(agents);
             Console.WriteLine(JsonSerializer.Serialize(reports, JsonOptions()));
             return reports.All(report => report.Status == "Passed") ? 0 : 1;
+        case "world":
+            var world = ReadString(args, "world", "TestWorld") ?? "TestWorld";
+            var modRoot = ReadString(args, "modRoot", null);
+            return Exit(Print(runner.WorldSample(world, modRoot), quiet));
         case "worktrees":
             var plan = PlaygroundScenarioRunner.CreateWorktreePlan(FindRepositoryRoot(), ReadInt(args, "agents", 4));
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|worktrees] [--quiet] [agents=N]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|world|worktrees] [--quiet] [agents=N] [world=TestWorld] [modRoot=path]");
             return 2;
     }
 }
@@ -56,6 +60,13 @@ static int ReadInt(IReadOnlyList<string> args, string name, int fallback)
     var prefix = name + "=";
     var value = args.FirstOrDefault(arg => arg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
     return value is not null && int.TryParse(value[prefix.Length..], out var parsed) ? parsed : fallback;
+}
+
+static string? ReadString(IReadOnlyList<string> args, string name, string? fallback)
+{
+    var prefix = name + "=";
+    var value = args.FirstOrDefault(arg => arg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+    return value is not null ? value[prefix.Length..] : fallback;
 }
 
 static string FindRepositoryRoot()
