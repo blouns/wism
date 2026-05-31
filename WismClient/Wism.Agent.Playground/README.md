@@ -9,6 +9,7 @@ dotnet run --project Wism.Agent.Playground -- sample
 dotnet run --project Wism.Agent.Playground -- win
 dotnet run --project Wism.Agent.Playground -- lose
 dotnet run --project Wism.Agent.Playground -- parallel agents=4
+dotnet run --project Wism.Agent.Playground -- companion scenario=win delayMs=300
 dotnet run --project Wism.Agent.Playground -- world world=TestWorld
 dotnet run --project Wism.Agent.Playground -- world world=Mini-Illuria
 dotnet run --project Wism.Agent.Playground -- worktrees agents=4
@@ -22,6 +23,7 @@ dotnet run --project Wism.Agent.Playground -- worktrees agents=4
 - Reports scene-backed worlds clearly when their city/location coordinates are not exported for headless loading.
 - Runs without `Console.Clear`, `Console.ReadKey`, or a real terminal handle.
 - Emits JSON reports so wism-agents can parse outcomes.
+- Can publish command/map telemetry to Wism Companion through the existing `wism-commands` named pipe while running headless scenarios.
 - Keeps public WISM worktree creation as an explicit plan by default. The command output names separate branch/worktree pairs rooted at `HEAD`, which should be the committed playground scaffold.
 - Parallel experiments use child processes because the current game runtime has static `Game.Current` and `World.Current` state.
 

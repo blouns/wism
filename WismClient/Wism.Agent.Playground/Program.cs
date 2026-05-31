@@ -21,6 +21,10 @@ try
             var reports = runner.ParallelSmoke(agents);
             Console.WriteLine(JsonSerializer.Serialize(reports, JsonOptions()));
             return reports.All(report => report.Status == "Passed") ? 0 : 1;
+        case "companion":
+            var scenario = ReadString(args, "scenario", "win") ?? "win";
+            var delayMs = ReadInt(args, "delayMs", 300);
+            return Exit(Print(runner.CompanionDemo(scenario, delayMs), quiet));
         case "world":
             var world = ReadString(args, "world", "TestWorld") ?? "TestWorld";
             var modRoot = ReadString(args, "modRoot", null);
@@ -30,7 +34,7 @@ try
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|world|worktrees] [--quiet] [agents=N] [world=TestWorld] [modRoot=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|worktrees] [--quiet] [agents=N] [scenario=win] [delayMs=300] [world=TestWorld] [modRoot=path]");
             return 2;
     }
 }

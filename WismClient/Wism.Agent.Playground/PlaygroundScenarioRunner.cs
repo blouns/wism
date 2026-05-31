@@ -5,8 +5,10 @@ using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
+using Wism.Client.CommandProcessors;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.Data;
 using Wism.Client.Data.Entities;
 using Wism.Client.Factories;
@@ -20,6 +22,9 @@ public sealed class PlaygroundScenarioRunner
 {
     private readonly List<string> events = new();
     private readonly ControllerProvider controllers;
+    private StandardProcessor? companionProcessor;
+    private MapSnapshotEmitter? mapSnapshotEmitter;
+    private int companionDelayMs;
 
     public PlaygroundScenarioRunner()
     {
@@ -116,6 +121,19 @@ public sealed class PlaygroundScenarioRunner
                 Events: events.ToArray(),
                 Map: string.Empty);
         }
+    }
+
+    public PlaygroundReport CompanionDemo(string scenario = "win", int delayMs = 300)
+    {
+        EnableCompanionTelemetry(Math.Clamp(delayMs, 0, 5000));
+        events.Add("Companion telemetry enabled on named pipe wism-commands.");
+
+        return scenario.ToLowerInvariant() switch
+        {
+            "sample" => SampleWithTelemetry(),
+            "lose" => Lose(),
+            _ => Win()
+        };
     }
 
     private static void KillAll(Player player)
@@ -232,6 +250,7 @@ public sealed class PlaygroundScenarioRunner
         MapBuilder.AddCitiesFromWorldPath(world, worldName);
         MapBuilder.AddLocationsFromWorldPath(world, worldName);
         MapBuilder.AllocateBoons(world.GetLocations());
+        PublishMapSnapshot();
     }
 
     private static string ConfigureModPath(string? requestedModRoot = null, string? worldName = null, bool requireMap = false)
@@ -366,10 +385,10 @@ public sealed class PlaygroundScenarioRunner
     private ActionState Execute(Command command)
     {
         controllers.CommandController.AddCommand(command);
-        var result = command.Execute();
+        var result = ExecuteCommand(command);
         while (result == ActionState.InProgress)
         {
-            result = command.Execute();
+            result = ExecuteCommand(command);
         }
 
         if (result == ActionState.Failed)
@@ -378,6 +397,47 @@ public sealed class PlaygroundScenarioRunner
         }
 
         return result;
+    }
+
+    private ActionState ExecuteCommand(Command command)
+    {
+        var result = companionProcessor?.Execute(command) ?? command.Execute();
+        PublishMapSnapshot();
+        return result;
+    }
+
+    private PlaygroundReport SampleWithTelemetry()
+    {
+        var report = Sample();
+        PublishMapSnapshot();
+        return report;
+    }
+
+    private void EnableCompanionTelemetry(int delayMs)
+    {
+        var loggerFactory = new WismLoggerFactory();
+        companionProcessor = new StandardProcessor(loggerFactory, new CommandIpcPublisher(loggerFactory));
+        mapSnapshotEmitter = new MapSnapshotEmitter(loggerFactory);
+        companionDelayMs = delayMs;
+    }
+
+    private void PublishMapSnapshot()
+    {
+        if (mapSnapshotEmitter is null || !Game.IsInitialized())
+        {
+            return;
+        }
+
+        var builder = new MapSnapshotBuilder();
+        if (builder.TryBuild(out var snapshot) && snapshot is not null)
+        {
+            snapshot.InvertYAxis = true;
+            mapSnapshotEmitter.Publish(snapshot);
+            if (companionDelayMs > 0)
+            {
+                Thread.Sleep(companionDelayMs);
+            }
+        }
     }
 
     private PlaygroundReport CreateReport(string scenario, string status, string outcome, int turns)
