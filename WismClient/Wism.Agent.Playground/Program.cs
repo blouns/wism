@@ -29,12 +29,20 @@ try
             var world = ReadString(args, "world", "TestWorld") ?? "TestWorld";
             var modRoot = ReadString(args, "modRoot", null);
             return Exit(Print(runner.WorldSample(world, modRoot), quiet));
+        case "record":
+            var recordScenario = ReadString(args, "scenario", "win") ?? "win";
+            var name = ReadString(args, "name", DefaultCaptureName(recordScenario)) ?? DefaultCaptureName(recordScenario);
+            var outputRoot = ReadString(args, "out", DefaultCaptureOutputRoot()) ?? DefaultCaptureOutputRoot();
+            var generateTest = ReadBool(args, "generateTest", true);
+            var result = runner.Record(recordScenario, name, outputRoot, generateTest);
+            PrintCapture(result, quiet);
+            return string.Equals(result.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "worktrees":
             var plan = PlaygroundScenarioRunner.CreateWorktreePlan(FindRepositoryRoot(), ReadInt(args, "agents", 4));
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|worktrees] [--quiet] [agents=N] [scenario=win] [delayMs=300] [world=TestWorld] [modRoot=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|worktrees] [--quiet] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [world=TestWorld] [modRoot=path]");
             return 2;
     }
 }
@@ -56,6 +64,17 @@ static PlaygroundReport Print(PlaygroundReport report, bool quiet)
     return report;
 }
 
+static void PrintCapture(CaptureResult result, bool quiet)
+{
+    if (quiet)
+    {
+        Console.WriteLine($"{result.Name}:{result.Status}:{result.OutputDirectory}");
+        return;
+    }
+
+    Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions()));
+}
+
 static int Exit(PlaygroundReport report) =>
     string.Equals(report.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
 
@@ -71,6 +90,35 @@ static string? ReadString(IReadOnlyList<string> args, string name, string? fallb
     var prefix = name + "=";
     var value = args.FirstOrDefault(arg => arg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
     return value is not null ? value[prefix.Length..] : fallback;
+}
+
+static bool ReadBool(IReadOnlyList<string> args, string name, bool fallback)
+{
+    var value = ReadString(args, name, null);
+    return value is null ? fallback : bool.TryParse(value, out var parsed) ? parsed : fallback;
+}
+
+static string DefaultCaptureName(string scenario)
+{
+    if (string.IsNullOrWhiteSpace(scenario))
+    {
+        return "CapturedAsciiWin";
+    }
+
+    var suffix = string.Equals(scenario, "win", StringComparison.OrdinalIgnoreCase)
+        ? "AsciiWin"
+        : char.ToUpperInvariant(scenario[0]) + scenario[1..].ToLowerInvariant();
+    return $"Captured{suffix}";
+}
+
+static string DefaultCaptureOutputRoot()
+{
+    return Path.Combine(
+        FindRepositoryRoot(),
+        "WismClient",
+        "Wism.Client.Test",
+        "AgentPlayground",
+        "Captures");
 }
 
 static string FindRepositoryRoot()

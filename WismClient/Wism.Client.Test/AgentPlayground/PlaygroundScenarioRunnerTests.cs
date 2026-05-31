@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Wism.Agent.Playground;
@@ -69,5 +70,23 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(report.Status, Is.EqualTo("Failed"), report.Outcome);
         Assert.That(report.Scenario, Is.EqualTo("world:Mini-Illuria"));
         Assert.That(report.Outcome, Does.Contain("Unity scene placement export"));
+    }
+
+    [Test]
+    public void Record_CreatesCapturePackageAndGeneratedTest()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "captures");
+        var result = new PlaygroundScenarioRunner().Record("win", "CapturedAsciiWinTest", outputRoot);
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.FinalReport.Outcome);
+        Assert.That(File.Exists(result.ManifestPath), Is.True);
+        Assert.That(File.Exists(result.EventsPath), Is.True);
+        Assert.That(File.Exists(result.FinalReportPath), Is.True);
+        Assert.That(File.Exists(result.GeneratedTestPath), Is.True);
+
+        var verification = CaptureTestRunner.VerifyDirectory(result.OutputDirectory);
+        Assert.That(verification.Passed, Is.True, verification.Message);
+        Assert.That(verification.CommandCount, Is.GreaterThan(0));
+        Assert.That(verification.MapSnapshotCount, Is.GreaterThan(0));
     }
 }

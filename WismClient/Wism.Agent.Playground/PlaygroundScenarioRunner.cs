@@ -24,6 +24,7 @@ public sealed class PlaygroundScenarioRunner
     private readonly ControllerProvider controllers;
     private StandardProcessor? companionProcessor;
     private MapSnapshotEmitter? mapSnapshotEmitter;
+    private CaptureRecorder? captureRecorder;
     private int companionDelayMs;
 
     public PlaygroundScenarioRunner()
@@ -134,6 +135,25 @@ public sealed class PlaygroundScenarioRunner
             "lose" => Lose(),
             _ => Win()
         };
+    }
+
+    public CaptureResult Record(
+        string scenario,
+        string name,
+        string outputRoot,
+        bool generateTest = true)
+    {
+        captureRecorder = new CaptureRecorder(name, scenario, outputRoot);
+        events.Add($"Capture recording enabled for {captureRecorder.Name}.");
+
+        var report = scenario.ToLowerInvariant() switch
+        {
+            "sample" => SampleWithTelemetry(),
+            "lose" => Lose(),
+            _ => Win()
+        };
+
+        return captureRecorder.Save(report, generateTest);
     }
 
     private static void KillAll(Player player)
@@ -402,6 +422,7 @@ public sealed class PlaygroundScenarioRunner
     private ActionState ExecuteCommand(Command command)
     {
         var result = companionProcessor?.Execute(command) ?? command.Execute();
+        captureRecorder?.RecordCommand(command, result);
         PublishMapSnapshot();
         return result;
     }
@@ -423,7 +444,7 @@ public sealed class PlaygroundScenarioRunner
 
     private void PublishMapSnapshot()
     {
-        if (mapSnapshotEmitter is null || !Game.IsInitialized())
+        if ((mapSnapshotEmitter is null && captureRecorder is null) || !Game.IsInitialized())
         {
             return;
         }
@@ -432,8 +453,9 @@ public sealed class PlaygroundScenarioRunner
         if (builder.TryBuild(out var snapshot) && snapshot is not null)
         {
             snapshot.InvertYAxis = true;
-            mapSnapshotEmitter.Publish(snapshot);
-            if (companionDelayMs > 0)
+            captureRecorder?.RecordMapSnapshot(snapshot);
+            mapSnapshotEmitter?.Publish(snapshot);
+            if (mapSnapshotEmitter is not null && companionDelayMs > 0)
             {
                 Thread.Sleep(companionDelayMs);
             }
