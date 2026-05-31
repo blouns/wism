@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wism.Client.Agent\Wism.Client.Agent.csproj" />
+    <ProjectReference Include="..\Wism.Client.AI\Wism.Client.AI.csproj" />
+    <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
+    <ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
+  </ItemGroup>
+
+</Project>
