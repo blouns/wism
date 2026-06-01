@@ -102,7 +102,8 @@ public class PlaygroundScenarioRunnerTests
             clans: 2,
             maxTurns: 12,
             outputRoot: outputRoot,
-            name: "SmokeCampaign");
+            name: "SmokeCampaign",
+            companionDelayMs: 0);
 
         Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
         Assert.That(File.Exists(Path.Combine(result.OutputDirectory, "campaign.json")), Is.True);

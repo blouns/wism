@@ -166,9 +166,16 @@ public sealed class PlaygroundScenarioRunner
         int maxTurns = 40,
         string? outputRoot = null,
         string? name = null,
-        string? modRoot = null)
+        string? modRoot = null,
+        int companionDelayMs = 0)
     {
         events.Clear();
+        if (companionDelayMs > 0)
+        {
+            EnableCompanionTelemetry(Math.Clamp(companionDelayMs, 0, 5000));
+            events.Add($"Companion telemetry enabled on named pipe wism-commands with {companionDelayMs}ms delay.");
+        }
+
         var options = new CampaignOptions(
             Seed: seed,
             ClanCount: Math.Clamp(clans, 2, 4),
@@ -201,6 +208,7 @@ public sealed class PlaygroundScenarioRunner
 
         var recorder = new CampaignRecorder(options);
         events.Add($"Campaign seed {options.Seed} generated {options.ClanCount} clans.");
+        PublishMapSnapshot();
         recorder.Checkpoint("setup", 0, "System", "Generated, loaded, and validated campaign start.");
 
         var completedTurns = 0;

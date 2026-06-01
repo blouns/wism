@@ -44,7 +44,8 @@ try
             var campaignOut = ReadString(args, "out", Path.Combine(FindRepositoryRoot(), "artifacts", "campaigns"));
             var campaignName = ReadString(args, "name", null);
             var campaignModRoot = ReadString(args, "modRoot", null);
-            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot);
+            var campaignDelayMs = ReadInt(args, "delayMs", 0);
+            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs);
             PrintCampaign(campaign, quiet);
             return string.Equals(campaign.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "jump":
