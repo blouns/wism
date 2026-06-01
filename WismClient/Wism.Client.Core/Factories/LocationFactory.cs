@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.IO;
 using Wism.Client.Core;
 using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
@@ -15,7 +16,7 @@ namespace Wism.Client.Factories
                 throw new ArgumentNullException(nameof(locationEntity));
             }
 
-            var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world.Name}";
+            var path = ResolveLocationModulePath(world.Name);
             var builder = new LocationBuilder(path);
             builder.AddLocation(world, locationEntity.X, locationEntity.Y, locationEntity.LocationShortName);
 
@@ -39,11 +40,28 @@ namespace Wism.Client.Factories
                 throw new ArgumentNullException(nameof(locationEntity));
             }
 
-            var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world.Name}";
+            var path = ResolveLocationModulePath(world.Name);
             var builder = new LocationBuilder(path);
             builder.AddLocation(world, locationEntity.X, locationEntity.Y, locationEntity.LocationShortName);
 
             return world.Map[locationEntity.X, locationEntity.Y].Location;
+        }
+
+        private static string ResolveLocationModulePath(string worldName)
+        {
+            var path = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{worldName}";
+            if (File.Exists(Path.Combine(path, "Location.json")))
+            {
+                return path;
+            }
+
+            var fallback = $@"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{ModFactory.WorldPath}";
+            if (File.Exists(Path.Combine(fallback, "Location.json")))
+            {
+                return fallback;
+            }
+
+            return path;
         }
     }
 }

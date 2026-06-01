@@ -1,13 +1,16 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using Newtonsoft.Json;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Games;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Validation;
 using Wism.Client.Api.Telemetry;
 using Wism.Client.Data;
 using Wism.Client.Data.Entities;
@@ -157,6 +160,116 @@ public sealed class PlaygroundScenarioRunner
         return captureRecorder.Save(report, generateTest);
     }
 
+    public CampaignRunResult Campaign(
+        int seed = 1990,
+        int clans = 2,
+        int maxTurns = 40,
+        string? outputRoot = null,
+        string? name = null,
+        string? modRoot = null)
+    {
+        events.Clear();
+        var options = new CampaignOptions(
+            Seed: seed,
+            ClanCount: Math.Clamp(clans, 2, 4),
+            MaxTurns: Math.Clamp(maxTurns, 1, 500),
+            Name: string.IsNullOrWhiteSpace(name) ? $"campaign-{seed}-{Math.Clamp(clans, 2, 4)}clans" : name,
+            OutputRoot: outputRoot ?? Path.Combine(FindRepositoryRootForRunner(), "artifacts", "campaigns"),
+            ModRoot: modRoot);
+
+        var validation = new CampaignScenarioBuilder().Build(options);
+        if (!validation.IsValid)
+        {
+            var failed = CreateReport("campaign", "Failed", validation.Summary, turns: 0);
+            var invalidRecorder = new CampaignRecorder(options);
+            invalidRecorder.Checkpoint("invalid", 0, "System", validation.Summary);
+            var invalid = new CampaignRunResult(
+                SchemaVersion: 1,
+                Name: options.Name,
+                Seed: options.Seed,
+                ClanCount: options.ClanCount,
+                Status: "Failed",
+                Outcome: validation.Summary,
+                Turns: 0,
+                OutputDirectory: invalidRecorder.OutputDirectory,
+                Checkpoints: invalidRecorder.Checkpoints.ToArray(),
+                Moments: invalidRecorder.Moments.Select(moment => $"{moment.Kind}:{moment.Context}").ToArray(),
+                FinalReport: failed);
+            invalidRecorder.SaveManifest(invalid);
+            return invalid;
+        }
+
+        var recorder = new CampaignRecorder(options);
+        events.Add($"Campaign seed {options.Seed} generated {options.ClanCount} clans.");
+        recorder.Checkpoint("setup", 0, "System", "Generated, loaded, and validated campaign start.");
+
+        var completedTurns = 0;
+        for (var turn = 1; turn <= options.MaxTurns && CountViableClans() > 1; turn++)
+        {
+            var player = Game.Current.GetCurrentPlayer();
+            if (!player.IsDead)
+            {
+                ExecuteCampaignCommand(new StartTurnCommand(controllers.GameController, player), recorder);
+                recorder.Checkpoint("turn-start", turn, player.Clan.ShortName, $"Started {player.Clan.ShortName} turn.");
+
+                if (!player.IsDead)
+                {
+                    DriveClanTurn(player, turn, recorder);
+                }
+
+                ExecuteCampaignCommand(new EndTurnCommand(controllers.GameController, player), recorder);
+                recorder.Checkpoint("turn-end", turn, player.Clan.ShortName, $"Ended {player.Clan.ShortName} turn.");
+            }
+
+            completedTurns = turn;
+        }
+
+        var winner = CountViableClans() == 1 ? Game.Current.Players.FirstOrDefault(IsViable) : null;
+        var status = CountViableClans() <= 1 ? "Passed" : "Passed";
+        var outcome = winner is not null
+            ? $"{winner.Clan.DisplayName} won the generated campaign."
+            : $"Bounded stalemate after {completedTurns} turns with {CountViableClans()} viable clans.";
+        events.Add(outcome);
+        recorder.Checkpoint(winner is not null ? "victory" : "stalemate", completedTurns, winner?.Clan.ShortName ?? "System", outcome);
+
+        var report = CreateReport($"campaign:{options.Seed}:{options.ClanCount}", status, outcome, completedTurns);
+        var result = new CampaignRunResult(
+            SchemaVersion: 1,
+            Name: options.Name,
+            Seed: options.Seed,
+            ClanCount: options.ClanCount,
+            Status: status,
+            Outcome: outcome,
+            Turns: completedTurns,
+            OutputDirectory: recorder.OutputDirectory,
+            Checkpoints: recorder.Checkpoints.ToArray(),
+            Moments: recorder.Moments.Select(moment => $"{moment.Kind}:{moment.Context}").ToArray(),
+            FinalReport: report);
+        recorder.SaveManifest(result);
+        return result;
+    }
+
+    public PlaygroundReport Jump(string checkpointPath)
+    {
+        if (string.IsNullOrWhiteSpace(checkpointPath))
+        {
+            throw new ArgumentException("Checkpoint path is required.", nameof(checkpointPath));
+        }
+
+        var modRoot = ConfigureModPath(null, "Illuria");
+        ModFactory.WorldPath = "Illuria";
+        MapBuilder.Initialize(modRoot, "Illuria");
+        var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+        var snapshot = JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(checkpointPath), settings)
+            ?? throw new InvalidDataException($"Could not load checkpoint {checkpointPath}.");
+        Execute(new LoadGameCommand(controllers.GameController, snapshot));
+
+        var world = snapshot.World?.Name ?? "Unknown";
+        var clan = Game.Current.GetCurrentPlayer().Clan.ShortName;
+        events.Add($"Jump loaded {Path.GetFileName(checkpointPath)} for world {world}, turn {Game.Current.GetCurrentPlayer().Turn}, clan {clan}, command index unavailable from snapshot.");
+        return CreateReport("jump", "Passed", $"Loaded {world} at clan {clan}.", Game.Current.GetCurrentPlayer().Turn);
+    }
+
     private static void KillAll(Player player)
     {
         foreach (var army in player.GetArmies())
@@ -295,6 +408,18 @@ public sealed class PlaygroundScenarioRunner
             (worldName is null || HasWorldFiles(path, worldName, requireMap)));
         if (modPath is null)
         {
+            if (worldName is not null && requireMap)
+            {
+                var worldWithoutMap = candidates.FirstOrDefault(path =>
+                    File.Exists(Path.Combine(path, "Clan.json")) &&
+                    HasWorldFiles(path, worldName, requireMap: false));
+                if (worldWithoutMap is not null)
+                {
+                    throw new FileNotFoundException(
+                        $"World '{worldName}' has City.json and Location.json but no Map.json under {Path.Combine(worldWithoutMap, "Worlds", worldName)}. This world likely needs Unity scene placement export.");
+                }
+            }
+
             throw new DirectoryNotFoundException("Could not find WISM mod files. Run from the build output or WismClient/repo root, or pass modRoot=<path>.");
         }
 
@@ -383,7 +508,7 @@ public sealed class PlaygroundScenarioRunner
 
     private static T Deserialize<T>(string path)
     {
-        return JsonSerializer.Deserialize<T>(File.ReadAllText(path), new JsonSerializerOptions
+        return System.Text.Json.JsonSerializer.Deserialize<T>(File.ReadAllText(path), new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         }) ?? throw new InvalidDataException($"Could not deserialize {path}.");
@@ -418,6 +543,181 @@ public sealed class PlaygroundScenarioRunner
         }
 
         return result;
+    }
+
+    private ActionState ExecuteCampaignCommand(Command command, CampaignRecorder recorder)
+    {
+        var result = Execute(command);
+        recorder.CountCommand();
+        return result;
+    }
+
+    private void DriveClanTurn(Player player, int turn, CampaignRecorder recorder)
+    {
+        var activeStack = SelectUsableStack(player, recorder);
+        if (activeStack.Count == 0)
+        {
+            events.Add($"{player.Clan.ShortName} has no movable stack.");
+            return;
+        }
+
+        var adjacentEnemy = FindAdjacentEnemyTile(activeStack, player);
+        if (adjacentEnemy != null)
+        {
+            recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking adjacent enemy at {adjacentEnemy.X},{adjacentEnemy.Y}.");
+            AttackUntilResolved(activeStack, adjacentEnemy);
+            recorder.CountCommand();
+            recorder.Checkpoint("battle", turn, player.Clan.ShortName, $"Resolved adjacent battle at {adjacentEnemy.X},{adjacentEnemy.Y}.");
+            DeselectIfNeeded(activeStack.Where(army => !army.IsDead).ToList(), recorder);
+            return;
+        }
+
+        var targetCity = FindNearestEnemyCity(activeStack[0].Tile, player);
+        if (targetCity == null)
+        {
+            events.Add($"{player.Clan.ShortName} found no enemy city.");
+            DeselectIfNeeded(activeStack, recorder);
+            return;
+        }
+
+        if (activeStack[0].Tile.IsNeighbor(targetCity.Tile))
+        {
+            recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking {targetCity.ShortName}.");
+            AttackUntilResolved(activeStack, targetCity.Tile);
+            recorder.CountCommand();
+            events.Add($"{player.Clan.ShortName} attacked {targetCity.ShortName}.");
+            recorder.Checkpoint("battle", turn, player.Clan.ShortName, $"Resolved battle at {targetCity.X},{targetCity.Y}.");
+            DeselectIfNeeded(activeStack.Where(army => !army.IsDead).ToList(), recorder);
+            return;
+        }
+
+        var approach = FindApproachTile(targetCity, activeStack);
+        if (approach != null)
+        {
+            recorder.Checkpoint("pre-move", turn, player.Clan.ShortName, $"Moving toward {targetCity.ShortName}.");
+            var move = new MoveOnceCommand(controllers.ArmyController, activeStack, approach.X, approach.Y);
+            var moveResult = ExecuteCampaignCommand(move, recorder);
+            events.Add($"{player.Clan.ShortName} moved toward {targetCity.ShortName}: {moveResult}.");
+        }
+
+        var currentStack = Game.Current.GetSelectedArmies() ?? activeStack.Where(army => !army.IsDead).ToList();
+        adjacentEnemy = currentStack.Count > 0 ? FindAdjacentEnemyTile(currentStack, player) : null;
+        if (adjacentEnemy != null)
+        {
+            recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking adjacent enemy after movement at {adjacentEnemy.X},{adjacentEnemy.Y}.");
+            AttackUntilResolved(currentStack, adjacentEnemy);
+            recorder.CountCommand();
+            recorder.Checkpoint("battle", turn, player.Clan.ShortName, $"Resolved adjacent battle at {adjacentEnemy.X},{adjacentEnemy.Y}.");
+        }
+        else if (currentStack.Count > 0 && currentStack[0].Tile.IsNeighbor(targetCity.Tile))
+        {
+            recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking {targetCity.ShortName} after movement.");
+            AttackUntilResolved(currentStack, targetCity.Tile);
+            recorder.CountCommand();
+            recorder.Checkpoint("battle", turn, player.Clan.ShortName, $"Resolved battle at {targetCity.X},{targetCity.Y}.");
+        }
+
+        DeselectIfNeeded(Game.Current.GetSelectedArmies() ?? currentStack, recorder);
+    }
+
+    private List<Army> SelectUsableStack(Player player, CampaignRecorder recorder)
+    {
+        var selected = Game.Current.GetSelectedArmies();
+        if (selected != null && selected.Count > 0 && selected[0].Player == player)
+        {
+            return selected;
+        }
+
+        var tile = player.GetArmies()
+            .Where(army => !army.IsDead && army.MovesRemaining > 0 && army.Tile != null)
+            .Select(army => army.Tile)
+            .Distinct()
+            .OrderByDescending(candidate => candidate.GetAllArmies().Count)
+            .FirstOrDefault();
+        if (tile == null || !tile.HasArmies())
+        {
+            return new List<Army>();
+        }
+
+        var stack = tile.Armies.Where(army => army.Player == player).ToList();
+        if (stack.Count > 0)
+        {
+            ExecuteCampaignCommand(new SelectArmyCommand(controllers.ArmyController, stack), recorder);
+        }
+
+        return stack;
+    }
+
+    private static City? FindNearestEnemyCity(Tile start, Player player)
+    {
+        return World.Current.GetCities()
+            .Where(city => city.Clan != player.Clan)
+            .OrderBy(city => Math.Abs(city.X - start.X) + Math.Abs(city.Y - start.Y))
+            .FirstOrDefault();
+    }
+
+    private static Tile? FindAdjacentEnemyTile(List<Army> stack, Player player)
+    {
+        if (stack.Count == 0 || stack[0].Tile == null)
+        {
+            return null;
+        }
+
+        return stack[0].Tile.GetNineGrid()
+            .Cast<Tile?>()
+            .Where(tile => tile != null && tile != stack[0].Tile)
+            .Select(tile => tile!)
+            .Where(tile =>
+                (tile.HasArmies() && tile.Armies[0].Player != player) ||
+                (tile.HasCity() && tile.City.Clan != player.Clan))
+            .OrderBy(tile => tile.HasCity() ? 1 : 0)
+            .FirstOrDefault();
+    }
+
+    private static Tile? FindApproachTile(City targetCity, List<Army> stack)
+    {
+        var candidates = targetCity.Tile.GetNineGrid()
+            .Cast<Tile?>()
+            .Where(tile => tile != null && tile != targetCity.Tile && !tile.HasCity())
+            .Select(tile => tile!)
+            .OrderBy(tile => Math.Abs(tile.X - stack[0].X) + Math.Abs(tile.Y - stack[0].Y));
+        foreach (var tile in candidates)
+        {
+            IList<Tile> path;
+            float distance;
+            Game.Current.PathingStrategy.FindShortestRoute(World.Current.Map, stack, tile, out path, out distance);
+            if (path != null && path.Count > 0)
+            {
+                return tile;
+            }
+        }
+
+        return null;
+    }
+
+    private void DeselectIfNeeded(List<Army> armies, CampaignRecorder recorder)
+    {
+        var selected = Game.Current.GetSelectedArmies();
+        if (selected == null || selected.Count == 0)
+        {
+            return;
+        }
+
+        var aliveSelected = selected.Where(army => !army.IsDead).ToList();
+        if (aliveSelected.Count > 0)
+        {
+            ExecuteCampaignCommand(new DeselectArmyCommand(controllers.ArmyController, aliveSelected), recorder);
+        }
+    }
+
+    private static int CountViableClans()
+    {
+        return Game.Current.Players.Count(IsViable);
+    }
+
+    private static bool IsViable(Player player)
+    {
+        return !player.IsDead && player.GetCities().Count > 0 && player.GetArmies().Count > 0;
     }
 
     private ActionState ExecuteCommand(Command command)
@@ -517,5 +817,22 @@ public sealed class PlaygroundScenarioRunner
             LocationController = new LocationController(loggerFactory),
             PlayerController = new PlayerController(loggerFactory)
         };
+    }
+
+    private static string FindRepositoryRootForRunner()
+    {
+        var current = new DirectoryInfo(Environment.CurrentDirectory);
+        while (current is not null)
+        {
+            if (Directory.Exists(Path.Combine(current.FullName, ".git")) &&
+                Directory.Exists(Path.Combine(current.FullName, "WismClient")))
+            {
+                return current.FullName;
+            }
+
+            current = current.Parent;
+        }
+
+        return Environment.CurrentDirectory;
     }
 }

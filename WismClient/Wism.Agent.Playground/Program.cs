@@ -37,12 +37,31 @@ try
             var result = runner.Record(recordScenario, name, outputRoot, generateTest);
             PrintCapture(result, quiet);
             return string.Equals(result.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+        case "campaign":
+            var campaignSeed = ReadInt(args, "seed", 1990);
+            var campaignClans = ReadInt(args, "clans", 2);
+            var maxTurns = ReadInt(args, "maxTurns", 40);
+            var campaignOut = ReadString(args, "out", Path.Combine(FindRepositoryRoot(), "artifacts", "campaigns"));
+            var campaignName = ReadString(args, "name", null);
+            var campaignModRoot = ReadString(args, "modRoot", null);
+            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot);
+            PrintCampaign(campaign, quiet);
+            return string.Equals(campaign.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+        case "jump":
+            var checkpoint = ReadString(args, "checkpoint", null);
+            if (string.IsNullOrWhiteSpace(checkpoint))
+            {
+                Console.Error.WriteLine("checkpoint=<path> is required.");
+                return 2;
+            }
+
+            return Exit(Print(runner.Jump(checkpoint), quiet));
         case "worktrees":
             var plan = PlaygroundScenarioRunner.CreateWorktreePlan(FindRepositoryRoot(), ReadInt(args, "agents", 4));
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|worktrees] [--quiet] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [world=TestWorld] [modRoot=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|jump|worktrees] [--quiet] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2] [maxTurns=40] [checkpoint=path]");
             return 2;
     }
 }
@@ -69,6 +88,17 @@ static void PrintCapture(CaptureResult result, bool quiet)
     if (quiet)
     {
         Console.WriteLine($"{result.Name}:{result.Status}:{result.OutputDirectory}");
+        return;
+    }
+
+    Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions()));
+}
+
+static void PrintCampaign(CampaignRunResult result, bool quiet)
+{
+    if (quiet)
+    {
+        Console.WriteLine($"{result.Name}:{result.Status}:{result.Outcome}:{result.OutputDirectory}");
         return;
     }
 

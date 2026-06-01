@@ -2,6 +2,8 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Wism.Agent.Playground;
+using Wism.Client.Core;
+using Wism.Client.Core.Validation;
 
 namespace Wism.Client.Test.AgentPlayground;
 
@@ -89,5 +91,81 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(verification.Passed, Is.True, verification.Message);
         Assert.That(verification.CommandCount, Is.GreaterThan(0));
         Assert.That(verification.MapSnapshotCount, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void Campaign_RunsToVictoryOrBoundedStalemateAndWritesJumpableCheckpoints()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 20260601,
+            clans: 2,
+            maxTurns: 12,
+            outputRoot: outputRoot,
+            name: "SmokeCampaign");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(File.Exists(Path.Combine(result.OutputDirectory, "campaign.json")), Is.True);
+        Assert.That(result.Checkpoints, Has.Some.Contains("pre-battle"));
+        Assert.That(result.Checkpoints.Any(path => path.Contains("victory") || path.Contains("stalemate")), Is.True);
+
+        var preBattle = result.Checkpoints.First(path => path.Contains("pre-battle"));
+        var jump = new PlaygroundScenarioRunner().Jump(preBattle);
+        Assert.That(jump.Status, Is.EqualTo("Passed"), jump.Outcome);
+        Assert.That(jump.Outcome, Does.Contain("GeneratedCampaign_20260601_2"));
+    }
+
+    [Test]
+    public void Campaign_SameSeedProducesSameOutcome()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var first = new PlaygroundScenarioRunner().Campaign(
+            seed: 4242,
+            clans: 2,
+            maxTurns: 12,
+            outputRoot: outputRoot,
+            name: "DeterministicA");
+        var second = new PlaygroundScenarioRunner().Campaign(
+            seed: 4242,
+            clans: 2,
+            maxTurns: 12,
+            outputRoot: outputRoot,
+            name: "DeterministicB");
+
+        Assert.That(second.Outcome, Is.EqualTo(first.Outcome));
+        Assert.That(second.FinalReport.Map, Is.EqualTo(first.FinalReport.Map));
+    }
+
+    [Test]
+    public void Campaign_FourClanRunStartsEachClanWithCityAndArmy()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 8080,
+            clans: 4,
+            maxTurns: 4,
+            outputRoot: outputRoot,
+            name: "FourClanSmoke");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.FinalReport.Players, Has.Count.EqualTo(4));
+        Assert.That(result.FinalReport.Players.All(player => player.CityCount > 0), Is.True);
+        Assert.That(result.FinalReport.Players.Any(player => player.ArmyCount > 0), Is.True);
+    }
+
+    [Test]
+    public void WorldValidator_FindsInvalidActiveClanWithoutArmy()
+    {
+        new PlaygroundScenarioRunner().Sample();
+        var sirians = Game.Current.Players.Single(player => player.Clan.ShortName == "Sirians");
+        foreach (var army in sirians.GetArmies().ToArray())
+        {
+            army.Kill();
+        }
+
+        var validation = new WorldValidator().Validate(World.Current, Game.Current.Players);
+
+        Assert.That(validation.IsValid, Is.False);
+        Assert.That(validation.Issues.Select(issue => issue.Code), Does.Contain("player.no-army"));
     }
 }
