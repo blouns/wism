@@ -167,10 +167,36 @@ public class PlaygroundScenarioRunnerTests
             size: "large");
 
         Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
-        Assert.That(result.FinalReport.Events, Has.Some.Contains("GeneratedWarlordsLarge_5150_4"));
-        Assert.That(result.FinalReport.Map.Split('\n'), Has.Length.GreaterThanOrEqualTo(60));
+        Assert.That(result.FinalReport.Events, Has.Some.Contains("GeneratedMiniIlluriaLarge_5150_4"));
+        Assert.That(result.FinalReport.Map.Split('\n'), Has.Length.GreaterThanOrEqualTo(80));
         Assert.That(result.FinalReport.Map, Does.Contain("W"));
         Assert.That(result.FinalReport.Map, Does.Contain("B"));
+    }
+
+    [Test]
+    public void Campaign_LargeMapCanUseAllMiniIlluriaCapitalAnchors()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 5150,
+            clans: 8,
+            maxTurns: 1,
+            outputRoot: outputRoot,
+            name: "LargeEightClanSmoke",
+            size: "large");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.FinalReport.Players, Has.Count.EqualTo(8));
+        Assert.That(result.FinalReport.Events, Has.Some.Contains("GeneratedMiniIlluriaLarge_5150_8"));
+        Assert.That(result.FinalReport.Events, Has.Some.Contains("World GeneratedMiniIlluriaLarge_5150_8 dimensions: 94x80."));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == "Sirians").Capitol.Tile.X, Is.EqualTo(52));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == "Sirians").Capitol.Tile.Y, Is.EqualTo(10));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == "LordBane").Capitol.Tile.X, Is.EqualTo(72));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == "LordBane").Capitol.Tile.Y, Is.EqualTo(57));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == "OrcsOfKor").Capitol.Tile.X, Is.EqualTo(75));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == "OrcsOfKor").Capitol.Tile.Y, Is.EqualTo(36));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == "Elvallie").Capitol.Tile.X, Is.EqualTo(36));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == "Elvallie").Capitol.Tile.Y, Is.EqualTo(16));
     }
 
     [Test]

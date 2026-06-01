@@ -58,7 +58,11 @@ internal sealed class CampaignScenarioBuilder
         "Sirians",
         "LordBane",
         "OrcsOfKor",
-        "Elvallie"
+        "Elvallie",
+        "StormGiants",
+        "GreyDwarves",
+        "Selentines",
+        "HorseLords"
     };
 
     private static readonly IReadOnlyDictionary<string, string> Capitals = new Dictionary<string, string>
@@ -66,7 +70,23 @@ internal sealed class CampaignScenarioBuilder
         ["Sirians"] = "Marthos",
         ["LordBane"] = "BanesCitadel",
         ["OrcsOfKor"] = "Kor",
-        ["Elvallie"] = "Elvallie"
+        ["Elvallie"] = "Elvallie",
+        ["StormGiants"] = "Stormheim",
+        ["GreyDwarves"] = "Khamar",
+        ["Selentines"] = "Enmouth",
+        ["HorseLords"] = "Dunethal"
+    };
+
+    private static readonly IReadOnlyDictionary<string, (int X, int Y)> MiniIlluriaCapitalAnchors = new Dictionary<string, (int X, int Y)>
+    {
+        ["Sirians"] = (52, 10),
+        ["LordBane"] = (72, 57),
+        ["OrcsOfKor"] = (75, 36),
+        ["Elvallie"] = (36, 16),
+        ["StormGiants"] = (16, 31),
+        ["GreyDwarves"] = (25, 50),
+        ["Selentines"] = (10, 62),
+        ["HorseLords"] = (48, 47)
     };
 
     private static readonly string[] LocationOrder =
@@ -85,7 +105,7 @@ internal sealed class CampaignScenarioBuilder
         ModFactory.WorldPath = "Illuria";
         MapBuilder.Initialize(modRoot, "Illuria");
 
-        var clanCount = Math.Clamp(options.ClanCount, 2, 4);
+        var clanCount = Math.Clamp(options.ClanCount, 2, ClanOrder.Length);
         Game.CreateEmpty();
         Game.Current.RandomSeed = options.Seed;
         Game.Current.Random = new Random(options.Seed);
@@ -99,16 +119,16 @@ internal sealed class CampaignScenarioBuilder
         Game.Current.Transition(GameState.Ready);
 
         var isLarge = string.Equals(options.Size, "large", StringComparison.OrdinalIgnoreCase);
-        var width = isLarge ? 90 : clanCount <= 2 ? 22 : 28;
-        var height = isLarge ? 60 : clanCount <= 2 ? 16 : 20;
-        var cityCoordinates = GetCityCoordinates(width, height, clanCount);
+        var width = isLarge ? 94 : clanCount <= 2 ? 22 : 28;
+        var height = isLarge ? 80 : clanCount <= 2 ? 16 : 20;
+        var cityCoordinates = GetCityCoordinates(width, height, clanCount, isLarge);
         var locationCoordinates = GetLocationCoordinates(width, height, clanCount, isLarge);
         var map = isLarge
             ? CreateWarlordsStyleMap(width, height, cityCoordinates, locationCoordinates, options.Seed)
             : CreateMap(width, height, cityCoordinates, options.Seed);
         World.CreateWorld(map);
         World.Current.Name = isLarge
-            ? $"GeneratedWarlordsLarge_{options.Seed}_{clanCount}"
+            ? $"GeneratedMiniIlluriaLarge_{options.Seed}_{clanCount}"
             : $"GeneratedCampaign_{options.Seed}_{clanCount}";
 
         MapBuilder.AddCitiesFromInfos(World.Current, CreateCities(cityCoordinates, clanCount));
@@ -226,8 +246,16 @@ internal sealed class CampaignScenarioBuilder
         return map;
     }
 
-    private static IReadOnlyList<(int X, int Y)> GetCityCoordinates(int width, int height, int clanCount)
+    private static IReadOnlyList<(int X, int Y)> GetCityCoordinates(int width, int height, int clanCount, bool isLarge)
     {
+        if (isLarge)
+        {
+            return ClanOrder
+                .Take(clanCount)
+                .Select(clan => MiniIlluriaCapitalAnchors[clan])
+                .ToArray();
+        }
+
         var coordinates = new List<(int X, int Y)>
         {
             (3, 4),

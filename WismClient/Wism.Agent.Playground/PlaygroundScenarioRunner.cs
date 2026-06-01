@@ -179,9 +179,9 @@ public sealed class PlaygroundScenarioRunner
 
         var options = new CampaignOptions(
             Seed: seed,
-            ClanCount: Math.Clamp(clans, 2, 4),
+            ClanCount: Math.Clamp(clans, 2, 8),
             MaxTurns: Math.Clamp(maxTurns, 1, 500),
-            Name: string.IsNullOrWhiteSpace(name) ? $"campaign-{seed}-{Math.Clamp(clans, 2, 4)}clans" : name,
+            Name: string.IsNullOrWhiteSpace(name) ? $"campaign-{seed}-{Math.Clamp(clans, 2, 8)}clans" : name,
             OutputRoot: outputRoot ?? Path.Combine(FindRepositoryRootForRunner(), "artifacts", "campaigns"),
             ModRoot: modRoot,
             Size: string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) ? "large" : "medium");
