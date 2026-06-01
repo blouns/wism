@@ -167,7 +167,8 @@ public sealed class PlaygroundScenarioRunner
         string? outputRoot = null,
         string? name = null,
         string? modRoot = null,
-        int companionDelayMs = 0)
+        int companionDelayMs = 0,
+        string size = "medium")
     {
         events.Clear();
         if (companionDelayMs > 0)
@@ -182,7 +183,8 @@ public sealed class PlaygroundScenarioRunner
             MaxTurns: Math.Clamp(maxTurns, 1, 500),
             Name: string.IsNullOrWhiteSpace(name) ? $"campaign-{seed}-{Math.Clamp(clans, 2, 4)}clans" : name,
             OutputRoot: outputRoot ?? Path.Combine(FindRepositoryRootForRunner(), "artifacts", "campaigns"),
-            ModRoot: modRoot);
+            ModRoot: modRoot,
+            Size: string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) ? "large" : "medium");
 
         var validation = new CampaignScenarioBuilder().Build(options);
         if (!validation.IsValid)
@@ -208,6 +210,7 @@ public sealed class PlaygroundScenarioRunner
 
         var recorder = new CampaignRecorder(options);
         events.Add($"Campaign seed {options.Seed} generated {options.ClanCount} clans.");
+        events.Add($"World {World.Current.Name} dimensions: {World.Current.Map.GetLength(0)}x{World.Current.Map.GetLength(1)}.");
         PublishMapSnapshot();
         recorder.Checkpoint("setup", 0, "System", "Generated, loaded, and validated campaign start.");
 
@@ -536,7 +539,7 @@ public sealed class PlaygroundScenarioRunner
         events.Add($"Battle resolved at {target.X},{target.Y}.");
     }
 
-    private ActionState Execute(Command command)
+    private ActionState Execute(Command command, bool logFailure = true)
     {
         controllers.CommandController.AddCommand(command);
         var result = ExecuteCommand(command);
@@ -545,7 +548,7 @@ public sealed class PlaygroundScenarioRunner
             result = ExecuteCommand(command);
         }
 
-        if (result == ActionState.Failed)
+        if (result == ActionState.Failed && logFailure)
         {
             events.Add($"Command failed: {command.GetType().Name}");
         }
@@ -553,9 +556,9 @@ public sealed class PlaygroundScenarioRunner
         return result;
     }
 
-    private ActionState ExecuteCampaignCommand(Command command, CampaignRecorder recorder)
+    private ActionState ExecuteCampaignCommand(Command command, CampaignRecorder recorder, bool logFailure = true)
     {
-        var result = Execute(command);
+        var result = Execute(command, logFailure);
         recorder.CountCommand();
         return result;
     }
@@ -603,9 +606,23 @@ public sealed class PlaygroundScenarioRunner
         if (approach != null)
         {
             recorder.Checkpoint("pre-move", turn, player.Clan.ShortName, $"Moving toward {targetCity.ShortName}.");
+            var before = activeStack[0].Tile;
             var move = new MoveOnceCommand(controllers.ArmyController, activeStack, approach.X, approach.Y);
-            var moveResult = ExecuteCampaignCommand(move, recorder);
-            events.Add($"{player.Clan.ShortName} moved toward {targetCity.ShortName}: {moveResult}.");
+            var moveResult = ExecuteCampaignCommand(move, recorder, logFailure: false);
+            var after = activeStack.FirstOrDefault(army => !army.IsDead)?.Tile;
+            var madeProgress = before != null && after != null && (before.X != after.X || before.Y != after.Y);
+            if (madeProgress && moveResult == ActionState.Failed)
+            {
+                events.Add($"{player.Clan.ShortName} moved toward {targetCity.ShortName}: Paused after spending available moves.");
+            }
+            else
+            {
+                events.Add($"{player.Clan.ShortName} moved toward {targetCity.ShortName}: {moveResult}.");
+                if (moveResult == ActionState.Failed)
+                {
+                    events.Add($"Command failed: {move.GetType().Name}");
+                }
+            }
         }
 
         var currentStack = Game.Current.GetSelectedArmies() ?? activeStack.Where(army => !army.IsDead).ToList();

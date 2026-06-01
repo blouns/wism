@@ -155,6 +155,25 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void Campaign_LargeWarlordsStyleMapCreatesStressSizedWorld()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 5150,
+            clans: 4,
+            maxTurns: 1,
+            outputRoot: outputRoot,
+            name: "LargeMapSmoke",
+            size: "large");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.FinalReport.Events, Has.Some.Contains("GeneratedWarlordsLarge_5150_4"));
+        Assert.That(result.FinalReport.Map.Split('\n'), Has.Length.GreaterThanOrEqualTo(60));
+        Assert.That(result.FinalReport.Map, Does.Contain("W"));
+        Assert.That(result.FinalReport.Map, Does.Contain("B"));
+    }
+
+    [Test]
     public void WorldValidator_FindsInvalidActiveClanWithoutArmy()
     {
         new PlaygroundScenarioRunner().Sample();

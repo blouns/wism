@@ -48,7 +48,8 @@ internal sealed record CampaignOptions(
     int MaxTurns,
     string Name,
     string OutputRoot,
-    string? ModRoot);
+    string? ModRoot,
+    string Size);
 
 internal sealed class CampaignScenarioBuilder
 {
@@ -97,19 +98,86 @@ internal sealed class CampaignScenarioBuilder
             .ToList();
         Game.Current.Transition(GameState.Ready);
 
-        var width = clanCount <= 2 ? 22 : 28;
-        var height = clanCount <= 2 ? 16 : 20;
+        var isLarge = string.Equals(options.Size, "large", StringComparison.OrdinalIgnoreCase);
+        var width = isLarge ? 90 : clanCount <= 2 ? 22 : 28;
+        var height = isLarge ? 60 : clanCount <= 2 ? 16 : 20;
         var cityCoordinates = GetCityCoordinates(width, height, clanCount);
-        var map = CreateMap(width, height, cityCoordinates, options.Seed);
+        var locationCoordinates = GetLocationCoordinates(width, height, clanCount, isLarge);
+        var map = isLarge
+            ? CreateWarlordsStyleMap(width, height, cityCoordinates, locationCoordinates, options.Seed)
+            : CreateMap(width, height, cityCoordinates, options.Seed);
         World.CreateWorld(map);
-        World.Current.Name = $"GeneratedCampaign_{options.Seed}_{clanCount}";
+        World.Current.Name = isLarge
+            ? $"GeneratedWarlordsLarge_{options.Seed}_{clanCount}"
+            : $"GeneratedCampaign_{options.Seed}_{clanCount}";
 
         MapBuilder.AddCitiesFromInfos(World.Current, CreateCities(cityCoordinates, clanCount));
-        MapBuilder.AddLocationsFromInfos(World.Current, CreateLocations(width, height, clanCount));
+        MapBuilder.AddLocationsFromInfos(World.Current, CreateLocations(locationCoordinates, clanCount));
         MapBuilder.AllocateBoons(World.Current.GetLocations());
         AddStartingArmies();
 
         return new WorldValidator().Validate(World.Current, Game.Current.Players);
+    }
+
+    private static Tile[,] CreateWarlordsStyleMap(
+        int width,
+        int height,
+        IReadOnlyList<(int X, int Y)> cityCoordinates,
+        IReadOnlyList<(int X, int Y)> locationCoordinates,
+        int seed)
+    {
+        var random = new Random(seed);
+        var map = new Tile[width, height];
+        for (var x = 0; x < width; x++)
+        {
+            for (var y = 0; y < height; y++)
+            {
+                var terrain = "Grass";
+                if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
+                {
+                    terrain = "Water";
+                }
+
+                map[x, y] = new Tile { Terrain = MapBuilder.TerrainKinds[terrain] };
+            }
+        }
+
+        MapBuilder.AffixMapObjects(map);
+
+        PaintRiver(map, width * 2 / 3, 4, height - 5, seed);
+        PaintLake(map, width / 5, height / 3, 5, 4);
+        PaintLake(map, width * 3 / 4, height * 2 / 3, 7, 5);
+        PaintMountainRange(map, width / 3, height - 8, 18, descending: false);
+        PaintMountainRange(map, width * 3 / 4, height / 2, 26, descending: true);
+        PaintPatch(map, random, "Forest", width / 6, height * 3 / 4, 14, 9);
+        PaintPatch(map, random, "Forest", width * 4 / 5, height / 4, 15, 11);
+        PaintPatch(map, random, "Marsh", width / 5, height / 3 - 2, 13, 7);
+        PaintPatch(map, random, "Hill", width / 2, height / 2, 18, 9);
+
+        foreach (var city in cityCoordinates)
+        {
+            ClearLandAround(map, city.X, city.Y, radius: 3);
+        }
+
+        foreach (var location in locationCoordinates)
+        {
+            ClearLandAround(map, location.X, location.Y, radius: 2);
+        }
+
+        for (var i = 1; i < cityCoordinates.Count; i++)
+        {
+            CarveRoad(map, cityCoordinates[0], cityCoordinates[i]);
+        }
+
+        foreach (var location in locationCoordinates)
+        {
+            CarveRoad(map, cityCoordinates[0], location);
+        }
+
+        CarveRoad(map, (width / 5, height / 3 + 3), (width * 4 / 5, height / 4));
+        CarveRoad(map, (width / 3, height - 9), (width * 3 / 4, height / 2));
+
+        return map;
     }
 
     private static Tile[,] CreateMap(int width, int height, IReadOnlyList<(int X, int Y)> cityCoordinates, int seed)
@@ -197,7 +265,9 @@ internal sealed class CampaignScenarioBuilder
             return;
         }
 
-        map[x, y].Terrain = MapBuilder.TerrainKinds["Road"];
+        map[x, y].Terrain = map[x, y].Terrain.ShortName == "Water"
+            ? MapBuilder.TerrainKinds["Bridge"]
+            : MapBuilder.TerrainKinds["Road"];
     }
 
     private static List<CityInfo> CreateCities(IReadOnlyList<(int X, int Y)> coordinates, int clanCount)
@@ -222,9 +292,17 @@ internal sealed class CampaignScenarioBuilder
         return cities;
     }
 
-    private static List<LocationInfo> CreateLocations(int width, int height, int clanCount)
+    private static IReadOnlyList<(int X, int Y)> GetLocationCoordinates(int width, int height, int clanCount, bool isLarge)
     {
-        var positions = new[]
+        var positions = isLarge
+            ? new[]
+            {
+                (width / 2, height / 2),
+                (width / 4, height * 3 / 4),
+                (width * 3 / 4, height / 4),
+                (width * 4 / 5, height * 2 / 3)
+            }
+            : new[]
         {
             (width / 2, height / 2),
             (width / 2 - 3, height / 2 + 2),
@@ -232,12 +310,101 @@ internal sealed class CampaignScenarioBuilder
             (width / 2, Math.Max(2, height / 2 - 4))
         };
 
+        return positions.Take(clanCount).ToArray();
+    }
+
+    private static List<LocationInfo> CreateLocations(IReadOnlyList<(int X, int Y)> positions, int clanCount)
+    {
         return LocationOrder.Take(clanCount).Select((shortName, index) => new LocationInfo
         {
             ShortName = shortName,
-            X = positions[index].Item1,
-            Y = positions[index].Item2
+            X = positions[index].X,
+            Y = positions[index].Y
         }).ToList();
+    }
+
+    private static void PaintRiver(Tile[,] map, int baseX, int yStart, int yEnd, int seed)
+    {
+        for (var y = yStart; y <= yEnd; y++)
+        {
+            var bend = (int)Math.Round(Math.Sin((y + seed % 13) / 5.0) * 4);
+            for (var dx = -1; dx <= 1; dx++)
+            {
+                SetTerrain(map, baseX + bend + dx, y, "Water");
+            }
+        }
+    }
+
+    private static void PaintLake(Tile[,] map, int centerX, int centerY, int radiusX, int radiusY)
+    {
+        for (var x = centerX - radiusX; x <= centerX + radiusX; x++)
+        {
+            for (var y = centerY - radiusY; y <= centerY + radiusY; y++)
+            {
+                var nx = (x - centerX) / (double)radiusX;
+                var ny = (y - centerY) / (double)radiusY;
+                if (nx * nx + ny * ny <= 1.0)
+                {
+                    SetTerrain(map, x, y, "Water");
+                }
+            }
+        }
+    }
+
+    private static void PaintMountainRange(Tile[,] map, int startX, int startY, int length, bool descending)
+    {
+        for (var i = 0; i < length; i++)
+        {
+            var x = startX + i;
+            var y = descending ? startY - i / 2 : startY + (int)Math.Sin(i / 2.0) * 2;
+            for (var dx = -1; dx <= 1; dx++)
+            {
+                for (var dy = -1; dy <= 1; dy++)
+                {
+                    if (Math.Abs(dx) + Math.Abs(dy) <= 2)
+                    {
+                        SetTerrain(map, x + dx, y + dy, "Mountain");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void PaintPatch(Tile[,] map, Random random, string terrain, int centerX, int centerY, int width, int height)
+    {
+        for (var x = centerX - width / 2; x <= centerX + width / 2; x++)
+        {
+            for (var y = centerY - height / 2; y <= centerY + height / 2; y++)
+            {
+                var dx = Math.Abs(x - centerX) / (double)Math.Max(1, width / 2);
+                var dy = Math.Abs(y - centerY) / (double)Math.Max(1, height / 2);
+                if (dx * dx + dy * dy <= 1.15 && random.Next(100) < 75)
+                {
+                    SetTerrain(map, x, y, terrain);
+                }
+            }
+        }
+    }
+
+    private static void ClearLandAround(Tile[,] map, int centerX, int centerY, int radius)
+    {
+        for (var x = centerX - radius; x <= centerX + radius; x++)
+        {
+            for (var y = centerY - radius; y <= centerY + radius; y++)
+            {
+                SetTerrain(map, x, y, "Grass");
+            }
+        }
+    }
+
+    private static void SetTerrain(Tile[,] map, int x, int y, string terrain)
+    {
+        if (x <= 0 || y <= 0 || x >= map.GetLength(0) - 1 || y >= map.GetLength(1) - 1)
+        {
+            return;
+        }
+
+        map[x, y].Terrain = MapBuilder.TerrainKinds[terrain];
     }
 
     private static ProductionInfo[] DefaultProduction()
