@@ -4,6 +4,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Cities;
 using Wism.Client.Commands.Games;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
@@ -29,9 +30,13 @@ public sealed class PlaygroundScenarioRunner
     private MapSnapshotEmitter? mapSnapshotEmitter;
     private CaptureRecorder? captureRecorder;
     private int companionDelayMs;
+    private readonly IWismLoggerFactory loggerFactory;
 
-    public PlaygroundScenarioRunner()
+    public PlaygroundScenarioRunner(bool suppressConsoleLogs = false)
     {
+        loggerFactory = suppressConsoleLogs
+            ? new SilentWismLoggerFactory()
+            : new WismLoggerFactory();
         controllers = CreateControllers();
     }
 
@@ -222,6 +227,8 @@ public sealed class PlaygroundScenarioRunner
             {
                 ExecuteCampaignCommand(new StartTurnCommand(controllers.GameController, player), recorder);
                 recorder.Checkpoint("turn-start", turn, player.Clan.ShortName, $"Started {player.Clan.ShortName} turn.");
+                ReviewAndRenewProduction(player, turn, recorder);
+                StartIdleProduction(player, turn, recorder);
 
                 if (!player.IsDead)
                 {
@@ -591,7 +598,16 @@ public sealed class PlaygroundScenarioRunner
             return;
         }
 
-        if (activeStack[0].Tile.IsNeighbor(targetCity.Tile))
+        if (activeStack[0].Tile.IsNeighbor(targetCity.Tile) && CanCapture(activeStack, targetCity))
+        {
+            recorder.Checkpoint("pre-capture", turn, player.Clan.ShortName, $"Capturing empty city {targetCity.ShortName}.");
+            ExecuteCampaignCommand(new CaptureCityCommand(controllers.CityController, player, activeStack, targetCity), recorder);
+            events.Add($"{player.Clan.ShortName} captured {targetCity.ShortName}.");
+            recorder.Checkpoint("city-capture", turn, player.Clan.ShortName, $"Captured {targetCity.ShortName}.");
+            return;
+        }
+
+        if (activeStack[0].Tile.IsNeighbor(targetCity.Tile) && CanAttack(activeStack, targetCity.Tile))
         {
             recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking {targetCity.ShortName}.");
             AttackUntilResolved(activeStack, targetCity.Tile);
@@ -634,7 +650,15 @@ public sealed class PlaygroundScenarioRunner
             recorder.CountCommand();
             recorder.Checkpoint("battle", turn, player.Clan.ShortName, $"Resolved adjacent battle at {adjacentEnemy.X},{adjacentEnemy.Y}.");
         }
-        else if (currentStack.Count > 0 && currentStack[0].Tile.IsNeighbor(targetCity.Tile))
+        else if (currentStack.Count > 0 && currentStack[0].Tile.IsNeighbor(targetCity.Tile) && CanCapture(currentStack, targetCity))
+        {
+            recorder.Checkpoint("pre-capture", turn, player.Clan.ShortName, $"Capturing empty city {targetCity.ShortName} after movement.");
+            ExecuteCampaignCommand(new CaptureCityCommand(controllers.CityController, player, currentStack, targetCity), recorder);
+            events.Add($"{player.Clan.ShortName} captured {targetCity.ShortName}.");
+            recorder.Checkpoint("city-capture", turn, player.Clan.ShortName, $"Captured {targetCity.ShortName}.");
+            return;
+        }
+        else if (currentStack.Count > 0 && currentStack[0].Tile.IsNeighbor(targetCity.Tile) && CanAttack(currentStack, targetCity.Tile))
         {
             recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking {targetCity.ShortName} after movement.");
             AttackUntilResolved(currentStack, targetCity.Tile);
@@ -643,6 +667,51 @@ public sealed class PlaygroundScenarioRunner
         }
 
         DeselectIfNeeded(Game.Current.GetSelectedArmies() ?? currentStack, recorder);
+    }
+
+    private void ReviewAndRenewProduction(Player player, int turn, CampaignRecorder recorder)
+    {
+        var review = new ReviewProductionCommand(controllers.CityController, player);
+        var reviewResult = ExecuteCampaignCommand(review, recorder, logFailure: false);
+        if (reviewResult != ActionState.Succeeded)
+        {
+            return;
+        }
+
+        var produced = review.ArmiesProducedResult?.Count ?? 0;
+        var delivered = review.ArmiesDeliveredResult?.Count ?? 0;
+        recorder.Checkpoint("production", turn, player.Clan.ShortName, $"Reviewed production: {produced} produced, {delivered} delivered.");
+
+        var renew = new RenewProductionCommand(controllers.CityController, player, review);
+        var renewResult = ExecuteCampaignCommand(renew, recorder, logFailure: false);
+        if (renewResult == ActionState.Succeeded)
+        {
+            events.Add($"{player.Clan.ShortName} renewed {renew.ArmiesToRenew.Count} production orders.");
+        }
+    }
+
+    private void StartIdleProduction(Player player, int turn, CampaignRecorder recorder)
+    {
+        foreach (var city in player.GetCities().Where(city => !city.Barracks.ProducingArmy()))
+        {
+            var production = city.Barracks.GetProductionKinds()
+                .OrderBy(info => info.TurnsToProduce)
+                .ThenBy(info => info.Upkeep)
+                .FirstOrDefault();
+            if (production == null)
+            {
+                continue;
+            }
+
+            var armyInfo = ModFactory.FindArmyInfo(production.ArmyInfoName);
+            var command = new StartProductionCommand(controllers.CityController, city, armyInfo);
+            var result = ExecuteCampaignCommand(command, recorder, logFailure: false);
+            if (result == ActionState.Succeeded)
+            {
+                events.Add($"{player.Clan.ShortName} started {armyInfo.ShortName} production in {city.ShortName}.");
+                recorder.Checkpoint("production-start", turn, player.Clan.ShortName, $"{city.ShortName} started {armyInfo.ShortName}.");
+            }
+        }
     }
 
     private List<Army> SelectUsableStack(Player player, CampaignRecorder recorder)
@@ -695,8 +764,24 @@ public sealed class PlaygroundScenarioRunner
             .Where(tile =>
                 (tile.HasArmies() && tile.Armies[0].Player != player) ||
                 (tile.HasCity() && tile.City.Clan != player.Clan))
+            .Where(tile => CanAttack(stack, tile))
             .OrderBy(tile => tile.HasCity() ? 1 : 0)
             .FirstOrDefault();
+    }
+
+    private static bool CanAttack(List<Army> stack, Tile target)
+    {
+        return stack.Count > 0 &&
+               stack.All(army => !army.IsDead) &&
+               target.CanAttackHere(stack);
+    }
+
+    private static bool CanCapture(List<Army> stack, City city)
+    {
+        return stack.Count > 0 &&
+               stack.All(army => !army.IsDead && army.MovesRemaining > city.Tile.Terrain.MovementCost) &&
+               city.Clan != stack[0].Clan &&
+               city.Tile.MusterArmy().All(army => army.Clan == stack[0].Clan);
     }
 
     private static Tile? FindApproachTile(City targetCity, List<Army> stack)
@@ -763,7 +848,6 @@ public sealed class PlaygroundScenarioRunner
 
     private void EnableCompanionTelemetry(int delayMs)
     {
-        var loggerFactory = new WismLoggerFactory();
         companionProcessor = new StandardProcessor(loggerFactory, new CommandIpcPublisher(loggerFactory));
         mapSnapshotEmitter = new MapSnapshotEmitter(loggerFactory);
         companionDelayMs = delayMs;
@@ -829,9 +913,8 @@ public sealed class PlaygroundScenarioRunner
         return sb.ToString().TrimEnd();
     }
 
-    private static ControllerProvider CreateControllers()
+    private ControllerProvider CreateControllers()
     {
-        var loggerFactory = new WismLoggerFactory();
         return new ControllerProvider
         {
             ArmyController = new ArmyController(loggerFactory),
@@ -859,5 +942,27 @@ public sealed class PlaygroundScenarioRunner
         }
 
         return Environment.CurrentDirectory;
+    }
+
+    private sealed class SilentWismLoggerFactory : IWismLoggerFactory
+    {
+        private static readonly IWismLogger Logger = new SilentWismLogger();
+
+        public IWismLogger CreateLogger() => Logger;
+    }
+
+    private sealed class SilentWismLogger : IWismLogger
+    {
+        public void LogInformation(string message)
+        {
+        }
+
+        public void LogWarning(string message)
+        {
+        }
+
+        public void LogError(string message)
+        {
+        }
     }
 }

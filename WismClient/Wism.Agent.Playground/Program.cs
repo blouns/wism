@@ -3,7 +3,7 @@ using Wism.Agent.Playground;
 
 var command = args.FirstOrDefault(arg => !arg.StartsWith("--", StringComparison.OrdinalIgnoreCase)) ?? "sample";
 var quiet = args.Any(arg => string.Equals(arg, "--quiet", StringComparison.OrdinalIgnoreCase));
-var runner = new PlaygroundScenarioRunner();
+var runner = new PlaygroundScenarioRunner(quiet);
 
 try
 {

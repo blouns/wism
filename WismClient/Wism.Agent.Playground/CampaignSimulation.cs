@@ -261,7 +261,11 @@ internal sealed class CampaignScenarioBuilder
             (3, 4),
             (width - 5, height - 4),
             (width - 5, 4),
-            (3, height - 4)
+            (3, height - 4),
+            (width / 2, 3),
+            (width / 2, height - 4),
+            (width / 4, height / 2),
+            (width * 3 / 4, height / 2)
         };
 
         return coordinates.Take(clanCount).ToArray();
