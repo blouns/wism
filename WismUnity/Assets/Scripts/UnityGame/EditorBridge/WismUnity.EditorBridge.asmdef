@@ -1,0 +1,18 @@
+{
+    "name": "WismUnity.EditorBridge",
+    "rootNamespace": "WismUnity.EditorBridge",
+    "references": [
+        "Unity.AI.MCP.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
