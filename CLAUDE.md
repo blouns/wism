@@ -1,37 +1,31 @@
-# WISM — Repo Overview for Claude Code
+# WISM Claude Bootstrap
 
-A from-scratch C# + Unity clone of **Warlords (1990, SSG)**. Core design principle: all game logic lives outside Unity, compiled to DLLs and consumed by the view layer.
+Use this file when Claude opens the public WISM repo.
+
+## Orientation
+
+WISM is a public C# and Unity strategy-game workspace. The design goal is to keep rules and deterministic game logic in `WismClient`, while Unity projects provide views, input, editor tooling, and human-facing workflows.
 
 ## Repo Layout
 
-```
+```text
 wism/
-├── WismClient/          # C# game engine — Core, Api, AI, Agent, tests, Companion, SignalR
-├── WismUnity/           # Unity project — primary game UI (view/input only)
-├── WismCompanion/       # Unity companion app — live map replica
-├── Prototype/           # Old prototypes (WismClientPrototype, WismCloudPrototype)
-├── warlords_manual.pdf  # Original game manual (authoritative rules reference)
-└── warlords_manual_extracted.txt  # Searchable text version of the manual
+├── WismClient/      # Core game engine, commands, AI, tests, shared contracts
+├── WismUnity/       # Primary Unity game front end
+├── WismCompanion/   # Unity companion shell
+└── Prototype/       # Legacy prototypes; avoid extending
 ```
 
-## How the Solutions Relate
+## Agent Bootstrap
 
-```
-WismClient (C#, no Unity)
-  └─ builds DLLs → copied to WismUnity/Assets/Plugins/WismClient/
-                           and WismCompanion/Assets/Plugins/WismClient/
-```
+- Codex should use the user-level `wism-workspace` skill when available.
+- Claude should read the nearest `CLAUDE.md` in the active solution folder.
+- All agents should inspect `git status --short --branch` before editing.
 
-- **WismClient** is the source of truth for all game rules and logic
-- **WismUnity** and **WismCompanion** are view/controller shells — they reference WismClient DLLs only
-- Never add Unity-specific code to WismClient projects
+## Public Boundary
 
-## Active Development
+Do not add local paths, credentials, private orchestration details, private telemetry routing, or private planning language to this public repo.
 
-Primary workspace: `WismClient/` — see `WismClient/CLAUDE.md` for full build commands, architecture, and conventions.
+## Core Rule
 
-## Game Reference
-
-- Rules: `warlords_manual.pdf` / `warlords_manual_extracted.txt`
-- Key principle: all game state changes go through Command objects and are replayable deterministically
-- Mod system: JSON files in `WismClient/Wism.Client.Core/mod/`
+Prefer WismClient for rules and deterministic state changes. Prefer Unity projects for presentation, editor tooling, input, and visual inspection.
