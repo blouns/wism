@@ -24,7 +24,7 @@ wism/
 
 ## Public Boundary
 
-Do not add local paths, credentials, private orchestration details, private telemetry routing, or private planning language to this public repo.
+Do not add local paths, credentials, internal automation details, or non-public planning language to this public repo.
 
 ## Core Rule
 

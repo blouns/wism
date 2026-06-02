@@ -11,4 +11,4 @@ Codex should use the user-level `wism-workspace` skill when available. Claude sh
 - Keep game rules in WismClient.
 - Keep Unity-specific behavior in Unity-facing code.
 - Do not mutate scenes or prefabs without explicit user intent and backup.
-- Do not add private orchestration, credentials, local paths, or private telemetry details to public files.
+- Do not add internal automation details, credentials, local paths, or non-public runtime details to public files.

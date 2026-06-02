@@ -4,11 +4,11 @@ Use this file when Codex opens the public WISM repo.
 
 ## First Step
 
-If available, use the user-level Codex skill `wism-workspace` before editing. It routes WISM work by folder and gives the current public/private boundary rules.
+If available, use the user-level Codex skill `wism-workspace` before editing. It routes WISM work by folder and gives the current repository boundary rules.
 
 ## Public Repo Boundary
 
-This repo is public-facing. Do not add local machine paths, credentials, private agent orchestration details, private telemetry routing, or private planning language.
+This repo is public-facing. Do not add local machine paths, credentials, internal automation details, or non-public planning language.
 
 Use public names:
 

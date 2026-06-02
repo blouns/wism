@@ -15,4 +15,4 @@ If available, use the user-level Codex skill `wism-workspace`. Load the `wism-un
 - Inspect `git status --short --branch` before editing.
 - Do not overwrite dirty files from another agent or user.
 - Do not mutate Unity scenes or prefabs without explicit user intent and backup.
-- Keep private orchestration and local environment details out of public files.
+- Keep internal automation and local environment details out of public files.
