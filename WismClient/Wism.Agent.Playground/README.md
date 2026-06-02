@@ -27,7 +27,7 @@ dotnet run --project Wism.Agent.Playground -- worktrees agents=4
 - Supports both persisted test fixture shape and production mod info shape for world city/location files.
 - Reports scene-backed worlds clearly when their city/location coordinates are not exported for headless loading.
 - Runs without `Console.Clear`, `Console.ReadKey`, or a real terminal handle.
-- Emits JSON reports so wism-agents can parse outcomes.
+- Emits JSON reports so private agent automation can parse outcomes.
 - Can publish command/map telemetry to Wism Companion through the existing `wism-commands` named pipe while running headless scenarios.
 - Campaigns generate deterministic 2-4 clan worlds from a seed, validate the world with `WorldValidator`, drive turns through public commands, and save checkpoints under `artifacts/campaigns` unless `out=<path>` is supplied.
 - Campaign `size=large` uses a 94x80 Mini-Illuria-style stress map with the real capital anchors for Marthos, Bane's Citadel, Kor, Elvallie, Stormheim, Khamar, Enmouth, and Dunethal.
