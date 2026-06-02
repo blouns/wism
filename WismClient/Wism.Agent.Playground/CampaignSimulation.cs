@@ -49,7 +49,8 @@ internal sealed record CampaignOptions(
     string Name,
     string OutputRoot,
     string? ModRoot,
-    string Size);
+    string Size,
+    string ScenarioFamily);
 
 internal sealed class CampaignScenarioBuilder
 {
@@ -97,6 +98,30 @@ internal sealed class CampaignScenarioBuilder
         "GreyportRuins"
     };
 
+    private static readonly string[] SearchLocationOrder =
+    {
+        "GreyportRuins",
+        "EmperorsCrypt",
+        "TempleIris",
+        "SeerRiver",
+        "GoldenLibrary",
+        "OldWoodsTower",
+        "NirnsDeep",
+        "MirkDecay"
+    };
+
+    private static readonly string[] OutpostOrder =
+    {
+        "Deserton",
+        "Zaigonne",
+        "Bereri",
+        "Tal",
+        "Minbourne",
+        "Tirfing",
+        "Amenal",
+        "Pareth"
+    };
+
     public WorldValidationReport Build(CampaignOptions options)
     {
         var modRoot = ResolveModRoot(options.ModRoot);
@@ -121,18 +146,23 @@ internal sealed class CampaignScenarioBuilder
         var isLarge = string.Equals(options.Size, "large", StringComparison.OrdinalIgnoreCase);
         var width = isLarge ? 94 : clanCount <= 2 ? 22 : 28;
         var height = isLarge ? 80 : clanCount <= 2 ? 16 : 20;
+        var scenarioFamily = NormalizeScenario(options.ScenarioFamily);
         var cityCoordinates = GetCityCoordinates(width, height, clanCount, isLarge);
-        var locationCoordinates = GetLocationCoordinates(width, height, clanCount, isLarge);
+        var outpostCoordinates = UsesCapturePressure(scenarioFamily)
+            ? GetOutpostCoordinates(width, height, clanCount, isLarge)
+            : Array.Empty<(int X, int Y)>();
+        var allCityCoordinates = cityCoordinates.Concat(outpostCoordinates).ToArray();
+        var locationCoordinates = GetLocationCoordinates(width, height, clanCount, isLarge, scenarioFamily, cityCoordinates);
         var map = isLarge
-            ? CreateWarlordsStyleMap(width, height, cityCoordinates, locationCoordinates, options.Seed)
-            : CreateMap(width, height, cityCoordinates, options.Seed);
+            ? CreateWarlordsStyleMap(width, height, allCityCoordinates, locationCoordinates, options.Seed)
+            : CreateMap(width, height, allCityCoordinates, options.Seed);
         World.CreateWorld(map);
         World.Current.Name = isLarge
             ? $"GeneratedMiniIlluriaLarge_{options.Seed}_{clanCount}"
             : $"GeneratedCampaign_{options.Seed}_{clanCount}";
 
-        MapBuilder.AddCitiesFromInfos(World.Current, CreateCities(cityCoordinates, clanCount));
-        MapBuilder.AddLocationsFromInfos(World.Current, CreateLocations(locationCoordinates, clanCount));
+        MapBuilder.AddCitiesFromInfos(World.Current, CreateCities(cityCoordinates, clanCount, outpostCoordinates));
+        MapBuilder.AddLocationsFromInfos(World.Current, CreateLocations(locationCoordinates, clanCount, scenarioFamily));
         MapBuilder.AllocateBoons(World.Current.GetLocations());
         AddStartingArmies();
 
@@ -302,7 +332,10 @@ internal sealed class CampaignScenarioBuilder
             : MapBuilder.TerrainKinds["Road"];
     }
 
-    private static List<CityInfo> CreateCities(IReadOnlyList<(int X, int Y)> coordinates, int clanCount)
+    private static List<CityInfo> CreateCities(
+        IReadOnlyList<(int X, int Y)> coordinates,
+        int clanCount,
+        IReadOnlyList<(int X, int Y)> outpostCoordinates)
     {
         var cities = new List<CityInfo>();
         for (var i = 0; i < clanCount; i++)
@@ -321,11 +354,69 @@ internal sealed class CampaignScenarioBuilder
             });
         }
 
+        for (var i = 0; i < Math.Min(clanCount, outpostCoordinates.Count); i++)
+        {
+            var ownerIndex = (i + 1) % clanCount;
+            var clanInfo = ModFactory.FindClanInfo(ClanOrder[ownerIndex]);
+            cities.Add(new CityInfo
+            {
+                ShortName = OutpostOrder[i],
+                DisplayName = OutpostOrder[i],
+                ClanName = clanInfo.ShortName,
+                Defense = 4,
+                Income = 20,
+                X = outpostCoordinates[i].X,
+                Y = outpostCoordinates[i].Y,
+                ProductionInfos = DefaultProduction()
+            });
+        }
+
         return cities;
     }
 
-    private static IReadOnlyList<(int X, int Y)> GetLocationCoordinates(int width, int height, int clanCount, bool isLarge)
+    private static IReadOnlyList<(int X, int Y)> GetOutpostCoordinates(int width, int height, int clanCount, bool isLarge)
     {
+        if (isLarge)
+        {
+            return ClanOrder
+                .Take(clanCount)
+                .Select(clan => StepToward(MiniIlluriaCapitalAnchors[clan], (width / 2, height / 2), 7))
+                .ToArray();
+        }
+
+        var positions = clanCount <= 2
+            ? new[] { (8, 4), (width - 9, height - 4) }
+            : new[]
+            {
+                (8, 4),
+                (width - 9, height - 4),
+                (width - 9, 4),
+                (8, height - 4),
+                (width / 2 - 4, 7),
+                (width / 2 + 4, height - 8),
+                (width / 4 + 4, height / 2),
+                (width * 3 / 4 - 4, height / 2)
+            };
+
+        return positions.Take(clanCount).ToArray();
+    }
+
+    private static IReadOnlyList<(int X, int Y)> GetLocationCoordinates(
+        int width,
+        int height,
+        int clanCount,
+        bool isLarge,
+        string scenarioFamily,
+        IReadOnlyList<(int X, int Y)> cityCoordinates)
+    {
+        if (UsesRuinSearch(scenarioFamily))
+        {
+            return cityCoordinates
+                .Take(clanCount)
+                .Select(city => ClampInside(StepToward(city, (width / 2, height / 2), isLarge ? 6 : 3), width, height))
+                .ToArray();
+        }
+
         var positions = isLarge
             ? new[]
             {
@@ -345,9 +436,10 @@ internal sealed class CampaignScenarioBuilder
         return positions.Take(clanCount).ToArray();
     }
 
-    private static List<LocationInfo> CreateLocations(IReadOnlyList<(int X, int Y)> positions, int clanCount)
+    private static List<LocationInfo> CreateLocations(IReadOnlyList<(int X, int Y)> positions, int clanCount, string scenarioFamily)
     {
-        return LocationOrder.Take(clanCount).Select((shortName, index) => new LocationInfo
+        var order = UsesRuinSearch(scenarioFamily) ? SearchLocationOrder : LocationOrder;
+        return order.Take(clanCount).Select((shortName, index) => new LocationInfo
         {
             ShortName = shortName,
             X = positions[index].X,
@@ -455,10 +547,56 @@ internal sealed class CampaignScenarioBuilder
         {
             player.Gold = 400;
             var city = player.Capitol;
+            player.HireHero(city.Tile);
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), city.Tile);
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("HeavyInfantry"), city.Tile);
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("Cavalry"), city.Tile);
         }
+    }
+
+    private static (int X, int Y) StepToward((int X, int Y) start, (int X, int Y) target, int steps)
+    {
+        var x = start.X;
+        var y = start.Y;
+        for (var i = 0; i < steps; i++)
+        {
+            if (Math.Abs(target.X - x) >= Math.Abs(target.Y - y) && x != target.X)
+            {
+                x += x < target.X ? 1 : -1;
+            }
+            else if (y != target.Y)
+            {
+                y += y < target.Y ? 1 : -1;
+            }
+        }
+
+        return (x, y);
+    }
+
+    private static (int X, int Y) ClampInside((int X, int Y) point, int width, int height)
+    {
+        return (Math.Clamp(point.X, 2, width - 3), Math.Clamp(point.Y, 2, height - 3));
+    }
+
+    private static string NormalizeScenario(string scenarioFamily)
+    {
+        return string.IsNullOrWhiteSpace(scenarioFamily)
+            ? "standard"
+            : scenarioFamily.Trim().ToLowerInvariant();
+    }
+
+    private static bool UsesCapturePressure(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("capture", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("empty-city", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("pressure", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool UsesRuinSearch(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("search", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("ruin", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ResolveModRoot(string? requestedModRoot)

@@ -13,6 +13,8 @@ dotnet run --project Wism.Agent.Playground -- companion scenario=win delayMs=300
 dotnet run --project Wism.Agent.Playground -- world world=TestWorld
 dotnet run --project Wism.Agent.Playground -- world world=Mini-Illuria
 dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12
+dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 scenario=capture-pressure
+dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 scenario=ruin-search
 dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 delayMs=1500
 dotnet run --project Wism.Agent.Playground -- campaign seed=5150 clans=4 maxTurns=1 size=large delayMs=1500
 dotnet run --project Wism.Agent.Playground -- campaign seed=5150 clans=8 maxTurns=2 size=large
@@ -30,6 +32,8 @@ dotnet run --project Wism.Agent.Playground -- worktrees agents=4
 - Emits JSON reports so private agent automation can parse outcomes.
 - Can publish command/map telemetry to Wism Companion through the existing `wism-commands` named pipe while running headless scenarios.
 - Campaigns generate deterministic 2-4 clan worlds from a seed, validate the world with `WorldValidator`, drive turns through public commands, and save checkpoints under `artifacts/campaigns` unless `out=<path>` is supplied.
+- Campaign `scenario=capture-pressure` adds owned-but-empty outpost cities near opposing roads so capture behavior is exercised.
+- Campaign `scenario=ruin-search` places searchable locations near capitals and routes hero-led stacks through real search commands.
 - Campaign `size=large` uses a 94x80 Mini-Illuria-style stress map with the real capital anchors for Marthos, Bane's Citadel, Kor, Elvallie, Stormheim, Khamar, Enmouth, and Dunethal.
 - Campaign `delayMs=<milliseconds>` enables Companion telemetry and pauses after map snapshots, which makes move-by-move and turn-by-turn viewing practical.
 - `jump checkpoint=<path>` loads a saved campaign checkpoint through `LoadGameCommand` for debugging a recorded moment.
@@ -40,10 +44,10 @@ dotnet run --project Wism.Agent.Playground -- worktrees agents=4
 
 - V1 campaign generation is intentionally simple: medium maps, border mountains, carved road corridors, owned starting capitals, center-area searchables, and legal starting stacks.
 - Large map generation is a visual/testing preset inspired by the classic Warlords 40x40 tile/minimap presentation. It preserves the Mini-Illuria strategic capital layout but still generates terrain procedurally for testing.
-- V1 drivers are deterministic heuristics, not LLM turn players. They start turns, move the largest available stack toward an enemy city, attack adjacent blockers/cities, and end turns.
+- V1 drivers are deterministic heuristics, not LLM turn players. They start turns, move the largest available stack toward a scenario mission, capture adjacent empty cities, search reachable locations when requested, attack adjacent blockers/cities, and end turns.
 - Outcomes are reported as victory or bounded stalemate after `maxTurns`.
 - Checkpoints are full game snapshots named by moment, such as `setup`, `turn-start`, `pre-move`, `pre-battle`, `battle`, `turn-end`, `victory`, or `stalemate`.
-- Searchables are placed and validated, but deliberate searchable exploration is not yet part of the v1 driver.
+- Searchable exploration is deliberate for search-oriented scenarios and still opportunistic elsewhere.
 
 ## Baseline
 

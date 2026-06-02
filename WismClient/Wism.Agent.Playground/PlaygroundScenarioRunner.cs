@@ -6,6 +6,7 @@ using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Commands.Cities;
 using Wism.Client.Commands.Games;
+using Wism.Client.Commands.Locations;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.CommandProcessors;
@@ -173,7 +174,8 @@ public sealed class PlaygroundScenarioRunner
         string? name = null,
         string? modRoot = null,
         int companionDelayMs = 0,
-        string size = "medium")
+        string size = "medium",
+        string scenarioFamily = "standard")
     {
         events.Clear();
         if (companionDelayMs > 0)
@@ -189,7 +191,8 @@ public sealed class PlaygroundScenarioRunner
             Name: string.IsNullOrWhiteSpace(name) ? $"campaign-{seed}-{Math.Clamp(clans, 2, 8)}clans" : name,
             OutputRoot: outputRoot ?? Path.Combine(FindRepositoryRootForRunner(), "artifacts", "campaigns"),
             ModRoot: modRoot,
-            Size: string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) ? "large" : "medium");
+            Size: string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) ? "large" : "medium",
+            ScenarioFamily: NormalizeScenarioFamily(scenarioFamily));
 
         var validation = new CampaignScenarioBuilder().Build(options);
         if (!validation.IsValid)
@@ -214,7 +217,7 @@ public sealed class PlaygroundScenarioRunner
         }
 
         var recorder = new CampaignRecorder(options);
-        events.Add($"Campaign seed {options.Seed} generated {options.ClanCount} clans.");
+        events.Add($"Campaign seed {options.Seed} generated {options.ClanCount} clans for {options.ScenarioFamily}.");
         events.Add($"World {World.Current.Name} dimensions: {World.Current.Map.GetLength(0)}x{World.Current.Map.GetLength(1)}.");
         PublishMapSnapshot();
         recorder.Checkpoint("setup", 0, "System", "Generated, loaded, and validated campaign start.");
@@ -232,7 +235,7 @@ public sealed class PlaygroundScenarioRunner
 
                 if (!player.IsDead)
                 {
-                    DriveClanTurn(player, turn, recorder);
+                    DriveClanTurn(player, turn, recorder, options.ScenarioFamily);
                 }
 
                 ExecuteCampaignCommand(new EndTurnCommand(controllers.GameController, player), recorder);
@@ -570,12 +573,25 @@ public sealed class PlaygroundScenarioRunner
         return result;
     }
 
-    private void DriveClanTurn(Player player, int turn, CampaignRecorder recorder)
+    private void DriveClanTurn(Player player, int turn, CampaignRecorder recorder, string scenarioFamily)
     {
         var activeStack = SelectUsableStack(player, recorder);
         if (activeStack.Count == 0)
         {
             events.Add($"{player.Clan.ShortName} has no movable stack.");
+            return;
+        }
+
+        if (TrySearchCurrentLocation(activeStack, player, turn, recorder))
+        {
+            DeselectIfNeeded(activeStack.Where(army => !army.IsDead).ToList(), recorder);
+            return;
+        }
+
+        var adjacentCapturableCity = FindAdjacentCapturableCity(activeStack, player);
+        if (adjacentCapturableCity != null)
+        {
+            CaptureCity(activeStack, adjacentCapturableCity, player, turn, recorder, "Capturing adjacent empty city");
             return;
         }
 
@@ -590,7 +606,30 @@ public sealed class PlaygroundScenarioRunner
             return;
         }
 
-        var targetCity = FindNearestEnemyCity(activeStack[0].Tile, player);
+        if (UsesSearchMission(scenarioFamily))
+        {
+            var targetLocation = FindNearestUnsearchedReachableLocation(activeStack);
+            if (targetLocation != null)
+            {
+                recorder.Checkpoint("pre-move", turn, player.Clan.ShortName, $"Moving toward searchable {targetLocation.ShortName}.");
+                var moveResult = MoveStackToward(activeStack, targetLocation.Tile, recorder, logFailure: false);
+                events.Add($"{player.Clan.ShortName} moved toward searchable {targetLocation.ShortName}: {moveResult}.");
+
+                var currentSearchStack = Game.Current.GetSelectedArmies() ?? activeStack.Where(army => !army.IsDead).ToList();
+                if (currentSearchStack.Count > 0 && TrySearchCurrentLocation(currentSearchStack, player, turn, recorder))
+                {
+                    DeselectIfNeeded(currentSearchStack.Where(army => !army.IsDead).ToList(), recorder);
+                    return;
+                }
+
+                DeselectIfNeeded(currentSearchStack, recorder);
+                return;
+            }
+        }
+
+        var targetCity = UsesCaptureMission(scenarioFamily)
+            ? FindNearestCapturableCity(activeStack, player) ?? FindNearestEnemyCity(activeStack[0].Tile, player)
+            : FindNearestEnemyCity(activeStack[0].Tile, player);
         if (targetCity == null)
         {
             events.Add($"{player.Clan.ShortName} found no enemy city.");
@@ -600,10 +639,7 @@ public sealed class PlaygroundScenarioRunner
 
         if (activeStack[0].Tile.IsNeighbor(targetCity.Tile) && CanCapture(activeStack, targetCity))
         {
-            recorder.Checkpoint("pre-capture", turn, player.Clan.ShortName, $"Capturing empty city {targetCity.ShortName}.");
-            ExecuteCampaignCommand(new CaptureCityCommand(controllers.CityController, player, activeStack, targetCity), recorder);
-            events.Add($"{player.Clan.ShortName} captured {targetCity.ShortName}.");
-            recorder.Checkpoint("city-capture", turn, player.Clan.ShortName, $"Captured {targetCity.ShortName}.");
+            CaptureCity(activeStack, targetCity, player, turn, recorder, "Capturing empty city");
             return;
         }
 
@@ -623,8 +659,7 @@ public sealed class PlaygroundScenarioRunner
         {
             recorder.Checkpoint("pre-move", turn, player.Clan.ShortName, $"Moving toward {targetCity.ShortName}.");
             var before = activeStack[0].Tile;
-            var move = new MoveOnceCommand(controllers.ArmyController, activeStack, approach.X, approach.Y);
-            var moveResult = ExecuteCampaignCommand(move, recorder, logFailure: false);
+            var moveResult = MoveStackToward(activeStack, approach, recorder, logFailure: false);
             var after = activeStack.FirstOrDefault(army => !army.IsDead)?.Tile;
             var madeProgress = before != null && after != null && (before.X != after.X || before.Y != after.Y);
             if (madeProgress && moveResult == ActionState.Failed)
@@ -636,14 +671,20 @@ public sealed class PlaygroundScenarioRunner
                 events.Add($"{player.Clan.ShortName} moved toward {targetCity.ShortName}: {moveResult}.");
                 if (moveResult == ActionState.Failed)
                 {
-                    events.Add($"Command failed: {move.GetType().Name}");
+                    events.Add($"Command failed: {nameof(MoveOnceCommand)}");
                 }
             }
         }
 
         var currentStack = Game.Current.GetSelectedArmies() ?? activeStack.Where(army => !army.IsDead).ToList();
-        adjacentEnemy = currentStack.Count > 0 ? FindAdjacentEnemyTile(currentStack, player) : null;
-        if (adjacentEnemy != null)
+        adjacentCapturableCity = currentStack.Count > 0 ? FindAdjacentCapturableCity(currentStack, player) : null;
+        adjacentEnemy = currentStack.Count > 0 && adjacentCapturableCity == null ? FindAdjacentEnemyTile(currentStack, player) : null;
+        if (adjacentCapturableCity != null)
+        {
+            CaptureCity(currentStack, adjacentCapturableCity, player, turn, recorder, "Capturing adjacent empty city after movement");
+            return;
+        }
+        else if (adjacentEnemy != null)
         {
             recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking adjacent enemy after movement at {adjacentEnemy.X},{adjacentEnemy.Y}.");
             AttackUntilResolved(currentStack, adjacentEnemy);
@@ -652,10 +693,7 @@ public sealed class PlaygroundScenarioRunner
         }
         else if (currentStack.Count > 0 && currentStack[0].Tile.IsNeighbor(targetCity.Tile) && CanCapture(currentStack, targetCity))
         {
-            recorder.Checkpoint("pre-capture", turn, player.Clan.ShortName, $"Capturing empty city {targetCity.ShortName} after movement.");
-            ExecuteCampaignCommand(new CaptureCityCommand(controllers.CityController, player, currentStack, targetCity), recorder);
-            events.Add($"{player.Clan.ShortName} captured {targetCity.ShortName}.");
-            recorder.Checkpoint("city-capture", turn, player.Clan.ShortName, $"Captured {targetCity.ShortName}.");
+            CaptureCity(currentStack, targetCity, player, turn, recorder, "Capturing empty city after movement");
             return;
         }
         else if (currentStack.Count > 0 && currentStack[0].Tile.IsNeighbor(targetCity.Tile) && CanAttack(currentStack, targetCity.Tile))
@@ -750,6 +788,23 @@ public sealed class PlaygroundScenarioRunner
             .FirstOrDefault();
     }
 
+    private static City? FindNearestCapturableCity(List<Army> stack, Player player)
+    {
+        return World.Current.GetCities()
+            .Where(city => city.Clan != player.Clan)
+            .Where(city => CanCaptureAtDestination(stack, city))
+            .OrderBy(city => Math.Abs(city.X - stack[0].X) + Math.Abs(city.Y - stack[0].Y))
+            .FirstOrDefault(city => FindApproachTile(city, stack) != null || stack[0].Tile.IsNeighbor(city.Tile));
+    }
+
+    private static City? FindAdjacentCapturableCity(List<Army> stack, Player player)
+    {
+        return World.Current.GetCities()
+            .Where(city => city.Clan != player.Clan)
+            .Where(city => stack.Count > 0 && stack[0].Tile != null && stack[0].Tile.IsNeighbor(city.Tile))
+            .FirstOrDefault(city => CanCapture(stack, city));
+    }
+
     private static Tile? FindAdjacentEnemyTile(List<Army> stack, Player player)
     {
         if (stack.Count == 0 || stack[0].Tile == null)
@@ -784,6 +839,22 @@ public sealed class PlaygroundScenarioRunner
                city.Tile.MusterArmy().All(army => army.Clan == stack[0].Clan);
     }
 
+    private static bool CanCaptureAtDestination(List<Army> stack, City city)
+    {
+        return stack.Count > 0 &&
+               stack.All(army => !army.IsDead) &&
+               city.Clan != stack[0].Clan &&
+               city.Tile.MusterArmy().All(army => army.Clan == stack[0].Clan);
+    }
+
+    private void CaptureCity(List<Army> stack, City city, Player player, int turn, CampaignRecorder recorder, string action)
+    {
+        recorder.Checkpoint("pre-capture", turn, player.Clan.ShortName, $"{action} {city.ShortName}.");
+        ExecuteCampaignCommand(new CaptureCityCommand(controllers.CityController, player, stack, city), recorder);
+        events.Add($"{player.Clan.ShortName} captured {city.ShortName}.");
+        recorder.Checkpoint("city-capture", turn, player.Clan.ShortName, $"Captured {city.ShortName}.");
+    }
+
     private static Tile? FindApproachTile(City targetCity, List<Army> stack)
     {
         var candidates = targetCity.Tile.GetNineGrid()
@@ -803,6 +874,100 @@ public sealed class PlaygroundScenarioRunner
         }
 
         return null;
+    }
+
+    private Location? FindNearestUnsearchedReachableLocation(List<Army> stack)
+    {
+        if (stack.Count == 0 || !stack.Any(army => army is Hero && !army.IsDead))
+        {
+            return null;
+        }
+
+        return World.Current.GetLocations()
+            .Where(location => !location.Searched)
+            .OrderBy(location => Math.Abs(location.X - stack[0].X) + Math.Abs(location.Y - stack[0].Y))
+            .FirstOrDefault(location => HasRoute(stack, location.Tile));
+    }
+
+    private static bool HasRoute(List<Army> stack, Tile target)
+    {
+        IList<Tile> path;
+        float distance;
+        Game.Current.PathingStrategy.FindShortestRoute(World.Current.Map, stack, target, out path, out distance);
+        return path != null && path.Count > 0;
+    }
+
+    private ActionState MoveStackToward(List<Army> stack, Tile target, CampaignRecorder recorder, bool logFailure)
+    {
+        var move = new MoveOnceCommand(controllers.ArmyController, stack, target.X, target.Y);
+        return ExecuteCampaignCommand(move, recorder, logFailure);
+    }
+
+    private bool TrySearchCurrentLocation(List<Army> stack, Player player, int turn, CampaignRecorder recorder)
+    {
+        if (stack.Count == 0 || stack[0].Tile == null)
+        {
+            return false;
+        }
+
+        var location = World.Current.GetLocations()
+            .FirstOrDefault(candidate => !candidate.Searched && candidate.Tile == stack[0].Tile);
+        if (location == null)
+        {
+            return false;
+        }
+
+        var command = CreateSearchCommand(stack, location);
+        if (command == null)
+        {
+            return false;
+        }
+
+        recorder.Checkpoint("pre-search", turn, player.Clan.ShortName, $"Searching {location.ShortName}.");
+        var result = ExecuteCampaignCommand(command, recorder, logFailure: false);
+        if (result != ActionState.Succeeded)
+        {
+            events.Add($"{player.Clan.ShortName} could not search {location.ShortName}: {result}.");
+            return false;
+        }
+
+        events.Add($"{player.Clan.ShortName} searched {location.ShortName}.");
+        recorder.Checkpoint("search", turn, player.Clan.ShortName, $"Searched {location.ShortName}.");
+        return true;
+    }
+
+    private Command? CreateSearchCommand(List<Army> stack, Location location)
+    {
+        return location.Kind switch
+        {
+            "Temple" => new SearchTempleCommand(controllers.LocationController, stack, location),
+            "Sage" => new SearchSageCommand(controllers.LocationController, stack, location),
+            "Library" => new SearchLibraryCommand(controllers.LocationController, stack, location),
+            "Ruins" => new SearchRuinsCommand(controllers.LocationController, stack, location),
+            "Tomb" => new SearchRuinsCommand(controllers.LocationController, stack, location),
+            _ => null
+        };
+    }
+
+    private static string NormalizeScenarioFamily(string scenarioFamily)
+    {
+        return string.IsNullOrWhiteSpace(scenarioFamily)
+            ? "standard"
+            : scenarioFamily.Trim().ToLowerInvariant();
+    }
+
+    private static bool UsesSearchMission(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("search", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("ruin", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool UsesCaptureMission(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("capture", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("empty-city", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("pressure", StringComparison.OrdinalIgnoreCase);
     }
 
     private void DeselectIfNeeded(List<Army> armies, CampaignRecorder recorder)

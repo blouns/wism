@@ -155,6 +155,54 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void Campaign_CapturePressureExercisesCityCapture()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 9001,
+            clans: 2,
+            maxTurns: 6,
+            outputRoot: outputRoot,
+            name: "CapturePressureSmoke",
+            scenarioFamily: "capture-pressure");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.Moments, Has.Some.StartsWith("city-capture:"));
+    }
+
+    [Test]
+    public void Campaign_RuinSearchExercisesSearch()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 9002,
+            clans: 2,
+            maxTurns: 6,
+            outputRoot: outputRoot,
+            name: "RuinSearchSmoke",
+            scenarioFamily: "ruin-search");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.Moments, Has.Some.StartsWith("search:"));
+    }
+
+    [Test]
+    public void Campaign_SixClanPressureUsesValidIlluriaOutpostNames()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 199370,
+            clans: 6,
+            maxTurns: 3,
+            outputRoot: outputRoot,
+            name: "SixClanPressureSmoke",
+            scenarioFamily: "six-clan-pressure");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.FinalReport.Players, Has.Count.EqualTo(6));
+    }
+
+    [Test]
     public void Campaign_LargeWarlordsStyleMapCreatesStressSizedWorld()
     {
         var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
