@@ -130,8 +130,15 @@ namespace WismUnity.Playground
             }
             finally
             {
-                report.events.Add("Restoring original editor scene setup without saving.");
-                EditorSceneManager.RestoreSceneManagerSetup(originalSetup);
+                if (originalSetup.Length > 0)
+                {
+                    report.events.Add("Restoring original editor scene setup without saving.");
+                    EditorSceneManager.RestoreSceneManagerSetup(originalSetup);
+                }
+                else
+                {
+                    report.events.Add("No original editor scene setup was loaded; leaving batchmode scene cleanup to Unity shutdown.");
+                }
             }
         }
 
