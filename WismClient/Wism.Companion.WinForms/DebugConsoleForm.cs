@@ -1,4 +1,6 @@
-﻿using Wism.CompanionApp.WinForms;
+using Wism.Companion.Shared.Events;
+using Wism.Companion.Shared.Telemetry;
+using Wism.CompanionApp.WinForms;
 
 namespace Wism.Companion.WinForms
 {
@@ -6,24 +8,25 @@ namespace Wism.Companion.WinForms
     {
         private readonly SignalRClient _client;
         private readonly CommandLogger _logger = new();
-
+        private readonly TelemetryChannelRegistry _channels = new();
+        private readonly TelemetryLogBuffer _logBuffer = new();
+        private string? _selectedChannel;
 
         public DebugConsoleForm()
         {
             InitializeComponent();
+            ConfigureLogGrid();
             _client = new SignalRClient(
-                    LogMessage,
-                    _logger.Log,
-                    snapshot =>
-                    {
-                        mapRenderer.InvertYAxis = snapshot.InvertYAxis;
-                        mapRenderer.UpdateMap(snapshot);
-                    }
-                );
+                SetStatus,
+                AddLogEntry,
+                _logger.Log,
+                ReceiveMapSnapshot,
+                ReceiveCommand);
         }
 
         private async void DebugConsoleForm_Load(object sender, EventArgs e)
         {
+            SetStatus("Connecting to SignalR host...");
             await _client.ConnectAsync();
         }
 
@@ -38,29 +41,25 @@ namespace Wism.Companion.WinForms
                 {
                     Directory.CreateDirectory(folder);
                 }
-                var file = Path.Combine(folder, $"recording_{ DateTime.Now:yyyyMMdd_HHmmss}.json");
+
+                var file = Path.Combine(folder, $"recording_{DateTime.Now:yyyyMMdd_HHmmss}.json");
                 _logger.Save(file);
                 buttonRecord.Text = "Record";
-                LogMessage($"[Logger] Recording saved to {file}");
+                SetStatus($"Recording saved to {file}");
             }
             else
             {
+                if (string.IsNullOrWhiteSpace(_selectedChannel))
+                {
+                    SetStatus("Select a channel before recording");
+                    return;
+                }
+
                 _logger.Clear();
-                _logger.Start();
+                _logger.Start(_selectedChannel);
                 buttonRecord.Text = "Stop";
-                LogMessage("[Logger] Recording started...");
+                SetStatus($"Recording {_selectedChannel}...");
             }
-        }
-
-        private void LogMessage(string message)
-        {
-            if (InvokeRequired)
-            {
-                BeginInvoke(() => LogMessage(message));
-                return;
-            }
-
-            listBoxLog.Items.Insert(0, $"{DateTime.Now:T} - {message}");
         }
 
         private async void buttonReplay_Click(object sender, EventArgs e)
@@ -74,44 +73,201 @@ namespace Wism.Companion.WinForms
             if (open.ShowDialog() == DialogResult.OK)
             {
                 var engine = new ReplayEngine(ReplayEvent);
-                LogMessage($"[Replay] Starting replay from {Path.GetFileName(open.FileName)}...");
+                SetStatus($"Replaying {Path.GetFileName(open.FileName)}...");
                 await engine.ReplayAsync(open.FileName, 500);
-                LogMessage($"[Replay] Finished replay.");
+                SetStatus("Replay finished");
+            }
+        }
+
+        private void buttonClear_Click(object sender, EventArgs e)
+        {
+            _logBuffer.Clear(_selectedChannel);
+            RefreshLogGrid();
+            SetStatus(string.IsNullOrWhiteSpace(_selectedChannel)
+                ? "No channel selected"
+                : $"Cleared log for {_selectedChannel}");
+        }
+
+        private void ReceiveCommand(CommandExecutedEvent command)
+        {
+            var channel = TelemetryContext.ChannelIdOrDefault(command.Telemetry);
+            RegisterChannelOption(channel);
+
+            if (command.TargetPosition is not null && ShouldRenderChannel(channel))
+            {
+                mapRenderer.TrackArmyAt(command.TargetPosition);
+            }
+        }
+
+        private void ReceiveMapSnapshot(MapSnapshot snapshot)
+        {
+            var channel = _channels.Register(snapshot);
+            RegisterChannelOption(channel);
+            if (ShouldRenderChannel(channel))
+            {
+                RenderSnapshot(snapshot);
             }
         }
 
         private void ReplayEvent(object evt)
         {
-            if (evt is Wism.Companion.Shared.Events.CommandExecutedEvent cmd)
+            var entry = TelemetryLogEntry.Replay(evt);
+            AddLogEntry(entry);
+
+            if (evt is CommandExecutedEvent command)
             {
-                if (cmd.TargetPosition != null)
-                {
-                    // Center map on target
-                    mapRenderer.TrackArmyAt(cmd.TargetPosition);
-                }
-
-                string actor = cmd.ActorId ?? "Unknown";
-                string target = cmd.TargetPosition != null
-                    ? $"({cmd.TargetPosition.X},{cmd.TargetPosition.Y})"
-                    : cmd.TargetId ?? "None";
-
-                string details = cmd.Parameters.Count > 0
-                    ? string.Join(", ", cmd.Parameters.Select(kvp => $"{kvp.Key}={kvp.Value}"))
-                    : "no params";
-
-                LogMessage($"[REPLAY:{cmd.CommandType}] {actor} → {target} [{details}] → {cmd.Result}");
+                ReceiveCommand(command);
             }
-            else if (evt is Wism.Companion.Shared.Events.MapSnapshot map)
+            else if (evt is MapSnapshot map)
             {
-                mapRenderer.UpdateMap(map);
-                LogMessage($"[REPLAY:MAP] {map.Width}x{map.Height} with {map.Armies.Count} armies");
+                ReceiveMapSnapshot(map);
             }
             else
             {
-                LogMessage("[REPLAY] Unknown event type");
+                RegisterChannelOption(entry.ChannelId);
             }
         }
 
+        private void AddLogEntry(TelemetryLogEntry entry)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(() => AddLogEntry(entry));
+                return;
+            }
 
+            RegisterChannelOption(entry.ChannelId);
+            var count = _logBuffer.Add(entry);
+
+            if (ShouldRenderChannel(entry.ChannelId))
+            {
+                InsertVisibleEntry(entry);
+                labelLogStats.Text = $"{count} events";
+            }
+        }
+
+        private void comboChannels_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _selectedChannel = comboChannels.SelectedItem?.ToString();
+            var snapshot = _channels.GetLatestMap(_selectedChannel);
+            if (snapshot is not null)
+            {
+                RenderSnapshot(snapshot);
+            }
+
+            RefreshLogGrid();
+            SetStatus(string.IsNullOrWhiteSpace(_selectedChannel)
+                ? "No channel selected"
+                : $"Viewing {_selectedChannel}");
+        }
+
+        private void dataGridLog_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridLog.CurrentRow?.DataBoundItem is TelemetryLogEntry entry)
+            {
+                textLogDetail.Text = entry.Detail;
+            }
+        }
+
+        private void RegisterChannelOption(string channel)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(() => RegisterChannelOption(channel));
+                return;
+            }
+
+            if (!comboChannels.Items.Contains(channel))
+            {
+                comboChannels.Items.Add(channel);
+            }
+
+            if (_selectedChannel is null)
+            {
+                _selectedChannel = channel;
+                comboChannels.SelectedItem = channel;
+            }
+        }
+
+        private bool ShouldRenderChannel(string channel)
+        {
+            return string.Equals(_selectedChannel, channel, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void RenderSnapshot(MapSnapshot snapshot)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(() => RenderSnapshot(snapshot));
+                return;
+            }
+
+            mapRenderer.InvertYAxis = snapshot.InvertYAxis;
+            mapRenderer.UpdateMap(snapshot);
+        }
+
+        private void ConfigureLogGrid()
+        {
+            dataGridLog.AutoGenerateColumns = false;
+            dataGridLog.Columns.Clear();
+            dataGridLog.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(TelemetryLogEntry.LocalTime),
+                HeaderText = "Time",
+                Width = 72
+            });
+            dataGridLog.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(TelemetryLogEntry.Category),
+                HeaderText = "Kind",
+                Width = 116
+            });
+            dataGridLog.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(TelemetryLogEntry.Summary),
+                HeaderText = "Event",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            dataGridLog.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(TelemetryLogEntry.Result),
+                HeaderText = "Result",
+                Width = 130
+            });
+        }
+
+        private void InsertVisibleEntry(TelemetryLogEntry entry)
+        {
+            var entries = _logBuffer.GetEntries(_selectedChannel).ToList();
+            dataGridLog.DataSource = entries;
+            dataGridLog.ClearSelection();
+            if (entries.Count > 0)
+            {
+                dataGridLog.Rows[0].Selected = true;
+                dataGridLog.CurrentCell = dataGridLog.Rows[0].Cells[0];
+                textLogDetail.Text = entries[0].Detail;
+            }
+        }
+
+        private void RefreshLogGrid()
+        {
+            var entries = _logBuffer.GetEntries(_selectedChannel).ToList();
+            dataGridLog.DataSource = entries;
+            labelLogStats.Text = string.IsNullOrWhiteSpace(_selectedChannel)
+                ? "0 events"
+                : $"{_logBuffer.GetCount(_selectedChannel)} events";
+            textLogDetail.Text = entries.Count == 0 ? string.Empty : entries[0].Detail;
+        }
+
+        private void SetStatus(string message)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(() => SetStatus(message));
+                return;
+            }
+
+            labelStatus.Text = message;
+        }
     }
 }

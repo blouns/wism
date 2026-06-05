@@ -16,6 +16,7 @@ namespace Wism.Companion.Shared.Events
 
         // Optional but useful
         public string? Result { get; set; }
+        public TelemetryContext? Telemetry { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 }

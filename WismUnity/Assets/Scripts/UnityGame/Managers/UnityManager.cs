@@ -20,6 +20,7 @@ using Wism.Client.Core;
 using Wism.Client.Core.Telemetry;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
+using Wism.Companion.Shared.Events;
 using IWismLogger = Wism.Client.Common.IWismLogger;
 
 namespace Assets.Scripts.Managers
@@ -186,8 +187,26 @@ namespace Assets.Scripts.Managers
         private void InitializeSnapshotBroadcaster()
         {
             var builder = new MapSnapshotBuilder();
-            var emitter = new MapSnapshotEmitter(this.GameManager.LoggerFactory);
+            var emitter = new MapSnapshotEmitter(this.GameManager.LoggerFactory, CreateTelemetryContext());
             this.snapshotBroadcaster = new UnityMapSnapshotBroadcaster(builder, emitter);
+        }
+
+        private static TelemetryContext CreateTelemetryContext()
+        {
+            var instanceId = System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+            var sourceName = string.IsNullOrWhiteSpace(Application.productName)
+                ? "WismUnity"
+                : Application.productName;
+
+            return new TelemetryContext
+            {
+                ChannelId = $"unity:{sourceName}:{instanceId}",
+                SessionId = $"unity:{Guid.NewGuid():N}",
+                SourceKind = "Unity",
+                SourceName = sourceName,
+                InstanceId = instanceId,
+                StartedAtUtc = DateTime.UtcNow
+            };
         }
 
         private void InitializeWismGame(UnityNewGameEntity gameSettings)

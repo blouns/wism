@@ -4,13 +4,13 @@
     <UnityPluginDir Condition="'$(UnityPluginDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\WismUnity\Assets\Plugins\WismClient\'))</UnityPluginDir>
   </PropertyGroup>
 
-  <ItemGroup>
-    <UnityClientOutput Include="$(OutputPath)$(AssemblyName).dll" />
-    <UnityClientOutput Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
-  </ItemGroup>
-
   <Target Name="CopyBinariesAndModsToUnity" AfterTargets="Build">
     <Message Text="Publishing $(AssemblyName) to Unity: $(UnityPluginDir)" Importance="high" />
+
+    <ItemGroup>
+      <UnityClientOutput Include="$(OutputPath)$(AssemblyName).dll" />
+      <UnityClientOutput Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+    </ItemGroup>
 
     <Copy
       SourceFiles="@(UnityClientOutput)"

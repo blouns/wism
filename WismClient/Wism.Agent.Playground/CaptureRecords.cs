@@ -56,13 +56,19 @@ public sealed class CaptureRecorder
     };
 
     private readonly List<string> eventLines = new();
+    private readonly TelemetryContext? telemetryContext;
     private GameEntity? startingSnapshot;
 
-    public CaptureRecorder(string name, string scenario, string outputRoot)
+    public CaptureRecorder(
+        string name,
+        string scenario,
+        string outputRoot,
+        TelemetryContext? telemetryContext = null)
     {
         Name = SanitizeName(name);
         Scenario = scenario;
         OutputDirectory = Path.Combine(outputRoot, Name);
+        this.telemetryContext = telemetryContext;
     }
 
     public string Name { get; }
@@ -86,6 +92,7 @@ public sealed class CaptureRecorder
     public void RecordCommand(Command command, ActionState result)
     {
         var executed = command.ToExecutedEvent(result);
+        ApplyTelemetry(executed);
         eventLines.Add(SystemTextJsonSerializer.Serialize(new CaptureEvent<CommandExecutedEvent>(
             nameof(CommandExecutedEvent),
             executed), EventJsonOptions));
@@ -94,10 +101,27 @@ public sealed class CaptureRecorder
 
     public void RecordMapSnapshot(MapSnapshot snapshot)
     {
+        ApplyTelemetry(snapshot);
         eventLines.Add(SystemTextJsonSerializer.Serialize(new CaptureEvent<MapSnapshot>(
             nameof(MapSnapshot),
             snapshot), EventJsonOptions));
         MapSnapshotCount++;
+    }
+
+    private void ApplyTelemetry(CommandExecutedEvent evt)
+    {
+        if (telemetryContext is not null && evt.Telemetry is null)
+        {
+            evt.Telemetry = telemetryContext;
+        }
+    }
+
+    private void ApplyTelemetry(MapSnapshot snapshot)
+    {
+        if (telemetryContext is not null && snapshot.Telemetry is null)
+        {
+            snapshot.Telemetry = telemetryContext;
+        }
     }
 
     public CaptureResult Save(PlaygroundReport report, bool generateTest)

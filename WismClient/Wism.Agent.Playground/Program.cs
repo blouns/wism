@@ -4,6 +4,7 @@ using Wism.Agent.Playground;
 var command = args.FirstOrDefault(arg => !arg.StartsWith("--", StringComparison.OrdinalIgnoreCase)) ?? "sample";
 var quiet = args.Any(arg => string.Equals(arg, "--quiet", StringComparison.OrdinalIgnoreCase));
 var runner = new PlaygroundScenarioRunner(quiet);
+var channel = ReadString(args, "channel", null);
 
 try
 {
@@ -24,7 +25,7 @@ try
         case "companion":
             var scenario = ReadString(args, "scenario", "win") ?? "win";
             var delayMs = ReadInt(args, "delayMs", 300);
-            return Exit(Print(runner.CompanionDemo(scenario, delayMs), quiet));
+            return Exit(Print(runner.CompanionDemo(scenario, delayMs, channel), quiet));
         case "world":
             var world = ReadString(args, "world", "TestWorld") ?? "TestWorld";
             var modRoot = ReadString(args, "modRoot", null);
@@ -34,7 +35,7 @@ try
             var name = ReadString(args, "name", DefaultCaptureName(recordScenario)) ?? DefaultCaptureName(recordScenario);
             var outputRoot = ReadString(args, "out", DefaultCaptureOutputRoot()) ?? DefaultCaptureOutputRoot();
             var generateTest = ReadBool(args, "generateTest", true);
-            var result = runner.Record(recordScenario, name, outputRoot, generateTest);
+            var result = runner.Record(recordScenario, name, outputRoot, generateTest, channel);
             PrintCapture(result, quiet);
             return string.Equals(result.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "campaign":
@@ -47,7 +48,7 @@ try
             var campaignDelayMs = ReadInt(args, "delayMs", 0);
             var campaignSize = ReadString(args, "size", "medium") ?? "medium";
             var campaignScenario = ReadString(args, "scenario", ReadString(args, "preset", "standard")) ?? "standard";
-            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs, campaignSize, campaignScenario);
+            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs, campaignSize, campaignScenario, channel);
             PrintCampaign(campaign, quiet);
             return string.Equals(campaign.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "jump":
@@ -64,7 +65,7 @@ try
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|jump|worktrees] [--quiet] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [preset=standard|capture-pressure|ruin-search] [checkpoint=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|jump|worktrees] [--quiet] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [preset=standard|capture-pressure|ruin-search] [checkpoint=path]");
             return 2;
     }
 }
