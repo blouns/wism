@@ -5,6 +5,7 @@ using Wism.Client.Commands;
 using Wism.Client.Commands.Cities;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
+using Wism.Client.Core;
 using IWismLogger = Wism.Client.Common.IWismLogger;
 
 namespace Assets.Scripts.CommandProcessors
@@ -34,6 +35,14 @@ namespace Assets.Scripts.CommandProcessors
         public ActionState Execute(ICommandAction command)
         {
             var cityCommand = (BuildCityCommand)command;
+
+            var player = cityCommand.Player;
+            if (!player.IsHuman)
+            {
+                // AI path: skip UI entirely
+                var aiState = cityCommand.Execute();
+                return aiState;
+            }
 
             if (this.stager == null)
             {

@@ -71,34 +71,58 @@ public class CaptureModule : ITacticalModule
         return bids;
     }
 
-
-
     public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
     {
-        var army = armies[0];
         var commands = new List<ICommandAction>();
 
+        // 1) Snapshot current selection
+        var current = Game.Current.ArmiesSelected()
+            ? Game.Current.GetSelectedArmies()
+            : new List<Army>();
+
+        var army = armies[0];
         var capturableCities = world.GetCities()
             .Where(c => c.Clan != army.Player.Clan)
             .ToList();
 
         var target = FindNearestCapturableCity(army, capturableCities);
-        if (target == null) return commands;
+        if (target == null)
+            return commands;
 
-        // If adjacent and can attack — attack the city
+        // 2) If in range, generate full attack pipeline, then filter it
         if (target.Tile.CanAttackHere(armies) && AiUtilities.IsInAttackRange(armies, target.Tile))
         {
             logger.LogInformation($"[Capture] Army attacking city at ({target.Tile.X},{target.Tile.Y})");
 
-            return AiUtilities.GenerateAttackCommands(armyController, armies, commands, target.Tile);
+            var raw = AiUtilities.GenerateAttackCommands(
+                armyController, armies, new List<ICommandAction>(), target.Tile);
+
+            foreach (var cmd in raw)
+            {
+                // skip redundant select
+                if (cmd is SelectArmyCommand sel
+                    && sel.Armies.Count == current.Count
+                    && !sel.Armies.Except(current).Any())
+                {
+                    logger.LogInformation("[Capture] Skipping duplicate SelectArmyCommand");
+                    continue;
+                }
+
+                commands.Add(cmd);
+                if (cmd is SelectArmyCommand s)
+                    current = s.Armies;
+            }
+
+            return commands;
         }
 
-        // Otherwise move toward the city
-        var attackPosition = AiUtilities.FindAttackPosition(target.Tile, armies, Game.Current.PathingStrategy, logger);
+        // 3) Otherwise just move toward the city
+        var attackPosition = AiUtilities.FindAttackPosition(
+            target.Tile, armies, Game.Current.PathingStrategy, logger);
+
         if (attackPosition != null)
         {
             logger.LogInformation($"[Capture] Army moving toward city at ({attackPosition.X},{attackPosition.Y})");
-
             commands.Add(new MoveOnceCommand(armyController, armies, attackPosition.X, attackPosition.Y));
         }
         else
@@ -108,6 +132,7 @@ public class CaptureModule : ITacticalModule
 
         return commands;
     }
+
 
 
     private City FindNearestCapturableCity(Army army, List<City> cities)

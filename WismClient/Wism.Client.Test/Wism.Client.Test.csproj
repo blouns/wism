@@ -23,6 +23,12 @@
     <Content Include="Data\UnitTestWorld\Map.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="AgentPlayground\Captures\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AgentPlayground\Captures\**\*.jsonl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Wism.Agent.Playground\Wism.Agent.Playground.csproj" />
     <ProjectReference Include="..\Wism.Client.AI\Wism.Client.AI.csproj" />
     <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
     <ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />

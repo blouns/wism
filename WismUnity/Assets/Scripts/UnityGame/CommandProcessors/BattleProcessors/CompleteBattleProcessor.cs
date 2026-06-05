@@ -34,33 +34,36 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            this.unityGame.SetTime(this.unityGame.GameManager.StandardTime);
-            this.unityGame.InputManager.SetInputMode(InputMode.Game);
+            unityGame.SetTime(unityGame.GameManager.StandardTime);
 
-            var attackCommand = ((CompleteBattleCommand)command).AttackCommand;
-            var result = attackCommand.Result;
-            switch (result)
+            var completeBattle = (CompleteBattleCommand)command;
+            var attackCommand = completeBattle.AttackCommand;
+            var isHuman = attackCommand.Player.IsHuman;
+
+            // Tear down any war UI and hide the battlefield
+            unityGame.WarPanel.Teardown();
+            HideWarScene();
+
+            if (attackCommand.Result == ActionState.Failed)
             {
-                case ActionState.Succeeded:
-                    this.unityGame.WarPanel.Teardown();
-                    this.unityGame.SetTime(this.unityGame.GameManager.StandardTime);
-                    this.unityGame.InputManager.SetInputMode(InputMode.Game);
-                    OpenProductionPanelIfClaimingCity(attackCommand);
-                    break;
-
-                case ActionState.Failed:
-                    this.inputManager.InputHandler.DeselectObject();
-                    this.unityGame.WarPanel.Teardown();
-
-                    break;
-                default:
-                    throw new InvalidOperationException("Unexpected ActionState: " + result);
+                inputManager.InputHandler.DeselectObject();
+            }
+            else if (attackCommand.Result == ActionState.Succeeded && isHuman)
+            {
+                OpenProductionPanelIfClaimingCity(attackCommand);
             }
 
-            HideWarScene();
+            // If we didn’t just switch into UI for production, set the next mode
+            if (unityGame.InputManager.GetInputMode() != InputMode.UI)
+            {
+                unityGame.InputManager.SetInputMode(isHuman
+                    ? InputMode.Game
+                    : InputMode.AITurn);
+            }
 
             return command.Execute();
         }
+
 
         private void OpenProductionPanelIfClaimingCity(AttackOnceCommand attackCommand)
         {

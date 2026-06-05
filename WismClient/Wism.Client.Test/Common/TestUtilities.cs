@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
-using Wism.Client.Commands;
+﻿using NUnit.Framework;
+using System.Collections.Generic;
+using System.Linq;
+using Wism.Client.AI.CommandProviders;
 using Wism.Client.CommandProviders;
+using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Commands.Games;
 using Wism.Client.Commands.Heros;
@@ -13,7 +15,6 @@ using Wism.Client.Core;
 using Wism.Client.Data;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
-using System.Linq;
 
 namespace Wism.Client.Test.Common;
 

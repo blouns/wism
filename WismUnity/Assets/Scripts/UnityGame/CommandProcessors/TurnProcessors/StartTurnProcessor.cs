@@ -36,6 +36,11 @@ namespace Assets.Scripts.CommandProcessors
         {
             var startTurn = (StartTurnCommand)command;
 
+            if (!this.unityGame.InteractiveUI)
+            {
+                return command.Execute();
+            }
+
             CenterOnCapitol(startTurn.Player);
 
             var messageBox = UnityUtilities.GameObjectHardFind("NotificationBox")

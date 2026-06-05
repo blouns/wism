@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wism.Companion.Shared", "Wi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wism.SignalR.Host", "Wism.SignalR.Host\Wism.SignalR.Host.csproj", "{2F40AB3C-65EB-4FE8-B7E1-AB868097D109}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wism.Agent.Playground", "Wism.Agent.Playground\Wism.Agent.Playground.csproj", "{C50F7087-D85A-41BE-8CFF-12902481A0C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{2F40AB3C-65EB-4FE8-B7E1-AB868097D109}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F40AB3C-65EB-4FE8-B7E1-AB868097D109}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F40AB3C-65EB-4FE8-B7E1-AB868097D109}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C50F7087-D85A-41BE-8CFF-12902481A0C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C50F7087-D85A-41BE-8CFF-12902481A0C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C50F7087-D85A-41BE-8CFF-12902481A0C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C50F7087-D85A-41BE-8CFF-12902481A0C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

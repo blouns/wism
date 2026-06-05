@@ -44,50 +44,59 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            var prepForBattleCommand = (PrepareForBattleCommand)command;
-            var targetTile = World.Current.Map[prepForBattleCommand.X, prepForBattleCommand.Y];
-            var attackingPlayer = prepForBattleCommand.Player;
-            this.unityGame.CurrentAttackers = new List<Army>(prepForBattleCommand.Armies);
-            this.unityGame.CurrentAttackers.Sort(new ByArmyBattleOrder(targetTile));
+            var prep = (PrepareForBattleCommand)command;
+            var isHuman = prep.Player.IsHuman;
+            var tile = World.Current.Map[prep.X, prep.Y];
 
-            Player defendingPlayer;
-            if (prepForBattleCommand.Defenders.Count > 0)
+            // 1) Build & sort attacker list
+            var attackers = new List<Army>(prep.Armies);
+            attackers.Sort(new ByArmyBattleOrder(tile));
+            unityGame.CurrentAttackers = attackers;
+
+            // 2) Build & sort defender list (or empty if none)
+            List<Army> defenders;
+            if (prep.Defenders.Count > 0)
             {
-                defendingPlayer = prepForBattleCommand.Defenders[0].Player;
-                this.unityGame.CurrentDefenders = targetTile.MusterArmy();
-                this.unityGame.CurrentDefenders.Sort(new ByArmyBattleOrder(targetTile));
+                defenders = tile.MusterArmy();
+                defenders.Sort(new ByArmyBattleOrder(tile));
             }
             else
             {
-                // Defenseless city
-                var tile = World.Current.Map[prepForBattleCommand.X, prepForBattleCommand.Y];
-                if (tile.City == null)
-                {
-                    throw new InvalidOperationException($"Expected a city to be present on {tile}");
-                }
-                defendingPlayer = tile.City.Player;
-                this.unityGame.CurrentDefenders = new List<Army>();
+                defenders = new List<Army>();
             }
+            unityGame.CurrentDefenders = defenders;
 
-            if (!this.timerElapsed)
+            var defendingPlayer = defenders.Count > 0
+                ? defenders[0].Player
+                : tile.City?.Player
+                  ?? throw new InvalidOperationException($"Expected a city at {prep.X},{prep.Y} for battle");
+
+
+            // 3) Determine modes
+            var sceneMode = InputMode.UI;       // always UI for the war scene
+            var nextMode = isHuman ? InputMode.Game : InputMode.AITurn;
+
+            // 4) First pass: show notification, draw scene, wait
+            if (!timerElapsed)
             {
-                this.unityGame.InputManager.SetInputMode(InputMode.UI);
+                unityGame.InputManager.SetInputMode(sceneMode);
                 UnityUtilities.GameObjectHardFind("SelectedBox").SetActive(false);
                 StartTimerOnFirstTime();
-                ShowBattleNotification(defendingPlayer);
-                DrawWarScene(targetTile);
-
+                ShowBattleNotification(defenders.Count > 0
+                    ? defendingPlayer
+                    : prep.Player);
+                DrawWarScene(tile);
                 return ActionState.InProgress;
             }
-            else
-            {
-                ShowWarPanel(attackingPlayer, this.unityGame.CurrentAttackers, defendingPlayer, this.unityGame.CurrentDefenders, targetTile);
-                this.timerElapsed = false;
-                this.timer = null;
 
-                return command.Execute();
-            }
+            // 5) Timer done: show panel, reset mode, then execute
+            ShowWarPanel(prep.Player, attackers, defendingPlayer, defenders, tile);
+            timerElapsed = false;
+            timer = null;
+            unityGame.InputManager.SetInputMode(nextMode);
+            return command.Execute();
         }
+
 
         private void StartTimerOnFirstTime()
         {

@@ -35,7 +35,17 @@ namespace Assets.Scripts.CommandProcessors
         public ActionState Execute(ICommandAction command)
         {
             var searchCommand = (SearchTempleCommand)command;
+            var player = searchCommand.Player;
 
+            if (!player.IsHuman)
+            {
+                // AI path: skip UI entirely
+                var aiState = searchCommand.Execute();
+                this.unityGame.GameManager.DeselectArmies();
+                return aiState;
+            }
+
+            // Human path: show UI
             if (this.stager == null)
             {
                 this.stager = new CutsceneStagerFactory(this.unityGame)

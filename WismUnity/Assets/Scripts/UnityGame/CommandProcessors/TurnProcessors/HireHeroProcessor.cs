@@ -36,50 +36,54 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
-            ActionState state;
+            var hire = (HireHeroCommand)command;
+            var player = hire.Player;
 
-            var hireCommand = (HireHeroCommand)command;
-
-            if (hireCommand.RecruitHeroCommand.Result != ActionState.Succeeded ||
-                !hireCommand.RecruitHeroCommand.HeroAccepted.HasValue)
+            // No hero available; fail immediately
+            if (hire.RecruitHeroCommand.Result != ActionState.Succeeded ||
+                !hire.RecruitHeroCommand.HeroAccepted.HasValue ||
+                !hire.RecruitHeroCommand.HeroAccepted.Value)
             {
-                // No hero was available
                 return ActionState.Failed;
             }
 
-            if (hireCommand.HeroAccepted &&
-                this.heroName == null)
-            {
-                // Wait for user to name the hero
-                this.unityGame.InputManager.SetInputMode(InputMode.UI);
-                this.heroName = GetHeroName(hireCommand);
-                state = ActionState.InProgress;
-            }
-            else if (hireCommand.HeroAccepted)
-            {
-                // Hire the hero
-                state = hireCommand.Execute();
-                hireCommand.Hero.DisplayName = this.heroName;
+            // AI and headless paths skip UI entirely.
+            if (!player.IsHuman || !this.unityGame.InteractiveUI)
+            {                
+                var aiState = hire.Execute();
+                this.heroName = hire.HeroDisplayName;
+                hire.Hero.DisplayName = this.heroName;
+                CreateAnyAllies(hire);
+                this.heroName = null;
 
-                // Create any allies that will join the hero
-                CreateAnyAllies(hireCommand);
-                this.unityGame.InputManager.SetInputMode(InputMode.Game);
-                Reset();
+                return aiState;
+            }
+
+            // Human path: handle naming dialog then actual hire
+            if (this.heroName == null)
+            {
+                // Tell the UI to pop up your naming dialog
+                unityGame.InputManager.SetInputMode(InputMode.UI);
+                this.heroName = GetHeroName(hire);
+                return ActionState.InProgress;
             }
             else
             {
-                // Hero not accepted
-                this.unityGame.InputManager.SetInputMode(InputMode.Game);
-                state = ActionState.Failed;
-                Reset();
-            }
+                // Name’s been entered—actually hire
+                var humanState = hire.Execute();
+                hire.Hero.DisplayName = this.heroName;
+                CreateAnyAllies(hire);
 
-            return state;
+                // Back to normal gameplay input
+                unityGame.InputManager.SetInputMode(InputMode.Game);
+                Reset();
+                return humanState;
+            }
         }
 
         private void Reset()
         {
-            this.input.Clear();
+            this.input?.Clear();
             this.input = null;
             this.heroName = null;
         }

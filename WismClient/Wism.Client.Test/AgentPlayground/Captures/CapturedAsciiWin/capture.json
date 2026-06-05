@@ -1,0 +1,16 @@
+{
+  "SchemaVersion": 1,
+  "Name": "CapturedAsciiWin",
+  "Scenario": "win",
+  "CreatedUtc": "2026-05-31T21:14:46.4964345Z",
+  "EventFile": "events.jsonl",
+  "StartingSnapshotFile": "starting-snapshot.json",
+  "FinalReportFile": "final-report.json",
+  "Expected": {
+    "Status": "Passed",
+    "Outcome": "Human-side win.",
+    "CommandCountMin": 8,
+    "MapSnapshotCountMin": 9,
+    "NoUnexpectedCommandFailures": true
+  }
+}

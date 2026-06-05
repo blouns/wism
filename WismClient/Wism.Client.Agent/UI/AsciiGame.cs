@@ -145,10 +145,7 @@ public class AsciiGame : GameBase
     {
         foreach (var command in this.CommandController.GetCommandsAfterId(lastId))
         {
-            var isHuman = Game.Current.GetCurrentPlayer().IsHuman;
-
-            var playerKind = (isHuman) ? "Human" : "AI";
-            this.logger.LogInformation($"{playerKind} task executing: {command.Id}: {command.GetType()}");
+            LogPlayerKind(command);
 
             // Run the command
             var result = ActionState.NotStarted;
@@ -182,6 +179,13 @@ public class AsciiGame : GameBase
                 break;
             }
         }
+    }
+
+    private void LogPlayerKind(Commands.Command command)
+    {
+        var isHuman = Game.Current.GetCurrentPlayer().IsHuman;
+        var playerKind = (isHuman) ? "Human" : "AI";
+        this.logger.LogInformation($"{playerKind} task executing: {command.Id}: {command.GetType()}");
     }
 
     protected override void HandleInput()

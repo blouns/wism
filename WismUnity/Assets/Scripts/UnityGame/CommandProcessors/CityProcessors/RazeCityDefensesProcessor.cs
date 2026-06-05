@@ -35,6 +35,15 @@ namespace Assets.Scripts.CommandProcessors
         {
             var cityCommand = (RazeCityCommand)command;
 
+            var player = cityCommand.Player;
+            if (!player.IsHuman)
+            {
+                // AI path: skip UI entirely
+                var aiState = cityCommand.Execute();
+                return aiState;
+            }
+
+            // Human path: show UI
             if (this.stager == null)
             {
                 this.stager = new CutsceneStagerFactory(this.unityGame)

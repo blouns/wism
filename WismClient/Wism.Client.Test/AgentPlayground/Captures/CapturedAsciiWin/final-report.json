@@ -1,0 +1,30 @@
+{
+  "Scenario": "win",
+  "Status": "Passed",
+  "Outcome": "Human-side win.",
+  "Turns": 1,
+  "Players": [
+    {
+      "Clan": "The Sirians",
+      "IsHuman": true,
+      "IsDead": false,
+      "ArmyCount": 11,
+      "CityCount": 2,
+      "Gold": 2050
+    },
+    {
+      "Clan": "Lord Bane",
+      "IsHuman": false,
+      "IsDead": false,
+      "ArmyCount": 0,
+      "CityCount": 0,
+      "Gold": 0
+    }
+  ],
+  "Events": [
+    "Capture recording enabled for CapturedAsciiWin.",
+    "Battle resolved at 3,3.",
+    "Sirians eliminated Lord Bane."
+  ],
+  "Map": "05M.0 15M.0 25M.0 35M.0 45M.0 55M.0 \r\n04M.0 14CN1 24C.0 34G.0 44G.0 54M.0 \r\n03M.0 13C.0 23C.0 33CS8 43C.0 53M.0 \r\n02M.0 12G.0 22G.0 32C.0 42C.0 52M.0 \r\n01M.0 11CS3 21C.0 31G.0 41G.0 51M.0 \r\n00T.0 10C.0 20C.0 30M.0 40M.0 50M.0"
+}

@@ -9,6 +9,7 @@ using Wism.Client.Core.Armies;
 using Wism.Client.Core.Armies.TerrainTraversalStrategies;
 using Wism.Client.Core.Armies.WarStrategies;
 using Wism.Client.Data.Entities;
+using Wism.Client.Pathing;
 
 namespace Assets.Scripts
 {
@@ -78,6 +79,7 @@ namespace Assets.Scripts
             settings.WarStrategy = CreateDefaultWarStrategy();
             settings.MovementStrategies = CreateDefaultMovementStrategies();
             settings.TraversalStrategies = CreateDefaultTraversalStrategies();
+            settings.PathingStrategy = CreateDefaultPathingStrategy();
 
             // TODO: Random start location setting
 
@@ -92,6 +94,17 @@ namespace Assets.Scripts
 
             this.debugManager.LogInformation("Initializing game...");
             this.unityManager.GameManager.NewGame(settings);
+        }
+
+        private AssemblyEntity CreateDefaultPathingStrategy()
+        {           
+            var entity = new AssemblyEntity()
+            {
+                AssemblyName = Assembly.GetAssembly(typeof(AStarPathingStrategy)).FullName,
+                TypeName = (typeof(AStarPathingStrategy)).FullName
+            };
+
+            return entity;
         }
 
         public void LoadNewGame()
@@ -187,37 +200,37 @@ namespace Assets.Scripts
                 new UnityPlayerEntity()
                 {
                     ClanName = "StormGiants",
-                    IsHuman = true
+                    IsHuman = false
                 },
                 new UnityPlayerEntity()
                 {
                     ClanName = "Elvallie",
-                    IsHuman = true
+                    IsHuman = false
                 },
                 new UnityPlayerEntity()
                 {
                     ClanName = "OrcsOfKor",
-                    IsHuman = true
+                    IsHuman = false
                 },
                 new UnityPlayerEntity()
                 {
                     ClanName = "Selentines",
-                    IsHuman = true
+                    IsHuman = false
                 },
                 new UnityPlayerEntity()
                 {
                     ClanName = "HorseLords",
-                    IsHuman = true
+                    IsHuman = false
                 },
                 new UnityPlayerEntity()
                 {
                     ClanName = "GreyDwarves",
-                    IsHuman = true
+                    IsHuman = false
                 },
                 new UnityPlayerEntity()
                 {
                     ClanName = "LordBane",
-                    IsHuman = true
+                    IsHuman = false
                 }
             };
         }

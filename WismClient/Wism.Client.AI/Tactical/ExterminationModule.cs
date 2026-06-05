@@ -64,32 +64,62 @@ namespace Wism.Client.AI.Tactical
             var commands = new List<ICommandAction>();
 
             if (armies == null || armies.Count == 0)
-            {
                 return commands;
-            }
+
+            // 1) Snapshot current selection
+            var current = Game.Current.ArmiesSelected()
+                ? Game.Current.GetSelectedArmies()
+                : new List<Army>();
 
             var army = armies[0];
             var enemies = AiUtilities.GetAllEnemyArmies();
 
             foreach (var enemy in enemies)
             {
+                // 2) If in range, generate attack, then filter
                 if (enemy.Tile.CanAttackHere(armies) && AiUtilities.IsInAttackRange(armies, enemy.Tile))
                 {
-                    logger.LogInformation($"Army attacking tile at ({enemy.Tile.X},{enemy.Tile.Y}).");
-                    return AiUtilities.GenerateAttackCommands(armyController, armies, commands, enemy.Tile);
+                    logger.LogInformation($"[Extermination] Army attacking tile at ({enemy.Tile.X},{enemy.Tile.Y}).");
+
+                    var raw = AiUtilities.GenerateAttackCommands(
+                        armyController, armies, new List<ICommandAction>(), enemy.Tile);
+
+                    foreach (var cmd in raw)
+                    {
+                        if (cmd is SelectArmyCommand sel
+                            && sel.Armies.Count == current.Count
+                            && !sel.Armies.Except(current).Any())
+                        {
+                            logger.LogInformation("[Extermination] Skipping duplicate SelectArmyCommand");
+                            continue;
+                        }
+
+                        commands.Add(cmd);
+                        if (cmd is SelectArmyCommand s)
+                            current = s.Armies;
+                    }
+
+                    return commands;
                 }
 
-                var attackPosition = AiUtilities.FindAttackPosition(enemy.Tile, armies, this.pathingStrategy, this.logger);
+                // 3) Else move toward this enemy
+                var attackPosition = AiUtilities.FindAttackPosition(
+                    enemy.Tile, armies, this.pathingStrategy, this.logger);
+
                 if (attackPosition != null)
                 {
                     AiUtilities.LogAttackPositionInfo(enemy, attackPosition, this.logger);
 
-                    pathingStrategy.FindShortestRoute(World.Current.Map, armies, attackPosition, out var path, out _, ignoreClan: false);
+                    pathingStrategy.FindShortestRoute(
+                        World.Current.Map, armies, attackPosition,
+                        out var path, out _, ignoreClan: false);
 
                     if (path != null && path.Count > 1)
                     {
-                        logger.LogInformation($"Army moving toward ({path[1].X},{path[1].Y}) to approach target.");
-                        commands.Add(new MoveOnceCommand(armyController, armies, path[1].X, path[1].Y));
+                        logger.LogInformation(
+                            $"[Extermination] Army moving toward ({path[1].X},{path[1].Y}) to approach target.");
+                        commands.Add(new MoveOnceCommand(
+                            armyController, armies, path[1].X, path[1].Y));
                         return commands;
                     }
                 }
@@ -99,10 +129,12 @@ namespace Wism.Client.AI.Tactical
                 }
             }
 
-            logger.LogInformation($"Army at ({army.Tile.X},{army.Tile.Y}) found no valid moves this turn.");
+            logger.LogInformation(
+                $"[Extermination] Army at ({army.Tile.X},{army.Tile.Y}) found no valid moves this turn.");
             return commands;
         }
 
-        
+
+
     }
 }

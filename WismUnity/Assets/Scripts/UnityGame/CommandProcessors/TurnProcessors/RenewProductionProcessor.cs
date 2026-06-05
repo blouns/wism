@@ -48,10 +48,21 @@ namespace Assets.Scripts.CommandProcessors
         {
             var renewCommand = (RenewProductionCommand)command;
             var player = renewCommand.Player;
+            var isHuman = player.IsHuman;
 
             if (player.IsDead)
             {
                 return ActionState.Failed;
+            }
+
+            if (!isHuman)
+            {
+                return ActionState.Succeeded;
+            }
+
+            if (!this.unityGame.InteractiveUI)
+            {
+                return command.Execute();
             }
 
             // Show production on first city

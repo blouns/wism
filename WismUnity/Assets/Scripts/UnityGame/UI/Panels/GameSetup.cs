@@ -145,6 +145,7 @@ public class GameSetup : MonoBehaviour
 
     private UnityPlayerEntity[] GetSelectedPlayersFromPanel()
     {
+        var humanIndex = 0;
         var playerEntities = new List<UnityPlayerEntity>();
         for (int i = 0; i < this.playerToggles.Length; i++)
         {

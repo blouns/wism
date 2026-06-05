@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using Wism.Client.Agent.CommandProcessors.Human;
-using Wism.Client.Agent.CommandProcessors.Human.SearchProcessors;
+using Wism.Client.Agent.CommandProcessors.SearchProcessors;
 using Wism.Client.Api.Telemetry;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Common;
