@@ -20,6 +20,7 @@ using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Modules.Infos;
+using Wism.Companion.Shared.Events;
 
 namespace Wism.Agent.Playground;
 
@@ -32,6 +33,7 @@ public sealed class PlaygroundScenarioRunner
     private CaptureRecorder? captureRecorder;
     private int companionDelayMs;
     private readonly IWismLoggerFactory loggerFactory;
+    private TelemetryContext? telemetryContext;
 
     public PlaygroundScenarioRunner(bool suppressConsoleLogs = false)
     {
@@ -133,10 +135,15 @@ public sealed class PlaygroundScenarioRunner
         }
     }
 
-    public PlaygroundReport CompanionDemo(string scenario = "win", int delayMs = 300)
+    public PlaygroundReport CompanionDemo(string scenario = "win", int delayMs = 300, string? channel = null)
     {
-        EnableCompanionTelemetry(Math.Clamp(delayMs, 0, 5000));
-        events.Add("Companion telemetry enabled on named pipe wism-commands.");
+        telemetryContext = CreateTelemetryContext(
+            sourceKind: "Playground",
+            sourceName: scenario,
+            channelId: channel ?? $"playground:{scenario}:interactive",
+            runId: scenario);
+        EnableCompanionTelemetry(Math.Clamp(delayMs, 0, 5000), telemetryContext);
+        events.Add($"Companion telemetry enabled on named pipe wism-commands for channel {telemetryContext.ChannelId}.");
 
         return scenario.ToLowerInvariant() switch
         {
@@ -150,9 +157,15 @@ public sealed class PlaygroundScenarioRunner
         string scenario,
         string name,
         string outputRoot,
-        bool generateTest = true)
+        bool generateTest = true,
+        string? channel = null)
     {
-        captureRecorder = new CaptureRecorder(name, scenario, outputRoot);
+        telemetryContext = CreateTelemetryContext(
+            sourceKind: "Playground",
+            sourceName: name,
+            channelId: channel ?? $"playground:{scenario}:record",
+            runId: name);
+        captureRecorder = new CaptureRecorder(name, scenario, outputRoot, telemetryContext);
         events.Add($"Capture recording enabled for {captureRecorder.Name}.");
 
         var report = scenario.ToLowerInvariant() switch
@@ -175,24 +188,34 @@ public sealed class PlaygroundScenarioRunner
         string? modRoot = null,
         int companionDelayMs = 0,
         string size = "medium",
-        string scenarioFamily = "standard")
+        string scenarioFamily = "standard",
+        string? channel = null)
     {
         events.Clear();
+        var normalizedScenarioFamily = NormalizeScenarioFamily(scenarioFamily);
+        var boundedClans = Math.Clamp(clans, 2, 8);
+        var campaignName = string.IsNullOrWhiteSpace(name) ? $"campaign-{seed}-{boundedClans}clans" : name;
+        telemetryContext = CreateTelemetryContext(
+            sourceKind: "Playground",
+            sourceName: campaignName,
+            channelId: channel ?? $"playground:{normalizedScenarioFamily}:{seed}",
+            runId: campaignName);
+
         if (companionDelayMs > 0)
         {
-            EnableCompanionTelemetry(Math.Clamp(companionDelayMs, 0, 5000));
-            events.Add($"Companion telemetry enabled on named pipe wism-commands with {companionDelayMs}ms delay.");
+            EnableCompanionTelemetry(Math.Clamp(companionDelayMs, 0, 5000), telemetryContext);
+            events.Add($"Companion telemetry enabled on named pipe wism-commands with {companionDelayMs}ms delay for channel {telemetryContext.ChannelId}.");
         }
 
         var options = new CampaignOptions(
             Seed: seed,
-            ClanCount: Math.Clamp(clans, 2, 8),
+            ClanCount: boundedClans,
             MaxTurns: Math.Clamp(maxTurns, 1, 500),
-            Name: string.IsNullOrWhiteSpace(name) ? $"campaign-{seed}-{Math.Clamp(clans, 2, 8)}clans" : name,
+            Name: campaignName,
             OutputRoot: outputRoot ?? Path.Combine(FindRepositoryRootForRunner(), "artifacts", "campaigns"),
             ModRoot: modRoot,
             Size: string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) ? "large" : "medium",
-            ScenarioFamily: NormalizeScenarioFamily(scenarioFamily));
+            ScenarioFamily: normalizedScenarioFamily);
 
         var validation = new CampaignScenarioBuilder().Build(options);
         if (!validation.IsValid)
@@ -1011,10 +1034,10 @@ public sealed class PlaygroundScenarioRunner
         return report;
     }
 
-    private void EnableCompanionTelemetry(int delayMs)
+    private void EnableCompanionTelemetry(int delayMs, TelemetryContext context)
     {
-        companionProcessor = new StandardProcessor(loggerFactory, new CommandIpcPublisher(loggerFactory));
-        mapSnapshotEmitter = new MapSnapshotEmitter(loggerFactory);
+        companionProcessor = new StandardProcessor(loggerFactory, new CommandIpcPublisher(loggerFactory, context));
+        mapSnapshotEmitter = new MapSnapshotEmitter(loggerFactory, context);
         companionDelayMs = delayMs;
     }
 
@@ -1029,6 +1052,7 @@ public sealed class PlaygroundScenarioRunner
         if (builder.TryBuild(out var snapshot) && snapshot is not null)
         {
             snapshot.InvertYAxis = true;
+            ApplyTelemetry(snapshot);
             captureRecorder?.RecordMapSnapshot(snapshot);
             mapSnapshotEmitter?.Publish(snapshot);
             if (mapSnapshotEmitter is not null && companionDelayMs > 0)
@@ -1129,5 +1153,33 @@ public sealed class PlaygroundScenarioRunner
         public void LogError(string message)
         {
         }
+    }
+
+    private void ApplyTelemetry(MapSnapshot snapshot)
+    {
+        if (telemetryContext is not null && snapshot.Telemetry is null)
+        {
+            snapshot.Telemetry = telemetryContext;
+        }
+    }
+
+    private static TelemetryContext CreateTelemetryContext(
+        string sourceKind,
+        string sourceName,
+        string channelId,
+        string? runId = null)
+    {
+        var normalizedSourceKind = string.IsNullOrWhiteSpace(sourceKind) ? TelemetryContext.DefaultSourceKind : sourceKind;
+        var normalizedSourceName = string.IsNullOrWhiteSpace(sourceName) ? TelemetryContext.DefaultSourceName : sourceName;
+        return new TelemetryContext
+        {
+            ChannelId = string.IsNullOrWhiteSpace(channelId) ? TelemetryContext.DefaultChannelId : channelId,
+            SessionId = $"{normalizedSourceKind.ToLowerInvariant()}:{Guid.NewGuid():N}",
+            SourceKind = normalizedSourceKind,
+            SourceName = normalizedSourceName,
+            RunId = runId,
+            InstanceId = Process.GetCurrentProcess().Id.ToString(),
+            StartedAtUtc = DateTime.UtcNow
+        };
     }
 }

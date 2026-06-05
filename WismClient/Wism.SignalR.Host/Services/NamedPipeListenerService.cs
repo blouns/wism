@@ -13,6 +13,7 @@ namespace Wism.SignalR.Host.Services
         private readonly ILogger<NamedPipeListenerService> _logger;
         private readonly IHubContext<GameHub> _hub;
         private const string PipeName = "wism-commands";
+        private const int ListenerCount = 16;
 
         public NamedPipeListenerService(ILogger<NamedPipeListenerService> logger, IHubContext<GameHub> hub)
     {
@@ -22,12 +23,10 @@ namespace Wism.SignalR.Host.Services
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Starting two NamedPipe listener loops on {PipeName}", PipeName);
-        var listeners = new[]
-        {
-            Task.Run(() => ListenLoop(stoppingToken), stoppingToken),
-            Task.Run(() => ListenLoop(stoppingToken), stoppingToken)
-        };
+        _logger.LogInformation("Starting {ListenerCount} NamedPipe listener loops on {PipeName}", ListenerCount, PipeName);
+        var listeners = Enumerable
+            .Range(0, ListenerCount)
+            .Select(_ => Task.Run(() => ListenLoop(stoppingToken), stoppingToken));
         return Task.WhenAll(listeners);
     }
 
@@ -39,7 +38,7 @@ namespace Wism.SignalR.Host.Services
             using var server = new NamedPipeServerStream(
                 PipeName,
                 PipeDirection.In,
-                2,                          // maxInstances = 2
+                ListenerCount,
                 PipeTransmissionMode.Byte,
                 PipeOptions.Asynchronous);
 

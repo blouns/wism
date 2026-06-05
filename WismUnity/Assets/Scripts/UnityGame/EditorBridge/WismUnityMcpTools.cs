@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Unity.AI.MCP.Editor.Helpers;
 using Unity.AI.MCP.Editor.ToolRegistry;
 using UnityEditor;
 using UnityEditorInternal;
@@ -23,7 +24,7 @@ namespace WismUnity.EditorBridge
             var scene = EditorSceneManager.GetActiveScene();
             var projectRoot = Directory.GetCurrentDirectory();
 
-            return new
+            return Response.Success("WismUnity project status loaded.", new
             {
                 projectName = new DirectoryInfo(projectRoot).Name,
                 unityVersion = Application.unityVersion,
@@ -35,7 +36,7 @@ namespace WismUnity.EditorBridge
                 isUpdating = EditorApplication.isUpdating,
                 hasUnsavedSceneChanges = scene.isDirty,
                 timestampUtc = DateTime.UtcNow.ToString("O")
-            };
+            });
         }
 
         [McpTool("WismUnity.GetPackageStatus", "Returns installed package versions relevant to WismUnity and Unity AI Assistant integration.", Groups = new[] { Group, "packages" }, EnabledByDefault = true)]
@@ -49,11 +50,11 @@ namespace WismUnity.EditorBridge
                 "com.unity.test-framework"
             };
 
-            return new
+            return Response.Success("WismUnity package status loaded.", new
             {
                 packages = packages.Select(PackageStatus).ToArray(),
                 timestampUtc = DateTime.UtcNow.ToString("O")
-            };
+            });
         }
 
         [McpTool("WismUnity.GetSceneSummary", "Returns a read-only summary of the active scene hierarchy and WISM manager components.", Groups = new[] { Group, "scene" }, EnabledByDefault = true)]
@@ -62,14 +63,14 @@ namespace WismUnity.EditorBridge
             var scene = EditorSceneManager.GetActiveScene();
             if (!scene.IsValid() || !scene.isLoaded)
             {
-                return new
+                return Response.Success("WismUnity scene is not loaded.", new
                 {
                     activeScene = SceneInfo(scene),
                     rootGameObjectCount = 0,
                     sceneGameObjectCount = 0,
                     managerCount = 0,
                     managers = Array.Empty<object>()
-                };
+                });
             }
 
             var roots = scene.GetRootGameObjects();
@@ -87,14 +88,14 @@ namespace WismUnity.EditorBridge
                 .ThenBy(manager => manager.gameObject)
                 .ToArray();
 
-            return new
+            return Response.Success("WismUnity scene summary loaded.", new
             {
                 activeScene = SceneInfo(scene),
                 rootGameObjectCount = roots.Length,
                 sceneGameObjectCount = sceneObjects.Length,
                 managerCount = managers.Length,
                 managers
-            };
+            });
         }
 
         [McpTool("WismUnity.GetConsoleSummary", "Returns Unity console counts without clearing or modifying console messages.", Groups = new[] { Group, "debug" }, EnabledByDefault = true)]
@@ -104,26 +105,26 @@ namespace WismUnity.EditorBridge
             {
                 var logEntriesType = Type.GetType("UnityEditor.LogEntries,UnityEditor");
                 if (logEntriesType == null)
-                    return new { available = false, error = "UnityEditor.LogEntries type was not found." };
+                    return Response.Error("CONSOLE_SUMMARY_UNAVAILABLE", new { reason = "UnityEditor.LogEntries type was not found." });
 
                 var getCountsMethod = logEntriesType.GetMethod("GetCountsByType", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 if (getCountsMethod != null)
                 {
                     var parameters = new object[] { 0, 0, 0 };
                     getCountsMethod.Invoke(null, parameters);
-                    return new
+                    return Response.Success("Unity console summary loaded.", new
                     {
                         available = true,
                         errors = (int)parameters[0],
                         warnings = (int)parameters[1],
                         logs = (int)parameters[2],
                         timestampUtc = DateTime.UtcNow.ToString("O")
-                    };
+                    });
                 }
 
                 var getCountMethod = logEntriesType.GetMethod("GetCount", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 var total = getCountMethod != null ? (int)getCountMethod.Invoke(null, null) : -1;
-                return new
+                return Response.Success("Unity console total count loaded.", new
                 {
                     available = true,
                     errors = -1,
@@ -132,11 +133,11 @@ namespace WismUnity.EditorBridge
                     totalEntries = total,
                     note = "Unity console per-type counts were unavailable for this editor version.",
                     timestampUtc = DateTime.UtcNow.ToString("O")
-                };
+                });
             }
             catch (Exception ex)
             {
-                return new { available = false, error = ex.Message };
+                return Response.Error("CONSOLE_SUMMARY_FAILED", new { reason = ex.Message });
             }
         }
 
@@ -160,7 +161,7 @@ namespace WismUnity.EditorBridge
                 .ThenBy(camera => camera.name)
                 .ToArray();
 
-            return new
+            return Response.Success("WismUnity game view metadata loaded.", new
             {
                 screenWidth = Screen.width,
                 screenHeight = Screen.height,
@@ -169,7 +170,7 @@ namespace WismUnity.EditorBridge
                 cameraCount = allCameras.Length,
                 cameras = allCameras,
                 timestampUtc = DateTime.UtcNow.ToString("O")
-            };
+            });
         }
 
         static object PackageStatus(string packageName)

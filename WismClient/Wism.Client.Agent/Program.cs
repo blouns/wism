@@ -17,6 +17,7 @@ using Wism.Client.Agent.Telemetry;
 using Wism.Client.Core.Telemetry;
 using Wism.Client.Agent.CommandProcessors;
 using Wism.Client.Agent.CommandProcessors.SearchProcessors;
+using Wism.Companion.Shared.Events;
 
 namespace Wism.Client.Agent;
 
@@ -102,8 +103,15 @@ public class Program
                     });                
 
                 // Optional: For companion app
-                services.AddSingleton<CommandIpcPublisher>();
-                services.AddSingleton<MapSnapshotEmitter>();
+                services.AddSingleton(CreateTelemetryContext(args));
+                services.AddSingleton(provider =>
+                    new CommandIpcPublisher(
+                        provider.GetRequiredService<IWismLoggerFactory>(),
+                        provider.GetRequiredService<TelemetryContext>()));
+                services.AddSingleton(provider =>
+                    new MapSnapshotEmitter(
+                        provider.GetRequiredService<IWismLoggerFactory>(),
+                        provider.GetRequiredService<TelemetryContext>()));
                 services.AddSingleton<MapSnapshotBuilder>();
 
                 // Add command processors
@@ -142,5 +150,34 @@ public class Program
                         provider.GetService<IWismLoggerFactory>(),
                         provider.GetService<ControllerProvider>()));
             });
+    }
+
+    private static TelemetryContext CreateTelemetryContext(string[] args)
+    {
+        var channel = ReadArg(args, "channel");
+        var instanceId = Environment.ProcessId.ToString();
+        return new TelemetryContext
+        {
+            ChannelId = string.IsNullOrWhiteSpace(channel) ? $"ascii:default:{instanceId}" : channel,
+            SessionId = $"ascii:{Guid.NewGuid():N}",
+            SourceKind = "Ascii",
+            SourceName = "WismAgent",
+            InstanceId = instanceId,
+            StartedAtUtc = DateTime.UtcNow
+        };
+    }
+
+    private static string ReadArg(string[] args, string name)
+    {
+        var prefix = name + "=";
+        foreach (var arg in args)
+        {
+            if (arg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return arg[prefix.Length..];
+            }
+        }
+
+        return null;
     }
 }
