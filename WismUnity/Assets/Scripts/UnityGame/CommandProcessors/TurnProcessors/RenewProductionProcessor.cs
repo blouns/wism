@@ -60,6 +60,11 @@ namespace Assets.Scripts.CommandProcessors
                 return ActionState.Succeeded;
             }
 
+            if (!this.unityGame.InteractiveUI)
+            {
+                return command.Execute();
+            }
+
             // Show production on first city
             if (player.Turn == 1)
             {
