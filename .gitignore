@@ -314,3 +314,10 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# Local notes. Keep public docs in README.md and docs/.
+WismClient/PROJECT_MEMORY.md
+WismUnity/Assets/Scripts/UnityGame/Docs/Stories.txt
+WismUnity/Assets/Scripts/UnityGame/Docs/Stories.txt.meta
+WismUnity/Assets/Scripts/UnityGame/Docs/Unity Refactoring Backlog.txt
+WismUnity/Assets/Scripts/UnityGame/Docs/Unity Refactoring Backlog.txt.meta
