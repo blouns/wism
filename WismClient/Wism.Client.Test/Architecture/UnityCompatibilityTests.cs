@@ -23,7 +23,7 @@ public class UnityCompatibilityTests
         var projectSettings = File.ReadAllText(Path.Combine(repoRoot, "WismUnity", "ProjectSettings", "ProjectSettings.asset"));
         var unityGameProject = File.ReadAllText(Path.Combine(repoRoot, "WismUnity", "UnityGame.csproj"));
 
-        Assert.That(projectVersion, Does.Contain("m_EditorVersion: 6000.0.34f1"));
+        Assert.That(projectVersion, Does.Contain("m_EditorVersion: 6000.4.9f1"));
         Assert.That(projectSettings, Does.Contain("apiCompatibilityLevel: 6"));
         Assert.That(
             unityGameProject,
