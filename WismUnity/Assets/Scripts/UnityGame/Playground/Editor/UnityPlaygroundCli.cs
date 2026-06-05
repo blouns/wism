@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Wism.Client.Commands;
 using Wism.Client.Core;
 
 namespace WismUnity.Playground
@@ -27,6 +28,7 @@ namespace WismUnity.Playground
                 command = "world",
                 world = options.World,
                 scenePath = options.ScenePath,
+                scenarioName = options.Scenario,
                 runId = options.RunId,
                 startedAtUtc = DateTime.UtcNow.ToString("O"),
                 unityVersion = Application.unityVersion,
@@ -97,11 +99,11 @@ namespace WismUnity.Playground
 
                 if (options.AdvanceBootstrap)
                 {
-                    unityManager.FixedUpdate();
-                    unityManager.FixedUpdate();
+                    AdvanceTicks(unityManager, 2);
                     report.events.Add("Advanced UnityManager bootstrap with two FixedUpdate calls.");
                 }
 
+                RunScenario(options, report, unityManager);
                 report.events.Add($"UnityManager execution mode: {unityManager.ExecutionMode}");
 
                 report.game = GameSummary(unityManager);
@@ -125,8 +127,14 @@ namespace WismUnity.Playground
                     return;
                 }
 
-                report.status = "Passed";
-                report.outcome = $"{options.World} loaded and initialized without dirtying loaded scenes.";
+                if (!string.Equals(report.status, "Failed", StringComparison.OrdinalIgnoreCase))
+                {
+                    report.status = "Passed";
+                    report.outcome = report.scenario != null &&
+                                     !string.Equals(report.scenario.name, "smoke", StringComparison.OrdinalIgnoreCase)
+                        ? report.scenario.outcome
+                        : $"{options.World} loaded and initialized without dirtying loaded scenes.";
+                }
             }
             finally
             {
@@ -140,6 +148,160 @@ namespace WismUnity.Playground
                     report.events.Add("No original editor scene setup was loaded; leaving batchmode scene cleanup to Unity shutdown.");
                 }
             }
+        }
+
+        static void RunScenario(
+            UnityPlaygroundOptions options,
+            UnityPlaygroundReport report,
+            UnityManager unityManager)
+        {
+            var scenarioName = string.IsNullOrWhiteSpace(options.Scenario)
+                ? "smoke"
+                : options.Scenario.Trim();
+            if (string.Equals(scenarioName, "smoke", StringComparison.OrdinalIgnoreCase))
+            {
+                report.scenario = new UnityPlaygroundScenarioSummary
+                {
+                    name = "smoke",
+                    status = "Passed",
+                    outcome = "Scene and UnityManager initialization only.",
+                    maxTicks = 0,
+                    ticksRun = 0,
+                    startLastCommandId = unityManager.LastCommandId,
+                    endLastCommandId = unityManager.LastCommandId,
+                    queuedCommandCount = 0,
+                    executedCommandCount = 0,
+                    startingClan = CurrentClanName(),
+                    endingClan = CurrentClanName()
+                };
+                return;
+            }
+
+            if (string.Equals(scenarioName, "turn-cycle-smoke", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(scenarioName, "end-turn-smoke", StringComparison.OrdinalIgnoreCase))
+            {
+                RunTurnCycleSmoke(options, report, unityManager, scenarioName);
+                return;
+            }
+
+            throw new InvalidOperationException($"Unknown Unity Playground scenario: {scenarioName}");
+        }
+
+        static void RunTurnCycleSmoke(
+            UnityPlaygroundOptions options,
+            UnityPlaygroundReport report,
+            UnityManager unityManager,
+            string scenarioName)
+        {
+            var startingClan = CurrentClanName();
+            var startLastCommandId = unityManager.LastCommandId;
+
+            var bootstrapTicks = EnsureRunning(unityManager);
+            if (bootstrapTicks > 0)
+            {
+                report.events.Add($"Advanced UnityManager to Running with {bootstrapTicks} bootstrap tick(s).");
+            }
+
+            var queuedBefore = CountCommandsAfterId(unityManager, startLastCommandId);
+            unityManager.GameManager.EndTurn();
+            var queuedAfter = GetCommandsAfterId(unityManager, startLastCommandId).ToArray();
+            var targetCommandId = queuedAfter.Length > 0
+                ? queuedAfter.Max(command => command.Id)
+                : startLastCommandId;
+
+            var ticksRun = 0;
+            while (ticksRun < options.MaxTicks && unityManager.LastCommandId < targetCommandId)
+            {
+                unityManager.FixedUpdate();
+                ticksRun++;
+            }
+
+            var commands = GetCommandsAfterId(unityManager, startLastCommandId).ToArray();
+            report.commandTrace.AddRange(commands.Select(command => CommandTraceEntry(command, unityManager.LastCommandId)));
+
+            var executedCount = commands.Count(command => command.Id <= unityManager.LastCommandId);
+            var passed = unityManager.LastCommandId >= targetCommandId &&
+                         executedCount >= queuedAfter.Length &&
+                         queuedAfter.Length > queuedBefore;
+            report.scenario = new UnityPlaygroundScenarioSummary
+            {
+                name = scenarioName,
+                status = passed ? "Passed" : "Failed",
+                outcome = passed
+                    ? "Queued and executed a bounded end-turn command sequence through Unity FixedUpdate."
+                    : "End-turn command sequence did not complete within the tick budget.",
+                maxTicks = options.MaxTicks,
+                ticksRun = ticksRun,
+                startLastCommandId = startLastCommandId,
+                endLastCommandId = unityManager.LastCommandId,
+                queuedCommandCount = Math.Max(0, queuedAfter.Length - queuedBefore),
+                executedCommandCount = executedCount,
+                startingClan = startingClan,
+                endingClan = CurrentClanName()
+            };
+
+            report.events.Add($"{scenarioName}: queued {report.scenario.queuedCommandCount} command(s), executed {executedCount} command(s) in {ticksRun} tick(s).");
+            if (!passed)
+            {
+                report.status = "Failed";
+                report.outcome = report.scenario.outcome;
+            }
+        }
+
+        static int EnsureRunning(UnityManager unityManager)
+        {
+            var ticks = 0;
+            while (unityManager.ExecutionMode != ExecutionMode.Running && ticks < 4)
+            {
+                unityManager.FixedUpdate();
+                ticks++;
+            }
+
+            if (unityManager.ExecutionMode != ExecutionMode.Running)
+            {
+                throw new InvalidOperationException($"UnityManager did not reach Running mode. Current mode: {unityManager.ExecutionMode}");
+            }
+
+            return ticks;
+        }
+
+        static void AdvanceTicks(UnityManager unityManager, int ticks)
+        {
+            for (var index = 0; index < ticks; index++)
+            {
+                unityManager.FixedUpdate();
+            }
+        }
+
+        static int CountCommandsAfterId(UnityManager unityManager, int lastSeenCommandId)
+        {
+            return GetCommandsAfterId(unityManager, lastSeenCommandId).Count();
+        }
+
+        static IEnumerable<Command> GetCommandsAfterId(UnityManager unityManager, int lastSeenCommandId)
+        {
+            return unityManager.GameManager.ControllerProvider.CommandController.GetCommandsAfterId(lastSeenCommandId);
+        }
+
+        static UnityPlaygroundCommandTraceEntry CommandTraceEntry(Command command, int lastAdvancedCommandId)
+        {
+            return new UnityPlaygroundCommandTraceEntry
+            {
+                id = command.Id,
+                commandType = command.GetType().Name,
+                result = command.Result.ToString(),
+                advanced = command.Id <= lastAdvancedCommandId,
+                playerClan = command.Player != null && command.Player.Clan != null
+                    ? command.Player.Clan.ShortName
+                    : string.Empty
+            };
+        }
+
+        static string CurrentClanName()
+        {
+            return Game.IsInitialized() && Game.Current.GetCurrentPlayer() != null
+                ? Game.Current.GetCurrentPlayer().Clan.ShortName
+                : string.Empty;
         }
 
         static UnityNewGameEntity CreateSettings(string world)
@@ -295,10 +457,12 @@ namespace WismUnity.Playground
         {
             public string World = DefaultWorld;
             public string ScenePath = DefaultScene;
+            public string Scenario = "smoke";
             public string RunId = $"unity-smoke-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
             public string OutputDirectory = Path.Combine("artifacts", "unity-playground", "smoke");
             public bool CaptureScreenshot;
             public bool AdvanceBootstrap;
+            public int MaxTicks = 64;
 
             public static UnityPlaygroundOptions FromCommandLine(string[] args)
             {
@@ -306,9 +470,11 @@ namespace WismUnity.Playground
                 var values = ParseArgs(args);
                 options.World = Read(values, "world", options.World);
                 options.ScenePath = Read(values, "scene", options.ScenePath);
+                options.Scenario = Read(values, "scenario", options.Scenario);
                 options.RunId = Read(values, "runId", options.RunId);
                 options.CaptureScreenshot = ReadBool(values, "screenshot", false);
                 options.AdvanceBootstrap = ReadBool(values, "advanceBootstrap", false);
+                options.MaxTicks = ReadInt(values, "maxTicks", options.MaxTicks);
                 var outputRoot = Read(values, "out", options.OutputDirectory);
                 options.OutputDirectory = Path.GetFullPath(Path.Combine(outputRoot, options.RunId));
                 return options;
@@ -336,6 +502,13 @@ namespace WismUnity.Playground
             {
                 return values.TryGetValue(name, out var value) && !string.IsNullOrWhiteSpace(value)
                     ? value
+                    : fallback;
+            }
+
+            static int ReadInt(Dictionary<string, string> values, string name, int fallback)
+            {
+                return values.TryGetValue(name, out var value) && int.TryParse(value, out var parsed)
+                    ? Math.Max(1, parsed)
                     : fallback;
             }
 

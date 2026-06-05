@@ -47,11 +47,14 @@ namespace Assets.Scripts.CommandProcessors
                 return ActionState.Failed;
             }
 
-            // AI path: skip UI entirely
-            if (!player.IsHuman)
+            // AI and headless paths skip UI entirely.
+            if (!player.IsHuman || !this.unityGame.InteractiveUI)
             {                
                 var aiState = hire.Execute();
+                this.heroName = hire.HeroDisplayName;
+                hire.Hero.DisplayName = this.heroName;
                 CreateAnyAllies(hire);
+                this.heroName = null;
 
                 return aiState;
             }
@@ -80,7 +83,7 @@ namespace Assets.Scripts.CommandProcessors
 
         private void Reset()
         {
-            this.input.Clear();
+            this.input?.Clear();
             this.input = null;
             this.heroName = null;
         }
