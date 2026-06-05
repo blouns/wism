@@ -1,5 +1,5 @@
-## Claude Code
-# Local settings overrides — machine-specific, not for sharing
+## Local tool settings
+# Machine-specific settings overrides, not for sharing
 .claude/settings.local.json
 
 ## Unity ignores
@@ -10,6 +10,9 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]serSettings/
+artifacts/
+.tmp/
+WismUnity/TestResults-*.xml
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # [Aa]ssets/AssetStoreTools*
