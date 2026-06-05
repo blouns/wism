@@ -304,7 +304,19 @@ namespace Assets.Scripts.Managers
 
         public void GoToCapitol(Player player)
         {
-            var inputHandler = GetComponent<InputManager>().InputHandler;
+            if (!this.InteractiveUI)
+            {
+                return;
+            }
+
+            var inputManager = GetComponent<InputManager>();
+            var inputHandler = inputManager != null ? inputManager.InputHandler : null;
+            if (inputHandler == null || player == null || player.Capitol == null || player.Capitol.Tile == null)
+            {
+                Debug.LogWarning("Cannot center camera on capitol because the interactive camera target is unavailable.");
+                return;
+            }
+
             inputHandler.CenterOnTile(player.Capitol.Tile);
         }
 
@@ -540,17 +552,46 @@ namespace Assets.Scripts.Managers
 
         internal void ClearInfoPanel()
         {
-            this.inputManager.InputHandler.SetCurrentTile(null);
-            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
-                   .GetComponent<NotificationBox>();
-            messageBox.Notify("");
+            if (!this.InteractiveUI)
+            {
+                return;
+            }
+
+            if (this.inputManager != null && this.inputManager.InputHandler != null)
+            {
+                this.inputManager.InputHandler.SetCurrentTile(null);
+            }
+
+            var messageBoxObject = GameObject.FindGameObjectWithTag("NotificationBox");
+            var messageBox = messageBoxObject != null
+                ? messageBoxObject.GetComponent<NotificationBox>()
+                : null;
+            if (messageBox != null)
+            {
+                messageBox.Notify("");
+            }
         }
 
         public void NotifyUser(string message, params object[] args)
         {
-            var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
-                   .GetComponent<NotificationBox>();
-            messageBox.Notify(String.Format(message, args));
+            var formatted = String.Format(message, args);
+            if (!this.InteractiveUI)
+            {
+                LogInformation(formatted);
+                return;
+            }
+
+            var messageBoxObject = GameObject.FindGameObjectWithTag("NotificationBox");
+            var messageBox = messageBoxObject != null
+                ? messageBoxObject.GetComponent<NotificationBox>()
+                : null;
+            if (messageBox == null)
+            {
+                Debug.LogWarning("Cannot notify user because the notification box is unavailable.");
+                return;
+            }
+
+            messageBox.Notify(formatted);
         }
 
         private void DrawSelectedArmiesBox()

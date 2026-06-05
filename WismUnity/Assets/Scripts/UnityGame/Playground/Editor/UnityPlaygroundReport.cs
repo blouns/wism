@@ -11,6 +11,7 @@ namespace WismUnity.Playground
         public string outcome;
         public string world;
         public string scenePath;
+        public string scenarioName;
         public string runId;
         public string startedAtUtc;
         public string finishedAtUtc;
@@ -20,7 +21,9 @@ namespace WismUnity.Playground
         public string screenshotPath;
         public UnityPlaygroundSceneSummary scene;
         public UnityPlaygroundGameSummary game;
+        public UnityPlaygroundScenarioSummary scenario;
         public UnityPlaygroundConsoleSummary console;
+        public List<UnityPlaygroundCommandTraceEntry> commandTrace = new List<UnityPlaygroundCommandTraceEntry>();
         public string[] dirtyScenes = new string[0];
         public List<string> events = new List<string>();
     }
@@ -50,6 +53,32 @@ namespace WismUnity.Playground
         public string executionMode;
         public int lastCommandId;
         public bool interactiveUI;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundScenarioSummary
+    {
+        public string name;
+        public string status;
+        public string outcome;
+        public int maxTicks;
+        public int ticksRun;
+        public int startLastCommandId;
+        public int endLastCommandId;
+        public int queuedCommandCount;
+        public int executedCommandCount;
+        public string startingClan;
+        public string endingClan;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundCommandTraceEntry
+    {
+        public int id;
+        public string commandType;
+        public string result;
+        public bool advanced;
+        public string playerClan;
     }
 
     [System.Serializable]
