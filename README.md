@@ -1,43 +1,119 @@
-"# wism" 
+# WISM
 
-For discussion and more details, see: http://warlords.branallygames.com.
+WISM, short for **War in a Senseless Mind**, is a public-source, turn-based fantasy strategy project inspired by classic 1990s strategy games.
 
-[Overview]
+The project is split between a reusable C# game engine and Unity frontends. The core design goal is simple: keep rules, commands, replay, AI, and simulation logic outside Unity so the game can support multiple clients and survive frontend changes over time.
 
-War! Welcome to War in a Senseless Mind (WISM). WISM is an original Warlords 1990 clone, but is designed for modification and reuse/fork into similar projects as a game engine. Additionally, WISM was designed to have all core game logic outside of proprietary platforms like Unity or other game engines. This will allow for easier extension in the future and longevity as platforms evolve. A good example of this is the ASCII WISM app which provides a Console-based UI to the same game engine. 
+## Current Status
 
-Why another Warlords clone? Can't we just play the original on DosBox or Warlords Classic Strategy on iOS? Sure you can and you should! However, the original has limited re-playability on DosBox and old resolutions, it does not allow mods, new maps, armies, or features (though Warlords III introduced some of this). Warlords Classic is an iOS exclusive latter and closed source. We deserve more Warlords and we can with inspiration from SSG and all the subsequent great turn-based strategy games.
+WISM is playable and under active development. Expect a working but evolving codebase, especially around Unity scene authoring, world-building tools, and frontend polish.
 
-Here is a brief orientation to the projects.
+Primary current target:
 
-[WISM Client]
+- Windows desktop
+- Unity `6000.4.9f1`
+- .NET 8 for WismClient tools and tests
 
-This project is for core WISM game logic and is separated roughly into the API (Controller), Core (Model), and Agent (ASCII View). 
+## Technical Highlights
 
-API:
-The Client API is the local contract for a UI, AI, or remote player interface. Since all changes must be driven through Commands, the interface for a UI like Unity or the Console, an AI or set of AI controllers, or remote players is the same. This drives simplicity and is a key design principle.
+- Deterministic command stream for gameplay state changes.
+- Replay-friendly command persistence and capture tests.
+- Core rules isolated from Unity presentation code.
+- ASCII, Companion, and Unity clients over the same engine contracts.
+- Modular JSON world data and Unity world-builder inspection tools.
 
-Further, this layer is designed such that all game state changes driven by a controller are replayable deterministically. This allows for any controller set to the same random seed to stay in sync without copying or replicating game state other than the Command objects. This is also a key design principle and must not be violated. There may be additional non-game state, such as user information, chat, or similar state that may be managed outside of the command channel.
+## Repository Layout
 
-Core:
-The Core model contains the entities like Army, Terrain, and Items; though it also contains business logic for the core game states and operations such as private IWarStrategy and IPathingStrategy implementations to be consumed or extended by the API. It may be extended either directly or via the Module interfaces. This layer is designed for mods to be created as new army types, cities, or other items are added. Examples are found under "/mod" in the form of JSON files.
+```text
+wism/
+├── WismClient/      # Core game engine, API/controllers, AI, tests, and support apps
+├── WismUnity/       # Unity game frontend and world-builder scene surface
+├── WismCompanion/   # Companion/map-facing client experiments
+├── docs/            # Public project notes and architecture guidance
+├── wism_manual.md   # WISM-specific notes/manual content
+└── README.md
+```
 
-Agent:
-The agent contains basic primitives for constructing a game loop and interfacing with the WISM API controller and Core model (read-only). This contains a reference implementation called ASCII WISM to demonstrate extension. It also provides the structure for an agent to push or consume remote Commands. The agent will be the sync mechanism with the cloud or other remote play options to apply or send commands between systems. 
+## Architecture
 
-[WISM Unity]
+```text
+Player / AI / UI
+       |
+       v
+WismClient API -> Command stream -> WismClient Core model
+       |
+       +--> WismUnity frontend
+       +--> ASCII/agent-style frontends
+       +--> Companion or remote-play surfaces
+```
 
-This is the primary UI for the Warlords clone implementation. It is designed to accurately reflect Fawkner's look and feel. It borrows concepts, art, and sound to skin the game with an authentic experience. The desire is to add similar Module capability to the Unity UI to allow for easy extension, similar to WISM Core. At present updates and mods require changes to the Unity environment prefabs and GameObjects, which is not the long-term goal. As mentioned above, game logic is pushed as low as possible in the stack--down towards Core. However, there may be some user experience elements that are best left to the View (ASCII WISM or Unity WISM). Examples include display of combat sequences, army selection, or cut-scenes. 
+### WismClient
 
-The choice of using Unity and all .NET Standard 2.0 binaries means that this game is fully portable to all modern gaming environments, including Windows PC, iOS, Android, Xbox, or any of the platforms supported by Unity. Currently, the primary device target is Windows as it most closely honors the original Warlords spirit. 
+`WismClient` is the source of truth for game rules and state transitions.
 
-Thank you for visiting. I hope you enjoy the game!
+All gameplay mutations should enter the system as command objects. A controller creates a command, the API records it in command order, and processors execute the command against the core model. Replay consumers can reapply the same ordered command stream from the same starting state and random seed.
 
-Legal Disclaimer: Warlords and all related imagery and references are copyrights of SSG registered trademarks and attributed to Steven Fawkner and Roger Keating. Use of this code is for educational purposes only and may not be distributed for commercial use.
+New gameplay features should preserve this path instead of mutating core game state directly from Unity, AI, network, or companion surfaces.
 
-[References]
+### WismUnity
 
-https://en.wikipedia.org/wiki/Warlords_(1990_video_game)
-http://www.ssg.com.au/
+`WismUnity` is the main Unity frontend. It renders the map, accepts player input, drives UI panels, and presents turn-by-turn game feedback.
 
-No affiliation with Warlords Classic. For official Warlords content, visit and support: https://www.facebook.com/WarlordsGame.
+Unity is also currently used as a world-builder surface. Some map state is represented as Unity scenes, tilemaps, city objects, and location objects. That hybrid authoring/runtime model is intentional for now but should be handled carefully. See [World Builder Notes](docs/wismunity-world-builder-notes.md).
+
+### WismCompanion
+
+`WismCompanion` is an experimental companion surface for map/state visualization and related client work. It consumes WismClient artifacts rather than defining core rules.
+
+## Build And Test
+
+Build WismClient:
+
+```powershell
+dotnet build WismClient\WismClient.sln --configuration Release
+```
+
+Run WismClient tests:
+
+```powershell
+dotnet test WismClient\WismClient.sln --configuration Release
+```
+
+Open Unity:
+
+1. Install Unity `6000.4.9f1`.
+2. Open `WismUnity/` as the Unity project.
+3. Let packages restore.
+4. Open a scene such as `Assets/Scenes/Mini-Illuria.unity`.
+5. Press Play.
+
+## Unity Editor And World Builder
+
+WismUnity is both a playable frontend and, for now, a world-builder surface. Scene state, tilemaps, city objects, location objects, and MOD JSON all matter. Treat those assets carefully and prefer read-only inspection before any automated scene or data mutation.
+
+See [World Builder Notes](docs/wismunity-world-builder-notes.md).
+
+## Public Repo Hygiene
+
+This repository is public. Do not commit private automation plans, private repository names, internal codenames, secrets, tokens, local credentials, or unlicensed third-party assets.
+
+See:
+
+- [Public Boundary](docs/public-boundary.md)
+- [Asset Provenance](docs/asset-provenance.md)
+- [Architecture](docs/architecture.md)
+- [Project TODO](docs/TODO.md)
+- [Contributing](CONTRIBUTING.md)
+
+## Inspiration And Legal Note
+
+WISM is inspired by classic turn-based fantasy strategy games. It is not affiliated with, endorsed by, or sponsored by Strategic Studies Group, Ubisoft, or any rights holder for the Warlords series.
+
+Do not add copyrighted game manuals, copied commercial assets, copied sound effects, copied maps, or trademarked branding unless the project has a clear redistribution right documented in [Asset Provenance](docs/asset-provenance.md).
+
+The repository is source-available while licensing and asset provenance are being audited. See [LICENSE](LICENSE.md).
+
+## References
+
+- https://en.wikipedia.org/wiki/Warlords_(1990_video_game)
+- http://www.ssg.com.au/
