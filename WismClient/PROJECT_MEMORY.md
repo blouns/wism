@@ -54,6 +54,3 @@ Last updated: 2026-02-28
   - Save reusable test cases
   - Faster validation outside CLI + Unity
 
-## Source material
-- Manual located at `..\warlords_manual.pdf`.
-- Extracted text created at `..\warlords_manual_extracted.txt` for searchable reference.
