@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Assets.Scripts.UnityGame.ModKit;
 using NUnit.Framework;
 using UnityEngine;
@@ -72,11 +73,42 @@ public sealed class ModSettingsUiTests
         {
             Assert.That(CursorManager.CalculateHotspot(pointTexture, CursorManager.HotspotAnchor.UpperLeft), Is.EqualTo(Vector2.zero));
             Assert.That(CursorManager.CalculateHotspot(targetTexture, CursorManager.HotspotAnchor.Center), Is.EqualTo(new Vector2(16f, 16f)));
+            Assert.That(CursorManager.CalculatePivot(pointTexture, CursorManager.HotspotAnchor.UpperLeft), Is.EqualTo(new Vector2(0f, 1f)));
+            Assert.That(CursorManager.CalculatePivot(targetTexture, CursorManager.HotspotAnchor.Center), Is.EqualTo(new Vector2(0.5f, 0.5f)));
+            Assert.That(CursorManager.CalculateViewportScale(360, 0.45f, 1f), Is.EqualTo(0.5f).Within(0.001f));
+            Assert.That(CursorManager.CalculateViewportScale(1440, 0.45f, 1f), Is.EqualTo(1f).Within(0.001f));
         }
         finally
         {
             UnityEngine.Object.DestroyImmediate(pointTexture);
             UnityEngine.Object.DestroyImmediate(targetTexture);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator PointerCursorOverlay_UsesTipPivotAndViewportScaledSize()
+    {
+        yield return WaitForModSettings();
+
+        var cursorObject = new GameObject("CursorManager Test");
+        var pointTexture = new Texture2D(9, 22);
+        try
+        {
+            var manager = cursorObject.AddComponent<CursorManager>();
+            SetPrivateField(manager, "point", pointTexture);
+
+            manager.PointCursor();
+            yield return null;
+
+            var rect = GetPrivateField<RectTransform>(manager, "cursorTransform");
+            Assert.That(rect, Is.Not.Null);
+            Assert.That(rect.pivot, Is.EqualTo(new Vector2(0f, 1f)));
+            Assert.That(rect.sizeDelta.y, Is.EqualTo(22f * CursorManager.CalculateViewportScale(Screen.height, 0.45f, 1f)).Within(0.01f));
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(cursorObject);
+            UnityEngine.Object.DestroyImmediate(pointTexture);
         }
     }
 
@@ -313,5 +345,19 @@ public sealed class ModSettingsUiTests
         var eventSystem = EventSystem.current ?? new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule)).GetComponent<EventSystem>();
         var pointer = new PointerEventData(eventSystem);
         ExecuteEvents.Execute(component.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+    }
+
+    static void SetPrivateField<T>(object target, string fieldName, T value)
+    {
+        var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.That(field, Is.Not.Null, "Could not find field: " + fieldName);
+        field.SetValue(target, value);
+    }
+
+    static T GetPrivateField<T>(object target, string fieldName) where T : class
+    {
+        var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.That(field, Is.Not.Null, "Could not find field: " + fieldName);
+        return field.GetValue(target) as T;
     }
 }

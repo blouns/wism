@@ -1,8 +1,12 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CursorManager : MonoBehaviour
 {
+    private const string CursorCanvasName = "WismCursorCanvas";
+    private const float ReferenceViewportHeight = 720f;
+
     public enum HotspotAnchor
     {
         UpperLeft,
@@ -10,7 +14,13 @@ public class CursorManager : MonoBehaviour
     }
 
     [SerializeField]
-    private CursorMode cursorMode = CursorMode.ForceSoftware;
+    private CursorMode cursorMode = CursorMode.Auto;
+    [SerializeField]
+    private bool useViewportScaledCursor = true;
+    [SerializeField]
+    private float minCursorScale = 0.45f;
+    [SerializeField]
+    private float maxCursorScale = 1f;
 
     [SerializeField]
     private Texture2D attack;
@@ -42,16 +52,59 @@ public class CursorManager : MonoBehaviour
     [SerializeField]
     private Texture2D moveNorthEast;
 
+    private Canvas cursorCanvas;
+    private RawImage cursorImage;
+    private RectTransform cursorTransform;
+    private Texture2D activeCursor;
+    private HotspotAnchor activeHotspotAnchor;
+    private float activeScale = -1f;
+
     void Start()
     {
         InfoCursor();
+    }
+
+    void LateUpdate()
+    {
+        if (!this.useViewportScaledCursor || this.cursorTransform == null || this.activeCursor == null)
+        {
+            return;
+        }
+
+        var nextScale = CalculateViewportScale(Screen.height, this.minCursorScale, this.maxCursorScale);
+        if (!Mathf.Approximately(nextScale, this.activeScale))
+        {
+            ApplyOverlayCursor(this.activeCursor, this.activeHotspotAnchor, nextScale);
+        }
+
+        this.cursorTransform.anchoredPosition = Input.mousePosition;
+    }
+
+    void OnDisable()
+    {
+        RestoreSystemCursor();
+    }
+
+    void OnDestroy()
+    {
+        RestoreSystemCursor();
     }
 
     private void SetCursor(Texture2D cursor, HotspotAnchor hotspotAnchor)
     {
         if (cursor == null)
         {
+            HideOverlayCursor();
             Cursor.SetCursor(null, Vector2.zero, this.cursorMode);
+            return;
+        }
+
+        if (this.useViewportScaledCursor)
+        {
+            ApplyOverlayCursor(
+                cursor,
+                hotspotAnchor,
+                CalculateViewportScale(Screen.height, this.minCursorScale, this.maxCursorScale));
             return;
         }
 
@@ -68,6 +121,27 @@ public class CursorManager : MonoBehaviour
         return hotspotAnchor == HotspotAnchor.Center
             ? new Vector2(cursor.width / 2f, cursor.height / 2f)
             : Vector2.zero;
+    }
+
+    public static Vector2 CalculatePivot(Texture2D cursor, HotspotAnchor hotspotAnchor)
+    {
+        if (cursor == null || cursor.width <= 0 || cursor.height <= 0)
+        {
+            return new Vector2(0f, 1f);
+        }
+
+        var hotspot = CalculateHotspot(cursor, hotspotAnchor);
+        return new Vector2(
+            Mathf.Clamp01(hotspot.x / cursor.width),
+            Mathf.Clamp01(1f - (hotspot.y / cursor.height)));
+    }
+
+    public static float CalculateViewportScale(int viewportHeight, float minScale, float maxScale)
+    {
+        var safeMin = Mathf.Max(0.05f, minScale);
+        var safeMax = Mathf.Max(safeMin, maxScale);
+        var height = Mathf.Max(1, viewportHeight);
+        return Mathf.Clamp(height / ReferenceViewportHeight, safeMin, safeMax);
     }
 
     public void AttackCursor()
@@ -155,5 +229,78 @@ public class CursorManager : MonoBehaviour
     public void PointCursor()
     {
         SetCursor(this.point, HotspotAnchor.UpperLeft);
+    }
+
+    private void ApplyOverlayCursor(Texture2D cursor, HotspotAnchor hotspotAnchor, float scale)
+    {
+        EnsureOverlayCursor();
+
+        this.activeCursor = cursor;
+        this.activeHotspotAnchor = hotspotAnchor;
+        this.activeScale = scale;
+
+        cursor.filterMode = FilterMode.Point;
+        this.cursorImage.texture = cursor;
+        this.cursorImage.enabled = true;
+        this.cursorTransform.pivot = CalculatePivot(cursor, hotspotAnchor);
+        this.cursorTransform.sizeDelta = new Vector2(
+            Mathf.Max(1f, cursor.width * scale),
+            Mathf.Max(1f, cursor.height * scale));
+        this.cursorTransform.anchoredPosition = Input.mousePosition;
+        Cursor.SetCursor(null, Vector2.zero, this.cursorMode);
+        Cursor.visible = false;
+    }
+
+    private void EnsureOverlayCursor()
+    {
+        if (this.cursorCanvas != null && this.cursorImage != null && this.cursorTransform != null)
+        {
+            return;
+        }
+
+        var canvasObject = new GameObject(CursorCanvasName, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        DontDestroyOnLoad(canvasObject);
+
+        this.cursorCanvas = canvasObject.GetComponent<Canvas>();
+        this.cursorCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        this.cursorCanvas.sortingOrder = short.MaxValue;
+
+        var scaler = canvasObject.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+        scaler.scaleFactor = 1f;
+
+        var imageObject = new GameObject("CursorImage", typeof(RectTransform), typeof(RawImage));
+        imageObject.transform.SetParent(canvasObject.transform, false);
+
+        this.cursorImage = imageObject.GetComponent<RawImage>();
+        this.cursorImage.raycastTarget = false;
+        this.cursorTransform = imageObject.GetComponent<RectTransform>();
+        this.cursorTransform.anchorMin = Vector2.zero;
+        this.cursorTransform.anchorMax = Vector2.zero;
+    }
+
+    private void HideOverlayCursor()
+    {
+        this.activeCursor = null;
+        this.activeScale = -1f;
+        if (this.cursorImage != null)
+        {
+            this.cursorImage.enabled = false;
+        }
+
+        Cursor.visible = true;
+    }
+
+    private void RestoreSystemCursor()
+    {
+        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        Cursor.visible = true;
+        if (this.cursorCanvas != null)
+        {
+            Destroy(this.cursorCanvas.gameObject);
+            this.cursorCanvas = null;
+            this.cursorImage = null;
+            this.cursorTransform = null;
+        }
     }
 }
