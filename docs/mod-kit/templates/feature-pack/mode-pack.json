@@ -1,0 +1,15 @@
+{
+  "id": "pack-example-mode",
+  "displayName": "Example Mode",
+  "kind": "Mode",
+  "description": "Launch preset using existing worlds and commands.",
+  "dependencies": [],
+  "conflicts": [],
+  "launch": {
+    "world": "TestWorld",
+    "seed": 1990,
+    "clans": 2,
+    "maxTurns": 8,
+    "scenario": "standard"
+  }
+}

@@ -11,6 +11,7 @@ using UnityEditor.PackageManager;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Assets.Scripts.UnityGame.ModKit;
 
 namespace WismUnity.EditorBridge
 {
@@ -173,6 +174,34 @@ namespace WismUnity.EditorBridge
             });
         }
 
+        [McpTool("WismUnity.GetModKitStatus", "Returns a read-only Mod Kit profile, pack, validation, scene, and MOD data status report.", Groups = new[] { Group, "modkit" }, EnabledByDefault = true)]
+        public static object GetModKitStatus(string profile = null, string packs = null, string world = null, string modRoot = null)
+        {
+            try
+            {
+                var packIds = string.IsNullOrWhiteSpace(packs)
+                    ? Array.Empty<string>()
+                    : packs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(item => item.Trim())
+                        .Where(item => !string.IsNullOrWhiteSpace(item))
+                        .ToArray();
+                var selection = UnityModKitSelection.Inspect(profile, packIds, world, modRoot);
+                var scene = EditorSceneManager.GetActiveScene();
+
+                return Response.Success("WismUnity Mod Kit status loaded.", new
+                {
+                    selection,
+                    activeScene = SceneInfo(scene),
+                    dirtyScenes = LoadedDirtyScenes(),
+                    timestampUtc = DateTime.UtcNow.ToString("O")
+                });
+            }
+            catch (Exception ex)
+            {
+                return Response.Error("MODKIT_STATUS_FAILED", new { reason = ex.Message });
+            }
+        }
+
         static object PackageStatus(string packageName)
         {
             var package = UnityEditor.PackageManager.PackageInfo.FindForPackageName(packageName);
@@ -200,6 +229,21 @@ namespace WismUnity.EditorBridge
                 isDirty = scene.isDirty,
                 buildIndex = scene.buildIndex
             };
+        }
+
+        static string[] LoadedDirtyScenes()
+        {
+            var scenes = new List<string>();
+            for (var index = 0; index < SceneManager.sceneCount; index++)
+            {
+                var scene = SceneManager.GetSceneAt(index);
+                if (scene.isDirty)
+                {
+                    scenes.Add(string.IsNullOrWhiteSpace(scene.path) ? scene.name : scene.path);
+                }
+            }
+
+            return scenes.ToArray();
         }
 
         static IEnumerable<GameObject> Flatten(GameObject root)

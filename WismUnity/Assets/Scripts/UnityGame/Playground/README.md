@@ -18,6 +18,16 @@ Run with the Unity editor closed:
 The runner writes `manifest.json` under the requested artifact root and restores the original editor scene setup without saving.
 Add `advanceBootstrap=true` only when you intentionally want the runner to tick the runtime bootstrap path in editor/batchmode.
 
+Add `profile=<id>` and `packs=a,b` to exercise the Mod Kit selection path. When
+these arguments are present, the runner resolves the profile from
+`Assets\Plugins\WismClient\Mods`, applies the selected packs to `ModFactory`,
+sets `GameManager.ModPath` and `GameManager.WorldName`, and records the
+selection report in the manifest. When no profile, pack, or `modRoot` argument
+is supplied, the runner preserves the default `Assets\Mod` behavior.
+
+Use `command=modkit-status` to generate only the read-only Mod Kit status
+manifest without loading the smoke scene or applying the selection.
+
 ## Safety Contract
 
 - Do not mutate scenes, prefabs, MOD JSON, save slots, or plugin DLLs.

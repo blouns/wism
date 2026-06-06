@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.UnityGame.ModKit;
 
 namespace WismUnity.Playground
 {
@@ -9,7 +10,10 @@ namespace WismUnity.Playground
         public string command;
         public string status;
         public string outcome;
+        public string profile;
+        public string[] packs;
         public string world;
+        public string modRoot;
         public string scenePath;
         public string scenarioName;
         public string runId;
@@ -20,6 +24,7 @@ namespace WismUnity.Playground
         public string artifactDirectory;
         public string screenshotPath;
         public UnityPlaygroundSceneSummary scene;
+        public UnityModKitSelectionReport selection;
         public UnityPlaygroundGameSummary game;
         public UnityPlaygroundScenarioSummary scenario;
         public UnityPlaygroundConsoleSummary console;

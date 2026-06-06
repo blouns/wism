@@ -2,7 +2,8 @@
     "name": "WismUnity.EditorBridge",
     "rootNamespace": "WismUnity.EditorBridge",
     "references": [
-        "Unity.AI.MCP.Editor"
+        "Unity.AI.MCP.Editor",
+        "UnityGame"
     ],
     "includePlatforms": [
         "Editor"

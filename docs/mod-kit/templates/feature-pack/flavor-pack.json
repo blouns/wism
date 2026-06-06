@@ -1,0 +1,9 @@
+{
+  "id": "pack-example-flavor",
+  "displayName": "Example Flavor",
+  "kind": "Flavor",
+  "description": "Display-name overlay for existing stable ids. Stable ids and numeric values do not change.",
+  "dependencies": [],
+  "conflicts": [],
+  "overlay": "overlays/mod-overlay.json"
+}

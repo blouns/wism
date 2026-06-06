@@ -1,0 +1,28 @@
+{
+  "clans": [
+    {
+      "shortName": "Sirians",
+      "displayName": "Sirians of the Dawn"
+    },
+    {
+      "shortName": "LordBane",
+      "displayName": "Bane's Black Host"
+    }
+  ],
+  "armies": [
+    {
+      "shortName": "LightInfantry",
+      "displayName": "Border Spears"
+    },
+    {
+      "shortName": "HeavyInfantry",
+      "displayName": "Iron Guard"
+    }
+  ],
+  "artifacts": [
+    {
+      "shortName": "Firesword",
+      "displayName": "Emberblade"
+    }
+  ]
+}

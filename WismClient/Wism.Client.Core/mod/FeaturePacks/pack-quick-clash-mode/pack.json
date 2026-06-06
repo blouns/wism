@@ -1,0 +1,15 @@
+{
+  "id": "pack-quick-clash-mode",
+  "displayName": "Quick Clash Mode",
+  "kind": "Mode",
+  "description": "Uses existing worlds and commands for a short deterministic playable run.",
+  "dependencies": [],
+  "conflicts": [],
+  "launch": {
+    "world": "TestWorld",
+    "seed": 20260604,
+    "clans": 2,
+    "maxTurns": 8,
+    "scenario": "capture-pressure"
+  }
+}

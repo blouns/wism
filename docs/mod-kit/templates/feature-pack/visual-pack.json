@@ -1,0 +1,9 @@
+{
+  "id": "pack-example-visual",
+  "displayName": "Example Visual Skin",
+  "kind": "Visual",
+  "description": "Presentation-only catalog. No rules, stats, ids, or maps change.",
+  "dependencies": [],
+  "conflicts": [],
+  "presentationCatalog": "presentation-catalog.json"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "pack-dusklands-visual",
+  "displayName": "Dusklands Visual Skin",
+  "kind": "Visual",
+  "description": "Presentation-only visual catalog for a darker alternate skin. No rules, stats, ids, or maps change.",
+  "dependencies": [],
+  "conflicts": [],
+  "presentationCatalog": "presentation-catalog.json"
+}

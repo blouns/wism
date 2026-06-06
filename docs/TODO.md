@@ -9,8 +9,10 @@
 
 ## Build And Packaging
 
-- Document exactly how WismClient DLLs are built and copied into `WismUnity/Assets/Plugins/WismClient/`.
-- Decide whether Unity plugin DLLs should remain committed or become generated artifacts in CI/release packaging.
+- Keep WismClient plugin DLLs committed in `WismUnity/Assets/Plugins/WismClient/`
+  as generated shipped artifacts so Unity opens after clone.
+- Do not commit incidental DLL churn from local WismClient builds; commit plugin
+  DLL updates only when intentionally republishing WismClient changes for Unity.
 - Add a repeatable Unity batchmode validation command for public contributors.
 
 ## Naming And Style Cleanup

@@ -1,0 +1,13 @@
+{
+  "id": "pack-example-visual",
+  "terrain": {
+    "Grass": {
+      "palette": "example-grass"
+    }
+  },
+  "clans": {
+    "Sirians": {
+      "accent": "#7fb7ff"
+    }
+  }
+}

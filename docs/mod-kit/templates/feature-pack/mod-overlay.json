@@ -1,0 +1,20 @@
+{
+  "clans": [
+    {
+      "shortName": "Sirians",
+      "displayName": "Example Sirian Display Name"
+    }
+  ],
+  "armies": [
+    {
+      "shortName": "LightInfantry",
+      "displayName": "Example Infantry Display Name"
+    }
+  ],
+  "artifacts": [
+    {
+      "shortName": "Firesword",
+      "displayName": "Example Artifact Display Name"
+    }
+  ]
+}

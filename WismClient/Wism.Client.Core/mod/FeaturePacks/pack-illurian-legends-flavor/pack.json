@@ -1,0 +1,9 @@
+{
+  "id": "pack-illurian-legends-flavor",
+  "displayName": "Illurian Legends Flavor",
+  "kind": "Flavor",
+  "description": "Display-name overlay for a more mythic read of the classic data. Stable ids and numeric values do not change.",
+  "dependencies": [],
+  "conflicts": [],
+  "overlay": "overlays/mod-overlay.json"
+}

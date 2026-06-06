@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Assets.Scripts.Managers;
+using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -25,8 +26,11 @@ namespace WismUnity.Playground
             var report = new UnityPlaygroundReport
             {
                 schemaVersion = 1,
-                command = "world",
+                command = options.Command,
+                profile = options.Profile,
+                packs = options.Packs,
                 world = options.World,
+                modRoot = options.ModRoot,
                 scenePath = options.ScenePath,
                 scenarioName = options.Scenario,
                 runId = options.RunId,
@@ -39,7 +43,15 @@ namespace WismUnity.Playground
             try
             {
                 Directory.CreateDirectory(options.OutputDirectory);
-                RunWorldSmoke(options, report);
+                if (string.Equals(options.Command, "modkit-status", StringComparison.OrdinalIgnoreCase))
+                {
+                    RunModKitStatus(options, report);
+                }
+                else
+                {
+                    RunWorldSmoke(options, report);
+                }
+
                 if (string.Equals(report.status, "Failed", StringComparison.OrdinalIgnoreCase))
                 {
                     exitCode = 1;
@@ -70,6 +82,29 @@ namespace WismUnity.Playground
             Run();
         }
 
+        static void RunModKitStatus(UnityPlaygroundOptions options, UnityPlaygroundReport report)
+        {
+            report.selection = UnityModKitSelection.Inspect(
+                options.Profile,
+                options.Packs,
+                options.World,
+                options.ModRoot);
+            report.profile = report.selection.profileId;
+            report.packs = report.selection.activePackIds.Length > 0
+                ? report.selection.activePackIds
+                : report.selection.requestedPackIds;
+            report.world = report.selection.worldName;
+            report.modRoot = report.selection.modRoot;
+            report.scene = SceneSummary(EditorSceneManager.GetActiveScene());
+            report.console = ConsoleSummary();
+            report.dirtyScenes = GetLoadedDirtyScenes();
+            report.status = string.Equals(report.selection.status, "Failed", StringComparison.OrdinalIgnoreCase)
+                ? "Failed"
+                : "Passed";
+            report.outcome = "Generated read-only Mod Kit status report without loading or saving scenes.";
+            report.events.Add("Generated read-only Mod Kit status report.");
+        }
+
         static void RunWorldSmoke(UnityPlaygroundOptions options, UnityPlaygroundReport report)
         {
             if (!File.Exists(options.ScenePath))
@@ -93,8 +128,20 @@ namespace WismUnity.Playground
                 report.scene = SceneSummary(scene);
                 report.events.Add("Found UnityManager.");
 
-                UnityManager.SetNewGameSettings(CreateSettings(options.World));
-                unityManager.Initialize(CreateSettings(options.World));
+                report.selection = UnityModKitSelection.Apply(
+                    unityManager,
+                    options.Profile,
+                    options.Packs,
+                    options.World,
+                    options.ModRoot);
+                report.profile = report.selection.profileId;
+                report.packs = report.selection.activePackIds;
+                report.world = report.selection.worldName;
+                report.modRoot = report.selection.modRoot;
+                report.events.Add(report.selection.outcome);
+
+                UnityManager.SetNewGameSettings(CreateSettings(report.selection.worldName, report.selection.seed));
+                unityManager.Initialize(CreateSettings(report.selection.worldName, report.selection.seed));
                 report.events.Add("Initialized UnityManager with deterministic playground settings.");
 
                 if (options.AdvanceBootstrap)
@@ -142,6 +189,11 @@ namespace WismUnity.Playground
                 {
                     report.events.Add("Restoring original editor scene setup without saving.");
                     EditorSceneManager.RestoreSceneManagerSetup(originalSetup);
+                }
+                else if (scene.IsValid() && scene.isLoaded)
+                {
+                    report.events.Add("No original editor scene setup was loaded; closing playground scene without saving.");
+                    EditorSceneManager.CloseScene(scene, true);
                 }
                 else
                 {
@@ -304,13 +356,13 @@ namespace WismUnity.Playground
                 : string.Empty;
         }
 
-        static UnityNewGameEntity CreateSettings(string world)
+        static UnityNewGameEntity CreateSettings(string world, int seed)
         {
             return new UnityNewGameEntity
             {
                 InteractiveUI = false,
                 IsNewGame = true,
-                RandomSeed = 1990,
+                RandomSeed = seed > 0 ? seed : GameManager.DefaultRandom,
                 RandomStartLocations = false,
                 WorldName = world,
                 Players = new[]
@@ -455,7 +507,11 @@ namespace WismUnity.Playground
 
         sealed class UnityPlaygroundOptions
         {
+            public string Command = "world";
             public string World = DefaultWorld;
+            public string Profile = string.Empty;
+            public string[] Packs = new string[0];
+            public string ModRoot = string.Empty;
             public string ScenePath = DefaultScene;
             public string Scenario = "smoke";
             public string RunId = $"unity-smoke-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
@@ -468,6 +524,10 @@ namespace WismUnity.Playground
             {
                 var options = new UnityPlaygroundOptions();
                 var values = ParseArgs(args);
+                options.Command = Read(values, "command", options.Command);
+                options.Profile = Read(values, "profile", options.Profile);
+                options.Packs = ReadCsv(values, "packs");
+                options.ModRoot = Read(values, "modRoot", options.ModRoot);
                 options.World = Read(values, "world", options.World);
                 options.ScenePath = Read(values, "scene", options.ScenePath);
                 options.Scenario = Read(values, "scenario", options.Scenario);
@@ -517,6 +577,19 @@ namespace WismUnity.Playground
                 return values.TryGetValue(name, out var value) && bool.TryParse(value, out var parsed)
                     ? parsed
                     : fallback;
+            }
+
+            static string[] ReadCsv(Dictionary<string, string> values, string name)
+            {
+                if (!values.TryGetValue(name, out var value) || string.IsNullOrWhiteSpace(value))
+                {
+                    return new string[0];
+                }
+
+                return value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(item => item.Trim())
+                    .Where(item => !string.IsNullOrWhiteSpace(item))
+                    .ToArray();
             }
         }
     }

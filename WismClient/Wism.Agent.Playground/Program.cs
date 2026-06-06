@@ -1,9 +1,13 @@
 using System.Text.Json;
 using Wism.Agent.Playground;
+using Wism.Client.Modules.Profiles;
 
 var command = args.FirstOrDefault(arg => !arg.StartsWith("--", StringComparison.OrdinalIgnoreCase)) ?? "sample";
 var quiet = args.Any(arg => string.Equals(arg, "--quiet", StringComparison.OrdinalIgnoreCase));
-var runner = new PlaygroundScenarioRunner(quiet);
+var profileId = ReadString(args, "profile", ModularGameProfileCatalog.DefaultProfileId);
+var packIds = ReadCsv(args, "packs");
+var selection = ModularGameProfileCatalog.Resolve(FindRepositoryRoot(), profileId, packIds);
+var runner = new PlaygroundScenarioRunner(quiet, selection);
 var channel = ReadString(args, "channel", null);
 
 try
@@ -27,7 +31,7 @@ try
             var delayMs = ReadInt(args, "delayMs", 300);
             return Exit(Print(runner.CompanionDemo(scenario, delayMs, channel), quiet));
         case "world":
-            var world = ReadString(args, "world", "TestWorld") ?? "TestWorld";
+            var world = ReadString(args, "world", selection.BaseWorld) ?? selection.BaseWorld;
             var modRoot = ReadString(args, "modRoot", null);
             return Exit(Print(runner.WorldSample(world, modRoot), quiet));
         case "record":
@@ -39,15 +43,15 @@ try
             PrintCapture(result, quiet);
             return string.Equals(result.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "campaign":
-            var campaignSeed = ReadInt(args, "seed", 1990);
-            var campaignClans = ReadInt(args, "clans", 2);
-            var maxTurns = ReadInt(args, "maxTurns", 40);
+            var campaignSeed = ReadInt(args, "seed", selection.Launch.Seed ?? 1990);
+            var campaignClans = ReadInt(args, "clans", selection.Launch.Clans ?? 2);
+            var maxTurns = ReadInt(args, "maxTurns", selection.Launch.MaxTurns ?? 40);
             var campaignOut = ReadString(args, "out", Path.Combine(FindRepositoryRoot(), "artifacts", "campaigns"));
             var campaignName = ReadString(args, "name", null);
             var campaignModRoot = ReadString(args, "modRoot", null);
             var campaignDelayMs = ReadInt(args, "delayMs", 0);
             var campaignSize = ReadString(args, "size", "medium") ?? "medium";
-            var campaignScenario = ReadString(args, "scenario", ReadString(args, "preset", "standard")) ?? "standard";
+            var campaignScenario = ReadString(args, "scenario", ReadString(args, "preset", selection.Launch.Scenario ?? "standard")) ?? "standard";
             var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs, campaignSize, campaignScenario, channel);
             PrintCampaign(campaign, quiet);
             return string.Equals(campaign.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
@@ -65,7 +69,7 @@ try
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|jump|worktrees] [--quiet] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [preset=standard|capture-pressure|ruin-search] [checkpoint=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [preset=standard|capture-pressure|ruin-search] [checkpoint=path]");
             return 2;
     }
 }
@@ -130,6 +134,14 @@ static bool ReadBool(IReadOnlyList<string> args, string name, bool fallback)
 {
     var value = ReadString(args, name, null);
     return value is null ? fallback : bool.TryParse(value, out var parsed) ? parsed : fallback;
+}
+
+static string[] ReadCsv(IReadOnlyList<string> args, string name)
+{
+    var value = ReadString(args, name, string.Empty);
+    return string.IsNullOrWhiteSpace(value)
+        ? Array.Empty<string>()
+        : value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }
 
 static string DefaultCaptureName(string scenario)

@@ -11,6 +11,7 @@ using Wism.Client.Core.Heros;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules.Infos;
+using Wism.Client.Modules.Profiles;
 
 namespace Wism.Client.Modules
 {
@@ -32,6 +33,20 @@ namespace Wism.Client.Modules
         public static string WorldPath { get; set; } = "Illuria";
         public static string WorldsPath { get; set; } = "worlds";
         public static string HeroPath { get; set; } = "hero.json";
+        public static IList<string> ActiveFeaturePackIds { get; set; } = new List<string>();
+
+        public static void ResetCache()
+        {
+            armyInfos = null;
+            terrainInfos = null;
+            clanInfos = null;
+            clanTerrainMappingInfos = null;
+            cityInfos = null;
+            locationInfos = null;
+            artifactInfos = null;
+            heroNames = null;
+            recruitHeroStrategy = null;
+        }
 
         public static IList<T> LoadModFiles<T>(string path)
         {
@@ -286,6 +301,7 @@ namespace Wism.Client.Modules
             if (armyInfos == null)
             {
                 armyInfos = LoadModFiles<ArmyInfo>(filePath);
+                ModOverlayApplicator.ApplyArmyOverlays(armyInfos, path, ActiveFeaturePackIds);
             }
 
             return armyInfos;
@@ -297,6 +313,7 @@ namespace Wism.Client.Modules
             if (clanInfos == null)
             {
                 clanInfos = LoadModFiles<ClanInfo>(filePath);
+                ModOverlayApplicator.ApplyClanOverlays(clanInfos, path, ActiveFeaturePackIds);
             }
 
             return clanInfos;
@@ -358,6 +375,7 @@ namespace Wism.Client.Modules
         {
             var filePath = string.Format(@"{0}\{1}", path, ArtifactInfo.FileName);
             artifactInfos = LoadModFiles<ArtifactInfo>(filePath);
+            ModOverlayApplicator.ApplyArtifactOverlays(artifactInfos, path, ActiveFeaturePackIds);
 
             return artifactInfos;
         }

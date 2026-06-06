@@ -21,6 +21,7 @@ Primary current target:
 - Core rules isolated from Unity presentation code.
 - ASCII, Companion, and Unity clients over the same engine contracts.
 - Modular JSON world data and Unity world-builder inspection tools.
+- Data-only profile and feature-pack authoring through the [WISM Mod Kit](docs/mod-kit/README.md).
 
 ## Repository Layout
 
@@ -87,6 +88,12 @@ Open Unity:
 4. Open a scene such as `Assets/Scenes/Mini-Illuria.unity`.
 5. Press Play.
 
+WismUnity consumes committed WismClient plugin DLLs from
+`WismUnity/Assets/Plugins/WismClient/`. They are generated shipped artifacts:
+commit updates only when intentionally republishing WismClient changes for Unity,
+and restore incidental DLL churn before public commits. See
+[WismUnity](WismUnity/README.md).
+
 ## Unity Editor And World Builder
 
 WismUnity is both a playable frontend and, for now, a world-builder surface. Scene state, tilemaps, city objects, location objects, and MOD JSON all matter. Treat those assets carefully and prefer read-only inspection before any automated scene or data mutation.
@@ -102,6 +109,7 @@ See:
 - [Public Boundary](docs/public-boundary.md)
 - [Asset Provenance](docs/asset-provenance.md)
 - [Architecture](docs/architecture.md)
+- [WISM Mod Kit](docs/mod-kit/README.md)
 - [Project TODO](docs/TODO.md)
 - [Contributing](CONTRIBUTING.md)
 

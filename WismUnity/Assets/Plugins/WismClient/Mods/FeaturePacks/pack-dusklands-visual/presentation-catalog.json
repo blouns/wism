@@ -1,0 +1,22 @@
+{
+  "id": "pack-dusklands-visual",
+  "terrain": {
+    "Grass": {
+      "palette": "dusky-green"
+    },
+    "Forest": {
+      "palette": "deep-pine"
+    },
+    "Mountain": {
+      "palette": "cold-stone"
+    }
+  },
+  "clans": {
+    "Sirians": {
+      "accent": "#7fb7ff"
+    },
+    "LordBane": {
+      "accent": "#d04c5f"
+    }
+  }
+}

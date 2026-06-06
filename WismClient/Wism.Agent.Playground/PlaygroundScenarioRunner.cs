@@ -20,6 +20,7 @@ using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Modules.Infos;
+using Wism.Client.Modules.Profiles;
 using Wism.Companion.Shared.Events;
 
 namespace Wism.Agent.Playground;
@@ -33,13 +34,15 @@ public sealed class PlaygroundScenarioRunner
     private CaptureRecorder? captureRecorder;
     private int companionDelayMs;
     private readonly IWismLoggerFactory loggerFactory;
+    private readonly ModularGameProfileSelection? profileSelection;
     private TelemetryContext? telemetryContext;
 
-    public PlaygroundScenarioRunner(bool suppressConsoleLogs = false)
+    public PlaygroundScenarioRunner(bool suppressConsoleLogs = false, ModularGameProfileSelection? profileSelection = null)
     {
         loggerFactory = suppressConsoleLogs
             ? new SilentWismLoggerFactory()
             : new WismLoggerFactory();
+        this.profileSelection = profileSelection;
         controllers = CreateControllers();
     }
 
@@ -207,13 +210,14 @@ public sealed class PlaygroundScenarioRunner
             events.Add($"Companion telemetry enabled on named pipe wism-commands with {companionDelayMs}ms delay for channel {telemetryContext.ChannelId}.");
         }
 
+        var resolvedModRoot = ConfigureModPath(modRoot);
         var options = new CampaignOptions(
             Seed: seed,
             ClanCount: boundedClans,
             MaxTurns: Math.Clamp(maxTurns, 1, 500),
             Name: campaignName,
             OutputRoot: outputRoot ?? Path.Combine(FindRepositoryRootForRunner(), "artifacts", "campaigns"),
-            ModRoot: modRoot,
+            ModRoot: resolvedModRoot,
             Size: string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) ? "large" : "medium",
             ScenarioFamily: normalizedScenarioFamily);
 
@@ -431,12 +435,16 @@ public sealed class PlaygroundScenarioRunner
         PublishMapSnapshot();
     }
 
-    private static string ConfigureModPath(string? requestedModRoot = null, string? worldName = null, bool requireMap = false)
+    private string ConfigureModPath(string? requestedModRoot = null, string? worldName = null, bool requireMap = false)
     {
         var candidates = new List<string>();
         if (!string.IsNullOrWhiteSpace(requestedModRoot))
         {
             candidates.Add(requestedModRoot);
+        }
+        else if (!string.IsNullOrWhiteSpace(profileSelection?.ModRoot))
+        {
+            candidates.Add(profileSelection.ModRoot);
         }
 
         candidates.AddRange(new[]
@@ -469,6 +477,8 @@ public sealed class PlaygroundScenarioRunner
 
         ModFactory.ModPath = modPath;
         ModFactory.WorldsPath = "Worlds";
+        ModFactory.ActiveFeaturePackIds = profileSelection?.PackIds.ToList() ?? new List<string>();
+        ModFactory.ResetCache();
         return modPath;
     }
 
