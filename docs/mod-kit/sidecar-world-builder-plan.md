@@ -249,7 +249,7 @@ Deliver the first sidecar app skeleton.
 
 Proof:
 
-- Sidecar opens a temporary workspace.
+- Sidecar opens the selected source mod root or an isolated test copy of it.
 - Validation displays pass and fail states.
 - CLI and sidecar reports match.
 - Unity status proof is linked when available.
@@ -334,7 +334,7 @@ Deliver stable package workflow.
 Proof:
 
 - Package a sidecar-created world.
-- Install into a temporary mod root.
+- Install into an isolated test copy of the source mod root.
 - Validate, AgentPlayground smoke, and Unity smoke pass.
 - Uninstall leaves no unmanaged source changes.
 
@@ -376,7 +376,8 @@ Each phase should have a visible demo:
 3. Edit terrain/city placement and watch validation update.
 4. Preview the world in Unity without dirty scenes.
 5. Run a bounded campaign smoke from the sidecar.
-6. Package and reinstall the world into a temporary mod root.
+6. Package and reinstall the world into an isolated test copy of the source mod
+   root.
 
 ## Open Design Questions
 

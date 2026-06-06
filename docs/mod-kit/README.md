@@ -41,7 +41,7 @@ For the full sidecar map and world-builder direction, see the
 
 ## Authoring Layout
 
-Create a feature pack under:
+The source mod folder is the supported authoring location:
 
 ```text
 WismClient/Wism.Client.Core/mod/FeaturePacks/<pack-id>/
@@ -54,6 +54,15 @@ WismClient/Wism.Client.Core/mod/FeaturePacks/<pack-id>/pack.json
 ```
 
 Useful templates live under `docs/mod-kit/templates/feature-pack/`.
+
+Run authoring commands from `WismClient`. The Mod Kit CLI project lives at:
+
+```text
+WismClient/Wism.ModKit.Cli/
+```
+
+For the normal workflow, no extra path arguments are needed. The CLI finds
+`WismClient/Wism.Client.Core/mod/` by default.
 
 ## Stable Id Rule
 
@@ -92,6 +101,11 @@ dotnet run --project Wism.Agent.Playground -- world profile=classic-warlords pac
 Unity validation is optional for quick local iteration on pure data-only pack
 edits, but a phase or release claim is not complete without the Unity proof
 required by the [Mod Kit E2E Proof Plan](e2e-proof-plan.md).
+
+Unity reads copied plugin mod data from
+`WismUnity/Assets/Plugins/WismClient/Mods/`. Keep
+`WismClient/Wism.Client.Core/mod/` as the source of truth and update the Unity
+plugin copy through the normal build/publish flow.
 
 Create a proof bundle after CLI, AgentPlayground, and Unity evidence exist:
 

@@ -25,7 +25,23 @@ For author-facing templates and the supported validation checklist, see the
 
 ## Authoring A Simple Pack
 
-Create `WismClient/Wism.Client.Core/mod/FeaturePacks/<pack-id>/pack.json`.
+Create packs only under the source mod folder:
+
+```text
+WismClient/Wism.Client.Core/mod/FeaturePacks/<pack-id>/
+```
+
+The required manifest is:
+
+```text
+WismClient/Wism.Client.Core/mod/FeaturePacks/<pack-id>/pack.json
+```
+
+Run validation from `WismClient`:
+
+```powershell
+dotnet run --project Wism.ModKit.Cli -- validate profile=classic-warlords packs=<pack-id>
+```
 
 Use stable ids from the base mod files. Flavor overlays may change display
 names, but must not change `ShortName`, stats, terrain costs, coordinates, or

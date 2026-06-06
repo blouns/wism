@@ -186,7 +186,7 @@ Acceptance:
 
 E2E proof:
 
-- Create a new pack in a temporary workspace.
+- Create a new pack under the selected source mod root.
 - Validate it with the CLI.
 - Load it through AgentPlayground.
 - Run Unity read-only report or Unity smoke against the generated pack.
@@ -413,6 +413,6 @@ E2E proof:
 
 - Package a proof mod.
 - Validate package.
-- Install into a temporary mod root.
+- Install into an isolated test copy of the source mod root.
 - Launch through AgentPlayground and Unity.
 - Uninstall and verify no unmanaged source changes remain.
