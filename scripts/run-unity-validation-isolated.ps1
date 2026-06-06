@@ -264,6 +264,7 @@ function Wait-UnityBatch {
     param(
         [string]$ProjectPath,
         [string]$ResultsPath,
+        [string]$LogPath,
         [int]$TimeoutMinutes
     )
 
@@ -275,6 +276,18 @@ function Wait-UnityBatch {
         Write-Host ("{0} Unity results={1} validationUnityProcesses={2}" -f (Get-Date -Format HH:mm:ss), $exists, $processes.Count)
         if ($exists -and $processes.Count -eq 0) {
             return
+        }
+
+        if (-not $exists -and $processes.Count -eq 0) {
+            $hint = ""
+            if (Test-Path -LiteralPath $LogPath) {
+                $errors = @(Select-String -Path $LogPath -Pattern "error CS|Scripts have compiler errors|Aborting batchmode" -SimpleMatch:$false | Select-Object -First 6)
+                if ($errors.Count -gt 0) {
+                    $hint = " First errors: " + (($errors | ForEach-Object { $_.Line.Trim() }) -join " | ")
+                }
+            }
+
+            throw "Unity exited without writing test results. See $LogPath.$hint"
         }
     } while ((Get-Date) -lt $deadline)
 
@@ -394,7 +407,7 @@ $unityStartedAt = (Get-Date).ToUniversalTime().ToString("O")
 Write-Host "Starting Unity PlayMode tests in isolated worktree..."
 & $unityExePath -batchmode -projectPath $unityProjectRoot -runTests -testPlatform PlayMode -testFilter $TestFilter -testResults $unityResults -logFile $unityLog
 $unityLauncherExitCode = if ($null -eq $global:LASTEXITCODE) { 0 } else { $global:LASTEXITCODE }
-Wait-UnityBatch -ProjectPath $unityProjectRoot -ResultsPath $unityResults -TimeoutMinutes $TimeoutMinutes
+Wait-UnityBatch -ProjectPath $unityProjectRoot -ResultsPath $unityResults -LogPath $unityLog -TimeoutMinutes $TimeoutMinutes
 $unityEndedAt = (Get-Date).ToUniversalTime().ToString("O")
 $unityTest = Read-UnityResults -ResultsPath $unityResults
 if ($unityTest.failed -ne 0 -or -not [string]::Equals($unityTest.result, "Passed", [System.StringComparison]::OrdinalIgnoreCase)) {

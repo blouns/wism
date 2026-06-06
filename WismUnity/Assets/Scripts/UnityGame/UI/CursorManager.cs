@@ -3,6 +3,15 @@ using UnityEngine;
 
 public class CursorManager : MonoBehaviour
 {
+    public enum HotspotAnchor
+    {
+        UpperLeft,
+        Center
+    }
+
+    [SerializeField]
+    private CursorMode cursorMode = CursorMode.ForceSoftware;
+
     [SerializeField]
     private Texture2D attack;
     [SerializeField]
@@ -35,29 +44,45 @@ public class CursorManager : MonoBehaviour
 
     void Start()
     {
-        SetCursor(this.info);
+        InfoCursor();
     }
 
-    private void SetCursor(Texture2D cursor)
+    private void SetCursor(Texture2D cursor, HotspotAnchor hotspotAnchor)
     {
-        // Set the cursor origin to its center (default is upper left corner)
-        Vector2 cursorOffset = new Vector2(cursor.width / 2, cursor.height / 2);
-        Cursor.SetCursor(cursor, cursorOffset, CursorMode.Auto);
+        if (cursor == null)
+        {
+            Cursor.SetCursor(null, Vector2.zero, this.cursorMode);
+            return;
+        }
+
+        Cursor.SetCursor(cursor, CalculateHotspot(cursor, hotspotAnchor), this.cursorMode);
+    }
+
+    public static Vector2 CalculateHotspot(Texture2D cursor, HotspotAnchor hotspotAnchor)
+    {
+        if (cursor == null)
+        {
+            return Vector2.zero;
+        }
+
+        return hotspotAnchor == HotspotAnchor.Center
+            ? new Vector2(cursor.width / 2f, cursor.height / 2f)
+            : Vector2.zero;
     }
 
     public void AttackCursor()
     {
-        SetCursor(this.attack);
+        SetCursor(this.attack, HotspotAnchor.Center);
     }
 
     public void InfoCursor()
     {
-        SetCursor(this.info);
+        SetCursor(this.info, HotspotAnchor.UpperLeft);
     }
 
     public void MagnifyCursor()
     {
-        SetCursor(this.magnify);
+        SetCursor(this.magnify, HotspotAnchor.Center);
     }
 
     public void MoveCursor(Vector3 heading)
@@ -114,21 +139,21 @@ public class CursorManager : MonoBehaviour
             throw new InvalidOperationException("Move cursor could not be calculated correctly.");
         }
 
-        SetCursor(moveCursor);
+        SetCursor(moveCursor, HotspotAnchor.Center);
     }
 
     public void ProduceCursor()
     {
-        SetCursor(this.produce);
+        SetCursor(this.produce, HotspotAnchor.Center);
     }
 
     public void SelectCursor()
     {
-        SetCursor(this.select);
+        SetCursor(this.select, HotspotAnchor.Center);
     }
 
     public void PointCursor()
     {
-        SetCursor(this.point);
+        SetCursor(this.point, HotspotAnchor.UpperLeft);
     }
 }

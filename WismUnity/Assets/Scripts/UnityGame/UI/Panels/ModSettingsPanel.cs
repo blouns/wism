@@ -427,10 +427,12 @@ public sealed class ModSettingsPanel : MonoBehaviour
         viewportRect.anchorMax = Vector2.one;
         viewportRect.offsetMin = Vector2.zero;
         viewportRect.offsetMax = Vector2.zero;
-        viewport.GetComponent<Image>().color = new Color(0.18f, 0.18f, 0.18f, 1f);
+        var viewportImage = viewport.GetComponent<Image>();
+        viewportImage.color = new Color(0.18f, 0.18f, 0.18f, 1f);
+        viewportImage.raycastTarget = false;
         viewport.GetComponent<Mask>().showMaskGraphic = false;
 
-        var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup));
+        var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
         content.transform.SetParent(viewport.transform, false);
         var contentRect = content.GetComponent<RectTransform>();
         contentRect.anchorMin = new Vector2(0, 1);
@@ -441,6 +443,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var contentLayout = content.GetComponent<VerticalLayoutGroup>();
         contentLayout.childControlHeight = true;
         contentLayout.childForceExpandHeight = false;
+        content.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         var item = new GameObject("Item", typeof(RectTransform), typeof(Toggle), typeof(Image));
         item.transform.SetParent(content.transform, false);
@@ -473,10 +476,12 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
         viewport.transform.SetParent(go.transform, false);
         Stretch(viewport.GetComponent<RectTransform>(), 0, 0, 0, 0);
-        viewport.GetComponent<Image>().color = RowColor;
+        var viewportImage = viewport.GetComponent<Image>();
+        viewportImage.color = RowColor;
+        viewportImage.raycastTarget = false;
         viewport.GetComponent<Mask>().showMaskGraphic = false;
 
-        var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup));
+        var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
         content.transform.SetParent(viewport.transform, false);
         var contentRect = content.GetComponent<RectTransform>();
         contentRect.anchorMin = new Vector2(0, 1);
@@ -488,6 +493,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         layout.spacing = 6;
         layout.childControlHeight = true;
         layout.childForceExpandHeight = false;
+        content.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         var scroll = go.GetComponent<ScrollRect>();
         scroll.content = contentRect;
@@ -500,7 +506,9 @@ public sealed class ModSettingsPanel : MonoBehaviour
     {
         var row = new GameObject("PackToggle:" + pack.Id, typeof(RectTransform), typeof(Image), typeof(Toggle), typeof(HorizontalLayoutGroup), typeof(PackRowHint));
         row.transform.SetParent(parent, false);
-        row.GetComponent<Image>().color = RowColor;
+        var rowImage = row.GetComponent<Image>();
+        rowImage.color = RowColor;
+        rowImage.raycastTarget = true;
         var layout = row.GetComponent<HorizontalLayoutGroup>();
         layout.padding = new RectOffset(10, 10, 0, 0);
         layout.spacing = 10;

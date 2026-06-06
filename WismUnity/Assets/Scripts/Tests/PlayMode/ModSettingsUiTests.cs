@@ -62,6 +62,41 @@ public sealed class ModSettingsUiTests
     }
 
     [UnityTest]
+    public IEnumerator CursorHotspots_DoNotOffsetPointerCursorTargets()
+    {
+        yield return WaitForModSettings();
+
+        var pointTexture = new Texture2D(9, 22);
+        var targetTexture = new Texture2D(32, 32);
+        try
+        {
+            Assert.That(CursorManager.CalculateHotspot(pointTexture, CursorManager.HotspotAnchor.UpperLeft), Is.EqualTo(Vector2.zero));
+            Assert.That(CursorManager.CalculateHotspot(targetTexture, CursorManager.HotspotAnchor.Center), Is.EqualTo(new Vector2(16f, 16f)));
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(pointTexture);
+            UnityEngine.Object.DestroyImmediate(targetTexture);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator PackRows_UseVisibleRowsAsClickTargets()
+    {
+        yield return WaitForModSettings();
+
+        var rowImage = GameObject.Find("PackToggle:pack-illurian-legends-flavor").GetComponent<Image>();
+        Assert.That(rowImage.raycastTarget, Is.True);
+
+        var viewportImage = GameObject.Find("PackScroll").transform.Find("Viewport").GetComponent<Image>();
+        Assert.That(viewportImage.raycastTarget, Is.False);
+
+        var contentFitter = GameObject.Find("PackList").GetComponent<ContentSizeFitter>();
+        Assert.That(contentFitter, Is.Not.Null);
+        Assert.That(contentFitter.verticalFit, Is.EqualTo(ContentSizeFitter.FitMode.PreferredSize));
+    }
+
+    [UnityTest]
     public IEnumerator PackRows_ShowSelectionStateAndColorCodedValidity()
     {
         yield return WaitForModSettings();
