@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
+using System.Xml;
+using System.Xml.Linq;
 using Wism.Client.Modules.Profiles;
 
 var command = args.FirstOrDefault(arg => !arg.StartsWith("--", StringComparison.OrdinalIgnoreCase)) ?? "validate";
@@ -60,6 +62,11 @@ static int RunProof(CliOptions options)
     {
         $"Wism.ModKit.Cli validate repo={options.RepositoryRoot} profile={options.ProfileId} packs={string.Join(",", options.PackIds)} --json"
     };
+    if (!string.IsNullOrWhiteSpace(options.UnityTestResults))
+    {
+        commands.Add($"Unity PlayMode ModSettingsUiTests results={options.UnityTestResults}");
+    }
+
     File.WriteAllLines(Path.Combine(outputDirectory, "commands.txt"), commands);
 
     var validation = Validate(options);
@@ -76,14 +83,21 @@ static int RunProof(CliOptions options)
 
     var unityStatus = ReadUnityProof(options.UnityStatusManifest);
     var unityRuntime = ReadUnityProof(options.UnityManifest);
+    var unityTests = ReadUnityTestResults(options.UnityTestResults);
     var unityStatusRequired = !string.IsNullOrWhiteSpace(options.UnityStatusManifest);
+    var unityTestsRequired = !string.IsNullOrWhiteSpace(options.UnityTestResults);
     var unityPassed = string.Equals(unityRuntime.Status, "Passed", StringComparison.OrdinalIgnoreCase) &&
                       (!unityStatusRequired || string.Equals(unityStatus.Status, "Passed", StringComparison.OrdinalIgnoreCase));
+    var unityTestsPassed = unityTestsRequired &&
+                           string.Equals(unityTests.Status, "Passed", StringComparison.OrdinalIgnoreCase);
     var status = validation.IsValid &&
                  (agentResult == null || agentResult.ExitCode == 0) &&
-                 unityPassed
+                 unityPassed &&
+                 unityTestsPassed
         ? "Green"
-        : !validation.IsValid || (agentResult != null && agentResult.ExitCode != 0)
+        : !validation.IsValid ||
+          (agentResult != null && agentResult.ExitCode != 0) ||
+          (unityTestsRequired && !unityTestsPassed)
             ? "Red"
             : "Yellow";
 
@@ -107,8 +121,9 @@ static int RunProof(CliOptions options)
         unity = unityRuntime,
         unityStatus,
         unityRuntime,
+        unityTests,
         notes = status == "Yellow"
-            ? "Unity runtime proof is missing or not passed, or a supplied Unity status proof did not pass; this proof bundle is not Green."
+            ? "Unity runtime proof is missing or not passed, a supplied Unity status proof did not pass, or Unity UI test proof was not supplied; this proof bundle is not Green."
             : string.Empty
     };
 
@@ -127,6 +142,7 @@ static int RunProof(CliOptions options)
         Console.WriteLine($"  AgentPlayground: {(agentResult == null ? "Skipped" : agentResult.Status)}");
         Console.WriteLine($"  Unity status: {(unityStatusRequired ? unityStatus.Status : "Not supplied")}");
         Console.WriteLine($"  Unity runtime: {unityRuntime.Status}");
+        Console.WriteLine($"  Unity tests: {(unityTestsRequired ? $"{unityTests.Status} ({unityTests.Passed}/{unityTests.Total})" : "Not supplied")}");
     }
 
     return status == "Red" ? 1 : 0;
@@ -319,6 +335,72 @@ static int ReadNestedInt(JsonElement root, string parentName, string name, int f
         : fallback;
 }
 
+static UnityTestProofResult ReadUnityTestResults(string resultsPath)
+{
+    if (string.IsNullOrWhiteSpace(resultsPath))
+    {
+        return new UnityTestProofResult
+        {
+            Status = "Missing",
+            ResultsPath = string.Empty,
+            Notes = "unityTestResults=<path> was not provided."
+        };
+    }
+
+    if (!File.Exists(resultsPath))
+    {
+        return new UnityTestProofResult
+        {
+            Status = "Missing",
+            ResultsPath = resultsPath,
+            Notes = "Unity test results path was provided but the file was not found."
+        };
+    }
+
+    try
+    {
+        var document = XDocument.Load(resultsPath);
+        var root = document.Root;
+        if (root == null)
+        {
+            return new UnityTestProofResult
+            {
+                Status = "Unreadable",
+                ResultsPath = resultsPath,
+                Notes = "Unity test results XML had no root element."
+            };
+        }
+
+        var result = ReadAttribute(root, "result", "Unknown");
+        var failed = ReadIntAttribute(root, "failed", 0);
+        var status = string.Equals(result, "Passed", StringComparison.OrdinalIgnoreCase) && failed == 0
+            ? "Passed"
+            : "Failed";
+
+        return new UnityTestProofResult
+        {
+            Status = status,
+            ResultsPath = resultsPath,
+            Result = result,
+            Total = ReadIntAttribute(root, "total", 0),
+            Passed = ReadIntAttribute(root, "passed", 0),
+            Failed = failed,
+            Skipped = ReadIntAttribute(root, "skipped", 0),
+            DurationSeconds = ReadDoubleAttribute(root, "duration", 0),
+            Notes = status == "Passed" ? string.Empty : "Unity test results did not report Passed."
+        };
+    }
+    catch (XmlException ex)
+    {
+        return new UnityTestProofResult
+        {
+            Status = "Unreadable",
+            ResultsPath = resultsPath,
+            Notes = ex.Message
+        };
+    }
+}
+
 static bool ReadNestedBool(JsonElement root, string parentName, string name, bool fallback)
 {
     if (!root.TryGetProperty(parentName, out var parent) || parent.ValueKind != JsonValueKind.Object)
@@ -336,6 +418,25 @@ static int ReadArrayLength(JsonElement root, string name)
     return root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Array
         ? value.GetArrayLength()
         : 0;
+}
+
+static string ReadAttribute(XElement element, string name, string fallback)
+{
+    return element.Attribute(name)?.Value ?? fallback;
+}
+
+static int ReadIntAttribute(XElement element, string name, int fallback)
+{
+    return int.TryParse(ReadAttribute(element, name, string.Empty), out var value)
+        ? value
+        : fallback;
+}
+
+static double ReadDoubleAttribute(XElement element, string name, double fallback)
+{
+    return double.TryParse(ReadAttribute(element, name, string.Empty), out var value)
+        ? value
+        : fallback;
 }
 
 static void PrintValidation(ValidationCliResult result)
@@ -358,7 +459,7 @@ static void PrintValidation(ValidationCliResult result)
 
 static int Usage()
 {
-    Console.WriteLine("Usage: Wism.ModKit.Cli [validate|proof] [repo=path] [modRoot=path] [profile=classic-warlords] [packs=a,b] [out=path] [runId=id] [unityManifest=path] [unityStatusManifest=path] [runAgent=true] [--json]");
+    Console.WriteLine("Usage: Wism.ModKit.Cli [validate|proof] [repo=path] [modRoot=path] [profile=classic-warlords] [packs=a,b] [out=path] [runId=id] [unityManifest=path] [unityStatusManifest=path] [unityTestResults=path] [runAgent=true] [--json]");
     return 2;
 }
 
@@ -377,6 +478,7 @@ sealed class CliOptions
     public string RunId { get; private set; } = string.Empty;
     public string UnityManifest { get; private set; } = string.Empty;
     public string UnityStatusManifest { get; private set; } = string.Empty;
+    public string UnityTestResults { get; private set; } = string.Empty;
     public bool Json { get; private set; }
     public bool RunAgentPlayground { get; private set; } = true;
 
@@ -401,6 +503,7 @@ sealed class CliOptions
         options.RunId = Read(values, "runId", options.RunId);
         options.UnityManifest = Read(values, "unityManifest", options.UnityManifest);
         options.UnityStatusManifest = Read(values, "unityStatusManifest", options.UnityStatusManifest);
+        options.UnityTestResults = Read(values, "unityTestResults", options.UnityTestResults);
         options.RunAgentPlayground = ReadBool(values, "runAgent", options.RunAgentPlayground);
         return options;
     }
@@ -495,5 +598,18 @@ sealed class UnityProofResult
     public int DirtySceneCount { get; set; }
     public int ErrorCount { get; set; }
     public int WarningCount { get; set; }
+    public string Notes { get; set; }
+}
+
+sealed class UnityTestProofResult
+{
+    public string Status { get; set; }
+    public string ResultsPath { get; set; }
+    public string Result { get; set; }
+    public int Total { get; set; }
+    public int Passed { get; set; }
+    public int Failed { get; set; }
+    public int Skipped { get; set; }
+    public double DurationSeconds { get; set; }
     public string Notes { get; set; }
 }

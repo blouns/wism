@@ -131,7 +131,15 @@ default no-pack behavior.
 Create a proof bundle after CLI, AgentPlayground, and Unity evidence exist:
 
 ```powershell
-dotnet run --project Wism.ModKit.Cli -- proof profile=classic-warlords packs=<pack-id> unityStatusManifest=<path-to-unity-status-manifest.json> unityManifest=<path-to-unity-runtime-manifest.json>
+dotnet run --project Wism.ModKit.Cli -- proof profile=classic-warlords packs=<pack-id> unityStatusManifest=<path-to-unity-status-manifest.json> unityManifest=<path-to-unity-runtime-manifest.json> unityTestResults=<path-to-unity-playmode-results.xml>
+```
+
+Run the Unity Mod Settings PlayMode gate from the repository root or any shell
+that can launch Unity. Let the Unity Test Runner exit on its own; do not pass
+`-quit` with `-runTests` for this gate.
+
+```powershell
+& "C:\Program Files\Unity\Hub\Editor\6000.4.9f1\Editor\Unity.exe" -batchmode -projectPath "$PWD\WismUnity" -runTests -testPlatform PlayMode -testFilter ModSettingsUiTests -testResults "$PWD\WismUnity\artifacts\mod-kit\modsettings-ui-tests.xml" -logFile "$PWD\WismUnity\artifacts\mod-kit\modsettings-ui-tests.log"
 ```
 
 ## Release Checklist

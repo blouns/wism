@@ -50,23 +50,30 @@ public sealed class ModSettingsPanel : MonoBehaviour
         CreateBodyText(root.transform, "Choose a profile, world, and data-only feature packs before starting a new game.");
 
         profileDropdown = CreateDropdown(root.transform, "Profile");
+        profileDropdown.gameObject.name = "ProfileDropdown";
         profileDropdown.onValueChanged.AddListener(_ => Evaluate());
 
         worldDropdown = CreateDropdown(root.transform, "World");
+        worldDropdown.gameObject.name = "WorldDropdown";
         worldDropdown.onValueChanged.AddListener(_ => Evaluate());
 
         CreateBodyText(root.transform, "Feature Packs");
         var scroll = CreateScroll(root.transform);
+        scroll.gameObject.name = "PackScroll";
         packList = scroll.content;
+        packList.gameObject.name = "PackList";
 
         statusText = CreateText(root.transform, "Status", 16, FontStyle.Bold);
+        statusText.gameObject.name = "StatusText";
         detailText = CreateText(root.transform, string.Empty, 13, FontStyle.Normal);
+        detailText.gameObject.name = "DetailText";
         detailText.horizontalOverflow = HorizontalWrapMode.Wrap;
 
         var actions = CreateHorizontal(root.transform);
-        CreateButton(actions.transform, "Back", () => SceneManager.LoadScene("SplashScreen"));
-        CreateButton(actions.transform, "Refresh", Refresh);
+        CreateButton(actions.transform, "Back", () => SceneManager.LoadScene("SplashScreen")).gameObject.name = "BackButton";
+        CreateButton(actions.transform, "Refresh", Refresh).gameObject.name = "RefreshButton";
         continueButton = CreateButton(actions.transform, "Continue", Continue);
+        continueButton.gameObject.name = "ContinueButton";
     }
 
     void Refresh()
@@ -92,6 +99,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         foreach (var pack in packs)
         {
             var row = CreateHorizontal(packList);
+            row.name = "PackToggle:" + pack.Id;
             var toggle = row.AddComponent<Toggle>();
             var background = CreateText(row.transform, string.Empty, 1, FontStyle.Normal);
             background.gameObject.name = "Background";
@@ -392,7 +400,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         go.transform.SetParent(parent, false);
         var label = go.GetComponent<Text>();
         label.text = text;
-        label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         label.fontSize = size;
         label.fontStyle = style;
         label.color = Color.white;

@@ -41,6 +41,7 @@ artifacts/mod-kit/<work-item-id>/<run-id>/
   cli-report.json
   agentplayground-report.json
   unity-smoke-manifest.json
+  unity-playmode-results.xml
   unity-console.log
 ```
 
@@ -82,6 +83,7 @@ Green requires:
 - AgentPlayground loads `classic-warlords` with proof packs.
 - Unity Playground smoke records selected profile and packs.
 - Unity Mod Settings can Green-verify the selected stack before GameSetup.
+- Unity Mod Settings PlayMode tests pass and leave NUnit XML results.
 - Unity proof manifest shows no dirty scene changes and no relevant errors.
 
 ### M2: Author Feedback And Unity Read-Only Bridge

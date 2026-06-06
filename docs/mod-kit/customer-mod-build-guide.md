@@ -144,6 +144,18 @@ dotnet test Wism.Client.Test\Wism.Client.Test.csproj --filter "ModKitValidatorTe
 These tests catch invalid manifests, broken overlay references, and catalog
 loading mistakes.
 
+## Run The Unity Mod Settings Gate
+
+From the repository root, run the PlayMode gate that opens `ModSettings`, drives
+the dropdowns and pack toggles, verifies Green and Red states, and confirms
+`Continue` locks the selected stack before `GameSetup`.
+
+```powershell
+& "C:\Program Files\Unity\Hub\Editor\6000.4.9f1\Editor\Unity.exe" -batchmode -projectPath "$PWD\WismUnity" -runTests -testPlatform PlayMode -testFilter ModSettingsUiTests -testResults "$PWD\WismUnity\artifacts\mod-kit\modsettings-ui-tests.xml" -logFile "$PWD\WismUnity\artifacts\mod-kit\modsettings-ui-tests.log"
+```
+
+Do not add `-quit`; the Unity Test Runner exits after writing the result XML.
+
 ## Unity Preview And Play
 
 Unity uses copied plugin mod data from:
