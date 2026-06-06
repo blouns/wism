@@ -55,6 +55,19 @@ WismClient/Wism.Client.Core/mod/FeaturePacks/<pack-id>/pack.json
 
 Useful templates live under `docs/mod-kit/templates/feature-pack/`.
 
+Feature-pack manifests should include:
+
+```json
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "minWismVersion": "0.1.0"
+}
+```
+
+Legacy manifests without these fields remain loadable for development, but they
+are not Green verified for the Unity Mod Settings new-game gate.
+
 Run authoring commands from `WismClient`. The Mod Kit CLI project lives at:
 
 ```text
@@ -107,6 +120,14 @@ Unity reads copied plugin mod data from
 `WismClient/Wism.Client.Core/mod/` as the source of truth and update the Unity
 plugin copy through the normal build/publish flow.
 
+When playing in WismUnity, the splash flow opens `ModSettings` before
+`GameSetup`. Choose a profile, world, and stacked feature packs there. A new
+game can continue only when the selected stack validates Green and the selected
+world has a Unity scene. New saves persist the exact selected stack and content
+fingerprint; loading a save uses that saved stack and blocks missing or
+mismatched mod content. Existing legacy saves without mod metadata load with
+default no-pack behavior.
+
 Create a proof bundle after CLI, AgentPlayground, and Unity evidence exist:
 
 ```powershell
@@ -117,6 +138,8 @@ dotnet run --project Wism.ModKit.Cli -- proof profile=classic-warlords packs=<pa
 
 - `pack.json` id matches the feature-pack folder name.
 - `displayName` and `kind` are present.
+- `schemaVersion`, `version`, and compatible WISM version range are present for
+  Green verification.
 - Flavor overlay short names resolve to existing stable ids.
 - Visual presentation catalog exists and parses as JSON.
 - Mode launch world exists and has `City.json` and `Location.json`.

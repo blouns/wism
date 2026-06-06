@@ -2,7 +2,11 @@ namespace Wism.Client.Modules.Profiles
 {
     public sealed class FeaturePackManifest
     {
+        public int? SchemaVersion { get; set; }
         public string Id { get; set; } = string.Empty;
+        public string Version { get; set; } = string.Empty;
+        public string MinWismVersion { get; set; } = string.Empty;
+        public string MaxWismVersion { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public FeaturePackKind Kind { get; set; }
         public string Description { get; set; } = string.Empty;

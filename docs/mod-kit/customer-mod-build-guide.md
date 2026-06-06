@@ -53,7 +53,10 @@ WismClient/Wism.Client.Core/mod/FeaturePacks/pack-my-first-flavor/pack.json
 
 ```json
 {
+  "schemaVersion": 1,
   "id": "pack-my-first-flavor",
+  "version": "1.0.0",
+  "minWismVersion": "0.1.0",
   "displayName": "My First Flavor Pack",
   "kind": "Flavor",
   "description": "Display-name changes for existing WISM stable ids.",
@@ -141,7 +144,7 @@ dotnet test Wism.Client.Test\Wism.Client.Test.csproj --filter "ModKitValidatorTe
 These tests catch invalid manifests, broken overlay references, and catalog
 loading mistakes.
 
-## Unity Preview
+## Unity Preview And Play
 
 Unity uses copied plugin mod data from:
 
@@ -172,6 +175,29 @@ Mod Root: Assets\Plugins\WismClient\Mods
 Then click `Refresh Status`. The Control Room is read-only; it should not save
 scenes or mutate Unity objects.
 
+To play with the pack in Unity, open WismUnity and press Play. The splash screen
+loads `ModSettings` before `GameSetup`.
+
+In `ModSettings`:
+
+```text
+Profile: classic-warlords
+World: TestWorld
+Selected packs: pack-my-first-flavor
+```
+
+Click `Refresh` if you have copied new plugin mod data while Unity is open.
+`Continue` is enabled only when the profile, pack stack, world data, Unity
+scene, version fields, dependencies, conflicts, and compatibility fingerprint
+are Green.
+
+After `Continue`, the normal `GameSetup` scene starts a new game using that
+locked stack. Saves record the exact profile, pack ids, pack versions, world,
+and content fingerprint. Loading a save uses the saved stack, not the current
+Mod Settings selection. If required pack data is missing or the fingerprint no
+longer matches, loading is blocked with a clear error. Legacy saves with no mod
+metadata still load with the default no-pack behavior and a warning.
+
 ## Other Pack Kinds
 
 ### Visual
@@ -180,7 +206,10 @@ Use `kind: "Visual"` and point to a presentation catalog:
 
 ```json
 {
+  "schemaVersion": 1,
   "id": "pack-my-visual-style",
+  "version": "1.0.0",
+  "minWismVersion": "0.1.0",
   "displayName": "My Visual Style",
   "kind": "Visual",
   "description": "Presentation-only catalog data.",
@@ -202,7 +231,10 @@ Use `kind: "Mode"` and provide a launch preset:
 
 ```json
 {
+  "schemaVersion": 1,
   "id": "pack-my-quick-mode",
+  "version": "1.0.0",
+  "minWismVersion": "0.1.0",
   "displayName": "My Quick Mode",
   "kind": "Mode",
   "description": "Launch preset using an existing world.",
@@ -222,6 +254,8 @@ Use `kind: "Mode"` and provide a launch preset:
 
 - Keep the folder name and `pack.json` `id` identical.
 - Use lowercase, folder-friendly pack ids.
+- Include `schemaVersion`, `version`, and `minWismVersion` so the pack can be
+  Green verified rather than merely legacy-loadable.
 - Keep stable ids such as `ShortName` unchanged.
 - Do not add executable code to a V1 pack.
 - Do not hand-edit generated Unity plugin DLLs.
@@ -241,6 +275,10 @@ exist in the base data.
 Unity does not show the pack: Unity is reading copied plugin mod data. Update
 `WismUnity/Assets/Plugins/WismClient/Mods/`, then refresh the Control Room.
 
+Unity `Continue` stays disabled: check the status panel in `ModSettings`.
+Common causes are missing version metadata, a missing scene for the selected
+world, an unsupported WISM version range, unresolved dependencies, or conflicts.
+
 ## Done Checklist
 
 - Pack lives under `WismClient/Wism.Client.Core/mod/FeaturePacks/<pack-id>/`.
@@ -250,3 +288,4 @@ Unity does not show the pack: Unity is reading copied plugin mod data. Update
 - Focused Mod Kit tests pass.
 - AgentPlayground smoke passes when runtime proof is needed.
 - Unity Control Room status passes when Unity proof is needed.
+- Unity `ModSettings` shows Green and `Continue` starts `GameSetup`.

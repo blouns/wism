@@ -175,17 +175,18 @@ namespace WismUnity.EditorBridge
         }
 
         [McpTool("WismUnity.GetModKitStatus", "Returns a read-only Mod Kit profile, pack, validation, scene, and MOD data status report.", Groups = new[] { Group, "modkit" }, EnabledByDefault = true)]
-        public static object GetModKitStatus(string profile = null, string packs = null, string world = null, string modRoot = null)
+        public static object GetModKitStatus(WismUnityModKitStatusRequest request)
         {
             try
             {
-                var packIds = string.IsNullOrWhiteSpace(packs)
+                request = request ?? new WismUnityModKitStatusRequest();
+                var packIds = string.IsNullOrWhiteSpace(request.packs)
                     ? Array.Empty<string>()
-                    : packs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    : request.packs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                         .Select(item => item.Trim())
                         .Where(item => !string.IsNullOrWhiteSpace(item))
                         .ToArray();
-                var selection = UnityModKitSelection.Inspect(profile, packIds, world, modRoot);
+                var selection = UnityModKitSelection.Inspect(request.profile, packIds, request.world, request.modRoot);
                 var scene = EditorSceneManager.GetActiveScene();
 
                 return Response.Success("WismUnity Mod Kit status loaded.", new
@@ -200,6 +201,15 @@ namespace WismUnity.EditorBridge
             {
                 return Response.Error("MODKIT_STATUS_FAILED", new { reason = ex.Message });
             }
+        }
+
+        [Serializable]
+        public sealed class WismUnityModKitStatusRequest
+        {
+            public string profile;
+            public string packs;
+            public string world;
+            public string modRoot;
         }
 
         static object PackageStatus(string packageName)

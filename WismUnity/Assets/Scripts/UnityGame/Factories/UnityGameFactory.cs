@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.UnityGame.Factories;
+using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Reflection;
@@ -68,6 +69,20 @@ namespace Assets.Scripts
                     .GetComponent<DebugManager>();
             this.unityManager.InteractiveUI = newGameEntity.InteractiveUI;
 
+            if (newGameEntity.ModKitSelection != null)
+            {
+                var report = UnityModKitSelection.Apply(
+                    this.unityManager,
+                    newGameEntity.ModKitSelection.ProfileId,
+                    newGameEntity.ModKitSelection.PackIds,
+                    newGameEntity.ModKitSelection.World,
+                    UnityModKitSelection.PluginModRoot);
+                if (!report.isGreen)
+                {
+                    throw new InvalidOperationException(report.outcome);
+                }
+            }
+
             // Set up the Game
             this.WorldName = newGameEntity.WorldName;
             this.debugManager.LogInformation($"Creating new game in { this.WorldName }...");
@@ -80,6 +95,7 @@ namespace Assets.Scripts
             settings.MovementStrategies = CreateDefaultMovementStrategies();
             settings.TraversalStrategies = CreateDefaultTraversalStrategies();
             settings.PathingStrategy = CreateDefaultPathingStrategy();
+            settings.ModKitSelection = newGameEntity.ModKitSelection;
 
             // TODO: Random start location setting
 

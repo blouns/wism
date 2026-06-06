@@ -1,5 +1,8 @@
 {
+  "schemaVersion": 1,
   "id": "pack-quick-clash-mode",
+  "version": "1.0.0",
+  "minWismVersion": "0.1.0",
   "displayName": "Quick Clash Mode",
   "kind": "Mode",
   "description": "Uses existing worlds and commands for a short deterministic playable run.",

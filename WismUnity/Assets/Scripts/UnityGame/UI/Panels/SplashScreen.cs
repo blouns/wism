@@ -16,6 +16,8 @@ namespace Assets.Scripts.UI.Panels
         private CanvasGroup splashScreenGroup;
         [SerializeField]
         private int nextScene;
+        [SerializeField]
+        private string nextSceneName = "ModSettings";
 
         public IEnumerator Start()
         {
@@ -39,7 +41,14 @@ namespace Assets.Scripts.UI.Panels
 
         private void NextScene()
         {
-            SceneManager.LoadScene(this.nextScene);
+            if (!string.IsNullOrWhiteSpace(this.nextSceneName))
+            {
+                SceneManager.LoadScene(this.nextSceneName);
+            }
+            else
+            {
+                SceneManager.LoadScene(this.nextScene);
+            }
             SceneManager.UnloadSceneAsync(0);
         }
 

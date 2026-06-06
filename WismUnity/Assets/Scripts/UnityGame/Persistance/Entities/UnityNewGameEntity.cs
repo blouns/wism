@@ -1,4 +1,6 @@
-﻿namespace Assets.Scripts.UnityGame.Persistance.Entities
+using Wism.Client.Data.Entities;
+
+namespace Assets.Scripts.UnityGame.Persistance.Entities
 {
     public class UnityNewGameEntity
     {
@@ -13,5 +15,7 @@
         public UnityPlayerEntity[] Players { get; set; }
 
         public bool IsNewGame { get; set; }
+
+        public ModKitSelectionEntity ModKitSelection { get; set; }
     }
 }

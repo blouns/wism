@@ -16,6 +16,7 @@ using Wism.Client.Data.Entities;
 using Wism.Client.Commands.Games;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Data;
+using Assets.Scripts.UnityGame.ModKit;
 
 namespace Assets.Scripts.Managers
 {
@@ -304,6 +305,11 @@ namespace Assets.Scripts.Managers
             var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
             var snapshot = PersistanceManager.LoadEntities(filename, unityGame);
+            var savedSelection = snapshot.ModKitSelection ?? snapshot.WismGameEntity?.ModKitSelection;
+            UnityModKitSelection.ApplySavedSelection(
+                unityGame,
+                savedSelection,
+                UnityModKitSelection.PluginModRoot);
 
             this.commandController.AddCommand(
                 new LoadGameCommand(this.provider.GameController, snapshot.WismGameEntity));

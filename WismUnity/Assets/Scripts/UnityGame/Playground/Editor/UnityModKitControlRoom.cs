@@ -131,6 +131,9 @@ namespace WismUnity.Playground
             DrawLine("Packs", lastReport.activePackIds.Length == 0 ? "(none)" : string.Join(", ", lastReport.activePackIds));
             DrawLine("World", lastReport.worldName);
             DrawLine("Mod Root", lastReport.modRoot);
+            DrawLine("Compatibility", lastReport.compatibilityStatus);
+            DrawLine("Green", lastReport.isGreen ? "Yes" : "No");
+            DrawLine("Fingerprint", lastReport.contentFingerprint);
             DrawLine("Validation", lastReport.validation == null ? "Default selection" : $"{lastReport.validation.issueCount} issue(s)");
             DrawLine("Dirty Scenes", string.Join(", ", GetLoadedDirtyScenes()));
             DrawLine("Active Scene", EditorSceneManager.GetActiveScene().path);
@@ -151,6 +154,16 @@ namespace WismUnity.Playground
                 EditorGUILayout.Space(4);
                 EditorGUILayout.LabelField("Issues", EditorStyles.boldLabel);
                 foreach (var issue in lastReport.validation.issues)
+                {
+                    EditorGUILayout.HelpBox($"{issue.severity} {issue.code}: {issue.message}\n{issue.path}", MessageType.Warning);
+                }
+            }
+
+            if (lastReport.compatibilityIssues != null && lastReport.compatibilityIssues.Length > 0)
+            {
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Compatibility Issues", EditorStyles.boldLabel);
+                foreach (var issue in lastReport.compatibilityIssues)
                 {
                     EditorGUILayout.HelpBox($"{issue.severity} {issue.code}: {issue.message}\n{issue.path}", MessageType.Warning);
                 }

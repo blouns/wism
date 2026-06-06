@@ -30,6 +30,7 @@ namespace Assets.Scripts.Managers
 
             // Persist WISM game state
             snapshot.WismGameEntity = Game.Current.Snapshot();
+            snapshot.WismGameEntity.ModKitSelection = snapshot.ModKitSelection;
             snapshot.WismGameEntity.World.Name = snapshot.WorldName;
 
             // Write to disk

@@ -32,7 +32,8 @@ namespace Wism.Client.Data
                 TraversalStrategies = SnapshotTraversalStrategies(game.TraversalStrategy),
                 PathingStrategy = SnapshotPathingStrategy(game.PathingStrategy),
                 World = SnapshotWorld(World.Current),
-                LastArmyId = ArmyFactory.LastId
+                LastArmyId = ArmyFactory.LastId,
+                ModKitSelection = game.ModKitSelection
             };
 
             return snapshot;

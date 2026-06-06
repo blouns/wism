@@ -140,10 +140,15 @@ static ValidationCliResult Validate(CliOptions options)
     var report = ModKitValidator.ValidateModRoot(modRoot);
     ModularGameProfileSelection selection = null;
     string selectionError = null;
+    ModKitCompatibilityReport compatibility = null;
 
     try
     {
         selection = ModularGameProfileCatalog.ResolveFromModRoot(modRoot, options.ProfileId, options.PackIds);
+        var world = !string.IsNullOrWhiteSpace(selection.Launch?.World)
+            ? selection.Launch.World
+            : selection.BaseWorld;
+        compatibility = ModKitSelectionService.VerifySelection(modRoot, options.ProfileId, options.PackIds, world);
     }
     catch (Exception ex)
     {
@@ -183,6 +188,10 @@ static ValidationCliResult Validate(CliOptions options)
         PackIds = options.PackIds,
         BaseWorld = selection?.BaseWorld ?? string.Empty,
         LaunchWorld = selection?.Launch?.World ?? string.Empty,
+        CompatibilityStatus = compatibility?.Status.ToString() ?? string.Empty,
+        IsGreen = compatibility?.IsGreen ?? false,
+        IsLoadable = compatibility?.IsLoadable ?? isValid,
+        ContentFingerprint = compatibility?.Selection?.ContentFingerprint ?? string.Empty,
         IssueCount = issues.Length,
         Issues = issues
     };
@@ -264,6 +273,9 @@ static UnityProofResult ReadUnityProof(string manifestPath)
             UnityVersion = ReadString(root, "unityVersion", string.Empty),
             World = ReadString(root, "world", ReadNestedString(root, "selection", "worldName", string.Empty)),
             Profile = ReadString(root, "profile", ReadNestedString(root, "selection", "profileId", string.Empty)),
+            CompatibilityStatus = ReadNestedString(root, "selection", "compatibilityStatus", string.Empty),
+            IsGreen = ReadNestedBool(root, "selection", "isGreen", false),
+            ContentFingerprint = ReadNestedString(root, "selection", "contentFingerprint", string.Empty),
             DirtySceneCount = ReadArrayLength(root, "dirtyScenes"),
             ErrorCount = ReadNestedInt(root, "console", "errors", 0),
             WarningCount = ReadNestedInt(root, "console", "warnings", 0),
@@ -307,6 +319,18 @@ static int ReadNestedInt(JsonElement root, string parentName, string name, int f
         : fallback;
 }
 
+static bool ReadNestedBool(JsonElement root, string parentName, string name, bool fallback)
+{
+    if (!root.TryGetProperty(parentName, out var parent) || parent.ValueKind != JsonValueKind.Object)
+    {
+        return fallback;
+    }
+
+    return parent.TryGetProperty(name, out var value) && (value.ValueKind == JsonValueKind.True || value.ValueKind == JsonValueKind.False)
+        ? value.GetBoolean()
+        : fallback;
+}
+
 static int ReadArrayLength(JsonElement root, string name)
 {
     return root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Array
@@ -322,6 +346,9 @@ static void PrintValidation(ValidationCliResult result)
     Console.WriteLine($"  Packs: {(result.PackIds.Length == 0 ? "(none)" : string.Join(", ", result.PackIds))}");
     Console.WriteLine($"  Base world: {result.BaseWorld}");
     Console.WriteLine($"  Launch world: {result.LaunchWorld}");
+    Console.WriteLine($"  Compatibility: {result.CompatibilityStatus}");
+    Console.WriteLine($"  Green: {result.IsGreen}");
+    Console.WriteLine($"  Fingerprint: {result.ContentFingerprint}");
     Console.WriteLine($"  Issues: {result.IssueCount}");
     foreach (var issue in result.Issues)
     {
@@ -431,6 +458,10 @@ sealed class ValidationCliResult
     public string[] PackIds { get; set; }
     public string BaseWorld { get; set; }
     public string LaunchWorld { get; set; }
+    public string CompatibilityStatus { get; set; }
+    public bool IsGreen { get; set; }
+    public bool IsLoadable { get; set; }
+    public string ContentFingerprint { get; set; }
     public int IssueCount { get; set; }
     public ValidationIssueDto[] Issues { get; set; }
 }
@@ -458,6 +489,9 @@ sealed class UnityProofResult
     public string UnityVersion { get; set; }
     public string World { get; set; }
     public string Profile { get; set; }
+    public string CompatibilityStatus { get; set; }
+    public bool IsGreen { get; set; }
+    public string ContentFingerprint { get; set; }
     public int DirtySceneCount { get; set; }
     public int ErrorCount { get; set; }
     public int WarningCount { get; set; }

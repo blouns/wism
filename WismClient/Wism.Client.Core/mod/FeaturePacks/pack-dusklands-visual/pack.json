@@ -1,5 +1,8 @@
 {
+  "schemaVersion": 1,
   "id": "pack-dusklands-visual",
+  "version": "1.0.0",
+  "minWismVersion": "0.1.0",
   "displayName": "Dusklands Visual Skin",
   "kind": "Visual",
   "description": "Presentation-only visual catalog for a darker alternate skin. No rules, stats, ids, or maps change.",

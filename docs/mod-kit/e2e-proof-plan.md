@@ -81,6 +81,7 @@ Green requires:
 - AgentPlayground loads `classic-warlords` with zero packs.
 - AgentPlayground loads `classic-warlords` with proof packs.
 - Unity Playground smoke records selected profile and packs.
+- Unity Mod Settings can Green-verify the selected stack before GameSetup.
 - Unity proof manifest shows no dirty scene changes and no relevant errors.
 
 ### M2: Author Feedback And Unity Read-Only Bridge
@@ -119,6 +120,8 @@ Green requires:
 - AgentPlayground runs bounded campaign smoke against the mod.
 - Unity launches the selected scenario or records a precise unsupported-feature
   report.
+- Save/load proof confirms saves retain their selected mod stack and content
+  fingerprint.
 - Proof bundle includes campaign outcome, coverage counters, Unity launch
   evidence, and package metadata.
 

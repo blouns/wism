@@ -30,5 +30,7 @@ namespace Wism.Client.Data.Entities
         [DataMember] public AssemblyEntity PathingStrategy { get; set; }
 
         [DataMember] public int LastArmyId { get; set; }
+
+        [DataMember] public ModKitSelectionEntity ModKitSelection { get; set; }
     }
 }

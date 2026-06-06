@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using Assets.Scripts.Managers;
 using Newtonsoft.Json.Linq;
+using UnityEngine;
+using Wism.Client.Data.Entities;
 using Wism.Client.Modules;
 using Wism.Client.Modules.Profiles;
 
@@ -45,7 +47,7 @@ namespace Assets.Scripts.UnityGame.ModKit
             string modRootOverride)
         {
             var report = Inspect(profileId, packIds, worldOverride, modRootOverride);
-            if (report.status == "Failed")
+            if (!report.isLoadable && report.status == "Failed")
             {
                 throw new InvalidOperationException(report.outcome);
             }
@@ -65,6 +67,42 @@ namespace Assets.Scripts.UnityGame.ModKit
             report.outcome = report.hasExplicitSelection
                 ? "Applied explicit Mod Kit selection to ModFactory and GameManager."
                 : "Applied Unity default mod settings to ModFactory and GameManager.";
+            return report;
+        }
+
+        public static UnityModKitSelectionReport ApplySavedSelection(
+            UnityManager unityManager,
+            ModKitSelectionEntity savedSelection,
+            string modRootOverride)
+        {
+            var modRoot = ResolveDefaultModRoot(modRootOverride, true);
+            var report = CreateBaseReport(
+                savedSelection == null ? ModularGameProfileCatalog.DefaultProfileId : savedSelection.ProfileId,
+                savedSelection == null ? Array.Empty<string>() : savedSelection.PackIds,
+                savedSelection == null ? string.Empty : savedSelection.World,
+                modRoot);
+            var compatibility = ModKitSelectionService.VerifySavedSelection(modRoot, savedSelection, ResolveWismVersion());
+            ApplyCompatibility(report, compatibility);
+            if (!compatibility.IsLoadable)
+            {
+                throw new InvalidOperationException(report.outcome);
+            }
+
+            ModFactory.ModPath = report.modRoot;
+            ModFactory.WorldPath = report.worldName;
+            ModFactory.ActiveFeaturePackIds = report.activePackIds.ToList();
+            ModFactory.ResetCache();
+
+            if (unityManager != null && unityManager.GameManager != null)
+            {
+                unityManager.GameManager.ModPath = report.modRoot;
+                unityManager.GameManager.WorldName = report.worldName;
+            }
+
+            report.applied = true;
+            report.outcome = savedSelection == null
+                ? "Loaded legacy save with default no-pack Mod Kit settings."
+                : "Applied saved Mod Kit selection to ModFactory and GameManager.";
             return report;
         }
 
@@ -130,10 +168,12 @@ namespace Assets.Scripts.UnityGame.ModKit
                     .Select(pack => pack.Id)
                     .ToArray();
                 report.sceneModDrift = BuildDriftSummary(report.modRoot, report.worldName);
-                report.status = validation.IsValid ? "Passed" : "Failed";
-                report.outcome = validation.IsValid
-                    ? "Resolved explicit Mod Kit selection."
-                    : "Mod Kit validation failed.";
+                ApplyCompatibility(report, ModKitSelectionService.VerifySelection(
+                    report.modRoot,
+                    report.profileId,
+                    report.requestedPackIds,
+                    report.worldName,
+                    ResolveWismVersion()));
             }
             catch (Exception ex)
             {
@@ -142,6 +182,44 @@ namespace Assets.Scripts.UnityGame.ModKit
                 report.activePackIds = new string[0];
                 report.sceneModDrift = BuildDriftSummary(report.modRoot, report.worldName);
             }
+        }
+
+        static void ApplyCompatibility(UnityModKitSelectionReport report, ModKitCompatibilityReport compatibility)
+        {
+            report.compatibilityStatus = compatibility.Status.ToString();
+            report.isGreen = compatibility.IsGreen;
+            report.isLoadable = compatibility.IsLoadable;
+            report.selectionEntity = compatibility.Selection;
+            report.contentFingerprint = compatibility.Selection == null
+                ? string.Empty
+                : compatibility.Selection.ContentFingerprint;
+            report.compatibilityIssues = compatibility.Issues.Select(issue => new UnityModKitValidationIssueSummary
+            {
+                severity = issue.Severity.ToString(),
+                code = issue.Code,
+                message = issue.Message,
+                path = issue.Path
+            }).ToArray();
+            report.status = compatibility.IsGreen
+                ? "Passed"
+                : compatibility.IsLoadable
+                    ? "Warning"
+                    : "Failed";
+            report.outcome = compatibility.IsGreen
+                ? "Resolved verified Mod Kit selection."
+                : $"Mod Kit selection is {compatibility.Status}.";
+            if (compatibility.Selection != null)
+            {
+                report.activePackIds = compatibility.Selection.PackIds ?? Array.Empty<string>();
+                report.worldName = compatibility.Selection.World;
+            }
+        }
+
+        static string ResolveWismVersion()
+        {
+            return string.IsNullOrWhiteSpace(Application.version)
+                ? ModKitSelectionService.CurrentWismVersion
+                : Application.version;
         }
 
         static string ResolveDefaultModRoot(string modRootOverride, bool preferPluginModRoot)
@@ -209,7 +287,13 @@ namespace Assets.Scripts.UnityGame.ModKit
         public string worldOverride;
         public int seed;
         public int packCount;
+        public bool isGreen;
+        public bool isLoadable;
+        public string compatibilityStatus;
+        public string contentFingerprint;
+        public ModKitSelectionEntity selectionEntity;
         public UnityModKitValidationSummary validation;
+        public UnityModKitValidationIssueSummary[] compatibilityIssues = new UnityModKitValidationIssueSummary[0];
         public UnityModKitDriftSummary sceneModDrift;
         public string timestampUtc;
     }

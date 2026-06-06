@@ -1,5 +1,6 @@
-﻿using Assets.Scripts.Managers;
+using Assets.Scripts.Managers;
 using System;
+using Wism.Client.Core;
 using Wism.Client.Data.Entities;
 
 namespace Assets.Scripts.Persistance.Entities
@@ -15,12 +16,12 @@ namespace Assets.Scripts.Persistance.Entities
         {
             if (string.IsNullOrWhiteSpace(gameDisplayName))
             {
-                throw new System.ArgumentException($"'{nameof(gameDisplayName)}' cannot be null or whitespace", nameof(gameDisplayName));
+                throw new ArgumentException($"'{nameof(gameDisplayName)}' cannot be null or whitespace", nameof(gameDisplayName));
             }
 
             if (unityGame is null)
             {
-                throw new System.ArgumentNullException(nameof(unityGame));
+                throw new ArgumentNullException(nameof(unityGame));
             }
 
             Initialize(gameDisplayName, unityGame);
@@ -28,11 +29,12 @@ namespace Assets.Scripts.Persistance.Entities
 
         private void Initialize(string gameDisplayName, UnityManager unityGame)
         {
-            this.DisplayName = gameDisplayName;
-            this.WorldName = unityGame.GetComponent<UnityGameFactory>().WorldName;   // TODO: Resolve dupe world name with GameManager
-            this.LastCommandId = unityGame.LastCommandId;
+            DisplayName = gameDisplayName;
+            WorldName = unityGame.GetComponent<UnityGameFactory>().WorldName;
+            ModKitSelection = Game.IsInitialized() ? Game.Current.ModKitSelection : null;
+            LastCommandId = unityGame.LastCommandId;
             var cameraPosition = unityGame.GetMainCamera().transform.position;
-            this.CameraPosition = new float[3]
+            CameraPosition = new[]
             {
                 cameraPosition.x,
                 cameraPosition.y,
@@ -40,26 +42,11 @@ namespace Assets.Scripts.Persistance.Entities
             };
         }
 
-        /// <summary>
-        /// Save file friendly name
-        /// </summary>
         public string DisplayName { get; set; }
-
-        /// <summary>
-        /// World name
-        /// </summary>
         public string WorldName { get; set; }
-
-        /// <summary>
-        /// Last execution command run
-        /// </summary>
+        public ModKitSelectionEntity ModKitSelection { get; set; }
         public int LastCommandId { get; set; }
-
-        /// <summary>
-        /// Camera position
-        /// </summary>
         public float[] CameraPosition { get; set; }
-
         public GameEntity WismGameEntity { get; set; }
     }
 }

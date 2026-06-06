@@ -48,6 +48,8 @@ namespace Wism.Client.Core
         /// </summary>
         public int RandomSeed { get; set; }
 
+        public ModKitSelectionEntity ModKitSelection { get; set; }
+
         /// <summary>
         ///     Gets or sets the strategy used for battles
         /// </summary>

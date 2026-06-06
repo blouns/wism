@@ -140,8 +140,8 @@ namespace WismUnity.Playground
                 report.modRoot = report.selection.modRoot;
                 report.events.Add(report.selection.outcome);
 
-                UnityManager.SetNewGameSettings(CreateSettings(report.selection.worldName, report.selection.seed));
-                unityManager.Initialize(CreateSettings(report.selection.worldName, report.selection.seed));
+                UnityManager.SetNewGameSettings(CreateSettings(report.selection.worldName, report.selection.seed, report.selection.selectionEntity));
+                unityManager.Initialize(CreateSettings(report.selection.worldName, report.selection.seed, report.selection.selectionEntity));
                 report.events.Add("Initialized UnityManager with deterministic playground settings.");
 
                 if (options.AdvanceBootstrap)
@@ -236,7 +236,65 @@ namespace WismUnity.Playground
                 return;
             }
 
+            if (string.Equals(scenarioName, "save-load-smoke", StringComparison.OrdinalIgnoreCase))
+            {
+                RunSaveLoadSmoke(options, report, unityManager);
+                return;
+            }
+
             throw new InvalidOperationException($"Unknown Unity Playground scenario: {scenarioName}");
+        }
+
+        static void RunSaveLoadSmoke(
+            UnityPlaygroundOptions options,
+            UnityPlaygroundReport report,
+            UnityManager unityManager)
+        {
+            var bootstrapTicks = EnsureRunning(unityManager);
+            if (bootstrapTicks > 0)
+            {
+                report.events.Add($"Advanced UnityManager to Running with {bootstrapTicks} bootstrap tick(s).");
+            }
+
+            var filename = options.RunId + ".json";
+            PersistanceManager.Save(filename, "Unity Mod Kit save/load smoke", unityManager);
+            var savePath = Path.Combine(Application.persistentDataPath, filename);
+            var snapshot = PersistanceManager.LoadEntities(savePath, unityManager);
+            var savedSelection = snapshot.ModKitSelection ?? snapshot.WismGameEntity?.ModKitSelection;
+            var loadedReport = UnityModKitSelection.ApplySavedSelection(
+                unityManager,
+                savedSelection,
+                UnityModKitSelection.PluginModRoot);
+
+            var expectedFingerprint = report.selection?.selectionEntity?.ContentFingerprint ?? string.Empty;
+            var actualFingerprint = savedSelection?.ContentFingerprint ?? string.Empty;
+            var passed = savedSelection != null &&
+                         string.Equals(expectedFingerprint, actualFingerprint, StringComparison.OrdinalIgnoreCase) &&
+                         loadedReport.isLoadable;
+
+            report.scenario = new UnityPlaygroundScenarioSummary
+            {
+                name = "save-load-smoke",
+                status = passed ? "Passed" : "Failed",
+                outcome = passed
+                    ? "Saved and reloaded a Unity game with matching Mod Kit selection metadata and fingerprint."
+                    : "Saved game did not retain a loadable matching Mod Kit selection.",
+                maxTicks = options.MaxTicks,
+                ticksRun = bootstrapTicks,
+                startLastCommandId = 0,
+                endLastCommandId = unityManager.LastCommandId,
+                queuedCommandCount = 0,
+                executedCommandCount = 0,
+                startingClan = CurrentClanName(),
+                endingClan = CurrentClanName()
+            };
+            report.events.Add("Save/load smoke file: " + savePath);
+
+            if (!passed)
+            {
+                report.status = "Failed";
+                report.outcome = report.scenario.outcome;
+            }
         }
 
         static void RunTurnCycleSmoke(
@@ -356,7 +414,10 @@ namespace WismUnity.Playground
                 : string.Empty;
         }
 
-        static UnityNewGameEntity CreateSettings(string world, int seed)
+        static UnityNewGameEntity CreateSettings(
+            string world,
+            int seed,
+            Wism.Client.Data.Entities.ModKitSelectionEntity modKitSelection)
         {
             return new UnityNewGameEntity
             {
@@ -365,6 +426,7 @@ namespace WismUnity.Playground
                 RandomSeed = seed > 0 ? seed : GameManager.DefaultRandom,
                 RandomStartLocations = false,
                 WorldName = world,
+                ModKitSelection = modKitSelection,
                 Players = new[]
                 {
                     new UnityPlayerEntity { ClanName = "Sirians", IsHuman = true },

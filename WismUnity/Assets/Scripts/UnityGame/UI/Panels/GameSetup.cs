@@ -1,4 +1,5 @@
 using Assets.Scripts.Managers;
+using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,10 @@ public class GameSetup : MonoBehaviour
 
         // Default world
         this.worldName = GetWorldNameFromPanel();
+        if (UnityModKitRuntimeSelection.HasSelection)
+        {
+            this.worldName = UnityModKitRuntimeSelection.CurrentSelection.World;
+        }
     }
 
     public void LoadButton()
@@ -109,6 +114,24 @@ public class GameSetup : MonoBehaviour
             return false;
         }
 
+        if (settings.ModKitSelection != null)
+        {
+            var report = UnityModKitSelection.Inspect(
+                settings.ModKitSelection.ProfileId,
+                settings.ModKitSelection.PackIds,
+                settings.ModKitSelection.World,
+                UnityModKitSelection.PluginModRoot);
+            if (!report.isGreen)
+            {
+                Debug.LogError(report.outcome);
+                return false;
+            }
+
+            ModFactory.ModPath = report.modRoot;
+            ModFactory.WorldPath = report.worldName;
+            ModFactory.ActiveFeaturePackIds = new List<string>(report.activePackIds);
+        }
+
         // Load Mod cities for world and compare to number of players
         // Must have enough cities for all the players
         IList<CityInfo> cityInfos = null;
@@ -139,6 +162,8 @@ public class GameSetup : MonoBehaviour
         settings.RandomStartLocations = false;
         settings.InteractiveUI = true;
         settings.IsNewGame = true;
+        settings.RandomSeed = GameManager.DefaultRandom;
+        UnityModKitRuntimeSelection.ApplyTo(settings);
 
         return settings;
     }
