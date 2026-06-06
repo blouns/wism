@@ -17,7 +17,7 @@ namespace Assets.Scripts.UI.Panels
         [SerializeField]
         private int nextScene;
         [SerializeField]
-        private string nextSceneName = "ModSettings";
+        private string nextSceneName = "GameSetup";
 
         public IEnumerator Start()
         {

@@ -107,7 +107,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var actions = CreateHorizontal(root.transform);
         actions.gameObject.name = "ActionsRow";
         LayoutElement(actions, 44);
-        CreateButton(actions.transform, "Back", () => SceneManager.LoadScene("SplashScreen")).gameObject.name = "BackButton";
+        CreateButton(actions.transform, "Back", Back).gameObject.name = "BackButton";
         CreateButton(actions.transform, "Refresh", Refresh).gameObject.name = "RefreshButton";
         continueButton = CreateButton(actions.transform, "Continue", Continue);
         continueButton.gameObject.name = "ContinueButton";
@@ -238,6 +238,12 @@ public sealed class ModSettingsPanel : MonoBehaviour
         }
 
         UnityModKitRuntimeSelection.Set(currentReport);
+        SceneManager.LoadScene(GameSetupScene);
+    }
+
+    void Back()
+    {
+        UnityModKitRuntimeSelection.Clear();
         SceneManager.LoadScene(GameSetupScene);
     }
 

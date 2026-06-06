@@ -12,6 +12,9 @@ using Toggle = UnityEngine.UI.Toggle;
 
 public class GameSetup : MonoBehaviour
 {
+    private const string ModSettingsScene = "ModSettings";
+    private const string ModSettingsButtonName = "AdvancedModsButton";
+
     [SerializeField]
     private Toggle[] playerToggles;
     [SerializeField]
@@ -38,7 +41,10 @@ public class GameSetup : MonoBehaviour
         if (UnityModKitRuntimeSelection.HasSelection)
         {
             this.worldName = UnityModKitRuntimeSelection.CurrentSelection.World;
+            TrySelectWorldInPanel(this.worldName);
         }
+
+        EnsureModSettingsButton();
     }
 
     public void LoadButton()
@@ -62,6 +68,16 @@ public class GameSetup : MonoBehaviour
     public void OnWorldChange()
     {
         this.worldName = GetWorldNameFromPanel();
+        if (UnityModKitRuntimeSelection.HasSelection &&
+            !string.Equals(UnityModKitRuntimeSelection.CurrentSelection.World, this.worldName, StringComparison.OrdinalIgnoreCase))
+        {
+            UnityModKitRuntimeSelection.Clear();
+        }
+    }
+
+    public void ModSettingsButton()
+    {
+        SceneManager.LoadScene(ModSettingsScene);
     }
 
     private void LoadGame()
@@ -220,5 +236,65 @@ public class GameSetup : MonoBehaviour
         }
 
         this.worldName = GetWorldNameFromPanel();
+    }
+
+    private static void EnsureModSettingsButton()
+    {
+        if (GameObject.Find(ModSettingsButtonName) != null)
+        {
+            return;
+        }
+
+        var loadButtonObject = GameObject.Find("LoadButton");
+        var startButtonObject = GameObject.Find("StartButton");
+        if (loadButtonObject == null || startButtonObject == null)
+        {
+            return;
+        }
+
+        var buttonObject = Instantiate(loadButtonObject, loadButtonObject.transform.parent, false);
+        buttonObject.name = ModSettingsButtonName;
+
+        var button = buttonObject.GetComponent<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => SceneManager.LoadScene(ModSettingsScene));
+
+        foreach (var label in buttonObject.GetComponentsInChildren<Text>(true))
+        {
+            label.text = "Mods...";
+        }
+
+        var rect = buttonObject.GetComponent<RectTransform>();
+        var loadRect = loadButtonObject.GetComponent<RectTransform>();
+        var startRect = startButtonObject.GetComponent<RectTransform>();
+        rect.anchoredPosition = new Vector2(
+            (loadRect.anchoredPosition.x + startRect.anchoredPosition.x) / 2f,
+            loadRect.anchoredPosition.y);
+        rect.sizeDelta = new Vector2(180f, loadRect.sizeDelta.y);
+    }
+
+    private static void TrySelectWorldInPanel(string worldName)
+    {
+        var dropdownObject = GameObject.Find("WorldDropdown");
+        if (dropdownObject == null)
+        {
+            return;
+        }
+
+        var dropdown = dropdownObject.GetComponent<Dropdown>();
+        if (dropdown == null)
+        {
+            return;
+        }
+
+        var index = dropdown.options.FindIndex(option =>
+            string.Equals(option.text, worldName, StringComparison.OrdinalIgnoreCase));
+        if (index < 0)
+        {
+            return;
+        }
+
+        dropdown.value = index;
+        dropdown.RefreshShownValue();
     }
 }

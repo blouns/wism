@@ -3,7 +3,7 @@ param(
     [string]$UnityExe = $env:UNITY_EXE,
     [string]$WorktreePath = "",
     [string]$RunId = "",
-    [string]$TestFilter = "ModSettingsUiTests",
+    [string]$TestFilter = "ModSettings",
     [string]$Profile = "classic-warlords",
     [string]$Packs = "pack-illurian-legends-flavor",
     [string]$World = "TestWorld",
@@ -86,6 +86,20 @@ function Invoke-Native {
         exitCode = $code
         logPath = $LogPath
     }
+}
+
+function Clear-UnityPackageCacheTemps {
+    param([string]$UnityProjectRoot)
+
+    $packageCache = Join-Path $UnityProjectRoot "Library\PackageCache"
+    if (-not (Test-Path -LiteralPath $packageCache)) {
+        return
+    }
+
+    Get-ChildItem -LiteralPath $packageCache -Directory -Filter ".tmp-*" -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            Remove-Item -LiteralPath $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+        }
 }
 
 function Get-CurrentHead {
@@ -402,6 +416,8 @@ $existingValidationUnity = @(Get-UnityProcessesForProject -ProjectPath $unityPro
 if ($existingValidationUnity.Count -gt 0) {
     throw "Validation worktree is already open in Unity. Close that Unity instance or use a different -WorktreePath."
 }
+
+Clear-UnityPackageCacheTemps -UnityProjectRoot $unityProjectRoot
 
 $unityStartedAt = (Get-Date).ToUniversalTime().ToString("O")
 Write-Host "Starting Unity PlayMode tests in isolated worktree..."

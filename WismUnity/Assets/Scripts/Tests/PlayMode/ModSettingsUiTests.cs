@@ -172,6 +172,22 @@ public sealed class ModSettingsUiTests
     }
 
     [UnityTest]
+    public IEnumerator Back_CancelsSelectionAndLoadsGameSetup()
+    {
+        SetDropdown("ProfileDropdown", "classic-warlords");
+        SetDropdown("WorldDropdown", "TestWorld");
+        SetToggle("pack-illurian-legends-flavor", true);
+        yield return null;
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Not.Null);
+
+        Click(FindButton("BackButton"));
+        yield return new WaitUntil(() => SceneManager.GetActiveScene().name == "GameSetup");
+
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Null);
+        Assert.That(GameObject.Find("AdvancedModsButton"), Is.Not.Null);
+    }
+
+    [UnityTest]
     public IEnumerator MissingScene_DisablesContinue()
     {
         SetDropdown("ProfileDropdown", "classic-warlords");
