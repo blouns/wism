@@ -146,15 +146,24 @@ loading mistakes.
 
 ## Run The Unity Mod Settings Gate
 
-From the repository root, run the PlayMode gate that opens `ModSettings`, drives
-the dropdowns and pack toggles, verifies Green and Red states, and confirms
-`Continue` locks the selected stack before `GameSetup`.
+From the repository root, run the isolated gate. It opens `ModSettings` in a
+separate validation worktree, drives the dropdowns and pack toggles, verifies
+Green and Red states, confirms `Continue` locks the selected stack before
+`GameSetup`, and writes proof artifacts. Because it uses a separate project
+path, your main WismUnity editor can stay open.
 
 ```powershell
-& "C:\Program Files\Unity\Hub\Editor\6000.4.9f1\Editor\Unity.exe" -batchmode -projectPath "$PWD\WismUnity" -runTests -testPlatform PlayMode -testFilter ModSettingsUiTests -testResults "$PWD\WismUnity\artifacts\mod-kit\modsettings-ui-tests.xml" -logFile "$PWD\WismUnity\artifacts\mod-kit\modsettings-ui-tests.log"
+.\scripts\run-unity-validation-isolated.ps1
 ```
 
-Do not add `-quit`; the Unity Test Runner exits after writing the result XML.
+The runner writes a summary under:
+
+```text
+artifacts/unity-validation/<run-id>/isolated-validation-summary.json
+```
+
+Pass `-UnityExe <path>` or set `UNITY_EXE` if Unity is not installed at the
+default Unity Hub path.
 
 ## Unity Preview And Play
 

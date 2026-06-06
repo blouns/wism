@@ -134,13 +134,20 @@ Create a proof bundle after CLI, AgentPlayground, and Unity evidence exist:
 dotnet run --project Wism.ModKit.Cli -- proof profile=classic-warlords packs=<pack-id> unityStatusManifest=<path-to-unity-status-manifest.json> unityManifest=<path-to-unity-runtime-manifest.json> unityTestResults=<path-to-unity-playmode-results.xml>
 ```
 
-Run the Unity Mod Settings PlayMode gate from the repository root or any shell
-that can launch Unity. Let the Unity Test Runner exit on its own; do not pass
-`-quit` with `-runTests` for this gate.
+Run the Unity Mod Settings PlayMode gate through the isolated validation runner.
+It creates or reuses a separate Git worktree under `.tmp/`, overlays relevant
+dirty source files, runs WismClient build/tests, runs AgentPlayground, runs
+Unity batchmode against the isolated `WismUnity` project path, waits for the
+real Unity process and result XML, and then writes a proof bundle. This avoids
+blocking on the editor lock if your main WismUnity project is open.
 
 ```powershell
-& "C:\Program Files\Unity\Hub\Editor\6000.4.9f1\Editor\Unity.exe" -batchmode -projectPath "$PWD\WismUnity" -runTests -testPlatform PlayMode -testFilter ModSettingsUiTests -testResults "$PWD\WismUnity\artifacts\mod-kit\modsettings-ui-tests.xml" -logFile "$PWD\WismUnity\artifacts\mod-kit\modsettings-ui-tests.log"
+.\scripts\run-unity-validation-isolated.ps1
 ```
+
+Use `-UnityExe <path>` or set `UNITY_EXE` if Unity is not installed at the
+default Unity Hub path. Use `-NoDirtyOverlay` to validate committed `HEAD`
+only.
 
 ## Release Checklist
 

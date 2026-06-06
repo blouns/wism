@@ -158,3 +158,16 @@ Before closing a work item:
 - Capture proof artifacts under the work item id.
 - Inspect generated file churn before staging.
 - Record any skipped verification with the reason and the next unblock step.
+
+## Local Isolated Unity Runner
+
+Use the isolated runner for local Mod Kit Unity proof:
+
+```powershell
+.\scripts\run-unity-validation-isolated.ps1
+```
+
+The runner validates a separate Git worktree under `.tmp/` instead of the
+currently open Unity project. It may overlay relevant dirty files for fast local
+iteration, but proof artifacts still record the source `HEAD`, overlay list,
+Unity result XML, Unity log, and proof summary.
