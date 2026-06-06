@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.IO;
 using System.Linq;
 using Assets.Scripts.UnityGame.ModKit;
 using NUnit.Framework;
@@ -12,6 +13,8 @@ using UnityEngine.UI;
 [TestFixture]
 public sealed class ModSettingsUiTests
 {
+    string createdInvalidPackPath;
+
     [UnitySetUp]
     public IEnumerator SetUp()
     {
@@ -24,6 +27,12 @@ public sealed class ModSettingsUiTests
     public IEnumerator TearDown()
     {
         UnityModKitRuntimeSelection.Clear();
+        if (!string.IsNullOrWhiteSpace(createdInvalidPackPath) && Directory.Exists(createdInvalidPackPath))
+        {
+            Directory.Delete(createdInvalidPackPath, true);
+        }
+
+        createdInvalidPackPath = null;
         yield return null;
     }
 
@@ -44,11 +53,54 @@ public sealed class ModSettingsUiTests
         yield return WaitForModSettings();
 
         Assert.That(Camera.main, Is.Not.Null);
+        Assert.That(EventSystem.current, Is.Not.Null);
         Assert.That(RectHeight("ActionsRow"), Is.LessThanOrEqualTo(56f));
         Assert.That(RectHeight("BackButton"), Is.LessThanOrEqualTo(48f));
         Assert.That(RectHeight("RefreshButton"), Is.LessThanOrEqualTo(48f));
         Assert.That(RectHeight("ContinueButton"), Is.LessThanOrEqualTo(48f));
         Assert.That(RectHeight("PackScroll"), Is.InRange(96f, 160f));
+    }
+
+    [UnityTest]
+    public IEnumerator PackRows_ShowSelectionStateAndColorCodedValidity()
+    {
+        yield return WaitForModSettings();
+
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackCheck").text, Is.EqualTo("[ ]"));
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackState").text, Is.EqualTo("Verified"));
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackState").color.g, Is.GreaterThan(0.75f));
+
+        SetToggle("pack-illurian-legends-flavor", true);
+        yield return null;
+
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackCheck").text, Is.EqualTo("[x]"));
+        Assert.That(FindText("PackHintText").text, Does.Contain("selected"));
+
+        SetToggle("pack-illurian-legends-flavor", false);
+        yield return null;
+
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackCheck").text, Is.EqualTo("[ ]"));
+        Assert.That(FindText("PackHintText").text, Does.Contain("not selected"));
+    }
+
+    [UnityTest]
+    public IEnumerator InvalidPack_ShowsReasonInPackStatusBar()
+    {
+        yield return WaitForModSettings();
+
+        CreateInvalidPack("pack-ui-invalid-test");
+        Click(FindButton("RefreshButton"));
+        yield return WaitForPackRow("pack-ui-invalid-test");
+
+        Assert.That(FindPackChildText("pack-ui-invalid-test", "PackState").text, Is.EqualTo("Invalid"));
+        Assert.That(FindPackChildText("pack-ui-invalid-test", "PackState").color.r, Is.GreaterThan(0.9f));
+
+        SetToggle("pack-ui-invalid-test", true);
+        yield return null;
+
+        Assert.That(FindText("PackHintText").text, Does.Contain("Missing schemaVersion and version metadata"));
+        Assert.That(FindText("StatusText").color.r, Is.GreaterThan(0.9f));
+        Assert.That(FindButton("ContinueButton").interactable, Is.False);
     }
 
     [UnityTest]
@@ -123,6 +175,11 @@ public sealed class ModSettingsUiTests
             GameObject.Find("PackToggle:pack-illurian-legends-flavor") != null);
     }
 
+    static IEnumerator WaitForPackRow(string packId)
+    {
+        yield return new WaitUntil(() => GameObject.Find("PackToggle:" + packId) != null);
+    }
+
     static Dropdown FindDropdown(string name)
     {
         return RequireComponent<Dropdown>(name);
@@ -143,6 +200,17 @@ public sealed class ModSettingsUiTests
         return RequireComponent<Toggle>("PackToggle:" + packId);
     }
 
+    static Text FindPackChildText(string packId, string childName)
+    {
+        var row = GameObject.Find("PackToggle:" + packId);
+        Assert.That(row, Is.Not.Null, "Could not find pack row: " + packId);
+        var child = row.transform.Find(childName);
+        Assert.That(child, Is.Not.Null, $"Could not find {childName} under {packId}.");
+        var text = child.GetComponent<Text>();
+        Assert.That(text, Is.Not.Null, $"Could not find Text on {childName} under {packId}.");
+        return text;
+    }
+
     static T RequireComponent<T>(string name) where T : Component
     {
         var gameObject = GameObject.Find(name);
@@ -155,6 +223,15 @@ public sealed class ModSettingsUiTests
     static float RectHeight(string name)
     {
         return RequireComponent<RectTransform>(name).rect.height;
+    }
+
+    void CreateInvalidPack(string packId)
+    {
+        createdInvalidPackPath = Path.Combine(UnityModKitSelection.PluginModRoot, "FeaturePacks", packId);
+        Directory.CreateDirectory(createdInvalidPackPath);
+        File.WriteAllText(
+            Path.Combine(createdInvalidPackPath, "pack.json"),
+            "{ \"id\": \"" + packId + "\", \"displayName\": \"UI Invalid Test Pack\", \"kind\": \"Flavor\" }");
     }
 
     static void SetDropdown(string name, string value)

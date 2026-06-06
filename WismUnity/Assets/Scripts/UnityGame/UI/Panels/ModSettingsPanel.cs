@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Assets.Scripts.UnityGame.ModKit;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Wism.Client.Modules.Profiles;
@@ -15,18 +16,40 @@ using UnityEditor;
 public sealed class ModSettingsPanel : MonoBehaviour
 {
     const string GameSetupScene = "GameSetup";
+    static readonly Color PanelColor = new Color(0.12f, 0.12f, 0.12f, 0.95f);
+    static readonly Color FieldColor = new Color(0.22f, 0.22f, 0.22f, 1f);
+    static readonly Color RowColor = new Color(0.16f, 0.16f, 0.16f, 1f);
+    static readonly Color RowSelectedColor = new Color(0.20f, 0.25f, 0.21f, 1f);
+    static readonly Color GreenColor = new Color(0.36f, 0.86f, 0.48f, 1f);
+    static readonly Color RedColor = new Color(1f, 0.34f, 0.34f, 1f);
+    static readonly Color MutedTextColor = new Color(0.78f, 0.78f, 0.78f, 1f);
 
     readonly HashSet<string> selectedPacks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     Dropdown profileDropdown;
     Dropdown worldDropdown;
     Text statusText;
     Text detailText;
+    Text packHintText;
     Transform packList;
     Button continueButton;
     string[] profileIds = new string[0];
     string[] worldIds = new string[0];
     FeaturePackManifest[] packs = new FeaturePackManifest[0];
     UnityModKitSelectionReport currentReport;
+
+    readonly struct PackHealthStatus
+    {
+        public PackHealthStatus(string label, Color color, string reason)
+        {
+            Label = label;
+            Color = color;
+            Reason = reason;
+        }
+
+        public string Label { get; }
+        public Color Color { get; }
+        public string Reason { get; }
+    }
 
     void Start()
     {
@@ -37,6 +60,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
     void BuildUi()
     {
         EnsureCamera();
+        EnsureEventSystem();
         var canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
         {
@@ -65,6 +89,11 @@ public sealed class ModSettingsPanel : MonoBehaviour
         scroll.gameObject.name = "PackScroll";
         packList = scroll.content;
         packList.gameObject.name = "PackList";
+        packHintText = CreateText(root.transform, "Click a feature pack row or checkbox to select or unselect it.", 12, FontStyle.Normal);
+        packHintText.gameObject.name = "PackHintText";
+        packHintText.color = MutedTextColor;
+        packHintText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        LayoutElement(packHintText.gameObject, 32);
 
         statusText = CreateText(root.transform, "Status", 16, FontStyle.Bold);
         statusText.gameObject.name = "StatusText";
@@ -106,13 +135,27 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
         foreach (var pack in packs)
         {
-            var row = CreateHorizontal(packList);
-            row.name = "PackToggle:" + pack.Id;
-            var toggle = row.AddComponent<Toggle>();
-            var background = CreateText(row.transform, string.Empty, 1, FontStyle.Normal);
-            background.gameObject.name = "Background";
-            toggle.targetGraphic = background;
-            var label = CreateText(row.transform, PackLabel(pack, false), 13, FontStyle.Normal);
+            var health = PackHealth(pack);
+            var row = CreatePackRow(packList, pack, health);
+            var toggle = row.GetComponent<Toggle>();
+            var check = row.transform.Find("PackCheck").GetComponent<Text>();
+            var name = row.transform.Find("PackName").GetComponent<Text>();
+            var state = row.transform.Find("PackState").GetComponent<Text>();
+            var background = row.GetComponent<Image>();
+
+            void UpdateRow(bool selected)
+            {
+                check.text = selected ? "[x]" : "[ ]";
+                name.text = PackDisplayName(pack);
+                state.text = health.Label;
+                state.color = health.Color;
+                background.color = selected ? RowSelectedColor : RowColor;
+            }
+
+            row.GetComponent<PackRowHint>().Configure(
+                () => SetPackHint($"{PackDisplayName(pack)}: {health.Reason}"),
+                () => SetPackHint("Click a feature pack row or checkbox to select or unselect it."));
+
             toggle.onValueChanged.AddListener(selected =>
             {
                 if (selected)
@@ -124,9 +167,12 @@ public sealed class ModSettingsPanel : MonoBehaviour
                     selectedPacks.Remove(pack.Id);
                 }
 
-                label.text = PackLabel(pack, selected);
+                UpdateRow(selected);
+                SetPackHint($"{PackDisplayName(pack)}: {(selected ? "selected" : "not selected")}. {health.Reason}");
                 Evaluate();
             });
+
+            UpdateRow(false);
         }
     }
 
@@ -145,6 +191,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         statusText.text = green
             ? "Green: verified stack can start a new game."
             : "Red: fix selection before continuing.";
+        statusText.color = green ? GreenColor : RedColor;
         detailText.text = BuildDetail(sceneAvailable);
         continueButton.interactable = green;
 
@@ -243,16 +290,37 @@ public sealed class ModSettingsPanel : MonoBehaviour
         return SceneUtility.GetBuildIndexByScenePath(path) >= 0;
     }
 
-    static string PackLabel(FeaturePackManifest pack, bool selected)
+    static string PackDisplayName(FeaturePackManifest pack)
     {
-        var status = selected ? "Selected" : "Verified";
-        if (!pack.SchemaVersion.HasValue || string.IsNullOrWhiteSpace(pack.Version))
+        return string.IsNullOrWhiteSpace(pack.DisplayName) ? pack.Id : pack.DisplayName;
+    }
+
+    static PackHealthStatus PackHealth(FeaturePackManifest pack)
+    {
+        if (!pack.SchemaVersion.HasValue && string.IsNullOrWhiteSpace(pack.Version))
         {
-            status = "Invalid";
+            return new PackHealthStatus("Invalid", RedColor, "Missing schemaVersion and version metadata, so this pack is loadable but not Green verified.");
         }
 
-        var name = string.IsNullOrWhiteSpace(pack.DisplayName) ? pack.Id : pack.DisplayName;
-        return $"{name} ({status})";
+        if (!pack.SchemaVersion.HasValue)
+        {
+            return new PackHealthStatus("Invalid", RedColor, "Missing schemaVersion metadata, so this pack is loadable but not Green verified.");
+        }
+
+        if (string.IsNullOrWhiteSpace(pack.Version))
+        {
+            return new PackHealthStatus("Invalid", RedColor, "Missing version metadata, so this pack is loadable but not Green verified.");
+        }
+
+        return new PackHealthStatus("Verified", GreenColor, "Green verification metadata is present.");
+    }
+
+    void SetPackHint(string message)
+    {
+        if (packHintText != null)
+        {
+            packHintText.text = message;
+        }
     }
 
     static void EnsureCamera()
@@ -269,6 +337,16 @@ public sealed class ModSettingsPanel : MonoBehaviour
         camera.backgroundColor = new Color(0.08f, 0.09f, 0.10f, 1f);
         camera.orthographic = true;
         camera.orthographicSize = 5f;
+    }
+
+    static void EnsureEventSystem()
+    {
+        if (EventSystem.current != null)
+        {
+            return;
+        }
+
+        new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
     }
 
     static void ConfigureCanvas(Canvas canvas)
@@ -296,7 +374,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = Vector2.zero;
         rect.sizeDelta = new Vector2(920f, 620f);
-        panel.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.12f, 0.95f);
+        panel.GetComponent<Image>().color = PanelColor;
         var layout = panel.GetComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(22, 22, 18, 18);
         layout.spacing = 10;
@@ -320,7 +398,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         CreateBodyText(parent, label);
         var go = new GameObject(label + " Dropdown", typeof(RectTransform), typeof(Image), typeof(Dropdown));
         go.transform.SetParent(parent, false);
-        go.GetComponent<Image>().color = new Color(0.22f, 0.22f, 0.22f, 1f);
+        go.GetComponent<Image>().color = FieldColor;
         var dropdown = go.GetComponent<Dropdown>();
         var labelText = CreateText(go.transform, string.Empty, 14, FontStyle.Normal);
         labelText.alignment = TextAnchor.MiddleLeft;
@@ -389,13 +467,13 @@ public sealed class ModSettingsPanel : MonoBehaviour
     {
         var go = new GameObject("Pack Scroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
         go.transform.SetParent(parent, false);
-        go.GetComponent<Image>().color = new Color(0.16f, 0.16f, 0.16f, 1f);
+        go.GetComponent<Image>().color = RowColor;
         LayoutElement(go, 132);
 
         var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
         viewport.transform.SetParent(go.transform, false);
         Stretch(viewport.GetComponent<RectTransform>(), 0, 0, 0, 0);
-        viewport.GetComponent<Image>().color = new Color(0.16f, 0.16f, 0.16f, 1f);
+        viewport.GetComponent<Image>().color = RowColor;
         viewport.GetComponent<Mask>().showMaskGraphic = false;
 
         var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup));
@@ -416,6 +494,44 @@ public sealed class ModSettingsPanel : MonoBehaviour
         scroll.viewport = viewport.GetComponent<RectTransform>();
         scroll.horizontal = false;
         return scroll;
+    }
+
+    static GameObject CreatePackRow(Transform parent, FeaturePackManifest pack, PackHealthStatus health)
+    {
+        var row = new GameObject("PackToggle:" + pack.Id, typeof(RectTransform), typeof(Image), typeof(Toggle), typeof(HorizontalLayoutGroup), typeof(PackRowHint));
+        row.transform.SetParent(parent, false);
+        row.GetComponent<Image>().color = RowColor;
+        var layout = row.GetComponent<HorizontalLayoutGroup>();
+        layout.padding = new RectOffset(10, 10, 0, 0);
+        layout.spacing = 10;
+        layout.childAlignment = TextAnchor.MiddleLeft;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+        LayoutElement(row, 28);
+
+        var toggle = row.GetComponent<Toggle>();
+        toggle.targetGraphic = row.GetComponent<Image>();
+
+        var check = CreateText(row.transform, "[ ]", 13, FontStyle.Bold);
+        check.gameObject.name = "PackCheck";
+        check.alignment = TextAnchor.MiddleLeft;
+        LayoutElement(check.gameObject, 26, 34, 0);
+
+        var name = CreateText(row.transform, PackDisplayName(pack), 13, FontStyle.Normal);
+        name.gameObject.name = "PackName";
+        name.alignment = TextAnchor.MiddleLeft;
+        name.horizontalOverflow = HorizontalWrapMode.Wrap;
+        LayoutElement(name.gameObject, 26, 520, 0);
+
+        var state = CreateText(row.transform, health.Label, 13, FontStyle.Bold);
+        state.gameObject.name = "PackState";
+        state.alignment = TextAnchor.MiddleRight;
+        state.color = health.Color;
+        LayoutElement(state.gameObject, 26, 110, 0);
+
+        return row;
     }
 
     static GameObject CreateHorizontal(Transform parent)
@@ -452,14 +568,35 @@ public sealed class ModSettingsPanel : MonoBehaviour
         go.transform.SetParent(parent, false);
         var label = go.GetComponent<Text>();
         label.text = text;
-        label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        label.font = ResolveFont();
         label.fontSize = size;
         label.fontStyle = style;
         label.color = Color.white;
+        label.alignByGeometry = true;
+        label.raycastTarget = false;
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
         label.verticalOverflow = VerticalWrapMode.Overflow;
         LayoutElement(go, Math.Max(24, size + 8));
         return label;
+    }
+
+    static Font resolvedFont;
+
+    static Font ResolveFont()
+    {
+        if (resolvedFont != null)
+        {
+            return resolvedFont;
+        }
+
+        resolvedFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
+                       Resources.GetBuiltinResource<Font>("Arial.ttf");
+        if (resolvedFont != null && resolvedFont.material != null && resolvedFont.material.mainTexture != null)
+        {
+            resolvedFont.material.mainTexture.filterMode = FilterMode.Bilinear;
+        }
+
+        return resolvedFont;
     }
 
     static void LayoutElement(GameObject go, float height)
@@ -490,5 +627,27 @@ public sealed class ModSettingsPanel : MonoBehaviour
         rect.anchorMax = Vector2.one;
         rect.offsetMin = new Vector2(left, bottom);
         rect.offsetMax = new Vector2(right, -top);
+    }
+}
+
+public sealed class PackRowHint : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+{
+    Action enter;
+    Action exit;
+
+    public void Configure(Action onEnter, Action onExit)
+    {
+        enter = onEnter;
+        exit = onExit;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        enter?.Invoke();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        exit?.Invoke();
     }
 }
