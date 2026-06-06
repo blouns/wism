@@ -36,6 +36,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
     void BuildUi()
     {
+        EnsureCamera();
         var canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
         {
@@ -44,8 +45,10 @@ public sealed class ModSettingsPanel : MonoBehaviour
             gameObject.AddComponent<CanvasScaler>();
             gameObject.AddComponent<GraphicRaycaster>();
         }
+        ConfigureCanvas(canvas);
 
-        var root = CreatePanel(transform, "Mod Settings", new Vector2(24f, -24f), new Vector2(-24f, 24f));
+        var root = CreatePanel(transform, "Mod Settings", new Vector2(32f, 32f), new Vector2(-32f, -32f));
+        LayoutElement(root, 0, 760, 0);
         CreateHeader(root.transform, "WISM Mod Settings");
         CreateBodyText(root.transform, "Choose a profile, world, and data-only feature packs before starting a new game.");
 
@@ -65,11 +68,16 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
         statusText = CreateText(root.transform, "Status", 16, FontStyle.Bold);
         statusText.gameObject.name = "StatusText";
+        LayoutElement(statusText.gameObject, 28);
         detailText = CreateText(root.transform, string.Empty, 13, FontStyle.Normal);
         detailText.gameObject.name = "DetailText";
         detailText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        detailText.verticalOverflow = VerticalWrapMode.Truncate;
+        LayoutElement(detailText.gameObject, 104);
 
         var actions = CreateHorizontal(root.transform);
+        actions.gameObject.name = "ActionsRow";
+        LayoutElement(actions, 44);
         CreateButton(actions.transform, "Back", () => SceneManager.LoadScene("SplashScreen")).gameObject.name = "BackButton";
         CreateButton(actions.transform, "Refresh", Refresh).gameObject.name = "RefreshButton";
         continueButton = CreateButton(actions.transform, "Continue", Continue);
@@ -247,19 +255,51 @@ public sealed class ModSettingsPanel : MonoBehaviour
         return $"{name} ({status})";
     }
 
+    static void EnsureCamera()
+    {
+        if (Camera.main != null)
+        {
+            return;
+        }
+
+        var cameraObject = new GameObject("ModSettings Camera", typeof(Camera));
+        cameraObject.tag = "MainCamera";
+        var camera = cameraObject.GetComponent<Camera>();
+        camera.clearFlags = CameraClearFlags.SolidColor;
+        camera.backgroundColor = new Color(0.08f, 0.09f, 0.10f, 1f);
+        camera.orthographic = true;
+        camera.orthographicSize = 5f;
+    }
+
+    static void ConfigureCanvas(Canvas canvas)
+    {
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        var scaler = canvas.GetComponent<CanvasScaler>() ?? canvas.gameObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1280, 720);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
+
+        if (canvas.GetComponent<GraphicRaycaster>() == null)
+        {
+            canvas.gameObject.AddComponent<GraphicRaycaster>();
+        }
+    }
+
     static GameObject CreatePanel(Transform parent, string name, Vector2 offsetMin, Vector2 offsetMax)
     {
         var panel = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup));
         panel.transform.SetParent(parent, false);
         var rect = panel.GetComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = offsetMin;
-        rect.offsetMax = offsetMax;
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(920f, 620f);
         panel.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.12f, 0.95f);
         var layout = panel.GetComponent<VerticalLayoutGroup>();
-        layout.padding = new RectOffset(16, 16, 16, 16);
-        layout.spacing = 8;
+        layout.padding = new RectOffset(22, 22, 18, 18);
+        layout.spacing = 10;
         layout.childForceExpandHeight = false;
         layout.childControlHeight = true;
         return panel;
@@ -284,9 +324,10 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var dropdown = go.GetComponent<Dropdown>();
         var labelText = CreateText(go.transform, string.Empty, 14, FontStyle.Normal);
         labelText.alignment = TextAnchor.MiddleLeft;
+        Stretch(labelText.rectTransform, 12, 0, -28, 0);
         dropdown.captionText = labelText;
         CreateDropdownTemplate(go.transform, dropdown);
-        LayoutElement(go, 32);
+        LayoutElement(go, 34);
         return dropdown;
     }
 
@@ -330,6 +371,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
         var itemLabel = CreateText(item.transform, "Option", 13, FontStyle.Normal);
         itemLabel.alignment = TextAnchor.MiddleLeft;
+        Stretch(itemLabel.rectTransform, 10, 0, -10, 0);
         var toggle = item.GetComponent<Toggle>();
         toggle.targetGraphic = item.GetComponent<Image>();
 
@@ -348,23 +390,30 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var go = new GameObject("Pack Scroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
         go.transform.SetParent(parent, false);
         go.GetComponent<Image>().color = new Color(0.16f, 0.16f, 0.16f, 1f);
-        LayoutElement(go, 190);
+        LayoutElement(go, 132);
+
+        var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+        viewport.transform.SetParent(go.transform, false);
+        Stretch(viewport.GetComponent<RectTransform>(), 0, 0, 0, 0);
+        viewport.GetComponent<Image>().color = new Color(0.16f, 0.16f, 0.16f, 1f);
+        viewport.GetComponent<Mask>().showMaskGraphic = false;
 
         var content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup));
-        content.transform.SetParent(go.transform, false);
+        content.transform.SetParent(viewport.transform, false);
         var contentRect = content.GetComponent<RectTransform>();
         contentRect.anchorMin = new Vector2(0, 1);
         contentRect.anchorMax = new Vector2(1, 1);
         contentRect.pivot = new Vector2(0.5f, 1);
-        contentRect.offsetMin = Vector2.zero;
-        contentRect.offsetMax = Vector2.zero;
+        contentRect.offsetMin = new Vector2(12, 0);
+        contentRect.offsetMax = new Vector2(-12, 0);
         var layout = content.GetComponent<VerticalLayoutGroup>();
-        layout.spacing = 4;
+        layout.spacing = 6;
         layout.childControlHeight = true;
         layout.childForceExpandHeight = false;
 
         var scroll = go.GetComponent<ScrollRect>();
         scroll.content = contentRect;
+        scroll.viewport = viewport.GetComponent<RectTransform>();
         scroll.horizontal = false;
         return scroll;
     }
@@ -376,8 +425,10 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var layout = go.GetComponent<HorizontalLayoutGroup>();
         layout.spacing = 8;
         layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
         layout.childControlWidth = true;
-        LayoutElement(go, 28);
+        layout.childControlHeight = true;
+        LayoutElement(go, 30);
         return go;
     }
 
@@ -390,7 +441,8 @@ public sealed class ModSettingsPanel : MonoBehaviour
         button.onClick.AddListener(action);
         var label = CreateText(go.transform, text, 14, FontStyle.Bold);
         label.alignment = TextAnchor.MiddleCenter;
-        LayoutElement(go, 32);
+        Stretch(label.rectTransform, 0, 0, 0, 0);
+        LayoutElement(go, 40);
         return button;
     }
 
@@ -412,8 +464,31 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
     static void LayoutElement(GameObject go, float height)
     {
+        LayoutElement(go, height, -1, 0);
+    }
+
+    static void LayoutElement(GameObject go, float height, float width, float flexibleHeight)
+    {
         var element = go.GetComponent<LayoutElement>() ?? go.AddComponent<LayoutElement>();
-        element.minHeight = height;
-        element.preferredHeight = height;
+        if (height > 0)
+        {
+            element.minHeight = height;
+            element.preferredHeight = height;
+        }
+
+        if (width > 0)
+        {
+            element.preferredWidth = width;
+        }
+
+        element.flexibleHeight = flexibleHeight;
+    }
+
+    static void Stretch(RectTransform rect, float left, float top, float right, float bottom)
+    {
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = new Vector2(left, bottom);
+        rect.offsetMax = new Vector2(right, -top);
     }
 }

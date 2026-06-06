@@ -39,6 +39,19 @@ public sealed class ModSettingsUiTests
     }
 
     [UnityTest]
+    public IEnumerator ModSettings_HasCameraAndCompactLayout()
+    {
+        yield return WaitForModSettings();
+
+        Assert.That(Camera.main, Is.Not.Null);
+        Assert.That(RectHeight("ActionsRow"), Is.LessThanOrEqualTo(56f));
+        Assert.That(RectHeight("BackButton"), Is.LessThanOrEqualTo(48f));
+        Assert.That(RectHeight("RefreshButton"), Is.LessThanOrEqualTo(48f));
+        Assert.That(RectHeight("ContinueButton"), Is.LessThanOrEqualTo(48f));
+        Assert.That(RectHeight("PackScroll"), Is.InRange(96f, 160f));
+    }
+
+    [UnityTest]
     public IEnumerator ValidStack_EnablesContinue()
     {
         SetDropdown("ProfileDropdown", "classic-warlords");
@@ -137,6 +150,11 @@ public sealed class ModSettingsUiTests
         var component = gameObject.GetComponent<T>();
         Assert.That(component, Is.Not.Null, "Could not find component " + typeof(T).Name + " on " + name);
         return component;
+    }
+
+    static float RectHeight(string name)
+    {
+        return RequireComponent<RectTransform>(name).rect.height;
     }
 
     static void SetDropdown(string name, string value)

@@ -49,7 +49,6 @@ namespace Assets.Scripts.UI.Panels
             {
                 SceneManager.LoadScene(this.nextScene);
             }
-            SceneManager.UnloadSceneAsync(0);
         }
 
         private void Show()
