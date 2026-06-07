@@ -33,10 +33,16 @@ namespace Wism.Client.Commands.Armies
 
         protected override ActionState ExecuteInternal()
         {
+            if (this.AttackCommand.Result != ActionState.Succeeded ||
+                Game.Current.GameState != GameState.CompletedBattle)
+            {
+                return ActionState.Failed;
+            }
+
             return this.ArmyController.CompleteBattle(
                 this.AttackCommand.OriginalAttackingArmies,
                 this.TargetTile,
-                this.AttackCommand.Result == ActionState.Succeeded);
+                true);
         }
 
         public override string ToString()
@@ -48,7 +54,7 @@ namespace Wism.Client.Commands.Armies
 
         public override CommandExecutedEvent ToExecutedEvent(ActionState result)
         {
-            var attacker = Armies.FirstOrDefault();
+            var attacker = Armies?.FirstOrDefault();
             var tile = attacker?.Tile;
 
             // Try to infer the defender from the tile if enemies still exist
@@ -66,7 +72,7 @@ namespace Wism.Client.Commands.Armies
                 Timestamp = DateTime.UtcNow,
                 Parameters = new Dictionary<string, object>
                 {
-                    { "Attackers", Armies.Count },
+                    { "Attackers", Armies?.Count ?? 0 },
                     { "EnemiesRemaining", enemies?.Count ?? 0 },
                     { "Terrain", tile?.Terrain?.ToString() ?? "Unknown" },
                     { "TileStatus", tile?.ToString() ?? "Unknown" }

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using Newtonsoft.Json;
+using Wism.Client.AI.Framework;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Commands.Cities;
@@ -27,6 +28,9 @@ namespace Wism.Agent.Playground;
 
 public sealed class PlaygroundScenarioRunner
 {
+    private const int MaxBufferedCommandIterations = 2048;
+    private const int MaxBufferedCommandNoProgressIterations = 64;
+
     private readonly List<string> events = new();
     private readonly ControllerProvider controllers;
     private StandardProcessor? companionProcessor;
@@ -257,12 +261,28 @@ public sealed class PlaygroundScenarioRunner
             {
                 ExecuteCampaignCommand(new StartTurnCommand(controllers.GameController, player), recorder);
                 recorder.Checkpoint("turn-start", turn, player.Clan.ShortName, $"Started {player.Clan.ShortName} turn.");
-                ReviewAndRenewProduction(player, turn, recorder);
-                StartIdleProduction(player, turn, recorder);
 
-                if (!player.IsDead)
+                var endedTurn = false;
+                if (UsesClassicAiMission(options.ScenarioFamily))
                 {
-                    DriveClanTurn(player, turn, recorder, options.ScenarioFamily);
+                    endedTurn = DriveClassicAiTurn(player, turn, recorder);
+                }
+                else
+                {
+                    ReviewAndRenewProduction(player, turn, recorder, options.ScenarioFamily);
+                    StartIdleProduction(player, turn, recorder, options.ScenarioFamily);
+
+                    if (!player.IsDead)
+                    {
+                        DriveClanTurn(player, turn, recorder, options.ScenarioFamily);
+                    }
+                }
+
+                if (endedTurn)
+                {
+                    recorder.Checkpoint("turn-end", turn, player.Clan.ShortName, $"Ended {player.Clan.ShortName} turn.");
+                    completedTurns = turn;
+                    continue;
                 }
 
                 ExecuteCampaignCommand(new EndTurnCommand(controllers.GameController, player), recorder);
@@ -295,6 +315,41 @@ public sealed class PlaygroundScenarioRunner
             FinalReport: report);
         recorder.SaveManifest(result);
         return result;
+    }
+
+    private bool DriveClassicAiTurn(Player player, int turn, CampaignRecorder recorder)
+    {
+        player.IsHuman = false;
+        var logger = loggerFactory.CreateLogger();
+        var provider = WarlordsClassicAiFactory.CreateCommandProvider(controllers, logger);
+        provider.GenerateCommands();
+
+        var commands = provider.GetBufferedCommands()
+            .OfType<Command>()
+            .ToList();
+        if (commands.Count == 0)
+        {
+            events.Add($"{player.Clan.ShortName} Classic AI produced no commands.");
+            return false;
+        }
+
+        var endedTurn = false;
+        foreach (var command in commands)
+        {
+            var commandContext = $"Executing {command.GetType().Name}: {command}.";
+            logger.LogInformation($"[Campaign] {player.Clan.ShortName} turn {turn} command {recorder.CommandIndex}: {commandContext}");
+            recorder.Checkpoint("pre-command", turn, player.Clan.ShortName, commandContext);
+            var result = ExecuteBufferedCampaignCommand(command, recorder, logFailure: false);
+            logger.LogInformation($"[Campaign] {player.Clan.ShortName} turn {turn} command {recorder.CommandIndex} result: {result}");
+            RecordClassicAiCommandMoment(command, result, player, turn, recorder);
+            endedTurn |= command is EndTurnCommand;
+            if (endedTurn || Game.Current.GameState == GameState.GameOver)
+            {
+                break;
+            }
+        }
+
+        return endedTurn;
     }
 
     public PlaygroundReport Jump(string checkpointPath)
@@ -606,6 +661,115 @@ public sealed class PlaygroundScenarioRunner
         return result;
     }
 
+    private ActionState ExecuteBufferedCampaignCommand(Command command, CampaignRecorder recorder, bool logFailure = true)
+    {
+        var previousProgress = GetCommandProgressSignature(command);
+        var noProgressIterations = 0;
+        var result = ExecuteCommand(command);
+        var iterations = 1;
+        while (result == ActionState.InProgress)
+        {
+            var currentProgress = GetCommandProgressSignature(command);
+            if (currentProgress == previousProgress)
+            {
+                noProgressIterations++;
+            }
+            else
+            {
+                previousProgress = currentProgress;
+                noProgressIterations = 0;
+            }
+
+            if (iterations++ >= MaxBufferedCommandIterations ||
+                noProgressIterations >= MaxBufferedCommandNoProgressIterations)
+            {
+                var message = noProgressIterations >= MaxBufferedCommandNoProgressIterations
+                    ? $"{command.GetType().Name} exceeded {MaxBufferedCommandNoProgressIterations} in-progress executions without state progress: {currentProgress}."
+                    : $"{command.GetType().Name} exceeded {MaxBufferedCommandIterations} in-progress executions: {currentProgress}.";
+                events.Add(message);
+                recorder.Checkpoint("command-timeout", Game.Current.GetCurrentPlayer().Turn, Game.Current.GetCurrentPlayer().Clan.ShortName, message);
+                result = ActionState.Failed;
+                break;
+            }
+
+            result = ExecuteCommand(command);
+        }
+
+        if (result == ActionState.Failed && logFailure)
+        {
+            events.Add($"Command failed: {command.GetType().Name}");
+        }
+
+        recorder.CountCommand();
+        return result;
+    }
+
+    private static string GetCommandProgressSignature(Command command)
+    {
+        if (command is not AttackOnceCommand attack)
+        {
+            return string.Empty;
+        }
+
+        var attackers = attack.Armies?.Where(army => army is not null && !army.IsDead).OrderBy(army => army.Id).Select(FormatCombatant).ToArray()
+            ?? Array.Empty<string>();
+        var targetTile = World.Current.Map[attack.X, attack.Y];
+        var defenders = targetTile.MusterArmy().Where(army => army is not null && !army.IsDead).OrderBy(army => army.Id).Select(FormatCombatant).ToArray();
+        return $"attackers={string.Join(",", attackers)}|defenders={string.Join(",", defenders)}|state={Game.Current.GameState}";
+    }
+
+    private static string FormatCombatant(Army army) => $"{army.Id}:{army.HitPoints}";
+
+    private void RecordClassicAiCommandMoment(Command command, ActionState result, Player player, int turn, CampaignRecorder recorder)
+    {
+        if (result != ActionState.Succeeded)
+        {
+            return;
+        }
+
+        switch (command)
+        {
+            case StartProductionCommand start:
+            {
+                var destination = start.DestinationCity ?? start.ProductionCity;
+                events.Add($"{player.Clan.ShortName} started {start.ArmyInfo.ShortName} production in {start.ProductionCity.ShortName} for {destination.ShortName}.");
+                var kind = start.DestinationCity != null && start.DestinationCity != start.ProductionCity
+                    ? "production-vector"
+                    : "production-start";
+                recorder.Checkpoint(kind, turn, player.Clan.ShortName, $"{start.ProductionCity.ShortName} started {start.ArmyInfo.ShortName} for {destination.ShortName}.");
+                break;
+            }
+
+            case ReviewProductionCommand review:
+                recorder.Checkpoint("production", turn, player.Clan.ShortName, $"Reviewed production: {review.ArmiesProducedResult?.Count ?? 0} produced, {review.ArmiesDeliveredResult?.Count ?? 0} delivered.");
+                break;
+
+            case CaptureCityCommand capture:
+                events.Add($"{player.Clan.ShortName} captured {capture.City.ShortName}.");
+                recorder.Checkpoint("city-capture", turn, player.Clan.ShortName, $"Captured {capture.City.ShortName}.");
+                break;
+
+            case SearchTempleCommand:
+            case SearchSageCommand:
+            case SearchLibraryCommand:
+            case SearchRuinsCommand:
+                recorder.Checkpoint("search", turn, player.Clan.ShortName, $"Searched with {command.GetType().Name}.");
+                break;
+
+            case CompleteBattleCommand complete:
+                if (complete.AttackCommand.Result == ActionState.Succeeded &&
+                    complete.TargetTile?.City != null &&
+                    complete.TargetTile.City.Clan == player.Clan)
+                {
+                    events.Add($"{player.Clan.ShortName} captured {complete.TargetTile.City.ShortName}.");
+                    recorder.Checkpoint("city-capture", turn, player.Clan.ShortName, $"Captured {complete.TargetTile.City.ShortName}.");
+                }
+
+                recorder.Checkpoint("battle", turn, player.Clan.ShortName, "Resolved Classic AI battle.");
+                break;
+        }
+    }
+
     private void DriveClanTurn(Player player, int turn, CampaignRecorder recorder, string scenarioFamily)
     {
         var activeStack = SelectUsableStack(player, recorder);
@@ -618,6 +782,13 @@ public sealed class PlaygroundScenarioRunner
         if (TrySearchCurrentLocation(activeStack, player, turn, recorder))
         {
             DeselectIfNeeded(activeStack.Where(army => !army.IsDead).ToList(), recorder);
+            return;
+        }
+
+        if (UsesProductionEconomy(scenarioFamily))
+        {
+            recorder.Checkpoint("production-watch", turn, player.Clan.ShortName, "Holding position to exercise routed production delivery.");
+            DeselectIfNeeded(activeStack, recorder);
             return;
         }
 
@@ -740,7 +911,7 @@ public sealed class PlaygroundScenarioRunner
         DeselectIfNeeded(Game.Current.GetSelectedArmies() ?? currentStack, recorder);
     }
 
-    private void ReviewAndRenewProduction(Player player, int turn, CampaignRecorder recorder)
+    private void ReviewAndRenewProduction(Player player, int turn, CampaignRecorder recorder, string scenarioFamily)
     {
         var review = new ReviewProductionCommand(controllers.CityController, player);
         var reviewResult = ExecuteCampaignCommand(review, recorder, logFailure: false);
@@ -752,6 +923,11 @@ public sealed class PlaygroundScenarioRunner
         var produced = review.ArmiesProducedResult?.Count ?? 0;
         var delivered = review.ArmiesDeliveredResult?.Count ?? 0;
         recorder.Checkpoint("production", turn, player.Clan.ShortName, $"Reviewed production: {produced} produced, {delivered} delivered.");
+        if (UsesProductionEconomy(scenarioFamily))
+        {
+            events.Add($"{player.Clan.ShortName} kept routed production as a one-shot delivery exercise.");
+            return;
+        }
 
         var renew = new RenewProductionCommand(controllers.CityController, player, review);
         var renewResult = ExecuteCampaignCommand(renew, recorder, logFailure: false);
@@ -761,8 +937,14 @@ public sealed class PlaygroundScenarioRunner
         }
     }
 
-    private void StartIdleProduction(Player player, int turn, CampaignRecorder recorder)
+    private void StartIdleProduction(Player player, int turn, CampaignRecorder recorder, string scenarioFamily)
     {
+        if (UsesProductionEconomy(scenarioFamily) &&
+            player.GetCities().Any(city => city.Barracks.ProducingArmy() || city.Barracks.HasDeliveries()))
+        {
+            return;
+        }
+
         foreach (var city in player.GetCities().Where(city => !city.Barracks.ProducingArmy()))
         {
             var production = city.Barracks.GetProductionKinds()
@@ -775,14 +957,26 @@ public sealed class PlaygroundScenarioRunner
             }
 
             var armyInfo = ModFactory.FindArmyInfo(production.ArmyInfoName);
-            var command = new StartProductionCommand(controllers.CityController, city, armyInfo);
+            var destination = UsesProductionEconomy(scenarioFamily)
+                ? FindProductionDestination(player, city)
+                : null;
+            var command = new StartProductionCommand(controllers.CityController, city, armyInfo, destination);
             var result = ExecuteCampaignCommand(command, recorder, logFailure: false);
             if (result == ActionState.Succeeded)
             {
-                events.Add($"{player.Clan.ShortName} started {armyInfo.ShortName} production in {city.ShortName}.");
-                recorder.Checkpoint("production-start", turn, player.Clan.ShortName, $"{city.ShortName} started {armyInfo.ShortName}.");
+                var destinationText = destination == null ? city.ShortName : destination.ShortName;
+                events.Add($"{player.Clan.ShortName} started {armyInfo.ShortName} production in {city.ShortName} for {destinationText}.");
+                recorder.Checkpoint("production-start", turn, player.Clan.ShortName, $"{city.ShortName} started {armyInfo.ShortName} for {destinationText}.");
             }
         }
+    }
+
+    private static City? FindProductionDestination(Player player, City productionCity)
+    {
+        return player.GetCities()
+            .Where(city => city != productionCity)
+            .OrderBy(city => Math.Abs(city.X - productionCity.X) + Math.Abs(city.Y - productionCity.Y))
+            .FirstOrDefault();
     }
 
     private List<Army> SelectUsableStack(Player player, CampaignRecorder recorder)
@@ -1001,6 +1195,17 @@ public sealed class PlaygroundScenarioRunner
                scenarioFamily.Contains("empty-city", StringComparison.OrdinalIgnoreCase) ||
                scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase) ||
                scenarioFamily.Contains("pressure", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool UsesProductionEconomy(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("production", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("economy", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool UsesClassicAiMission(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("classic-ai", StringComparison.OrdinalIgnoreCase);
     }
 
     private void DeselectIfNeeded(List<Army> armies, CampaignRecorder recorder)

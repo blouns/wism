@@ -1,0 +1,308 @@
+/* WISM Companion — dark, dense, publisher-grade debug theme. */
+
+.root {
+    flex-grow: 1;
+    background-color: rgb(24, 25, 28);
+    color: rgb(222, 224, 228);
+    font-size: 12px;
+}
+
+/* ---- Top bar ---- */
+.topbar {
+    flex-direction: row;
+    align-items: center;
+    height: 40px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: rgb(31, 33, 38);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(12, 13, 15);
+}
+
+.brand {
+    -unity-font-style: bold;
+    font-size: 14px;
+    color: rgb(240, 242, 246);
+    margin-right: 12px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: rgb(128, 128, 128);
+    margin-right: 6px;
+}
+
+.status-label {
+    width: 150px;
+    color: rgb(170, 174, 182);
+    margin-right: 12px;
+}
+
+.host-field {
+    width: 240px;
+    margin-right: 6px;
+}
+
+.btn {
+    height: 24px;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: rgb(54, 88, 145);
+    color: rgb(238, 240, 244);
+    border-radius: 4px;
+    border-width: 0;
+    margin-right: 12px;
+}
+
+.btn:hover {
+    background-color: rgb(66, 104, 168);
+}
+
+.vsep {
+    width: 1px;
+    height: 22px;
+    background-color: rgb(58, 61, 68);
+    margin-left: 6px;
+    margin-right: 12px;
+}
+
+.channel-label {
+    color: rgb(150, 154, 162);
+    margin-right: 6px;
+}
+
+.channel {
+    min-width: 170px;
+}
+
+.channel:disabled {
+    opacity: 0.6;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.stats {
+    color: rgb(150, 154, 162);
+    -unity-text-align: middle-right;
+}
+
+/* ---- Body layout ---- */
+.body {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.panel {
+    background-color: rgb(28, 30, 34);
+    border-width: 1px;
+    border-color: rgb(14, 15, 17);
+    border-radius: 6px;
+    margin: 8px;
+}
+
+.map-host {
+    flex-grow: 1;
+    margin-right: 4px;
+}
+
+.side {
+    width: 380px;
+    flex-direction: column;
+}
+
+.log-host {
+    flex-grow: 1;
+    margin-left: 4px;
+    padding: 6px;
+}
+
+.inspector-host {
+    height: 230px;
+    margin-left: 4px;
+    margin-top: 4px;
+    padding: 6px;
+}
+
+.panel-title {
+    -unity-font-style: bold;
+    color: rgb(196, 200, 208);
+    margin-bottom: 6px;
+}
+
+/* ---- Log ---- */
+.log-list {
+    flex-grow: 1;
+    background-color: rgb(22, 23, 26);
+    border-radius: 4px;
+}
+
+.log-row {
+    flex-direction: row;
+    align-items: center;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.log-row:hover {
+    background-color: rgb(38, 41, 47);
+}
+
+.log-time {
+    width: 64px;
+    color: rgb(132, 136, 144);
+}
+
+.log-summary {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgb(210, 213, 219);
+}
+
+.log-row--command .log-summary {
+    color: rgb(140, 200, 255);
+}
+
+.log-row--map .log-summary {
+    color: rgb(150, 200, 150);
+}
+
+.detail-scroll {
+    height: 110px;
+    margin-top: 6px;
+    background-color: rgb(22, 23, 26);
+    border-radius: 4px;
+}
+
+.detail-label {
+    white-space: normal;
+    padding: 6px;
+    color: rgb(196, 200, 208);
+    -unity-font-style: normal;
+}
+
+/* ---- Inspector ---- */
+.inspector-scroll {
+    flex-grow: 1;
+}
+
+.inspector-content {
+    flex-direction: column;
+}
+
+.insp-header {
+    -unity-font-style: bold;
+    color: rgb(232, 196, 120);
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+
+.insp-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 1px;
+}
+
+.insp-key {
+    width: 90px;
+    color: rgb(140, 144, 152);
+}
+
+.insp-val {
+    flex-grow: 1;
+    color: rgb(216, 219, 225);
+}
+
+.insp-swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    margin-right: 6px;
+    border-width: 1px;
+    border-color: rgb(10, 10, 12);
+}
+
+.insp-hint {
+    color: rgb(130, 134, 142);
+    white-space: normal;
+}
+
+/* ---- Empty state hero (shown when no channels are connected) ---- */
+.empty-state {
+    position: absolute;
+    left: 0;
+    top: 40px;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(20, 21, 24);
+}
+
+.empty-card {
+    align-items: center;
+    padding: 36px;
+    padding-left: 64px;
+    padding-right: 64px;
+    background-color: rgb(28, 30, 34);
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgb(40, 43, 49);
+}
+
+.empty-logo {
+    font-size: 52px;
+    -unity-font-style: bold;
+    color: rgb(232, 196, 120);
+    letter-spacing: 4px;
+}
+
+.empty-logo-sub {
+    font-size: 14px;
+    color: rgb(150, 154, 162);
+    margin-top: 2px;
+}
+
+.empty-divider {
+    height: 1px;
+    width: 220px;
+    background-color: rgb(48, 51, 58);
+    margin-top: 20px;
+    margin-bottom: 18px;
+}
+
+.empty-status-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.empty-spinner {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    background-color: rgb(232, 196, 120);
+    margin-right: 8px;
+}
+
+.empty-status {
+    font-size: 15px;
+    color: rgb(210, 213, 219);
+}
+
+.empty-host {
+    font-size: 12px;
+    color: rgb(120, 124, 132);
+    margin-top: 6px;
+}
+
+.empty-hint {
+    color: rgb(110, 114, 122);
+    margin-top: 18px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+}

@@ -44,7 +44,62 @@ namespace Wism.Client.AI.Framework
 
             commands.Add(
                 new CompleteBattleCommand(armyController, attack));
+            commands.Add(new DeselectArmyCommand(armyController, armies));
 
+            return commands;
+        }
+
+        internal static IEnumerable<ICommandAction> GenerateMoveCommands(
+            ArmyController armyController,
+            List<Army> armies,
+            List<ICommandAction> commands,
+            Tile targetTile,
+            IList<Tile> path = null)
+        {
+            var current = Game.Current.ArmiesSelected()
+                ? Game.Current.GetSelectedArmies()
+                : new List<Army>();
+
+            if (!AreSameSelection(current, armies))
+            {
+                if (current.Any())
+                {
+                    commands.Add(new DeselectArmyCommand(armyController, current));
+                }
+
+                commands.Add(new SelectArmyCommand(armyController, armies));
+            }
+
+            var move = new MoveOnceCommand(armyController, armies, targetTile.X, targetTile.Y)
+            {
+                Path = path
+            };
+
+            commands.Add(move);
+            commands.Add(new DeselectArmyCommand(armyController, armies));
+            return commands;
+        }
+
+        internal static IEnumerable<ICommandAction> GenerateDefendCommands(
+            ArmyController armyController,
+            List<Army> armies,
+            List<ICommandAction> commands)
+        {
+            var current = Game.Current.ArmiesSelected()
+                ? Game.Current.GetSelectedArmies()
+                : new List<Army>();
+
+            if (!AreSameSelection(current, armies))
+            {
+                if (current.Any())
+                {
+                    commands.Add(new DeselectArmyCommand(armyController, current));
+                }
+
+                commands.Add(new SelectArmyCommand(armyController, armies));
+            }
+
+            commands.Add(new DefendCommand(armyController, armies));
             return commands;
         }
 

@@ -40,6 +40,11 @@ namespace Wism.Client.Commands.Armies
         protected override ActionState ExecuteInternal()
         {
             var targetTile = World.Current.Map[this.X, this.Y];
+            if (!IsPreparedAttackStillCurrent(this.Armies, targetTile))
+            {
+                return ActionState.Failed;
+            }
+
             var result = this.ArmyController.AttackOnce(this.Armies, targetTile);
 
             if (result == AttackResult.DefenderWinBattle)
@@ -59,6 +64,32 @@ namespace Wism.Client.Commands.Armies
             return ActionState.InProgress;
         }
 
+        private static bool IsPreparedAttackStillCurrent(List<MapObjects.Army> armies, Tile targetTile)
+        {
+            if (armies == null || armies.Count == 0 || targetTile == null)
+            {
+                return false;
+            }
+
+            if (Game.Current.GameState != GameState.AttackingArmy || !Game.Current.ArmiesSelected())
+            {
+                return false;
+            }
+
+            var selected = Game.Current.GetSelectedArmies();
+            if (selected == null ||
+                selected.Count != armies.Count ||
+                armies.Except(selected).Any())
+            {
+                return false;
+            }
+
+            var origin = armies[0].Tile;
+            return origin != null &&
+                   origin.ContainsVisitingArmies(armies) &&
+                   targetTile.CanAttackHere(armies);
+        }
+
         public override string ToString()
         {
             return
@@ -67,7 +98,7 @@ namespace Wism.Client.Commands.Armies
 
         public override CommandExecutedEvent ToExecutedEvent(ActionState result)
         {
-            var attacker = Armies.FirstOrDefault();
+            var attacker = Armies?.FirstOrDefault();
             var tile = World.Current.Map[X, Y];
             var enemies = OriginalDefendingArmies;
 
@@ -83,7 +114,7 @@ namespace Wism.Client.Commands.Armies
                 Timestamp = DateTime.UtcNow,
                 Parameters = new Dictionary<string, object>
                 {
-                    { "Attackers", Armies.Count },
+                    { "Attackers", Armies?.Count ?? 0 },
                     { "Enemies", enemies?.Count ?? 0 },
                     { "Terrain", tile?.Terrain?.ToString() ?? "Unknown" }
                 }

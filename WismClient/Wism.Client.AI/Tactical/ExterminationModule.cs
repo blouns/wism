@@ -16,16 +16,38 @@ namespace Wism.Client.AI.Tactical
 {
     public class ExterminationModule : ITacticalModule
     {
+        private const double MinimumAttackWinProbability = 0.40;
+
         private readonly PathfindingService pathfindingService;
         private readonly IPathingStrategy pathingStrategy;
         private readonly ArmyController armyController;
+        private readonly CombatEstimator combatEstimator;
+        private readonly GarrisonPolicy garrisonPolicy;
         private readonly IWismLogger logger;
 
         public ExterminationModule(PathfindingService pathfindingService, IPathingStrategy pathingStrategy, ArmyController armyController, IWismLogger logger)
+            : this(pathfindingService, pathingStrategy, armyController, new CombatEstimator(), GarrisonPolicy.None, logger)
+        {
+        }
+
+        public ExterminationModule(PathfindingService pathfindingService, IPathingStrategy pathingStrategy, ArmyController armyController, CombatEstimator combatEstimator, IWismLogger logger)
+            : this(pathfindingService, pathingStrategy, armyController, combatEstimator, GarrisonPolicy.None, logger)
+        {
+        }
+
+        public ExterminationModule(
+            PathfindingService pathfindingService,
+            IPathingStrategy pathingStrategy,
+            ArmyController armyController,
+            CombatEstimator combatEstimator,
+            GarrisonPolicy garrisonPolicy,
+            IWismLogger logger)
         {
             this.pathfindingService = pathfindingService;
             this.pathingStrategy = pathingStrategy;
             this.armyController = armyController;
+            this.combatEstimator = combatEstimator;
+            this.garrisonPolicy = garrisonPolicy;
             this.logger = logger;
         }
 
@@ -42,15 +64,18 @@ namespace Wism.Client.AI.Tactical
 
             foreach (var stack in stacks)
             {
-                var stackList = stack.ToList();
+                var stackList = this.garrisonPolicy.GetMobileArmies(stack.ToList());
                 if (stackList.Count == 0)
                     continue;
 
                 var leader = stackList[0];
-                var closestEnemyTile = pathfindingService.FindClosestEnemyTile(leader, enemies, true);
-                if (closestEnemyTile != null)
+                var target = FindBestEnemyTarget(stackList, enemies);
+                if (target != null)
                 {
-                    double influence = 1.0 / (AiUtilities.GetManhattanDistance(leader.Tile, closestEnemyTile) + 1);
+                    var distance = AiUtilities.GetManhattanDistance(leader.Tile, target);
+                    var estimate = this.combatEstimator.EstimateAttack(stackList, target);
+                    var combatPressure = 0.10 + estimate.WinProbability;
+                    var influence = combatPressure / (distance + 1);
                     bids.Add(new SimpleBid(stackList, this, influence));
                 }
             }
@@ -66,6 +91,10 @@ namespace Wism.Client.AI.Tactical
             if (armies == null || armies.Count == 0)
                 return commands;
 
+            armies = this.garrisonPolicy.GetMobileArmies(armies);
+            if (armies.Count == 0)
+                return commands;
+
             // 1) Snapshot current selection
             var current = Game.Current.ArmiesSelected()
                 ? Game.Current.GetSelectedArmies()
@@ -73,60 +102,74 @@ namespace Wism.Client.AI.Tactical
 
             var army = armies[0];
             var enemies = AiUtilities.GetAllEnemyArmies();
+            var target = FindBestEnemyTarget(armies, enemies);
 
-            foreach (var enemy in enemies)
+            if (target == null)
             {
-                // 2) If in range, generate attack, then filter
-                if (enemy.Tile.CanAttackHere(armies) && AiUtilities.IsInAttackRange(armies, enemy.Tile))
+                logger.LogInformation(
+                    $"[Extermination] Army at ({army.Tile.X},{army.Tile.Y}) found no valid enemy targets this turn.");
+                return commands;
+            }
+
+            // 2) If in range, generate attack, then filter
+            if (target.CanAttackHere(armies) && AiUtilities.IsInAttackRange(armies, target))
+            {
+                var estimate = this.combatEstimator.EstimateAttack(armies, target);
+                if (estimate.WinProbability < MinimumAttackWinProbability)
                 {
-                    logger.LogInformation($"[Extermination] Army attacking tile at ({enemy.Tile.X},{enemy.Tile.Y}).");
-
-                    var raw = AiUtilities.GenerateAttackCommands(
-                        armyController, armies, new List<ICommandAction>(), enemy.Tile);
-
-                    foreach (var cmd in raw)
-                    {
-                        if (cmd is SelectArmyCommand sel
-                            && sel.Armies.Count == current.Count
-                            && !sel.Armies.Except(current).Any())
-                        {
-                            logger.LogInformation("[Extermination] Skipping duplicate SelectArmyCommand");
-                            continue;
-                        }
-
-                        commands.Add(cmd);
-                        if (cmd is SelectArmyCommand s)
-                            current = s.Armies;
-                    }
-
+                    logger.LogInformation(
+                        $"[Extermination] Skipping low-odds attack at ({target.X},{target.Y}); win probability {estimate.WinProbability:0.000}.");
                     return commands;
                 }
 
-                // 3) Else move toward this enemy
-                var attackPosition = AiUtilities.FindAttackPosition(
-                    enemy.Tile, armies, this.pathingStrategy, this.logger);
+                logger.LogInformation(
+                    $"[Extermination] Army attacking tile at ({target.X},{target.Y}) with win probability {estimate.WinProbability:0.000}.");
 
-                if (attackPosition != null)
+                var raw = AiUtilities.GenerateAttackCommands(
+                    armyController, armies, new List<ICommandAction>(), target);
+
+                foreach (var cmd in raw)
                 {
-                    AiUtilities.LogAttackPositionInfo(enemy, attackPosition, this.logger);
-
-                    pathingStrategy.FindShortestRoute(
-                        World.Current.Map, armies, attackPosition,
-                        out var path, out _, ignoreClan: false);
-
-                    if (path != null && path.Count > 1)
+                    if (cmd is SelectArmyCommand sel
+                        && sel.Armies.Count == current.Count
+                        && !sel.Armies.Except(current).Any())
                     {
-                        logger.LogInformation(
-                            $"[Extermination] Army moving toward ({path[1].X},{path[1].Y}) to approach target.");
-                        commands.Add(new MoveOnceCommand(
-                            armyController, armies, path[1].X, path[1].Y));
-                        return commands;
+                        logger.LogInformation("[Extermination] Skipping duplicate SelectArmyCommand");
+                        continue;
                     }
+
+                    commands.Add(cmd);
+                    if (cmd is SelectArmyCommand s)
+                        current = s.Armies;
                 }
-                else
+
+                return commands;
+            }
+
+            // 3) Else move toward this enemy
+            var attackPosition = AiUtilities.FindAttackPosition(
+                target, armies, this.pathingStrategy, this.logger);
+
+            if (attackPosition != null)
+            {
+                LogAttackPositionInfo(target, attackPosition);
+
+                pathingStrategy.FindShortestRoute(
+                    World.Current.Map, armies, attackPosition,
+                    out var path, out _, ignoreClan: false);
+
+                if (path != null && path.Count > 1)
                 {
-                    logger.LogInformation("[Extermination] No attack position found for enemy.");
+                    logger.LogInformation(
+                        $"[Extermination] Army moving toward ({path[1].X},{path[1].Y}) to approach target.");
+                    AiUtilities.GenerateMoveCommands(
+                        armyController, armies, commands, attackPosition, path);
+                    return commands;
                 }
+            }
+            else
+            {
+                logger.LogInformation("[Extermination] No attack position found for enemy.");
             }
 
             logger.LogInformation(
@@ -134,7 +177,48 @@ namespace Wism.Client.AI.Tactical
             return commands;
         }
 
+        private Tile FindBestEnemyTarget(List<Army> armies, List<Army> enemies)
+        {
+            if (armies == null || armies.Count == 0 || enemies == null || enemies.Count == 0)
+            {
+                return null;
+            }
 
+            var leader = armies[0];
+            return enemies
+                .Select(enemy => enemy.Tile)
+                .Where(tile => tile != null)
+                .Distinct()
+                .Select(tile =>
+                {
+                    var distance = AiUtilities.GetManhattanDistance(leader.Tile, tile);
+                    var estimate = this.combatEstimator.EstimateAttack(armies, tile);
+                    var score = (0.10 + estimate.WinProbability) / (distance + 1);
+                    return new { Tile = tile, Distance = distance, Estimate = estimate, Score = score };
+                })
+                .OrderByDescending(candidate => candidate.Score)
+                .ThenByDescending(candidate => candidate.Estimate.WinProbability)
+                .ThenBy(candidate => candidate.Distance)
+                .ThenBy(candidate => candidate.Tile.X)
+                .ThenBy(candidate => candidate.Tile.Y)
+                .Select(candidate => candidate.Tile)
+                .FirstOrDefault();
+        }
+
+        private void LogAttackPositionInfo(Tile enemyTile, Tile attackPosition)
+        {
+            logger.LogInformation($"AttackPosition = ({attackPosition.X},{attackPosition.Y})");
+            logger.LogInformation($"EnemyPosition  = ({enemyTile.X},{enemyTile.Y})");
+
+            var dx = System.Math.Abs(attackPosition.X - enemyTile.X);
+            var dy = System.Math.Abs(attackPosition.Y - enemyTile.Y);
+            logger.LogInformation($"[Extermination] Distance to enemy: dx={dx}, dy={dy}, sum={dx + dy}");
+
+            if (attackPosition.X == enemyTile.X && attackPosition.Y == enemyTile.Y)
+            {
+                logger.LogWarning("[Extermination] WARNING: AI is trying to move onto the enemy tile!");
+            }
+        }
 
     }
 }

@@ -1,0 +1,56 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="root" class="root">
+
+        <ui:VisualElement name="topbar" class="topbar">
+            <ui:Label text="WISM Companion" class="brand" />
+            <ui:VisualElement name="status-dot" class="status-dot" />
+            <ui:Label name="status-label" text="Disconnected" class="status-label" />
+            <ui:TextField name="host-field" value="ws://localhost:5000/gameHub" class="host-field" />
+            <ui:Button name="connect-button" text="Connect" class="btn" />
+            <ui:VisualElement class="vsep" />
+            <ui:Label text="Channel" class="channel-label" />
+            <ui:DropdownField name="channel-dropdown" class="channel" />
+            <ui:VisualElement class="spacer" />
+            <ui:Label name="stats-label" text="0 events" class="stats" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="body" class="body">
+
+            <ui:VisualElement name="map-host" class="panel map-host" />
+
+            <ui:VisualElement name="side" class="side">
+
+                <ui:VisualElement name="log-host" class="panel log-host">
+                    <ui:Label text="Event Log" class="panel-title" />
+                    <ui:ListView name="log-list" class="log-list" />
+                    <ui:ScrollView name="detail-scroll" class="detail-scroll">
+                        <ui:Label name="detail-label" text="Select an event to see details." class="detail-label" />
+                    </ui:ScrollView>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="inspector-host" class="panel inspector-host">
+                    <ui:Label text="Inspector" class="panel-title" />
+                    <ui:ScrollView class="inspector-scroll">
+                        <ui:VisualElement name="inspector-content" class="inspector-content" />
+                    </ui:ScrollView>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="empty-state" class="empty-state">
+            <ui:VisualElement class="empty-card">
+                <ui:Label text="WISM" class="empty-logo" />
+                <ui:Label text="C O M P A N I O N" class="empty-logo-sub" />
+                <ui:VisualElement class="empty-divider" />
+                <ui:VisualElement class="empty-status-row">
+                    <ui:VisualElement name="empty-spinner" class="empty-spinner" />
+                    <ui:Label name="empty-status" text="Waiting for a connection…" class="empty-status" />
+                </ui:VisualElement>
+                <ui:Label name="empty-host" text="ws://localhost:5000/gameHub" class="empty-host" />
+                <ui:Label text="Start Wism.SignalR.Host, then launch a WISM game." class="empty-hint" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

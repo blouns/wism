@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Wism.Client.Comparers;
 using Wism.Client.MapObjects;
@@ -91,6 +92,7 @@ namespace Wism.Client.Core
         /// <returns>True if armies are present; otherwise, false</returns>
         public bool HasArmies()
         {
+            this.Armies = PruneDeadArmies(this.Armies);
             return this.Armies != null && this.Armies.Count > 0;
         }
 
@@ -100,6 +102,7 @@ namespace Wism.Client.Core
         /// <returns>True if armies are present; otherwise, false</returns>
         public bool HasVisitingArmies()
         {
+            this.VisitingArmies = PruneDeadArmies(this.VisitingArmies);
             return this.VisitingArmies != null && this.VisitingArmies.Count > 0;
         }
 
@@ -192,7 +195,7 @@ namespace Wism.Client.Core
         ///     Adds a set of visiting armies to the tile
         /// </summary>
         /// <param name="newVisitingArmies">Armies to add</param>
-        internal void AddVisitingArmies(List<Army> newVisitingArmies)
+        public void AddVisitingArmies(List<Army> newVisitingArmies)
         {
             if (!this.HasRoom(newVisitingArmies.Count))
             {
@@ -290,9 +293,7 @@ namespace Wism.Client.Core
         /// <returns></returns>
         public bool HasRoom(int newArmyCount)
         {
-            return
-                !this.HasArmies() ||
-                this.Armies.Count + newArmyCount <= Army.MaxArmies;
+            return this.GetAllArmies().Count + newArmyCount <= Army.MaxArmies;
         }
 
         public bool CanAttackHere(List<Army> armies)
@@ -302,9 +303,15 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(armies));
             }
 
-            return (this.HasArmies() && this.Armies[0].Clan != armies[0].Clan) ||
-                   (this.HasCity() && this.City.Clan != armies[0].Clan &&
-                    armies.TrueForAll(a => a.MovesRemaining > this.Terrain.MovementCost));
+            var attackerClan = armies[0].Clan;
+            var defenders = this.MusterArmy();
+            var hasEnemyDefenders = defenders.Any(army => army.Clan != attackerClan);
+            var canEnterEmptyEnemyCity = this.HasCity() &&
+                                         this.City.Clan != attackerClan &&
+                                         defenders.Count == 0 &&
+                                         armies.TrueForAll(a => a.MovesRemaining > this.Terrain.MovementCost);
+
+            return hasEnemyDefenders || canEnterEmptyEnemyCity;
         }
 
         /// <summary>
@@ -417,6 +424,17 @@ namespace Wism.Client.Core
             allArmies.Sort(new ByArmyBattleOrder(this));
 
             return allArmies;
+        }
+
+        private static List<Army> PruneDeadArmies(List<Army> armies)
+        {
+            if (armies == null)
+            {
+                return null;
+            }
+
+            armies.RemoveAll(army => army == null || army.IsDead);
+            return armies.Count == 0 ? null : armies;
         }
 
         public void CommitVisitingArmies()

@@ -6,10 +6,13 @@ using Wism.Client.AI.Framework;
 using Wism.Client.AI.Services;
 using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
+using Wism.Client.Commands;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 using Wism.Client.Modules.Infos;
 using Wism.Client.Pathing;
 using Wism.Client.Test.Common;
@@ -146,6 +149,87 @@ namespace Wism.Client.Test.AI
             }
 
             Assert.That(targetTile.City.Clan, Is.EqualTo(sirians.Clan), "Player should have captured the enemy city with a full stack.");
+        }
+
+        [Test]
+        public void CaptureModule_RedirectsWeakStackAwayFromLowOddsDefendedCity()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var sirians = Game.Current.Players[0];
+            var lordBane = Game.Current.Players[1];
+            var attackerTile = World.Current.Map[6, 4];
+            var baneCity = World.Current.Map[7, 4].City;
+            var neutralCity = World.Current.Map[5, 7].City;
+
+            for (var i = 0; i < 4; i++)
+            {
+                sirians.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), attackerTile);
+            }
+            foreach (var tile in baneCity.GetTiles())
+            {
+                lordBane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile);
+                lordBane.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile);
+            }
+
+            TestUtilities.StartTurn(controllerProvider);
+
+            var captureModule = new CaptureModule(
+                controllerProvider.ArmyController,
+                controllerProvider.CityController,
+                logger);
+            var bestBid = captureModule.GenerateBids(World.Current)
+                .OrderByDescending(bid => bid.Utility)
+                .FirstOrDefault();
+
+            Assert.That(bestBid, Is.Not.Null);
+
+            var commands = bestBid.Module.GenerateCommands(bestBid.Armies, World.Current).ToList();
+            var baneTiles = baneCity.GetTiles().ToList();
+            var neutralTiles = neutralCity.GetTiles().ToList();
+
+            Assert.That(
+                commands.OfType<AttackOnceCommand>()
+                    .Any(command => baneTiles.Any(tile => tile.X == command.X && tile.Y == command.Y)),
+                Is.False);
+            Assert.That(
+                commands.OfType<MoveOnceCommand>()
+                    .Any(command => neutralTiles.Any(tile =>
+                        System.Math.Abs(tile.X - command.X) <= 1 &&
+                        System.Math.Abs(tile.Y - command.Y) <= 1)),
+                Is.True);
+        }
+
+        [Test]
+        public void CaptureModule_IgnoresStaleArmyWhenPathingToTarget()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var sirians = Game.Current.Players[0];
+            var liveArmy = sirians.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[3, 4]);
+            var staleArmy = sirians.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[3, 4]);
+            staleArmy.Tile.RemoveArmies(new List<Army> { staleArmy });
+            staleArmy.Tile = null;
+
+            var captureModule = new CaptureModule(
+                controllerProvider.ArmyController,
+                controllerProvider.CityController,
+                logger);
+
+            List<ICommandAction> commands = null;
+            Assert.DoesNotThrow(() =>
+            {
+                commands = captureModule.GenerateCommands(new List<Army> { liveArmy, staleArmy }, World.Current).ToList();
+            });
+
+            Assert.That(commands, Is.Not.Null);
         }
 
        

@@ -250,7 +250,7 @@ namespace Wism.Client.Core
                 !this.IgnoreGameOver)
             {
                 // You are no longer in the fight!
-                player.IsDead = true;
+                player.Eliminate();
                 this.Transition(GameState.Ready);
                 return;
             }
@@ -384,16 +384,23 @@ namespace Wism.Client.Core
         /// <param name="armies">Armies to remove</param>
         public void RemoveSelectedArmies(List<Army> armies)
         {
-            if (!this.ArmiesSelected())
+            if (!this.ArmiesSelected() || armies == null || armies.Count == 0)
             {
                 return;
             }
 
-            // Commit armies to tile
-            armies[0].Tile.RemoveVisitingArmies(armies);
+            var tile = armies[0].Tile;
+            if (tile != null && tile.ContainsVisitingArmies(armies))
+            {
+                tile.RemoveVisitingArmies(armies);
+            }
 
             // Remove from selected armies
             armies.ForEach(a => this.selectedArmies.Remove(a));
+            if (this.selectedArmies.Count == 0)
+            {
+                this.selectedArmies = null;
+            }
         }
 
         /// <summary>
@@ -421,6 +428,12 @@ namespace Wism.Client.Core
 
             // Simplify deselect for attack scenarios
             var armiesToDeselect = RemoveDeadArmies(this.selectedArmies);
+            if (armiesToDeselect.Count == 0)
+            {
+                this.selectedArmies = null;
+                this.Transition(GameState.Ready);
+                return;
+            }
 
             // Deselect
             armiesToDeselect[0].Tile.CommitVisitingArmies();
@@ -548,16 +561,14 @@ namespace Wism.Client.Core
 
         private static List<Army> RemoveDeadArmies(List<Army> armies)
         {
-            var armiesToReturn = new List<Army>(armies);
-            foreach (var army in armies)
+            if (armies == null)
             {
-                if (!army.IsDead)
-                {
-                    armiesToReturn.Add(army);
-                }
+                return new List<Army>();
             }
 
-            return armiesToReturn;
+            return armies
+                .Where(army => army != null && !army.IsDead)
+                .ToList();
         }
 
         private static string ArmiesToString(List<Army> armies)

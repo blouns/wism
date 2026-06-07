@@ -148,7 +148,7 @@ internal sealed class CampaignScenarioBuilder
         var height = isLarge ? 80 : clanCount <= 2 ? 16 : 20;
         var scenarioFamily = NormalizeScenario(options.ScenarioFamily);
         var cityCoordinates = GetCityCoordinates(width, height, clanCount, isLarge);
-        var outpostCoordinates = UsesCapturePressure(scenarioFamily)
+        var outpostCoordinates = UsesCapturePressure(scenarioFamily) || UsesProductionEconomy(scenarioFamily)
             ? GetOutpostCoordinates(width, height, clanCount, isLarge)
             : Array.Empty<(int X, int Y)>();
         var allCityCoordinates = cityCoordinates.Concat(outpostCoordinates).ToArray();
@@ -161,7 +161,7 @@ internal sealed class CampaignScenarioBuilder
             ? $"GeneratedMiniIlluriaLarge_{options.Seed}_{clanCount}"
             : $"GeneratedCampaign_{options.Seed}_{clanCount}";
 
-        MapBuilder.AddCitiesFromInfos(World.Current, CreateCities(cityCoordinates, clanCount, outpostCoordinates));
+        MapBuilder.AddCitiesFromInfos(World.Current, CreateCities(cityCoordinates, clanCount, outpostCoordinates, scenarioFamily));
         MapBuilder.AddLocationsFromInfos(World.Current, CreateLocations(locationCoordinates, clanCount, scenarioFamily));
         MapBuilder.AllocateBoons(World.Current.GetLocations());
         AddStartingArmies();
@@ -335,7 +335,8 @@ internal sealed class CampaignScenarioBuilder
     private static List<CityInfo> CreateCities(
         IReadOnlyList<(int X, int Y)> coordinates,
         int clanCount,
-        IReadOnlyList<(int X, int Y)> outpostCoordinates)
+        IReadOnlyList<(int X, int Y)> outpostCoordinates,
+        string scenarioFamily)
     {
         var cities = new List<CityInfo>();
         for (var i = 0; i < clanCount; i++)
@@ -356,7 +357,7 @@ internal sealed class CampaignScenarioBuilder
 
         for (var i = 0; i < Math.Min(clanCount, outpostCoordinates.Count); i++)
         {
-            var ownerIndex = (i + 1) % clanCount;
+            var ownerIndex = UsesProductionEconomy(scenarioFamily) ? i : (i + 1) % clanCount;
             var clanInfo = ModFactory.FindClanInfo(ClanOrder[ownerIndex]);
             cities.Add(new CityInfo
             {
@@ -593,6 +594,12 @@ internal sealed class CampaignScenarioBuilder
                scenarioFamily.Contains("pressure", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static bool UsesProductionEconomy(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("production", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("economy", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool UsesRuinSearch(string scenarioFamily)
     {
         return scenarioFamily.Contains("search", StringComparison.OrdinalIgnoreCase) ||
@@ -656,8 +663,12 @@ internal sealed class CampaignRecorder
         var path = Path.Combine(this.outputDirectory, fileName);
         var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
         File.WriteAllText(path, JsonConvert.SerializeObject(Game.Current.Snapshot(), settings));
+        var moment = new CampaignMoment(kind, clan, turn, this.commandIndex, fileName, context);
         this.checkpoints.Add(path);
-        this.moments.Add(new CampaignMoment(kind, clan, turn, this.commandIndex, fileName, context));
+        this.moments.Add(moment);
+        File.AppendAllText(
+            Path.Combine(this.outputDirectory, "checkpoint-index.jsonl"),
+            JsonConvert.SerializeObject(moment) + Environment.NewLine);
         return path;
     }
 

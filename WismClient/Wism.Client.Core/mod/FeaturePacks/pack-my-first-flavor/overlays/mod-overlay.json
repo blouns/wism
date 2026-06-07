@@ -1,0 +1,24 @@
+{
+  "clans": [
+    {
+      "shortName": "Sirians",
+      "displayName": "Sirians of the Bright Coast"
+    },
+    {
+      "shortName": "LordBane",
+      "displayName": "The Black Citadel"
+    }
+  ],
+  "armies": [
+    {
+      "shortName": "LightInfantry",
+      "displayName": "Border Spears"
+    }
+  ],
+  "artifacts": [
+    {
+      "shortName": "Firesword",
+      "displayName": "Emberblade"
+    }
+  ]
+}

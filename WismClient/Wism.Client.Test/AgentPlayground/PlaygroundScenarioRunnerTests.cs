@@ -248,6 +248,232 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void Campaign_ProductionEconomyExercisesDeliveredProduction()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 20260608,
+            clans: 2,
+            maxTurns: 12,
+            outputRoot: outputRoot,
+            name: "ProductionEconomySmoke",
+            scenarioFamily: "production-economy");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.Moments, Has.Some.Contains(" delivered."));
+    }
+
+    [Test]
+    public void Campaign_ClassicAiProductionVectoringExercisesRoutedProduction()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 20260608,
+            clans: 2,
+            maxTurns: 1,
+            outputRoot: outputRoot,
+            name: "ClassicAiProductionVectoringSmoke",
+            scenarioFamily: "classic-ai-production-vectoring");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.Moments, Has.Some.StartsWith("production-vector:"));
+    }
+
+    [Test]
+    public void EvalScorecard_FailsWhenRequiredScenarioSignalsAreMissing()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "capture-pressure",
+                counters: EvalCounters.Empty with { BoundedStalemates = 1 }),
+            EvalCase(
+                scenarioFamily: "ruin-search",
+                counters: EvalCounters.Empty with { BoundedStalemates = 1 }),
+            EvalCase(
+                scenarioFamily: "production-economy",
+                counters: EvalCounters.Empty with { BoundedStalemates = 1 }),
+            EvalCase(
+                scenarioFamily: "classic-ai-production-vectoring",
+                counters: EvalCounters.Empty with { BoundedStalemates = 1 })
+        });
+
+        Assert.That(scorecard.Status, Is.EqualTo("Failed"));
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "capture-signal").Passed, Is.False);
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "search-signal").Passed, Is.False);
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "production-delivery-signal").Passed, Is.False);
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "production-vectoring-signal").Passed, Is.False);
+    }
+
+    [Test]
+    public void EvalScorecard_FailsWhenInvalidCommandsAreObserved()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-capture-pressure",
+                counters: EvalCounters.Empty with { Victories = 1, CityCaptures = 1, InvalidCommands = 1 })
+        });
+
+        Assert.That(scorecard.Status, Is.EqualTo("Failed"));
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "classic-ai-no-invalid-commands").Passed, Is.False);
+    }
+
+    [Test]
+    public void EvalScorecard_FailsWhenBoardStateInvariantsAreBroken()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-capture-pressure",
+                counters: EvalCounters.Empty with
+                {
+                    Victories = 1,
+                    CityCaptures = 1,
+                    MixedClanTileStacks = 1,
+                    GhostArmies = 1
+                })
+        });
+
+        Assert.That(scorecard.Status, Is.EqualTo("Failed"));
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "board-state-invariants").Passed, Is.False);
+    }
+
+    [Test]
+    public void EvalScorecard_FailsWhenClassicAiConquestVictoryPressureIsTooLow()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-capture-pressure",
+                counters: EvalCounters.Empty with { CityCaptures = 1 }),
+            EvalCase(
+                scenarioFamily: "classic-ai-road-contact",
+                counters: EvalCounters.Empty with { Victories = 1, CityCaptures = 1, Battles = 1 }),
+            EvalCase(
+                scenarioFamily: "classic-ai-siege-defense",
+                counters: EvalCounters.Empty with { CityCaptures = 1, Battles = 1 })
+        });
+
+        Assert.That(scorecard.Status, Is.EqualTo("Failed"));
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "classic-ai-victory-pressure").Passed, Is.False);
+    }
+
+    [Test]
+    public void EvalScorecard_DoesNotRequireVictoryForClassicAiProductionVectoringSmoke()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-production-vectoring",
+                counters: EvalCounters.Empty with { BoundedStalemates = 1, ProductionVectors = 1 })
+        });
+
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "classic-ai-victory-pressure").Passed, Is.True);
+    }
+
+    [Test]
+    public void EvalBatch_ClassicAiProductionVectoringWritesVectorSignal()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "evals");
+        var result = new EvalBatchRunner().Run(new EvalBatchOptions(
+            Seed: 20260608,
+            Cases: 1,
+            MaxTurns: 1,
+            OutputRoot: outputRoot,
+            ScenarioFamilies: new[] { "classic-ai-production-vectoring" },
+            ClanCounts: new[] { 2 },
+            Sizes: new[] { "medium" },
+            ModRoot: null));
+
+        Assert.That(result.Status, Is.EqualTo("Passed"));
+        Assert.That(result.Scorecard.Counters.ProductionVectors, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void EvalBatch_ClassicAiMultiStackCommandsDoNotLeaveConflictingVisitingArmies()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "evals");
+        var result = new EvalBatchRunner().Run(new EvalBatchOptions(
+            Seed: 20260609,
+            Cases: 2,
+            MaxTurns: 8,
+            OutputRoot: outputRoot,
+            ScenarioFamilies: new[] { "classic-ai-production-vectoring" },
+            ClanCounts: new[] { 2 },
+            Sizes: new[] { "medium" },
+            ModRoot: null));
+
+        Assert.That(result.Status, Is.EqualTo("Passed"));
+        Assert.That(result.Scorecard.Counters.Crashes, Is.EqualTo(0));
+        Assert.That(result.Scorecard.ParseableCaseArtifacts, Is.EqualTo(2));
+    }
+
+    [Test]
+    public void EvalBatch_ClassicAiConquestWritesCityCaptureSignal()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "evals");
+        var result = new EvalBatchRunner().Run(new EvalBatchOptions(
+            Seed: 20260609,
+            Cases: 1,
+            MaxTurns: 20,
+            OutputRoot: outputRoot,
+            ScenarioFamilies: new[] { "classic-ai-production-vectoring" },
+            ClanCounts: new[] { 2 },
+            Sizes: new[] { "medium" },
+            ModRoot: null));
+
+        Assert.That(result.Status, Is.EqualTo("Passed"));
+        Assert.That(result.Scorecard.Counters.Victories, Is.GreaterThan(0));
+        Assert.That(result.Scorecard.Counters.CityCaptures, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void EvalBatch_ClassicAiFourClanCommandsTolerateStaleAttackPlans()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "evals");
+        var result = new EvalBatchRunner().Run(new EvalBatchOptions(
+            Seed: 20260614,
+            Cases: 3,
+            MaxTurns: 20,
+            OutputRoot: outputRoot,
+            ScenarioFamilies: new[] { "classic-ai-production-vectoring" },
+            ClanCounts: new[] { 4 },
+            Sizes: new[] { "medium" },
+            ModRoot: null));
+
+        Assert.That(result.Scorecard.Counters.Crashes, Is.EqualTo(0));
+        Assert.That(result.Scorecard.ParseableCaseArtifacts, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void EvalBatch_WritesScorecardLedgerAndSummaryArtifacts()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "evals");
+        var result = new EvalBatchRunner().Run(new EvalBatchOptions(
+            Seed: 20260608,
+            Cases: 5,
+            MaxTurns: 12,
+            OutputRoot: outputRoot,
+            ScenarioFamilies: new[] { "capture-pressure", "ruin-search", "production-economy", "road-contact", "siege-defense" },
+            ClanCounts: new[] { 2 },
+            Sizes: new[] { "medium" },
+            ModRoot: null));
+
+        Assert.That(File.Exists(result.EvalRunPath), Is.True);
+        Assert.That(File.Exists(result.CaseResultsPath), Is.True);
+        Assert.That(File.Exists(result.ScorecardPath), Is.True);
+        Assert.That(File.Exists(result.LearningLedgerPath), Is.True);
+        Assert.That(File.Exists(result.SummaryPath), Is.True);
+        Assert.That(result.Status, Is.EqualTo("Passed"));
+        Assert.That(result.Scorecard.TotalCases, Is.EqualTo(5));
+        Assert.That(result.Scorecard.ParseableCaseArtifacts, Is.EqualTo(5));
+        Assert.That(result.Scorecard.Counters.CityCaptures, Is.GreaterThan(0));
+        Assert.That(result.Scorecard.Counters.Searches, Is.GreaterThan(0));
+        Assert.That(result.Scorecard.Counters.ProductionDeliveries, Is.GreaterThan(0));
+    }
+
+    [Test]
     public void WorldValidator_FindsInvalidActiveClanWithoutArmy()
     {
         new PlaygroundScenarioRunner().Sample();
@@ -262,4 +488,23 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(validation.IsValid, Is.False);
         Assert.That(validation.Issues.Select(issue => issue.Code), Does.Contain("player.no-army"));
     }
+
+    private static EvalCaseResult EvalCase(string scenarioFamily, EvalCounters counters) =>
+        new(
+            CaseId: scenarioFamily,
+            Index: 1,
+            Seed: 1,
+            ScenarioFamily: scenarioFamily,
+            ClanCount: 2,
+            MaxTurns: 4,
+            Size: "medium",
+            Status: "Passed",
+            Outcome: "Bounded stalemate.",
+            Turns: 4,
+            ParseableArtifact: true,
+            CampaignDirectory: null,
+            CampaignManifestPath: null,
+            Counters: counters,
+            FailureClass: null,
+            FailureMessage: null);
 }

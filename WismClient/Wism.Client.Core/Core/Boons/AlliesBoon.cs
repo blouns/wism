@@ -28,12 +28,18 @@ namespace Wism.Client.Core.Boons
                 throw new ArgumentNullException(nameof(target));
             }
 
-            if (!target.HasVisitingArmies())
+            var army = target.HasVisitingArmies()
+                ? target.VisitingArmies[0]
+                : target.HasArmies()
+                    ? target.Armies[0]
+                    : null;
+
+            if (army == null)
             {
-                throw new ArgumentNullException(nameof(target), "Target tile has no visiting armies");
+                throw new ArgumentNullException(nameof(target), "Target tile has no armies");
             }
 
-            var player = target.VisitingArmies[0].Player;
+            var player = army.Player;
 
             // Up to 2 allies
             var numberOfAllies = Game.Current.Random.Next(1, 3);

@@ -35,7 +35,20 @@ namespace Wism.Client.Pathing
             var graph = BuildGraph(map, queue, armiesToMove, target, ignoreClan);
 
             // Distance from source to source is zero
-            graph[armiesToMove[0].X, armiesToMove[0].Y].Distance = 0.0f;
+            var sourceX = armiesToMove[0].X;
+            var sourceY = armiesToMove[0].Y;
+            if (sourceX < 0 || sourceY < 0 || sourceX >= map.GetLength(0) || sourceY >= map.GetLength(1))
+            {
+                return;
+            }
+
+            var source = graph[sourceX, sourceY];
+            if (source == null)
+            {
+                return;
+            }
+
+            source.Distance = 0.0f;
 
             while (queue.Count > 0)
             {

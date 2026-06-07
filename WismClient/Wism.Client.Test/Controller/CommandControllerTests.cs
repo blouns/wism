@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Wism.Client.Commands;
@@ -9,6 +10,7 @@ using Wism.Client.Core;
 using Wism.Client.Data;
 using Wism.Client.Data.Entities;
 using Wism.Client.Data.Entities.Player;
+using Wism.Client.Modules.Infos;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Controller;
@@ -44,6 +46,36 @@ public class CommandControllerTests
         var moveCommand = command as MoveOnceCommand;
         Assert.That(moveCommand.X, Is.EqualTo(3));
         Assert.That(moveCommand.Y, Is.EqualTo(4));
+    }
+
+    [Test]
+    public void SelectArmyCommand_ArmyNotPresentOnTile_FailsWithoutThrowing()
+    {
+        var armyController = TestUtilities.CreateArmyController();
+        var player = Game.Current.Players[0];
+        var armies = player.GetArmies();
+        var tile = armies[0].Tile;
+        tile.Armies.Remove(armies[0]);
+        tile.Armies = null;
+
+        var result = new SelectArmyCommand(armyController, armies).Execute();
+
+        Assert.That(result, Is.EqualTo(ActionState.Failed));
+    }
+
+    [Test]
+    public void SelectArmyCommand_VisitingSubset_FailsWithoutThrowing()
+    {
+        var armyController = TestUtilities.CreateArmyController();
+        var player = Game.Current.Players[0];
+        var tile = World.Current.Map[2, 2];
+        player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), tile);
+        var visitingStack = player.GetArmies();
+        Game.Current.SelectArmies(visitingStack);
+
+        var result = new SelectArmyCommand(armyController, visitingStack.Take(1).ToList()).Execute();
+
+        Assert.That(result, Is.EqualTo(ActionState.Failed));
     }
 
     [Test]

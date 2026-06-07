@@ -436,6 +436,21 @@ namespace Wism.Client.Core
             }
         }
 
+        internal void Eliminate()
+        {
+            if (this.IsDead)
+            {
+                return;
+            }
+
+            foreach (var army in this.GetArmies())
+            {
+                army.Kill();
+            }
+
+            this.IsDead = true;
+        }
+
         private void DeployArmies(Tile tile, List<Army> newArmies)
         {
             // Deploy to the world

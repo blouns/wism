@@ -55,6 +55,26 @@ try
             var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs, campaignSize, campaignScenario, channel);
             PrintCampaign(campaign, quiet);
             return string.Equals(campaign.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+        case "eval":
+            var evalSeed = ReadInt(args, "seed", 20260608);
+            var evalCases = ReadInt(args, "cases", 50);
+            var evalMaxTurns = ReadInt(args, "maxTurns", 12);
+            var evalOut = ReadString(args, "out", Path.Combine(FindRepositoryRoot(), "artifacts", "evals"));
+            var evalModRoot = ReadString(args, "modRoot", null);
+            var evalScenarios = ReadCsv(args, "scenarios");
+            var evalClans = ReadIntCsv(args, "clans", new[] { 2, 4 });
+            var evalSizes = ReadCsv(args, "sizes");
+            var eval = new EvalBatchRunner().Run(new EvalBatchOptions(
+                Seed: evalSeed,
+                Cases: evalCases,
+                MaxTurns: evalMaxTurns,
+                OutputRoot: evalOut ?? Path.Combine(FindRepositoryRoot(), "artifacts", "evals"),
+                ScenarioFamilies: evalScenarios,
+                ClanCounts: evalClans,
+                Sizes: evalSizes,
+                ModRoot: evalModRoot));
+            PrintEval(eval, quiet);
+            return string.Equals(eval.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "jump":
             var checkpoint = ReadString(args, "checkpoint", null);
             if (string.IsNullOrWhiteSpace(checkpoint))
@@ -69,7 +89,7 @@ try
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [preset=standard|capture-pressure|ruin-search] [checkpoint=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|eval|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [sizes=medium,large] [preset=standard|capture-pressure|ruin-search|classic-ai-production-vectoring] [scenarios=a,b] [cases=50] [checkpoint=path]");
             return 2;
     }
 }
@@ -113,6 +133,17 @@ static void PrintCampaign(CampaignRunResult result, bool quiet)
     Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions()));
 }
 
+static void PrintEval(EvalRunResult result, bool quiet)
+{
+    if (quiet)
+    {
+        Console.WriteLine($"{result.RunId}:{result.Status}:{result.Scorecard.PassedCases}/{result.Scorecard.TotalCases} cases:{result.OutputDirectory}");
+        return;
+    }
+
+    Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions()));
+}
+
 static int Exit(PlaygroundReport report) =>
     string.Equals(report.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
 
@@ -142,6 +173,16 @@ static string[] ReadCsv(IReadOnlyList<string> args, string name)
     return string.IsNullOrWhiteSpace(value)
         ? Array.Empty<string>()
         : value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+}
+
+static int[] ReadIntCsv(IReadOnlyList<string> args, string name, IReadOnlyList<int> fallback)
+{
+    var values = ReadCsv(args, name)
+        .Select(value => int.TryParse(value, out var parsed) ? parsed : (int?)null)
+        .Where(value => value.HasValue)
+        .Select(value => value!.Value)
+        .ToArray();
+    return values.Length > 0 ? values : fallback.ToArray();
 }
 
 static string DefaultCaptureName(string scenario)

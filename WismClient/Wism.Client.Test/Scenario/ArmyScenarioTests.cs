@@ -71,6 +71,25 @@ public class ArmyScenarioTests
     }
 
     [Test]
+    public void PrepareForBattle_FriendlyTarget_FailsWithoutEnteringAttackState()
+    {
+        var armyController = TestUtilities.CreateArmyController();
+        Game.CreateDefaultGame();
+        var player1 = Game.Current.Players[0];
+        var attackerTile = World.Current.Map[2, 2];
+        var friendlyTargetTile = World.Current.Map[2, 3];
+        player1.HireHero(attackerTile);
+        player1.HireHero(friendlyTargetTile);
+        var armiesToAttack = new List<Army>(attackerTile.Armies);
+
+        Assert.That(new SelectArmyCommand(armyController, armiesToAttack).Execute(), Is.EqualTo(ActionState.Succeeded));
+        var result = new PrepareForBattleCommand(armyController, armiesToAttack, friendlyTargetTile.X, friendlyTargetTile.Y).Execute();
+
+        Assert.That(result, Is.EqualTo(ActionState.Failed));
+        Assert.That(Game.Current.GameState, Is.EqualTo(GameState.SelectedArmy));
+    }
+
+    [Test]
     public void MoveArmy_ExhaustMoves()
     {
         // Assemble

@@ -105,10 +105,11 @@ namespace Wism.Client.Controllers
                 return MoveResult.InsuffientMoves;
             }
 
-            if (targetTile.HasArmies())
+            var targetArmies = targetTile.GetAllArmies();
+            if (targetArmies.Count > 0)
             {
                 // Does the tile have room for the unit of the same team?
-                if (targetTile.Armies[0].Clan == armiesToMove[0].Clan &&
+                if (targetArmies[0].Clan == armiesToMove[0].Clan &&
                     !targetTile.HasRoom(armiesToMove.Count))
                 {
                     this.logger.LogInformation($"{targetTile} has too many units to move there");
@@ -117,12 +118,11 @@ namespace Wism.Client.Controllers
                 }
 
                 // Is it an enemy tile?
-                if (targetTile.HasArmies() &&
-                    targetTile.Armies[0].Clan != armiesToMove[0].Clan)
+                if (targetArmies.Any(army => army.Clan != armiesToMove[0].Clan))
                 {
                     this.logger.LogInformation(
                         $"Army cannot move {ArmiesToString(armiesToMove)} to {targetTile} " +
-                        $"as it occupied by {targetTile.Armies[0].Clan}");
+                        $"as it occupied by {targetArmies[0].Clan}");
                     Game.Current.Transition(GameState.SelectedArmy);
                     return MoveResult.Blocked;
                 }
@@ -314,10 +314,11 @@ namespace Wism.Client.Controllers
             this.logger.LogInformation($"{ArmiesToString(armiesToAttackWith)} attacking {targetTile} once");
 
             // Attack!
+            var attackingClan = armiesToAttackWith[0].Clan;
             var war = Game.Current.WarStrategy;
             var attackSucceeded = war.AttackOnce(armiesToAttackWith, targetTile);
 
-            if (war.BattleContinues(targetTile.MusterArmy(), armiesToAttackWith))
+            if (war.BattleContinues(GetHostileDefenders(targetTile, attackingClan), armiesToAttackWith))
             {
                 // Battle continues
                 result = attackSucceeded ? AttackResult.AttackerWinsRound : AttackResult.DefenderWinsRound;
@@ -328,12 +329,12 @@ namespace Wism.Client.Controllers
                 Game.Current.Transition(GameState.CompletedBattle);
                 if (attackSucceeded)
                 {
-                    targetTile.Armies = null;
                     result = AttackResult.AttackerWinsBattle;
                 }
                 else
                 {
                     attackingFromTile.VisitingArmies = null;
+                    Game.Current.Transition(GameState.Ready);
                     result = AttackResult.DefenderWinBattle;
                 }
             }
@@ -345,13 +346,19 @@ namespace Wism.Client.Controllers
         {
             Game.Current.Transition(GameState.MovingArmy);
 
+            var movingArmies = armiesToMove.ToList();
             var originatingTile = armiesToMove[0].Tile;
 
-            targetTile.VisitingArmies = armiesToMove;
-            armiesToMove.ForEach(a =>
+            if (originatingTile != targetTile &&
+                originatingTile.HasVisitingArmies() &&
+                originatingTile.ContainsVisitingArmies(movingArmies))
             {
-                a.Tile = targetTile;
+                originatingTile.RemoveVisitingArmies(movingArmies);
+            }
 
+            targetTile.AddVisitingArmies(movingArmies);
+            movingArmies.ForEach(a =>
+            {
                 // TODO: Account for bonuses
                 a.MovesRemaining -= targetTile.Terrain.MovementCost;
                 if (a.MovesRemaining <= 0)
@@ -361,13 +368,19 @@ namespace Wism.Client.Controllers
             });
 
             targetTile.VisitingArmies.Sort(new ByArmyViewingOrder());
-            originatingTile.VisitingArmies = null;
         }
 
         private static int CalculateDistance(IList<Tile> myPath)
         {
             // TODO: Calculate based on true unit and affiliation cost; for now, static
             return myPath.Sum(tile => tile.Terrain.MovementCost);
+        }
+
+        private static List<Army> GetHostileDefenders(Tile targetTile, Clan attackingClan)
+        {
+            return targetTile.MusterArmy()
+                .Where(army => army.Clan != attackingClan)
+                .ToList();
         }
 
         private static string ArmiesToString(List<Army> armies)
@@ -379,6 +392,11 @@ namespace Wism.Client.Controllers
         {
             if (Game.Current.GameState != GameState.CompletedBattle)
             {
+                if (!attackerWon && Game.Current.GameState == GameState.Ready)
+                {
+                    return ActionState.Succeeded;
+                }
+
                 throw new InvalidOperationException("Cannot complete the battle in this state: " +
                                                     Game.Current.GameState);
             }
@@ -386,7 +404,6 @@ namespace Wism.Client.Controllers
             if (attackerWon)
             {
                 // Attacker won                
-                targetTile.Armies = null;
                 if (targetTile.HasCity())
                 {
                     var player = attackingArmies[0].Player;

@@ -13,7 +13,7 @@ namespace Wism.Client.Core
         private const int DefaultTurnsToDeliver = 3;
 
         private readonly City city;
-        private readonly IDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
+        private readonly DefaultDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
         private readonly Dictionary<ProductionInfo, int> productionInfoDictionary;
 
         public Barracks(City city, ProductionInfo[] productionInfos)
@@ -247,15 +247,26 @@ namespace Wism.Client.Core
             // Move armies closer to their destination
             foreach (var army in this.ArmiesToDeliver)
             {
-                army.TurnsToDeliver--;
+                if (army.TurnsToDeliver > 0)
+                {
+                    army.TurnsToDeliver--;
+                }
             }
 
             // Deliver if armies have reached their destination
             if (this.HasDeliveries() &&
                 this.ArmiesToDeliver.Peek().TurnsToDeliver == 0)
             {
-                var armyInTraining = this.ArmiesToDeliver.Dequeue();
+                var armyInTraining = this.ArmiesToDeliver.Peek();
+                var targetTile = armyInTraining.DestinationCity?.Tile ?? this.city.Tile;
+                if (!this.deploymentStrategy.TryFindNextOpenTile(this.Player, armyInTraining.ArmyInfo, targetTile, out _))
+                {
+                    armyInTraining.TurnsToDeliver = 0;
+                    return false;
+                }
+
                 this.Deploy(armyInTraining);
+                this.ArmiesToDeliver.Dequeue();
                 armyDelivered = armyInTraining;
                 delivered = true;
             }
@@ -303,7 +314,7 @@ namespace Wism.Client.Core
             {
                 // Cancel deliveries to city
                 var newQueue = new Queue<ArmyInTraining>();
-                while (newQueue.Count > 0)
+                while (this.ArmiesToDeliver.Count > 0)
                 {
                     var army = this.ArmiesToDeliver.Dequeue();
                     if (army.DestinationCity != city)

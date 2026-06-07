@@ -36,6 +36,8 @@ namespace Wism.Client.Commands.Players
 
             if (this.ReviewProductionCommand.Result == ActionState.Succeeded)
             {
+                this.ArmiesToRenew = this.ArmiesToRenew ??
+                    new List<ArmyInTraining>(this.ReviewProductionCommand.ArmiesProducedResult ?? Enumerable.Empty<ArmyInTraining>());
                 state = this.cityController.RenewProduction(this.Player, this.ArmiesToRenew);
             }
 

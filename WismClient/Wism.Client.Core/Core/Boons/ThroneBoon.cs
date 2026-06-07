@@ -16,9 +16,15 @@ namespace Wism.Client.Core.Boons
                 throw new ArgumentNullException(nameof(target));
             }
 
-            if (!target.HasVisitingArmies())
+            var army = target.HasVisitingArmies()
+                ? target.VisitingArmies[0]
+                : target.HasArmies()
+                    ? target.Armies[0]
+                    : null;
+
+            if (army == null)
             {
-                throw new ArgumentNullException(nameof(target), "Target tile has no visiting armies");
+                throw new ArgumentNullException(nameof(target), "Target tile has no armies");
             }
 
             int strengthBoon;
@@ -39,14 +45,14 @@ namespace Wism.Client.Core.Boons
                 strengthBoon = 1;
             }
 
-            target.VisitingArmies[0].Strength += strengthBoon;
-            if (target.VisitingArmies[0].Strength > Army.MaxStrength)
+            army.Strength += strengthBoon;
+            if (army.Strength > Army.MaxStrength)
             {
-                target.VisitingArmies[0].Strength = Army.MaxStrength;
+                army.Strength = Army.MaxStrength;
             }
-            else if (target.VisitingArmies[0].Strength < 1)
+            else if (army.Strength < 1)
             {
-                target.VisitingArmies[0].Strength = 1;
+                army.Strength = 1;
             }
 
             this.Result = strengthBoon;

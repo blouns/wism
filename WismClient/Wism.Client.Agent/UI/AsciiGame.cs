@@ -120,17 +120,7 @@ public class AsciiGame : GameBase
         var logger = LoggerFactory.CreateLogger();
         var humanCommander = new ConsoleCommandProvider(LoggerFactory, controllerProvider);
 
-        var pathingStrategy = new AStarPathingStrategy();
-        var pathfinder = new PathfindingService(pathingStrategy);
-        var armyController = controllerProvider.ArmyController;
-
-        var exterminationModule = new ExterminationModule(pathfinder, pathingStrategy, armyController, logger);
-
-        var aiController = new AiController(
-            new SimpleStrategicModule(),
-            new List<ITacticalModule> { exterminationModule });
-        
-        var aiCommander = new AdaptaCommandProvider(logger, aiController, controllerProvider);
+        var aiCommander = WarlordsClassicAiFactory.CreateCommandProvider(controllerProvider, logger);
 
         this.PlayerCommanders = new Dictionary<Player, ICommandProvider>
         {

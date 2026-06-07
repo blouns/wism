@@ -12,6 +12,8 @@ namespace Wism.Client.Core.Armies.WarStrategies
     /// </summary>
     public class DefaultWarStrategy : IWarStrategy
     {
+        private const int MaxNoHitExchanges = 512;
+
         /// <summary>
         ///     Combat is resolved. Attacking and Defending armies are sorted on the display with
         ///     the most valuable armies on the right hand side.Combat is a series of one-on-one
@@ -30,7 +32,7 @@ namespace Wism.Client.Core.Armies.WarStrategies
         /// <returns>True if attacker wins; false otherwise.</returns>
         public bool Attack(List<Army> attackers, Tile tile)
         {
-            var defenders = tile.MusterArmy();
+            var defenders = GetDefenders(attackers, tile);
 
             // Attack armys one-at-a-time to the death!
             while (attackers.Count > 0 && defenders.Count > 0)
@@ -45,7 +47,7 @@ namespace Wism.Client.Core.Armies.WarStrategies
                 }
 
                 // Refresh the list
-                defenders = tile.MusterArmy();
+                defenders = GetDefenders(attackers, tile);
             }
 
             return attackers.Count > 0;
@@ -124,7 +126,7 @@ namespace Wism.Client.Core.Armies.WarStrategies
             out List<Army> defenders, out int compositeAFCM, out int compositeDFCM)
         {
             // Muster all armys from composite tile (i.e. city) to defend
-            defenders = target.MusterArmy();
+            defenders = GetDefenders(attackers, target);
 
             // Calculate composite modifieres
             compositeAFCM = attackers.Sum(a => a.GetAttackModifier(target));
@@ -133,6 +135,14 @@ namespace Wism.Client.Core.Armies.WarStrategies
             // Apply army-specific terrain modifiers (e.g. elves like forests)
             ApplyArmyTerrainModifiers(attackers, target);
             ApplyArmyTerrainModifiers(defenders, target);
+        }
+
+        private static List<Army> GetDefenders(List<Army> attackers, Tile target)
+        {
+            var attackerClan = attackers[0].Clan;
+            return target.MusterArmy()
+                .Where(army => army.Clan != attackerClan)
+                .ToList();
         }
 
         private static void ResetHitPoints(List<Army> defenders, List<Army> attackers)
@@ -187,37 +197,67 @@ namespace Wism.Client.Core.Armies.WarStrategies
         private static bool AttackRoll(Army attacker, int attackStrength, Army defender, int defenseStrength)
         {
             var random = Game.Current.Random;
-            // Have we won?
-            if (defender.HitPoints == 0)
+
+            var noHitExchanges = 0;
+            while (true)
             {
-                return true;
+                // Have we won?
+                if (defender.HitPoints <= 0)
+                {
+                    return true;
+                }
+
+                // Have we lost?
+                if (attacker.HitPoints <= 0)
+                {
+                    return false;
+                }
+
+                // No? Then keep fighting!
+                var attackerRoll = random.Next(1, 11); // Roll 10 sided die
+                var defenderRoll = random.Next(1, 11); // Roll 10 sided die
+
+                var attackerRollLow = attackerRoll <= defenseStrength;
+                var defenderRollLow = defenderRoll <= attackStrength;
+
+                // Attacker took a hit
+                if (attackerRollLow && !defenderRollLow)
+                {
+                    attacker.HitPoints--;
+                    noHitExchanges = 0;
+                }
+                // Defender took a hit
+                else if (!attackerRollLow && defenderRollLow)
+                {
+                    defender.HitPoints--;
+                    noHitExchanges = 0;
+                }
+                else if (++noHitExchanges >= MaxNoHitExchanges)
+                {
+                    ResolveStalledExchange(attacker, attackStrength, defender, defenseStrength);
+                    noHitExchanges = 0;
+                }
             }
+        }
 
-            // Have we lost?
-            if (attacker.HitPoints == 0)
-            {
-                return false;
-            }
-
-            // No? Then keep fighting!
-            var attackerRoll = random.Next(1, 11); // Roll 10 sided die
-            var defenderRoll = random.Next(1, 11); // Roll 10 sided die
-
-            var attackerRollLow = attackerRoll <= defenseStrength;
-            var defenderRollLow = defenderRoll <= attackStrength;
-
-            // Attacker took a hit
-            if (attackerRollLow && !defenderRollLow)
-            {
-                attacker.HitPoints--;
-            }
-            // Defender took a hit
-            else if (!attackerRollLow && defenderRollLow)
+        private static void ResolveStalledExchange(Army attacker, int attackStrength, Army defender, int defenseStrength)
+        {
+            if (attackStrength > defenseStrength)
             {
                 defender.HitPoints--;
             }
-
-            return AttackRoll(attacker, attackStrength, defender, defenseStrength);
+            else if (defenseStrength > attackStrength)
+            {
+                attacker.HitPoints--;
+            }
+            else if (Game.Current.Random.Next(0, 2) == 0)
+            {
+                attacker.HitPoints--;
+            }
+            else
+            {
+                defender.HitPoints--;
+            }
         }
     }
 }

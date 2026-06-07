@@ -32,42 +32,88 @@ namespace Wism.Client.Commands.Cities
 
         protected override ActionState ExecuteInternal()
         {
-            var targetTile = this.City.Tile;
+            if (!CanCaptureWithCurrentArmyState(this.Armies, this.Player))
+            {
+                return ActionState.Failed;
+            }
+
             var originTile = this.Armies[0].Tile;
+            var targetTile = this.ResolveCaptureTile(originTile);
 
-            if (targetTile == null || originTile == null)
+            if (targetTile == null)
             {
                 return ActionState.Failed;
             }
 
-            if (this.City.Clan == this.Player.Clan ||
-                targetTile.MusterArmy().Any(army => army.Clan != this.Player.Clan) ||
-                !originTile.IsNeighbor(targetTile) ||
-                !targetTile.HasRoom(this.Armies.Count) ||
-                this.Armies.Any(army => army.Player != this.Player || army.MovesRemaining <= targetTile.Terrain.MovementCost))
+            if (this.City.Clan == this.Player.Clan)
             {
                 return ActionState.Failed;
             }
 
-            if (originTile.HasVisitingArmies())
+            if (originTile.HasVisitingArmies() && originTile.ContainsVisitingArmies(this.Armies))
             {
                 originTile.RemoveVisitingArmies(this.Armies);
             }
-            else
+            else if (originTile.ContainsArmies(this.Armies))
             {
                 originTile.RemoveArmies(this.Armies);
             }
-
-            targetTile.VisitingArmies = new List<MapObjects.Army>(this.Armies);
-            foreach (var army in targetTile.VisitingArmies)
+            else
             {
-                army.Tile = targetTile;
+                return ActionState.Failed;
+            }
+
+            targetTile.AddVisitingArmies(new List<MapObjects.Army>(this.Armies));
+            foreach (var army in this.Armies)
+            {
                 army.MovesRemaining = Math.Max(0, army.MovesRemaining - targetTile.Terrain.MovementCost);
             }
 
             this.CityController.ClaimCity(this.City, this.Player);
             Game.Current.DeselectArmies();
             return ActionState.Succeeded;
+        }
+
+        private static bool CanCaptureWithCurrentArmyState(List<MapObjects.Army> armies, Core.Player player)
+        {
+            if (armies == null ||
+                armies.Count == 0 ||
+                player == null ||
+                armies.Any(army => army?.Player != player))
+            {
+                return false;
+            }
+
+            if (Game.Current.ArmiesSelected())
+            {
+                var selected = Game.Current.GetSelectedArmies();
+                return selected != null &&
+                       selected.Count == armies.Count &&
+                       !armies.Except(selected).Any();
+            }
+
+            var originTile = armies[0].Tile;
+            return originTile != null && originTile.ContainsArmies(armies);
+        }
+
+        private Tile ResolveCaptureTile(Tile originTile)
+        {
+            if (originTile == null)
+            {
+                return null;
+            }
+
+            return this.City.GetTiles()
+                .Where(tile => tile != null &&
+                    originTile.IsNeighbor(tile) &&
+                    tile.HasRoom(this.Armies.Count) &&
+                    !this.City.GetTiles()
+                        .Any(cityTile => cityTile.GetAllArmies().Any(army => army.Clan != this.Player.Clan)) &&
+                    this.Armies.All(army =>
+                        army.Player == this.Player &&
+                        army.MovesRemaining > tile.Terrain.MovementCost))
+                .OrderBy(tile => Math.Abs(originTile.X - tile.X) + Math.Abs(originTile.Y - tile.Y))
+                .FirstOrDefault();
         }
 
         public override string ToString()

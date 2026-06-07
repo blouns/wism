@@ -29,6 +29,17 @@ namespace Wism.Client.Commands.Armies
 
         protected override ActionState ExecuteInternal()
         {
+            if (this.Armies == null || this.Armies.Count == 0)
+            {
+                return ActionState.Failed;
+            }
+
+            var targetTile = World.Current.Map[this.X, this.Y];
+            if (targetTile == null || !targetTile.CanAttackHere(this.Armies))
+            {
+                return ActionState.Failed;
+            }
+
             return this.ArmyController.PrepareForBattle();
         }
 

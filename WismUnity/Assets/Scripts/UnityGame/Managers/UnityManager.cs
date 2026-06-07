@@ -170,17 +170,7 @@ namespace Assets.Scripts.Managers
             //    return;
             //}
 
-            var pathingStrategy = new AStarPathingStrategy();
-            var pathfinder = new PathfindingService(pathingStrategy);
-            var armyController = provider.ArmyController;
-            var exterminationModule = new ExterminationModule(pathfinder, pathingStrategy, armyController, logger);
-            var captureModule = new CaptureModule(armyController, logger);
-
-            var aiController = new AiController(
-                new SimpleStrategicModule(),
-                new List<ITacticalModule> { exterminationModule, captureModule });
-
-            this.adaptaProvider = new AdaptaCommandProvider(this.logger, aiController, this.provider);
+            this.adaptaProvider = WarlordsClassicAiFactory.CreateCommandProvider(this.provider, this.logger);
             this.DebugManager.LogInformation($"ADAPTA AI initialized.");
         }
 

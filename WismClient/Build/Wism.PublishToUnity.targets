@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <UnityPluginDir Condition="'$(UnityPluginDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\WismUnity\Assets\Plugins\WismClient\'))</UnityPluginDir>
+    <CompanionPluginDir Condition="'$(CompanionPluginDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\WismCompanion\Assets\Plugins\WismShared\'))</CompanionPluginDir>
+    <!-- The Unity companion only needs the shared contract DTOs and their core dependency. -->
+    <PublishToCompanion Condition="'$(AssemblyName)' == 'Wism.Companion.Shared' or '$(AssemblyName)' == 'Wism.Client.Core'">true</PublishToCompanion>
   </PropertyGroup>
 
   <Target Name="CopyBinariesAndModsToUnity" AfterTargets="Build">
@@ -16,6 +19,15 @@
       SourceFiles="@(UnityClientOutput)"
       DestinationFolder="$(UnityPluginDir)"
       SkipUnchangedFiles="true" />
+
+    <!-- Also publish the shared contract assemblies into the standalone WismCompanion shell. -->
+    <Message Text="Publishing $(AssemblyName) to WismCompanion: $(CompanionPluginDir)" Importance="high" Condition="'$(PublishToCompanion)' == 'true'" />
+    <MakeDir Directories="$(CompanionPluginDir)" Condition="'$(PublishToCompanion)' == 'true'" />
+    <Copy
+      SourceFiles="@(UnityClientOutput)"
+      DestinationFolder="$(CompanionPluginDir)"
+      SkipUnchangedFiles="true"
+      Condition="'$(PublishToCompanion)' == 'true'" />
 
     <ItemGroup>
       <UnityModFiles Include="$(OutputPath)mod\\**\\*" Condition="'$(IncludeModFiles)' == 'true'" />

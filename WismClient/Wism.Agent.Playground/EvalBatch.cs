@@ -1,0 +1,578 @@
+using System.Text.Json;
+using Wism.Client.Data.Entities;
+
+namespace Wism.Agent.Playground;
+
+public sealed record EvalBatchOptions(
+    int Seed,
+    int Cases,
+    int MaxTurns,
+    string OutputRoot,
+    IReadOnlyList<string> ScenarioFamilies,
+    IReadOnlyList<int> ClanCounts,
+    IReadOnlyList<string> Sizes,
+    string? ModRoot);
+
+public sealed record EvalRunResult(
+    int SchemaVersion,
+    string RunId,
+    DateTime CreatedUtc,
+    string Status,
+    string OutputDirectory,
+    string EvalRunPath,
+    string CaseResultsPath,
+    string ScorecardPath,
+    string LearningLedgerPath,
+    string SummaryPath,
+    EvalScorecard Scorecard,
+    IReadOnlyList<EvalCaseResult> Cases);
+
+public sealed record EvalCaseResult(
+    string CaseId,
+    int Index,
+    int Seed,
+    string ScenarioFamily,
+    int ClanCount,
+    int MaxTurns,
+    string Size,
+    string Status,
+    string Outcome,
+    int Turns,
+    bool ParseableArtifact,
+    string? CampaignDirectory,
+    string? CampaignManifestPath,
+    EvalCounters Counters,
+    string? FailureClass,
+    string? FailureMessage);
+
+public sealed record EvalScorecard(
+    int SchemaVersion,
+    string Status,
+    int TotalCases,
+    int PassedCases,
+    int FailedCases,
+    int ParseableCaseArtifacts,
+    double ParseableCaseArtifactPercent,
+    IReadOnlyList<string> ScenarioFamilies,
+    EvalCounters Counters,
+    IReadOnlyList<EvalGateResult> Gates);
+
+public sealed record EvalGateResult(string Name, bool Passed, string Detail);
+
+public sealed record LearningLedgerEntry(
+    DateTime CreatedUtc,
+    string RunId,
+    string CaseId,
+    string Kind,
+    string Summary,
+    string? ArtifactPath);
+
+public sealed record EvalCounters(
+    int Crashes,
+    int Timeouts,
+    int ValidationFailures,
+    int Victories,
+    int BoundedStalemates,
+    int CityCaptures,
+    int Searches,
+    int ProductionStarts,
+    int ProductionDeliveries,
+    int Battles,
+    int SaveLoadSuccesses,
+    int StuckOrNoOpTurns,
+    int ProductionVectors,
+    int InvalidCommands,
+    int MixedClanTileStacks,
+    int GhostArmies)
+{
+    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+    public static EvalCounters operator +(EvalCounters left, EvalCounters right) =>
+        new(
+            left.Crashes + right.Crashes,
+            left.Timeouts + right.Timeouts,
+            left.ValidationFailures + right.ValidationFailures,
+            left.Victories + right.Victories,
+            left.BoundedStalemates + right.BoundedStalemates,
+            left.CityCaptures + right.CityCaptures,
+            left.Searches + right.Searches,
+            left.ProductionStarts + right.ProductionStarts,
+            left.ProductionDeliveries + right.ProductionDeliveries,
+            left.Battles + right.Battles,
+            left.SaveLoadSuccesses + right.SaveLoadSuccesses,
+            left.StuckOrNoOpTurns + right.StuckOrNoOpTurns,
+            left.ProductionVectors + right.ProductionVectors,
+            left.InvalidCommands + right.InvalidCommands,
+            left.MixedClanTileStacks + right.MixedClanTileStacks,
+            left.GhostArmies + right.GhostArmies);
+}
+
+public sealed class EvalBatchRunner
+{
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true
+    };
+
+    private static readonly JsonSerializerOptions JsonLineOptions = new()
+    {
+        WriteIndented = false
+    };
+
+    public EvalRunResult Run(EvalBatchOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        var runId = $"eval-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{options.Seed}-{options.Cases}cases";
+        var outputDirectory = Path.Combine(options.OutputRoot, runId);
+        Directory.CreateDirectory(outputDirectory);
+
+        var cases = BuildCases(options).ToArray();
+        var results = new List<EvalCaseResult>(cases.Length);
+        foreach (var definition in cases)
+        {
+            results.Add(RunCase(definition, outputDirectory, options.ModRoot));
+        }
+
+        var scorecard = BuildScorecard(results);
+        var status = scorecard.Gates.All(gate => gate.Passed) ? "Passed" : "Failed";
+        scorecard = scorecard with { Status = status };
+
+        var evalRunPath = Path.Combine(outputDirectory, "eval-run.json");
+        var caseResultsPath = Path.Combine(outputDirectory, "eval-case-result.jsonl");
+        var scorecardPath = Path.Combine(outputDirectory, "scorecard.json");
+        var learningLedgerPath = Path.Combine(outputDirectory, "learning-ledger.jsonl");
+        var summaryPath = Path.Combine(outputDirectory, "eval-summary.md");
+
+        var run = new EvalRunResult(
+            SchemaVersion: 1,
+            RunId: runId,
+            CreatedUtc: DateTime.UtcNow,
+            Status: status,
+            OutputDirectory: outputDirectory,
+            EvalRunPath: evalRunPath,
+            CaseResultsPath: caseResultsPath,
+            ScorecardPath: scorecardPath,
+            LearningLedgerPath: learningLedgerPath,
+            SummaryPath: summaryPath,
+            Scorecard: scorecard,
+            Cases: results);
+
+        File.WriteAllText(evalRunPath, JsonSerializer.Serialize(run, JsonOptions));
+        File.WriteAllText(scorecardPath, JsonSerializer.Serialize(scorecard, JsonOptions));
+        File.WriteAllLines(caseResultsPath, results.Select(result => JsonSerializer.Serialize(result, JsonLineOptions)));
+        File.WriteAllLines(learningLedgerPath, BuildLearningLedger(runId, results).Select(entry => JsonSerializer.Serialize(entry, JsonLineOptions)));
+        File.WriteAllText(summaryPath, BuildSummary(run));
+
+        return run;
+    }
+
+    public static EvalScorecard BuildScorecard(IReadOnlyList<EvalCaseResult> cases)
+    {
+        var counters = cases.Aggregate(EvalCounters.Empty, (current, result) => current + result.Counters);
+        var total = cases.Count;
+        var passed = cases.Count(result => IsPassed(result.Status));
+        var failed = total - passed;
+        var parseable = cases.Count(result => result.ParseableArtifact);
+        var parseablePercent = total == 0 ? 0 : Math.Round(parseable * 100.0 / total, 2);
+        var families = cases.Select(result => result.ScenarioFamily)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var hasCaptureCases = cases.Any(result => IsCaptureFocused(result.ScenarioFamily));
+        var hasSearchCases = cases.Any(result => IsSearchFocused(result.ScenarioFamily));
+        var hasProductionCases = cases.Any(result => IsProductionFocused(result.ScenarioFamily));
+        var hasProductionVectoringCases = cases.Any(result => IsProductionVectoringFocused(result.ScenarioFamily));
+        var classicAiCases = cases.Where(result => IsClassicAiFocused(result.ScenarioFamily)).ToArray();
+        var classicAiConquestCases = cases.Where(result => IsClassicAiConquestFocused(result.ScenarioFamily)).ToArray();
+        var classicAiInvalidCommands = classicAiCases.Sum(result => result.Counters.InvalidCommands);
+        var classicAiVictoryPercent = classicAiConquestCases.Length == 0
+            ? 100
+            : Math.Round(classicAiConquestCases.Count(result => result.Counters.Victories > 0) * 100.0 / classicAiConquestCases.Length, 2);
+
+        var gates = new[]
+        {
+            new EvalGateResult("no-crashes", counters.Crashes == 0, $"{counters.Crashes} crashes"),
+            new EvalGateResult("no-unclassified-timeouts", counters.Timeouts == 0, $"{counters.Timeouts} timeouts"),
+            new EvalGateResult(
+                "classic-ai-no-invalid-commands",
+                classicAiCases.Length == 0 || classicAiInvalidCommands == 0,
+                $"{classicAiInvalidCommands} classic AI invalid commands; {counters.InvalidCommands} total invalid commands"),
+            new EvalGateResult("parseable-artifacts", parseablePercent >= 90, $"{parseable}/{total} parseable ({parseablePercent:0.##}%)"),
+            new EvalGateResult("capture-signal", !hasCaptureCases || counters.CityCaptures > 0, $"{counters.CityCaptures} city captures"),
+            new EvalGateResult("search-signal", !hasSearchCases || counters.Searches > 0, $"{counters.Searches} searches"),
+            new EvalGateResult("production-delivery-signal", !hasProductionCases || counters.ProductionDeliveries > 0, $"{counters.ProductionDeliveries} production deliveries"),
+            new EvalGateResult("production-vectoring-signal", !hasProductionVectoringCases || counters.ProductionVectors > 0, $"{counters.ProductionVectors} production vectors"),
+            new EvalGateResult(
+                "board-state-invariants",
+                counters.MixedClanTileStacks == 0 && counters.GhostArmies == 0,
+                $"{counters.MixedClanTileStacks} mixed-clan tile stacks; {counters.GhostArmies} ghost armies"),
+            new EvalGateResult(
+                "classic-ai-victory-pressure",
+                classicAiConquestCases.Length == 0 || classicAiVictoryPercent >= 50,
+                $"{classicAiConquestCases.Count(result => result.Counters.Victories > 0)}/{classicAiConquestCases.Length} classic AI conquest cases won ({classicAiVictoryPercent:0.##}%)")
+        };
+
+        return new EvalScorecard(
+            SchemaVersion: 1,
+            Status: gates.All(gate => gate.Passed) ? "Passed" : "Failed",
+            TotalCases: total,
+            PassedCases: passed,
+            FailedCases: failed,
+            ParseableCaseArtifacts: parseable,
+            ParseableCaseArtifactPercent: parseablePercent,
+            ScenarioFamilies: families,
+            Counters: counters,
+            Gates: gates);
+    }
+
+    private static IEnumerable<EvalCaseDefinition> BuildCases(EvalBatchOptions options)
+    {
+        var scenarios = options.ScenarioFamilies.Count > 0 ? options.ScenarioFamilies : DefaultScenarioFamilies();
+        var clans = options.ClanCounts.Count > 0 ? options.ClanCounts : new[] { 2, 4 };
+        var sizes = options.Sizes.Count > 0 ? options.Sizes : new[] { "medium" };
+
+        for (var index = 0; index < Math.Max(1, options.Cases); index++)
+        {
+            yield return new EvalCaseDefinition(
+                CaseId: $"case-{index + 1:0000}",
+                Index: index + 1,
+                Seed: options.Seed + index,
+                ScenarioFamily: scenarios[index % scenarios.Count],
+                ClanCount: clans[index % clans.Count],
+                MaxTurns: Math.Clamp(options.MaxTurns, 1, 500),
+                Size: sizes[index % sizes.Count]);
+        }
+    }
+
+    private static EvalCaseResult RunCase(EvalCaseDefinition definition, string outputDirectory, string? modRoot)
+    {
+        var campaignDirectory = Path.Combine(outputDirectory, "campaigns", definition.CaseId);
+        var manifestPath = Path.Combine(campaignDirectory, "campaign.json");
+
+        try
+        {
+            var runner = new PlaygroundScenarioRunner(suppressConsoleLogs: true);
+            var campaign = runner.Campaign(
+                seed: definition.Seed,
+                clans: definition.ClanCount,
+                maxTurns: definition.MaxTurns,
+                outputRoot: Path.Combine(outputDirectory, "campaigns"),
+                name: definition.CaseId,
+                modRoot: modRoot,
+                size: definition.Size,
+                scenarioFamily: definition.ScenarioFamily);
+            var parseable = TryReadManifest(manifestPath);
+            var counters = CountSignals(campaign);
+            var hasCommandTimeout = counters.Timeouts > 0;
+            var hasBoardInvariantFailure = counters.MixedClanTileStacks > 0 || counters.GhostArmies > 0;
+            var status = hasCommandTimeout || hasBoardInvariantFailure ? "Failed" : campaign.Status;
+
+            return new EvalCaseResult(
+                CaseId: definition.CaseId,
+                Index: definition.Index,
+                Seed: definition.Seed,
+                ScenarioFamily: definition.ScenarioFamily,
+                ClanCount: definition.ClanCount,
+                MaxTurns: definition.MaxTurns,
+                Size: definition.Size,
+                Status: campaign.Status,
+                Outcome: campaign.Outcome,
+                Turns: campaign.Turns,
+                ParseableArtifact: parseable,
+                CampaignDirectory: campaign.OutputDirectory,
+                CampaignManifestPath: manifestPath,
+                Counters: counters,
+                FailureClass: IsPassed(status) ? null : hasCommandTimeout ? "command-timeout" : hasBoardInvariantFailure ? "board-state-invariant" : "campaign-failed",
+                FailureMessage: IsPassed(status) ? null : hasCommandTimeout
+                    ? "A command exceeded the buffered in-progress execution limit."
+                    : hasBoardInvariantFailure
+                        ? $"Final checkpoint has {counters.MixedClanTileStacks} mixed-clan tile stack(s) and {counters.GhostArmies} ghost army reference(s)."
+                        : campaign.Outcome)
+                with { Status = status };
+        }
+        catch (Exception ex)
+        {
+            var hasCampaignDirectory = Directory.Exists(campaignDirectory);
+            return new EvalCaseResult(
+                CaseId: definition.CaseId,
+                Index: definition.Index,
+                Seed: definition.Seed,
+                ScenarioFamily: definition.ScenarioFamily,
+                ClanCount: definition.ClanCount,
+                MaxTurns: definition.MaxTurns,
+                Size: definition.Size,
+                Status: "Failed",
+                Outcome: ex.Message,
+                Turns: 0,
+                ParseableArtifact: false,
+                CampaignDirectory: hasCampaignDirectory ? campaignDirectory : null,
+                CampaignManifestPath: hasCampaignDirectory ? manifestPath : null,
+                Counters: EvalCounters.Empty with { Crashes = 1 },
+                FailureClass: ex.GetType().Name,
+                FailureMessage: ex.ToString());
+        }
+    }
+
+    private static EvalCounters CountSignals(CampaignRunResult campaign)
+    {
+        var moments = campaign.Moments.Select(moment => moment.ToLowerInvariant()).ToArray();
+        var events = campaign.FinalReport.Events.Select(evt => evt.ToLowerInvariant()).ToArray();
+        var text = moments.Concat(events).ToArray();
+        var boardInvariants = CountFinalBoardStateInvariants(campaign);
+
+        return new EvalCounters(
+            Crashes: 0,
+            Timeouts: CountContains(moments, "command-timeout"),
+            ValidationFailures: campaign.Status.Equals("Failed", StringComparison.OrdinalIgnoreCase) &&
+                                campaign.Outcome.Contains("validation", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
+            Victories: campaign.Outcome.Contains(" won ", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
+            BoundedStalemates: campaign.Outcome.Contains("bounded stalemate", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
+            CityCaptures: CountContains(moments, "city-capture") + CountContains(events, "captured "),
+            Searches: CountContains(moments, "search") + CountContains(events, "searched "),
+            ProductionStarts: CountContains(moments, "production-start") + CountContains(events, " started "),
+            ProductionDeliveries: CountProductionDeliveries(moments),
+            Battles: CountContains(moments, "battle") + CountContains(events, "battle resolved"),
+            SaveLoadSuccesses: 0,
+            StuckOrNoOpTurns: CountContains(text, "no actionable") + CountContains(text, "stuck"),
+            ProductionVectors: CountContains(moments, "production-vector"),
+            InvalidCommands: CountContains(text, "command failed:"),
+            MixedClanTileStacks: boardInvariants.MixedClanTileStacks,
+            GhostArmies: boardInvariants.GhostArmies);
+    }
+
+    private static BoardStateInvariantCounters CountFinalBoardStateInvariants(CampaignRunResult campaign)
+    {
+        var finalCheckpoint = campaign.Checkpoints.LastOrDefault();
+        if (string.IsNullOrWhiteSpace(finalCheckpoint) || !File.Exists(finalCheckpoint))
+        {
+            return BoardStateInvariantCounters.Empty;
+        }
+
+        var snapshot = Newtonsoft.Json.JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(finalCheckpoint));
+        if (snapshot?.World?.Tiles == null || snapshot.Players == null)
+        {
+            return BoardStateInvariantCounters.Empty;
+        }
+
+        var armyOwners = new Dictionary<int, string>();
+        foreach (var player in snapshot.Players)
+        {
+            if (player.Armies == null)
+            {
+                continue;
+            }
+
+            foreach (var army in player.Armies)
+            {
+                armyOwners[army.Id] = player.ClanShortName;
+            }
+        }
+
+        var tileArmies = snapshot.World.Tiles.ToDictionary(
+            tile => (tile.X, tile.Y),
+            tile => ConcatIds(tile.ArmyIds, tile.VisitingArmyIds));
+
+        var mixedClanTileStacks = snapshot.World.Tiles.Count(tile =>
+        {
+            var owners = ConcatIds(tile.ArmyIds, tile.VisitingArmyIds)
+                .Select(id => armyOwners.TryGetValue(id, out var owner) ? owner : null)
+                .Where(owner => !string.IsNullOrWhiteSpace(owner))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count();
+
+            return owners > 1;
+        });
+
+        var ghostArmies = 0;
+        foreach (var player in snapshot.Players)
+        {
+            if (player.Armies == null)
+            {
+                continue;
+            }
+
+            foreach (var army in player.Armies)
+            {
+                if (army.IsDead)
+                {
+                    continue;
+                }
+
+                if (!tileArmies.TryGetValue((army.X, army.Y), out var ids) || !ids.Contains(army.Id))
+                {
+                    ghostArmies++;
+                }
+            }
+        }
+
+        return new BoardStateInvariantCounters(mixedClanTileStacks, ghostArmies);
+    }
+
+    private static int[] ConcatIds(int[] armyIds, int[] visitingArmyIds) =>
+        (armyIds ?? Array.Empty<int>())
+            .Concat(visitingArmyIds ?? Array.Empty<int>())
+            .ToArray();
+
+    private static IEnumerable<LearningLedgerEntry> BuildLearningLedger(string runId, IReadOnlyList<EvalCaseResult> results)
+    {
+        var failures = results.Where(result => !IsPassed(result.Status) || result.Counters.Crashes > 0).ToArray();
+        if (failures.Length == 0)
+        {
+            yield return new LearningLedgerEntry(
+                CreatedUtc: DateTime.UtcNow,
+                RunId: runId,
+                CaseId: "run",
+                Kind: "no-new-failure-class",
+                Summary: "No failures were observed in this eval batch.",
+                ArtifactPath: null);
+            yield break;
+        }
+
+        foreach (var failure in failures)
+        {
+            yield return new LearningLedgerEntry(
+                CreatedUtc: DateTime.UtcNow,
+                RunId: runId,
+                CaseId: failure.CaseId,
+                Kind: failure.FailureClass ?? "campaign-failed",
+                Summary: failure.FailureMessage ?? failure.Outcome,
+                ArtifactPath: failure.CampaignManifestPath);
+        }
+    }
+
+    private static string BuildSummary(EvalRunResult run)
+    {
+        var lines = new List<string>
+        {
+            "# WISM Eval Summary",
+            string.Empty,
+            $"Run: `{run.RunId}`",
+            $"Status: `{run.Status}`",
+            $"Cases: {run.Scorecard.TotalCases}",
+            $"Passed cases: {run.Scorecard.PassedCases}",
+            $"Failed cases: {run.Scorecard.FailedCases}",
+            $"Parseable artifacts: {run.Scorecard.ParseableCaseArtifacts}/{run.Scorecard.TotalCases} ({run.Scorecard.ParseableCaseArtifactPercent:0.##}%)",
+            string.Empty,
+            "## Signals",
+            string.Empty,
+            $"- Victories: {run.Scorecard.Counters.Victories}",
+            $"- Bounded stalemates: {run.Scorecard.Counters.BoundedStalemates}",
+            $"- City captures: {run.Scorecard.Counters.CityCaptures}",
+            $"- Searches: {run.Scorecard.Counters.Searches}",
+            $"- Production starts: {run.Scorecard.Counters.ProductionStarts}",
+            $"- Production deliveries: {run.Scorecard.Counters.ProductionDeliveries}",
+            $"- Production vectors: {run.Scorecard.Counters.ProductionVectors}",
+            $"- Battles: {run.Scorecard.Counters.Battles}",
+            $"- Invalid commands: {run.Scorecard.Counters.InvalidCommands}",
+            $"- Mixed-clan tile stacks: {run.Scorecard.Counters.MixedClanTileStacks}",
+            $"- Ghost armies: {run.Scorecard.Counters.GhostArmies}",
+            $"- Crashes: {run.Scorecard.Counters.Crashes}",
+            $"- Timeouts: {run.Scorecard.Counters.Timeouts}",
+            string.Empty,
+            "## Gates",
+            string.Empty
+        };
+
+        lines.AddRange(run.Scorecard.Gates.Select(gate => $"- {(gate.Passed ? "PASS" : "FAIL")} `{gate.Name}`: {gate.Detail}"));
+        lines.Add(string.Empty);
+        lines.Add("## Artifacts");
+        lines.Add(string.Empty);
+        lines.Add($"- `eval-run.json`");
+        lines.Add($"- `eval-case-result.jsonl`");
+        lines.Add($"- `scorecard.json`");
+        lines.Add($"- `learning-ledger.jsonl`");
+
+        return string.Join(Environment.NewLine, lines) + Environment.NewLine;
+    }
+
+    private static bool TryReadManifest(string path)
+    {
+        try
+        {
+            return File.Exists(path) &&
+                   JsonSerializer.Deserialize<CampaignRunResult>(File.ReadAllText(path), JsonLineOptions) is not null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static int CountContains(IEnumerable<string> values, string needle) =>
+        values.Count(value => value.Contains(needle, StringComparison.OrdinalIgnoreCase));
+
+    private static int CountProductionDeliveries(IEnumerable<string> moments) =>
+        moments.Select(ExtractDeliveredCount).Sum();
+
+    private static int ExtractDeliveredCount(string value)
+    {
+        const string marker = " delivered";
+        var markerIndex = value.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (markerIndex <= 0)
+        {
+            return 0;
+        }
+
+        var start = markerIndex - 1;
+        while (start >= 0 && char.IsDigit(value[start]))
+        {
+            start--;
+        }
+
+        return int.TryParse(value.Substring(start + 1, markerIndex - start - 1), out var delivered)
+            ? delivered
+            : 0;
+    }
+
+    private static bool IsPassed(string status) =>
+        status.Equals("Passed", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsCaptureFocused(string scenarioFamily) =>
+        scenarioFamily.Contains("capture", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("defense", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsSearchFocused(string scenarioFamily) =>
+        scenarioFamily.Contains("search", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("ruin", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsProductionFocused(string scenarioFamily) =>
+        !IsProductionVectoringFocused(scenarioFamily) &&
+        (scenarioFamily.Contains("production", StringComparison.OrdinalIgnoreCase) ||
+         scenarioFamily.Contains("economy", StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsProductionVectoringFocused(string scenarioFamily) =>
+        scenarioFamily.Contains("vector", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsClassicAiFocused(string scenarioFamily) =>
+        scenarioFamily.Contains("classic-ai", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsClassicAiConquestFocused(string scenarioFamily) =>
+        IsClassicAiFocused(scenarioFamily) &&
+        !IsProductionVectoringFocused(scenarioFamily);
+
+    private static IReadOnlyList<string> DefaultScenarioFamilies() =>
+        new[]
+        {
+            "capture-pressure",
+            "ruin-search",
+            "production-economy",
+            "road-contact",
+            "siege-defense"
+        };
+
+    private sealed record EvalCaseDefinition(
+        string CaseId,
+        int Index,
+        int Seed,
+        string ScenarioFamily,
+        int ClanCount,
+        int MaxTurns,
+        string Size);
+
+    private sealed record BoardStateInvariantCounters(int MixedClanTileStacks, int GhostArmies)
+    {
+        public static BoardStateInvariantCounters Empty { get; } = new(0, 0);
+    }
+}

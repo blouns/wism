@@ -219,6 +219,26 @@ public class PathingStrategyTests
     }
 
     [Test]
+    public void DijkstraUntraversableSource_ReturnsNoRoute()
+    {
+        IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+        string[,] matrix =
+        {
+            { "S", "1", "T" },
+            { "1", "1", "1" },
+            { "1", "1", "1" }
+        };
+
+        var map = ConvertMatrixToMap(matrix, out var start, out var target);
+        start[0].Tile.Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Water"));
+
+        pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
+
+        Assert.That(shortestRoute, Is.Empty);
+        Assert.That(distance, Is.EqualTo(int.MaxValue));
+    }
+
+    [Test]
     public void AStarSimple1_3x3Test()
     {
         IPathingStrategy pathingStrategy = new AStarPathingStrategy();

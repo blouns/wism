@@ -47,6 +47,92 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void CombatEstimator_RatesStrongStackAboveWeakStack()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var player = Game.Current.Players[0];
+            var enemy = Game.Current.Players[1];
+
+            var strongTile = World.Current.Map[5, 4];
+            var weakTile = World.Current.Map[6, 4];
+            var enemyTile = World.Current.Map[6, 5];
+
+            var strongStack = new List<Wism.Client.MapObjects.Army>();
+            for (var i = 0; i < 8; i++)
+            {
+                strongStack.Add(player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), strongTile));
+                enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyTile);
+            }
+
+            var weakStack = new List<Wism.Client.MapObjects.Army>
+            {
+                player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), weakTile)
+            };
+
+            var estimator = new CombatEstimator();
+            var strongEstimate = estimator.EstimateAttack(strongStack, enemyTile);
+            var weakEstimate = estimator.EstimateAttack(weakStack, enemyTile);
+
+            Assert.That(strongEstimate.WinProbability, Is.GreaterThan(weakEstimate.WinProbability));
+            Assert.That(weakEstimate.WinProbability, Is.LessThan(0.40));
+        }
+
+        [Test]
+        public void ExterminationModule_SkipsHopelessAdjacentAttack()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var player = Game.Current.Players[0];
+            var enemy = Game.Current.Players[1];
+
+            var playerTile = World.Current.Map[6, 4];
+            var enemyTile = World.Current.Map[6, 5];
+
+            player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), playerTile);
+            for (var i = 0; i < 8; i++)
+            {
+                enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyTile);
+            }
+
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+            var module = new ExterminationModule(new PathfindingService(new AStarPathingStrategy()), new AStarPathingStrategy(), controllerProvider.ArmyController, logger);
+
+            var commands = GetTestCommands(module, World.Current, logger);
+
+            Assert.That(commands.Any(c => c is AttackOnceCommand), Is.False);
+        }
+
+        [Test]
+        public void ExterminationModule_AttacksFavorableAdjacentStack()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var player = Game.Current.Players[0];
+            var enemy = Game.Current.Players[1];
+
+            var playerTile = World.Current.Map[6, 4];
+            var enemyTile = World.Current.Map[6, 5];
+
+            for (var i = 0; i < 8; i++)
+            {
+                player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), playerTile);
+            }
+
+            enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyTile);
+
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+            var module = new ExterminationModule(new PathfindingService(new AStarPathingStrategy()), new AStarPathingStrategy(), controllerProvider.ArmyController, logger);
+
+            var commands = GetTestCommands(module, World.Current, logger);
+
+            Assert.That(commands.Any(c => c is AttackOnceCommand), Is.True);
+        }
+
+        [Test]
         public void ExterminationModule_ReturnsNullCommand_WhenNoEnemiesExist()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
@@ -139,7 +225,8 @@ namespace Wism.Client.Test.AI
             var command = commands.FirstOrDefault();
 
             Assert.That(command, Is.Not.Null);
-            Assert.That(command, Is.InstanceOf<MoveOnceCommand>());
+            Assert.That(commands.Any(c => c is SelectArmyCommand), Is.True);
+            Assert.That(commands.Any(c => c is MoveOnceCommand), Is.True);
         }
 
         [Test]

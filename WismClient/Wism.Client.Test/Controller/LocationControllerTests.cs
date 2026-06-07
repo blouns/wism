@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
+using Wism.Client.Commands.Locations;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Test.Common;
@@ -102,6 +105,54 @@ public class LocationControllerTests
         Assert.That(location.Searched, Is.True);
         Assert.That(location.HasMonster(), Is.False);
         Assert.That(location.HasBoon(), Is.False);
+    }
+
+    [Test]
+    public void SearchRuinsCommand_NoBoonDoesNotThrow()
+    {
+        var locationController = TestUtilities.CreateLocationController();
+        Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+        var player1 = Game.Current.Players[0];
+        var location = MapBuilder.FindLocation("Stonehenge");
+        var tile = World.Current.Map[1, 1];
+        World.Current.AddLocation(location, tile);
+        location.Boon = null;
+        location.Monster = null;
+        var hero = player1.HireHero(tile);
+        var armies = new List<Army> { hero };
+
+        var command = new SearchRuinsCommand(locationController, armies, location);
+        var result = command.Execute();
+
+        Assert.That(result, Is.EqualTo(ActionState.Succeeded));
+        Assert.That(command.Boon, Is.Null);
+        Assert.That(command.BoonResult, Is.Null);
+        Assert.That(location.Searched, Is.True);
+    }
+
+    [Test]
+    public void SearchRuinsCommand_StationedHeroRedeemsGoldBoon()
+    {
+        var locationController = TestUtilities.CreateLocationController();
+        Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+        var player1 = Game.Current.Players[0];
+        var location = MapBuilder.FindLocation("Stonehenge");
+        var tile = World.Current.Map[1, 1];
+        World.Current.AddLocation(location, tile);
+        location.Boon = new GoldBoon();
+        location.Monster = null;
+        var hero = player1.HireHero(tile);
+        var armies = new List<Army> { hero };
+        var initialGold = player1.Gold;
+
+        var command = new SearchRuinsCommand(locationController, armies, location);
+        var result = command.Execute();
+
+        Assert.That(result, Is.EqualTo(ActionState.Succeeded));
+        Assert.That(command.Boon, Is.Not.Null);
+        Assert.That(command.BoonResult, Is.Not.Null);
+        Assert.That(player1.Gold, Is.GreaterThan(initialGold));
+        Assert.That(location.Searched, Is.True);
     }
 
     [Test]

@@ -1,0 +1,9 @@
+{
+  "id": "pack-my-first-flavor",
+  "displayName": "My First Flavor Pack",
+  "kind": "Flavor",
+  "description": "Display-name changes for existing WISM stable ids.",
+  "dependencies": [],
+  "conflicts": [],
+  "overlay": "overlays/mod-overlay.json"
+}

@@ -22,7 +22,7 @@ namespace Wism.Client.Commands.Locations
             if (success)
             {
                 this.Boon = boon;
-                this.BoonResult = boon.Result;
+                this.BoonResult = boon?.Result;
             }
 
             return success ? ActionState.Succeeded : ActionState.Failed;

@@ -192,6 +192,8 @@ namespace Wism.Client.MapObjects
                 throw new ArgumentException("Clan cannot claim a city when there are armies of another clan present.");
             }
 
+            var previousPlayer = this.Player;
+
             // Claim the city
             this.Player = player;
             this.Clan = player.Clan;
@@ -209,18 +211,18 @@ namespace Wism.Client.MapObjects
 
             // Reset production
             this.Barracks.Reset();
-            this.CancelIncomingProduction();
+            this.CancelIncomingProduction(previousPlayer);
         }
 
-        private void CancelIncomingProduction()
+        private void CancelIncomingProduction(Player player)
         {
-            if (this.Player == null)
+            if (player == null)
             {
                 // Neutral city
                 return;
             }
 
-            var cities = this.Player.GetCities();
+            var cities = player.GetCities();
             foreach (var otherCity in cities)
             {
                 otherCity.Barracks.CancelDelivery(this);

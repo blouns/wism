@@ -18,14 +18,20 @@ namespace Wism.Client.Core.Boons
                 throw new ArgumentNullException(nameof(target));
             }
 
-            if (!target.HasVisitingArmies())
+            var army = target.HasVisitingArmies()
+                ? target.VisitingArmies[0]
+                : target.HasArmies()
+                    ? target.Armies[0]
+                    : null;
+
+            if (army == null)
             {
-                throw new ArgumentNullException(nameof(target), "Target tile has no visiting armies");
+                throw new ArgumentNullException(nameof(target), "Target tile has no armies");
             }
 
             var goldBoon = Game.Current.Random.Next(MinGold, MaxGold + 1);
 
-            target.VisitingArmies[0].Player.Gold += goldBoon;
+            army.Player.Gold += goldBoon;
 
             this.Result = goldBoon;
             return goldBoon;

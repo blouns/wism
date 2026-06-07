@@ -19,25 +19,27 @@ namespace Wism.Client.AI.Strategic
 
         public void AllocateAssets(IEnumerable<IBid> bids)
         {
-            // Pick highest utility bid per primary army (first army in stack)
-            var bestBids = new Dictionary<Army, IBid>();
+            var reservedArmies = new HashSet<Army>();
+            var selectedBids = new List<IBid>();
 
-            foreach (var bid in bids)
+            foreach (var bid in bids
+                .Where(bid => bid != null && bid.Armies != null && bid.Armies.Count > 0)
+                .OrderByDescending(bid => bid.Utility)
+                .ThenBy(bid => bid.Armies.Min(army => army.Id)))
             {
-                if (bid.Armies == null || bid.Armies.Count == 0)
+                if (bid.Armies.Any(army => army == null || reservedArmies.Contains(army)))
                 {
                     continue;
                 }
 
-                Army primaryArmy = bid.Armies[0];
-
-                if (!bestBids.ContainsKey(primaryArmy) || bestBids[primaryArmy].Utility < bid.Utility)
+                selectedBids.Add(bid);
+                foreach (var army in bid.Armies)
                 {
-                    bestBids[primaryArmy] = bid;
+                    reservedArmies.Add(army);
                 }
             }
 
-            acceptedBids = bestBids.Values.ToList();
+            acceptedBids = selectedBids;
         }
 
         public IEnumerable<IBid> GetAcceptedBids()

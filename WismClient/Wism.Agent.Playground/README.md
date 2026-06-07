@@ -16,10 +16,13 @@ dotnet run --project Wism.Agent.Playground -- world world=Mini-Illuria
 dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12
 dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 scenario=capture-pressure
 dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 scenario=ruin-search
+dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 scenario=production-economy
+dotnet run --project Wism.Agent.Playground -- eval seed=20260608 cases=1 maxTurns=1 scenarios=classic-ai-production-vectoring clans=2 sizes=medium --quiet
 dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 delayMs=1500
 dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 channel=eval:smoke
 dotnet run --project Wism.Agent.Playground -- campaign seed=5150 clans=4 maxTurns=1 size=large delayMs=1500
 dotnet run --project Wism.Agent.Playground -- campaign seed=5150 clans=8 maxTurns=2 size=large
+dotnet run --project Wism.Agent.Playground -- eval seed=20260608 cases=50 maxTurns=12 scenarios=capture-pressure,ruin-search,production-economy,road-contact,siege-defense clans=2,4 sizes=medium --quiet
 dotnet run --project Wism.Agent.Playground -- jump checkpoint=<checkpoint-json>
 dotnet run --project Wism.Agent.Playground -- worktrees agents=4
 ```
@@ -38,10 +41,13 @@ dotnet run --project Wism.Agent.Playground -- worktrees agents=4
 - Campaigns generate deterministic 2-4 clan worlds from a seed, validate the world with `WorldValidator`, drive turns through public commands, and save checkpoints under `artifacts/campaigns` unless `out=<path>` is supplied.
 - Campaign `scenario=capture-pressure` adds owned-but-empty outpost cities near opposing roads so capture behavior is exercised.
 - Campaign `scenario=ruin-search` places searchable locations near capitals and routes hero-led stacks through real search commands.
+- Campaign `scenario=production-economy` adds same-owner delivery outposts and holds combat movement so routed production delivery is exercised without destination capture noise.
+- Eval `scenario=classic-ai-production-vectoring` drives the Warlords Classic AI command provider long enough to prove routed production selection with a `production-vectoring-signal` gate.
 - Campaign `size=large` uses a 94x80 Mini-Illuria-style stress map with the real capital anchors for Marthos, Bane's Citadel, Kor, Elvallie, Stormheim, Khamar, Enmouth, and Dunethal.
 - Campaign `delayMs=<milliseconds>` enables Companion telemetry and pauses after map snapshots, which makes move-by-move and turn-by-turn viewing practical.
 - Campaigns default to deterministic channel IDs such as `playground:capture-pressure:20260601` when Companion telemetry or capture metadata is enabled.
 - `jump checkpoint=<path>` loads a saved campaign checkpoint through `LoadGameCommand` for debugging a recorded moment.
+- `eval` runs deterministic campaign batches, writes `eval-run.json`, `eval-case-result.jsonl`, `scorecard.json`, `learning-ledger.jsonl`, and `eval-summary.md`, and fails unless required scenario-family signals are present.
 - Keeps public WISM worktree creation as an explicit plan by default. The command output names separate branch/worktree pairs rooted at `HEAD`, which should be the committed playground scaffold.
 - Parallel experiments use child processes because the current game runtime has static `Game.Current` and `World.Current` state.
 

@@ -11,11 +11,18 @@ namespace Wism.Client.AI.Framework
     {
         private readonly IStrategicModule strategicModule;
         private readonly List<ITacticalModule> tacticalModules;
+        private readonly List<ITurnModule> turnModules;
 
         public AiController(IStrategicModule strategicModule, List<ITacticalModule> tacticalModules)
+            : this(strategicModule, tacticalModules, new List<ITurnModule>())
+        {
+        }
+
+        public AiController(IStrategicModule strategicModule, List<ITacticalModule> tacticalModules, List<ITurnModule> turnModules)
         {
             this.strategicModule = strategicModule;
-            this.tacticalModules = tacticalModules;
+            this.tacticalModules = tacticalModules ?? new List<ITacticalModule>();
+            this.turnModules = turnModules ?? new List<ITurnModule>();
         }
 
         public IEnumerable<IBid> GetBids(World world)
@@ -25,18 +32,27 @@ namespace Wism.Client.AI.Framework
 
         public List<ICommandAction> ExecuteTurnAndReturnCommands(World world)
         {
+            var commands = new List<ICommandAction>();
+
+            foreach (var module in turnModules)
+            {
+                var generated = module.GenerateCommands(world);
+                if (generated != null)
+                {
+                    commands.AddRange(generated);
+                }
+            }
+
             var bids = GetBids(world).ToList();
             if (bids.Count == 0)
             {
-                return new List<ICommandAction>();
+                return commands;
             }
 
             strategicModule.UpdateGoals(world);
             strategicModule.AllocateAssets(bids);
 
             var winningBids = (strategicModule as SimpleStrategicModule)?.GetAcceptedBids() ?? bids;
-
-            var commands = new List<ICommandAction>();
 
             foreach (var bid in winningBids)
             {
