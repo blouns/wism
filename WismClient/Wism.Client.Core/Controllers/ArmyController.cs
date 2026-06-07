@@ -347,14 +347,7 @@ namespace Wism.Client.Controllers
             Game.Current.Transition(GameState.MovingArmy);
 
             var movingArmies = armiesToMove.ToList();
-            var originatingTile = armiesToMove[0].Tile;
-
-            if (originatingTile != targetTile &&
-                originatingTile.HasVisitingArmies() &&
-                originatingTile.ContainsVisitingArmies(movingArmies))
-            {
-                originatingTile.RemoveVisitingArmies(movingArmies);
-            }
+            DetachMovingArmiesFromOriginTiles(movingArmies, targetTile);
 
             targetTile.AddVisitingArmies(movingArmies);
             movingArmies.ForEach(a =>
@@ -368,6 +361,30 @@ namespace Wism.Client.Controllers
             });
 
             targetTile.VisitingArmies.Sort(new ByArmyViewingOrder());
+        }
+
+        private static void DetachMovingArmiesFromOriginTiles(List<Army> movingArmies, Tile targetTile)
+        {
+            foreach (var group in movingArmies
+                         .Where(army => army.Tile != null && army.Tile != targetTile)
+                         .GroupBy(army => army.Tile))
+            {
+                var originTile = group.Key;
+                foreach (var army in group)
+                {
+                    // City-footprint stacks can be split between stationary and visiting lists.
+                    // Detach per army so moving a mixed stack cannot leave stale tile references.
+                    if (originTile.HasVisitingArmies() && originTile.VisitingArmies.Contains(army))
+                    {
+                        originTile.RemoveVisitingArmies(new List<Army> { army });
+                    }
+
+                    if (originTile.HasArmies() && originTile.Armies.Contains(army))
+                    {
+                        originTile.RemoveArmies(new List<Army> { army });
+                    }
+                }
+            }
         }
 
         private static int CalculateDistance(IList<Tile> myPath)

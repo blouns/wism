@@ -74,6 +74,31 @@ public class ArmyControllerTests
     }
 
     [Test]
+    public void TryMove_DetachesMixedStationaryAndVisitingOriginStack()
+    {
+        var controllers = TestUtilities.CreateControllerProvider();
+        var player = Game.Current.Players[0];
+        var origin = World.Current.Map[1, 1];
+        var target = World.Current.Map[2, 1];
+
+        var visitor = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+        var stationary = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+        origin.RemoveArmies(new List<Army> { visitor });
+        origin.AddVisitingArmies(new List<Army> { visitor });
+
+        var movingStack = new List<Army> { visitor, stationary };
+
+        var result = controllers.ArmyController.TryMove(movingStack, target);
+
+        Assert.That(result, Is.EqualTo(MoveResult.Moved));
+        Assert.That(origin.GetAllArmies(), Is.Empty);
+        Assert.That(target.GetAllArmies(), Is.EquivalentTo(movingStack));
+        Assert.That(target.GetAllArmies().Distinct().Count(), Is.EqualTo(movingStack.Count));
+        Assert.That(visitor.Tile, Is.EqualTo(target));
+        Assert.That(stationary.Tile, Is.EqualTo(target));
+    }
+
+    [Test]
     public void WinningCityBattle_DoesNotDetachNonDefendingFriendlyArmiesOnTargetTile()
     {
         var controllers = TestUtilities.CreateControllerProvider();
