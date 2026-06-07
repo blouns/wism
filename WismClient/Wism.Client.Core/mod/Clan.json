@@ -4,62 +4,71 @@
     "PrimaryColor": "(199, 199, 199)",
     "SecondaryColor": "(0, 0, 0)",
     "DisplayName": "The Sirians",
-    "Capitol": "Marthos"
+    "Capitol": "Marthos",
+    "StartingGold": 1000
   },
   {
     "ShortName": "StormGiants",
     "PrimaryColor": "(199, 199, 0)",
     "SecondaryColor": "(0, 0, 0)",
     "DisplayName": "Storm Giants",
-    "Capitol": "Stormheim"
+    "Capitol": "Stormheim",
+    "StartingGold": 1000
   },
   {
     "ShortName": "GreyDwarves",
     "PrimaryColor": "(199, 134, 0)",
     "SecondaryColor": "(0, 0, 0)",
     "DisplayName": "Grey Dwarves",
-    "Capitol": "Khamar"
+    "Capitol": "Khamar",
+    "StartingGold": 1000
   },
   {
     "ShortName": "OrcsOfKor",
     "PrimaryColor": "(199, 0, 0)",
     "SecondaryColor": "(0, 0, 0)",
     "DisplayName": "Orcs of Kor",
-    "Capitol": "Kor"
+    "Capitol": "Kor",
+    "StartingGold": 1000
   },
   {
     "ShortName": "Elvallie",
     "PrimaryColor": "(85, 150, 85)",
     "SecondaryColor": "(0, 0, 0)",
     "DisplayName": "Elvallie",
-    "Capitol": "Elvallie"
+    "Capitol": "Elvallie",
+    "StartingGold": 1000
   },
   {
     "ShortName": "Selentines",
     "PrimaryColor": "(255, 0, 0)",
     "SecondaryColor": "(0, 85, 119)",
     "DisplayName": "The Selentines",
-    "Capitol": "Enmouth"
+    "Capitol": "Enmouth",
+    "StartingGold": 1000
   },
   {
     "ShortName": "HorseLords",
     "PrimaryColor": "(134, 199, 0)",
     "SecondaryColor": "(0, 0, 0)",
     "DisplayName": "Horse Lords",
-    "Capitol": "Dunethel"
+    "Capitol": "Dunethel",
+    "StartingGold": 1000
   },
   {
     "ShortName": "LordBane",
     "PrimaryColor": "(0, 0, 0)",
     "SecondaryColor": "(199, 0, 0)",
     "DisplayName": "Lord Bane",
-    "Capitol": "BanesCitadel"
+    "Capitol": "BanesCitadel",
+    "StartingGold": 1000
   },
   {
     "ShortName": "Neutral",
     "PrimaryColor": "(100, 100, 100)",
     "SecondaryColor": "(0, 0, 0)",
     "DisplayName": "Neutral",
-    "Capitol": "None"
+    "Capitol": "None",
+    "StartingGold": 0
   }
 ]

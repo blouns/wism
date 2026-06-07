@@ -77,6 +77,15 @@ namespace Wism.Client.MapObjects
             return defenderModifier;
         }
 
+        /// <summary>
+        ///     Returns the effective movement cost for this army to enter a tile.
+        ///     Flying armies pay 1 per tile regardless of terrain (Warlords rule).
+        /// </summary>
+        public int GetEffectiveMovementCost(Tile tile)
+        {
+            return this.CanFly ? 1 : tile.Terrain.MovementCost;
+        }
+
         public string ToStringVerbose()
         {
             var sb = new StringBuilder();

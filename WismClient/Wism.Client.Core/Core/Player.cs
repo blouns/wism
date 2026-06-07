@@ -13,8 +13,6 @@ namespace Wism.Client.Core
 {
     public class Player
     {
-        // TODO: Starting gold varies by clan
-        private const int StartingGold = 100;
 
         private readonly List<ArmyInTraining> armiesDelivered = new List<ArmyInTraining>();
         private readonly List<ArmyInTraining> armiesProduced = new List<ArmyInTraining>();
@@ -62,7 +60,7 @@ namespace Wism.Client.Core
             var player = new Player(recruitingStrategy)
             {
                 Clan = clan,
-                Gold = StartingGold,
+                Gold = clan.Info.StartingGold,
                 Turn = 1
             };
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Pathing
@@ -30,8 +31,7 @@ namespace Wism.Client.Pathing
 
         public int GetMovementCost(List<Army> armiesToMove)
         {
-            // TODO: Add army and terrain bonuses
-            return this.Value.Terrain.MovementCost;
+            return armiesToMove.Max(a => a.GetEffectiveMovementCost(this.Value));
         }
     }
 }

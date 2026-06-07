@@ -12,7 +12,7 @@ namespace Wism.Client.Core.Armies.WarStrategies.CombatModifiers
         {
             if (attacker.CanFly)
             {
-                return modifier++;
+                return ++modifier;
             }
 
             return modifier;

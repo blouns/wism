@@ -191,7 +191,7 @@ namespace Wism.Client.Controllers
 
                 // Pop the starting location and return updated path and distance
                 myPath.RemoveAt(0);
-                myDistance = CalculateDistance(myPath);
+                myDistance = CalculateDistance(armiesToMove, myPath);
                 result = ActionState.InProgress;
             }
             else if (moveResult == MoveResult.InsuffientMoves)
@@ -352,8 +352,7 @@ namespace Wism.Client.Controllers
             {
                 a.Tile = targetTile;
 
-                // TODO: Account for bonuses
-                a.MovesRemaining -= targetTile.Terrain.MovementCost;
+                a.MovesRemaining -= a.GetEffectiveMovementCost(targetTile);
                 if (a.MovesRemaining <= 0)
                 {
                     a.MovesRemaining = 0;
@@ -364,10 +363,9 @@ namespace Wism.Client.Controllers
             originatingTile.VisitingArmies = null;
         }
 
-        private static int CalculateDistance(IList<Tile> myPath)
+        private static int CalculateDistance(List<Army> armies, IList<Tile> myPath)
         {
-            // TODO: Calculate based on true unit and affiliation cost; for now, static
-            return myPath.Sum(tile => tile.Terrain.MovementCost);
+            return myPath.Sum(tile => armies.Max(a => a.GetEffectiveMovementCost(tile)));
         }
 
         private static string ArmiesToString(List<Army> armies)
