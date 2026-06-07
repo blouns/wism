@@ -505,6 +505,7 @@ public class PlaygroundScenarioRunnerTests
             CampaignDirectory: null,
             CampaignManifestPath: null,
             Counters: counters,
+            DebugPacketPath: null,
             FailureClass: null,
             FailureMessage: null);
 }

@@ -48,6 +48,7 @@ dotnet run --project Wism.Agent.Playground -- worktrees agents=4
 - Campaigns default to deterministic channel IDs such as `playground:capture-pressure:20260601` when Companion telemetry or capture metadata is enabled.
 - `jump checkpoint=<path>` loads a saved campaign checkpoint through `LoadGameCommand` for debugging a recorded moment.
 - `eval` runs deterministic campaign batches, writes `eval-run.json`, `eval-case-result.jsonl`, `scorecard.json`, `learning-ledger.jsonl`, and `eval-summary.md`, and fails unless required scenario-family signals are present.
+- Failed board-state invariant cases write `debug-packets.jsonl` beside the campaign manifest with tile, army, owner, checkpoint, suspected subsystem, and one-case repro context.
 - Keeps public WISM worktree creation as an explicit plan by default. The command output names separate branch/worktree pairs rooted at `HEAD`, which should be the committed playground scaffold.
 - Parallel experiments use child processes because the current game runtime has static `Game.Current` and `World.Current` state.
 

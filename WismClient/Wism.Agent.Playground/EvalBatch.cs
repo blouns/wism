@@ -42,8 +42,29 @@ public sealed record EvalCaseResult(
     string? CampaignDirectory,
     string? CampaignManifestPath,
     EvalCounters Counters,
+    string? DebugPacketPath,
     string? FailureClass,
     string? FailureMessage);
+
+public sealed record EvalDebugPacket(
+    int SchemaVersion,
+    string Kind,
+    string CaseId,
+    int Seed,
+    string ScenarioFamily,
+    string? CheckpointPath,
+    string SuspectedSubsystem,
+    string Summary,
+    IReadOnlyList<EvalInvariantFailure> Failures,
+    string ReproCommand);
+
+public sealed record EvalInvariantFailure(
+    string Kind,
+    int? X,
+    int? Y,
+    IReadOnlyList<int> ArmyIds,
+    IReadOnlyList<string> Owners,
+    string Detail);
 
 public sealed record EvalScorecard(
     int SchemaVersion,
@@ -263,7 +284,9 @@ public sealed class EvalBatchRunner
                 size: definition.Size,
                 scenarioFamily: definition.ScenarioFamily);
             var parseable = TryReadManifest(manifestPath);
-            var counters = CountSignals(campaign);
+            var boardInvariants = InspectFinalBoardStateInvariants(campaign);
+            var counters = CountSignals(campaign, boardInvariants.Counters);
+            var debugPacketPath = WriteDebugPackets(definition, campaign, boardInvariants);
             var hasCommandTimeout = counters.Timeouts > 0;
             var hasBoardInvariantFailure = counters.MixedClanTileStacks > 0 || counters.GhostArmies > 0;
             var status = hasCommandTimeout || hasBoardInvariantFailure ? "Failed" : campaign.Status;
@@ -283,6 +306,7 @@ public sealed class EvalBatchRunner
                 CampaignDirectory: campaign.OutputDirectory,
                 CampaignManifestPath: manifestPath,
                 Counters: counters,
+                DebugPacketPath: debugPacketPath,
                 FailureClass: IsPassed(status) ? null : hasCommandTimeout ? "command-timeout" : hasBoardInvariantFailure ? "board-state-invariant" : "campaign-failed",
                 FailureMessage: IsPassed(status) ? null : hasCommandTimeout
                     ? "A command exceeded the buffered in-progress execution limit."
@@ -309,17 +333,17 @@ public sealed class EvalBatchRunner
                 CampaignDirectory: hasCampaignDirectory ? campaignDirectory : null,
                 CampaignManifestPath: hasCampaignDirectory ? manifestPath : null,
                 Counters: EvalCounters.Empty with { Crashes = 1 },
+                DebugPacketPath: null,
                 FailureClass: ex.GetType().Name,
                 FailureMessage: ex.ToString());
         }
     }
 
-    private static EvalCounters CountSignals(CampaignRunResult campaign)
+    private static EvalCounters CountSignals(CampaignRunResult campaign, BoardStateInvariantCounters boardInvariants)
     {
         var moments = campaign.Moments.Select(moment => moment.ToLowerInvariant()).ToArray();
         var events = campaign.FinalReport.Events.Select(evt => evt.ToLowerInvariant()).ToArray();
         var text = moments.Concat(events).ToArray();
-        var boardInvariants = CountFinalBoardStateInvariants(campaign);
 
         return new EvalCounters(
             Crashes: 0,
@@ -341,18 +365,18 @@ public sealed class EvalBatchRunner
             GhostArmies: boardInvariants.GhostArmies);
     }
 
-    private static BoardStateInvariantCounters CountFinalBoardStateInvariants(CampaignRunResult campaign)
+    private static BoardStateInvariantReport InspectFinalBoardStateInvariants(CampaignRunResult campaign)
     {
         var finalCheckpoint = campaign.Checkpoints.LastOrDefault();
         if (string.IsNullOrWhiteSpace(finalCheckpoint) || !File.Exists(finalCheckpoint))
         {
-            return BoardStateInvariantCounters.Empty;
+            return BoardStateInvariantReport.Empty;
         }
 
         var snapshot = Newtonsoft.Json.JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(finalCheckpoint));
         if (snapshot?.World?.Tiles == null || snapshot.Players == null)
         {
-            return BoardStateInvariantCounters.Empty;
+            return BoardStateInvariantReport.Empty;
         }
 
         var armyOwners = new Dictionary<int, string>();
@@ -373,16 +397,28 @@ public sealed class EvalBatchRunner
             tile => (tile.X, tile.Y),
             tile => ConcatIds(tile.ArmyIds, tile.VisitingArmyIds));
 
-        var mixedClanTileStacks = snapshot.World.Tiles.Count(tile =>
+        var failures = new List<EvalInvariantFailure>();
+        foreach (var tile in snapshot.World.Tiles)
         {
-            var owners = ConcatIds(tile.ArmyIds, tile.VisitingArmyIds)
+            var ids = ConcatIds(tile.ArmyIds, tile.VisitingArmyIds);
+            var owners = ids
                 .Select(id => armyOwners.TryGetValue(id, out var owner) ? owner : null)
                 .Where(owner => !string.IsNullOrWhiteSpace(owner))
+                .Select(owner => owner!)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Count();
+                .ToArray();
 
-            return owners > 1;
-        });
+            if (owners.Length > 1)
+            {
+                failures.Add(new EvalInvariantFailure(
+                    Kind: "mixed-clan-tile-stack",
+                    X: tile.X,
+                    Y: tile.Y,
+                    ArmyIds: ids,
+                    Owners: owners,
+                    Detail: $"Tile ({tile.X},{tile.Y}) has armies from {string.Join(", ", owners)}."));
+            }
+        }
 
         var ghostArmies = 0;
         foreach (var player in snapshot.Players)
@@ -402,11 +438,49 @@ public sealed class EvalBatchRunner
                 if (!tileArmies.TryGetValue((army.X, army.Y), out var ids) || !ids.Contains(army.Id))
                 {
                     ghostArmies++;
+                    failures.Add(new EvalInvariantFailure(
+                        Kind: "ghost-army",
+                        X: army.X,
+                        Y: army.Y,
+                        ArmyIds: new[] { army.Id },
+                        Owners: new[] { player.ClanShortName },
+                        Detail: $"Army {army.Id} for {player.ClanShortName} reports ({army.X},{army.Y}) but that tile does not reference it."));
                 }
             }
         }
 
-        return new BoardStateInvariantCounters(mixedClanTileStacks, ghostArmies);
+        return new BoardStateInvariantReport(
+            new BoardStateInvariantCounters(
+                failures.Count(failure => failure.Kind.Equals("mixed-clan-tile-stack", StringComparison.OrdinalIgnoreCase)),
+                ghostArmies),
+            failures,
+            finalCheckpoint);
+    }
+
+    private static string? WriteDebugPackets(EvalCaseDefinition definition, CampaignRunResult campaign, BoardStateInvariantReport boardInvariants)
+    {
+        if (boardInvariants.Failures.Count == 0)
+        {
+            return null;
+        }
+
+        Directory.CreateDirectory(campaign.OutputDirectory);
+        var path = Path.Combine(campaign.OutputDirectory, "debug-packets.jsonl");
+        var packet = new EvalDebugPacket(
+            SchemaVersion: 1,
+            Kind: "board-state-invariant",
+            CaseId: definition.CaseId,
+            Seed: definition.Seed,
+            ScenarioFamily: definition.ScenarioFamily,
+            CheckpointPath: boardInvariants.CheckpointPath,
+            SuspectedSubsystem: boardInvariants.Counters.MixedClanTileStacks > 0
+                ? "movement/capture/battle stack mutation"
+                : "movement/capture/elimination tile indexing",
+            Summary: $"{boardInvariants.Counters.MixedClanTileStacks} mixed-clan tile stack(s); {boardInvariants.Counters.GhostArmies} ghost army reference(s).",
+            Failures: boardInvariants.Failures,
+            ReproCommand: $"dotnet run --project Wism.Agent.Playground -- eval seed={definition.Seed} cases=1 maxTurns={definition.MaxTurns} scenarios={definition.ScenarioFamily} clans={definition.ClanCount} sizes={definition.Size} --quiet");
+        File.WriteAllText(path, JsonSerializer.Serialize(packet, JsonLineOptions) + Environment.NewLine);
+        return path;
     }
 
     private static int[] ConcatIds(int[] armyIds, int[] visitingArmyIds) =>
@@ -437,7 +511,7 @@ public sealed class EvalBatchRunner
                 CaseId: failure.CaseId,
                 Kind: failure.FailureClass ?? "campaign-failed",
                 Summary: failure.FailureMessage ?? failure.Outcome,
-                ArtifactPath: failure.CampaignManifestPath);
+                ArtifactPath: failure.DebugPacketPath ?? failure.CampaignManifestPath);
         }
     }
 
@@ -574,5 +648,13 @@ public sealed class EvalBatchRunner
     private sealed record BoardStateInvariantCounters(int MixedClanTileStacks, int GhostArmies)
     {
         public static BoardStateInvariantCounters Empty { get; } = new(0, 0);
+    }
+
+    private sealed record BoardStateInvariantReport(
+        BoardStateInvariantCounters Counters,
+        IReadOnlyList<EvalInvariantFailure> Failures,
+        string? CheckpointPath)
+    {
+        public static BoardStateInvariantReport Empty { get; } = new(BoardStateInvariantCounters.Empty, Array.Empty<EvalInvariantFailure>(), null);
     }
 }
