@@ -168,7 +168,7 @@ namespace Wism.Client.Controllers
                 return ActionState.Succeeded;
             }
 
-            // Get a route            
+            // Get a route
             var myDistance = 0.0f;
             var myPath = path;
             if (NoPathYet(myPath))
@@ -179,6 +179,14 @@ namespace Wism.Client.Controllers
                     // Impossible route
                     distance = myDistance;
                     return ActionState.Failed;
+                }
+
+                // Army was already at the destination when FindPath was called
+                if (AtDestination(myPath))
+                {
+                    this.PrepareArmiesForArrival(armiesToMove, myPath, out distance);
+                    path = myPath;
+                    return ActionState.Succeeded;
                 }
             }
 

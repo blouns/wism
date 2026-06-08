@@ -1,11 +1,13 @@
 using System;
 using NUnit.Framework;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Core.Armies.WarStrategies;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Modules.Infos;
+using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.Unit.Parity;
 
@@ -27,7 +29,8 @@ public class ManualParityTests
     [SetUp]
     public void SetUp()
     {
-        Game.CreateDefaultGame();
+        // TestWorld has Forest, Mountain, Grass, Hill, Marsh and neutral Deserton city
+        Game.CreateDefaultGame("TestWorld");
         Game.Current.Random = new Random(1990);
     }
 
@@ -100,38 +103,26 @@ public class ManualParityTests
     [Test]
     public void NeutralCity_WeakAttacker_CanLose()
     {
-        // Use a known bad-luck seed where a single light-infantry loses to a Defense=9 city.
-        // With city defense = 9, even capped at 9 strength, single attacker of strength 3
-        // will frequently lose. We run 30 trials and expect at least some losses.
-        var citytile = World.Current.Map[1, 1];
-        if (!citytile.HasCity())
-        {
-            Assert.Ignore("No city at map[1,1] in test world.");
-            return;
-        }
-
-        var city = citytile.City;
-        var neutralPlayer = Player.GetNeutralPlayer();
-        city.Claim(neutralPlayer);
-        city.Defense = 9;
-
+        // TestWorld has Deserton (Neutral) at (5,7) with Defense=4.
+        // Single Sirian LightInfantry (Strength=3, no AFCM bonuses) has ~30% city-kill odds
+        // per round vs. a Defense=4 city. Over 30 trials we expect both wins and losses.
         int wins = 0;
-        int trials = 30;
+        const int trials = 30;
         IWarStrategy war = new DefaultWarStrategy();
 
         for (int i = 0; i < trials; i++)
         {
-            Game.CreateDefaultGame();
+            var cp = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(cp, "TestWorld");
             Game.Current.Random = new Random(i * 17 + 3);
-            var attacker = Game.Current.Players[0];
-            var targetTile = World.Current.Map[1, 1];
-            if (!targetTile.HasCity()) break;
-            targetTile.City.Claim(Player.GetNeutralPlayer());
-            targetTile.City.Defense = 9;
 
-            var attackTile = World.Current.Map[0, 1];
-            attacker.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), attackTile);
+            var attacker = Game.Current.Players[0];           // Sirians
+            var targetTile = World.Current.Map[5, 7];         // Deserton (Neutral, Defense=4)
+            var conscriptTile = World.Current.Map[4, 6];      // Grass tile adjacent to Deserton
+
+            attacker.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), conscriptTile);
             var attackers = attacker.GetArmies();
+
             if (war.Attack(attackers, targetTile))
             {
                 wins++;
@@ -139,9 +130,9 @@ public class ManualParityTests
         }
 
         Assert.That(wins, Is.LessThan(trials),
-            "Single light-infantry should NOT always capture Defense=9 neutral city");
+            "Single LightInfantry should NOT always win vs. Defense=4 neutral city");
         Assert.That(wins, Is.GreaterThan(0),
-            "Strong attacker should win at least sometimes");
+            "Single LightInfantry should win at least sometimes vs. Defense=4 neutral city");
     }
 
     // -------------------------------------------------------------------------
