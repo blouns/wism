@@ -156,6 +156,26 @@ public class WarStrategyTests
     }
 
     [Test]
+    public void MusterArmy_IncludesVisitingArmiesAcrossCityFootprint()
+    {
+        Game.CreateDefaultGame();
+        var player = Game.Current.Players[0];
+        var enemy = Game.Current.Players[1];
+        var cityTile = World.Current.Map[2, 2];
+        var otherCityTile = World.Current.Map[3, 2];
+
+        MapBuilder.AddCity(World.Current, 2, 2, "Marthos", player.Clan.ShortName);
+        var defender = enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[4, 2]);
+        defender.Tile.RemoveArmies(new System.Collections.Generic.List<Wism.Client.MapObjects.Army> { defender });
+        otherCityTile.AddVisitingArmies(new System.Collections.Generic.List<Wism.Client.MapObjects.Army> { defender });
+
+        var defenders = cityTile.MusterArmy();
+
+        Assert.That(defenders, Does.Contain(defender));
+        Assert.That(defenders[0].Clan, Is.EqualTo(enemy.Clan));
+    }
+
+    [Test]
     public void EnemyOwnedCityWithOnlyFriendlyGarrison_IsNotAttackable()
     {
         Game.CreateDefaultGame();

@@ -370,13 +370,42 @@ public sealed class EvalBatchRunner
 
     private static BoardStateInvariantReport InspectFinalBoardStateInvariants(CampaignRunResult campaign)
     {
-        var finalCheckpoint = campaign.Checkpoints.LastOrDefault();
-        if (string.IsNullOrWhiteSpace(finalCheckpoint) || !File.Exists(finalCheckpoint))
+        var checkpoints = campaign.Checkpoints
+            .Where(path => !string.IsNullOrWhiteSpace(path) && File.Exists(path))
+            .ToArray();
+        if (checkpoints.Length == 0)
         {
             return BoardStateInvariantReport.Empty;
         }
 
-        var snapshot = Newtonsoft.Json.JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(finalCheckpoint));
+        var failures = new List<EvalInvariantFailure>();
+        var ghostArmies = 0;
+        var firstFailureCheckpoint = checkpoints.LastOrDefault();
+        foreach (var checkpoint in checkpoints)
+        {
+            var report = InspectCheckpointBoardStateInvariants(checkpoint);
+            if (report.Failures.Count > 0 && failures.Count == 0)
+            {
+                firstFailureCheckpoint = checkpoint;
+            }
+
+            failures.AddRange(report.Failures);
+            ghostArmies += report.Counters.GhostArmies;
+        }
+
+        return new BoardStateInvariantReport(
+            new BoardStateInvariantCounters(
+                failures.Count(failure =>
+                    failure.Kind.Equals("mixed-clan-tile-stack", StringComparison.OrdinalIgnoreCase) ||
+                    failure.Kind.Equals("mixed-clan-city-footprint", StringComparison.OrdinalIgnoreCase)),
+                ghostArmies),
+            failures,
+            firstFailureCheckpoint);
+    }
+
+    private static BoardStateInvariantReport InspectCheckpointBoardStateInvariants(string checkpoint)
+    {
+        var snapshot = Newtonsoft.Json.JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(checkpoint));
         if (snapshot?.World?.Tiles == null || snapshot.Players == null)
         {
             return BoardStateInvariantReport.Empty;
@@ -399,6 +428,10 @@ public sealed class EvalBatchRunner
         var tileArmies = snapshot.World.Tiles.ToDictionary(
             tile => (tile.X, tile.Y),
             tile => ConcatIds(tile.ArmyIds, tile.VisitingArmyIds));
+        var cityOwners = snapshot.World.Cities?.ToDictionary(
+            city => city.CityShortName,
+            city => city.ClanShortName,
+            StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         var failures = new List<EvalInvariantFailure>();
         foreach (var tile in snapshot.World.Tiles)
@@ -419,8 +452,36 @@ public sealed class EvalBatchRunner
                     Y: tile.Y,
                     ArmyIds: ids,
                     Owners: owners,
-                    Detail: $"Tile ({tile.X},{tile.Y}) has armies from {string.Join(", ", owners)}."));
+                    Detail: $"{Path.GetFileName(checkpoint)} tile ({tile.X},{tile.Y}) has armies from {string.Join(", ", owners)}."));
             }
+        }
+
+        foreach (var cityGroup in snapshot.World.Tiles
+                     .Where(tile => !string.IsNullOrWhiteSpace(tile.CityShortName))
+                     .GroupBy(tile => tile.CityShortName, StringComparer.OrdinalIgnoreCase))
+        {
+            var ids = cityGroup
+                .SelectMany(tile => ConcatIds(tile.ArmyIds, tile.VisitingArmyIds))
+                .ToArray();
+            var owners = ids
+                .Select(id => armyOwners.TryGetValue(id, out var owner) ? owner : null)
+                .Where(owner => !string.IsNullOrWhiteSpace(owner))
+                .Select(owner => owner!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            if (owners.Length <= 1)
+            {
+                continue;
+            }
+
+            cityOwners.TryGetValue(cityGroup.Key, out var cityOwner);
+            failures.Add(new EvalInvariantFailure(
+                Kind: "mixed-clan-city-footprint",
+                X: null,
+                Y: null,
+                ArmyIds: ids,
+                Owners: owners,
+                Detail: $"{Path.GetFileName(checkpoint)} city {cityGroup.Key} owned by {cityOwner ?? "Unknown"} has armies from {string.Join(", ", owners)} across its footprint."));
         }
 
         var ghostArmies = 0;
@@ -447,7 +508,7 @@ public sealed class EvalBatchRunner
                         Y: army.Y,
                         ArmyIds: new[] { army.Id },
                         Owners: new[] { player.ClanShortName },
-                        Detail: $"Army {army.Id} for {player.ClanShortName} reports ({army.X},{army.Y}) but that tile does not reference it."));
+                        Detail: $"{Path.GetFileName(checkpoint)} army {army.Id} for {player.ClanShortName} reports ({army.X},{army.Y}) but that tile does not reference it."));
                 }
             }
         }
@@ -457,7 +518,7 @@ public sealed class EvalBatchRunner
                 failures.Count(failure => failure.Kind.Equals("mixed-clan-tile-stack", StringComparison.OrdinalIgnoreCase)),
                 ghostArmies),
             failures,
-            finalCheckpoint);
+            checkpoint);
     }
 
     private static string? WriteDebugPackets(EvalCaseDefinition definition, CampaignRunResult campaign, BoardStateInvariantReport boardInvariants)

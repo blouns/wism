@@ -106,6 +106,21 @@ namespace Wism.Client.Controllers
             }
 
             var targetArmies = targetTile.GetAllArmies();
+            var hostileCityArmies = targetTile.HasCity()
+                ? targetTile.City.GetTiles()
+                    .SelectMany(tile => tile.GetAllArmies())
+                    .Where(army => army.Clan != armiesToMove[0].Clan)
+                    .ToList()
+                : new List<Army>();
+            if (hostileCityArmies.Count > 0)
+            {
+                this.logger.LogInformation(
+                    $"Army cannot move {ArmiesToString(armiesToMove)} to {targetTile} " +
+                    $"as {targetTile.City} is occupied by {hostileCityArmies[0].Clan}");
+                Game.Current.Transition(GameState.SelectedArmy);
+                return MoveResult.Blocked;
+            }
+
             if (targetArmies.Count > 0)
             {
                 // Does the tile have room for the unit of the same team?

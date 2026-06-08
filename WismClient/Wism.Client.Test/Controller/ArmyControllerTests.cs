@@ -74,6 +74,34 @@ public class ArmyControllerTests
     }
 
     [Test]
+    public void TryMove_BlocksHostileVisitorAnywhereInCityFootprint()
+    {
+        var controllers = TestUtilities.CreateControllerProvider();
+        var player = Game.Current.Players[0];
+        var enemy = Game.Current.Players[1];
+        var origin = World.Current.Map[1, 2];
+        var cityTile = World.Current.Map[2, 2];
+        var otherCityTile = World.Current.Map[3, 2];
+
+        MapBuilder.AddCity(World.Current, 2, 2, "Marthos", player.Clan.ShortName);
+        var defender = enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[4, 2]);
+        defender.Tile.RemoveArmies(new List<Army> { defender });
+        otherCityTile.AddVisitingArmies(new List<Army> { defender });
+
+        var mover = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+        var movingStack = new List<Army> { mover };
+        TestUtilities.Select(controllers, movingStack);
+
+        var result = controllers.ArmyController.TryMove(movingStack, cityTile);
+
+        Assert.That(result, Is.EqualTo(MoveResult.Blocked));
+        Assert.That(otherCityTile.GetAllArmies(), Does.Contain(defender));
+        Assert.That(cityTile.GetAllArmies(), Does.Not.Contain(mover));
+        Assert.That(defender.Tile, Is.EqualTo(otherCityTile));
+        Assert.That(mover.Tile, Is.EqualTo(origin));
+    }
+
+    [Test]
     public void TryMove_DetachesMixedStationaryAndVisitingOriginStack()
     {
         var controllers = TestUtilities.CreateControllerProvider();
