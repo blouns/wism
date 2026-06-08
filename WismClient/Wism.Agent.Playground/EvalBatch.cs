@@ -105,9 +105,10 @@ public sealed record EvalCounters(
     int ProductionVectors,
     int InvalidCommands,
     int MixedClanTileStacks,
+    int StaleVisitingArmies,
     int GhostArmies)
 {
-    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static EvalCounters operator +(EvalCounters left, EvalCounters right) =>
         new(
@@ -126,6 +127,7 @@ public sealed record EvalCounters(
             left.ProductionVectors + right.ProductionVectors,
             left.InvalidCommands + right.InvalidCommands,
             left.MixedClanTileStacks + right.MixedClanTileStacks,
+            left.StaleVisitingArmies + right.StaleVisitingArmies,
             left.GhostArmies + right.GhostArmies);
 }
 
@@ -228,8 +230,8 @@ public sealed class EvalBatchRunner
             new EvalGateResult("production-vectoring-signal", !hasProductionVectoringCases || counters.ProductionVectors > 0, $"{counters.ProductionVectors} production vectors"),
             new EvalGateResult(
                 "board-state-invariants",
-                counters.MixedClanTileStacks == 0 && counters.GhostArmies == 0,
-                $"{counters.MixedClanTileStacks} mixed-clan tile stacks; {counters.GhostArmies} ghost armies"),
+                counters.MixedClanTileStacks == 0 && counters.StaleVisitingArmies == 0 && counters.GhostArmies == 0,
+                $"{counters.MixedClanTileStacks} mixed-clan tile stacks; {counters.StaleVisitingArmies} stale visiting armies; {counters.GhostArmies} ghost armies"),
             new EvalGateResult(
                 "classic-ai-victory-pressure",
                 classicAiConquestCases.Length == 0 || classicAiPressurePercent >= 50,
@@ -291,7 +293,9 @@ public sealed class EvalBatchRunner
             var counters = CountSignals(campaign, boardInvariants.Counters);
             var debugPacketPath = WriteDebugPackets(definition, campaign, boardInvariants);
             var hasCommandTimeout = counters.Timeouts > 0;
-            var hasBoardInvariantFailure = counters.MixedClanTileStacks > 0 || counters.GhostArmies > 0;
+            var hasBoardInvariantFailure = counters.MixedClanTileStacks > 0 ||
+                                           counters.StaleVisitingArmies > 0 ||
+                                           counters.GhostArmies > 0;
             var status = hasCommandTimeout || hasBoardInvariantFailure ? "Failed" : campaign.Status;
 
             return new EvalCaseResult(
@@ -314,7 +318,7 @@ public sealed class EvalBatchRunner
                 FailureMessage: IsPassed(status) ? null : hasCommandTimeout
                     ? "A command exceeded the buffered in-progress execution limit."
                     : hasBoardInvariantFailure
-                        ? $"Final checkpoint has {counters.MixedClanTileStacks} mixed-clan tile stack(s) and {counters.GhostArmies} ghost army reference(s)."
+                        ? $"Final checkpoint has {counters.MixedClanTileStacks} mixed-clan tile stack(s), {counters.StaleVisitingArmies} stale visiting army reference(s), and {counters.GhostArmies} ghost army reference(s)."
                         : campaign.Outcome)
                 with { Status = status };
         }
@@ -365,6 +369,7 @@ public sealed class EvalBatchRunner
             ProductionVectors: CountContains(moments, "production-vector"),
             InvalidCommands: CountContains(text, "command failed:"),
             MixedClanTileStacks: boardInvariants.MixedClanTileStacks,
+            StaleVisitingArmies: boardInvariants.StaleVisitingArmies,
             GhostArmies: boardInvariants.GhostArmies);
     }
 
@@ -379,6 +384,8 @@ public sealed class EvalBatchRunner
         }
 
         var failures = new List<EvalInvariantFailure>();
+        var mixedClanTileStacks = 0;
+        var staleVisitingArmies = 0;
         var ghostArmies = 0;
         var firstFailureCheckpoint = checkpoints.LastOrDefault();
         foreach (var checkpoint in checkpoints)
@@ -390,14 +397,15 @@ public sealed class EvalBatchRunner
             }
 
             failures.AddRange(report.Failures);
+            mixedClanTileStacks += report.Counters.MixedClanTileStacks;
+            staleVisitingArmies += report.Counters.StaleVisitingArmies;
             ghostArmies += report.Counters.GhostArmies;
         }
 
         return new BoardStateInvariantReport(
             new BoardStateInvariantCounters(
-                failures.Count(failure =>
-                    failure.Kind.Equals("mixed-clan-tile-stack", StringComparison.OrdinalIgnoreCase) ||
-                    failure.Kind.Equals("mixed-clan-city-footprint", StringComparison.OrdinalIgnoreCase)),
+                mixedClanTileStacks,
+                staleVisitingArmies,
                 ghostArmies),
             failures,
             firstFailureCheckpoint);
@@ -424,6 +432,12 @@ public sealed class EvalBatchRunner
                 armyOwners[army.Id] = player.ClanShortName;
             }
         }
+
+        var selectedArmyIds = (snapshot.SelectedArmyIds ?? Array.Empty<int>()).ToHashSet();
+        var currentClan = snapshot.CurrentPlayerIndex >= 0 &&
+                          snapshot.CurrentPlayerIndex < snapshot.Players.Length
+            ? snapshot.Players[snapshot.CurrentPlayerIndex].ClanShortName
+            : null;
 
         var tileArmies = snapshot.World.Tiles.ToDictionary(
             tile => (tile.X, tile.Y),
@@ -453,6 +467,25 @@ public sealed class EvalBatchRunner
                     ArmyIds: ids,
                     Owners: owners,
                     Detail: $"{Path.GetFileName(checkpoint)} tile ({tile.X},{tile.Y}) has armies from {string.Join(", ", owners)}."));
+            }
+
+            foreach (var visitingArmyId in tile.VisitingArmyIds ?? Array.Empty<int>())
+            {
+                armyOwners.TryGetValue(visitingArmyId, out var owner);
+                if (selectedArmyIds.Contains(visitingArmyId) &&
+                    !string.IsNullOrWhiteSpace(owner) &&
+                    string.Equals(owner, currentClan, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                failures.Add(new EvalInvariantFailure(
+                    Kind: "stale-visiting-army",
+                    X: tile.X,
+                    Y: tile.Y,
+                    ArmyIds: new[] { visitingArmyId },
+                    Owners: new[] { owner ?? "Unknown" },
+                    Detail: $"{Path.GetFileName(checkpoint)} tile ({tile.X},{tile.Y}) has visiting army {visitingArmyId} for {owner ?? "Unknown"}, but selected current clan is {currentClan ?? "Unknown"}."));
             }
         }
 
@@ -515,7 +548,10 @@ public sealed class EvalBatchRunner
 
         return new BoardStateInvariantReport(
             new BoardStateInvariantCounters(
-                failures.Count(failure => failure.Kind.Equals("mixed-clan-tile-stack", StringComparison.OrdinalIgnoreCase)),
+                failures.Count(failure =>
+                    failure.Kind.Equals("mixed-clan-tile-stack", StringComparison.OrdinalIgnoreCase) ||
+                    failure.Kind.Equals("mixed-clan-city-footprint", StringComparison.OrdinalIgnoreCase)),
+                failures.Count(failure => failure.Kind.Equals("stale-visiting-army", StringComparison.OrdinalIgnoreCase)),
                 ghostArmies),
             failures,
             checkpoint);
@@ -539,15 +575,17 @@ public sealed class EvalBatchRunner
             CheckpointPath: boardInvariants.CheckpointPath,
             SuspectedSubsystem: boardInvariants.Counters.MixedClanTileStacks > 0
                 ? "movement/capture/battle stack mutation"
-                : "movement/capture/elimination tile indexing",
-            Summary: $"{boardInvariants.Counters.MixedClanTileStacks} mixed-clan tile stack(s); {boardInvariants.Counters.GhostArmies} ghost army reference(s).",
+                : boardInvariants.Counters.StaleVisitingArmies > 0
+                    ? "selection/deselection visiting-army lifecycle"
+                    : "movement/capture/elimination tile indexing",
+            Summary: $"{boardInvariants.Counters.MixedClanTileStacks} mixed-clan tile stack(s); {boardInvariants.Counters.StaleVisitingArmies} stale visiting army reference(s); {boardInvariants.Counters.GhostArmies} ghost army reference(s).",
             Failures: boardInvariants.Failures,
             ReproCommand: $"dotnet run --project Wism.Agent.Playground -- eval seed={definition.Seed} cases=1 maxTurns={definition.MaxTurns} scenarios={definition.ScenarioFamily} clans={definition.ClanCount} sizes={definition.Size} --quiet");
         File.WriteAllText(path, JsonSerializer.Serialize(packet, JsonLineOptions) + Environment.NewLine);
         return path;
     }
 
-    private static int[] ConcatIds(int[] armyIds, int[] visitingArmyIds) =>
+    private static int[] ConcatIds(int[]? armyIds, int[]? visitingArmyIds) =>
         (armyIds ?? Array.Empty<int>())
             .Concat(visitingArmyIds ?? Array.Empty<int>())
             .ToArray();
@@ -604,6 +642,7 @@ public sealed class EvalBatchRunner
             $"- Battles: {run.Scorecard.Counters.Battles}",
             $"- Invalid commands: {run.Scorecard.Counters.InvalidCommands}",
             $"- Mixed-clan tile stacks: {run.Scorecard.Counters.MixedClanTileStacks}",
+            $"- Stale visiting armies: {run.Scorecard.Counters.StaleVisitingArmies}",
             $"- Ghost armies: {run.Scorecard.Counters.GhostArmies}",
             $"- Crashes: {run.Scorecard.Counters.Crashes}",
             $"- Timeouts: {run.Scorecard.Counters.Timeouts}",
@@ -749,9 +788,9 @@ public sealed class EvalBatchRunner
         int MaxTurns,
         string Size);
 
-    private sealed record BoardStateInvariantCounters(int MixedClanTileStacks, int GhostArmies)
+    private sealed record BoardStateInvariantCounters(int MixedClanTileStacks, int StaleVisitingArmies, int GhostArmies)
     {
-        public static BoardStateInvariantCounters Empty { get; } = new(0, 0);
+        public static BoardStateInvariantCounters Empty { get; } = new(0, 0, 0);
     }
 
     private sealed record BoardStateInvariantReport(

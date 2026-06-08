@@ -156,7 +156,7 @@ public class WarStrategyTests
     }
 
     [Test]
-    public void MusterArmy_IncludesVisitingArmiesAcrossCityFootprint()
+    public void MusterArmy_IgnoresUnselectedVisitingArmiesAcrossCityFootprint()
     {
         Game.CreateDefaultGame();
         var player = Game.Current.Players[0];
@@ -171,8 +171,8 @@ public class WarStrategyTests
 
         var defenders = cityTile.MusterArmy();
 
-        Assert.That(defenders, Does.Contain(defender));
-        Assert.That(defenders[0].Clan, Is.EqualTo(enemy.Clan));
+        Assert.That(defenders, Does.Not.Contain(defender));
+        Assert.That(defenders, Is.Empty);
     }
 
     [Test]

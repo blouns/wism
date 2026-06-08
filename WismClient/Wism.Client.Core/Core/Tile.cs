@@ -407,12 +407,18 @@ namespace Wism.Client.Core
                 var tiles = this.City.GetTiles();
                 for (var i = 0; i < tiles.Length; i++)
                 {
-                    allArmies.AddRange(tiles[i].GetAllArmies());
+                    if (tiles[i].HasArmies())
+                    {
+                        allArmies.AddRange(tiles[i].Armies);
+                    }
                 }
             }
             else
             {
-                allArmies.AddRange(this.GetAllArmies());
+                if (this.HasArmies())
+                {
+                    allArmies.AddRange(this.Armies);
+                }
             }
 
             allArmies.Sort(new ByArmyBattleOrder(this));

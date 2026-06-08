@@ -204,6 +204,7 @@ namespace Wism.Client.Core
         {
             // End current players turn
             this.DeselectArmies();
+            this.CommitAllVisitingArmies();
             this.nextArmyQueue.Clear();
             this.quitArmySet.Clear();
             var player = this.GetCurrentPlayer();
@@ -244,6 +245,7 @@ namespace Wism.Client.Core
         /// </summary>
         public void StartTurn()
         {
+            this.CommitAllVisitingArmies();
             var player = this.GetCurrentPlayer();
 
             if (player.GetCities().Count == 0 &&
@@ -340,16 +342,22 @@ namespace Wism.Client.Core
                 var visiting = tile.VisitingArmies;
                 if (visiting.Count == armies.Count && !armies.Except(visiting).Any())
                 {
-                    // Sync selectedArmies if desynced
                     if (!this.ArmiesSelected())
-                        this.SelectArmiesInternal(visiting);
+                    {
+                        tile.CommitVisitingArmies();
+                    }
+                    else
+                    {
+                        this.Transition(GameState.SelectedArmy);
+                        return;
+                    }
 
-                    this.Transition(GameState.SelectedArmy);
-                    return;
                 }
-
-                throw new InvalidOperationException(
-                    $"Tile already has different visiting armies: {ArmiesToString(visiting)}");
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Tile already has different visiting armies: {ArmiesToString(visiting)}");
+                }
             }
 
             // Deselect current selection if switching
@@ -411,7 +419,8 @@ namespace Wism.Client.Core
         {
             return (this.GameState == GameState.SelectedArmy ||
                     this.GameState == GameState.MovingArmy ||
-                    this.GameState == GameState.AttackingArmy) &&
+                    this.GameState == GameState.AttackingArmy ||
+                    this.GameState == GameState.CompletedBattle) &&
                    this.selectedArmies != null &&
                    this.selectedArmies.Count > 0;
         }
@@ -436,9 +445,33 @@ namespace Wism.Client.Core
             }
 
             // Deselect
-            armiesToDeselect[0].Tile.CommitVisitingArmies();
+            foreach (var group in armiesToDeselect
+                         .Where(army => army.Tile != null && army.Tile.HasVisitingArmies())
+                         .GroupBy(army => army.Tile))
+            {
+                group.Key.CommitVisitingArmies();
+            }
+
             this.selectedArmies = null;
             this.Transition(GameState.Ready);
+        }
+
+        private void CommitAllVisitingArmies()
+        {
+            if (World.Current.Map == null)
+            {
+                return;
+            }
+
+            foreach (var tile in World.Current.Map)
+            {
+                if (tile.HasVisitingArmies())
+                {
+                    tile.CommitVisitingArmies();
+                }
+            }
+
+            this.selectedArmies = null;
         }
 
         /// <summary>
