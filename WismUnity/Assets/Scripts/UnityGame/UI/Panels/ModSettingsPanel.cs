@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Assets.Scripts.UnityGame.ModKit;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -16,13 +17,14 @@ using UnityEditor;
 public sealed class ModSettingsPanel : MonoBehaviour
 {
     const string GameSetupScene = "GameSetup";
-    static readonly Color PanelColor = new Color(0.12f, 0.12f, 0.12f, 0.95f);
-    static readonly Color FieldColor = new Color(0.22f, 0.22f, 0.22f, 1f);
-    static readonly Color RowColor = new Color(0.16f, 0.16f, 0.16f, 1f);
-    static readonly Color RowSelectedColor = new Color(0.20f, 0.25f, 0.21f, 1f);
-    static readonly Color GreenColor = new Color(0.36f, 0.86f, 0.48f, 1f);
-    static readonly Color RedColor = new Color(1f, 0.34f, 0.34f, 1f);
-    static readonly Color MutedTextColor = new Color(0.78f, 0.78f, 0.78f, 1f);
+    static readonly Color PanelColor = new Color(0.48f, 0.48f, 0.46f, 0.98f);
+    static readonly Color FieldColor = new Color(0.86f, 0.86f, 0.84f, 1f);
+    static readonly Color RowColor = new Color(0.38f, 0.38f, 0.36f, 1f);
+    static readonly Color RowSelectedColor = new Color(0.52f, 0.54f, 0.44f, 1f);
+    static readonly Color TextColor = new Color(0.03f, 0.03f, 0.03f, 1f);
+    static readonly Color GreenColor = new Color(0.00f, 0.46f, 0.12f, 1f);
+    static readonly Color RedColor = new Color(0.78f, 0.00f, 0.00f, 1f);
+    static readonly Color MutedTextColor = new Color(0.15f, 0.15f, 0.15f, 1f);
 
     readonly HashSet<string> selectedPacks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     Dropdown profileDropdown;
@@ -30,12 +32,16 @@ public sealed class ModSettingsPanel : MonoBehaviour
     Text statusText;
     Text detailText;
     Text packHintText;
+    Text worldDetailText;
+    RawImage worldPreviewImage;
     Transform packList;
     Button continueButton;
     string[] profileIds = new string[0];
     string[] worldIds = new string[0];
     FeaturePackManifest[] packs = new FeaturePackManifest[0];
     UnityModKitSelectionReport currentReport;
+    bool isRefreshing;
+    bool initializedSelection;
 
     readonly struct PackHealthStatus
     {
@@ -74,15 +80,18 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var root = CreatePanel(transform, "Mod Settings", new Vector2(32f, 32f), new Vector2(-32f, -32f));
         LayoutElement(root, 0, 760, 0);
         CreateHeader(root.transform, "WISM Mod Settings");
-        CreateBodyText(root.transform, "Choose a profile, world, and data-only feature packs before starting a new game.");
+        CreateBodyText(root.transform, "Choose a profile, world, and feature packs before starting a new game.");
 
         profileDropdown = CreateDropdown(root.transform, "Profile");
         profileDropdown.gameObject.name = "ProfileDropdown";
-        profileDropdown.onValueChanged.AddListener(_ => Evaluate());
+        profileDropdown.onValueChanged.AddListener(_ => OnProfileChanged());
 
         worldDropdown = CreateDropdown(root.transform, "World");
         worldDropdown.gameObject.name = "WorldDropdown";
         worldDropdown.onValueChanged.AddListener(_ => Evaluate());
+
+        var worldDetails = CreateWorldDetails(root.transform);
+        worldDetails.gameObject.name = "WorldDetails";
 
         CreateBodyText(root.transform, "Feature Packs");
         var scroll = CreateScroll(root.transform);
@@ -115,21 +124,72 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
     void Refresh()
     {
-        UnityModKitRuntimeSelection.Clear();
-        selectedPacks.Clear();
+        isRefreshing = true;
+        var previousProfile = Current(profileDropdown, profileIds);
+        var previousWorld = Current(worldDropdown, worldIds);
+        var previousPacks = new HashSet<string>(selectedPacks, StringComparer.OrdinalIgnoreCase);
+
         profileIds = DiscoverIds(Path.Combine(UnityModKitSelection.PluginModRoot, "Profiles"), "classic-warlords");
         worldIds = DiscoverIds(Path.Combine(UnityModKitSelection.PluginModRoot, "Worlds"), "Mini-Illuria");
         packs = ModularGameProfileCatalog.DiscoverPacksFromModRoot(UnityModKitSelection.PluginModRoot).ToArray();
-        ResetDropdown(profileDropdown, profileIds, "classic-warlords");
-        ResetDropdown(worldDropdown, worldIds, "TestWorld");
+
+        var profile = profileIds.Contains(previousProfile, StringComparer.OrdinalIgnoreCase)
+            ? previousProfile
+            : "classic-warlords";
+        ResetDropdown(profileDropdown, profileIds, profile);
+
+        if (!initializedSelection)
+        {
+            ApplyProfileDefaults(profile);
+            previousWorld = DefaultWorldForProfile(profile);
+            initializedSelection = true;
+        }
+        else
+        {
+            selectedPacks.Clear();
+            foreach (var packId in previousPacks.Where(PackExists))
+            {
+                selectedPacks.Add(packId);
+            }
+        }
+
+        var world = worldIds.Contains(previousWorld, StringComparer.OrdinalIgnoreCase)
+            ? previousWorld
+            : DefaultWorldForProfile(profile);
+        ResetDropdown(worldDropdown, worldIds, world);
+        RebuildPackRows();
+        isRefreshing = false;
+        Evaluate();
+    }
+
+    void OnProfileChanged()
+    {
+        if (isRefreshing)
+        {
+            return;
+        }
+
+        var profile = Current(profileDropdown, profileIds);
+        ApplyProfileDefaults(profile);
+        ResetDropdown(worldDropdown, worldIds, DefaultWorldForProfile(profile));
         RebuildPackRows();
         Evaluate();
+    }
+
+    void ApplyProfileDefaults(string profile)
+    {
+        selectedPacks.Clear();
+        foreach (var packId in DefaultPacksForProfile(profile).Where(PackExists))
+        {
+            selectedPacks.Add(packId);
+        }
     }
 
     void RebuildPackRows()
     {
         foreach (Transform child in packList)
         {
+            child.gameObject.SetActive(false);
             Destroy(child.gameObject);
         }
 
@@ -146,14 +206,14 @@ public sealed class ModSettingsPanel : MonoBehaviour
             void UpdateRow(bool selected)
             {
                 check.text = selected ? "[x]" : "[ ]";
-                name.text = PackDisplayName(pack);
+                name.text = PackDisplayName(pack) + "\n" + PackDescription(pack);
                 state.text = health.Label;
                 state.color = health.Color;
                 background.color = selected ? RowSelectedColor : RowColor;
             }
 
             row.GetComponent<PackRowHint>().Configure(
-                () => SetPackHint($"{PackDisplayName(pack)}: {health.Reason}"),
+                () => SetPackHint(PackHint(pack, health)),
                 () => SetPackHint("Click a feature pack row or checkbox to select or unselect it."));
 
             toggle.onValueChanged.AddListener(selected =>
@@ -168,11 +228,13 @@ public sealed class ModSettingsPanel : MonoBehaviour
                 }
 
                 UpdateRow(selected);
-                SetPackHint($"{PackDisplayName(pack)}: {(selected ? "selected" : "not selected")}. {health.Reason}");
+                SetPackHint($"{PackDisplayName(pack)}: {(selected ? "selected" : "not selected")}. {PackDescription(pack)} {health.Reason}");
                 Evaluate();
             });
 
-            UpdateRow(false);
+            var isSelected = selectedPacks.Contains(pack.Id);
+            toggle.SetIsOnWithoutNotify(isSelected);
+            UpdateRow(isSelected);
         }
     }
 
@@ -193,6 +255,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
             : "Red: fix selection before continuing.";
         statusText.color = green ? GreenColor : RedColor;
         detailText.text = BuildDetail(sceneAvailable);
+        UpdateWorldDetails(world);
         continueButton.interactable = green;
 
         if (green)
@@ -211,6 +274,9 @@ public sealed class ModSettingsPanel : MonoBehaviour
         {
             "Profile: " + currentReport.profileId,
             "World: " + currentReport.worldName,
+            "Feature Packs: " + (currentReport.activePackIds == null || currentReport.activePackIds.Length == 0
+                ? "None"
+                : string.Join(", ", currentReport.activePackIds)),
             "Compatibility: " + currentReport.compatibilityStatus,
             "Fingerprint: " + (currentReport.contentFingerprint ?? string.Empty),
             "Scene: " + (sceneAvailable ? "Available" : "Missing")
@@ -321,6 +387,57 @@ public sealed class ModSettingsPanel : MonoBehaviour
         return new PackHealthStatus("Verified", GreenColor, "Green verification metadata is present.");
     }
 
+    bool PackExists(string packId)
+    {
+        return packs.Any(pack => string.Equals(pack.Id, packId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static string[] DefaultPacksForProfile(string profile)
+    {
+        try
+        {
+            var selection = ModularGameProfileCatalog.ResolveFromModRoot(
+                UnityModKitSelection.PluginModRoot,
+                string.IsNullOrWhiteSpace(profile) ? "classic-warlords" : profile,
+                null);
+            return selection.PackIds.ToArray();
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
+    }
+
+    static string DefaultWorldForProfile(string profile)
+    {
+        try
+        {
+            var selection = ModularGameProfileCatalog.ResolveFromModRoot(
+                UnityModKitSelection.PluginModRoot,
+                string.IsNullOrWhiteSpace(profile) ? "classic-warlords" : profile,
+                null);
+            return !string.IsNullOrWhiteSpace(selection.Launch.World)
+                ? selection.Launch.World
+                : selection.BaseWorld;
+        }
+        catch
+        {
+            return "Mini-Illuria";
+        }
+    }
+
+    static string PackDescription(FeaturePackManifest pack)
+    {
+        return string.IsNullOrWhiteSpace(pack.Description)
+            ? "No description provided."
+            : pack.Description;
+    }
+
+    static string PackHint(FeaturePackManifest pack, PackHealthStatus health)
+    {
+        return $"{PackDisplayName(pack)}: {PackDescription(pack)} {health.Reason}";
+    }
+
     void SetPackHint(string message)
     {
         if (packHintText != null)
@@ -340,7 +457,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         cameraObject.tag = "MainCamera";
         var camera = cameraObject.GetComponent<Camera>();
         camera.clearFlags = CameraClearFlags.SolidColor;
-        camera.backgroundColor = new Color(0.08f, 0.09f, 0.10f, 1f);
+        camera.backgroundColor = new Color(0.20f, 0.20f, 0.20f, 1f);
         camera.orthographic = true;
         camera.orthographicSize = 5f;
     }
@@ -372,7 +489,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
     static GameObject CreatePanel(Transform parent, string name, Vector2 offsetMin, Vector2 offsetMax)
     {
-        var panel = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup));
+        var panel = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup), typeof(Outline));
         panel.transform.SetParent(parent, false);
         var rect = panel.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -381,6 +498,9 @@ public sealed class ModSettingsPanel : MonoBehaviour
         rect.anchoredPosition = Vector2.zero;
         rect.sizeDelta = new Vector2(920f, 620f);
         panel.GetComponent<Image>().color = PanelColor;
+        var outline = panel.GetComponent<Outline>();
+        outline.effectColor = new Color(0.10f, 0.10f, 0.10f, 1f);
+        outline.effectDistance = new Vector2(4f, -4f);
         var layout = panel.GetComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(22, 22, 18, 18);
         layout.spacing = 10;
@@ -415,6 +535,39 @@ public sealed class ModSettingsPanel : MonoBehaviour
         return dropdown;
     }
 
+    GameObject CreateWorldDetails(Transform parent)
+    {
+        var row = new GameObject("World Details Row", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+        row.transform.SetParent(parent, false);
+        var layout = row.GetComponent<HorizontalLayoutGroup>();
+        layout.spacing = 12;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+        LayoutElement(row, 92);
+
+        var previewFrame = new GameObject("WorldPreviewFrame", typeof(RectTransform), typeof(Image));
+        previewFrame.transform.SetParent(row.transform, false);
+        previewFrame.GetComponent<Image>().color = new Color(0.18f, 0.18f, 0.18f, 1f);
+        LayoutElement(previewFrame, 92, 148, 0);
+
+        var preview = new GameObject("WorldPreview", typeof(RectTransform), typeof(RawImage));
+        preview.transform.SetParent(previewFrame.transform, false);
+        Stretch(preview.GetComponent<RectTransform>(), 6, 6, -6, 6);
+        worldPreviewImage = preview.GetComponent<RawImage>();
+        worldPreviewImage.color = Color.white;
+        worldPreviewImage.raycastTarget = false;
+
+        worldDetailText = CreateText(row.transform, string.Empty, 12, FontStyle.Normal);
+        worldDetailText.gameObject.name = "WorldDetailText";
+        worldDetailText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        worldDetailText.verticalOverflow = VerticalWrapMode.Truncate;
+        LayoutElement(worldDetailText.gameObject, 92, 680, 0);
+
+        return row;
+    }
+
     static void CreateDropdownTemplate(Transform parent, Dropdown dropdown)
     {
         var template = new GameObject("Template", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
@@ -424,7 +577,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         templateRect.anchorMax = new Vector2(1, 0);
         templateRect.pivot = new Vector2(0.5f, 1);
         templateRect.sizeDelta = new Vector2(0, 150);
-        template.GetComponent<Image>().color = new Color(0.18f, 0.18f, 0.18f, 1f);
+        template.GetComponent<Image>().color = FieldColor;
 
         var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
         viewport.transform.SetParent(template.transform, false);
@@ -434,7 +587,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         viewportRect.offsetMin = Vector2.zero;
         viewportRect.offsetMax = Vector2.zero;
         var viewportImage = viewport.GetComponent<Image>();
-        viewportImage.color = new Color(0.18f, 0.18f, 0.18f, 1f);
+        viewportImage.color = FieldColor;
         viewportImage.raycastTarget = false;
         viewport.GetComponent<Mask>().showMaskGraphic = false;
 
@@ -453,7 +606,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
         var item = new GameObject("Item", typeof(RectTransform), typeof(Toggle), typeof(Image));
         item.transform.SetParent(content.transform, false);
-        item.GetComponent<Image>().color = new Color(0.24f, 0.24f, 0.24f, 1f);
+        item.GetComponent<Image>().color = new Color(0.70f, 0.70f, 0.68f, 1f);
         LayoutElement(item, 26);
 
         var itemLabel = CreateText(item.transform, "Option", 13, FontStyle.Normal);
@@ -477,7 +630,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var go = new GameObject("Pack Scroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
         go.transform.SetParent(parent, false);
         go.GetComponent<Image>().color = RowColor;
-        LayoutElement(go, 132);
+        LayoutElement(go, 150);
 
         var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
         viewport.transform.SetParent(go.transform, false);
@@ -523,7 +676,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         layout.childControlHeight = true;
         layout.childForceExpandWidth = false;
         layout.childForceExpandHeight = false;
-        LayoutElement(row, 28);
+        LayoutElement(row, 44);
 
         var toggle = row.GetComponent<Toggle>();
         toggle.targetGraphic = row.GetComponent<Image>();
@@ -533,11 +686,11 @@ public sealed class ModSettingsPanel : MonoBehaviour
         check.alignment = TextAnchor.MiddleLeft;
         LayoutElement(check.gameObject, 26, 34, 0);
 
-        var name = CreateText(row.transform, PackDisplayName(pack), 13, FontStyle.Normal);
+        var name = CreateText(row.transform, PackDisplayName(pack) + "\n" + PackDescription(pack), 12, FontStyle.Normal);
         name.gameObject.name = "PackName";
         name.alignment = TextAnchor.MiddleLeft;
         name.horizontalOverflow = HorizontalWrapMode.Wrap;
-        LayoutElement(name.gameObject, 26, 520, 0);
+        LayoutElement(name.gameObject, 42, 520, 0);
 
         var state = CreateText(row.transform, health.Label, 13, FontStyle.Bold);
         state.gameObject.name = "PackState";
@@ -566,7 +719,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
     {
         var go = new GameObject(text + " Button", typeof(RectTransform), typeof(Image), typeof(Button));
         go.transform.SetParent(parent, false);
-        go.GetComponent<Image>().color = new Color(0.32f, 0.32f, 0.32f, 1f);
+        go.GetComponent<Image>().color = new Color(0.34f, 0.34f, 0.32f, 1f);
         var button = go.GetComponent<Button>();
         button.onClick.AddListener(action);
         var label = CreateText(go.transform, text, 14, FontStyle.Bold);
@@ -585,7 +738,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         label.font = ResolveFont();
         label.fontSize = size;
         label.fontStyle = style;
-        label.color = Color.white;
+        label.color = TextColor;
         label.alignByGeometry = true;
         label.raycastTarget = false;
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -611,6 +764,156 @@ public sealed class ModSettingsPanel : MonoBehaviour
         }
 
         return resolvedFont;
+    }
+
+    void UpdateWorldDetails(string world)
+    {
+        if (worldDetailText == null || worldPreviewImage == null)
+        {
+            return;
+        }
+
+        var summary = LoadWorldSummary(world);
+        worldDetailText.text = summary.Description;
+        worldPreviewImage.texture = summary.Preview;
+    }
+
+    static WorldSummary LoadWorldSummary(string world)
+    {
+        var worldRoot = Path.Combine(UnityModKitSelection.PluginModRoot, "Worlds", world ?? string.Empty);
+        var cityPath = Path.Combine(worldRoot, "City.json");
+        var locationPath = Path.Combine(worldRoot, "Location.json");
+        var mapPath = Path.Combine(worldRoot, "Map.json");
+        var cityCount = CountJsonArray(cityPath);
+        var locationCount = CountJsonArray(locationPath);
+        var map = LoadMapTiles(mapPath);
+        var ownedStartCount = CountOwnedStarts(cityPath);
+        var preview = BuildMapPreview(map);
+        var dimensions = map.Width > 0 && map.Height > 0
+            ? $"{map.Width} x {map.Height}"
+            : "Unknown size";
+        var description = $"{world}\nMap: {dimensions}    Cities: {cityCount}    Sites: {locationCount}\nStarting clans: {ownedStartCount}. Start is blocked when selected clans do not have city starts on this world.";
+        return new WorldSummary(description, preview);
+    }
+
+    static int CountJsonArray(string path)
+    {
+        try
+        {
+            return File.Exists(path) ? JArray.Parse(File.ReadAllText(path)).Count : 0;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    static int CountOwnedStarts(string cityPath)
+    {
+        try
+        {
+            if (!File.Exists(cityPath))
+            {
+                return 0;
+            }
+
+            var clans = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var city in JArray.Parse(File.ReadAllText(cityPath)).OfType<JObject>())
+            {
+                var clan = city["ClanName"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(clan) && !string.Equals(clan, "Neutral", StringComparison.OrdinalIgnoreCase))
+                {
+                    clans.Add(clan);
+                }
+            }
+
+            return clans.Count;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    static MapPreviewData LoadMapTiles(string mapPath)
+    {
+        var tiles = new List<MapPreviewTile>();
+        try
+        {
+            if (!File.Exists(mapPath))
+            {
+                return new MapPreviewData(tiles, 0, 0);
+            }
+
+            var token = JToken.Parse(File.ReadAllText(mapPath));
+            var tileArray = token.Type == JTokenType.Array ? (JArray)token : token["Tiles"] as JArray;
+            if (tileArray == null)
+            {
+                return new MapPreviewData(tiles, 0, 0);
+            }
+
+            foreach (var tile in tileArray.OfType<JObject>())
+            {
+                tiles.Add(new MapPreviewTile(
+                    tile["X"]?.Value<int>() ?? 0,
+                    tile["Y"]?.Value<int>() ?? 0,
+                    tile["TerrainShortName"]?.ToString() ?? string.Empty));
+            }
+        }
+        catch
+        {
+            return new MapPreviewData(new List<MapPreviewTile>(), 0, 0);
+        }
+
+        var width = tiles.Count == 0 ? 0 : tiles.Max(tile => tile.X) + 1;
+        var height = tiles.Count == 0 ? 0 : tiles.Max(tile => tile.Y) + 1;
+        return new MapPreviewData(tiles, width, height);
+    }
+
+    static Texture2D BuildMapPreview(MapPreviewData map)
+    {
+        var width = Mathf.Max(1, map.Width);
+        var height = Mathf.Max(1, map.Height);
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        texture.filterMode = FilterMode.Point;
+        var pixels = Enumerable.Repeat(new Color(0.22f, 0.22f, 0.22f, 1f), width * height).ToArray();
+
+        foreach (var tile in map.Tiles)
+        {
+            var y = height - 1 - Mathf.Clamp(tile.Y, 0, height - 1);
+            var x = Mathf.Clamp(tile.X, 0, width - 1);
+            pixels[x + y * width] = TerrainColor(tile.Terrain);
+        }
+
+        texture.SetPixels(pixels);
+        texture.Apply(false, true);
+        return texture;
+    }
+
+    static Color TerrainColor(string terrain)
+    {
+        var value = terrain ?? string.Empty;
+        if (value.IndexOf("water", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return new Color(0.05f, 0.24f, 0.58f, 1f);
+        }
+
+        if (value.IndexOf("mount", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return new Color(0.55f, 0.55f, 0.55f, 1f);
+        }
+
+        if (value.IndexOf("forest", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return new Color(0.03f, 0.34f, 0.10f, 1f);
+        }
+
+        if (value.IndexOf("road", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return new Color(0.58f, 0.55f, 0.50f, 1f);
+        }
+
+        return new Color(0.10f, 0.52f, 0.14f, 1f);
     }
 
     static void LayoutElement(GameObject go, float height)
@@ -641,6 +944,46 @@ public sealed class ModSettingsPanel : MonoBehaviour
         rect.anchorMax = Vector2.one;
         rect.offsetMin = new Vector2(left, bottom);
         rect.offsetMax = new Vector2(right, -top);
+    }
+
+    readonly struct WorldSummary
+    {
+        public WorldSummary(string description, Texture2D preview)
+        {
+            Description = description;
+            Preview = preview;
+        }
+
+        public string Description { get; }
+        public Texture2D Preview { get; }
+    }
+
+    readonly struct MapPreviewData
+    {
+        public MapPreviewData(List<MapPreviewTile> tiles, int width, int height)
+        {
+            Tiles = tiles;
+            Width = width;
+            Height = height;
+        }
+
+        public List<MapPreviewTile> Tiles { get; }
+        public int Width { get; }
+        public int Height { get; }
+    }
+
+    readonly struct MapPreviewTile
+    {
+        public MapPreviewTile(int x, int y, string terrain)
+        {
+            X = x;
+            Y = y;
+            Terrain = terrain;
+        }
+
+        public int X { get; }
+        public int Y { get; }
+        public string Terrain { get; }
     }
 }
 

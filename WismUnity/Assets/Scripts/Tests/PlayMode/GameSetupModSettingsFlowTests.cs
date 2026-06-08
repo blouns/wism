@@ -46,7 +46,9 @@ public sealed class GameSetupModSettingsFlowTests
 
         Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("GameSetup"));
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Null);
-        Assert.That(FindButton("AdvancedModsButton").GetComponentInChildren<Text>().text, Is.EqualTo("Mods..."));
+        Assert.That(FindButton("AdvancedModsButton").GetComponentInChildren<Text>().text, Does.Contain("M</color>ods..."));
+        Assert.That(FindButton("StartButton").GetComponentInChildren<Text>().text, Does.Contain("S</color>tart"));
+        Assert.That(GameObject.Find("GameSetupValidationText"), Is.Not.Null);
     }
 
     [UnityTest]

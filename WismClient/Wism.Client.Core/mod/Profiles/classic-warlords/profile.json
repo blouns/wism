@@ -6,7 +6,10 @@
   "displayName": "Classic Warlords",
   "baseWorld": "TestWorld",
   "modeId": "classic",
-  "enabledPacks": [],
+  "enabledPacks": [
+    "pack-dusklands-visual",
+    "pack-illurian-legends-flavor"
+  ],
   "modRoot": "mod",
   "unityScene": "Assets/Scenes/Mini-Illuria.unity",
   "launch": {

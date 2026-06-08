@@ -8,7 +8,6 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
     private Camera minimapCamera;
     private Camera mainCamera;
     private CameraFollow mainCameraFollow;
-    private Vector3? minimapNormalVector;
     private UnityManager unityManager;
 
     void Start()
@@ -19,24 +18,6 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
             .GetComponent<CameraFollow>();
         this.mainCamera = UnityUtilities.GameObjectHardFind("MainCamera")
             .GetComponent<Camera>();
-    }
-
-    private Vector3 GetMinimapNormal()
-    {
-        if (this.minimapNormalVector == null)
-        {
-            RectTransform canvasRect = UnityUtilities.GameObjectHardFind("CameraCanvas").
-                        GetComponent<RectTransform>();
-            RectTransform panelRect = UnityUtilities.GameObjectHardFind("Minimap").
-                GetComponent<RectTransform>();
-
-            this.minimapNormalVector = new Vector3(
-                panelRect.sizeDelta.x / canvasRect.sizeDelta.x,
-                panelRect.sizeDelta.y / canvasRect.sizeDelta.y,
-                0f);
-        }
-
-        return this.minimapNormalVector.Value;
     }
 
     void AddPhysics2DRaycaster()
@@ -53,23 +34,28 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        // Center tuning
-        const float xOffset = 6f;
-        const float yOffset = 7f;
-
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             var unityManager = GetUnityManager();
             unityManager.InputManager.SkipInput();
 
-            var minimapNormal = GetMinimapNormal();
-            var viewportVector = this.mainCamera.ScreenToViewportPoint(
-                eventData.pointerCurrentRaycast.screenPosition);
-            float miniNormalX = 1 - (1 - viewportVector.x) / minimapNormal.x;
-            float miniNormalY = 1 - (1 - viewportVector.y) / minimapNormal.y;
+            RectTransform panelRect = UnityUtilities.GameObjectHardFind("Minimap")
+                .GetComponent<RectTransform>();
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                panelRect,
+                eventData.position,
+                eventData.pressEventCamera,
+                out var localPoint))
+            {
+                return;
+            }
 
-            float x = miniNormalX * (World.Current.Map.GetUpperBound(0) + 1) + xOffset;
-            float y = miniNormalY * (World.Current.Map.GetUpperBound(1) + 1) + yOffset;
+            var rect = panelRect.rect;
+            float miniNormalX = Mathf.Clamp01((localPoint.x - rect.xMin) / rect.width);
+            float miniNormalY = Mathf.Clamp01((localPoint.y - rect.yMin) / rect.height);
+
+            float x = miniNormalX * World.Current.Map.GetUpperBound(0);
+            float y = miniNormalY * World.Current.Map.GetUpperBound(1);
 
             this.mainCameraFollow.SetCameraTarget(new Vector3(x, y, 0f));
         }

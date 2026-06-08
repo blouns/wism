@@ -20,13 +20,18 @@ public sealed class ModularProfileCatalogTests
     }
 
     [Test]
-    public void ClassicProfile_ResolvesWithNoPacks()
+    public void ClassicProfile_ResolvesWithDefaultPacks()
     {
         var selection = ModularGameProfileCatalog.Resolve(TestContext.CurrentContext.TestDirectory);
 
         Assert.That(selection.Profile.Id, Is.EqualTo("classic-warlords"));
         Assert.That(selection.BaseWorld, Is.EqualTo("TestWorld"));
-        Assert.That(selection.Packs, Is.Empty);
+        Assert.That(selection.PackIds, Is.EqualTo(new[]
+        {
+            "pack-dusklands-visual",
+            "pack-illurian-legends-flavor"
+        }));
+        Assert.That(selection.Launch.World, Is.EqualTo("TestWorld"));
     }
 
     [Test]

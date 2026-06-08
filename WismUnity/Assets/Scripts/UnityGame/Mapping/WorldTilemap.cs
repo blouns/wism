@@ -154,8 +154,21 @@ namespace Assets.Scripts.Tilemaps
 
         public Tile GetClickedTile(Camera followCamera)
         {
+            if (followCamera == null || World.Current?.Map == null)
+            {
+                return null;
+            }
+
             Vector3 worldPoint = followCamera.ScreenToWorldPoint(Input.mousePosition);
             var gameCoord = ConvertUnityToGameVector(worldPoint);
+            if (gameCoord.x < 0 ||
+                gameCoord.y < 0 ||
+                gameCoord.x > World.Current.Map.GetUpperBound(0) ||
+                gameCoord.y > World.Current.Map.GetUpperBound(1))
+            {
+                return null;
+            }
+
             Tile gameTile = World.Current.Map[gameCoord.x, gameCoord.y];
 
             return gameTile;

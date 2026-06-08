@@ -6,6 +6,8 @@ public class CursorManager : MonoBehaviour
 {
     private const string CursorCanvasName = "WismCursorCanvas";
     private const float ReferenceViewportHeight = 720f;
+    private const float MaxPointerHeight = 28f;
+    private const float MaxTargetHeight = 36f;
 
     public enum HotspotAnchor
     {
@@ -243,12 +245,27 @@ public class CursorManager : MonoBehaviour
         this.cursorImage.texture = cursor;
         this.cursorImage.enabled = true;
         this.cursorTransform.pivot = CalculatePivot(cursor, hotspotAnchor);
-        this.cursorTransform.sizeDelta = new Vector2(
-            Mathf.Max(1f, cursor.width * scale),
-            Mathf.Max(1f, cursor.height * scale));
+        this.cursorTransform.sizeDelta = CalculateOverlaySize(cursor, hotspotAnchor, scale);
         this.cursorTransform.anchoredPosition = Input.mousePosition;
         Cursor.SetCursor(null, Vector2.zero, this.cursorMode);
         Cursor.visible = false;
+    }
+
+    public static Vector2 CalculateOverlaySize(Texture2D cursor, HotspotAnchor hotspotAnchor, float scale)
+    {
+        if (cursor == null || cursor.width <= 0 || cursor.height <= 0)
+        {
+            return Vector2.one;
+        }
+
+        var targetHeight = hotspotAnchor == HotspotAnchor.UpperLeft ? MaxPointerHeight : MaxTargetHeight;
+        var scaledHeight = cursor.height * scale;
+        var cappedScale = scaledHeight > targetHeight
+            ? targetHeight / cursor.height
+            : scale;
+        return new Vector2(
+            Mathf.Max(1f, cursor.width * cappedScale),
+            Mathf.Max(1f, cursor.height * cappedScale));
     }
 
     private void EnsureOverlayCursor()

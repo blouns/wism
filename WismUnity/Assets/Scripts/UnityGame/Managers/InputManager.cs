@@ -329,6 +329,11 @@ namespace Assets.Scripts.Managers
             var camera = this.unityManager.GetMainCamera();
             Tile clickedTile = this.unityManager.WorldTilemap
                 .GetClickedTile(camera);
+            if (clickedTile == null)
+            {
+                return;
+            }
+
             this.InputHandler.HandleArmyClick(isDoubleClick, clickedTile);
             this.InputHandler.HandleCityClick(clickedTile);
         }

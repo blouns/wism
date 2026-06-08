@@ -3,6 +3,7 @@ using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -14,6 +15,7 @@ public class GameSetup : MonoBehaviour
 {
     private const string ModSettingsScene = "ModSettings";
     private const string ModSettingsButtonName = "AdvancedModsButton";
+    private const string ValidationTextName = "GameSetupValidationText";
 
     [SerializeField]
     private Toggle[] playerToggles;
@@ -21,6 +23,9 @@ public class GameSetup : MonoBehaviour
     private int nextScene;
 
     private string worldName;
+    private Button startButton;
+    private Text validationText;
+    private ClanInfo[] availableClans = new ClanInfo[0];
 
     public void Start()
     {
@@ -29,14 +34,6 @@ public class GameSetup : MonoBehaviour
             throw new InvalidOperationException("Must have at least one player.");
         }
 
-        // Default to all players
-        for (int i = 0; i < this.playerToggles.Length; i++)
-        {
-            this.playerToggles[i].isOn = true;
-            this.playerToggles[i].interactable = true;
-        }
-
-        // Default world
         this.worldName = GetWorldNameFromPanel();
         if (UnityModKitRuntimeSelection.HasSelection)
         {
@@ -44,7 +41,13 @@ public class GameSetup : MonoBehaviour
             TrySelectWorldInPanel(this.worldName);
         }
 
+        this.startButton = GameObject.Find("StartButton")?.GetComponent<Button>();
         EnsureModSettingsButton();
+        NormalizeShortcutLabels();
+        EnsureValidationText();
+        RefreshAvailableClans();
+        ConfigurePlayerRows();
+        UpdateStartValidation();
     }
 
     public void LoadButton()
@@ -58,7 +61,6 @@ public class GameSetup : MonoBehaviour
 
         if (!AreValidGameSettings(settings))
         {
-            // TODO: Notify user?
             return;
         }
 
@@ -73,6 +75,10 @@ public class GameSetup : MonoBehaviour
         {
             UnityModKitRuntimeSelection.Clear();
         }
+
+        RefreshAvailableClans();
+        ConfigurePlayerRows();
+        UpdateStartValidation();
     }
 
     public void ModSettingsButton()
@@ -113,6 +119,18 @@ public class GameSetup : MonoBehaviour
 
     private bool AreValidGameSettings(UnityNewGameEntity settings)
     {
+        var validation = ValidateGameSettings(settings);
+        if (!validation.IsValid)
+        {
+            Debug.LogError(validation.Message);
+        }
+
+        UpdateValidationText(validation);
+        return validation.IsValid;
+    }
+
+    private GameSetupValidation ValidateGameSettings(UnityNewGameEntity settings)
+    {
         if (settings is null)
         {
             throw new ArgumentNullException(nameof(settings));
@@ -120,14 +138,12 @@ public class GameSetup : MonoBehaviour
 
         if (settings.Players.Length < 2)
         {
-            Debug.LogError("Must have at least two players to start a new game.");
-            return false;
+            return GameSetupValidation.Invalid("Select at least two players.");
         }
 
         if (string.IsNullOrWhiteSpace(settings.WorldName))
         {
-            Debug.LogError("World name cannot be null.");
-            return false;
+            return GameSetupValidation.Invalid("Choose a world.");
         }
 
         if (settings.ModKitSelection != null)
@@ -139,13 +155,20 @@ public class GameSetup : MonoBehaviour
                 UnityModKitSelection.PluginModRoot);
             if (!report.isGreen)
             {
-                Debug.LogError(report.outcome);
-                return false;
+                return GameSetupValidation.Invalid(report.outcome);
             }
 
             ModFactory.ModPath = report.modRoot;
             ModFactory.WorldPath = report.worldName;
             ModFactory.ActiveFeaturePackIds = new List<string>(report.activePackIds);
+            ModFactory.ResetCache();
+        }
+        else
+        {
+            ModFactory.ModPath = GameManager.DefaultModPath;
+            ModFactory.WorldPath = settings.WorldName;
+            ModFactory.ActiveFeaturePackIds = new List<string>();
+            ModFactory.ResetCache();
         }
 
         // Load Mod cities for world and compare to number of players
@@ -158,16 +181,30 @@ public class GameSetup : MonoBehaviour
         }
         catch
         {
-            Debug.LogError("Could not load the world: " + settings.WorldName);
+            return GameSetupValidation.Invalid("Could not load the world: " + settings.WorldName);
         }
 
-        if (cityInfos != null && cityInfos.Count < settings.Players.Length)
+        if (cityInfos == null || cityInfos.Count < settings.Players.Length)
         {
-            Debug.LogError("Must have at least enough cities for each player.");
-            return false;
+            return GameSetupValidation.Invalid("World must have at least one city for each selected player.");
         }
 
-        return true;
+        var startClans = new HashSet<string>(
+            cityInfos
+                .Where(city => !string.IsNullOrWhiteSpace(city.ClanName) && !string.Equals(city.ClanName, "Neutral", StringComparison.OrdinalIgnoreCase))
+                .Select(city => city.ClanName),
+            StringComparer.OrdinalIgnoreCase);
+        var missingStartClans = settings.Players
+            .Select(player => player.ClanName)
+            .Where(clan => !startClans.Contains(clan))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (missingStartClans.Length > 0)
+        {
+            return GameSetupValidation.Invalid("World has no starting city for: " + string.Join(", ", missingStartClans));
+        }
+
+        return GameSetupValidation.Valid("Ready.");
     }
 
     private UnityNewGameEntity GetGameSettings()
@@ -186,7 +223,6 @@ public class GameSetup : MonoBehaviour
 
     private UnityPlayerEntity[] GetSelectedPlayersFromPanel()
     {
-        var humanIndex = 0;
         var playerEntities = new List<UnityPlayerEntity>();
         for (int i = 0; i < this.playerToggles.Length; i++)
         {
@@ -204,20 +240,12 @@ public class GameSetup : MonoBehaviour
 
     private string GetClanName(int i)
     {
-        // TODO: This will come from a mod; for now hardcode
-        string[] clans =
+        if (i < 0 || i >= availableClans.Length)
         {
-            "Sirians",
-            "StormGiants",
-            "GreyDwarves",
-            "OrcsOfKor",
-            "Elvallie",
-            "Selentines",
-            "HorseLords",
-            "LordBane"
-        };
+            throw new InvalidOperationException("No clan is available for player row " + i + ".");
+        }
 
-        return clans[i];
+        return availableClans[i].ShortName;
     }
 
     private static string GetWorldNameFromPanel()
@@ -236,6 +264,159 @@ public class GameSetup : MonoBehaviour
         }
 
         this.worldName = GetWorldNameFromPanel();
+    }
+
+    private void RefreshAvailableClans()
+    {
+        ApplyCurrentModContext();
+        try
+        {
+            availableClans = ModFactory.LoadClanInfos(ModFactory.ModPath)
+                .Where(clan => !string.Equals(clan.ShortName, "Neutral", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Could not load clans: " + ex.Message);
+            availableClans = new ClanInfo[0];
+        }
+    }
+
+    private void ApplyCurrentModContext()
+    {
+        if (UnityModKitRuntimeSelection.HasSelection)
+        {
+            var report = UnityModKitSelection.Inspect(
+                UnityModKitRuntimeSelection.CurrentSelection.ProfileId,
+                UnityModKitRuntimeSelection.CurrentSelection.PackIds,
+                UnityModKitRuntimeSelection.CurrentSelection.World,
+                UnityModKitSelection.PluginModRoot);
+            if (report.isLoadable)
+            {
+                ModFactory.ModPath = report.modRoot;
+                ModFactory.WorldPath = report.worldName;
+                ModFactory.ActiveFeaturePackIds = new List<string>(report.activePackIds);
+                ModFactory.ResetCache();
+                return;
+            }
+        }
+
+        ModFactory.ModPath = GameManager.DefaultModPath;
+        ModFactory.WorldPath = this.worldName;
+        ModFactory.ActiveFeaturePackIds = new List<string>();
+        ModFactory.ResetCache();
+    }
+
+    private void ConfigurePlayerRows()
+    {
+        var startClans = LoadStartClanNames(this.worldName);
+        for (int i = 0; i < this.playerToggles.Length; i++)
+        {
+            var toggle = this.playerToggles[i];
+            var hasClan = i < availableClans.Length;
+            toggle.interactable = hasClan;
+            toggle.isOn = hasClan && startClans.Contains(availableClans[i].ShortName);
+
+            var label = toggle.GetComponentInChildren<Text>(true);
+            if (label != null)
+            {
+                label.text = hasClan ? availableClans[i].DisplayName : "Unavailable";
+            }
+        }
+    }
+
+    private HashSet<string> LoadStartClanNames(string world)
+    {
+        try
+        {
+            var cityInfos = ModFactory.LoadCityInfos(@$"{ModFactory.ModPath}\{ModFactory.WorldsPath}\{world}");
+            return new HashSet<string>(
+                cityInfos
+                    .Where(city => !string.IsNullOrWhiteSpace(city.ClanName) && !string.Equals(city.ClanName, "Neutral", StringComparison.OrdinalIgnoreCase))
+                    .Select(city => city.ClanName),
+                StringComparer.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return new HashSet<string>(availableClans.Take(Math.Min(2, availableClans.Length)).Select(clan => clan.ShortName), StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    private void UpdateStartValidation()
+    {
+        var validation = ValidateGameSettings(GetGameSettings());
+        if (this.startButton != null)
+        {
+            this.startButton.interactable = validation.IsValid;
+        }
+
+        UpdateValidationText(validation);
+    }
+
+    private void UpdateValidationText(GameSetupValidation validation)
+    {
+        if (validationText == null)
+        {
+            return;
+        }
+
+        validationText.text = validation.Message;
+        validationText.color = validation.IsValid ? new Color(0f, 0.35f, 0.08f, 1f) : new Color(0.70f, 0f, 0f, 1f);
+    }
+
+    private void EnsureValidationText()
+    {
+        var existing = GameObject.Find(ValidationTextName);
+        if (existing != null)
+        {
+            validationText = existing.GetComponent<Text>();
+            return;
+        }
+
+        var startButtonObject = GameObject.Find("StartButton");
+        if (startButtonObject == null)
+        {
+            return;
+        }
+
+        var textObject = new GameObject(ValidationTextName, typeof(RectTransform), typeof(Text));
+        textObject.transform.SetParent(startButtonObject.transform.parent, false);
+        validationText = textObject.GetComponent<Text>();
+        validationText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+        validationText.fontSize = 14;
+        validationText.fontStyle = FontStyle.Bold;
+        validationText.alignment = TextAnchor.MiddleCenter;
+        validationText.raycastTarget = false;
+
+        var rect = textObject.GetComponent<RectTransform>();
+        var startRect = startButtonObject.GetComponent<RectTransform>();
+        rect.anchorMin = startRect.anchorMin;
+        rect.anchorMax = startRect.anchorMax;
+        rect.pivot = startRect.pivot;
+        rect.sizeDelta = new Vector2(520f, 28f);
+        rect.anchoredPosition = startRect.anchoredPosition + new Vector2(-155f, 34f);
+    }
+
+    private static void NormalizeShortcutLabels()
+    {
+        SetShortcutLabel("StartButton", "S", "tart");
+        SetShortcutLabel(ModSettingsButtonName, "M", "ods...");
+    }
+
+    private static void SetShortcutLabel(string objectName, string shortcut, string rest)
+    {
+        var buttonObject = GameObject.Find(objectName);
+        if (buttonObject == null)
+        {
+            return;
+        }
+
+        foreach (var label in buttonObject.GetComponentsInChildren<Text>(true))
+        {
+            label.supportRichText = true;
+            label.color = Color.black;
+            label.text = $"<color=#b80000>{shortcut}</color>{rest}";
+        }
     }
 
     private static void EnsureModSettingsButton()
@@ -261,7 +442,9 @@ public class GameSetup : MonoBehaviour
 
         foreach (var label in buttonObject.GetComponentsInChildren<Text>(true))
         {
-            label.text = "Mods...";
+            label.supportRichText = true;
+            label.color = Color.black;
+            label.text = "<color=#b80000>M</color>ods...";
         }
 
         var rect = buttonObject.GetComponent<RectTransform>();
@@ -296,5 +479,27 @@ public class GameSetup : MonoBehaviour
 
         dropdown.value = index;
         dropdown.RefreshShownValue();
+    }
+
+    private readonly struct GameSetupValidation
+    {
+        private GameSetupValidation(bool isValid, string message)
+        {
+            IsValid = isValid;
+            Message = message;
+        }
+
+        public bool IsValid { get; }
+        public string Message { get; }
+
+        public static GameSetupValidation Valid(string message)
+        {
+            return new GameSetupValidation(true, message);
+        }
+
+        public static GameSetupValidation Invalid(string message)
+        {
+            return new GameSetupValidation(false, message);
+        }
     }
 }

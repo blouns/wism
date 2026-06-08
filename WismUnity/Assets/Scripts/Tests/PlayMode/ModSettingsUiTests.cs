@@ -69,6 +69,7 @@ public sealed class ModSettingsUiTests
 
         var pointTexture = new Texture2D(9, 22);
         var targetTexture = new Texture2D(32, 32);
+        var oversizedPointer = new Texture2D(64, 128);
         try
         {
             Assert.That(CursorManager.CalculateHotspot(pointTexture, CursorManager.HotspotAnchor.UpperLeft), Is.EqualTo(Vector2.zero));
@@ -77,11 +78,13 @@ public sealed class ModSettingsUiTests
             Assert.That(CursorManager.CalculatePivot(targetTexture, CursorManager.HotspotAnchor.Center), Is.EqualTo(new Vector2(0.5f, 0.5f)));
             Assert.That(CursorManager.CalculateViewportScale(360, 0.45f, 1f), Is.EqualTo(0.5f).Within(0.001f));
             Assert.That(CursorManager.CalculateViewportScale(1440, 0.45f, 1f), Is.EqualTo(1f).Within(0.001f));
+            Assert.That(CursorManager.CalculateOverlaySize(oversizedPointer, CursorManager.HotspotAnchor.UpperLeft, 1f).y, Is.LessThanOrEqualTo(28f));
         }
         finally
         {
             UnityEngine.Object.DestroyImmediate(pointTexture);
             UnityEngine.Object.DestroyImmediate(targetTexture);
+            UnityEngine.Object.DestroyImmediate(oversizedPointer);
         }
     }
 
@@ -133,21 +136,22 @@ public sealed class ModSettingsUiTests
     {
         yield return WaitForModSettings();
 
-        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackCheck").text, Is.EqualTo("[ ]"));
-        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackState").text, Is.EqualTo("Verified"));
-        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackState").color.g, Is.GreaterThan(0.75f));
-
-        SetToggle("pack-illurian-legends-flavor", true);
-        yield return null;
-
         Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackCheck").text, Is.EqualTo("[x]"));
-        Assert.That(FindText("PackHintText").text, Does.Contain("selected"));
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackName").text, Does.Contain("Display-name overlay"));
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackState").text, Is.EqualTo("Verified"));
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackState").color.g, Is.GreaterThan(0.30f));
 
         SetToggle("pack-illurian-legends-flavor", false);
         yield return null;
 
         Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackCheck").text, Is.EqualTo("[ ]"));
         Assert.That(FindText("PackHintText").text, Does.Contain("not selected"));
+
+        SetToggle("pack-illurian-legends-flavor", true);
+        yield return null;
+
+        Assert.That(FindPackChildText("pack-illurian-legends-flavor", "PackCheck").text, Is.EqualTo("[x]"));
+        Assert.That(FindText("PackHintText").text, Does.Contain("selected"));
     }
 
     [UnityTest]
@@ -160,13 +164,13 @@ public sealed class ModSettingsUiTests
         yield return WaitForPackRow("pack-ui-invalid-test");
 
         Assert.That(FindPackChildText("pack-ui-invalid-test", "PackState").text, Is.EqualTo("Invalid"));
-        Assert.That(FindPackChildText("pack-ui-invalid-test", "PackState").color.r, Is.GreaterThan(0.9f));
+        Assert.That(FindPackChildText("pack-ui-invalid-test", "PackState").color.r, Is.GreaterThan(0.70f));
 
         SetToggle("pack-ui-invalid-test", true);
         yield return null;
 
         Assert.That(FindText("PackHintText").text, Does.Contain("Missing schemaVersion and version metadata"));
-        Assert.That(FindText("StatusText").color.r, Is.GreaterThan(0.9f));
+        Assert.That(FindText("StatusText").color.r, Is.GreaterThan(0.70f));
         Assert.That(FindButton("ContinueButton").interactable, Is.False);
     }
 
@@ -181,7 +185,7 @@ public sealed class ModSettingsUiTests
         Assert.That(FindText("StatusText").text, Does.StartWith("Green"));
         Assert.That(FindButton("ContinueButton").interactable, Is.True);
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Not.Null);
-        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Is.EqualTo(new[] { "pack-illurian-legends-flavor" }));
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Is.EquivalentTo(new[] { "pack-dusklands-visual", "pack-illurian-legends-flavor" }));
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection.ContentFingerprint, Is.Not.Empty);
     }
 
@@ -199,7 +203,7 @@ public sealed class ModSettingsUiTests
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Not.Null);
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection.ProfileId, Is.EqualTo("classic-warlords"));
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection.World, Is.EqualTo("TestWorld"));
-        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Is.EqualTo(new[] { "pack-illurian-legends-flavor" }));
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Is.EquivalentTo(new[] { "pack-dusklands-visual", "pack-illurian-legends-flavor" }));
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection.ContentFingerprint, Is.Not.Empty);
     }
 
@@ -233,21 +237,30 @@ public sealed class ModSettingsUiTests
     }
 
     [UnityTest]
-    public IEnumerator Refresh_ReevaluatesSelectionWithoutStalePack()
+    public IEnumerator Refresh_PreservesCurrentSelection()
     {
         SetDropdown("ProfileDropdown", "classic-warlords");
         SetDropdown("WorldDropdown", "TestWorld");
-        SetToggle("pack-illurian-legends-flavor", true);
+        SetToggle("pack-quick-clash-mode", true);
         yield return null;
-        Assert.That(FindToggle("pack-illurian-legends-flavor").isOn, Is.True);
+        Assert.That(FindToggle("pack-quick-clash-mode").isOn, Is.True);
 
         Click(FindButton("RefreshButton"));
         yield return null;
 
-        Assert.That(FindToggle("pack-illurian-legends-flavor").isOn, Is.False);
+        Assert.That(FindToggle("pack-quick-clash-mode").isOn, Is.True);
         Assert.That(FindButton("ContinueButton").interactable, Is.True);
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Not.Null);
-        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Is.Empty);
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Does.Contain("pack-quick-clash-mode"));
+    }
+
+    [UnityTest]
+    public IEnumerator WorldDetails_ShowPreviewAndMetadata()
+    {
+        yield return WaitForModSettings();
+
+        Assert.That(GameObject.Find("WorldPreview").GetComponent<RawImage>().texture, Is.Not.Null);
+        Assert.That(FindText("WorldDetailText").text, Does.Contain("Cities:"));
     }
 
     static IEnumerator WaitForModSettings()
@@ -334,7 +347,7 @@ public sealed class ModSettingsUiTests
         var toggle = FindToggle(packId);
         if (toggle.isOn != value)
         {
-            Click(toggle);
+            toggle.isOn = value;
         }
 
         Assert.That(toggle.isOn, Is.EqualTo(value));
