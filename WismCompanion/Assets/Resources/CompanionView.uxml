@@ -21,7 +21,13 @@
             <ui:VisualElement name="side" class="side">
 
                 <ui:VisualElement name="log-host" class="panel log-host">
-                    <ui:Label text="Event Log" class="panel-title" />
+                    <ui:VisualElement class="log-toolbar">
+                        <ui:Label text="Event Log" class="panel-title" />
+                        <ui:VisualElement class="spacer" />
+                        <ui:Button name="log-mode-raw" text="Raw" class="log-mode-btn log-mode-btn--active" />
+                        <ui:Button name="log-mode-simple" text="Simple" class="log-mode-btn" />
+                        <ui:TextField name="log-filter" placeholder-text="filter..." class="log-filter" />
+                    </ui:VisualElement>
                     <ui:ListView name="log-list" class="log-list" />
                     <ui:ScrollView name="detail-scroll" class="detail-scroll">
                         <ui:Label name="detail-label" text="Select an event to see details." class="detail-label" />

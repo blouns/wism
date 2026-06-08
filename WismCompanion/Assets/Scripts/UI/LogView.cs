@@ -1,18 +1,26 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.UIElements;
 using WismCompanion.State;
 
 namespace WismCompanion.UI
 {
+    public enum LogViewMode { Raw, Simple }
+
     /// <summary>
     /// Binds the per-channel event log to a virtualized ListView and shows the selected entry's
-    /// detail. Mirrors the WinForms companion's "time | kind | event | result" log + detail pane.
+    /// detail. Raw mode shows all entries; Simple mode shows Commands only. A text filter narrows
+    /// the visible set in either mode.
     /// </summary>
     public sealed class LogView
     {
         private readonly ListView list;
         private readonly Label detail;
-        private List<CompanionLogEntry> items = new();
+        private List<CompanionLogEntry> source = new();
+        private List<CompanionLogEntry> displayed = new();
+        private LogViewMode mode = LogViewMode.Raw;
+        private string filter = string.Empty;
 
         public LogView(ListView list, Label detail)
         {
@@ -23,14 +31,40 @@ namespace WismCompanion.UI
             list.selectionType = SelectionType.Single;
             list.makeItem = MakeItem;
             list.bindItem = BindItem;
-            list.itemsSource = items;
+            list.itemsSource = displayed;
             list.selectionChanged += OnSelectionChanged;
         }
 
         public void SetEntries(IReadOnlyList<CompanionLogEntry> entries)
         {
-            items = new List<CompanionLogEntry>(entries);
-            list.itemsSource = items;
+            source = new List<CompanionLogEntry>(entries);
+            ApplyFilter();
+        }
+
+        public void SetMode(LogViewMode newMode)
+        {
+            mode = newMode;
+            ApplyFilter();
+        }
+
+        public void SetFilter(string text)
+        {
+            filter = text ?? string.Empty;
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            IEnumerable<CompanionLogEntry> view = source;
+
+            if (mode == LogViewMode.Simple)
+                view = view.Where(e => e.Category == "Command");
+
+            if (!string.IsNullOrWhiteSpace(filter))
+                view = view.Where(e => e.Summary.Contains(filter, StringComparison.OrdinalIgnoreCase));
+
+            displayed = view.ToList();
+            list.itemsSource = displayed;
             list.ClearSelection();
             list.RefreshItems();
         }
@@ -53,12 +87,10 @@ namespace WismCompanion.UI
 
         private void BindItem(VisualElement element, int index)
         {
-            if (index < 0 || index >= items.Count)
-            {
+            if (index < 0 || index >= displayed.Count)
                 return;
-            }
 
-            var entry = items[index];
+            var entry = displayed[index];
             element.EnableInClassList("log-row--command", entry.Category == "Command");
             element.EnableInClassList("log-row--map", entry.Category == "Map");
 
@@ -69,9 +101,7 @@ namespace WismCompanion.UI
         private void OnSelectionChanged(IEnumerable<object> selection)
         {
             if (detail == null)
-            {
                 return;
-            }
 
             foreach (var item in selection)
             {

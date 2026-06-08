@@ -63,6 +63,17 @@ namespace WismCompanion.UI
             inspector = new InspectorView(root.Q<VisualElement>("inspector-content"));
             inspector.ShowEmpty("Click a tile, army, or city on the map.");
 
+            var logModeRaw = root.Q<Button>("log-mode-raw");
+            var logModeSimple = root.Q<Button>("log-mode-simple");
+            var logFilterField = root.Q<TextField>("log-filter");
+
+            if (logModeRaw != null)
+                logModeRaw.clicked += () => SetLogMode(LogViewMode.Raw, logModeRaw, logModeSimple);
+            if (logModeSimple != null)
+                logModeSimple.clicked += () => SetLogMode(LogViewMode.Simple, logModeRaw, logModeSimple);
+            if (logFilterField != null)
+                logFilterField.RegisterValueChangedCallback(evt => logView.SetFilter(evt.newValue));
+
             if (connectButton != null)
             {
                 connectButton.clicked += () => ConnectRequested?.Invoke(hostField != null ? hostField.value : null);
@@ -214,6 +225,13 @@ namespace WismCompanion.UI
         private void OnMapSelection(MapSelection selection)
         {
             inspector.Show(selection, state.GetLatestMap(state.SelectedChannel));
+        }
+
+        private void SetLogMode(LogViewMode mode, Button rawBtn, Button simpleBtn)
+        {
+            logView.SetMode(mode);
+            rawBtn?.EnableInClassList("log-mode-btn--active", mode == LogViewMode.Raw);
+            simpleBtn?.EnableInClassList("log-mode-btn--active", mode == LogViewMode.Simple);
         }
 
         private static string ShortStatus(CompanionConnectionStatus status)

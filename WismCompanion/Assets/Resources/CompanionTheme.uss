@@ -115,13 +115,14 @@
 }
 
 .log-host {
-    flex-grow: 1;
+    flex: 2;
     margin-left: 4px;
     padding: 6px;
 }
 
 .inspector-host {
-    height: 230px;
+    flex: 1;
+    min-height: 200px;
     margin-left: 4px;
     margin-top: 4px;
     padding: 6px;
@@ -184,6 +185,51 @@
     padding: 6px;
     color: rgb(196, 200, 208);
     -unity-font-style: normal;
+}
+
+/* ---- Log toolbar ---- */
+.log-toolbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.log-toolbar .panel-title {
+    margin-bottom: 0;
+}
+
+.log-mode-btn {
+    height: 20px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 11px;
+    background-color: rgb(40, 42, 48);
+    color: rgb(160, 164, 172);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(58, 61, 68);
+    margin-left: 4px;
+}
+
+.log-mode-btn:hover {
+    background-color: rgb(50, 53, 60);
+    color: rgb(210, 213, 219);
+}
+
+.log-mode-btn--active {
+    background-color: rgb(54, 88, 145);
+    color: rgb(238, 240, 244);
+    border-color: rgb(66, 104, 168);
+}
+
+.log-mode-btn--active:hover {
+    background-color: rgb(66, 104, 168);
+}
+
+.log-filter {
+    width: 90px;
+    margin-left: 8px;
+    font-size: 11px;
 }
 
 /* ---- Inspector ---- */
