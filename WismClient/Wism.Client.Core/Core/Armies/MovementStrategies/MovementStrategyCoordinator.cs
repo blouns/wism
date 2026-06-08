@@ -86,8 +86,7 @@ namespace Wism.Client.Core.Armies
                 throw new ArgumentNullException(nameof(targetTile));
             }
 
-            // TODO: Account for terrain bonuses
-            return armiesWithMovesThatMatter.All(army => army.MovesRemaining >= targetTile.Terrain.MovementCost);
+            return armiesWithMovesThatMatter.All(army => army.MovesRemaining >= army.GetEffectiveMovementCost(targetTile));
         }
 
         /// <summary>
@@ -102,7 +101,7 @@ namespace Wism.Client.Core.Armies
             var movesRemaining = this.GetEffectiveMovesRemaining(armiesWithApplicableMoves);
             var movesRequired = this.GetMovesToTarget(armiesWithApplicableMoves, path, targetTile);
 
-            return movesRequired - movesRemaining >= 0;
+            return movesRemaining >= movesRequired;
         }
 
         public int GetEffectiveMovesRemaining(List<Army> armiesWithApplicableMoves)
@@ -119,7 +118,8 @@ namespace Wism.Client.Core.Armies
             for (var i = 1; i < path.Count; i++)
             {
                 var tile = path[i];
-                moves += tile.Terrain.MovementCost; // TODO: Include terrain / clan bonuses
+                // Use effective cost for the slowest (highest-cost) army in the stack
+                moves += armiesWithApplicableMoves.Max(a => a.GetEffectiveMovementCost(tile));
                 if (tile == targetTile)
                 {
                     targetReached = true;

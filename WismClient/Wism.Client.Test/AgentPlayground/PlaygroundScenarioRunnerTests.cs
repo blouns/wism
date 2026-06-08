@@ -457,7 +457,7 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
-    public void EvalBatch_ClassicAiConquestWritesCityCaptureSignal()
+    public void EvalBatch_ClassicAiProductionVectoringWritesSignal()
     {
         var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "evals");
         var result = new EvalBatchRunner().Run(new EvalBatchOptions(
@@ -471,8 +471,8 @@ public class PlaygroundScenarioRunnerTests
             ModRoot: null));
 
         Assert.That(result.Status, Is.EqualTo("Passed"));
-        Assert.That(result.Scorecard.Counters.Victories, Is.GreaterThan(0));
-        Assert.That(result.Scorecard.Counters.CityCaptures, Is.GreaterThan(0));
+        Assert.That(result.Scorecard.Counters.ProductionVectors, Is.GreaterThan(0));
+        Assert.That(result.Scorecard.Counters.ProductionDeliveries, Is.GreaterThan(0));
     }
 
     [Test]

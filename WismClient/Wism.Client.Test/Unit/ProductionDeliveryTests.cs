@@ -167,6 +167,42 @@ public class ProductionDeliveryTests
         });
     }
 
+    [Test]
+    public void RoutedProduction_CompletesThenWaitsDeliveryTurnsBeforeDeployment()
+    {
+        World.CreateWorld(CreateGrassMap(8, 8));
+        var player = Game.Current.Players[0];
+        var sourceCity = MapBuilder.FindCity("Marthos");
+        var destinationCity = MapBuilder.FindCity("BanesCitadel");
+        World.Current.AddCity(sourceCity, World.Current.Map[1, 1]);
+        World.Current.AddCity(destinationCity, World.Current.Map[4, 4]);
+        player.ClaimCity(sourceCity);
+        player.ClaimCity(destinationCity);
+        player.Gold = 1000000;
+
+        var started = sourceCity.Barracks.StartProduction(
+            ModFactory.FindArmyInfo("LightInfantry"),
+            destinationCity);
+        var produced = sourceCity.Barracks.Produce(out var producedArmy);
+        var deliveredImmediately = sourceCity.Barracks.Deliver(out _);
+        var deliveredAfterSecondTurn = sourceCity.Barracks.Deliver(out _);
+        var deliveredAfterThirdTurn = sourceCity.Barracks.Deliver(out var deliveredArmy);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(started, Is.True);
+            Assert.That(produced, Is.True, "One-turn production should complete before routed delivery starts.");
+            Assert.That(producedArmy, Is.Not.Null);
+            Assert.That(sourceCity.Barracks.HasDeliveries(), Is.False,
+                "The third delivery tick should empty the routed delivery queue.");
+            Assert.That(deliveredImmediately, Is.False, "Routed production should not deploy on the production turn.");
+            Assert.That(deliveredAfterSecondTurn, Is.False, "Routed production should still be travelling after two ticks.");
+            Assert.That(deliveredAfterThirdTurn, Is.True, "Routed production should deploy on the third delivery tick.");
+            Assert.That(deliveredArmy, Is.SameAs(producedArmy));
+            Assert.That(player.GetArmies().Single().Tile, Is.Not.Null);
+        });
+    }
+
     private static Tile[,] CreateGrassMap(int width, int height)
     {
         var map = new Tile[width, height];

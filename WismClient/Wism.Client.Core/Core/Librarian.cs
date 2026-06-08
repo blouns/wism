@@ -397,10 +397,7 @@ namespace Wism.Client.Core
 
         private void BuildLocationKnowledge()
         {
-            if (this.allLocations == null)
-            {
-                this.allLocations = World.Current.GetLocations();
-            }
+            this.allLocations = World.Current.GetLocations();
         }
 
         private string[] BuildOtherKnowledge()

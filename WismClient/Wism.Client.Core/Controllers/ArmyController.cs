@@ -183,7 +183,7 @@ namespace Wism.Client.Controllers
                 return ActionState.Succeeded;
             }
 
-            // Get a route            
+            // Get a route
             var myDistance = 0.0f;
             var myPath = path;
             if (NoPathYet(myPath))
@@ -194,6 +194,14 @@ namespace Wism.Client.Controllers
                     // Impossible route
                     distance = myDistance;
                     return ActionState.Failed;
+                }
+
+                // Army was already at the destination when FindPath was called
+                if (AtDestination(myPath))
+                {
+                    this.PrepareArmiesForArrival(armiesToMove, myPath, out distance);
+                    path = myPath;
+                    return ActionState.Succeeded;
                 }
             }
 
@@ -206,7 +214,7 @@ namespace Wism.Client.Controllers
 
                 // Pop the starting location and return updated path and distance
                 myPath.RemoveAt(0);
-                myDistance = CalculateDistance(myPath);
+                myDistance = CalculateDistance(armiesToMove, myPath);
                 result = ActionState.InProgress;
             }
             else if (moveResult == MoveResult.InsuffientMoves)
@@ -367,8 +375,7 @@ namespace Wism.Client.Controllers
             targetTile.AddVisitingArmies(movingArmies);
             movingArmies.ForEach(a =>
             {
-                // TODO: Account for bonuses
-                a.MovesRemaining -= targetTile.Terrain.MovementCost;
+                a.MovesRemaining -= a.GetEffectiveMovementCost(targetTile);
                 if (a.MovesRemaining <= 0)
                 {
                     a.MovesRemaining = 0;
@@ -402,10 +409,9 @@ namespace Wism.Client.Controllers
             }
         }
 
-        private static int CalculateDistance(IList<Tile> myPath)
+        private static int CalculateDistance(List<Army> armies, IList<Tile> myPath)
         {
-            // TODO: Calculate based on true unit and affiliation cost; for now, static
-            return myPath.Sum(tile => tile.Terrain.MovementCost);
+            return myPath.Sum(tile => armies.Max(a => a.GetEffectiveMovementCost(tile)));
         }
 
         private static List<Army> GetHostileDefenders(Tile targetTile, Clan attackingClan)

@@ -1,0 +1,37 @@
+[
+  {
+    "Id": 0,
+    "X": 18,
+    "Y": 2,
+    "LocationShortName": "Stonehenge",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 10,
+    "Y": 8,
+    "LocationShortName": "CryptKeeper",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 25,
+    "Y": 5,
+    "LocationShortName": "SagesHut",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 30,
+    "Y": 12,
+    "LocationShortName": "Suzzallo",
+    "Searched": false
+  },
+  {
+    "Id": 0,
+    "X": 8,
+    "Y": 14,
+    "LocationShortName": "TempleDog",
+    "Searched": false
+  }
+]

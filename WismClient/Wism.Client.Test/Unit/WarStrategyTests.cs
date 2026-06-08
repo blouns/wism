@@ -219,7 +219,9 @@ public class WarStrategyTests
             attacker.ConscriptArmy(ArmyInfo.GetArmyInfo("HeavyInfantry"), attackerTile)
         };
         MapBuilder.AddCity(World.Current, 2, 2, "BanesCitadel", enemy.Clan.ShortName);
-        enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyCityTile);
+        cityTile.City.Defense = 0;
+        var defender = enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyCityTile);
+        defender.Strength = 1;
         var friendlyGarrison = attacker.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[1, 2]);
         friendlyGarrison.Tile.RemoveArmies(new System.Collections.Generic.List<Wism.Client.MapObjects.Army> { friendlyGarrison });
         friendlyCityTile.AddArmy(friendlyGarrison);

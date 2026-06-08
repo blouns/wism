@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 0,
+    "X": 3,
+    "Y": 4,
+    "CityShortName": "Marthos",
+    "Defense": 6,
+    "ClanShortName": "Sirians"
+  },
+  {
+    "Id": 0,
+    "X": 7,
+    "Y": 4,
+    "CityShortName": "BanesCitadel",
+    "Defense": 6,
+    "ClanShortName": "LordBane"
+  },
+  {
+    "Id": 0,
+    "X": 5,
+    "Y": 7,
+    "CityShortName": "Deserton",
+    "Defense": 4,
+    "ClanShortName": "Neutral"
+  }
+]

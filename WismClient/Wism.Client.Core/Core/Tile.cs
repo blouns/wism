@@ -309,7 +309,7 @@ namespace Wism.Client.Core
             var canEnterEmptyEnemyCity = this.HasCity() &&
                                          this.City.Clan != attackerClan &&
                                          defenders.Count == 0 &&
-                                         armies.TrueForAll(a => a.MovesRemaining > this.Terrain.MovementCost);
+                                         armies.TrueForAll(a => a.MovesRemaining > a.GetEffectiveMovementCost(this));
 
             return hasEnemyDefenders || canEnterEmptyEnemyCity;
         }

@@ -1,15 +1,5 @@
 [
     {
-        "ClanName": "Sirians",
-        "TerrainName": "Road",
-        "Modifier": 1
-    },
-    {
-        "ClanName": "Sirians",
-        "TerrainName": "Plain",
-        "Modifier": 1
-    },
-    {
         "ClanName": "StormGiants",
         "TerrainName": "Hill",
         "Modifier": 1

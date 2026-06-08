@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Common;
 using Wism.Client.Comparers;
+using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Core.Armies.WarStrategies
@@ -13,6 +14,7 @@ namespace Wism.Client.Core.Armies.WarStrategies
     public class DefaultWarStrategy : IWarStrategy
     {
         private const int MaxNoHitExchanges = 512;
+        private const int TowerDefenseBonus = 2;
 
         /// <summary>
         ///     Combat is resolved. Attacking and Defending armies are sorted on the display with
@@ -32,6 +34,12 @@ namespace Wism.Client.Core.Armies.WarStrategies
         /// <returns>True if attacker wins; false otherwise.</returns>
         public bool Attack(List<Army> attackers, Tile tile)
         {
+            // Neutral city: fight city defense as phantom guard force
+            if (tile.HasCity() && tile.City.Clan.ShortName == "Neutral")
+            {
+                return this.AttackNeutralCity(attackers, tile);
+            }
+
             var defenders = GetDefenders(attackers, tile);
 
             // Attack armys one-at-a-time to the death!
@@ -47,7 +55,9 @@ namespace Wism.Client.Core.Armies.WarStrategies
                 }
 
                 // Refresh the list
-                defenders = GetDefenders(attackers, tile);
+                defenders = attackers.Count > 0
+                    ? GetDefenders(attackers, tile)
+                    : new List<Army>();
             }
 
             return attackers.Count > 0;
@@ -90,12 +100,7 @@ namespace Wism.Client.Core.Armies.WarStrategies
 
             PrepareArmiesForAttack(attackers, target, out var defenders, out var compositeAFCM, out var compositeDFCM);
 
-            // Attacking a neutral city
-            //if (target.HasCity() && target.City.Clan.ShortName == "Neutral")
-            //{
-            //    wasSuccessful = AttackNeutralCityOnce(attackers, compositeAFCM, target.City);
-            //}
-            // Attacking an empty city owned by a Player always succeeds
+            // Attacking an empty city owned by a player always succeeds
             if (defenders.Count == 0 && target.HasCity())
             {
                 wasSuccessful = true;
@@ -128,9 +133,21 @@ namespace Wism.Client.Core.Armies.WarStrategies
             // Muster all armys from composite tile (i.e. city) to defend
             defenders = GetDefenders(attackers, target);
 
-            // Calculate composite modifieres
+            // Calculate composite modifiers
             compositeAFCM = attackers.Sum(a => a.GetAttackModifier(target));
             compositeDFCM = defenders.Sum(a => a.GetDefenseModifier());
+
+            // City defense bonus added once for the whole defending force (Warlords DFCM rule)
+            if (target.HasCity())
+            {
+                compositeDFCM += target.City.Defense;
+            }
+
+            // Tower defense bonus: fixed +2 when defenders occupy a tower tile
+            if (target.Terrain.ShortName == "Tower")
+            {
+                compositeDFCM += TowerDefenseBonus;
+            }
 
             // Apply army-specific terrain modifiers (e.g. elves like forests)
             ApplyArmyTerrainModifiers(attackers, target);
@@ -185,13 +202,109 @@ namespace Wism.Client.Core.Armies.WarStrategies
             return attackSucceeded;
         }
 
-        private static void ApplyArmyTerrainModifiers(IList<Army> armys, Tile target)
+        /// <summary>
+        ///     Apply each army's clan terrain affinity to its combat strength.
+        ///     Armies fighting in their preferred terrain get a bonus; in disfavored terrain, a penalty.
+        /// </summary>
+        private static void ApplyArmyTerrainModifiers(IList<Army> armies, Tile target)
         {
-            foreach (var army in armys)
+            foreach (var army in armies)
             {
-                // TODO: Apply army-specific modifiers; for now just raw stregth
-                army.ModifiedStrength = army.Strength;
+                var terrainBonus = army.Clan.GetTerrainModifier(target);
+                army.ModifiedStrength = Math.Max(1, army.Strength + terrainBonus);
             }
+        }
+
+        /// <summary>
+        ///     Neutral city combat. Each defense point is a "phantom guard" of strength equal
+        ///     to the city's defense rating. Attackers must defeat all guard points to capture.
+        /// </summary>
+        private bool AttackNeutralCity(List<Army> attackers, Tile tile)
+        {
+            var city = tile.City;
+            ApplyArmyTerrainModifiers(attackers, tile);
+            var compositeAFCM = attackers.Sum(a => a.GetAttackModifier(tile));
+
+            while (attackers.Count > 0 && city.Defense > 0)
+            {
+                attackers.Sort(new ByArmyBattleOrder(tile));
+                var currentAttacker = attackers[0];
+                var attackStrength = Math.Min(compositeAFCM + currentAttacker.ModifiedStrength, 9);
+                var cityStrength = Math.Min(city.Defense, 9);
+
+                if (NeutralCityRoll(currentAttacker, attackStrength, cityStrength))
+                {
+                    city.Defense--;
+                    currentAttacker.Reset();
+                }
+                else
+                {
+                    attackers.Remove(currentAttacker);
+                }
+            }
+
+            return attackers.Count > 0;
+        }
+
+        /// <summary>
+        ///     Resolve one phantom-guard combat round against a neutral city.
+        ///     Returns true if attacker won; kills the army and returns false if city won.
+        /// </summary>
+        private static bool NeutralCityRoll(Army attacker, int attackStrength, int cityStrength)
+        {
+            var random = Game.Current.Random;
+            var attackerHp = ArmyFactory.DefaultHitPoints;
+            var cityHp = ArmyFactory.DefaultHitPoints;
+
+            var noHitExchanges = 0;
+            while (attackerHp > 0 && cityHp > 0)
+            {
+                var attackerRoll = random.Next(1, 11);
+                var cityRoll = random.Next(1, 11);
+
+                var attackerRollLow = attackerRoll <= cityStrength;
+                var cityRollLow = cityRoll <= attackStrength;
+
+                if (attackerRollLow && !cityRollLow)
+                {
+                    attackerHp--;
+                    noHitExchanges = 0;
+                }
+                else if (!attackerRollLow && cityRollLow)
+                {
+                    cityHp--;
+                    noHitExchanges = 0;
+                }
+                else if (++noHitExchanges >= MaxNoHitExchanges)
+                {
+                    if (attackStrength > cityStrength)
+                    {
+                        cityHp--;
+                    }
+                    else if (cityStrength > attackStrength)
+                    {
+                        attackerHp--;
+                    }
+                    else if (Game.Current.Random.Next(0, 2) == 0)
+                    {
+                        attackerHp--;
+                    }
+                    else
+                    {
+                        cityHp--;
+                    }
+
+                    noHitExchanges = 0;
+                }
+            }
+
+            if (cityHp <= 0)
+            {
+                return true;
+            }
+
+            attacker.Kill();
+            return false;
         }
 
         private static bool AttackRoll(Army attacker, int attackStrength, Army defender, int defenseStrength)
