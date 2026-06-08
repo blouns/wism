@@ -131,6 +131,10 @@ E2E proof:
 
 ## WISM-WORLDKIT-001: World Validation Contract
 
+Status: implemented for WismClient and `Wism.ModKit.Cli world validate`;
+Unity read-only preview/report integration remains in WISM-WORLDKIT-003 and
+WISM-WORLDKIT-007.
+
 Objective:
 
 Make world validity a first-class, reusable contract before sidecar world
@@ -157,9 +161,15 @@ E2E proof:
 
 - Validate at least one known-good world.
 - Validate deliberate invalid worlds for placement, overlap, ownership, and
-  reachability.
+  start viability.
 - Load the valid world through AgentPlayground.
 - Preview or report the valid world through Unity without scene mutation.
+
+Current proof:
+
+- `dotnet test Wism.Client.Test\Wism.Client.Test.csproj -c Release --filter WorldKitValidatorTests`
+- `dotnet run --project Wism.ModKit.Cli -- world validate world=TestWorld players=2 clans=Sirians,LordBane --json`
+- `dotnet run --project Wism.ModKit.Cli -- world validate world=TestWorld clans=Sirians,StormGiants`
 
 ## WISM-SIDECAR-001: Sidecar Skeleton
 

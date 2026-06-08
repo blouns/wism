@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Xml;
 using System.Xml.Linq;
 using Wism.Client.Modules.Profiles;
+using Wism.Client.Modules.Worlds;
 
 var command = args.FirstOrDefault(arg => !arg.StartsWith("--", StringComparison.OrdinalIgnoreCase)) ?? "validate";
 var options = CliOptions.Parse(args);
@@ -13,6 +15,7 @@ try
     {
         "validate" => RunValidate(options),
         "proof" => RunProof(options),
+        "world" => RunWorld(args, options),
         _ => Usage()
     };
 }
@@ -30,6 +33,42 @@ catch (Exception ex)
     }
 
     return 1;
+}
+
+static int RunWorld(string[] args, CliOptions options)
+{
+    var subcommand = args
+        .Where(arg => !arg.StartsWith("--", StringComparison.OrdinalIgnoreCase))
+        .Where(arg => !arg.Contains("=", StringComparison.OrdinalIgnoreCase))
+        .Skip(1)
+        .FirstOrDefault() ?? "validate";
+    if (!string.Equals(subcommand, "validate", StringComparison.OrdinalIgnoreCase))
+    {
+        return Usage();
+    }
+
+    var modRoot = string.IsNullOrWhiteSpace(options.ModRoot)
+        ? ModularGameProfileCatalog.ResolveModRoot(options.RepositoryRoot)
+        : Path.GetFullPath(options.ModRoot);
+    var report = WorldKitValidator.ValidateModRoot(
+        modRoot,
+        options.WorldId,
+        new WorldKitValidationOptions
+        {
+            RequestedPlayers = options.RequestedPlayers,
+            ActiveClans = options.ActiveClans
+        });
+
+    if (options.Json)
+    {
+        Console.WriteLine(JsonSerializer.Serialize(report, JsonOptions()));
+    }
+    else
+    {
+        PrintWorldValidation(report);
+    }
+
+    return report.IsValid ? 0 : 1;
 }
 
 static int RunValidate(CliOptions options)
@@ -457,15 +496,34 @@ static void PrintValidation(ValidationCliResult result)
     }
 }
 
+static void PrintWorldValidation(WorldKitValidationReport report)
+{
+    Console.WriteLine($"World Kit validation: {report.Status}");
+    Console.WriteLine($"  World: {report.WorldId}");
+    Console.WriteLine($"  World root: {report.WorldRoot}");
+    Console.WriteLine($"  Map: {report.Coverage.Width} x {report.Coverage.Height} ({report.Coverage.TileCount}/{report.Coverage.ExpectedTileCount} tiles)");
+    Console.WriteLine($"  Cities: {report.Coverage.CityCount}");
+    Console.WriteLine($"  Locations: {report.Coverage.LocationCount}");
+    Console.WriteLine($"  Clan starts: {report.Coverage.ClansWithStarts}");
+    Console.WriteLine($"  Reachable city pairs: {report.Coverage.ReachableCityPairs}/{report.Coverage.TotalCityPairs}");
+    Console.WriteLine($"  Issues: {report.IssueCount}");
+    foreach (var issue in report.Issues)
+    {
+        Console.WriteLine($"  {issue}");
+    }
+}
+
 static int Usage()
 {
     Console.WriteLine("Usage: Wism.ModKit.Cli [validate|proof] [repo=path] [modRoot=path] [profile=classic-warlords] [packs=a,b] [out=path] [runId=id] [unityManifest=path] [unityStatusManifest=path] [unityTestResults=path] [runAgent=true] [--json]");
+    Console.WriteLine("       Wism.ModKit.Cli world validate [repo=path] [modRoot=path] [world=TestWorld] [players=N] [clans=a,b] [--json]");
     return 2;
 }
 
 static JsonSerializerOptions JsonOptions() => new()
 {
-    WriteIndented = true
+    WriteIndented = true,
+    Converters = { new JsonStringEnumConverter() }
 };
 
 sealed class CliOptions
@@ -479,6 +537,9 @@ sealed class CliOptions
     public string UnityManifest { get; private set; } = string.Empty;
     public string UnityStatusManifest { get; private set; } = string.Empty;
     public string UnityTestResults { get; private set; } = string.Empty;
+    public string WorldId { get; private set; } = "TestWorld";
+    public int RequestedPlayers { get; private set; }
+    public string[] ActiveClans { get; private set; } = Array.Empty<string>();
     public bool Json { get; private set; }
     public bool RunAgentPlayground { get; private set; } = true;
 
@@ -504,6 +565,9 @@ sealed class CliOptions
         options.UnityManifest = Read(values, "unityManifest", options.UnityManifest);
         options.UnityStatusManifest = Read(values, "unityStatusManifest", options.UnityStatusManifest);
         options.UnityTestResults = Read(values, "unityTestResults", options.UnityTestResults);
+        options.WorldId = Read(values, "world", options.WorldId);
+        options.RequestedPlayers = ReadInt(values, "players", options.RequestedPlayers);
+        options.ActiveClans = ReadCsv(values, "clans");
         options.RunAgentPlayground = ReadBool(values, "runAgent", options.RunAgentPlayground);
         return options;
     }
@@ -518,6 +582,13 @@ sealed class CliOptions
     static bool ReadBool(IReadOnlyDictionary<string, string> values, string name, bool fallback)
     {
         return values.TryGetValue(name, out var value) && bool.TryParse(value, out var parsed)
+            ? parsed
+            : fallback;
+    }
+
+    static int ReadInt(IReadOnlyDictionary<string, string> values, string name, int fallback)
+    {
+        return values.TryGetValue(name, out var value) && int.TryParse(value, out var parsed)
             ? parsed
             : fallback;
     }
