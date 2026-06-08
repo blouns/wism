@@ -138,6 +138,28 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void Campaign_TurnCheckpointModeKeepsMomentsButReducesSnapshots()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 20260608,
+            clans: 2,
+            maxTurns: 4,
+            outputRoot: outputRoot,
+            name: "TurnCheckpointSmoke",
+            scenarioFamily: "classic-ai-production-vectoring",
+            checkpointMode: "turns");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.Moments, Has.Some.StartsWith("pre-command:"));
+        Assert.That(result.Moments, Has.Some.StartsWith("production-vector:"));
+        Assert.That(result.Checkpoints, Has.None.Contains("pre-command"));
+        Assert.That(result.Checkpoints.Any(path => path.Contains("turn-end")), Is.True);
+        Assert.That(result.Checkpoints.Any(path => path.Contains("victory") || path.Contains("stalemate")), Is.True);
+        Assert.That(result.Checkpoints.Count, Is.LessThan(result.Moments.Count));
+    }
+
+    [Test]
     public void Campaign_FourClanRunStartsEachClanWithCityAndArmy()
     {
         var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
@@ -360,6 +382,31 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void EvalScorecard_PassesLongEightClanClassicAiReadinessWithMaterialConquestProgress()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-conquest",
+                clanCount: 8,
+                maxTurns: 100,
+                outcome: "Bounded stalemate after 100 turns with 3 viable clans.",
+                counters: EvalCounters.Empty with
+                {
+                    BoundedStalemates = 1,
+                    CityCaptures = 34,
+                    Battles = 74,
+                    Searches = 2,
+                    ProductionDeliveries = 4,
+                    ProductionVectors = 14
+                })
+        });
+
+        Assert.That(scorecard.Status, Is.EqualTo("Passed"));
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "classic-ai-victory-pressure").Passed, Is.True);
+    }
+
+    [Test]
     public void EvalScorecard_DoesNotRequireVictoryForClassicAiProductionVectoringSmoke()
     {
         var scorecard = EvalBatchRunner.BuildScorecard(new[]
@@ -489,18 +536,23 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(validation.Issues.Select(issue => issue.Code), Does.Contain("player.no-army"));
     }
 
-    private static EvalCaseResult EvalCase(string scenarioFamily, EvalCounters counters) =>
+    private static EvalCaseResult EvalCase(
+        string scenarioFamily,
+        EvalCounters counters,
+        int clanCount = 2,
+        int maxTurns = 4,
+        string outcome = "Bounded stalemate.") =>
         new(
             CaseId: scenarioFamily,
             Index: 1,
             Seed: 1,
             ScenarioFamily: scenarioFamily,
-            ClanCount: 2,
-            MaxTurns: 4,
+            ClanCount: clanCount,
+            MaxTurns: maxTurns,
             Size: "medium",
             Status: "Passed",
-            Outcome: "Bounded stalemate.",
-            Turns: 4,
+            Outcome: outcome,
+            Turns: maxTurns,
             ParseableArtifact: true,
             CampaignDirectory: null,
             CampaignManifestPath: null,

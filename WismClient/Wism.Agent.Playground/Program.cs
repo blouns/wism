@@ -52,7 +52,8 @@ try
             var campaignDelayMs = ReadInt(args, "delayMs", 0);
             var campaignSize = ReadString(args, "size", "medium") ?? "medium";
             var campaignScenario = ReadString(args, "scenario", ReadString(args, "preset", selection.Launch.Scenario ?? "standard")) ?? "standard";
-            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs, campaignSize, campaignScenario, channel);
+            var campaignCheckpointMode = ReadString(args, "checkpointMode", "full") ?? "full";
+            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs, campaignSize, campaignScenario, channel, campaignCheckpointMode);
             PrintCampaign(campaign, quiet);
             return string.Equals(campaign.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "eval":
@@ -64,6 +65,7 @@ try
             var evalScenarios = ReadCsv(args, "scenarios");
             var evalClans = ReadIntCsv(args, "clans", new[] { 2, 4 });
             var evalSizes = ReadCsv(args, "sizes");
+            var evalCheckpointMode = ReadString(args, "checkpointMode", "full") ?? "full";
             var eval = new EvalBatchRunner().Run(new EvalBatchOptions(
                 Seed: evalSeed,
                 Cases: evalCases,
@@ -72,7 +74,8 @@ try
                 ScenarioFamilies: evalScenarios,
                 ClanCounts: evalClans,
                 Sizes: evalSizes,
-                ModRoot: evalModRoot));
+                ModRoot: evalModRoot,
+                CheckpointMode: evalCheckpointMode));
             PrintEval(eval, quiet);
             return string.Equals(eval.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "jump":
@@ -89,7 +92,7 @@ try
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|eval|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [sizes=medium,large] [preset=standard|capture-pressure|ruin-search|classic-ai-production-vectoring] [scenarios=a,b] [cases=50] [checkpoint=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|eval|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [checkpointMode=full|turns|summary] [sizes=medium,large] [preset=standard|capture-pressure|ruin-search|classic-ai-production-vectoring] [scenarios=a,b] [cases=50] [checkpoint=path]");
             return 2;
     }
 }

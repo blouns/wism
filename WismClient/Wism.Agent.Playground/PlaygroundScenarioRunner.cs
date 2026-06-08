@@ -196,7 +196,8 @@ public sealed class PlaygroundScenarioRunner
         int companionDelayMs = 0,
         string size = "medium",
         string scenarioFamily = "standard",
-        string? channel = null)
+        string? channel = null,
+        string checkpointMode = "full")
     {
         events.Clear();
         var normalizedScenarioFamily = NormalizeScenarioFamily(scenarioFamily);
@@ -223,7 +224,8 @@ public sealed class PlaygroundScenarioRunner
             OutputRoot: outputRoot ?? Path.Combine(FindRepositoryRootForRunner(), "artifacts", "campaigns"),
             ModRoot: resolvedModRoot,
             Size: string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) ? "large" : "medium",
-            ScenarioFamily: normalizedScenarioFamily);
+            ScenarioFamily: normalizedScenarioFamily,
+            CheckpointMode: ParseCheckpointMode(checkpointMode));
 
         var validation = new CampaignScenarioBuilder().Build(options);
         if (!validation.IsValid)
@@ -1181,6 +1183,16 @@ public sealed class PlaygroundScenarioRunner
         return string.IsNullOrWhiteSpace(scenarioFamily)
             ? "standard"
             : scenarioFamily.Trim().ToLowerInvariant();
+    }
+
+    private static CampaignCheckpointMode ParseCheckpointMode(string checkpointMode)
+    {
+        return checkpointMode.Trim().ToLowerInvariant() switch
+        {
+            "turn" or "turns" or "turn-end" => CampaignCheckpointMode.Turns,
+            "summary" or "final" => CampaignCheckpointMode.Summary,
+            _ => CampaignCheckpointMode.Full
+        };
     }
 
     private static bool UsesSearchMission(string scenarioFamily)

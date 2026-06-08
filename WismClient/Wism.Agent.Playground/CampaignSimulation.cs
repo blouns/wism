@@ -50,7 +50,15 @@ internal sealed record CampaignOptions(
     string OutputRoot,
     string? ModRoot,
     string Size,
-    string ScenarioFamily);
+    string ScenarioFamily,
+    CampaignCheckpointMode CheckpointMode = CampaignCheckpointMode.Full);
+
+internal enum CampaignCheckpointMode
+{
+    Full,
+    Turns,
+    Summary
+}
 
 internal sealed class CampaignScenarioBuilder
 {
@@ -633,6 +641,7 @@ internal sealed class CampaignScenarioBuilder
 internal sealed class CampaignRecorder
 {
     private readonly string outputDirectory;
+    private readonly CampaignCheckpointMode checkpointMode;
     private readonly List<string> checkpoints = new();
     private readonly List<CampaignMoment> moments = new();
     private int commandIndex;
@@ -641,6 +650,7 @@ internal sealed class CampaignRecorder
     public CampaignRecorder(CampaignOptions options)
     {
         this.outputDirectory = Path.Combine(options.OutputRoot, Sanitize(options.Name));
+        this.checkpointMode = options.CheckpointMode;
     }
 
     public string OutputDirectory => this.outputDirectory;
@@ -659,17 +669,46 @@ internal sealed class CampaignRecorder
     public string Checkpoint(string kind, int turn, string clan, string context)
     {
         this.PrepareOutputDirectory();
-        var fileName = $"{this.checkpoints.Count:0000}-{kind}-turn{turn:000}-{Sanitize(clan)}.json";
-        var path = Path.Combine(this.outputDirectory, fileName);
-        var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
-        File.WriteAllText(path, JsonConvert.SerializeObject(Game.Current.Snapshot(), settings));
+        var fileName = string.Empty;
+        if (this.ShouldWriteSnapshot(kind))
+        {
+            fileName = $"{this.checkpoints.Count:0000}-{kind}-turn{turn:000}-{Sanitize(clan)}.json";
+            var path = Path.Combine(this.outputDirectory, fileName);
+            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+            File.WriteAllText(path, JsonConvert.SerializeObject(Game.Current.Snapshot(), settings));
+            this.checkpoints.Add(path);
+        }
+
         var moment = new CampaignMoment(kind, clan, turn, this.commandIndex, fileName, context);
-        this.checkpoints.Add(path);
         this.moments.Add(moment);
         File.AppendAllText(
             Path.Combine(this.outputDirectory, "checkpoint-index.jsonl"),
             JsonConvert.SerializeObject(moment) + Environment.NewLine);
-        return path;
+        return fileName.Length == 0 ? string.Empty : Path.Combine(this.outputDirectory, fileName);
+    }
+
+    private bool ShouldWriteSnapshot(string kind)
+    {
+        if (this.checkpointMode == CampaignCheckpointMode.Full)
+        {
+            return true;
+        }
+
+        if (kind.Equals("command-timeout", StringComparison.OrdinalIgnoreCase) ||
+            kind.Equals("invalid", StringComparison.OrdinalIgnoreCase) ||
+            kind.Equals("setup", StringComparison.OrdinalIgnoreCase) ||
+            kind.Equals("victory", StringComparison.OrdinalIgnoreCase) ||
+            kind.Equals("stalemate", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (this.checkpointMode == CampaignCheckpointMode.Turns)
+        {
+            return kind.Equals("turn-end", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
     }
 
     public void SaveManifest(CampaignRunResult result)

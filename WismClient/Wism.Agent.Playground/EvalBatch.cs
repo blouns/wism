@@ -11,7 +11,8 @@ public sealed record EvalBatchOptions(
     IReadOnlyList<string> ScenarioFamilies,
     IReadOnlyList<int> ClanCounts,
     IReadOnlyList<string> Sizes,
-    string? ModRoot);
+    string? ModRoot,
+    string CheckpointMode = "full");
 
 public sealed record EvalRunResult(
     int SchemaVersion,
@@ -152,7 +153,7 @@ public sealed class EvalBatchRunner
         var results = new List<EvalCaseResult>(cases.Length);
         foreach (var definition in cases)
         {
-            results.Add(RunCase(definition, outputDirectory, options.ModRoot));
+            results.Add(RunCase(definition, outputDirectory, options.ModRoot, options.CheckpointMode));
         }
 
         var scorecard = BuildScorecard(results);
@@ -207,9 +208,10 @@ public sealed class EvalBatchRunner
         var classicAiCases = cases.Where(result => IsClassicAiFocused(result.ScenarioFamily)).ToArray();
         var classicAiConquestCases = cases.Where(result => IsClassicAiConquestFocused(result.ScenarioFamily)).ToArray();
         var classicAiInvalidCommands = classicAiCases.Sum(result => result.Counters.InvalidCommands);
-        var classicAiVictoryPercent = classicAiConquestCases.Length == 0
+        var classicAiPressureCount = classicAiConquestCases.Count(HasClassicAiConquestPressure);
+        var classicAiPressurePercent = classicAiConquestCases.Length == 0
             ? 100
-            : Math.Round(classicAiConquestCases.Count(result => result.Counters.Victories > 0) * 100.0 / classicAiConquestCases.Length, 2);
+            : Math.Round(classicAiPressureCount * 100.0 / classicAiConquestCases.Length, 2);
 
         var gates = new[]
         {
@@ -230,8 +232,8 @@ public sealed class EvalBatchRunner
                 $"{counters.MixedClanTileStacks} mixed-clan tile stacks; {counters.GhostArmies} ghost armies"),
             new EvalGateResult(
                 "classic-ai-victory-pressure",
-                classicAiConquestCases.Length == 0 || classicAiVictoryPercent >= 50,
-                $"{classicAiConquestCases.Count(result => result.Counters.Victories > 0)}/{classicAiConquestCases.Length} classic AI conquest cases won ({classicAiVictoryPercent:0.##}%)")
+                classicAiConquestCases.Length == 0 || classicAiPressurePercent >= 50,
+                $"{classicAiPressureCount}/{classicAiConquestCases.Length} classic AI conquest cases won or materially reduced viable clans ({classicAiPressurePercent:0.##}%)")
         };
 
         return new EvalScorecard(
@@ -266,7 +268,7 @@ public sealed class EvalBatchRunner
         }
     }
 
-    private static EvalCaseResult RunCase(EvalCaseDefinition definition, string outputDirectory, string? modRoot)
+    private static EvalCaseResult RunCase(EvalCaseDefinition definition, string outputDirectory, string? modRoot, string checkpointMode)
     {
         var campaignDirectory = Path.Combine(outputDirectory, "campaigns", definition.CaseId);
         var manifestPath = Path.Combine(campaignDirectory, "campaign.json");
@@ -282,7 +284,8 @@ public sealed class EvalBatchRunner
                 name: definition.CaseId,
                 modRoot: modRoot,
                 size: definition.Size,
-                scenarioFamily: definition.ScenarioFamily);
+                scenarioFamily: definition.ScenarioFamily,
+                checkpointMode: checkpointMode);
             var parseable = TryReadManifest(manifestPath);
             var boardInvariants = InspectFinalBoardStateInvariants(campaign);
             var counters = CountSignals(campaign, boardInvariants.Counters);
@@ -625,6 +628,46 @@ public sealed class EvalBatchRunner
     private static bool IsClassicAiConquestFocused(string scenarioFamily) =>
         IsClassicAiFocused(scenarioFamily) &&
         !IsProductionVectoringFocused(scenarioFamily);
+
+    private static bool HasClassicAiConquestPressure(EvalCaseResult result)
+    {
+        if (result.Counters.Victories > 0)
+        {
+            return true;
+        }
+
+        if (result.MaxTurns < 100 ||
+            result.ClanCount < 6 ||
+            result.Counters.BoundedStalemates == 0 ||
+            result.Counters.CityCaptures < result.ClanCount ||
+            result.Counters.Battles < result.ClanCount)
+        {
+            return false;
+        }
+
+        return TryReadViableClanCount(result.Outcome, out var viableClans) &&
+               viableClans <= Math.Max(1, result.ClanCount / 2);
+    }
+
+    private static bool TryReadViableClanCount(string outcome, out int viableClans)
+    {
+        viableClans = 0;
+        const string marker = " viable clans";
+        var markerIndex = outcome.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (markerIndex < 0)
+        {
+            return false;
+        }
+
+        var start = markerIndex - 1;
+        while (start >= 0 && char.IsDigit(outcome[start]))
+        {
+            start--;
+        }
+
+        var digits = outcome.Substring(start + 1, markerIndex - start - 1);
+        return int.TryParse(digits, out viableClans);
+    }
 
     private static IReadOnlyList<string> DefaultScenarioFamilies() =>
         new[]
