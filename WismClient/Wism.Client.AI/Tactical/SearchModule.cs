@@ -146,7 +146,7 @@ namespace Wism.Client.AI.Tactical
             if (path != null && path.Count > 1)
             {
                 logger.LogInformation($"[Search] Moving toward {target.ShortName} via ({path[1].X},{path[1].Y}).");
-                AiUtilities.GenerateMoveCommands(armyController, armies, commands, target.Tile, path);
+                AiUtilities.GenerateMoveCommands(armyController, armies, commands, target.Tile, path, logger);
             }
 
             return commands;

@@ -11,7 +11,7 @@
     "pack-illurian-legends-flavor"
   ],
   "modRoot": "mod",
-  "unityScene": "Assets/Scenes/Mini-Illuria.unity",
+  "unityScene": "Assets/Scenes/Test/TestWorld.unity",
   "launch": {
     "world": "TestWorld",
     "seed": 1990,

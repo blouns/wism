@@ -5,6 +5,7 @@ using System.Xml;
 using System.Xml.Linq;
 using Wism.Client.Modules.Profiles;
 using Wism.Client.Modules.Worlds;
+using Wism.ModKit.Cli;
 
 var command = args.FirstOrDefault(arg => !arg.StartsWith("--", StringComparison.OrdinalIgnoreCase)) ?? "validate";
 var options = CliOptions.Parse(args);
@@ -42,6 +43,11 @@ static int RunWorld(string[] args, CliOptions options)
         .Where(arg => !arg.Contains("=", StringComparison.OrdinalIgnoreCase))
         .Skip(1)
         .FirstOrDefault() ?? "validate";
+    if (string.Equals(subcommand, "build-near-illuria", StringComparison.OrdinalIgnoreCase))
+    {
+        return RunWorldBuildNearIlluria(options);
+    }
+
     if (!string.Equals(subcommand, "validate", StringComparison.OrdinalIgnoreCase))
     {
         return Usage();
@@ -69,6 +75,40 @@ static int RunWorld(string[] args, CliOptions options)
     }
 
     return report.IsValid ? 0 : 1;
+}
+
+static int RunWorldBuildNearIlluria(CliOptions options)
+{
+    var result = NearIlluriaKitBuilder.Build(new NearIlluriaKitBuildOptions
+    {
+        RepositoryRoot = options.RepositoryRoot,
+        UnityModRoot = options.UnityModRoot,
+        SourceWorld = options.SourceWorldId,
+        World = options.WorldWasSpecified ? options.WorldId : string.Empty,
+        Profile = options.ProfileWasSpecified ? options.ProfileId : string.Empty,
+        CopyToUnity = options.CopyToUnity
+    });
+
+    if (options.Json)
+    {
+        Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions()));
+    }
+    else
+    {
+        Console.WriteLine($"Near-Illuria kit build: {result.Status}");
+        Console.WriteLine($"  Source world: {result.SourceWorld}");
+        Console.WriteLine($"  World: {result.World}");
+        Console.WriteLine($"  Profile: {result.Profile}");
+        Console.WriteLine($"  Map: {result.Width} x {result.Height}");
+        Console.WriteLine($"  Cities: {result.CityCount} ({result.NavyCityCount} navy-capable, {result.AdjustedCityCount} adjusted)");
+        Console.WriteLine($"  Locations: {result.LocationCount}");
+        foreach (var path in result.WrittenFiles)
+        {
+            Console.WriteLine($"  Wrote: {path}");
+        }
+    }
+
+    return 0;
 }
 
 static int RunValidate(CliOptions options)
@@ -517,6 +557,7 @@ static int Usage()
 {
     Console.WriteLine("Usage: Wism.ModKit.Cli [validate|proof] [repo=path] [modRoot=path] [profile=classic-warlords] [packs=a,b] [out=path] [runId=id] [unityManifest=path] [unityStatusManifest=path] [unityTestResults=path] [runAgent=true] [--json]");
     Console.WriteLine("       Wism.ModKit.Cli world validate [repo=path] [modRoot=path] [world=TestWorld] [players=N] [clans=a,b] [--json]");
+    Console.WriteLine("       Wism.ModKit.Cli world build-near-illuria [repo=path] [source=Illuria] [world=Near-Illuria] [profile=near-illuria] [unityModRoot=path] [copyUnity=true] [--json]");
     return 2;
 }
 
@@ -538,10 +579,15 @@ sealed class CliOptions
     public string UnityStatusManifest { get; private set; } = string.Empty;
     public string UnityTestResults { get; private set; } = string.Empty;
     public string WorldId { get; private set; } = "TestWorld";
+    public string SourceWorldId { get; private set; } = "Illuria";
+    public string UnityModRoot { get; private set; } = string.Empty;
     public int RequestedPlayers { get; private set; }
     public string[] ActiveClans { get; private set; } = Array.Empty<string>();
     public bool Json { get; private set; }
     public bool RunAgentPlayground { get; private set; } = true;
+    public bool CopyToUnity { get; private set; } = true;
+    public bool ProfileWasSpecified { get; private set; }
+    public bool WorldWasSpecified { get; private set; }
 
     public static CliOptions Parse(string[] args)
     {
@@ -559,6 +605,7 @@ sealed class CliOptions
         options.RepositoryRoot = Read(values, "repo", options.RepositoryRoot);
         options.ModRoot = Read(values, "modRoot", options.ModRoot);
         options.ProfileId = Read(values, "profile", options.ProfileId);
+        options.ProfileWasSpecified = values.ContainsKey("profile");
         options.PackIds = ReadCsv(values, "packs");
         options.Output = Read(values, "out", options.Output);
         options.RunId = Read(values, "runId", options.RunId);
@@ -566,9 +613,13 @@ sealed class CliOptions
         options.UnityStatusManifest = Read(values, "unityStatusManifest", options.UnityStatusManifest);
         options.UnityTestResults = Read(values, "unityTestResults", options.UnityTestResults);
         options.WorldId = Read(values, "world", options.WorldId);
+        options.WorldWasSpecified = values.ContainsKey("world");
+        options.SourceWorldId = Read(values, "source", options.SourceWorldId);
+        options.UnityModRoot = Read(values, "unityModRoot", options.UnityModRoot);
         options.RequestedPlayers = ReadInt(values, "players", options.RequestedPlayers);
         options.ActiveClans = ReadCsv(values, "clans");
         options.RunAgentPlayground = ReadBool(values, "runAgent", options.RunAgentPlayground);
+        options.CopyToUnity = ReadBool(values, "copyUnity", options.CopyToUnity);
         return options;
     }
 

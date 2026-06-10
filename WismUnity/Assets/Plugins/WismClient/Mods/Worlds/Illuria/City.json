@@ -21,7 +21,7 @@
       }
     ],
     "ShortName": "Deserton",
-    "X": 0,
+    "X": 101,
     "Y": 0
   },
   {
@@ -46,8 +46,8 @@
       }
     ],
     "ShortName": "Zaigonne",
-    "X": 0,
-    "Y": 0
+    "X": 80,
+    "Y": 3
   },
   {
     "ClanName": "Neutral",
@@ -85,8 +85,8 @@
       }
     ],
     "ShortName": "Bereri",
-    "X": 0,
-    "Y": 0
+    "X": 6,
+    "Y": 7
   },
   {
     "ClanName": "Neutral",
@@ -110,8 +110,8 @@
       }
     ],
     "ShortName": "Tal",
-    "X": 0,
-    "Y": 0
+    "X": 35,
+    "Y": 3
   },
   {
     "ClanName": "Neutral",
@@ -135,8 +135,8 @@
       }
     ],
     "ShortName": "Minbourne",
-    "X": 0,
-    "Y": 0
+    "X": 62,
+    "Y": 2
   },
   {
     "ClanName": "Neutral",
@@ -153,8 +153,8 @@
       }
     ],
     "ShortName": "Tirfing",
-    "X": 0,
-    "Y": 0
+    "X": 71,
+    "Y": 17
   },
   {
     "ClanName": "Neutral",
@@ -171,8 +171,8 @@
       }
     ],
     "ShortName": "Amenal",
-    "X": 0,
-    "Y": 0
+    "X": 10,
+    "Y": 17
   },
   {
     "ClanName": "Neutral",
@@ -203,8 +203,8 @@
       }
     ],
     "ShortName": "Pareth",
-    "X": 0,
-    "Y": 0
+    "X": 47,
+    "Y": 9
   },
   {
     "ClanName": "Neutral",
@@ -228,8 +228,8 @@
       }
     ],
     "ShortName": "Ungor",
-    "X": 0,
-    "Y": 0
+    "X": 83,
+    "Y": 8
   },
   {
     "ClanName": "Neutral",
@@ -253,8 +253,8 @@
       }
     ],
     "ShortName": "Gorag",
-    "X": 0,
-    "Y": 0
+    "X": 96,
+    "Y": 2
   },
   {
     "ClanName": "Neutral",
@@ -271,8 +271,8 @@
       }
     ],
     "ShortName": "Vival",
-    "X": 0,
-    "Y": 0
+    "X": 3,
+    "Y": 10
   },
   {
     "ClanName": "LordBane",
@@ -310,8 +310,8 @@
       }
     ],
     "ShortName": "BanesCitadel",
-    "X": 0,
-    "Y": 0
+    "X": 98,
+    "Y": 9
   },
   {
     "ClanName": "Neutral",
@@ -328,8 +328,8 @@
       }
     ],
     "ShortName": "Needleton",
-    "X": 0,
-    "Y": 0
+    "X": 46,
+    "Y": 12
   },
   {
     "ClanName": "Neutral",
@@ -360,8 +360,8 @@
       }
     ],
     "ShortName": "Gunthang",
-    "X": 0,
-    "Y": 0
+    "X": 34,
+    "Y": 6
   },
   {
     "ClanName": "Neutral",
@@ -378,8 +378,8 @@
       }
     ],
     "ShortName": "Deephallow",
-    "X": 0,
-    "Y": 0
+    "X": 58,
+    "Y": 19
   },
   {
     "ClanName": "Neutral",
@@ -410,8 +410,8 @@
       }
     ],
     "ShortName": "AkGiriel",
-    "X": 0,
-    "Y": 0
+    "X": 16,
+    "Y": 15
   },
   {
     "ClanName": "Neutral",
@@ -435,8 +435,8 @@
       }
     ],
     "ShortName": "AkEnlie",
-    "X": 0,
-    "Y": 0
+    "X": 14,
+    "Y": 16
   },
   {
     "ClanName": "Neutral",
@@ -460,8 +460,8 @@
       }
     ],
     "ShortName": "AkFarzon",
-    "X": 0,
-    "Y": 0
+    "X": 28,
+    "Y": 14
   },
   {
     "ClanName": "Neutral",
@@ -492,8 +492,8 @@
       }
     ],
     "ShortName": "Meneloth",
-    "X": 0,
-    "Y": 0
+    "X": 69,
+    "Y": 26
   },
   {
     "ClanName": "Neutral",
@@ -524,8 +524,8 @@
       }
     ],
     "ShortName": "Malikor",
-    "X": 0,
-    "Y": 0
+    "X": 100,
+    "Y": 27
   },
   {
     "ClanName": "Selentines",
@@ -563,8 +563,8 @@
       }
     ],
     "ShortName": "Enmouth",
-    "X": 0,
-    "Y": 0
+    "X": 9,
+    "Y": 23
   },
   {
     "ClanName": "Neutral",
@@ -588,8 +588,8 @@
       }
     ],
     "ShortName": "Argrond",
-    "X": 0,
-    "Y": 0
+    "X": 88,
+    "Y": 18
   },
   {
     "ClanName": "Neutral",
@@ -613,8 +613,8 @@
       }
     ],
     "ShortName": "Barthel",
-    "X": 0,
-    "Y": 0
+    "X": 30,
+    "Y": 15
   },
   {
     "ClanName": "Neutral",
@@ -645,8 +645,8 @@
       }
     ],
     "ShortName": "Marton",
-    "X": 0,
-    "Y": 0
+    "X": 16,
+    "Y": 20
   },
   {
     "ClanName": "Neutral",
@@ -670,8 +670,8 @@
       }
     ],
     "ShortName": "Waybourne",
-    "X": 0,
-    "Y": 0
+    "X": 2,
+    "Y": 26
   },
   {
     "ClanName": "Neutral",
@@ -695,8 +695,8 @@
       }
     ],
     "ShortName": "Dethal",
-    "X": 0,
-    "Y": 0
+    "X": 96,
+    "Y": 32
   },
   {
     "ClanName": "Neutral",
@@ -727,8 +727,8 @@
       }
     ],
     "ShortName": "Greenweigh",
-    "X": 0,
-    "Y": 0
+    "X": 23,
+    "Y": 27
   },
   {
     "ClanName": "Neutral",
@@ -745,8 +745,8 @@
       }
     ],
     "ShortName": "Upway",
-    "X": 0,
-    "Y": 0
+    "X": 44,
+    "Y": 20
   },
   {
     "ClanName": "Neutral",
@@ -770,8 +770,8 @@
       }
     ],
     "ShortName": "Darclan",
-    "X": 0,
-    "Y": 0
+    "X": 83,
+    "Y": 28
   },
   {
     "ClanName": "Neutral",
@@ -795,8 +795,8 @@
       }
     ],
     "ShortName": "Maridun",
-    "X": 0,
-    "Y": 0
+    "X": 49,
+    "Y": 19
   },
   {
     "ClanName": "Neutral",
@@ -820,8 +820,8 @@
       }
     ],
     "ShortName": "Jessarton",
-    "X": 0,
-    "Y": 0
+    "X": 3,
+    "Y": 29
   },
   {
     "ClanName": "Neutral",
@@ -845,8 +845,8 @@
       }
     ],
     "ShortName": "Zhoran",
-    "X": 0,
-    "Y": 0
+    "X": 27,
+    "Y": 36
   },
   {
     "ClanName": "GreyDwarves",
@@ -870,8 +870,8 @@
       }
     ],
     "ShortName": "Khamar",
-    "X": 0,
-    "Y": 0
+    "X": 34,
+    "Y": 37
   },
   {
     "ClanName": "Neutral",
@@ -895,8 +895,8 @@
       }
     ],
     "ShortName": "Upbourne",
-    "X": 0,
-    "Y": 0
+    "X": 14,
+    "Y": 31
   },
   {
     "ClanName": "Neutral",
@@ -920,8 +920,8 @@
       }
     ],
     "ShortName": "Cragmorton",
-    "X": 0,
-    "Y": 0
+    "X": 30,
+    "Y": 36
   },
   {
     "ClanName": "Neutral",
@@ -938,8 +938,8 @@
       }
     ],
     "ShortName": "Paynor",
-    "X": 0,
-    "Y": 0
+    "X": 84,
+    "Y": 40
   },
   {
     "ClanName": "Neutral",
@@ -956,8 +956,8 @@
       }
     ],
     "ShortName": "Carmel",
-    "X": 0,
-    "Y": 0
+    "X": 17,
+    "Y": 33
   },
   {
     "ClanName": "HorseLords",
@@ -981,8 +981,8 @@
       }
     ],
     "ShortName": "Dunethal",
-    "X": 0,
-    "Y": 0
+    "X": 60,
+    "Y": 31
   },
   {
     "ClanName": "Neutral",
@@ -1006,8 +1006,8 @@
       }
     ],
     "ShortName": "Derridon",
-    "X": 0,
-    "Y": 0
+    "X": 49,
+    "Y": 26
   },
   {
     "ClanName": "Neutral",
@@ -1031,8 +1031,8 @@
       }
     ],
     "ShortName": "Fleymark",
-    "X": 0,
-    "Y": 0
+    "X": 74,
+    "Y": 31
   },
   {
     "ClanName": "Neutral",
@@ -1063,8 +1063,8 @@
       }
     ],
     "ShortName": "PaKur",
-    "X": 0,
-    "Y": 0
+    "X": 86,
+    "Y": 40
   },
   {
     "ClanName": "Neutral",
@@ -1095,8 +1095,8 @@
       }
     ],
     "ShortName": "ArArak",
-    "X": 0,
-    "Y": 0
+    "X": 102,
+    "Y": 39
   },
   {
     "ClanName": "Neutral",
@@ -1127,8 +1127,8 @@
       }
     ],
     "ShortName": "DharKhosis",
-    "X": 0,
-    "Y": 0
+    "X": 24,
+    "Y": 43
   },
   {
     "ClanName": "Neutral",
@@ -1159,8 +1159,8 @@
       }
     ],
     "ShortName": "CitadelOfFire",
-    "X": 0,
-    "Y": 0
+    "X": 50,
+    "Y": 45
   },
   {
     "ClanName": "Neutral",
@@ -1191,8 +1191,8 @@
       }
     ],
     "ShortName": "CitadelOfIce",
-    "X": 0,
-    "Y": 0
+    "X": 64,
+    "Y": 35
   },
   {
     "ClanName": "Neutral",
@@ -1230,8 +1230,8 @@
       }
     ],
     "ShortName": "Hithos",
-    "X": 0,
-    "Y": 0
+    "X": 10,
+    "Y": 42
   },
   {
     "ClanName": "Neutral",
@@ -1255,8 +1255,8 @@
       }
     ],
     "ShortName": "Ubar",
-    "X": 0,
-    "Y": 0
+    "X": 43,
+    "Y": 40
   },
   {
     "ClanName": "Neutral",
@@ -1287,8 +1287,8 @@
       }
     ],
     "ShortName": "Galin",
-    "X": 0,
-    "Y": 0
+    "X": 29,
+    "Y": 45
   },
   {
     "ClanName": "Neutral",
@@ -1319,8 +1319,8 @@
       }
     ],
     "ShortName": "Herzag",
-    "X": 0,
-    "Y": 0
+    "X": 75,
+    "Y": 43
   },
   {
     "ClanName": "Neutral",
@@ -1337,8 +1337,8 @@
       }
     ],
     "ShortName": "Gimlad",
-    "X": 0,
-    "Y": 0
+    "X": 97,
+    "Y": 44
   },
   {
     "ClanName": "Neutral",
@@ -1369,8 +1369,8 @@
       }
     ],
     "ShortName": "Vernon",
-    "X": 0,
-    "Y": 0
+    "X": 39,
+    "Y": 44
   },
   {
     "ClanName": "Neutral",
@@ -1394,8 +1394,8 @@
       }
     ],
     "ShortName": "Thurtz",
-    "X": 0,
-    "Y": 0
+    "X": 90,
+    "Y": 46
   },
   {
     "ClanName": "Neutral",
@@ -1426,8 +1426,8 @@
       }
     ],
     "ShortName": "Kazrak",
-    "X": 0,
-    "Y": 0
+    "X": 58,
+    "Y": 47
   },
   {
     "ClanName": "OrcsOfKor",
@@ -1458,8 +1458,8 @@
       }
     ],
     "ShortName": "Kor",
-    "X": 0,
-    "Y": 0
+    "X": 99,
+    "Y": 43
   },
   {
     "ClanName": "Neutral",
@@ -1490,8 +1490,8 @@
       }
     ],
     "ShortName": "Ilnyr",
-    "X": 0,
-    "Y": 0
+    "X": 73,
+    "Y": 40
   },
   {
     "ClanName": "Neutral",
@@ -1515,8 +1515,8 @@
       }
     ],
     "ShortName": "Ohmsmouth",
-    "X": 0,
-    "Y": 0
+    "X": 11,
+    "Y": 48
   },
   {
     "ClanName": "Neutral",
@@ -1540,8 +1540,8 @@
       }
     ],
     "ShortName": "Himelton",
-    "X": 0,
-    "Y": 0
+    "X": 24,
+    "Y": 45
   },
   {
     "ClanName": "Neutral",
@@ -1565,8 +1565,8 @@
       }
     ],
     "ShortName": "Wellmore",
-    "X": 0,
-    "Y": 0
+    "X": 2,
+    "Y": 52
   },
   {
     "ClanName": "Neutral",
@@ -1604,8 +1604,8 @@
       }
     ],
     "ShortName": "BaladNaran",
-    "X": 0,
-    "Y": 0
+    "X": 98,
+    "Y": 57
   },
   {
     "ClanName": "Neutral",
@@ -1622,8 +1622,8 @@
       }
     ],
     "ShortName": "Lador",
-    "X": 0,
-    "Y": 0
+    "X": 27,
+    "Y": 55
   },
   {
     "ClanName": "Neutral",
@@ -1647,8 +1647,8 @@
       }
     ],
     "ShortName": "Duinoth",
-    "X": 0,
-    "Y": 0
+    "X": 70,
+    "Y": 52
   },
   {
     "ClanName": "StormGiants",
@@ -1665,8 +1665,8 @@
       }
     ],
     "ShortName": "Stormheim",
-    "X": 0,
-    "Y": 0
+    "X": 21,
+    "Y": 57
   },
   {
     "ClanName": "Neutral",
@@ -1690,8 +1690,8 @@
       }
     ],
     "ShortName": "Angbar",
-    "X": 0,
-    "Y": 0
+    "X": 45,
+    "Y": 52
   },
   {
     "ClanName": "Neutral",
@@ -1715,8 +1715,8 @@
       }
     ],
     "ShortName": "Ssuri",
-    "X": 0,
-    "Y": 0
+    "X": 64,
+    "Y": 53
   },
   {
     "ClanName": "Neutral",
@@ -1740,8 +1740,8 @@
       }
     ],
     "ShortName": "Tasme",
-    "X": 0,
-    "Y": 0
+    "X": 4,
+    "Y": 56
   },
   {
     "ClanName": "Neutral",
@@ -1772,8 +1772,8 @@
       }
     ],
     "ShortName": "Argenthorn",
-    "X": 0,
-    "Y": 0
+    "X": 34,
+    "Y": 53
   },
   {
     "ClanName": "Neutral",
@@ -1797,8 +1797,8 @@
       }
     ],
     "ShortName": "Troy",
-    "X": 0,
-    "Y": 0
+    "X": 62,
+    "Y": 59
   },
   {
     "ClanName": "Neutral",
@@ -1822,8 +1822,8 @@
       }
     ],
     "ShortName": "Garom",
-    "X": 0,
-    "Y": 0
+    "X": 84,
+    "Y": 55
   },
   {
     "ClanName": "Neutral",
@@ -1847,8 +1847,8 @@
       }
     ],
     "ShortName": "Quiesce",
-    "X": 0,
-    "Y": 0
+    "X": 24,
+    "Y": 61
   },
   {
     "ClanName": "Neutral",
@@ -1879,8 +1879,8 @@
       }
     ],
     "ShortName": "Varde",
-    "X": 0,
-    "Y": 0
+    "X": 4,
+    "Y": 61
   },
   {
     "ClanName": "Neutral",
@@ -1897,8 +1897,8 @@
       }
     ],
     "ShortName": "Charling",
-    "X": 0,
-    "Y": 0
+    "X": 43,
+    "Y": 66
   },
   {
     "ClanName": "Neutral",
@@ -1929,8 +1929,8 @@
       }
     ],
     "ShortName": "Hereuth",
-    "X": 0,
-    "Y": 0
+    "X": 75,
+    "Y": 62
   },
   {
     "ClanName": "Elvallie",
@@ -1961,8 +1961,8 @@
       }
     ],
     "ShortName": "Elvallie",
-    "X": 0,
-    "Y": 0
+    "X": 42,
+    "Y": 65
   },
   {
     "ClanName": "Neutral",
@@ -1993,8 +1993,8 @@
       }
     ],
     "ShortName": "Gildenhome",
-    "X": 0,
-    "Y": 0
+    "X": 28,
+    "Y": 57
   },
   {
     "ClanName": "Neutral",
@@ -2018,8 +2018,8 @@
       }
     ],
     "ShortName": "Khorfe",
-    "X": 0,
-    "Y": 0
+    "X": 4,
+    "Y": 65
   },
   {
     "ClanName": "Neutral",
@@ -2050,8 +2050,8 @@
       }
     ],
     "ShortName": "Gluk",
-    "X": 0,
-    "Y": 0
+    "X": 76,
+    "Y": 66
   },
   {
     "ClanName": "Neutral",
@@ -2082,8 +2082,8 @@
       }
     ],
     "ShortName": "Loremark",
-    "X": 0,
-    "Y": 0
+    "X": 31,
+    "Y": 72
   },
   {
     "ClanName": "Neutral",
@@ -2114,8 +2114,8 @@
       }
     ],
     "ShortName": "Gork",
-    "X": 0,
-    "Y": 0
+    "X": 87,
+    "Y": 61
   },
   {
     "ClanName": "Neutral",
@@ -2139,8 +2139,8 @@
       }
     ],
     "ShortName": "AlfarsGap",
-    "X": 0,
-    "Y": 0
+    "X": 11,
+    "Y": 71
   },
   {
     "ClanName": "Sirians",
@@ -2178,7 +2178,7 @@
       }
     ],
     "ShortName": "Marthos",
-    "X": 0,
-    "Y": 0
+    "X": 71,
+    "Y": 62
   }
 ]

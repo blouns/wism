@@ -24,8 +24,8 @@
                     <ui:VisualElement class="log-toolbar">
                         <ui:Label text="Event Log" class="panel-title" />
                         <ui:VisualElement class="spacer" />
-                        <ui:Button name="log-mode-raw" text="Raw" class="log-mode-btn log-mode-btn--active" />
-                        <ui:Button name="log-mode-simple" text="Simple" class="log-mode-btn" />
+                        <ui:Button name="log-mode-raw" text="Raw" class="log-mode-btn" />
+                        <ui:Button name="log-mode-simple" text="Simple" class="log-mode-btn log-mode-btn--active" />
                         <ui:TextField name="log-filter" placeholder-text="filter..." class="log-filter" />
                     </ui:VisualElement>
                     <ui:ListView name="log-list" class="log-list" />

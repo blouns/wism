@@ -91,6 +91,9 @@
 		<None Update="mod\Worlds\Illuria\Location.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="mod\Worlds\Near-Illuria\*.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="mod\Worlds\UnitTestWorld\Map.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

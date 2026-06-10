@@ -92,7 +92,13 @@ namespace Assets.Scripts.UI
 
             if (!this.armyManager.ArmyDictionary.ContainsKey(army.Id))
             {
-                throw new InvalidOperationException("Could not find selected army in game objects.");
+                Debug.LogWarningFormat(
+                    "SelectedArmyBox: selected army {0} at {1},{2} has no rendered game object yet.",
+                    army.Id,
+                    army.X,
+                    army.Y);
+                HideSelectedBox();
+                return;
             }
 
             // Render the selected box

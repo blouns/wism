@@ -89,5 +89,16 @@ public class GameInitializationTests : IPrebuildSetup, IPostBuildCleanup
         Assert.IsNotNull(unityManagerObject, "Could not find the UnityManager");
     }
 
+    [UnityTest]
+    public IEnumerator DeselectArmies_NoSelectedArmies_DoesNotThrow()
+    {
+        var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
+            .GetComponent<GameManager>();
+
+        yield return new WaitForSeconds(0.1f);
+
+        Assert.DoesNotThrow(() => gameManager.DeselectArmies());
+    }
+
     #endregion
 }

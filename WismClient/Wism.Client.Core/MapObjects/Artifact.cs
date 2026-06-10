@@ -30,8 +30,8 @@ namespace Wism.Client.MapObjects
                 throw new ArgumentNullException(nameof(hero));
             }
 
-            var tile = hero.Tile;
-            tile.Items.Add(this);
+            var tile = hero.Tile ?? throw new InvalidOperationException("Cannot drop an artifact from a hero that is not on the map.");
+            tile.AddItem(this);
 
             // Add for tracking
             World.Current.AddLooseItem(this, tile);

@@ -54,8 +54,14 @@ namespace Wism.Client.AI.Framework
             List<Army> armies,
             List<ICommandAction> commands,
             Tile targetTile,
-            IList<Tile> path = null)
+            IList<Tile> path = null,
+            IWismLogger logger = null)
         {
+            if (!CanMoveOneStepThisTurn(armies, targetTile, ref path, logger))
+            {
+                return commands;
+            }
+
             var current = Game.Current.ArmiesSelected()
                 ? Game.Current.GetSelectedArmies()
                 : new List<Army>();
@@ -78,6 +84,54 @@ namespace Wism.Client.AI.Framework
             commands.Add(move);
             commands.Add(new DeselectArmyCommand(armyController, armies));
             return commands;
+        }
+
+        private static bool CanMoveOneStepThisTurn(
+            List<Army> armies,
+            Tile targetTile,
+            ref IList<Tile> path,
+            IWismLogger logger)
+        {
+            if (armies == null || armies.Count == 0 || targetTile == null)
+            {
+                return false;
+            }
+
+            if (path == null)
+            {
+                Game.Current.PathingStrategy.FindShortestRoute(
+                    World.Current.Map,
+                    armies,
+                    targetTile,
+                    out path,
+                    out _,
+                    ignoreClan: false);
+            }
+
+            if (path == null || path.Count <= 1)
+            {
+                logger?.LogInformation("[AI] No movement command queued because no next path step is available.");
+                return false;
+            }
+
+            var nextTile = path[1];
+            if (!nextTile.CanTraverseHere(armies))
+            {
+                logger?.LogInformation(
+                    $"[AI] No movement command queued because next step ({nextTile.X},{nextTile.Y}) is blocked.");
+                return false;
+            }
+
+            var armiesWithApplicableMoves =
+                Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armies, nextTile);
+            if (!Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(armiesWithApplicableMoves, nextTile))
+            {
+                logger?.LogInformation(
+                    $"[AI] No movement command queued because next step ({nextTile.X},{nextTile.Y}) costs more moves than the stack has remaining.");
+                return false;
+            }
+
+            return true;
         }
 
         internal static IEnumerable<ICommandAction> GenerateDefendCommands(

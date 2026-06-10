@@ -41,6 +41,11 @@ namespace Wism.Client.Api.Telemetry
                         Name = a.ShortName,
                         Owner = a.Player.Clan.ShortName,
                         Health = a.HitPoints,
+                        Strength = a.Strength,
+                        Moves = a.Moves,
+                        IsHero = a is Hero,
+                        IsSpecial = a.IsSpecial(),
+                        CanFly = a.CanFly,
                         Position = new PositionDto
                         {
                             X = a.Tile.X,
@@ -107,12 +112,16 @@ namespace Wism.Client.Api.Telemetry
                             Name = selected.ShortName,
                             Owner = selected.Player.Clan.ShortName,
                             Health = selected.HitPoints,
+                            Strength = selected.Strength,
+                            Moves = selected.Moves,
+                            IsHero = selected is Hero,
+                            IsSpecial = selected.IsSpecial(),
+                            CanFly = selected.CanFly,
                             Position = new PositionDto
                             {
                                 X = selected.Tile.X,
                                 Y = selected.Tile.Y
-                            },
-                            IsHero = selected is Hero
+                            }
                         };
                     }
                 }

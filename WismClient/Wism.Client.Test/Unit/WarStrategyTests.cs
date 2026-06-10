@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Core.Armies.WarStrategies;
+using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 using Wism.Client.Modules.Infos;
 
@@ -235,11 +238,93 @@ public class WarStrategyTests
         Assert.That(enemy.GetArmies(), Is.Empty);
     }
 
+    [Test]
+    public void NeutralCityGarrison_DoesNotReceiveCityDefenseBonusTwice()
+    {
+        Game.CreateDefaultGame();
+        var attacker = Game.Current.Players[0];
+        var attackerTile = World.Current.Map[1, 1];
+        var cityTile = World.Current.Map[2, 2];
+        MapBuilder.AddCity(World.Current, 2, 2, "Marthos");
+        cityTile.City.Defense = 3;
+
+        var neutralGarrison = cityTile.MusterArmy().Single();
+        neutralGarrison.Strength = 3;
+        neutralGarrison.Reset();
+
+        var attackingArmy = attacker.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), attackerTile);
+        Game.Current.Random = new RepeatingRandom(4, 2);
+
+        IWarStrategy war = new DefaultWarStrategy();
+        var won = war.AttackOnce(new List<Army> { attackingArmy }, cityTile);
+
+        Assert.That(won, Is.True);
+        Assert.That(neutralGarrison.IsDead, Is.True);
+        Assert.That(cityTile.MusterArmy(), Is.Empty);
+    }
+
+    [Test]
+    public void NeutralCity_TwoLightInfantryOftenCaptureDefenseThree()
+    {
+        const int trials = 100;
+        var wins = 0;
+        IWarStrategy war = new DefaultWarStrategy();
+
+        for (var i = 0; i < trials; i++)
+        {
+            Game.CreateDefaultGame();
+            Game.Current.Random = new Random(i * 37 + 11);
+
+            var attacker = Game.Current.Players[0];
+            var attackerTile = World.Current.Map[1, 1];
+            var cityTile = World.Current.Map[2, 2];
+            MapBuilder.AddCity(World.Current, 2, 2, "Marthos");
+            cityTile.City.Defense = 3;
+
+            var neutralGarrison = cityTile.MusterArmy().Single();
+            neutralGarrison.Strength = 3;
+            neutralGarrison.Reset();
+
+            var attackers = new List<Army>
+            {
+                attacker.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), attackerTile),
+                attacker.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), attackerTile)
+            };
+
+            if (war.Attack(attackers, cityTile))
+            {
+                wins++;
+            }
+        }
+
+        Assert.That(wins, Is.GreaterThan(40),
+            "Two basic armies should win enough neutral-city attacks for early conquest to be viable.");
+        Assert.That(wins, Is.LessThan(trials),
+            "Neutral cities should still create some combat risk.");
+    }
+
     private sealed class AlwaysLowRandom : Random
     {
         public override int Next(int minValue, int maxValue)
         {
             return minValue;
+        }
+    }
+
+    private sealed class RepeatingRandom : Random
+    {
+        private readonly int[] values;
+        private int index;
+
+        public RepeatingRandom(params int[] values)
+        {
+            this.values = values;
+        }
+
+        public override int Next(int minValue, int maxValue)
+        {
+            var value = this.values[this.index++ % this.values.Length];
+            return value >= minValue && value < maxValue ? value : minValue;
         }
     }
 

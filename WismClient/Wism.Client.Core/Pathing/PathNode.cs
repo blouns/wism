@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
 namespace Wism.Client.Pathing
 {
@@ -28,6 +30,23 @@ namespace Wism.Client.Pathing
 
             // TODO: Factor in unit and Clan cost mappings; for now, static
             return euclidean - (float)Math.Floor(euclidean) + other.Value.Terrain.MovementCost;
+        }
+
+        internal float GetDistanceTo(PathNode other, List<Army> armiesToMove)
+        {
+            double a = other.Value.X - this.Value.X;
+            double b = other.Value.Y - this.Value.Y;
+            var euclidean = Convert.ToSingle(Math.Sqrt(a * a + b * b));
+            var diagonalBias = euclidean - (float)Math.Floor(euclidean);
+
+            return diagonalBias + GetMovementCost(other.Value, armiesToMove);
+        }
+
+        internal static int GetMovementCost(Tile tile, List<Army> armiesToMove)
+        {
+            var armiesWithApplicableMoves =
+                Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armiesToMove, tile);
+            return armiesWithApplicableMoves.Max(army => army.GetEffectiveMovementCost(tile));
         }
 
         internal void AddNeighbor(PathNode neighbor)

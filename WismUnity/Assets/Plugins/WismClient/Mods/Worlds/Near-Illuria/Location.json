@@ -1,0 +1,322 @@
+[
+  {
+    "ShortName": "TempleIris",
+    "DisplayName": "Temple of Iris",
+    "Kind": "Temple",
+    "Terrain": "Temple",
+    "X": 9,
+    "Y": 19
+  },
+  {
+    "ShortName": "SeerRiver",
+    "DisplayName": "Seer of the River",
+    "Kind": "Sage",
+    "Terrain": "Temple",
+    "X": 81,
+    "Y": 50
+  },
+  {
+    "ShortName": "TempleEmrik",
+    "DisplayName": "Temple of Emrik",
+    "Kind": "Temple",
+    "Terrain": "Temple",
+    "X": 101,
+    "Y": 49
+  },
+  {
+    "ShortName": "GoldenLibrary",
+    "DisplayName": "Golden Library",
+    "Kind": "Library",
+    "Terrain": "Temple",
+    "X": 93,
+    "Y": 20
+  },
+  {
+    "ShortName": "GreatLibrary",
+    "DisplayName": "Great Library",
+    "Kind": "Library",
+    "Terrain": "Temple",
+    "X": 83,
+    "Y": 66
+  },
+  {
+    "ShortName": "TempleMiridine",
+    "DisplayName": "Temple of Miridine",
+    "Kind": "Temple",
+    "Terrain": "Temple",
+    "X": 42,
+    "Y": 9
+  },
+  {
+    "ShortName": "TempleLurinth",
+    "DisplayName": "Temple of Lurinth",
+    "Kind": "Temple",
+    "Terrain": "Temple",
+    "X": 40,
+    "Y": 48
+  },
+  {
+    "ShortName": "GrandOracle",
+    "DisplayName": "Grand Oracle",
+    "Kind": "Sage",
+    "Terrain": "Temple",
+    "X": 90,
+    "Y": 21
+  },
+  {
+    "ShortName": "GreyportRuins",
+    "DisplayName": "Greyport Ruins",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 68,
+    "Y": 50
+  },
+  {
+    "ShortName": "EmperorsCrypt",
+    "DisplayName": "Emperors\u0027 Crypt",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 66,
+    "Y": 13
+  },
+  {
+    "ShortName": "HarvestStone",
+    "DisplayName": "Harvest Stone",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 36,
+    "Y": 63
+  },
+  {
+    "ShortName": "OldWoodsTower",
+    "DisplayName": "Old Woods Tower",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 62,
+    "Y": 63
+  },
+  {
+    "ShortName": "DruidsTemple",
+    "DisplayName": "Druids\u0027 Temple",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 10,
+    "Y": 69
+  },
+  {
+    "ShortName": "NirnsCrypt",
+    "DisplayName": "Nirn\u0027s Crypt",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 17,
+    "Y": 43
+  },
+  {
+    "ShortName": "NirnsDeep",
+    "DisplayName": "Nirn\u0027s Deep",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 35,
+    "Y": 29
+  },
+  {
+    "ShortName": "MirkDecay",
+    "DisplayName": "Mirk\u0027s Decay",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 28,
+    "Y": 69
+  },
+  {
+    "ShortName": "WizardsHearth",
+    "DisplayName": "Wizard\u0027s Hearth",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 27,
+    "Y": 61
+  },
+  {
+    "ShortName": "DragonHalls",
+    "DisplayName": "Dragon Halls",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 87,
+    "Y": 26
+  },
+  {
+    "ShortName": "Bridgetower",
+    "DisplayName": "Bridgetower",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 57,
+    "Y": 11
+  },
+  {
+    "ShortName": "CryptMolok",
+    "DisplayName": "Crypt of Molok",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 62,
+    "Y": 41
+  },
+  {
+    "ShortName": "HallsChaos",
+    "DisplayName": "Halls of Chaos",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 58,
+    "Y": 1
+  },
+  {
+    "ShortName": "DragontowerRuins",
+    "DisplayName": "Dragontower Ruins",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 80,
+    "Y": 21
+  },
+  {
+    "ShortName": "NevDolar",
+    "DisplayName": "Nev Dolar",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 66,
+    "Y": 19
+  },
+  {
+    "ShortName": "OldInn",
+    "DisplayName": "The Old Inn",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 98,
+    "Y": 21
+  },
+  {
+    "ShortName": "ThroneHoran",
+    "DisplayName": "Throne of Horan",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 7,
+    "Y": 62
+  },
+  {
+    "ShortName": "ThroneBalnor",
+    "DisplayName": "Throne of Balnor",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 90,
+    "Y": 20
+  },
+  {
+    "ShortName": "GiantsTomb",
+    "DisplayName": "Giant\u0027s Tomb",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 18,
+    "Y": 43
+  },
+  {
+    "ShortName": "TowerDeath",
+    "DisplayName": "Tower of Death",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 91,
+    "Y": 61
+  },
+  {
+    "ShortName": "RuinsHaviel",
+    "DisplayName": "Ruins of Haviel",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 46,
+    "Y": 15
+  },
+  {
+    "ShortName": "DuskStone",
+    "DisplayName": "Dusk Stone",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 45,
+    "Y": 55
+  },
+  {
+    "ShortName": "DawnStone",
+    "DisplayName": "Dawn Stone",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 90,
+    "Y": 49
+  },
+  {
+    "ShortName": "Gemhold",
+    "DisplayName": "Gemhold",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 6,
+    "Y": 18
+  },
+  {
+    "ShortName": "DarkBarrows",
+    "DisplayName": "Dark Barrows",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 93,
+    "Y": 5
+  },
+  {
+    "ShortName": "DwarfHalls",
+    "DisplayName": "Dwarf Halls",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 73,
+    "Y": 33
+  },
+  {
+    "ShortName": "Guardian",
+    "DisplayName": "Guardian",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 19,
+    "Y": 22
+  },
+  {
+    "ShortName": "TowerNight",
+    "DisplayName": "Tower of Night",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 79,
+    "Y": 21
+  },
+  {
+    "ShortName": "CryptBaal",
+    "DisplayName": "Crypt of Baal",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 36,
+    "Y": 59
+  },
+  {
+    "ShortName": "TombNaar",
+    "DisplayName": "Tomb of Naar",
+    "Kind": "Tomb",
+    "Terrain": "Tomb",
+    "X": 93,
+    "Y": 6
+  },
+  {
+    "ShortName": "Monolyth",
+    "DisplayName": "Monolyth",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 46,
+    "Y": 39
+  },
+  {
+    "ShortName": "RuinsKabor",
+    "DisplayName": "Ruins of Kabor",
+    "Kind": "Ruins",
+    "Terrain": "Ruins",
+    "X": 91,
+    "Y": 60
+  }
+]

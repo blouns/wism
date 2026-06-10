@@ -71,7 +71,7 @@ namespace Assets.Scripts.Tilemaps
             debugManager.LogInformation("Affixed map objects");
             World.CreateWorld(gameMap);
             debugManager.LogInformation("Created world from game map");
-            World.Current.Name = GameManager.DefaultWorld;
+            World.Current.Name = gameManager.WorldName;
 
             return World.Current;
         }

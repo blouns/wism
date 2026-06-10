@@ -33,7 +33,8 @@ namespace Wism.Client.AI.Framework
                 new List<ITurnModule>
                 {
                     new ProductionModule(controllerProvider.CityController, logger)
-                });
+                },
+                logger);
         }
 
         public static AdaptaCommandProvider CreateCommandProvider(

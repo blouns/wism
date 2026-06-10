@@ -101,6 +101,29 @@ public class PathingStrategyTests
     }
 
     [Test]
+    public void DijkstraFlyerUsesEffectiveMovementCostForWeightedTerrain_3x3Test()
+    {
+        IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
+        string[,] matrix =
+        {
+            { "S", "9", "T" },
+            { "1", "1", "1" },
+            { "1", "1", "1" }
+        };
+
+        var map = ConvertMatrixToMap(matrix, out var start, out var target);
+        var startTile = start[0].Tile;
+        startTile.RemoveArmies(start);
+        var flyer = Game.Current.GetCurrentPlayer().ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), startTile);
+
+        pathingStrategy.FindShortestRoute(map, new List<Army> { flyer }, target, out var shortestRoute, out var distance);
+
+        Assert.That((int)distance, Is.EqualTo(2), "Flyers should pay one move per tile instead of avoiding high-cost terrain.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(3), "Flyer should take the direct route over expensive terrain.");
+        this.AssertPathStartsWithArmyEndsWithTower(shortestRoute);
+    }
+
+    [Test]
     public void DijkstraOnePath_6x6Test()
     {
         IPathingStrategy pathingStrategy = new DijkstraPathingStrategy();
@@ -252,7 +275,7 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.That((int)distance, Is.EqualTo(3), "Did not find the shortest route.");
+        Assert.That((int)distance, Is.EqualTo(2), "Did not find the shortest route.");
         Assert.That(shortestRoute.Count, Is.EqualTo(3), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
@@ -271,7 +294,7 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.That((int)distance, Is.EqualTo(2), "Did not find the shortest route.");
+        Assert.That((int)distance, Is.EqualTo(1), "Did not find the shortest route.");
         Assert.That(shortestRoute.Count, Is.EqualTo(2), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
@@ -290,7 +313,7 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        Assert.That((int)distance, Is.EqualTo(4), "Did not find the shortest route.");
+        Assert.That((int)distance, Is.EqualTo(3), "Did not find the shortest route.");
         Assert.That(shortestRoute.Count, Is.EqualTo(4), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
@@ -309,15 +332,32 @@ public class PathingStrategyTests
         var map = ConvertMatrixToMap(matrix, out var start, out var target);
         pathingStrategy.FindShortestRoute(map, start, target, out var shortestRoute, out var distance);
 
-        // BUGBUG: Current implementation of A* is not reporting the actual fastest route in this scenario.
-        //         Actual: (0,0)->(1,1)->(0x2); Distance: 6
-        //         Expected (0,0)->(1,0)->(2,1)->(1,2)->(0,2); Distance: 5
-        //         Note: Includes starting point movement cost in total distance.
-        //         QUESTION: Is this a limitation of the algorithm (i.e. expected with current tuning) or a bug? 
-        //                   This will require more study but in practice this is not causing major issues.
-        Assert.That((int)distance, Is.EqualTo(6), "Did not find the shortest route.");
-        Assert.That(shortestRoute.Count, Is.EqualTo(3), "Did not find the correct number of steps.");
+        Assert.That((int)distance, Is.EqualTo(4), "Did not find the shortest route.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(5), "Did not find the correct number of steps.");
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
+    }
+
+    [Test]
+    public void AStarFlyerUsesEffectiveMovementCostForWeightedTerrain_3x3Test()
+    {
+        IPathingStrategy pathingStrategy = new AStarPathingStrategy();
+        string[,] matrix =
+        {
+            { "S", "9", "T" },
+            { "1", "1", "1" },
+            { "1", "1", "1" }
+        };
+
+        var map = ConvertMatrixToMap(matrix, out var start, out var target);
+        var startTile = start[0].Tile;
+        startTile.RemoveArmies(start);
+        var flyer = Game.Current.GetCurrentPlayer().ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), startTile);
+
+        pathingStrategy.FindShortestRoute(map, new List<Army> { flyer }, target, out var shortestRoute, out var distance);
+
+        Assert.That((int)distance, Is.EqualTo(2), "Flyers should pay one move per tile instead of avoiding high-cost terrain.");
+        Assert.That(shortestRoute.Count, Is.EqualTo(3), "Flyer should take the direct route over expensive terrain.");
+        this.AssertPathStartsWithArmyEndsWithTower(shortestRoute);
     }
 
     [Test]
@@ -476,6 +516,12 @@ public class PathingStrategyTests
     private void AssertPathStartsWithHeroEndsWithTower(IList<Tile> shortestRoute)
     {
         Assert.That(shortestRoute[0].Armies[0].ShortName, Is.EqualTo("Hero"), "Shortest path did not start with hero.");
+        Assert.That(shortestRoute.Last().Terrain.ShortName, Is.EqualTo("Tower"), "Shortest path did not end with tower.");
+    }
+
+    private void AssertPathStartsWithArmyEndsWithTower(IList<Tile> shortestRoute)
+    {
+        Assert.That(shortestRoute[0].Armies.Count, Is.GreaterThan(0), "Shortest path did not start with an army.");
         Assert.That(shortestRoute.Last().Terrain.ShortName, Is.EqualTo("Tower"), "Shortest path did not end with tower.");
     }
 

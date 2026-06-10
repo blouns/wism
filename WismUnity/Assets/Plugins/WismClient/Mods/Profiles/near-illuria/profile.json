@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "near-illuria",
+  "version": "1.0.0",
+  "minWismVersion": "0.1.0",
+  "displayName": "Near-Illuria",
+  "description": "A playable eight-clan world kit built from the Illuria map base with deterministic WISM city and site placement.",
+  "baseWorld": "Near-Illuria",
+  "modeId": "classic",
+  "enabledPacks": [
+    "pack-dusklands-visual",
+    "pack-illurian-legends-flavor"
+  ],
+  "modRoot": "mod",
+  "unityScene": "Assets/Scenes/Near-Illuria.unity",
+  "launch": {
+    "world": "Near-Illuria",
+    "seed": 1990,
+    "clans": 8,
+    "maxTurns": 0,
+    "scenario": "standard"
+  }
+}

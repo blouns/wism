@@ -35,9 +35,9 @@ namespace Assets.Scripts.UnityGame.Factories
             WorldEntity entity = new WorldEntity();
 
             entity.Name = worldName;
-            entity.Tiles = CreateTiles(unityManager.WorldTilemap, out int xUpperBound, out int yUpperBound);
-            entity.MapXUpperBound = xUpperBound;
-            entity.MapYUpperBound = yUpperBound;
+            entity.Tiles = CreateTiles(unityManager.WorldTilemap, out int mapWidth, out int mapHeight);
+            entity.MapXUpperBound = mapWidth;
+            entity.MapYUpperBound = mapHeight;
 
             var cityFactory = new UnityCityFactory(this.debugManager);
             entity.Cities = cityFactory.CreateCities(worldName, unityManager);
@@ -48,20 +48,23 @@ namespace Assets.Scripts.UnityGame.Factories
             return entity;
         }
 
-        private TileEntity[] CreateTiles(WorldTilemap tilemap, out int xUpperBound, out int yUpperBound)
+        private TileEntity[] CreateTiles(WorldTilemap tilemap, out int mapWidth, out int mapHeight)
         {
             var map = tilemap.CreateWorldFromScene().Map;
-            xUpperBound = map.GetUpperBound(0);
-            yUpperBound = map.GetUpperBound(1);
+            var xUpperBound = map.GetUpperBound(0);
+            var yUpperBound = map.GetUpperBound(1);
 
-            // Flatten 2D-array
-            TileEntity[] tiles = new TileEntity[xUpperBound * yUpperBound];
-            for (int y = 0; y < yUpperBound; y++)
+            mapWidth = xUpperBound + 1;
+            mapHeight = yUpperBound + 1;
+
+            // Flatten 2D-array. WorldEntity uses size/count fields despite the legacy "UpperBound" names.
+            TileEntity[] tiles = new TileEntity[mapWidth * mapHeight];
+            for (int y = 0; y <= yUpperBound; y++)
             {
-                for (int x = 0; x < xUpperBound; x++)
+                for (int x = 0; x <= xUpperBound; x++)
                 {
                     var tile = map[x, y];
-                    tiles[x + y * xUpperBound] = new TileEntity()
+                    tiles[x + y * mapWidth] = new TileEntity()
                     {
                         // Only set terrain and location; other details added later
                         TerrainShortName = tile.Terrain.ShortName,

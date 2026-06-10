@@ -208,10 +208,10 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             // If new request prompt the user
-            if (!this.yesNoCancelBox.Cancelled &&
-                !this.yesNoCancelBox.Answer.HasValue)
+            if (!this.okCancelBox.Cancelled &&
+                !this.okCancelBox.Answer.HasValue)
             {
-                this.yesNoCancelBox.Ask($"{ait.DisplayName} reaches {ait.DestinationCity.DisplayName}");
+                this.okCancelBox.Ask($"{ait.DisplayName} reaches {ait.DestinationCity.DisplayName}");
             }
             else if (this.okCancelBox.Cancelled)
             {

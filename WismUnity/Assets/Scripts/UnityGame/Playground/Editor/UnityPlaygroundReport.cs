@@ -28,6 +28,9 @@ namespace WismUnity.Playground
         public UnityPlaygroundGameSummary game;
         public UnityPlaygroundScenarioSummary scenario;
         public UnityPlaygroundConsoleSummary console;
+        public UnityPlaygroundMixedModeSummary mixedMode;
+        public List<UnityPlaygroundInvariantEntry> invariants = new List<UnityPlaygroundInvariantEntry>();
+        public List<UnityPlaygroundScreenshotEntry> screenshots = new List<UnityPlaygroundScreenshotEntry>();
         public List<UnityPlaygroundCommandTraceEntry> commandTrace = new List<UnityPlaygroundCommandTraceEntry>();
         public string[] dirtyScenes = new string[0];
         public List<string> events = new List<string>();
@@ -74,6 +77,45 @@ namespace WismUnity.Playground
         public int executedCommandCount;
         public string startingClan;
         public string endingClan;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundMixedModeSummary
+    {
+        public int seed;
+        public bool fuzz;
+        public int humanAgentCount;
+        public int aiAgentCount;
+        public int turnsRequested;
+        public int turnsCompleted;
+        public int scriptedHumanTurns;
+        public int aiTurnsObserved;
+        public int commandStalls;
+        public int humanDecisionsApplied;
+        public int humanDecisionFallbacks;
+        public int cityCaptures;
+        public int searches;
+        public int battles;
+        public int stuckCommandId;
+        public string stuckCommandType;
+        public string humanDecisionScriptPath;
+        public string[] humanClans = new string[0];
+        public string[] aiClans = new string[0];
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundInvariantEntry
+    {
+        public string name;
+        public string status;
+        public string evidence;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundScreenshotEntry
+    {
+        public string label;
+        public string path;
     }
 
     [System.Serializable]

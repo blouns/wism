@@ -98,9 +98,10 @@ public class CaptureModule : ITacticalModule
 
             var captureArmies = SelectDirectCaptureArmies(stack, targetCity);
             var bidArmies = captureArmies.Count > 0 ? captureArmies : stack;
+            var targetScore = this.cityTargetEvaluator.Score(bidArmies, targetCity);
             var utility = captureArmies.Count > 0
-                ? ImmediateCaptureUtility
-                : this.cityTargetEvaluator.Score(bidArmies, targetCity);
+                ? ImmediateCaptureUtility + targetScore
+                : targetScore;
 
             logger.LogInformation($"[Capture] Bidding {bidArmies.Count} army/armies at ({leader.Tile.X},{leader.Tile.Y}) to target city at ({targetCity.Tile.X},{targetCity.Tile.Y}) with utility {utility:0.000}.");
 
@@ -218,7 +219,7 @@ public class CaptureModule : ITacticalModule
             }
 
             logger.LogInformation($"[Capture] Army moving toward city at ({attackPosition.X},{attackPosition.Y})");
-            AiUtilities.GenerateMoveCommands(armyController, armies, commands, attackPosition);
+            AiUtilities.GenerateMoveCommands(armyController, armies, commands, attackPosition, logger: logger);
         }
         else
         {

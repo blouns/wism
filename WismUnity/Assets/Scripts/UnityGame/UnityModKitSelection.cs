@@ -157,6 +157,7 @@ namespace Assets.Scripts.UnityGame.ModKit
                     report.requestedPackIds);
                 report.activePackIds = selection.PackIds.ToArray();
                 report.baseWorld = selection.BaseWorld;
+                report.unityScene = selection.Profile.UnityScene ?? string.Empty;
                 report.worldName = !string.IsNullOrWhiteSpace(report.worldOverride)
                     ? report.worldOverride
                     : !string.IsNullOrWhiteSpace(selection.Launch.World)
@@ -284,6 +285,7 @@ namespace Assets.Scripts.UnityGame.ModKit
         public string modRootOverride;
         public string baseWorld;
         public string worldName;
+        public string unityScene;
         public string worldOverride;
         public int seed;
         public int packCount;

@@ -31,7 +31,7 @@ namespace Wism.Client.Pathing
 
         public int GetMovementCost(List<Army> armiesToMove)
         {
-            return armiesToMove.Max(a => a.GetEffectiveMovementCost(this.Value));
+            return GetMovementCost(this.Value, armiesToMove);
         }
     }
 }

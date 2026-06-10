@@ -94,6 +94,25 @@ public class HeroTests
         Assert.That(hero.Strength, Is.EqualTo(5 + 1 + 1), "Hero did not get the correct Combat Bonus.");
     }
 
+    [Test]
+    public void DropAll_ArtifactOntoEmptyTile_AddsLooseItem()
+    {
+        var tile = World.Current.Map[2, 2];
+        var player = Game.Current.Players[0];
+        var hero = player.HireHero(tile);
+        var artifact = FindArtifact("Firesword");
+        hero.Items = new List<Artifact> { artifact };
+
+        hero.DropAll();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(hero.HasItems(), Is.False, "Hero should have dropped the artifact.");
+            Assert.That(tile.ContainsItem(artifact), Is.True, "Tile should contain the dropped artifact.");
+            Assert.That(World.Current.GetLooseItems(), Does.Contain(artifact), "World should track the dropped artifact.");
+        });
+    }
+
     private static Artifact FindArtifact(string artifactName)
     {
         var artifactInfos = new List<Artifact>(

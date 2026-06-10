@@ -110,6 +110,11 @@ namespace Wism.Client.Core
                 return false;
             }
 
+            if (!this.CanDeployProducedArmy(armyInfo, destinationCity))
+            {
+                return false;
+            }
+
             this.ChargePlayerForProductionCosts(armyInfo);
 
             // Increment the number of armies of this type built
@@ -283,6 +288,12 @@ namespace Wism.Client.Core
         {
             var pi = this.FindProductionInfo(armyInfo);
             return this.Player.Gold >= pi.Upkeep;
+        }
+
+        private bool CanDeployProducedArmy(ArmyInfo armyInfo, City destinationCity)
+        {
+            var targetTile = destinationCity?.Tile ?? this.city.Tile;
+            return this.deploymentStrategy.TryFindNextOpenTile(this.Player, armyInfo, targetTile, out _);
         }
 
         private void ChargePlayerForProductionCosts(ArmyInfo armyInfo)

@@ -100,7 +100,7 @@ namespace Wism.Client.AI.Tactical
 
             logger.LogInformation(
                 $"[Rally] Moving stack at ({armies[0].Tile.X},{armies[0].Tile.Y}) toward friendly stack at ({target.Tile.X},{target.Tile.Y}) via ({path[1].X},{path[1].Y}).");
-            AiUtilities.GenerateMoveCommands(this.armyController, armies, commands, target.Tile, path);
+            AiUtilities.GenerateMoveCommands(this.armyController, armies, commands, target.Tile, path, this.logger);
             return commands;
         }
 

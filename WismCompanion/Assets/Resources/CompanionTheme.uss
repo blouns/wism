@@ -45,6 +45,12 @@
     margin-right: 6px;
 }
 
+.host-field > .unity-base-text-field__input {
+    background-color: rgb(35, 37, 42);
+    border-color: rgb(58, 61, 68);
+    color: rgb(210, 213, 219);
+}
+
 .btn {
     height: 24px;
     padding-left: 12px;
@@ -75,6 +81,12 @@
 
 .channel {
     min-width: 170px;
+}
+
+.channel > .unity-popup-field__input {
+    background-color: rgb(35, 37, 42);
+    border-color: rgb(58, 61, 68);
+    color: rgb(210, 213, 219);
 }
 
 .channel:disabled {
@@ -173,6 +185,16 @@
     color: rgb(150, 200, 150);
 }
 
+.log-row--battle .log-summary {
+    color: rgb(240, 180, 80);
+}
+
+/* When a row is selected Unity's highlight is mid-blue-gray; force legible text. */
+.unity-list-view__item--selected .log-summary,
+.unity-list-view__item--selected .log-time {
+    color: rgb(240, 242, 246);
+}
+
 .detail-scroll {
     height: 110px;
     margin-top: 6px;
@@ -230,6 +252,42 @@
     width: 90px;
     margin-left: 8px;
     font-size: 11px;
+}
+
+.log-filter > .unity-base-text-field__input {
+    background-color: rgb(35, 37, 42);
+    border-color: rgb(58, 61, 68);
+    color: rgb(210, 213, 219);
+    -unity-placeholder-color: rgb(100, 104, 112);
+}
+
+/* ---- Map overlay buttons ---- */
+.map-btn {
+    height: 22px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 11px;
+    background-color: rgba(30, 32, 36, 0.88);
+    color: rgb(160, 164, 172);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(58, 61, 68);
+    margin-right: 4px;
+}
+
+.map-btn:hover {
+    background-color: rgba(50, 53, 60, 0.92);
+    color: rgb(210, 213, 219);
+}
+
+.map-btn--active {
+    background-color: rgba(54, 88, 145, 0.92);
+    color: rgb(238, 240, 244);
+    border-color: rgb(66, 104, 168);
+}
+
+.map-btn--active:hover {
+    background-color: rgba(66, 104, 168, 0.92);
 }
 
 /* ---- Inspector ---- */

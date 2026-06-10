@@ -140,8 +140,8 @@ namespace WismUnity.Playground
                 report.modRoot = report.selection.modRoot;
                 report.events.Add(report.selection.outcome);
 
-                UnityManager.SetNewGameSettings(CreateSettings(report.selection.worldName, report.selection.seed, report.selection.selectionEntity));
-                unityManager.Initialize(CreateSettings(report.selection.worldName, report.selection.seed, report.selection.selectionEntity));
+                UnityManager.SetNewGameSettings(CreateSettings(options, report.selection.worldName, report.selection.seed, report.selection.selectionEntity));
+                unityManager.Initialize(CreateSettings(options, report.selection.worldName, report.selection.seed, report.selection.selectionEntity));
                 report.events.Add("Initialized UnityManager with deterministic playground settings.");
 
                 if (options.AdvanceBootstrap)
@@ -242,7 +242,292 @@ namespace WismUnity.Playground
                 return;
             }
 
+            if (string.Equals(scenarioName, "mixed-human-ai-marathon", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(scenarioName, "mixed-mode", StringComparison.OrdinalIgnoreCase))
+            {
+                RunMixedHumanAiMarathon(options, report, unityManager);
+                return;
+            }
+
             throw new InvalidOperationException($"Unknown Unity Playground scenario: {scenarioName}");
+        }
+
+        static void RunMixedHumanAiMarathon(
+            UnityPlaygroundOptions options,
+            UnityPlaygroundReport report,
+            UnityManager unityManager)
+        {
+            var bootstrapTicks = EnsureRunning(unityManager);
+            if (bootstrapTicks > 0)
+            {
+                report.events.Add($"Advanced UnityManager to Running with {bootstrapTicks} bootstrap tick(s).");
+            }
+
+            var startLastCommandId = unityManager.LastCommandId;
+            var startingClan = CurrentClanName();
+            report.screenshots.Add(new UnityPlaygroundScreenshotEntry
+            {
+                label = "start",
+                path = CaptureScreenshot(options.OutputDirectory, options.RunId + "-start")
+            });
+
+            var scriptedHumanTurns = 0;
+            var humanDecisionsApplied = 0;
+            var humanDecisionFallbacks = 0;
+            var aiTurnsObserved = 0;
+            var commandStalls = 0;
+            var ticksRun = 0;
+            var completedTurns = 0;
+            var lastCommandId = unityManager.LastCommandId;
+            var lastClan = CurrentClanName();
+            var stuckCommandId = 0;
+            var stuckCommandType = string.Empty;
+            var humanDecisionScript = UnityPlaygroundHumanDecisionScript.Load(options.HumanDecisionScriptPath);
+            if (humanDecisionScript.available)
+            {
+                report.events.Add($"Loaded human decision script: {options.HumanDecisionScriptPath}");
+            }
+
+            while (ticksRun < options.MaxTicks && completedTurns < options.Turns)
+            {
+                var player = Game.Current.GetCurrentPlayer();
+                if (player.IsHuman && !HasQueuedCommand(unityManager))
+                {
+                    var applied = ApplyHumanDecision(unityManager, player, humanDecisionScript, report, out var endedTurn);
+                    humanDecisionsApplied += applied ? 1 : 0;
+                    if (!applied)
+                    {
+                        humanDecisionFallbacks++;
+                        unityManager.GameManager.EndTurn();
+                        endedTurn = true;
+                        report.events.Add($"Fallback human agent ended turn for {player.Clan.ShortName}.");
+                    }
+
+                    if (endedTurn)
+                    {
+                        scriptedHumanTurns++;
+                    }
+                }
+                else if (!player.IsHuman)
+                {
+                    aiTurnsObserved++;
+                }
+
+                unityManager.FixedUpdate();
+                ticksRun++;
+
+                var currentClan = CurrentClanName();
+                if (!string.Equals(currentClan, lastClan, StringComparison.OrdinalIgnoreCase))
+                {
+                    completedTurns++;
+                    lastClan = currentClan;
+                }
+
+                if (unityManager.LastCommandId == lastCommandId && !HasQueuedCommand(unityManager))
+                {
+                    commandStalls++;
+                    if (commandStalls > options.MaxCommandStalls)
+                    {
+                        report.events.Add($"Stopping mixed-mode run after {commandStalls} idle command stall tick(s).");
+                        break;
+                    }
+                }
+                else if (unityManager.LastCommandId == lastCommandId)
+                {
+                    commandStalls++;
+                    var stuckCommand = GetNextCommand(unityManager);
+                    if (stuckCommand != null)
+                    {
+                        stuckCommandId = stuckCommand.Id;
+                        stuckCommandType = stuckCommand.GetType().Name;
+                    }
+
+                    if (commandStalls > options.MaxCommandStalls)
+                    {
+                        report.events.Add($"Stopping mixed-mode run after {commandStalls} queued command stall tick(s) at {stuckCommandType}#{stuckCommandId}.");
+                        break;
+                    }
+                }
+                else
+                {
+                    commandStalls = 0;
+                    lastCommandId = unityManager.LastCommandId;
+                    stuckCommandId = 0;
+                    stuckCommandType = string.Empty;
+                }
+            }
+
+            report.screenshots.Add(new UnityPlaygroundScreenshotEntry
+            {
+                label = "end",
+                path = CaptureScreenshot(options.OutputDirectory, options.RunId + "-end")
+            });
+
+            var commands = GetCommandsAfterId(unityManager, startLastCommandId).ToArray();
+            report.commandTrace.AddRange(commands.Select(command => CommandTraceEntry(command, unityManager.LastCommandId)));
+            report.invariants.AddRange(CollectInvariants());
+
+            var failedInvariants = report.invariants
+                .Where(item => string.Equals(item.status, "Failed", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            var executedCount = commands.Count(command => command.Id <= unityManager.LastCommandId);
+            var humanClans = Game.Current.Players.Where(player => player.IsHuman).Select(player => player.Clan.ShortName).ToArray();
+            var aiClans = Game.Current.Players.Where(player => !player.IsHuman).Select(player => player.Clan.ShortName).ToArray();
+            var passed = completedTurns >= options.Turns &&
+                         commandStalls <= options.MaxCommandStalls &&
+                         failedInvariants.Length == 0;
+
+            report.mixedMode = new UnityPlaygroundMixedModeSummary
+            {
+                seed = ResolveSeed(options),
+                fuzz = options.Fuzz,
+                humanAgentCount = humanClans.Length,
+                aiAgentCount = aiClans.Length,
+                turnsRequested = options.Turns,
+                turnsCompleted = completedTurns,
+                scriptedHumanTurns = scriptedHumanTurns,
+                aiTurnsObserved = aiTurnsObserved,
+                commandStalls = commandStalls,
+                humanDecisionsApplied = humanDecisionsApplied,
+                humanDecisionFallbacks = humanDecisionFallbacks,
+                cityCaptures = CountCommand(commands, "CaptureCity"),
+                searches = CountCommand(commands, "Search"),
+                battles = CountCommand(commands, "Battle") + CountCommand(commands, "Attack"),
+                stuckCommandId = stuckCommandId,
+                stuckCommandType = stuckCommandType,
+                humanDecisionScriptPath = options.HumanDecisionScriptPath,
+                humanClans = humanClans,
+                aiClans = aiClans
+            };
+            report.scenario = new UnityPlaygroundScenarioSummary
+            {
+                name = "mixed-human-ai-marathon",
+                status = passed ? "Passed" : "Failed",
+                outcome = passed
+                    ? "Completed a mixed human-agent and AI-agent turn bridge through Unity FixedUpdate."
+                    : "Mixed-mode run did not satisfy turn, stall, or invariant gates.",
+                maxTicks = options.MaxTicks,
+                ticksRun = ticksRun,
+                startLastCommandId = startLastCommandId,
+                endLastCommandId = unityManager.LastCommandId,
+                queuedCommandCount = commands.Length,
+                executedCommandCount = executedCount,
+                startingClan = startingClan,
+                endingClan = CurrentClanName()
+            };
+
+            report.events.Add($"mixed-human-ai-marathon: turns={completedTurns}/{options.Turns}, commands={executedCount}, invariants failed={failedInvariants.Length}.");
+            if (!passed)
+            {
+                report.status = "Failed";
+                report.outcome = report.scenario.outcome;
+            }
+        }
+
+        static bool ApplyHumanDecision(
+            UnityManager unityManager,
+            Player player,
+            UnityPlaygroundHumanDecisionScript script,
+            UnityPlaygroundReport report,
+            out bool endedTurn)
+        {
+            endedTurn = false;
+            var decision = script.Next(player.Clan.ShortName);
+            if (decision == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                var action = (decision.action ?? string.Empty).Trim();
+                if (string.Equals(action, "endTurn", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(action, "end-turn", StringComparison.OrdinalIgnoreCase))
+                {
+                    unityManager.GameManager.EndTurn();
+                    endedTurn = true;
+                    report.events.Add($"Human decision {player.Clan.ShortName}: endTurn.");
+                    return true;
+                }
+
+                if (string.Equals(action, "selectNextArmy", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(action, "select-next-army", StringComparison.OrdinalIgnoreCase))
+                {
+                    unityManager.GameManager.SelectNextArmy();
+                    report.events.Add($"Human decision {player.Clan.ShortName}: selectNextArmy.");
+                    return true;
+                }
+
+                if (string.Equals(action, "deselect", StringComparison.OrdinalIgnoreCase))
+                {
+                    unityManager.GameManager.DeselectArmies();
+                    report.events.Add($"Human decision {player.Clan.ShortName}: deselect.");
+                    return true;
+                }
+
+                if (string.Equals(action, "defend", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!Game.Current.ArmiesSelected())
+                    {
+                        return false;
+                    }
+
+                    unityManager.GameManager.DefendSelectedArmies();
+                    report.events.Add($"Human decision {player.Clan.ShortName}: defend.");
+                    return true;
+                }
+
+                if (string.Equals(action, "search", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!Game.Current.ArmiesSelected())
+                    {
+                        return false;
+                    }
+
+                    unityManager.GameManager.SearchLocation();
+                    report.events.Add($"Human decision {player.Clan.ShortName}: search.");
+                    return true;
+                }
+
+                if (string.Equals(action, "moveSelected", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(action, "move-selected", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!Game.Current.ArmiesSelected() || !HasCoordinates(decision))
+                    {
+                        return false;
+                    }
+
+                    unityManager.GameManager.MoveSelectedArmies(decision.x, decision.y);
+                    report.events.Add($"Human decision {player.Clan.ShortName}: moveSelected {decision.x},{decision.y}.");
+                    return true;
+                }
+
+                if (string.Equals(action, "attackSelected", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(action, "attack-selected", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!Game.Current.ArmiesSelected() || !HasCoordinates(decision))
+                    {
+                        return false;
+                    }
+
+                    unityManager.GameManager.AttackWithSelectedArmies(decision.x, decision.y);
+                    report.events.Add($"Human decision {player.Clan.ShortName}: attackSelected {decision.x},{decision.y}.");
+                    return true;
+                }
+
+                report.events.Add($"Human decision {player.Clan.ShortName}: unsupported action '{action}'.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                report.events.Add($"Human decision {player.Clan.ShortName} failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        static bool HasCoordinates(UnityPlaygroundHumanDecision decision)
+        {
+            return decision.x >= 0 && decision.y >= 0;
         }
 
         static void RunSaveLoadSmoke(
@@ -388,6 +673,18 @@ namespace WismUnity.Playground
             return GetCommandsAfterId(unityManager, lastSeenCommandId).Count();
         }
 
+        static bool HasQueuedCommand(UnityManager unityManager)
+        {
+            return unityManager.GameManager.ControllerProvider.CommandController.CommandExists(unityManager.LastCommandId + 1);
+        }
+
+        static Command GetNextCommand(UnityManager unityManager)
+        {
+            return GetCommandsAfterId(unityManager, unityManager.LastCommandId)
+                .OrderBy(command => command.Id)
+                .FirstOrDefault();
+        }
+
         static IEnumerable<Command> GetCommandsAfterId(UnityManager unityManager, int lastSeenCommandId)
         {
             return unityManager.GameManager.ControllerProvider.CommandController.GetCommandsAfterId(lastSeenCommandId);
@@ -415,6 +712,7 @@ namespace WismUnity.Playground
         }
 
         static UnityNewGameEntity CreateSettings(
+            UnityPlaygroundOptions options,
             string world,
             int seed,
             Wism.Client.Data.Entities.ModKitSelectionEntity modKitSelection)
@@ -423,16 +721,166 @@ namespace WismUnity.Playground
             {
                 InteractiveUI = false,
                 IsNewGame = true,
-                RandomSeed = seed > 0 ? seed : GameManager.DefaultRandom,
+                RandomSeed = ResolveSeed(options, seed),
                 RandomStartLocations = false,
                 WorldName = world,
                 ModKitSelection = modKitSelection,
-                Players = new[]
-                {
-                    new UnityPlayerEntity { ClanName = "Sirians", IsHuman = true },
-                    new UnityPlayerEntity { ClanName = "LordBane", IsHuman = false }
-                }
+                Players = CreatePlayers(options)
             };
+        }
+
+        static UnityPlayerEntity[] CreatePlayers(UnityPlaygroundOptions options)
+        {
+            var total = Mathf.Clamp(options.HumanAgents + options.AiAgents, 2, ClassicClanOrder.Length);
+            var humanCount = Mathf.Clamp(options.HumanAgents, 0, total);
+            return ClassicClanOrder
+                .Take(total)
+                .Select((clan, index) => new UnityPlayerEntity
+                {
+                    ClanName = clan,
+                    IsHuman = index < humanCount
+                })
+                .ToArray();
+        }
+
+        static int ResolveSeed(UnityPlaygroundOptions options, int selectionSeed = 0)
+        {
+            if (options.Seed > 0)
+            {
+                return options.Seed;
+            }
+
+            if (selectionSeed > 0)
+            {
+                return selectionSeed;
+            }
+
+            if (options.Fuzz)
+            {
+                return Math.Abs(StableHash(options.RunId));
+            }
+
+            return GameManager.DefaultRandom;
+        }
+
+        static int StableHash(string value)
+        {
+            unchecked
+            {
+                var hash = 17;
+                foreach (var ch in value ?? string.Empty)
+                {
+                    hash = (hash * 31) + ch;
+                }
+
+                return hash == int.MinValue ? int.MaxValue : hash;
+            }
+        }
+
+        static int CountCommand(IEnumerable<Command> commands, string nameFragment)
+        {
+            return commands.Count(command => command.GetType().Name.IndexOf(nameFragment, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        static IReadOnlyList<UnityPlaygroundInvariantEntry> CollectInvariants()
+        {
+            var entries = new List<UnityPlaygroundInvariantEntry>();
+            if (!Game.IsInitialized() || TryGetCurrentWorld() == null)
+            {
+                entries.Add(new UnityPlaygroundInvariantEntry
+                {
+                    name = "game-initialized",
+                    status = "Failed",
+                    evidence = "Game or world was not initialized."
+                });
+                return entries;
+            }
+
+            var mixedTiles = new List<string>();
+            var visitingTiles = new List<string>();
+            var referencedArmyIds = new HashSet<int>();
+            var map = World.Current.Map;
+            for (var x = 0; x < map.GetLength(0); x++)
+            {
+                for (var y = 0; y < map.GetLength(1); y++)
+                {
+                    var tile = map[x, y];
+                    var armies = (tile.Armies ?? new List<Wism.Client.MapObjects.Army>())
+                        .Concat(tile.VisitingArmies ?? new List<Wism.Client.MapObjects.Army>())
+                        .Where(army => army != null && !army.IsDead)
+                        .ToArray();
+                    foreach (var army in armies)
+                    {
+                        referencedArmyIds.Add(army.Id);
+                    }
+
+                    var owners = armies
+                        .Where(army => army.Player != null && army.Player.Clan != null)
+                        .Select(army => army.Player.Clan.ShortName)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToArray();
+                    if (owners.Length > 1)
+                    {
+                        mixedTiles.Add($"{x},{y}:{string.Join("/", owners)}");
+                    }
+
+                    if (tile.VisitingArmies != null && tile.VisitingArmies.Any(army => army != null && !army.IsDead))
+                    {
+                        visitingTiles.Add($"{x},{y}");
+                    }
+                }
+            }
+
+            entries.Add(new UnityPlaygroundInvariantEntry
+            {
+                name = "mixed-hostile-tile-stacks",
+                status = mixedTiles.Count == 0 ? "Passed" : "Failed",
+                evidence = mixedTiles.Count == 0 ? "No live mixed-clan tile stacks found." : string.Join("; ", mixedTiles.Take(8))
+            });
+            entries.Add(new UnityPlaygroundInvariantEntry
+            {
+                name = "stale-visiting-armies",
+                status = visitingTiles.Count == 0 ? "Passed" : "Failed",
+                evidence = visitingTiles.Count == 0 ? "No visiting armies remained after command draining." : string.Join("; ", visitingTiles.Take(8))
+            });
+
+            var ghostArmies = Game.Current.Players
+                .SelectMany(player => player.GetArmies())
+                .Where(army => !army.IsDead && !referencedArmyIds.Contains(army.Id))
+                .Select(army => $"{army.Id}:{army.Clan.ShortName}@{army.Tile?.X},{army.Tile?.Y}")
+                .Take(8)
+                .ToArray();
+            entries.Add(new UnityPlaygroundInvariantEntry
+            {
+                name = "live-army-tile-references",
+                status = ghostArmies.Length == 0 ? "Passed" : "Failed",
+                evidence = ghostArmies.Length == 0 ? "All live armies are referenced by a tile." : string.Join("; ", ghostArmies)
+            });
+
+            var selectedArmies = Game.Current.ArmiesSelected()
+                ? Game.Current.GetSelectedArmies()
+                : null;
+            var staleSelected = selectedArmies != null &&
+                                selectedArmies.Any(army => army == null ||
+                                                           army.IsDead ||
+                                                           army.Player != Game.Current.GetCurrentPlayer());
+            entries.Add(new UnityPlaygroundInvariantEntry
+            {
+                name = "selected-armies-current-player",
+                status = staleSelected ? "Failed" : "Passed",
+                evidence = staleSelected ? "Selected armies include dead/null/non-current-player armies." : "Selected armies are empty or owned by the current player."
+            });
+
+            var activeRenderers = UnityEngine.Object.FindObjectsOfType<Renderer>()
+                .Count(renderer => renderer.enabled && renderer.gameObject.activeInHierarchy);
+            entries.Add(new UnityPlaygroundInvariantEntry
+            {
+                name = "active-renderers",
+                status = activeRenderers > 0 ? "Passed" : "Failed",
+                evidence = $"{activeRenderers} active renderer(s) found."
+            });
+
+            return entries;
         }
 
         static UnityManager FindUnityManager(Scene scene)
@@ -581,6 +1029,13 @@ namespace WismUnity.Playground
             public bool CaptureScreenshot;
             public bool AdvanceBootstrap;
             public int MaxTicks = 64;
+            public int Turns = 8;
+            public int HumanAgents = 1;
+            public int AiAgents = 1;
+            public int Seed = 0;
+            public bool Fuzz;
+            public int MaxCommandStalls = 12;
+            public string HumanDecisionScriptPath = string.Empty;
 
             public static UnityPlaygroundOptions FromCommandLine(string[] args)
             {
@@ -597,6 +1052,19 @@ namespace WismUnity.Playground
                 options.CaptureScreenshot = ReadBool(values, "screenshot", false);
                 options.AdvanceBootstrap = ReadBool(values, "advanceBootstrap", false);
                 options.MaxTicks = ReadInt(values, "maxTicks", options.MaxTicks);
+                options.Turns = ReadInt(values, "turns", options.Turns);
+                options.HumanAgents = ReadInt(values, "humanAgents", options.HumanAgents);
+                options.AiAgents = ReadInt(values, "aiAgents", options.AiAgents);
+                if (IsMixedMode(options.Scenario) && !values.ContainsKey("humanAgents") && !values.ContainsKey("aiAgents"))
+                {
+                    options.HumanAgents = 2;
+                    options.AiAgents = 6;
+                }
+
+                options.Seed = ReadInt(values, "seed", options.Seed);
+                options.Fuzz = ReadBool(values, "fuzz", false);
+                options.MaxCommandStalls = ReadInt(values, "maxCommandStalls", options.MaxCommandStalls);
+                options.HumanDecisionScriptPath = Read(values, "humanDecisionScript", Read(values, "human-decision-script", options.HumanDecisionScriptPath));
                 var outputRoot = Read(values, "out", options.OutputDirectory);
                 options.OutputDirectory = Path.GetFullPath(Path.Combine(outputRoot, options.RunId));
                 return options;
@@ -653,6 +1121,84 @@ namespace WismUnity.Playground
                     .Where(item => !string.IsNullOrWhiteSpace(item))
                     .ToArray();
             }
+
+            static bool IsMixedMode(string scenario)
+            {
+                return string.Equals(scenario, "mixed-human-ai-marathon", StringComparison.OrdinalIgnoreCase) ||
+                       string.Equals(scenario, "mixed-mode", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        static readonly string[] ClassicClanOrder =
+        {
+            "Sirians",
+            "StormGiants",
+            "Elvallie",
+            "OrcsOfKor",
+            "Selentines",
+            "HorseLords",
+            "GreyDwarves",
+            "LordBane"
+        };
+
+        [Serializable]
+        sealed class UnityPlaygroundHumanDecisionScript
+        {
+            public int schemaVersion = 1;
+            public UnityPlaygroundHumanDecision[] decisions = new UnityPlaygroundHumanDecision[0];
+
+            public bool available;
+            int cursor;
+
+            public static UnityPlaygroundHumanDecisionScript Load(string path)
+            {
+                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                {
+                    return new UnityPlaygroundHumanDecisionScript();
+                }
+
+                var script = JsonUtility.FromJson<UnityPlaygroundHumanDecisionScript>(File.ReadAllText(path));
+                if (script == null)
+                {
+                    return new UnityPlaygroundHumanDecisionScript();
+                }
+
+                script.available = true;
+                script.decisions = script.decisions ?? new UnityPlaygroundHumanDecision[0];
+                return script;
+            }
+
+            public UnityPlaygroundHumanDecision Next(string clan)
+            {
+                for (var index = cursor; index < decisions.Length; index++)
+                {
+                    var decision = decisions[index];
+                    if (decision == null)
+                    {
+                        cursor = index + 1;
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(decision.clan) ||
+                        string.Equals(decision.clan, clan, StringComparison.OrdinalIgnoreCase))
+                    {
+                        cursor = index + 1;
+                        return decision;
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        [Serializable]
+        sealed class UnityPlaygroundHumanDecision
+        {
+            public string clan;
+            public string action;
+            public int x = -1;
+            public int y = -1;
+            public string note;
         }
     }
 }

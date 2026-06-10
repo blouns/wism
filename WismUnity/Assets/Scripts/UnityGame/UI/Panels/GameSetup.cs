@@ -104,6 +104,14 @@ public class GameSetup : MonoBehaviour
 
     private void LoadScene(string worldName)
     {
+        var selectedScene = ResolveSelectedUnityScene();
+        if (!string.IsNullOrWhiteSpace(selectedScene))
+        {
+            SceneManager.LoadScene(selectedScene);
+            SceneManager.UnloadSceneAsync(1);
+            return;
+        }
+
         string scenePath = "Scenes/";
 
 #if DEBUG
@@ -115,6 +123,27 @@ public class GameSetup : MonoBehaviour
 
         SceneManager.LoadScene(scenePath + worldName);
         SceneManager.UnloadSceneAsync(1);
+    }
+
+    private static string ResolveSelectedUnityScene()
+    {
+        var unityScene = UnityModKitRuntimeSelection.LastReport == null
+            ? string.Empty
+            : UnityModKitRuntimeSelection.LastReport.unityScene;
+        if (string.IsNullOrWhiteSpace(unityScene))
+        {
+            return string.Empty;
+        }
+
+        var normalized = unityScene.Replace('\\', '/');
+        if (normalized.EndsWith(".unity", StringComparison.OrdinalIgnoreCase))
+        {
+            normalized = normalized.Substring(0, normalized.Length - ".unity".Length);
+        }
+
+        return normalized.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase)
+            ? normalized.Substring("Assets/".Length)
+            : normalized;
     }
 
     private bool AreValidGameSettings(UnityNewGameEntity settings)

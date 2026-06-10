@@ -8,6 +8,9 @@ namespace Wism.Client.AI.Services
 {
     public class CityTargetEvaluator
     {
+        private const int OpeningExpansionCityCount = 4;
+        private const double OpeningNeutralExpansionBonus = 4.0;
+
         public City SelectTarget(List<Army> armies, List<City> cities)
         {
             if (armies == null || armies.Count == 0 || cities == null || cities.Count == 0)
@@ -44,6 +47,10 @@ namespace Wism.Client.AI.Services
             if (city.Clan == null || city.Clan.ShortName == "Neutral")
             {
                 value += 1.25;
+                if (IsOpeningExpansion(armies[0].Player))
+                {
+                    value += OpeningNeutralExpansionBonus;
+                }
             }
             else
             {
@@ -74,6 +81,11 @@ namespace Wism.Client.AI.Services
             }
 
             return value / (distance + 1);
+        }
+
+        private static bool IsOpeningExpansion(Player player)
+        {
+            return player != null && player.GetCities().Count < OpeningExpansionCityCount;
         }
 
         public int GetDistanceToCity(Tile origin, City city)

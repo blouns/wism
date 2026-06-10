@@ -34,9 +34,8 @@ namespace WismCompanion.Tests
             var entry = CompanionLogEntry.FromCommand(command);
 
             Assert.That(entry.ChannelId, Is.EqualTo(TelemetryContext.DefaultChannelId));
-            Assert.That(entry.Summary, Does.Contain("unknown actor"));
-            Assert.That(entry.Summary, Does.Contain("no target"));
-            Assert.That(entry.Detail, Does.Contain("no params"));
+            Assert.That(entry.Summary, Does.Contain("?"));
+            Assert.That(entry.Detail, Does.Contain("none"));
         }
 
         [Test]

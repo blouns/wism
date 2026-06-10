@@ -79,7 +79,7 @@ namespace Wism.Client.Pathing
 
                 foreach (var neighbor in currentNode.Neighbors)
                 {
-                    UpdateNeighborIfShorter(queue, currentNode, neighbor);
+                    UpdateNeighborIfShorter(queue, currentNode, neighbor, armiesToMove);
                 }
             }
         }
@@ -203,12 +203,15 @@ namespace Wism.Client.Pathing
             return graph;
         }
 
-        private static void UpdateNeighborIfShorter(List<PathNode> queue, PathNode currentNode, PathNode neighborNode)
+        private static void UpdateNeighborIfShorter(
+            List<PathNode> queue,
+            PathNode currentNode,
+            PathNode neighborNode,
+            List<Army> armiesToMove)
         {
             if (queue.Contains(neighborNode))
             {
-                // Check alternate route with Euclidean distance
-                var altDistance = currentNode.Distance + currentNode.GetDistanceTo(neighborNode);
+                var altDistance = currentNode.Distance + currentNode.GetDistanceTo(neighborNode, armiesToMove);
                 if (altDistance < neighborNode.Distance)
                 {
                     // Shorter path found

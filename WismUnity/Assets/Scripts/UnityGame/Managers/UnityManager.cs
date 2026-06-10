@@ -473,12 +473,25 @@ namespace Assets.Scripts.Managers
 
             if (command is EndTurnCommand)
             {
+                QueueStartTurnAfterEndTurnIfNeeded();
+
                 var nextPlayer = Game.Current.GetCurrentPlayer();
                 if (nextPlayer.IsHuman && this.InputManager.GetInputMode() == InputMode.AITurn)
                 {
                     this.InputManager.SetInputMode(InputMode.Game);
                 }
             }
+        }
+
+        private void QueueStartTurnAfterEndTurnIfNeeded()
+        {
+            if (Game.Current.GameState != GameState.StartingTurn ||
+                this.provider.CommandController.CommandExists(this.LastCommandId + 1))
+            {
+                return;
+            }
+
+            this.GameManager.StartTurn(Game.Current.GetCurrentPlayer());
         }
 
         private void LogPlayerKind(Command command)

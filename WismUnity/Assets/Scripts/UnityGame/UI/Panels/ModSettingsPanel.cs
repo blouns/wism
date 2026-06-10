@@ -106,16 +106,16 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
         statusText = CreateText(root.transform, "Status", 16, FontStyle.Bold);
         statusText.gameObject.name = "StatusText";
-        LayoutElement(statusText.gameObject, 28);
+        LayoutElement(statusText.gameObject, 24);
         detailText = CreateText(root.transform, string.Empty, 13, FontStyle.Normal);
         detailText.gameObject.name = "DetailText";
         detailText.horizontalOverflow = HorizontalWrapMode.Wrap;
         detailText.verticalOverflow = VerticalWrapMode.Truncate;
-        LayoutElement(detailText.gameObject, 104);
+        LayoutElement(detailText.gameObject, 62);
 
         var actions = CreateHorizontal(root.transform);
         actions.gameObject.name = "ActionsRow";
-        LayoutElement(actions, 44);
+        LayoutElement(actions, 38);
         CreateButton(actions.transform, "Back", Back).gameObject.name = "BackButton";
         CreateButton(actions.transform, "Refresh", Refresh).gameObject.name = "RefreshButton";
         continueButton = CreateButton(actions.transform, "Continue", Continue);
@@ -248,13 +248,14 @@ public sealed class ModSettingsPanel : MonoBehaviour
             world,
             UnityModKitSelection.PluginModRoot);
 
-        var sceneAvailable = IsWorldSceneAvailable(world);
+        var sceneLabel = ResolveWorldSceneLabel(world, currentReport.unityScene);
+        var sceneAvailable = !string.IsNullOrWhiteSpace(sceneLabel);
         var green = currentReport.isGreen && sceneAvailable;
         statusText.text = green
             ? "Green: verified stack can start a new game."
             : "Red: fix selection before continuing.";
         statusText.color = green ? GreenColor : RedColor;
-        detailText.text = BuildDetail(sceneAvailable);
+        detailText.text = BuildDetail(sceneAvailable, sceneLabel);
         UpdateWorldDetails(world);
         continueButton.interactable = green;
 
@@ -268,7 +269,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         }
     }
 
-    string BuildDetail(bool sceneAvailable)
+    string BuildDetail(bool sceneAvailable, string sceneLabel)
     {
         var lines = new List<string>
         {
@@ -279,7 +280,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
                 : string.Join(", ", currentReport.activePackIds)),
             "Compatibility: " + currentReport.compatibilityStatus,
             "Fingerprint: " + (currentReport.contentFingerprint ?? string.Empty),
-            "Scene: " + (sceneAvailable ? "Available" : "Missing")
+            "Scene: " + (sceneAvailable ? sceneLabel : "Missing")
         };
 
         foreach (var issue in currentReport.compatibilityIssues ?? Array.Empty<UnityModKitValidationIssueSummary>())
@@ -298,7 +299,9 @@ public sealed class ModSettingsPanel : MonoBehaviour
     void Continue()
     {
         Evaluate();
-        if (currentReport == null || !currentReport.isGreen || !IsWorldSceneAvailable(currentReport.worldName))
+        if (currentReport == null ||
+            !currentReport.isGreen ||
+            string.IsNullOrWhiteSpace(ResolveWorldSceneLabel(currentReport.worldName, currentReport.unityScene)))
         {
             return;
         }
@@ -345,10 +348,34 @@ public sealed class ModSettingsPanel : MonoBehaviour
         return values[Mathf.Clamp(dropdown.value, 0, values.Length - 1)];
     }
 
-    static bool IsWorldSceneAvailable(string world)
+    static string ResolveWorldSceneLabel(string world, string unityScene)
     {
-        return IsSceneAvailable("Assets/Scenes/" + world + ".unity") ||
-               IsSceneAvailable("Assets/Scenes/Test/" + world + ".unity");
+        foreach (var path in CandidateWorldScenes(world, unityScene))
+        {
+            if (IsSceneAvailable(path))
+            {
+                return path;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    static IEnumerable<string> CandidateWorldScenes(string world, string unityScene)
+    {
+        yield return "Assets/Scenes/" + world + ".unity";
+        yield return "Assets/Scenes/Test/" + world + ".unity";
+
+        if (!string.IsNullOrWhiteSpace(unityScene) && ScenePathMatchesWorld(unityScene, world))
+        {
+            yield return unityScene;
+        }
+    }
+
+    static bool ScenePathMatchesWorld(string scenePath, string world)
+    {
+        var fileName = Path.GetFileNameWithoutExtension(scenePath.Replace('\\', '/'));
+        return string.Equals(fileName, world, StringComparison.OrdinalIgnoreCase);
     }
 
     static bool IsSceneAvailable(string path)
@@ -404,7 +431,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         }
         catch
         {
-            return Array.Empty<string>();
+            return ReadProfileArray(profile, "enabledPacks");
         }
     }
 
@@ -422,8 +449,61 @@ public sealed class ModSettingsPanel : MonoBehaviour
         }
         catch
         {
-            return "Mini-Illuria";
+            var launchWorld = ReadProfileString(profile, "launch", "world");
+            if (!string.IsNullOrWhiteSpace(launchWorld))
+            {
+                return launchWorld;
+            }
+
+            var baseWorld = ReadProfileString(profile, "baseWorld");
+            return string.IsNullOrWhiteSpace(baseWorld) ? "Mini-Illuria" : baseWorld;
         }
+    }
+
+    static string[] ReadProfileArray(string profile, string property)
+    {
+        try
+        {
+            var token = LoadProfileToken(profile);
+            return token[property] is JArray values
+                ? values.Select(value => value.ToString()).Where(value => !string.IsNullOrWhiteSpace(value)).ToArray()
+                : Array.Empty<string>();
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
+    }
+
+    static string ReadProfileString(string profile, string property)
+    {
+        try
+        {
+            return LoadProfileToken(profile)[property]?.ToString() ?? string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    static string ReadProfileString(string profile, string parent, string property)
+    {
+        try
+        {
+            return LoadProfileToken(profile)[parent]?[property]?.ToString() ?? string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    static JObject LoadProfileToken(string profile)
+    {
+        var profileId = string.IsNullOrWhiteSpace(profile) ? "classic-warlords" : profile;
+        var path = Path.Combine(UnityModKitSelection.PluginModRoot, "Profiles", profileId, "profile.json");
+        return JObject.Parse(File.ReadAllText(path));
     }
 
     static string PackDescription(FeaturePackManifest pack)
@@ -492,18 +572,18 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var panel = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup), typeof(Outline));
         panel.transform.SetParent(parent, false);
         var rect = panel.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
         rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(920f, 620f);
+        rect.offsetMin = offsetMin;
+        rect.offsetMax = offsetMax;
         panel.GetComponent<Image>().color = PanelColor;
         var outline = panel.GetComponent<Outline>();
         outline.effectColor = new Color(0.10f, 0.10f, 0.10f, 1f);
         outline.effectDistance = new Vector2(4f, -4f);
         var layout = panel.GetComponent<VerticalLayoutGroup>();
-        layout.padding = new RectOffset(22, 22, 18, 18);
-        layout.spacing = 10;
+        layout.padding = new RectOffset(22, 22, 12, 12);
+        layout.spacing = 5;
         layout.childForceExpandHeight = false;
         layout.childControlHeight = true;
         return panel;
@@ -511,7 +591,8 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
     static void CreateHeader(Transform parent, string text)
     {
-        CreateText(parent, text, 24, FontStyle.Bold);
+        var header = CreateText(parent, text, 22, FontStyle.Bold);
+        LayoutElement(header.gameObject, 28);
     }
 
     static void CreateBodyText(Transform parent, string text)
@@ -545,12 +626,12 @@ public sealed class ModSettingsPanel : MonoBehaviour
         layout.childControlHeight = true;
         layout.childForceExpandWidth = false;
         layout.childForceExpandHeight = false;
-        LayoutElement(row, 92);
+        LayoutElement(row, 72);
 
         var previewFrame = new GameObject("WorldPreviewFrame", typeof(RectTransform), typeof(Image));
         previewFrame.transform.SetParent(row.transform, false);
         previewFrame.GetComponent<Image>().color = new Color(0.18f, 0.18f, 0.18f, 1f);
-        LayoutElement(previewFrame, 92, 148, 0);
+        LayoutElement(previewFrame, 72, 120, 0);
 
         var preview = new GameObject("WorldPreview", typeof(RectTransform), typeof(RawImage));
         preview.transform.SetParent(previewFrame.transform, false);
@@ -563,7 +644,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         worldDetailText.gameObject.name = "WorldDetailText";
         worldDetailText.horizontalOverflow = HorizontalWrapMode.Wrap;
         worldDetailText.verticalOverflow = VerticalWrapMode.Truncate;
-        LayoutElement(worldDetailText.gameObject, 92, 680, 0);
+        LayoutElement(worldDetailText.gameObject, 72, 680, 0);
 
         return row;
     }
@@ -630,7 +711,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var go = new GameObject("Pack Scroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
         go.transform.SetParent(parent, false);
         go.GetComponent<Image>().color = RowColor;
-        LayoutElement(go, 150);
+        LayoutElement(go, 108);
 
         var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
         viewport.transform.SetParent(go.transform, false);
@@ -676,7 +757,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         layout.childControlHeight = true;
         layout.childForceExpandWidth = false;
         layout.childForceExpandHeight = false;
-        LayoutElement(row, 44);
+        LayoutElement(row, 42);
 
         var toggle = row.GetComponent<Toggle>();
         toggle.targetGraphic = row.GetComponent<Image>();
@@ -725,7 +806,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var label = CreateText(go.transform, text, 14, FontStyle.Bold);
         label.alignment = TextAnchor.MiddleCenter;
         Stretch(label.rectTransform, 0, 0, 0, 0);
-        LayoutElement(go, 40);
+        LayoutElement(go, 36);
         return button;
     }
 

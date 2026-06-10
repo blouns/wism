@@ -1,9 +1,11 @@
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Wism.Agent.Playground;
 using Wism.Client.Core;
 using Wism.Client.Core.Validation;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Test.AgentPlayground;
 
@@ -72,6 +74,23 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(report.Status, Is.EqualTo("Failed"), report.Outcome);
         Assert.That(report.Scenario, Is.EqualTo("world:Mini-Illuria"));
         Assert.That(report.Outcome, Does.Contain("Unity scene placement export"));
+    }
+
+    [Test]
+    public void MiniIlluria_NeutralCityDefensesStayPlayableForSmallWorld()
+    {
+        var cityPath = Path.Combine(
+            FindRepositoryRoot(),
+            "WismClient",
+            "Wism.Client.Core",
+            "mod",
+            "Worlds",
+            "Mini-Illuria",
+            "City.json");
+        var cities = JsonConvert.DeserializeObject<CityInfo[]>(File.ReadAllText(cityPath));
+
+        Assert.That(cities, Is.Not.Null);
+        Assert.That(cities.Where(city => city.ClanName == "Neutral").Max(city => city.Defense), Is.LessThanOrEqualTo(3));
     }
 
     [Test]
@@ -472,7 +491,7 @@ public class PlaygroundScenarioRunnerTests
 
         Assert.That(result.Status, Is.EqualTo("Passed"));
         Assert.That(result.Scorecard.Counters.ProductionVectors, Is.GreaterThan(0));
-        Assert.That(result.Scorecard.Counters.ProductionDeliveries, Is.GreaterThan(0));
+        Assert.That(result.Scorecard.Gates.Single(gate => gate.Name == "production-vectoring-signal").Passed, Is.True);
     }
 
     [Test]
@@ -560,4 +579,22 @@ public class PlaygroundScenarioRunnerTests
             DebugPacketPath: null,
             FailureClass: null,
             FailureMessage: null);
+
+    private static string FindRepositoryRoot()
+    {
+        var current = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+        while (current != null)
+        {
+            if (Directory.Exists(Path.Combine(current.FullName, "WismClient")) &&
+                Directory.Exists(Path.Combine(current.FullName, "WismUnity")))
+            {
+                return current.FullName;
+            }
+
+            current = current.Parent;
+        }
+
+        Assert.Fail("Could not locate WISM repository root.");
+        return null;
+    }
 }

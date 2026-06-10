@@ -163,7 +163,7 @@ namespace Wism.Client.AI.Tactical
                     logger.LogInformation(
                         $"[Extermination] Army moving toward ({path[1].X},{path[1].Y}) to approach target.");
                     AiUtilities.GenerateMoveCommands(
-                        armyController, armies, commands, attackPosition, path);
+                        armyController, armies, commands, attackPosition, path, logger);
                     return commands;
                 }
             }

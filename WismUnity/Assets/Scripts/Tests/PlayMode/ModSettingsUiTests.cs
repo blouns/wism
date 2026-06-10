@@ -60,6 +60,8 @@ public sealed class ModSettingsUiTests
         Assert.That(RectHeight("RefreshButton"), Is.LessThanOrEqualTo(48f));
         Assert.That(RectHeight("ContinueButton"), Is.LessThanOrEqualTo(48f));
         Assert.That(RectHeight("PackScroll"), Is.InRange(96f, 160f));
+        Assert.That(IsFullyOnScreen("ActionsRow"), Is.True);
+        Assert.That(IsFullyOnScreen("ContinueButton"), Is.True);
     }
 
     [UnityTest]
@@ -187,6 +189,18 @@ public sealed class ModSettingsUiTests
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Not.Null);
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Is.EquivalentTo(new[] { "pack-dusklands-visual", "pack-illurian-legends-flavor" }));
         Assert.That(UnityModKitRuntimeSelection.CurrentSelection.ContentFingerprint, Is.Not.Empty);
+    }
+
+    [UnityTest]
+    public IEnumerator NearIlluriaProfile_SelectsNearIlluriaWorld()
+    {
+        SetDropdown("ProfileDropdown", "near-illuria");
+        yield return null;
+
+        Assert.That(FindDropdown("WorldDropdown").captionText.text, Is.EqualTo("Near-Illuria"));
+        Assert.That(FindText("WorldDetailText").text, Does.Contain("Near-Illuria"));
+        Assert.That(FindText("WorldDetailText").text, Does.Contain("Map: 109 x 78"));
+        Assert.That(FindButton("ContinueButton").interactable, Is.True);
     }
 
     [UnityTest]
@@ -319,6 +333,18 @@ public sealed class ModSettingsUiTests
     static float RectHeight(string name)
     {
         return RequireComponent<RectTransform>(name).rect.height;
+    }
+
+    static bool IsFullyOnScreen(string name)
+    {
+        var rect = RequireComponent<RectTransform>(name);
+        var corners = new Vector3[4];
+        rect.GetWorldCorners(corners);
+        return corners.All(corner =>
+            corner.x >= 0f &&
+            corner.y >= 0f &&
+            corner.x <= Screen.width &&
+            corner.y <= Screen.height);
     }
 
     void CreateInvalidPack(string packId)

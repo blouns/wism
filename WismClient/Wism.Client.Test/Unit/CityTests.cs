@@ -1,7 +1,9 @@
 ﻿using System;
 using NUnit.Framework;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 using Wism.Client.Modules;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.Test.Unit;
 
@@ -159,5 +161,71 @@ public class CityTests
         // Surrounding tiles should have one tile full (8) and one tile with one (1) army
         Assert.That(World.Current.Map[1, 3].Armies.Count, Is.EqualTo(8));
         Assert.That(World.Current.Map[2, 3].Armies.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Production_StartProduction_NavyRequiresDeployableWater()
+    {
+        Game.CreateDefaultGame();
+        var tile = World.Current.Map[1, 2];
+        var city = CreateNavyCity("InlandPort", "Inland Port");
+        var player = Game.Current.GetCurrentPlayer();
+        var navyInfo = ModFactory.FindArmyInfo("Navy");
+        var startingGold = player.Gold;
+        World.Current.AddCity(city, tile);
+        player.ClaimCity(city);
+
+        var result = city.Barracks.StartProduction(navyInfo);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.False);
+            Assert.That(city.Barracks.ProducingArmy(), Is.False);
+            Assert.That(player.Gold, Is.EqualTo(startingGold));
+        });
+    }
+
+    [Test]
+    public void Production_StartProduction_NavyStartsWhenCityHasAdjacentWater()
+    {
+        Game.CreateDefaultGame();
+        var tile = World.Current.Map[1, 2];
+        var city = CreateNavyCity("CoastalPort", "Coastal Port");
+        var player = Game.Current.GetCurrentPlayer();
+        var navyInfo = ModFactory.FindArmyInfo("Navy");
+        World.Current.Map[3, 2].Terrain = MapBuilder.TerrainKinds["Water"];
+        World.Current.AddCity(city, tile);
+        player.ClaimCity(city);
+
+        var result = city.Barracks.StartProduction(navyInfo);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.True);
+            Assert.That(city.Barracks.ProducingArmy(), Is.True);
+            Assert.That(city.Barracks.ArmyInTraining.ArmyInfo.ShortName, Is.EqualTo("Navy"));
+        });
+    }
+
+    static City CreateNavyCity(string shortName, string displayName)
+    {
+        return City.Create(new CityInfo
+        {
+            ShortName = shortName,
+            DisplayName = displayName,
+            Defense = 4,
+            Income = 20,
+            ProductionInfos = new[]
+            {
+                new ProductionInfo
+                {
+                    ArmyInfoName = "Navy",
+                    TurnsToProduce = 1,
+                    Upkeep = 8,
+                    Moves = 18,
+                    Strength = 5
+                }
+            }
+        });
     }
 }

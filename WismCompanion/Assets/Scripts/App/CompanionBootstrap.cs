@@ -20,9 +20,13 @@ namespace WismCompanion.App
         // transport is still available by entering "pipe://wism-commands" in the connection field.
         private const string DefaultEndpoint = "ws://localhost:5000/gameHub";
 
+        private const float ChannelPruneInterval = 15f;
+        private const float ChannelStaleSecs = 60f;
+
         private CompanionState state;
         private CompanionController controller;
         private ICompanionTransport client;
+        private float channelPruneTimer;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -56,16 +60,19 @@ namespace WismCompanion.App
                 while (client.TryDequeue(out var message))
                 {
                     if (message.Kind == InboundMessage.MessageKind.MapSnapshot)
-                    {
                         state.ApplyMap(message.Map);
-                    }
                     else
-                    {
                         state.ApplyCommand(message.Command);
-                    }
                 }
 
                 controller?.SetConnectionStatus(client.Status, client.StatusDetail);
+            }
+
+            channelPruneTimer += Time.deltaTime;
+            if (channelPruneTimer >= ChannelPruneInterval)
+            {
+                channelPruneTimer = 0f;
+                state.PruneStaleChannels(TimeSpan.FromSeconds(ChannelStaleSecs));
             }
         }
 

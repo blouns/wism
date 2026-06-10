@@ -402,7 +402,7 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
-        public void GarrisonPolicy_ReservesLastOwnedCityDefender()
+        public void GarrisonPolicy_ReleasesLastOwnedCityDefenderWhenNoEnemyThreatensCity()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
             TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
@@ -413,11 +413,62 @@ namespace Wism.Client.Test.AI
 
             var mobileArmies = new GarrisonPolicy().GetMobileArmies(new[] { onlyDefender }.ToList());
 
+            Assert.That(mobileArmies, Is.EqualTo(new[] { onlyDefender }));
+        }
+
+        [Test]
+        public void GarrisonPolicy_ReservesLastOwnedCityDefenderWhenEnemyThreatensCity()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var player = Game.Current.Players[0];
+            var enemy = Game.Current.Players[1];
+            var cityTile = player.GetCities().First().Tile;
+            var onlyDefender = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), cityTile);
+            enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), FindClearAdjacentTile(cityTile.City));
+
+            var mobileArmies = new GarrisonPolicy().GetMobileArmies(new[] { onlyDefender }.ToList());
+
             Assert.That(mobileArmies, Is.Empty);
         }
 
         [Test]
-        public void GarrisonPolicy_ReleasesSurplusOwnedCityArmies()
+        public void GarrisonPolicy_ReleasesLoneHeroFromOwnedCity()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var player = Game.Current.Players[0];
+            var cityTile = player.GetCities().First().Tile;
+            var hero = player.HireHero(cityTile);
+
+            var mobileArmies = new GarrisonPolicy().GetMobileArmies(
+                new[] { (Wism.Client.MapObjects.Army)hero }.ToList());
+
+            Assert.That(mobileArmies, Is.EqualTo(new[] { hero }));
+        }
+
+        [Test]
+        public void GarrisonPolicy_ReservesThreatenedInfantryBeforeHero()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var player = Game.Current.Players[0];
+            var enemy = Game.Current.Players[1];
+            var cityTile = player.GetCities().First().Tile;
+            var defender = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), cityTile);
+            var hero = player.HireHero(cityTile);
+            enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), FindClearAdjacentTile(cityTile.City));
+
+            var mobileArmies = new GarrisonPolicy().GetMobileArmies(new[] { defender, hero }.ToList());
+
+            Assert.That(mobileArmies, Is.EqualTo(new[] { hero }));
+        }
+
+        [Test]
+        public void GarrisonPolicy_ReleasesOpeningStackWhenNoEnemyThreatensCity()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
             TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
@@ -429,8 +480,59 @@ namespace Wism.Client.Test.AI
 
             var mobileArmies = new GarrisonPolicy().GetMobileArmies(new[] { defender, mobile }.ToList());
 
+            Assert.That(mobileArmies, Is.EqualTo(new[] { defender, mobile }));
+        }
+
+        [Test]
+        public void GarrisonPolicy_ReleasesSurplusOwnedCityArmies()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var player = Game.Current.Players[0];
+            var enemy = Game.Current.Players[1];
+            var cityTile = player.GetCities().First().Tile;
+            var defender = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), cityTile);
+            var mobile = player.ConscriptArmy(ArmyInfo.GetArmyInfo("Cavalry"), cityTile);
+            enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), FindClearAdjacentTile(cityTile.City));
+
+            var mobileArmies = new GarrisonPolicy().GetMobileArmies(new[] { defender, mobile }.ToList());
+
             Assert.That(mobileArmies.Count, Is.EqualTo(1));
             Assert.That(mobileArmies[0], Is.EqualTo(mobile));
+        }
+
+        [Test]
+        public void WarlordsClassicAI_RushesNeutralCityWithOpeningDefenderWhenNoEnemyThreatensCity()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            player.IsHuman = false;
+            var cityTile = player.GetCities().First().Tile;
+            var defender = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), cityTile);
+            var neutralCity = Wism.Client.MapObjects.City.Create(CreateTestCityInfo("OpenNeutral", "Open Neutral"));
+            World.Current.AddCity(neutralCity, FindClearCityTileAwayFrom(cityTile, minimumDistance: 3));
+
+            var commander = WarlordsClassicAiFactory.CreateCommandProvider(controllerProvider, logger);
+            commander.GenerateCommands();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(
+                    commander.GetBufferedCommands().Any(command =>
+                        command is MoveOnceCommand ||
+                        command is CaptureCityCommand ||
+                        command is PrepareForBattleCommand ||
+                        command is AttackOnceCommand),
+                    Is.True,
+                    "Opening AI should use an available city defender to rush neutral cities when no enemy threatens the city.");
+                Assert.That(defender.Tile, Is.EqualTo(cityTile), "Command generation should not mutate army position before execution.");
+            });
         }
 
         [Test]
@@ -707,6 +809,46 @@ namespace Wism.Client.Test.AI
                 Assert.That(searchBid, Is.Not.Null);
                 Assert.That(captureBid, Is.Not.Null);
                 Assert.That(searchBid.Utility, Is.GreaterThan(captureBid.Utility));
+            });
+        }
+
+        [Test]
+        public void WarlordsClassicAI_DoesNotQueueSearchMoveWhenNextStepCostsTooMuch()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            player.IsHuman = false;
+
+            var originTile = World.Current.Map[19, 5];
+            var locationTile = World.Current.Map[20, 5];
+            var ruins = MapBuilder.FindLocation("Stonehenge");
+            locationTile.Terrain = MapBuilder.TerrainKinds["Hill"];
+            World.Current.AddLocation(ruins, locationTile);
+
+            var hero = player.HireHero(originTile);
+            hero.MovesRemaining = 1;
+            Assert.That(hero.Tile, Is.EqualTo(originTile));
+
+            var commands = new SearchModule(
+                    controllerProvider.ArmyController,
+                    controllerProvider.LocationController,
+                    Game.Current.PathingStrategy,
+                    new GarrisonPolicy(),
+                    logger)
+                .GenerateCommands(new[] { (Wism.Client.MapObjects.Army)hero }.ToList(), World.Current)
+                .ToList();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(commands.OfType<SelectArmyCommand>().Any(), Is.False);
+                Assert.That(commands.OfType<MoveOnceCommand>().Any(), Is.False);
+                Assert.That(hero.Tile, Is.EqualTo(originTile));
+                Assert.That(hero.MovesRemaining, Is.EqualTo(1));
             });
         }
 

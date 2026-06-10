@@ -82,8 +82,14 @@ namespace Assets.Scripts.Managers
 
         public void DeselectArmies()
         {
+            var selectedArmies = Game.Current.GetSelectedArmies();
+            if (selectedArmies == null || selectedArmies.Count == 0)
+            {
+                return;
+            }
+
             this.commandController.AddCommand(
-                new DeselectArmyCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies()));
+                new DeselectArmyCommand(this.provider.ArmyController, selectedArmies));
         }
 
         public void ConscriptArmies(Player player, Tile tile, List<ArmyInfo> armyKinds)
@@ -196,9 +202,6 @@ namespace Assets.Scripts.Managers
         {
             this.commandController.AddCommand(
                 new EndTurnCommand(this.provider.GameController, Game.Current.GetCurrentPlayer()));
-
-            // Start the next turn
-            StartTurn();
         }
 
         public void SearchLocation()

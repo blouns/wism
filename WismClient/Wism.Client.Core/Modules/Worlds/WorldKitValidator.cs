@@ -52,12 +52,16 @@ namespace Wism.Client.Modules.Worlds
                 .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
             var clanIds = LoadStableIds<ClanInfo>(report, Path.Combine(modRoot, "Clan.json"), info => info.ShortName, "clan-json-invalid");
             var armyIds = LoadStableIds<ArmyInfo>(report, Path.Combine(modRoot, "Army.json"), info => info.ShortName, "army-json-invalid");
+            var armyInfos = LoadInfos<ArmyInfo>(report, Path.Combine(modRoot, "Army.json"), "army-json-invalid")
+                .Where(info => !string.IsNullOrWhiteSpace(info.ShortName))
+                .GroupBy(info => info.ShortName, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
 
             var map = LoadMap(report, Path.Combine(report.WorldRoot, "Map.json"), terrainIds);
             var cities = LoadInfos<CityInfo>(report, Path.Combine(report.WorldRoot, "City.json"), "city-json-invalid");
             var locations = LoadLocationTokens(report, Path.Combine(report.WorldRoot, "Location.json"));
 
-            ValidateCities(report, map, cities, clanIds, armyIds);
+            ValidateCities(report, map, cities, clanIds, armyIds, armyInfos, terrainInfos);
             ValidateLocations(report, map, locations);
             ValidateStarts(report, cities, clanIds, options);
             ValidateReachability(report, map, cities, terrainInfos);
@@ -167,7 +171,9 @@ namespace Wism.Client.Modules.Worlds
             MapData map,
             IList<CityInfo> cities,
             ISet<string> clanIds,
-            ISet<string> armyIds)
+            ISet<string> armyIds,
+            IDictionary<string, ArmyInfo> armyInfos,
+            IDictionary<string, TerrainInfo> terrainInfos)
         {
             report.Coverage.CityCount = cities.Count;
             var occupied = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -218,8 +224,54 @@ namespace Wism.Client.Modules.Worlds
                     {
                         report.Add(WorldKitValidationSeverity.Error, "city-production-army-unknown", $"City '{city.ShortName}' references unknown production army '{production.ArmyInfoName}'.", cityPath, jsonPath, city.X, city.Y);
                     }
+                    else if (armyInfos.TryGetValue(production.ArmyInfoName, out var armyInfo) &&
+                             IsNavalArmy(armyInfo) &&
+                             !HasNavalDeploymentTile(map, terrainInfos, city))
+                    {
+                        report.Add(WorldKitValidationSeverity.Error, "city-production-navy-not-deployable", $"City '{city.ShortName}' can produce navy '{production.ArmyInfoName}', but has no adjacent floatable deployment tile.", cityPath, jsonPath, city.X, city.Y);
+                    }
                 }
             }
+        }
+
+        static bool IsNavalArmy(ArmyInfo armyInfo)
+        {
+            return armyInfo.CanFloat && !armyInfo.CanWalk && !armyInfo.CanFly;
+        }
+
+        static bool HasNavalDeploymentTile(
+            MapData map,
+            IDictionary<string, TerrainInfo> terrainInfos,
+            CityInfo city)
+        {
+            foreach (var point in CityFootprint(city.X, city.Y))
+            {
+                if (IsFloatable(map, terrainInfos, point.X, point.Y))
+                {
+                    return true;
+                }
+
+                foreach (var neighbor in NeighborsIncludingDiagonals(point.X, point.Y))
+                {
+                    if (IsFloatable(map, terrainInfos, neighbor.X, neighbor.Y))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        static bool IsFloatable(
+            MapData map,
+            IDictionary<string, TerrainInfo> terrainInfos,
+            int x,
+            int y)
+        {
+            return map.Tiles.TryGetValue(CoordinateKey(x, y), out var tile) &&
+                   terrainInfos.TryGetValue(tile.Terrain, out var terrain) &&
+                   terrain.AllowFloat;
         }
 
         static void ValidateLocations(WorldKitValidationReport report, MapData map, IList<LocationRecord> locations)
@@ -441,6 +493,22 @@ namespace Wism.Client.Modules.Worlds
             yield return new MapPoint(x + 1, y);
             yield return new MapPoint(x, y - 1);
             yield return new MapPoint(x, y + 1);
+        }
+
+        static IEnumerable<MapPoint> NeighborsIncludingDiagonals(int x, int y)
+        {
+            for (var yDelta = -1; yDelta <= 1; yDelta++)
+            {
+                for (var xDelta = -1; xDelta <= 1; xDelta++)
+                {
+                    if (xDelta == 0 && yDelta == 0)
+                    {
+                        continue;
+                    }
+
+                    yield return new MapPoint(x + xDelta, y + yDelta);
+                }
+            }
         }
 
         static string CoordinateKey(int x, int y)

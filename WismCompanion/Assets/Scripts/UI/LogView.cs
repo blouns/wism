@@ -19,7 +19,7 @@ namespace WismCompanion.UI
         private readonly Label detail;
         private List<CompanionLogEntry> source = new();
         private List<CompanionLogEntry> displayed = new();
-        private LogViewMode mode = LogViewMode.Raw;
+        private LogViewMode mode = LogViewMode.Simple;
         private string filter = string.Empty;
 
         public LogView(ListView list, Label detail)
@@ -34,6 +34,9 @@ namespace WismCompanion.UI
             list.itemsSource = displayed;
             list.selectionChanged += OnSelectionChanged;
         }
+
+        public int DisplayedCount => displayed.Count;
+        public int SourceCount    => source.Count;
 
         public void SetEntries(IReadOnlyList<CompanionLogEntry> entries)
         {
@@ -58,7 +61,7 @@ namespace WismCompanion.UI
             IEnumerable<CompanionLogEntry> view = source;
 
             if (mode == LogViewMode.Simple)
-                view = view.Where(e => e.Category == "Command");
+                view = view.Where(e => e.Category == "Command" || e.Category == "Battle");
 
             if (!string.IsNullOrWhiteSpace(filter))
                 view = view.Where(e => e.Summary.Contains(filter, StringComparison.OrdinalIgnoreCase));
@@ -66,7 +69,7 @@ namespace WismCompanion.UI
             displayed = view.ToList();
             list.itemsSource = displayed;
             list.ClearSelection();
-            list.RefreshItems();
+            list.Rebuild();
         }
 
         private static VisualElement MakeItem()
@@ -92,7 +95,8 @@ namespace WismCompanion.UI
 
             var entry = displayed[index];
             element.EnableInClassList("log-row--command", entry.Category == "Command");
-            element.EnableInClassList("log-row--map", entry.Category == "Map");
+            element.EnableInClassList("log-row--battle",  entry.Category == "Battle");
+            element.EnableInClassList("log-row--map",     entry.Category == "Map");
 
             element.Q<Label>("time").text = entry.LocalTime;
             element.Q<Label>("summary").text = entry.Summary;

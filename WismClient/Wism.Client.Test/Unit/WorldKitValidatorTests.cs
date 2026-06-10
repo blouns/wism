@@ -31,6 +31,37 @@ public sealed class WorldKitValidatorTests
     }
 
     [Test]
+    public void NearIlluria_ValidatesForAllEightClassicStarts()
+    {
+        var report = WorldKitValidator.ValidateModRoot(
+            Path.Combine(TestContext.CurrentContext.TestDirectory, "mod"),
+            "Near-Illuria",
+            new WorldKitValidationOptions
+            {
+                RequestedPlayers = 8,
+                ActiveClans = new[]
+                {
+                    "Sirians",
+                    "LordBane",
+                    "Selentines",
+                    "GreyDwarves",
+                    "HorseLords",
+                    "OrcsOfKor",
+                    "StormGiants",
+                    "Elvallie"
+                }
+            });
+
+        Assert.That(report.IsValid, Is.True, string.Join(Environment.NewLine, report.Issues));
+        Assert.That(report.Coverage.Width, Is.EqualTo(109));
+        Assert.That(report.Coverage.Height, Is.EqualTo(78));
+        Assert.That(report.Coverage.CityCount, Is.EqualTo(80));
+        Assert.That(report.Coverage.LocationCount, Is.EqualTo(40));
+        Assert.That(report.Coverage.ClansWithStarts, Is.EqualTo(8));
+        Assert.That(report.Coverage.ReachableCityPairs, Is.GreaterThan(0));
+    }
+
+    [Test]
     public void MissingRequestedClanStart_BlocksPlayableValidation()
     {
         var report = WorldKitValidator.ValidateModRoot(
@@ -107,12 +138,44 @@ public sealed class WorldKitValidatorTests
             && issue.Y == 1), Is.True);
     }
 
+    [Test]
+    public void InlandNavyProduction_ReturnsDeployabilityError()
+    {
+        var modRoot = CreateFixture(
+            "InlandNavyWorld",
+            CreateMap(5, 5),
+            CityJson(City("InlandPort", "Sirians", 1, 2, "Navy")),
+            "[]");
+
+        var report = WorldKitValidator.ValidateModRoot(modRoot, "InlandNavyWorld");
+
+        Assert.That(report.IsValid, Is.False);
+        Assert.That(report.Issues.Any(issue =>
+            issue.Code == "city-production-navy-not-deployable"
+            && issue.Message.Contains("InlandPort")), Is.True);
+    }
+
+    [Test]
+    public void CoastalNavyProduction_Validates()
+    {
+        var modRoot = CreateFixture(
+            "CoastalNavyWorld",
+            CreateMap(5, 5, new Dictionary<string, string> { { "3,2", "Water" } }),
+            CityJson(City("CoastalPort", "Sirians", 1, 2, "Navy")),
+            "[]");
+
+        var report = WorldKitValidator.ValidateModRoot(modRoot, "CoastalNavyWorld");
+
+        Assert.That(report.IsValid, Is.True, string.Join(Environment.NewLine, report.Issues));
+    }
+
     static string CreateFixture(string worldId, string mapJson, string cityJson, string locationJson)
     {
         var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, "worldkit-fixture-" + Guid.NewGuid().ToString("N"));
         Write(root, "Terrain.json",
             "[" +
             "{\"ShortName\":\"Grass\",\"DisplayName\":\"Grass\",\"AllowWalk\":true,\"AllowFlight\":true,\"AllowFloat\":false,\"Movement\":2}," +
+            "{\"ShortName\":\"Water\",\"DisplayName\":\"Water\",\"AllowWalk\":false,\"AllowFlight\":true,\"AllowFloat\":true,\"Movement\":1}," +
             "{\"ShortName\":\"Ruins\",\"DisplayName\":\"Ruins\",\"AllowWalk\":true,\"AllowFlight\":true,\"AllowFloat\":false,\"Movement\":2}" +
             "]");
         Write(root, "Clan.json",
@@ -121,28 +184,36 @@ public sealed class WorldKitValidatorTests
             "{\"ShortName\":\"LordBane\",\"DisplayName\":\"Lord Bane\"}," +
             "{\"ShortName\":\"StormGiants\",\"DisplayName\":\"Storm Giants\"}" +
             "]");
-        Write(root, "Army.json", "[{\"ShortName\":\"LightInfantry\",\"DisplayName\":\"Light Infantry\"}]");
+        Write(root, "Army.json",
+            "[" +
+            "{\"ShortName\":\"LightInfantry\",\"DisplayName\":\"Light Infantry\",\"CanWalk\":true,\"CanFloat\":false,\"CanFly\":false}," +
+            "{\"ShortName\":\"Navy\",\"DisplayName\":\"Navy\",\"CanWalk\":false,\"CanFloat\":true,\"CanFly\":false}" +
+            "]");
         Write(root, Path.Combine("Worlds", worldId, "Map.json"), mapJson);
         Write(root, Path.Combine("Worlds", worldId, "City.json"), cityJson);
         Write(root, Path.Combine("Worlds", worldId, "Location.json"), locationJson);
         return root;
     }
 
-    static string CreateMap(int width, int height)
+    static string CreateMap(int width, int height, IDictionary<string, string> terrainOverrides = null)
     {
         var tiles = new List<object>();
         for (var y = 0; y < height; y++)
         {
             for (var x = 0; x < width; x++)
             {
-                tiles.Add(new { X = x, Y = y, TerrainShortName = "Grass" });
+                var key = $"{x},{y}";
+                var terrain = terrainOverrides != null && terrainOverrides.TryGetValue(key, out var overrideTerrain)
+                    ? overrideTerrain
+                    : "Grass";
+                tiles.Add(new { X = x, Y = y, TerrainShortName = terrain });
             }
         }
 
         return JsonConvert.SerializeObject(new { Name = "FixtureWorld", Tiles = tiles });
     }
 
-    static object City(string shortName, string clanName, int x, int y)
+    static object City(string shortName, string clanName, int x, int y, string armyInfoName = "LightInfantry")
     {
         return new
         {
@@ -153,7 +224,7 @@ public sealed class WorldKitValidatorTests
             ClanName = clanName,
             Defense = 4,
             Income = 20,
-            ProductionInfos = new[] { new { ArmyInfoName = "LightInfantry", TurnsToProduce = 1, Upkeep = 4, Moves = 10, Strength = 3 } }
+            ProductionInfos = new[] { new { ArmyInfoName = armyInfoName, TurnsToProduce = 1, Upkeep = 4, Moves = 10, Strength = 3 } }
         };
     }
 
