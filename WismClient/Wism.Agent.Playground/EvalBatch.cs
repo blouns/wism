@@ -213,6 +213,14 @@ public static class EvalSuiteCatalog
                 ClanCounts: new[] { 2, 4, 8 },
                 Sizes: new[] { "medium", "large" },
                 CheckpointMode: "summary"),
+            "human-readiness" => new EvalSuiteDefinition(
+                "human-readiness",
+                Cases: 120,
+                MaxTurns: 80,
+                ScenarioFamilies: ClassicAiHumanReadinessFamilies(),
+                ClanCounts: new[] { 2, 4, 8 },
+                Sizes: new[] { "medium", "large" },
+                CheckpointMode: "summary"),
             "marathon" => new EvalSuiteDefinition(
                 "marathon",
                 Cases: 500,
@@ -239,6 +247,20 @@ public static class EvalSuiteCatalog
             "classic-ai-production-economy",
             "classic-ai-ruin-search",
             "classic-ai-defended-siege",
+            "classic-ai-lost-battle-recovery",
+            "classic-ai-target-captured-recovery",
+            "classic-ai-conquest"
+        };
+
+    private static IReadOnlyList<string> ClassicAiHumanReadinessFamilies() =>
+        new[]
+        {
+            "classic-ai-neutral-expansion",
+            "classic-ai-road-contact",
+            "classic-ai-ruin-search",
+            "classic-ai-defended-siege",
+            "classic-ai-production-economy",
+            "classic-ai-production-vectoring",
             "classic-ai-lost-battle-recovery",
             "classic-ai-target-captured-recovery",
             "classic-ai-conquest"

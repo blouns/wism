@@ -582,6 +582,25 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void EvalSuiteCatalog_ResolvesHumanReadinessDefaults()
+    {
+        var suite = EvalSuiteCatalog.Resolve("human-readiness");
+
+        Assert.That(suite.Cases, Is.EqualTo(120));
+        Assert.That(suite.MaxTurns, Is.EqualTo(80));
+        Assert.That(suite.ClanCounts, Is.EquivalentTo(new[] { 2, 4, 8 }));
+        Assert.That(suite.Sizes, Is.EquivalentTo(new[] { "medium", "large" }));
+        Assert.That(suite.CheckpointMode, Is.EqualTo("summary"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-neutral-expansion"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-road-contact"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-ruin-search"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-defended-siege"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-production-economy"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-production-vectoring"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-conquest"));
+    }
+
+    [Test]
     public void EvalScorecard_DoesNotRequireVictoryForClassicAiProductionVectoringSmoke()
     {
         var scorecard = EvalBatchRunner.BuildScorecard(new[]
