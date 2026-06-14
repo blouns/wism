@@ -253,6 +253,10 @@ Quantifiable targets:
   deliveries, battles, save/load success, and stuck/no-op turns.
 - Scorecard counter semantics have focused tests for positive, negative, noisy,
   and duplicate-looking event/moment strings.
+- Classic AI scorecard gates are grounded in
+  [`docs/evals/classic-ai-doctrine.md`](evals/classic-ai-doctrine.md). Use that
+  doctrine before changing scenario families, readiness gates, or AI strength
+  claims.
 - Green scorecard requires:
   - 0 crashes.
   - 0 unclassified timeouts.
