@@ -50,6 +50,8 @@ namespace Wism.Client.Core
 
         public ModKitSelectionEntity ModKitSelection { get; set; }
 
+        public StrategicPlanEntity[] StrategicPlans { get; set; }
+
         /// <summary>
         ///     Gets or sets the strategy used for battles
         /// </summary>

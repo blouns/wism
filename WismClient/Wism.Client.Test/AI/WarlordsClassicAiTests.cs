@@ -719,6 +719,63 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void WarlordsClassicAI_DoesNotSendNonHeroAcrossMapForTempleSearch()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            player.IsHuman = false;
+
+            var originTile = World.Current.Map[19, 5];
+            Assert.That(originTile.HasLocation(), Is.False);
+
+            var infantry = player.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), originTile);
+
+            var bids = new SearchModule(
+                    controllerProvider.ArmyController,
+                    controllerProvider.LocationController,
+                    Game.Current.PathingStrategy,
+                    new GarrisonPolicy(),
+                    logger)
+                .GenerateBids(World.Current)
+                .Where(bid => bid.Armies.Contains(infantry))
+                .ToList();
+
+            Assert.That(bids, Is.Empty);
+        }
+
+        [Test]
+        public void WarlordsClassicAI_DisablesTempleSearchInClassicStrategicProfile()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            player.IsHuman = false;
+
+            var templeTile = World.Current.Map[9, 6];
+            Assert.That(templeTile.HasLocation(), Is.True);
+            Assert.That(templeTile.Location.Kind, Is.EqualTo("Temple"));
+
+            player.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), templeTile);
+
+            var commander = WarlordsClassicAiFactory.CreateCommandProvider(
+                controllerProvider,
+                logger,
+                aiProfile: "strategic");
+            commander.GenerateCommands();
+
+            Assert.That(commander.GetBufferedCommands().OfType<SearchTempleCommand>().Any(), Is.False);
+        }
+
+        [Test]
         public void WarlordsClassicAI_PrefersImmediateCityCaptureOverCurrentTempleSearch()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();

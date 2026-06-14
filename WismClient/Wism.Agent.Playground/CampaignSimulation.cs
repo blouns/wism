@@ -26,6 +26,7 @@ public sealed record CampaignRunResult(
     string Name,
     int Seed,
     int ClanCount,
+    string AiProfile,
     string Status,
     string Outcome,
     int Turns,
@@ -33,7 +34,27 @@ public sealed record CampaignRunResult(
     IReadOnlyList<string> Checkpoints,
     IReadOnlyList<string> Moments,
     PlaygroundReport FinalReport,
-    VictoryOutcomeSnapshot? VictoryOutcome);
+    CampaignTelemetrySummary? Telemetry = null,
+    VictoryOutcomeSnapshot? VictoryOutcome = null);
+
+public sealed record CampaignTelemetrySummary(
+    double RuntimeSeconds,
+    double TimeoutBudgetSeconds,
+    double TimeoutBudgetUsedPercent,
+    int TurnsCompleted,
+    double SecondsPerTurn,
+    int CommandsExecuted,
+    double CommandsPerTurn,
+    int MeaningfulEvents,
+    double MeaningfulEventsPerTurn,
+    int MapWidth,
+    int MapHeight,
+    int TileCount,
+    int FinalArmyCount,
+    int FinalCityCount,
+    IReadOnlyDictionary<string, int> CommandTypeCounts,
+    string? TimeoutKind,
+    string? LastMomentKind);
 
 public sealed record CampaignMoment(
     string Kind,
@@ -52,7 +73,9 @@ internal sealed record CampaignOptions(
     string? ModRoot,
     string Size,
     string ScenarioFamily,
-    CampaignCheckpointMode CheckpointMode = CampaignCheckpointMode.Full);
+    string AiProfile = "strategic",
+    CampaignCheckpointMode CheckpointMode = CampaignCheckpointMode.Full,
+    int WallClockTimeoutSeconds = 0);
 
 internal enum CampaignCheckpointMode
 {
@@ -161,7 +184,7 @@ internal sealed class CampaignScenarioBuilder
             ? GetOutpostCoordinates(width, height, clanCount, isLarge)
             : Array.Empty<(int X, int Y)>();
         var allCityCoordinates = cityCoordinates.Concat(outpostCoordinates).ToArray();
-        var locationCoordinates = GetLocationCoordinates(width, height, clanCount, isLarge, scenarioFamily, cityCoordinates);
+        var locationCoordinates = GetLocationCoordinates(width, height, clanCount, isLarge, scenarioFamily, allCityCoordinates);
         var map = isLarge
             ? CreateWarlordsStyleMap(width, height, allCityCoordinates, locationCoordinates, options.Seed)
             : CreateMap(width, height, allCityCoordinates, options.Seed);
@@ -174,6 +197,7 @@ internal sealed class CampaignScenarioBuilder
         MapBuilder.AddLocationsFromInfos(World.Current, CreateLocations(locationCoordinates, clanCount, scenarioFamily));
         MapBuilder.AllocateBoons(World.Current.GetLocations());
         AddStartingArmies();
+        AddScenarioProbeArmies(scenarioFamily, clanCount);
 
         return new WorldValidator().Validate(World.Current, Game.Current.Players);
     }
@@ -421,10 +445,11 @@ internal sealed class CampaignScenarioBuilder
     {
         if (UsesRuinSearch(scenarioFamily))
         {
-            return cityCoordinates
+            var searchPositions = cityCoordinates
                 .Take(clanCount)
                 .Select(city => ClampInside(StepToward(city, (width / 2, height / 2), isLarge ? 6 : 3), width, height))
                 .ToArray();
+            return AvoidCityFootprints(searchPositions, cityCoordinates, width, height);
         }
 
         var positions = isLarge
@@ -443,7 +468,7 @@ internal sealed class CampaignScenarioBuilder
             (width / 2, Math.Max(2, height / 2 - 4))
         };
 
-        return positions.Take(clanCount).ToArray();
+        return AvoidCityFootprints(positions.Take(clanCount).ToArray(), cityCoordinates, width, height);
     }
 
     private static List<LocationInfo> CreateLocations(IReadOnlyList<(int X, int Y)> positions, int clanCount, string scenarioFamily)
@@ -564,6 +589,29 @@ internal sealed class CampaignScenarioBuilder
         }
     }
 
+    private static void AddScenarioProbeArmies(string scenarioFamily, int clanCount)
+    {
+        if (!scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase) &&
+            !scenarioFamily.Contains("lost-battle", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var defenderName = scenarioFamily.Contains("lost-battle", StringComparison.OrdinalIgnoreCase)
+            ? "HeavyInfantry"
+            : "LightInfantry";
+        foreach (var outpostName in OutpostOrder.Take(Math.Min(clanCount, OutpostOrder.Length)))
+        {
+            var city = World.Current.FindCity(outpostName);
+            if (city?.Clan?.Player == null)
+            {
+                continue;
+            }
+
+            city.Clan.Player.ConscriptArmy(ArmyInfo.GetArmyInfo(defenderName), city.Tile);
+        }
+    }
+
     private static (int X, int Y) StepToward((int X, int Y) start, (int X, int Y) target, int steps)
     {
         var x = start.X;
@@ -588,6 +636,68 @@ internal sealed class CampaignScenarioBuilder
         return (Math.Clamp(point.X, 2, width - 3), Math.Clamp(point.Y, 2, height - 3));
     }
 
+    private static IReadOnlyList<(int X, int Y)> AvoidCityFootprints(
+        IReadOnlyList<(int X, int Y)> positions,
+        IReadOnlyList<(int X, int Y)> cityCoordinates,
+        int width,
+        int height)
+    {
+        var blocked = new HashSet<(int X, int Y)>();
+        foreach (var city in cityCoordinates)
+        {
+            blocked.Add((city.X, city.Y));
+            blocked.Add((city.X, city.Y - 1));
+            blocked.Add((city.X + 1, city.Y));
+            blocked.Add((city.X + 1, city.Y - 1));
+        }
+
+        var resolved = new List<(int X, int Y)>(positions.Count);
+        var used = new HashSet<(int X, int Y)>();
+        foreach (var position in positions)
+        {
+            var candidate = ClampInside(position, width, height);
+            if (blocked.Contains(candidate) || used.Contains(candidate))
+            {
+                candidate = FindNearestOpenLocationTile(candidate, blocked, used, width, height);
+            }
+
+            resolved.Add(candidate);
+            used.Add(candidate);
+        }
+
+        return resolved;
+    }
+
+    private static (int X, int Y) FindNearestOpenLocationTile(
+        (int X, int Y) start,
+        HashSet<(int X, int Y)> blocked,
+        HashSet<(int X, int Y)> used,
+        int width,
+        int height)
+    {
+        for (var radius = 1; radius < Math.Max(width, height); radius++)
+        {
+            for (var dx = -radius; dx <= radius; dx++)
+            {
+                for (var dy = -radius; dy <= radius; dy++)
+                {
+                    if (Math.Abs(dx) + Math.Abs(dy) != radius)
+                    {
+                        continue;
+                    }
+
+                    var candidate = ClampInside((start.X + dx, start.Y + dy), width, height);
+                    if (!blocked.Contains(candidate) && !used.Contains(candidate))
+                    {
+                        return candidate;
+                    }
+                }
+            }
+        }
+
+        return start;
+    }
+
     private static string NormalizeScenario(string scenarioFamily)
     {
         return string.IsNullOrWhiteSpace(scenarioFamily)
@@ -599,6 +709,10 @@ internal sealed class CampaignScenarioBuilder
     {
         return scenarioFamily.Contains("capture", StringComparison.OrdinalIgnoreCase) ||
                scenarioFamily.Contains("empty-city", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("expansion", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("conquest", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("contact", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("recovery", StringComparison.OrdinalIgnoreCase) ||
                scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase) ||
                scenarioFamily.Contains("pressure", StringComparison.OrdinalIgnoreCase);
     }

@@ -35,6 +35,7 @@ namespace Wism.Client.Test.Controller
             // Assert
             Assert.That(result, Is.EqualTo(ActionState.Succeeded));
             Assert.That(target.City.Clan, Is.EqualTo(player.Clan));
+            Assert.That(target.HasVisitingArmies(), Is.False);
             Assert.That(target.GetAllArmies().Single(), Is.EqualTo(army));
             Assert.That(origin.GetAllArmies(), Is.Empty);
             Assert.That(Game.Current.GameState, Is.EqualTo(GameState.Ready));

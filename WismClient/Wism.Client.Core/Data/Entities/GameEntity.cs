@@ -32,5 +32,7 @@ namespace Wism.Client.Data.Entities
         [DataMember] public int LastArmyId { get; set; }
 
         [DataMember] public ModKitSelectionEntity ModKitSelection { get; set; }
+
+        [DataMember] public StrategicPlanEntity[] StrategicPlans { get; set; }
     }
 }

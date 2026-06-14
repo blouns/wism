@@ -58,7 +58,13 @@ namespace Wism.Client.AI.Tactical
 
                 logger.LogInformation(
                     $"[Rally] Bidding stack at ({stack[0].Tile.X},{stack[0].Tile.Y}) to rally at ({target.Tile.X},{target.Tile.Y}) with utility {utility:0.000}.");
-                bids.Add(new SimpleBid(stack, this, utility));
+                bids.Add(new StrategicBid(
+                    stack,
+                    this,
+                    utility,
+                    "Recover",
+                    targetX: target.Tile.X,
+                    targetY: target.Tile.Y));
             }
 
             return bids;

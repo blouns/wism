@@ -33,7 +33,8 @@ namespace Wism.Client.Data
                 PathingStrategy = SnapshotPathingStrategy(game.PathingStrategy),
                 World = SnapshotWorld(World.Current),
                 LastArmyId = ArmyFactory.LastId,
-                ModKitSelection = game.ModKitSelection
+                ModKitSelection = game.ModKitSelection,
+                StrategicPlans = game.StrategicPlans
             };
 
             return snapshot;

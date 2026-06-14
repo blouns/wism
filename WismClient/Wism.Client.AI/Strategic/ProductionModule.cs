@@ -153,6 +153,12 @@ namespace Wism.Client.AI.Strategic
 
         private City SelectPressureTarget(City productionCity, List<City> pressureTargets)
         {
+            var strategicTarget = SelectStrategicPressureTarget(productionCity, pressureTargets);
+            if (strategicTarget != null)
+            {
+                return strategicTarget;
+            }
+
             return pressureTargets
                 .Where(city => city?.Tile != null)
                 .Select(city => new
@@ -165,6 +171,33 @@ namespace Wism.Client.AI.Strategic
                 .ThenBy(candidate => candidate.Distance)
                 .ThenBy(candidate => candidate.City.ShortName)
                 .Select(candidate => candidate.City)
+                .FirstOrDefault();
+        }
+
+        private City SelectStrategicPressureTarget(City productionCity, List<City> pressureTargets)
+        {
+            var player = Game.Current.GetCurrentPlayer();
+            var plan = ClassicStrategicPlanner.GetPlan(player?.Clan?.ShortName);
+            if (plan?.Objectives == null)
+            {
+                return null;
+            }
+
+            var strategicTargetNames = plan.Objectives
+                .Where(objective => objective != null && objective.Status == "Active")
+                .Where(objective => objective.Kind == "Expand" || objective.Kind == "Siege")
+                .Where(objective => !string.IsNullOrWhiteSpace(objective.TargetCityShortName))
+                .OrderByDescending(objective => objective.Priority)
+                .ThenBy(objective => objective.TargetCityShortName)
+                .Select(objective => objective.TargetCityShortName)
+                .ToList();
+
+            return pressureTargets
+                .Where(city => city?.Tile != null)
+                .Where(city => strategicTargetNames.Contains(city.ShortName))
+                .OrderBy(city => strategicTargetNames.IndexOf(city.ShortName))
+                .ThenBy(city => this.cityTargetEvaluator.GetDistanceToCity(productionCity.Tile, city))
+                .ThenBy(city => city.ShortName)
                 .FirstOrDefault();
         }
 

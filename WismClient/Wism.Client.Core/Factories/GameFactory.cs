@@ -26,6 +26,7 @@ namespace Wism.Client.Factories
             // Game settings
             Game.Current.Random = new Random(settings.Random.Seed);
             Game.Current.ModKitSelection = settings.ModKitSelection;
+            Game.Current.StrategicPlans = settings.StrategicPlans;
             Game.Current.WarStrategy = GetWarStrategy(settings.WarStrategy);
             Game.Current.TraversalStrategy = GetTraversalStrategy(settings.TraversalStrategies);
             Game.Current.MovementCoordinator = GetMovementCoordinator(settings.MovementStrategies);
@@ -51,6 +52,7 @@ namespace Wism.Client.Factories
             // Game settings
             Game.Current.Random = LoadRandom(snapshot.Random);
             Game.Current.ModKitSelection = snapshot.ModKitSelection;
+            Game.Current.StrategicPlans = snapshot.StrategicPlans;
             Game.Current.WarStrategy = GetWarStrategy(snapshot.WarStrategy);
             Game.Current.TraversalStrategy = GetTraversalStrategy(snapshot.TraversalStrategies);
             Game.Current.MovementCoordinator = GetMovementCoordinator(snapshot.MovementStrategies);

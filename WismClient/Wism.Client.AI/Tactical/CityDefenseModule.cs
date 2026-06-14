@@ -85,7 +85,14 @@ namespace Wism.Client.AI.Tactical
                     defendersNeeded -= defenseArmies.Count;
                     logger.LogInformation(
                         $"[Defense] Bidding {defenseArmies.Count} army/armies at ({stack[0].Tile.X},{stack[0].Tile.Y}) to defend threatened city {city.ShortName}.");
-                    bids.Add(new SimpleBid(defenseArmies, this, ThreatenedCityDefenseUtility));
+                    bids.Add(new StrategicBid(
+                        defenseArmies,
+                        this,
+                        ThreatenedCityDefenseUtility,
+                        "Defend",
+                        city.ShortName,
+                        targetX: city.X,
+                        targetY: city.Y));
 
                     if (defendersNeeded <= 0)
                     {

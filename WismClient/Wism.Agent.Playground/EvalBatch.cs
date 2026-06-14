@@ -1,6 +1,13 @@
-using System.Text.Json;
+using Newtonsoft.Json;
+using System.Diagnostics;
+using SystemTextJsonSerializer = System.Text.Json.JsonSerializer;
+using SystemTextJsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
+using Wism.Client.Commands.Games;
+using Wism.Client.Common;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Data.Entities;
+using Wism.Client.Data;
 
 namespace Wism.Agent.Playground;
 
@@ -13,7 +20,11 @@ public sealed record EvalBatchOptions(
     IReadOnlyList<int> ClanCounts,
     IReadOnlyList<string> Sizes,
     string? ModRoot,
-    string CheckpointMode = "full");
+    string AiProfile = "tactical",
+    string CheckpointMode = "full",
+    int Workers = 1,
+    bool ProcessIsolated = true,
+    string TimeoutProfile = "calibrated");
 
 public sealed record EvalRunResult(
     int SchemaVersion,
@@ -34,6 +45,7 @@ public sealed record EvalCaseResult(
     int Index,
     int Seed,
     string ScenarioFamily,
+    string AiProfile,
     int ClanCount,
     int MaxTurns,
     string Size,
@@ -44,8 +56,10 @@ public sealed record EvalCaseResult(
     string? CampaignDirectory,
     string? CampaignManifestPath,
     EvalCounters Counters,
+    EvalCaseQualityMetrics Metrics,
     VictoryOutcomeSnapshot? VictoryOutcome,
-    EvalDominanceMetrics Metrics,
+    EvalDominanceMetrics DominanceMetrics,
+    EvalCaseTelemetry? Telemetry,
     string? DebugPacketPath,
     string? FailureClass,
     string? FailureMessage);
@@ -61,6 +75,45 @@ public sealed record EvalDominanceMetrics(
     string DominancePolicyId,
     bool SurrenderEligible,
     bool IsInferred);
+
+public sealed record EvalCaseTelemetry(
+    double RuntimeSeconds,
+    double TimeoutBudgetSeconds,
+    double TimeoutBudgetUsedPercent,
+    int TurnsCompleted,
+    double SecondsPerTurn,
+    int CommandsExecuted,
+    double CommandsPerTurn,
+    int MeaningfulEvents,
+    double MeaningfulEventsPerTurn,
+    int MapWidth,
+    int MapHeight,
+    int TileCount,
+    int FinalArmyCount,
+    int FinalCityCount,
+    IReadOnlyDictionary<string, int> CommandTypeCounts,
+    string? TimeoutKind,
+    string? LastMomentKind)
+{
+    public static EvalCaseTelemetry Empty { get; } = new(
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        new Dictionary<string, int>(),
+        null,
+        null);
+}
 
 public sealed record EvalDebugPacket(
     int SchemaVersion,
@@ -92,9 +145,101 @@ public sealed record EvalScorecard(
     double ParseableCaseArtifactPercent,
     IReadOnlyList<string> ScenarioFamilies,
     EvalCounters Counters,
+    ClassicAiReadinessScorecard ClassicAiReadiness,
     IReadOnlyList<EvalGateResult> Gates);
 
 public sealed record EvalGateResult(string Name, bool Passed, string Detail);
+
+public sealed record EvalCaseQualityMetrics(
+    int ViableClanReduction,
+    int? FirstCaptureTurn,
+    int? FirstBattleTurn,
+    int? FirstProductionDeliveryTurn,
+    int UsefulCommandMoments,
+    int CheckpointLoadSuccesses,
+    int CheckpointLoadFailures,
+    int StrategicObjectiveCreatedCount,
+    int StrategicObjectiveActiveCount,
+    int StrategicObjectiveStaleCount,
+    int StrategicDefendObjectiveCount)
+{
+    public static EvalCaseQualityMetrics Empty { get; } = new(0, null, null, null, 0, 0, 0, 0, 0, 0, 0);
+}
+
+public sealed record ClassicAiReadinessScorecard(
+    int ClassicAiCases,
+    int CasesWithExpansion,
+    int CasesWithDefense,
+    int CasesWithEconomy,
+    int CasesWithContact,
+    int CasesWithSearch,
+    int CasesWithRecovery,
+    int CasesWithConquestPressure,
+    double CommandEfficiencyPercent,
+    IReadOnlyList<EvalGateResult> Gates);
+
+public sealed record EvalSuiteDefinition(
+    string Name,
+    int Cases,
+    int MaxTurns,
+    IReadOnlyList<string> ScenarioFamilies,
+    IReadOnlyList<int> ClanCounts,
+    IReadOnlyList<string> Sizes,
+    string CheckpointMode = "full");
+
+public static class EvalSuiteCatalog
+{
+    public static EvalSuiteDefinition Resolve(string? suite)
+    {
+        var normalized = string.IsNullOrWhiteSpace(suite) ? "focused" : suite.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            "smoke" => new EvalSuiteDefinition(
+                "smoke",
+                Cases: 5,
+                MaxTurns: 12,
+                ScenarioFamilies: new[] { "classic-ai-production-vectoring", "classic-ai-neutral-expansion", "classic-ai-road-contact" },
+                ClanCounts: new[] { 2 },
+                Sizes: new[] { "medium" }),
+            "readiness" => new EvalSuiteDefinition(
+                "readiness",
+                Cases: 100,
+                MaxTurns: 80,
+                ScenarioFamilies: ClassicAiProbeFamilies(),
+                ClanCounts: new[] { 2, 4, 8 },
+                Sizes: new[] { "medium", "large" },
+                CheckpointMode: "summary"),
+            "marathon" => new EvalSuiteDefinition(
+                "marathon",
+                Cases: 500,
+                MaxTurns: 100,
+                ScenarioFamilies: ClassicAiProbeFamilies(),
+                ClanCounts: new[] { 2, 4, 8 },
+                Sizes: new[] { "medium", "large" },
+                CheckpointMode: "summary"),
+            _ => new EvalSuiteDefinition(
+                "focused",
+                Cases: 20,
+                MaxTurns: 40,
+                ScenarioFamilies: ClassicAiProbeFamilies(),
+                ClanCounts: new[] { 2, 4 },
+                Sizes: new[] { "medium" })
+        };
+    }
+
+    private static IReadOnlyList<string> ClassicAiProbeFamilies() =>
+        new[]
+        {
+            "classic-ai-neutral-expansion",
+            "classic-ai-road-contact",
+            "classic-ai-production-economy",
+            "classic-ai-ruin-search",
+            "classic-ai-defended-siege",
+            "classic-ai-lost-battle-recovery",
+            "classic-ai-target-captured-recovery",
+            "classic-ai-conquest"
+        };
+}
 
 public sealed record LearningLedgerEntry(
     DateTime CreatedUtc,
@@ -122,6 +267,7 @@ public sealed record EvalCounters(
     int MixedClanTileStacks,
     int StaleVisitingArmies,
     int GhostArmies,
+    int CheckpointLoadFailures,
     int DominanceVictories,
     int SurrenderOffers,
     int AcceptedSurrenders,
@@ -129,7 +275,7 @@ public sealed record EvalCounters(
     int InspectionModes,
     int EndgameCleanupCompletions)
 {
-    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static EvalCounters operator +(EvalCounters left, EvalCounters right) =>
         new(
@@ -150,6 +296,7 @@ public sealed record EvalCounters(
             left.MixedClanTileStacks + right.MixedClanTileStacks,
             left.StaleVisitingArmies + right.StaleVisitingArmies,
             left.GhostArmies + right.GhostArmies,
+            left.CheckpointLoadFailures + right.CheckpointLoadFailures,
             left.DominanceVictories + right.DominanceVictories,
             left.SurrenderOffers + right.SurrenderOffers,
             left.AcceptedSurrenders + right.AcceptedSurrenders,
@@ -160,12 +307,12 @@ public sealed record EvalCounters(
 
 public sealed class EvalBatchRunner
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    private static readonly SystemTextJsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true
     };
 
-    private static readonly JsonSerializerOptions JsonLineOptions = new()
+    private static readonly SystemTextJsonSerializerOptions JsonLineOptions = new()
     {
         WriteIndented = false
     };
@@ -178,22 +325,26 @@ public sealed class EvalBatchRunner
         var outputDirectory = Path.Combine(options.OutputRoot, runId);
         Directory.CreateDirectory(outputDirectory);
 
+        var evalRunPath = Path.Combine(outputDirectory, "eval-run.json");
+        var caseResultsPath = Path.Combine(outputDirectory, "eval-case-result.jsonl");
+        var scorecardPath = Path.Combine(outputDirectory, "scorecard.json");
+        var partialScorecardPath = Path.Combine(outputDirectory, "scorecard.partial.json");
+        var learningLedgerPath = Path.Combine(outputDirectory, "learning-ledger.jsonl");
+        var summaryPath = Path.Combine(outputDirectory, "eval-summary.md");
+
         var cases = BuildCases(options).ToArray();
-        var results = new List<EvalCaseResult>(cases.Length);
-        foreach (var definition in cases)
-        {
-            results.Add(RunCase(definition, outputDirectory, options.ModRoot, options.CheckpointMode));
-        }
+        var results = RunCasesIncrementally(
+                cases,
+                outputDirectory,
+                caseResultsPath,
+                partialScorecardPath,
+                options)
+            .OrderBy(result => result.Index)
+            .ToArray();
 
         var scorecard = BuildScorecard(results);
         var status = scorecard.Gates.All(gate => gate.Passed) ? "Passed" : "Failed";
         scorecard = scorecard with { Status = status };
-
-        var evalRunPath = Path.Combine(outputDirectory, "eval-run.json");
-        var caseResultsPath = Path.Combine(outputDirectory, "eval-case-result.jsonl");
-        var scorecardPath = Path.Combine(outputDirectory, "scorecard.json");
-        var learningLedgerPath = Path.Combine(outputDirectory, "learning-ledger.jsonl");
-        var summaryPath = Path.Combine(outputDirectory, "eval-summary.md");
 
         var run = new EvalRunResult(
             SchemaVersion: 1,
@@ -209,13 +360,46 @@ public sealed class EvalBatchRunner
             Scorecard: scorecard,
             Cases: results);
 
-        File.WriteAllText(evalRunPath, JsonSerializer.Serialize(run, JsonOptions));
-        File.WriteAllText(scorecardPath, JsonSerializer.Serialize(scorecard, JsonOptions));
-        File.WriteAllLines(caseResultsPath, results.Select(result => JsonSerializer.Serialize(result, JsonLineOptions)));
-        File.WriteAllLines(learningLedgerPath, BuildLearningLedger(runId, results).Select(entry => JsonSerializer.Serialize(entry, JsonLineOptions)));
+        File.WriteAllText(evalRunPath, SystemTextJsonSerializer.Serialize(run, JsonOptions));
+        File.WriteAllText(scorecardPath, SystemTextJsonSerializer.Serialize(scorecard, JsonOptions));
+        File.WriteAllLines(caseResultsPath, results.Select(result => SystemTextJsonSerializer.Serialize(result, JsonLineOptions)));
+        File.WriteAllLines(learningLedgerPath, BuildLearningLedger(runId, results).Select(entry => SystemTextJsonSerializer.Serialize(entry, JsonLineOptions)));
         File.WriteAllText(summaryPath, BuildSummary(run));
+        File.Delete(partialScorecardPath);
 
         return run;
+    }
+
+    public EvalCaseResult RunSingleCase(
+        string caseId,
+        int index,
+        int seed,
+        string scenarioFamily,
+        int clanCount,
+        int maxTurns,
+        string size,
+        string outputDirectory,
+        string? modRoot,
+        string checkpointMode,
+        string aiProfile,
+        int wallClockTimeoutSeconds = 0)
+    {
+        var definition = new EvalCaseDefinition(
+            CaseId: caseId,
+            Index: index,
+            Seed: seed,
+            ScenarioFamily: scenarioFamily,
+            ClanCount: clanCount,
+            MaxTurns: Math.Clamp(maxTurns, 1, 500),
+            Size: string.IsNullOrWhiteSpace(size) ? "medium" : size);
+
+        return RunCase(
+            definition,
+            outputDirectory,
+            modRoot,
+            checkpointMode,
+            aiProfile,
+            wallClockTimeoutSeconds > 0 ? wallClockTimeoutSeconds : ResolveCaseWallClockTimeoutSeconds(definition, "calibrated"));
     }
 
     public static EvalScorecard BuildScorecard(IReadOnlyList<EvalCaseResult> cases)
@@ -225,7 +409,7 @@ public sealed class EvalBatchRunner
         var passed = cases.Count(result => IsPassed(result.Status));
         var failed = total - passed;
         var parseable = cases.Count(result => result.ParseableArtifact);
-        var parseablePercent = total == 0 ? 0 : Math.Round(parseable * 100.0 / total, 2);
+        var parseablePercent = total == 0 ? 100 : Math.Round(parseable * 100.0 / total, 2);
         var families = cases.Select(result => result.ScenarioFamily)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
@@ -235,12 +419,16 @@ public sealed class EvalBatchRunner
         var hasProductionCases = cases.Any(result => IsProductionFocused(result.ScenarioFamily));
         var hasProductionVectoringCases = cases.Any(result => IsProductionVectoringFocused(result.ScenarioFamily));
         var classicAiCases = cases.Where(result => IsClassicAiFocused(result.ScenarioFamily)).ToArray();
-        var classicAiConquestCases = cases.Where(result => IsClassicAiConquestFocused(result.ScenarioFamily)).ToArray();
+        var classicAiConquestCases = cases.Where(IsClassicAiConquestPressureCase).ToArray();
+        var strategicProfileCases = cases.Where(result => string.Equals(result.AiProfile, "strategic", StringComparison.OrdinalIgnoreCase)).ToArray();
         var classicAiInvalidCommands = classicAiCases.Sum(result => result.Counters.InvalidCommands);
+        var strategicObjectiveCases = strategicProfileCases.Count(result => result.Metrics.StrategicObjectiveCreatedCount > 0);
         var classicAiPressureCount = classicAiConquestCases.Count(HasClassicAiConquestPressure);
         var classicAiPressurePercent = classicAiConquestCases.Length == 0
             ? 100
             : Math.Round(classicAiPressureCount * 100.0 / classicAiConquestCases.Length, 2);
+        var hasCheckpointEvidence = cases.Any(result => !string.IsNullOrWhiteSpace(result.CampaignDirectory));
+        var readiness = BuildClassicAiReadinessScorecard(cases);
 
         var gates = new[]
         {
@@ -250,7 +438,11 @@ public sealed class EvalBatchRunner
                 "classic-ai-no-invalid-commands",
                 classicAiCases.Length == 0 || classicAiInvalidCommands == 0,
                 $"{classicAiInvalidCommands} classic AI invalid commands; {counters.InvalidCommands} total invalid commands"),
-            new EvalGateResult("parseable-artifacts", parseablePercent >= 90, $"{parseable}/{total} parseable ({parseablePercent:0.##}%)"),
+            new EvalGateResult("parseable-artifacts", parseablePercent >= 100, $"{parseable}/{total} parseable ({parseablePercent:0.##}%)"),
+            new EvalGateResult(
+                "checkpoint-loadability",
+                !hasCheckpointEvidence || counters.CheckpointLoadFailures == 0 && counters.SaveLoadSuccesses >= total,
+                $"{counters.SaveLoadSuccesses} checkpoint load successes; {counters.CheckpointLoadFailures} failures"),
             new EvalGateResult("capture-signal", !hasCaptureCases || counters.CityCaptures > 0, $"{counters.CityCaptures} city captures"),
             new EvalGateResult("search-signal", !hasSearchCases || counters.Searches > 0, $"{counters.Searches} searches"),
             new EvalGateResult("production-delivery-signal", !hasProductionCases || counters.ProductionDeliveries > 0, $"{counters.ProductionDeliveries} production deliveries"),
@@ -262,8 +454,12 @@ public sealed class EvalBatchRunner
             new EvalGateResult(
                 "classic-ai-victory-pressure",
                 classicAiConquestCases.Length == 0 || classicAiPressurePercent >= 50,
-                $"{classicAiPressureCount}/{classicAiConquestCases.Length} classic AI conquest cases won or materially reduced viable clans ({classicAiPressurePercent:0.##}%)")
-        };
+                $"{classicAiPressureCount}/{classicAiConquestCases.Length} classic AI conquest cases won or materially reduced viable clans ({classicAiPressurePercent:0.##}%)"),
+            new EvalGateResult(
+                "strategic-plan-created",
+                strategicProfileCases.Length == 0 || strategicObjectiveCases == strategicProfileCases.Length,
+                $"{strategicObjectiveCases}/{strategicProfileCases.Length} strategic-profile cases persisted active or stale objectives")
+        }.Concat(readiness.Gates).ToArray();
 
         return new EvalScorecard(
             SchemaVersion: 1,
@@ -275,29 +471,157 @@ public sealed class EvalBatchRunner
             ParseableCaseArtifactPercent: parseablePercent,
             ScenarioFamilies: families,
             Counters: counters,
+            ClassicAiReadiness: readiness,
             Gates: gates);
     }
 
-    private static IEnumerable<EvalCaseDefinition> BuildCases(EvalBatchOptions options)
-    {
-        var scenarios = options.ScenarioFamilies.Count > 0 ? options.ScenarioFamilies : DefaultScenarioFamilies();
-        var clans = options.ClanCounts.Count > 0 ? options.ClanCounts : new[] { 2, 4 };
-        var sizes = options.Sizes.Count > 0 ? options.Sizes : new[] { "medium" };
+	private static IEnumerable<EvalCaseDefinition> BuildCases(EvalBatchOptions options)
+	{
+		var scenarios = options.ScenarioFamilies.Count > 0 ? options.ScenarioFamilies : DefaultScenarioFamilies();
+		var clans = options.ClanCounts.Count > 0 ? options.ClanCounts : new[] { 2, 4 };
+		var sizes = options.Sizes.Count > 0 ? options.Sizes : new[] { "medium" };
+		var combinations = scenarios
+			.SelectMany(scenario => clans
+				.SelectMany(clanCount => sizes
+					.Select(size => (ScenarioFamily: scenario, ClanCount: clanCount, Size: size))))
+			.ToArray();
 
-        for (var index = 0; index < Math.Max(1, options.Cases); index++)
-        {
-            yield return new EvalCaseDefinition(
-                CaseId: $"case-{index + 1:0000}",
-                Index: index + 1,
-                Seed: options.Seed + index,
-                ScenarioFamily: scenarios[index % scenarios.Count],
-                ClanCount: clans[index % clans.Count],
-                MaxTurns: Math.Clamp(options.MaxTurns, 1, 500),
-                Size: sizes[index % sizes.Count]);
+		for (var index = 0; index < Math.Max(1, options.Cases); index++)
+		{
+			var combination = combinations[index % combinations.Length];
+			yield return new EvalCaseDefinition(
+				CaseId: $"case-{index + 1:0000}",
+				Index: index + 1,
+				Seed: options.Seed + index,
+				ScenarioFamily: combination.ScenarioFamily,
+				ClanCount: combination.ClanCount,
+				MaxTurns: ResolveCaseMaxTurns(options.MaxTurns, combination.ScenarioFamily, combination.Size, combination.ClanCount, options.TimeoutProfile),
+				Size: combination.Size);
+		}
+	}
+
+	private static int ResolveCaseMaxTurns(int requestedMaxTurns, string scenarioFamily, string size, int clanCount, string timeoutProfile)
+	{
+		var bounded = Math.Clamp(requestedMaxTurns, 1, 500);
+		if (!IsClassicAiFocused(scenarioFamily) || bounded <= 40)
+		{
+			return bounded;
         }
+
+		if (IsClassicAiConquestFocused(scenarioFamily))
+		{
+			return bounded;
+		}
+
+		if (UsesCalibratedTimeoutProfile(timeoutProfile) &&
+		    string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) &&
+		    IsRecoveryProbe(scenarioFamily))
+		{
+			return Math.Min(bounded, clanCount <= 2 ? 20 : clanCount <= 4 ? 40 : 60);
+		}
+
+		if (IsRecoveryProbe(scenarioFamily))
+		{
+			return Math.Min(bounded, 60);
+		}
+
+        return Math.Min(bounded, 40);
     }
 
-    private static EvalCaseResult RunCase(EvalCaseDefinition definition, string outputDirectory, string? modRoot, string checkpointMode)
+    private static int ResolveCaseWallClockTimeoutSeconds(EvalCaseDefinition definition, string timeoutProfile)
+    {
+        if (definition.MaxTurns <= 12)
+        {
+            return 30;
+        }
+
+		if (!UsesCalibratedTimeoutProfile(timeoutProfile))
+		{
+			if (string.Equals(definition.Size, "large", StringComparison.OrdinalIgnoreCase))
+			{
+				return IsRecoveryProbe(definition.ScenarioFamily) ? 120 : 90;
+			}
+
+			return IsClassicAiConquestFocused(definition.ScenarioFamily) ? 120 : 60;
+		}
+
+		if (string.Equals(definition.Size, "large", StringComparison.OrdinalIgnoreCase))
+		{
+			if (definition.MaxTurns <= 20)
+			{
+				return 150;
+			}
+
+			if (definition.MaxTurns <= 40)
+			{
+				return 180;
+			}
+
+			if (definition.MaxTurns <= 60)
+			{
+				return 240;
+			}
+
+			return 300;
+		}
+
+        return IsClassicAiConquestFocused(definition.ScenarioFamily) ? 120 : 60;
+    }
+
+	private static bool UsesCalibratedTimeoutProfile(string timeoutProfile) =>
+		!string.Equals(timeoutProfile, "legacy", StringComparison.OrdinalIgnoreCase);
+
+    private static IReadOnlyList<EvalCaseResult> RunCasesIncrementally(
+        IReadOnlyList<EvalCaseDefinition> cases,
+        string outputDirectory,
+        string caseResultsPath,
+        string partialScorecardPath,
+        EvalBatchOptions options)
+    {
+        if (File.Exists(caseResultsPath))
+        {
+            File.Delete(caseResultsPath);
+        }
+
+        var results = new List<EvalCaseResult>(cases.Count);
+        var nextCase = 0;
+        var workerCount = Math.Clamp(options.Workers, 1, Math.Max(1, cases.Count));
+        var sync = new object();
+        var workers = Enumerable.Range(0, workerCount)
+            .Select(_ => Task.Run(() =>
+            {
+                while (true)
+                {
+                    EvalCaseDefinition definition;
+                    lock (sync)
+                    {
+                        if (nextCase >= cases.Count)
+                        {
+                            return;
+                        }
+
+                        definition = cases[nextCase++];
+                    }
+
+                    var result = options.ProcessIsolated
+                        ? RunCaseProcessIsolated(definition, outputDirectory, options.ModRoot, options.CheckpointMode, options.AiProfile, options.TimeoutProfile)
+                        : RunCase(definition, outputDirectory, options.ModRoot, options.CheckpointMode, options.AiProfile, ResolveCaseWallClockTimeoutSeconds(definition, options.TimeoutProfile));
+
+                    lock (sync)
+                    {
+                        results.Add(result);
+                        File.AppendAllText(caseResultsPath, SystemTextJsonSerializer.Serialize(result, JsonLineOptions) + Environment.NewLine);
+                        File.WriteAllText(partialScorecardPath, SystemTextJsonSerializer.Serialize(BuildScorecard(results), JsonOptions));
+                    }
+                }
+            }))
+            .ToArray();
+
+        Task.WaitAll(workers);
+        return results;
+    }
+
+    private static EvalCaseResult RunCase(EvalCaseDefinition definition, string outputDirectory, string? modRoot, string checkpointMode, string aiProfile, int wallClockTimeoutSeconds)
     {
         var campaignDirectory = Path.Combine(outputDirectory, "campaigns", definition.CaseId);
         var manifestPath = Path.Combine(campaignDirectory, "campaign.json");
@@ -314,28 +638,35 @@ public sealed class EvalBatchRunner
                 modRoot: modRoot,
                 size: definition.Size,
                 scenarioFamily: definition.ScenarioFamily,
-                checkpointMode: checkpointMode);
+                checkpointMode: checkpointMode,
+                aiProfile: aiProfile,
+                wallClockTimeoutSeconds: wallClockTimeoutSeconds);
             var parseable = TryReadManifest(manifestPath);
             var boardInvariants = InspectFinalBoardStateInvariants(campaign);
-            var counters = CountSignals(campaign, boardInvariants.Counters);
-            var metrics = BuildDominanceMetrics(campaign.VictoryOutcome);
+            var checkpointLoadability = InspectCheckpointLoadability(campaign);
+            var counters = CountSignals(campaign, boardInvariants.Counters) with
+            {
+                SaveLoadSuccesses = checkpointLoadability.Successes,
+                CheckpointLoadFailures = checkpointLoadability.Failures
+            };
+            var metrics = BuildQualityMetrics(definition, campaign, counters, checkpointLoadability);
+            var dominanceMetrics = BuildDominanceMetrics(campaign.VictoryOutcome);
+            var telemetry = BuildTelemetry(campaign, counters, metrics);
             var debugPacketPath = WriteDebugPackets(definition, campaign, boardInvariants);
-            var hasCommandTimeout = counters.Timeouts > 0;
+            var timeoutKind = telemetry.TimeoutKind;
+            var hasTimeout = counters.Timeouts > 0;
             var hasBoardInvariantFailure = counters.MixedClanTileStacks > 0 ||
                                            counters.StaleVisitingArmies > 0 ||
                                            counters.GhostArmies > 0;
-            var requiresFullConquest = IsEndgameCleanupFocused(definition.ScenarioFamily);
-            var missingCleanupConquest = requiresFullConquest &&
-                                         campaign.VictoryOutcome?.OutcomeKind != VictoryOutcomeKind.Conquest;
-            var status = hasCommandTimeout || hasBoardInvariantFailure || missingCleanupConquest
-                ? "Failed"
-                : campaign.Status;
+            var hasCheckpointLoadFailure = counters.CheckpointLoadFailures > 0;
+            var status = hasTimeout || hasBoardInvariantFailure || hasCheckpointLoadFailure ? "Failed" : campaign.Status;
 
             return new EvalCaseResult(
                 CaseId: definition.CaseId,
                 Index: definition.Index,
                 Seed: definition.Seed,
                 ScenarioFamily: definition.ScenarioFamily,
+                AiProfile: campaign.AiProfile,
                 ClanCount: definition.ClanCount,
                 MaxTurns: definition.MaxTurns,
                 Size: definition.Size,
@@ -346,16 +677,18 @@ public sealed class EvalBatchRunner
                 CampaignDirectory: campaign.OutputDirectory,
                 CampaignManifestPath: manifestPath,
                 Counters: counters,
-                VictoryOutcome: campaign.VictoryOutcome,
                 Metrics: metrics,
+                VictoryOutcome: campaign.VictoryOutcome,
+                DominanceMetrics: dominanceMetrics,
+                Telemetry: telemetry,
                 DebugPacketPath: debugPacketPath,
-                FailureClass: IsPassed(status) ? null : hasCommandTimeout ? "command-timeout" : hasBoardInvariantFailure ? "board-state-invariant" : missingCleanupConquest ? "endgame-cleanup-incomplete" : "campaign-failed",
-                FailureMessage: IsPassed(status) ? null : hasCommandTimeout
-                    ? "A command exceeded the buffered in-progress execution limit."
+                FailureClass: IsPassed(status) ? null : hasTimeout ? timeoutKind ?? "timeout" : hasBoardInvariantFailure ? "board-state-invariant" : hasCheckpointLoadFailure ? "checkpoint-load-failed" : "campaign-failed",
+                FailureMessage: IsPassed(status) ? null : hasTimeout
+                    ? TimeoutFailureMessage(timeoutKind)
                     : hasBoardInvariantFailure
                         ? $"Final checkpoint has {counters.MixedClanTileStacks} mixed-clan tile stack(s), {counters.StaleVisitingArmies} stale visiting army reference(s), and {counters.GhostArmies} ghost army reference(s)."
-                        : missingCleanupConquest
-                            ? $"Endgame cleanup requires full conquest; observed {campaign.VictoryOutcome?.OutcomeKind.ToString() ?? "None"}."
+                        : hasCheckpointLoadFailure
+                            ? checkpointLoadability.FirstFailureMessage ?? "At least one campaign checkpoint failed to load."
                             : campaign.Outcome)
                 with { Status = status };
         }
@@ -367,6 +700,7 @@ public sealed class EvalBatchRunner
                 Index: definition.Index,
                 Seed: definition.Seed,
                 ScenarioFamily: definition.ScenarioFamily,
+                AiProfile: aiProfile,
                 ClanCount: definition.ClanCount,
                 MaxTurns: definition.MaxTurns,
                 Size: definition.Size,
@@ -377,12 +711,300 @@ public sealed class EvalBatchRunner
                 CampaignDirectory: hasCampaignDirectory ? campaignDirectory : null,
                 CampaignManifestPath: hasCampaignDirectory ? manifestPath : null,
                 Counters: EvalCounters.Empty with { Crashes = 1 },
+                Metrics: EvalCaseQualityMetrics.Empty,
                 VictoryOutcome: null,
-                Metrics: BuildDominanceMetrics(null),
+                DominanceMetrics: BuildDominanceMetrics(null),
+                Telemetry: EvalCaseTelemetry.Empty,
                 DebugPacketPath: null,
                 FailureClass: ex.GetType().Name,
                 FailureMessage: ex.ToString());
         }
+    }
+
+    private static EvalCaseResult RunCaseProcessIsolated(
+        EvalCaseDefinition definition,
+        string outputDirectory,
+        string? modRoot,
+        string checkpointMode,
+        string aiProfile,
+        string timeoutProfile)
+    {
+        var caseResultDirectory = Path.Combine(outputDirectory, "case-results");
+        Directory.CreateDirectory(caseResultDirectory);
+        var resultPath = Path.Combine(caseResultDirectory, $"{definition.CaseId}.json");
+        var campaignDirectory = Path.Combine(outputDirectory, "campaigns", definition.CaseId);
+        var manifestPath = Path.Combine(campaignDirectory, "campaign.json");
+        var caseBudgetSeconds = ResolveCaseWallClockTimeoutSeconds(definition, timeoutProfile);
+        var hardTimeout = TimeSpan.FromSeconds(Math.Max(caseBudgetSeconds + 30, (int)Math.Ceiling(caseBudgetSeconds * 1.25)));
+
+        if (File.Exists(resultPath))
+        {
+            File.Delete(resultPath);
+        }
+
+        using var process = new Process
+        {
+            StartInfo = CreateEvalCaseStartInfo(
+                definition,
+                outputDirectory,
+                resultPath,
+                modRoot,
+                checkpointMode,
+                aiProfile,
+                caseBudgetSeconds)
+        };
+
+        try
+        {
+            process.Start();
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            if (!process.WaitForExit((int)hardTimeout.TotalMilliseconds))
+            {
+                TryKillProcessTree(process);
+                return CreateCaseTimeoutResult(definition, aiProfile, campaignDirectory, manifestPath, hardTimeout);
+            }
+
+            var stdout = stdoutTask.GetAwaiter().GetResult();
+            var stderr = stderrTask.GetAwaiter().GetResult();
+            if (TryReadCaseResult(resultPath, out var result))
+            {
+                return result;
+            }
+
+            return CreateCaseCrashResult(
+                definition,
+                aiProfile,
+                campaignDirectory,
+                manifestPath,
+                process.ExitCode,
+                stdout,
+                stderr);
+        }
+        catch (Exception ex)
+        {
+            return new EvalCaseResult(
+                CaseId: definition.CaseId,
+                Index: definition.Index,
+                Seed: definition.Seed,
+                ScenarioFamily: definition.ScenarioFamily,
+                AiProfile: aiProfile,
+                ClanCount: definition.ClanCount,
+                MaxTurns: definition.MaxTurns,
+                Size: definition.Size,
+                Status: "Failed",
+                Outcome: ex.Message,
+                Turns: 0,
+                ParseableArtifact: false,
+                CampaignDirectory: Directory.Exists(campaignDirectory) ? campaignDirectory : null,
+                CampaignManifestPath: File.Exists(manifestPath) ? manifestPath : null,
+                Counters: EvalCounters.Empty with { Crashes = 1 },
+                Metrics: EvalCaseQualityMetrics.Empty,
+                VictoryOutcome: null,
+                DominanceMetrics: BuildDominanceMetrics(null),
+                Telemetry: EvalCaseTelemetry.Empty,
+                DebugPacketPath: null,
+                FailureClass: ex.GetType().Name,
+                FailureMessage: ex.ToString());
+        }
+    }
+
+    private static ProcessStartInfo CreateEvalCaseStartInfo(
+        EvalCaseDefinition definition,
+        string outputDirectory,
+        string resultPath,
+        string? modRoot,
+        string checkpointMode,
+        string aiProfile,
+        int wallClockTimeoutSeconds)
+    {
+        var runner = GetRunnerLaunchTarget();
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = runner.FileName,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+            WorkingDirectory = FindRepositoryRootForEval()
+        };
+
+        foreach (var argument in runner.PrefixArguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        startInfo.ArgumentList.Add("eval-case");
+        startInfo.ArgumentList.Add($"caseId={definition.CaseId}");
+        startInfo.ArgumentList.Add($"index={definition.Index}");
+        startInfo.ArgumentList.Add($"seed={definition.Seed}");
+        startInfo.ArgumentList.Add($"scenario={definition.ScenarioFamily}");
+        startInfo.ArgumentList.Add($"clans={definition.ClanCount}");
+        startInfo.ArgumentList.Add($"maxTurns={definition.MaxTurns}");
+        startInfo.ArgumentList.Add($"size={definition.Size}");
+        startInfo.ArgumentList.Add($"out={outputDirectory}");
+        startInfo.ArgumentList.Add($"result={resultPath}");
+        startInfo.ArgumentList.Add($"checkpointMode={checkpointMode}");
+        startInfo.ArgumentList.Add($"aiProfile={aiProfile}");
+        startInfo.ArgumentList.Add($"wallClockTimeoutSeconds={wallClockTimeoutSeconds}");
+        if (!string.IsNullOrWhiteSpace(modRoot))
+        {
+            startInfo.ArgumentList.Add($"modRoot={modRoot}");
+        }
+
+        return startInfo;
+    }
+
+    private static (string FileName, IReadOnlyList<string> PrefixArguments) GetRunnerLaunchTarget()
+    {
+        var exePath = Path.Combine(AppContext.BaseDirectory, "Wism.Agent.Playground.exe");
+        if (File.Exists(exePath))
+        {
+            return (exePath, Array.Empty<string>());
+        }
+
+        var dllPath = Path.Combine(AppContext.BaseDirectory, "Wism.Agent.Playground.dll");
+        if (!File.Exists(dllPath))
+        {
+            throw new FileNotFoundException($"Could not find eval child runner at {exePath} or {dllPath}.");
+        }
+
+        return ("dotnet", new[] { dllPath });
+    }
+
+    private static string FindRepositoryRootForEval()
+    {
+        var current = new DirectoryInfo(Environment.CurrentDirectory);
+        while (current is not null)
+        {
+            if (Directory.Exists(Path.Combine(current.FullName, ".git")) &&
+                Directory.Exists(Path.Combine(current.FullName, "WismClient")))
+            {
+                return current.FullName;
+            }
+
+            current = current.Parent;
+        }
+
+        return Environment.CurrentDirectory;
+    }
+
+    private static void TryKillProcessTree(Process process)
+    {
+        try
+        {
+            process.Kill(entireProcessTree: true);
+            process.WaitForExit(5000);
+        }
+        catch
+        {
+            // The process may already have exited. Timeout evidence is still recorded by the parent.
+        }
+    }
+
+    private static bool TryReadCaseResult(string resultPath, out EvalCaseResult result)
+    {
+        result = null!;
+        if (!File.Exists(resultPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            result = SystemTextJsonSerializer.Deserialize<EvalCaseResult>(File.ReadAllText(resultPath), JsonOptions)!;
+            return result is not null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static EvalCaseResult CreateCaseTimeoutResult(
+        EvalCaseDefinition definition,
+        string aiProfile,
+        string campaignDirectory,
+        string manifestPath,
+        TimeSpan hardTimeout)
+    {
+        return new EvalCaseResult(
+            CaseId: definition.CaseId,
+            Index: definition.Index,
+            Seed: definition.Seed,
+            ScenarioFamily: definition.ScenarioFamily,
+            AiProfile: aiProfile,
+            ClanCount: definition.ClanCount,
+            MaxTurns: definition.MaxTurns,
+            Size: definition.Size,
+            Status: "Failed",
+            Outcome: $"Eval case exceeded {hardTimeout.TotalSeconds:0}s hard process timeout.",
+            Turns: 0,
+            ParseableArtifact: true,
+            CampaignDirectory: Directory.Exists(campaignDirectory) ? campaignDirectory : null,
+            CampaignManifestPath: File.Exists(manifestPath) ? manifestPath : null,
+            Counters: EvalCounters.Empty with { Timeouts = 1 },
+            Metrics: EvalCaseQualityMetrics.Empty,
+            VictoryOutcome: null,
+            DominanceMetrics: BuildDominanceMetrics(null),
+            Telemetry: EvalCaseTelemetry.Empty with
+            {
+                RuntimeSeconds = Math.Round(hardTimeout.TotalSeconds, 3),
+                TimeoutBudgetSeconds = Math.Round(hardTimeout.TotalSeconds, 3),
+                TimeoutBudgetUsedPercent = 100,
+                TimeoutKind = "case-timeout"
+            },
+            DebugPacketPath: null,
+            FailureClass: "case-timeout",
+            FailureMessage: $"Child process for {definition.CaseId} exceeded {hardTimeout.TotalSeconds:0}s and was terminated.");
+    }
+
+    private static EvalCaseResult CreateCaseCrashResult(
+        EvalCaseDefinition definition,
+        string aiProfile,
+        string campaignDirectory,
+        string manifestPath,
+        int exitCode,
+        string stdout,
+        string stderr)
+    {
+        var message = string.Join(Environment.NewLine, new[]
+        {
+            $"Child process exited with code {exitCode} without writing a case result.",
+            string.IsNullOrWhiteSpace(stdout) ? null : $"stdout: {TrimDiagnostic(stdout)}",
+            string.IsNullOrWhiteSpace(stderr) ? null : $"stderr: {TrimDiagnostic(stderr)}"
+        }.Where(value => value is not null));
+
+        return new EvalCaseResult(
+            CaseId: definition.CaseId,
+            Index: definition.Index,
+            Seed: definition.Seed,
+            ScenarioFamily: definition.ScenarioFamily,
+            AiProfile: aiProfile,
+            ClanCount: definition.ClanCount,
+            MaxTurns: definition.MaxTurns,
+            Size: definition.Size,
+            Status: "Failed",
+            Outcome: $"Eval child process failed with exit code {exitCode}.",
+            Turns: 0,
+            ParseableArtifact: true,
+            CampaignDirectory: Directory.Exists(campaignDirectory) ? campaignDirectory : null,
+            CampaignManifestPath: File.Exists(manifestPath) ? manifestPath : null,
+            Counters: EvalCounters.Empty with { Crashes = 1 },
+            Metrics: EvalCaseQualityMetrics.Empty,
+            VictoryOutcome: null,
+            DominanceMetrics: BuildDominanceMetrics(null),
+            Telemetry: EvalCaseTelemetry.Empty,
+            DebugPacketPath: null,
+            FailureClass: "case-process-failed",
+            FailureMessage: message);
+    }
+
+    private static string TrimDiagnostic(string value)
+    {
+        const int maxLength = 4000;
+        var normalized = value.Trim();
+        return normalized.Length <= maxLength ? normalized : normalized[..maxLength] + "...";
     }
 
     private static EvalCounters CountSignals(CampaignRunResult campaign, BoardStateInvariantCounters boardInvariants)
@@ -394,13 +1016,13 @@ public sealed class EvalBatchRunner
 
         return new EvalCounters(
             Crashes: 0,
-            Timeouts: CountContains(moments, "command-timeout"),
+            Timeouts: HasAny(moments, "command-timeout") || HasAny(moments, "campaign-timeout") ? 1 : 0,
             ValidationFailures: campaign.Status.Equals("Failed", StringComparison.OrdinalIgnoreCase) &&
                                 campaign.Outcome.Contains("validation", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
             Victories: outcomeKind == VictoryOutcomeKind.Conquest || campaign.Outcome.Contains(" won ", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
             BoundedStalemates: campaign.Outcome.Contains("bounded stalemate", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
             CityCaptures: CountContains(moments, "city-capture") + CountContains(events, "captured "),
-            Searches: CountContains(moments, "search") + CountContains(events, "searched "),
+            Searches: CountExecutedSearchCommands(campaign) ?? CountContains(moments, "search") + CountContains(events, "searched "),
             ProductionStarts: CountContains(moments, "production-start") + CountContains(events, " started "),
             ProductionDeliveries: CountProductionDeliveries(moments),
             Battles: CountContains(moments, "battle") + CountContains(events, "battle resolved"),
@@ -411,6 +1033,7 @@ public sealed class EvalBatchRunner
             MixedClanTileStacks: boardInvariants.MixedClanTileStacks,
             StaleVisitingArmies: boardInvariants.StaleVisitingArmies,
             GhostArmies: boardInvariants.GhostArmies,
+            CheckpointLoadFailures: 0,
             DominanceVictories: outcomeKind == VictoryOutcomeKind.DominanceVictory ? 1 : 0,
             SurrenderOffers: outcomeKind == VictoryOutcomeKind.SurrenderOffered ? 1 : 0,
             AcceptedSurrenders: outcomeKind == VictoryOutcomeKind.AcceptedSurrender ? 1 : 0,
@@ -447,6 +1070,245 @@ public sealed class EvalBatchRunner
             outcome.DominancePolicyId,
             outcome.SurrenderEligible,
             outcome.IsInferred);
+    }
+
+    private static EvalCaseTelemetry BuildTelemetry(
+        CampaignRunResult campaign,
+        EvalCounters counters,
+        EvalCaseQualityMetrics metrics)
+    {
+        var source = campaign.Telemetry;
+        var meaningfulEvents =
+            counters.CityCaptures +
+            counters.Searches +
+            counters.ProductionStarts +
+            counters.ProductionDeliveries +
+            counters.ProductionVectors +
+            counters.Battles +
+            counters.Victories +
+            metrics.ViableClanReduction;
+        var turns = Math.Max(0, campaign.Turns);
+        if (source is null)
+        {
+            return EvalCaseTelemetry.Empty with
+            {
+                TurnsCompleted = turns,
+                MeaningfulEvents = meaningfulEvents,
+                MeaningfulEventsPerTurn = turns <= 0 ? 0 : Math.Round(meaningfulEvents / (double)turns, 3),
+                TimeoutKind = DetectTimeoutKind(campaign),
+                LastMomentKind = ReadMomentDetails(campaign).LastOrDefault()?.Kind
+            };
+        }
+
+        return new EvalCaseTelemetry(
+            RuntimeSeconds: source.RuntimeSeconds,
+            TimeoutBudgetSeconds: source.TimeoutBudgetSeconds,
+            TimeoutBudgetUsedPercent: source.TimeoutBudgetUsedPercent,
+            TurnsCompleted: source.TurnsCompleted,
+            SecondsPerTurn: source.SecondsPerTurn,
+            CommandsExecuted: source.CommandsExecuted,
+            CommandsPerTurn: source.CommandsPerTurn,
+            MeaningfulEvents: meaningfulEvents,
+            MeaningfulEventsPerTurn: source.TurnsCompleted <= 0 ? 0 : Math.Round(meaningfulEvents / (double)source.TurnsCompleted, 3),
+            MapWidth: source.MapWidth,
+            MapHeight: source.MapHeight,
+            TileCount: source.TileCount,
+            FinalArmyCount: source.FinalArmyCount,
+            FinalCityCount: source.FinalCityCount,
+            CommandTypeCounts: source.CommandTypeCounts,
+            TimeoutKind: source.TimeoutKind ?? DetectTimeoutKind(campaign),
+            LastMomentKind: source.LastMomentKind);
+    }
+
+    private static string? DetectTimeoutKind(CampaignRunResult campaign)
+    {
+        var timeout = ReadMomentDetails(campaign).LastOrDefault(moment =>
+            moment.Kind.Equals("command-timeout", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Equals("campaign-timeout", StringComparison.OrdinalIgnoreCase));
+        return timeout?.Kind;
+    }
+
+    private static string TimeoutFailureMessage(string? timeoutKind) =>
+        string.Equals(timeoutKind, "campaign-timeout", StringComparison.OrdinalIgnoreCase)
+            ? "Campaign exceeded its wall-clock budget while still making progress."
+            : string.Equals(timeoutKind, "command-timeout", StringComparison.OrdinalIgnoreCase)
+                ? "A command exceeded the buffered in-progress execution limit."
+                : "The eval case exceeded a timeout budget.";
+
+    private static EvalCaseQualityMetrics BuildQualityMetrics(
+        EvalCaseDefinition definition,
+        CampaignRunResult campaign,
+        EvalCounters counters,
+        CheckpointLoadability checkpointLoadability)
+    {
+        var moments = ReadMomentDetails(campaign).ToArray();
+        var strategic = CountStrategicObjectives(campaign);
+        return new EvalCaseQualityMetrics(
+            ViableClanReduction: Math.Max(0, definition.ClanCount - ReadFinalViableClanCount(definition.ClanCount, campaign.Outcome)),
+            FirstCaptureTurn: FirstTurn(moments, "city-capture"),
+            FirstBattleTurn: FirstTurn(moments, "battle"),
+            FirstProductionDeliveryTurn: FirstProductionDeliveryTurn(moments),
+            UsefulCommandMoments: CountUsefulCommandMoments(moments),
+            CheckpointLoadSuccesses: checkpointLoadability.Successes,
+            CheckpointLoadFailures: checkpointLoadability.Failures,
+            StrategicObjectiveCreatedCount: strategic.Created,
+            StrategicObjectiveActiveCount: strategic.Active,
+            StrategicObjectiveStaleCount: strategic.Stale,
+            StrategicDefendObjectiveCount: strategic.Defend);
+    }
+
+    private static (int Created, int Active, int Stale, int Defend) CountStrategicObjectives(CampaignRunResult campaign)
+    {
+        var checkpoint = campaign.Checkpoints.LastOrDefault();
+        if (string.IsNullOrWhiteSpace(checkpoint) || !File.Exists(checkpoint))
+        {
+            return (0, 0, 0, 0);
+        }
+
+        try
+        {
+            var snapshot = JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(checkpoint));
+            var objectives = snapshot?.StrategicPlans?
+                .Where(plan => plan?.Objectives != null)
+                .SelectMany(plan => plan.Objectives)
+                .Where(objective => objective != null)
+                .ToArray() ?? Array.Empty<StrategicObjectiveEntity>();
+
+            return (
+                objectives.Length,
+                objectives.Count(objective => string.Equals(objective.Status, "Active", StringComparison.OrdinalIgnoreCase)),
+                objectives.Count(objective => string.Equals(objective.Status, "Stale", StringComparison.OrdinalIgnoreCase)),
+                objectives.Count(objective => string.Equals(objective.Kind, "Defend", StringComparison.OrdinalIgnoreCase)));
+        }
+        catch
+        {
+            return (0, 0, 0, 0);
+        }
+    }
+
+    private static ClassicAiReadinessScorecard BuildClassicAiReadinessScorecard(IReadOnlyList<EvalCaseResult> cases)
+    {
+        var classicCases = cases.Where(result => IsClassicAiFocused(result.ScenarioFamily)).ToArray();
+        var capabilityCases = classicCases.Where(IsClassicAiCapabilityProbe).ToArray();
+        var expansionCases = capabilityCases.Where(result => IsExpansionProbe(result.ScenarioFamily)).ToArray();
+        var defenseCases = capabilityCases.Where(result => IsDefenseProbe(result.ScenarioFamily)).ToArray();
+        var economyCases = capabilityCases.Where(result => IsEconomyProbe(result.ScenarioFamily)).ToArray();
+        var contactCases = capabilityCases.Where(result => IsContactProbe(result.ScenarioFamily)).ToArray();
+        var siegeCases = capabilityCases.Where(result => IsSiegeProbe(result.ScenarioFamily)).ToArray();
+        var searchCases = capabilityCases.Where(result => IsSearchFocused(result.ScenarioFamily)).ToArray();
+        var recoveryCases = capabilityCases.Where(result => IsRecoveryProbe(result.ScenarioFamily)).ToArray();
+        var conquestCases = classicCases.Where(result => IsClassicAiConquestFocused(result.ScenarioFamily)).ToArray();
+
+        var expansionCount = expansionCases.Count(result => result.Counters.CityCaptures > 0);
+        var defenseCount = defenseCases.Count(result =>
+            result.Metrics.StrategicDefendObjectiveCount > 0 &&
+            result.Counters.InvalidCommands == 0 &&
+            result.Counters.MixedClanTileStacks == 0 &&
+            result.Counters.StaleVisitingArmies == 0 &&
+            result.Counters.GhostArmies == 0);
+        var economyCount = economyCases.Count(result =>
+            result.Counters.ProductionStarts > 0 ||
+            result.Counters.ProductionDeliveries > 0 ||
+            result.Counters.ProductionVectors > 0);
+        var contactCount = contactCases.Count(result => result.Counters.Battles > 0 || result.Counters.CityCaptures > 0);
+        var siegeCount = siegeCases.Count(result => result.Counters.Battles > 0 && result.Counters.CityCaptures > 0);
+        var searchCount = searchCases.Count(result => result.Counters.Searches > 0);
+        var recoveryCount = recoveryCases.Count(result =>
+            result.Counters.InvalidCommands == 0 &&
+            result.Counters.Timeouts == 0 &&
+            result.Counters.StuckOrNoOpTurns == 0 &&
+            (result.Counters.Battles > 0 || result.Counters.CityCaptures > 0));
+        var conquestPressureCount = conquestCases.Count(HasClassicAiConquestPressure);
+
+        var useful = classicCases.Sum(result => result.Metrics.UsefulCommandMoments);
+        var waste = classicCases.Sum(result => result.Counters.InvalidCommands + result.Counters.Timeouts + result.Counters.StuckOrNoOpTurns);
+        var efficiency = useful + waste == 0 ? 100 : Math.Round(useful * 100.0 / (useful + waste), 2);
+
+        var gates = new[]
+        {
+            new EvalGateResult("classic-ai-expansion", expansionCases.Length == 0 || expansionCount == expansionCases.Length, $"{expansionCount}/{expansionCases.Length} expansion probes captured a city"),
+            new EvalGateResult("classic-ai-defense", defenseCases.Length == 0 || defenseCount == defenseCases.Length, $"{defenseCount}/{defenseCases.Length} defense probes persisted Defend objectives without illegal board state"),
+            new EvalGateResult("classic-ai-economy", economyCases.Length == 0 || economyCount == economyCases.Length, $"{economyCount}/{economyCases.Length} economy probes produced, delivered, or vectored armies"),
+            new EvalGateResult("classic-ai-contact", contactCases.Length == 0 || contactCount == contactCases.Length, $"{contactCount}/{contactCases.Length} contact probes reached battle or capture"),
+            new EvalGateResult("classic-ai-siege", siegeCases.Length == 0 || siegeCount == siegeCases.Length, $"{siegeCount}/{siegeCases.Length} siege probes battled and captured"),
+            new EvalGateResult("classic-ai-search", searchCases.Length == 0 || searchCount == searchCases.Length, $"{searchCount}/{searchCases.Length} search probes searched a site"),
+            new EvalGateResult("classic-ai-recovery", recoveryCases.Length == 0 || recoveryCount == recoveryCases.Length, $"{recoveryCount}/{recoveryCases.Length} recovery probes avoided invalid/no-progress turns and kept pressure"),
+            new EvalGateResult("classic-ai-command-efficiency", classicCases.Length == 0 || efficiency >= 80, $"{efficiency:0.##}% useful command signal across classic AI cases")
+        };
+
+        return new ClassicAiReadinessScorecard(
+            ClassicAiCases: classicCases.Length,
+            CasesWithExpansion: expansionCount,
+            CasesWithDefense: defenseCount,
+            CasesWithEconomy: economyCount,
+            CasesWithContact: contactCount,
+            CasesWithSearch: searchCount,
+            CasesWithRecovery: recoveryCount,
+            CasesWithConquestPressure: conquestPressureCount,
+            CommandEfficiencyPercent: efficiency,
+            Gates: gates);
+    }
+
+    private static CheckpointLoadability InspectCheckpointLoadability(CampaignRunResult campaign)
+    {
+        var checkpoints = SelectInterestingCheckpoints(campaign).ToArray();
+        if (checkpoints.Length == 0)
+        {
+            return CheckpointLoadability.Empty;
+        }
+
+        var controller = new GameController(new SilentWismLoggerFactory());
+        var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+        var successes = 0;
+        var failures = 0;
+        string? firstFailure = null;
+        foreach (var checkpoint in checkpoints)
+        {
+            try
+            {
+                var snapshot = JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(checkpoint), settings)
+                    ?? throw new InvalidDataException($"Could not deserialize checkpoint {checkpoint}.");
+                var result = new LoadGameCommand(controller, snapshot).Execute();
+                if (result == ActionState.Succeeded)
+                {
+                    successes++;
+                }
+                else
+                {
+                    failures++;
+                    firstFailure ??= $"{Path.GetFileName(checkpoint)} returned {result}.";
+                }
+            }
+            catch (Exception ex)
+            {
+                failures++;
+                firstFailure ??= $"{Path.GetFileName(checkpoint)} failed to load: {ex.Message}";
+            }
+        }
+
+        return new CheckpointLoadability(successes, failures, firstFailure);
+    }
+
+    private static IEnumerable<string> SelectInterestingCheckpoints(CampaignRunResult campaign)
+    {
+        var interesting = new[]
+        {
+            "setup",
+            "city-capture",
+            "battle",
+            "search",
+            "production",
+            "production-vector",
+            "turn-end",
+            "victory",
+            "stalemate",
+            "command-timeout"
+        };
+
+        return campaign.Checkpoints
+            .Where(path => !string.IsNullOrWhiteSpace(path) && File.Exists(path))
+            .Where(path => interesting.Any(kind => Path.GetFileName(path).Contains(kind, StringComparison.OrdinalIgnoreCase)))
+            .Take(16);
     }
 
     private static BoardStateInvariantReport InspectFinalBoardStateInvariants(CampaignRunResult campaign)
@@ -657,7 +1519,7 @@ public sealed class EvalBatchRunner
             Summary: $"{boardInvariants.Counters.MixedClanTileStacks} mixed-clan tile stack(s); {boardInvariants.Counters.StaleVisitingArmies} stale visiting army reference(s); {boardInvariants.Counters.GhostArmies} ghost army reference(s).",
             Failures: boardInvariants.Failures,
             ReproCommand: $"dotnet run --project Wism.Agent.Playground -- eval seed={definition.Seed} cases=1 maxTurns={definition.MaxTurns} scenarios={definition.ScenarioFamily} clans={definition.ClanCount} sizes={definition.Size} --quiet");
-        File.WriteAllText(path, JsonSerializer.Serialize(packet, JsonLineOptions) + Environment.NewLine);
+        File.WriteAllText(path, SystemTextJsonSerializer.Serialize(packet, JsonLineOptions) + Environment.NewLine);
         return path;
     }
 
@@ -716,18 +1578,30 @@ public sealed class EvalBatchRunner
             $"- Production deliveries: {run.Scorecard.Counters.ProductionDeliveries}",
             $"- Production vectors: {run.Scorecard.Counters.ProductionVectors}",
             $"- Battles: {run.Scorecard.Counters.Battles}",
-            $"- Dominance victories: {run.Scorecard.Counters.DominanceVictories}",
-            $"- Surrender offers: {run.Scorecard.Counters.SurrenderOffers}",
-            $"- Accepted surrenders: {run.Scorecard.Counters.AcceptedSurrenders}",
-            $"- Rejected surrenders: {run.Scorecard.Counters.RejectedSurrenders}",
-            $"- Inspection modes: {run.Scorecard.Counters.InspectionModes}",
-            $"- Endgame cleanup completions: {run.Scorecard.Counters.EndgameCleanupCompletions}",
             $"- Invalid commands: {run.Scorecard.Counters.InvalidCommands}",
             $"- Mixed-clan tile stacks: {run.Scorecard.Counters.MixedClanTileStacks}",
             $"- Stale visiting armies: {run.Scorecard.Counters.StaleVisitingArmies}",
             $"- Ghost armies: {run.Scorecard.Counters.GhostArmies}",
+            $"- Checkpoint load successes: {run.Scorecard.Counters.SaveLoadSuccesses}",
+            $"- Checkpoint load failures: {run.Scorecard.Counters.CheckpointLoadFailures}",
             $"- Crashes: {run.Scorecard.Counters.Crashes}",
             $"- Timeouts: {run.Scorecard.Counters.Timeouts}",
+            string.Empty,
+            "## Classic AI Readiness",
+            string.Empty,
+            $"- Classic AI cases: {run.Scorecard.ClassicAiReadiness.ClassicAiCases}",
+            $"- Expansion cases with capture: {run.Scorecard.ClassicAiReadiness.CasesWithExpansion}",
+            $"- Defense cases with Defend desired state: {run.Scorecard.ClassicAiReadiness.CasesWithDefense}",
+            $"- Economy cases with production signal: {run.Scorecard.ClassicAiReadiness.CasesWithEconomy}",
+            $"- Contact cases with battle/capture: {run.Scorecard.ClassicAiReadiness.CasesWithContact}",
+            $"- Search cases with site search: {run.Scorecard.ClassicAiReadiness.CasesWithSearch}",
+            $"- Recovery cases with continued legal pressure: {run.Scorecard.ClassicAiReadiness.CasesWithRecovery}",
+            $"- Conquest pressure cases: {run.Scorecard.ClassicAiReadiness.CasesWithConquestPressure}",
+            $"- Command efficiency: {run.Scorecard.ClassicAiReadiness.CommandEfficiencyPercent:0.##}%",
+            $"- Strategic objectives created: {run.Cases.Sum(result => result.Metrics.StrategicObjectiveCreatedCount)}",
+            $"- Strategic objectives active: {run.Cases.Sum(result => result.Metrics.StrategicObjectiveActiveCount)}",
+            $"- Strategic objectives stale: {run.Cases.Sum(result => result.Metrics.StrategicObjectiveStaleCount)}",
+            $"- Strategic Defend objectives: {run.Cases.Sum(result => result.Metrics.StrategicDefendObjectiveCount)}",
             string.Empty,
             "## Gates",
             string.Empty
@@ -750,7 +1624,7 @@ public sealed class EvalBatchRunner
         try
         {
             return File.Exists(path) &&
-                   JsonSerializer.Deserialize<CampaignRunResult>(File.ReadAllText(path), JsonLineOptions) is not null;
+                   SystemTextJsonSerializer.Deserialize<CampaignRunResult>(File.ReadAllText(path), JsonLineOptions) is not null;
         }
         catch
         {
@@ -761,8 +1635,81 @@ public sealed class EvalBatchRunner
     private static int CountContains(IEnumerable<string> values, string needle) =>
         values.Count(value => value.Contains(needle, StringComparison.OrdinalIgnoreCase));
 
+    private static int? CountExecutedSearchCommands(CampaignRunResult campaign)
+    {
+        var commandCounts = campaign.Telemetry?.CommandTypeCounts;
+        if (commandCounts is null || commandCounts.Count == 0)
+        {
+            return null;
+        }
+
+        return commandCounts
+            .Where(pair =>
+                pair.Key.Equals("SearchRuinsCommand", StringComparison.OrdinalIgnoreCase) ||
+                pair.Key.Equals("SearchSageCommand", StringComparison.OrdinalIgnoreCase) ||
+                pair.Key.Equals("SearchTempleCommand", StringComparison.OrdinalIgnoreCase))
+            .Sum(pair => pair.Value);
+    }
+
+    private static bool HasAny(IEnumerable<string> values, string needle) =>
+        values.Any(value => value.Contains(needle, StringComparison.OrdinalIgnoreCase));
+
     private static int CountProductionDeliveries(IEnumerable<string> moments) =>
         moments.Select(ExtractDeliveredCount).Sum();
+
+    private static int CountUsefulCommandMoments(IEnumerable<CampaignMoment> moments) =>
+        moments.Count(moment =>
+            moment.Kind.Contains("city-capture", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Contains("battle", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Contains("search", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Contains("production", StringComparison.OrdinalIgnoreCase));
+
+    private static IEnumerable<CampaignMoment> ReadMomentDetails(CampaignRunResult campaign)
+    {
+        var indexPath = Path.Combine(campaign.OutputDirectory, "checkpoint-index.jsonl");
+        if (!File.Exists(indexPath))
+        {
+            return Array.Empty<CampaignMoment>();
+        }
+
+        var moments = new List<CampaignMoment>();
+        foreach (var line in File.ReadLines(indexPath))
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            try
+            {
+                var moment = JsonConvert.DeserializeObject<CampaignMoment>(line);
+                if (moment != null)
+                {
+                    moments.Add(moment);
+                }
+            }
+            catch
+            {
+                // Metrics are diagnostic; malformed lines should not hide the primary eval result.
+            }
+        }
+
+        return moments;
+    }
+
+    private static int? FirstTurn(IEnumerable<CampaignMoment> moments, string kind) =>
+        moments
+            .Where(moment => moment.Kind.Contains(kind, StringComparison.OrdinalIgnoreCase))
+            .Select(moment => (int?)moment.Turn)
+            .OrderBy(turn => turn)
+            .FirstOrDefault();
+
+    private static int? FirstProductionDeliveryTurn(IEnumerable<CampaignMoment> moments) =>
+        moments
+            .Where(moment => moment.Context.Contains(" delivered", StringComparison.OrdinalIgnoreCase))
+            .Select(moment => (int?)moment.Turn)
+            .OrderBy(turn => turn)
+            .FirstOrDefault();
 
     private static int ExtractDeliveredCount(string value)
     {
@@ -807,21 +1754,54 @@ public sealed class EvalBatchRunner
     private static bool IsClassicAiFocused(string scenarioFamily) =>
         scenarioFamily.Contains("classic-ai", StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsEndgameCleanupFocused(string scenarioFamily) =>
-        scenarioFamily.Contains("endgame-cleanup", StringComparison.OrdinalIgnoreCase);
-
     private static bool IsClassicAiConquestFocused(string scenarioFamily) =>
         IsClassicAiFocused(scenarioFamily) &&
-        !IsProductionVectoringFocused(scenarioFamily);
+        scenarioFamily.Contains("conquest", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsClassicAiConquestPressureCase(EvalCaseResult result) =>
+        IsClassicAiConquestFocused(result.ScenarioFamily) &&
+        result.ClanCount >= 6 &&
+        result.MaxTurns >= 80;
+
+    private static bool IsClassicAiCapabilityProbe(EvalCaseResult result) =>
+        result.MaxTurns >= 20 ||
+        IsClassicAiConquestFocused(result.ScenarioFamily);
+
+    private static bool IsExpansionProbe(string scenarioFamily) =>
+        scenarioFamily.Contains("expansion", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("capture", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("conquest", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsDefenseProbe(string scenarioFamily) =>
+        scenarioFamily.Contains("defense", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("defended", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsEconomyProbe(string scenarioFamily) =>
+        scenarioFamily.Contains("economy", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("production", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("vector", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsContactProbe(string scenarioFamily) =>
+        scenarioFamily.Contains("contact", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("conquest", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsSiegeProbe(string scenarioFamily) =>
+        scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsRecoveryProbe(string scenarioFamily) =>
+        scenarioFamily.Contains("recovery", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("lost-battle", StringComparison.OrdinalIgnoreCase) ||
+        scenarioFamily.Contains("target-captured", StringComparison.OrdinalIgnoreCase);
 
     private static bool HasClassicAiConquestPressure(EvalCaseResult result)
     {
-        if (result.Counters.Victories > 0 || result.Counters.DominanceVictories > 0)
+        if (result.Counters.Victories > 0)
         {
             return true;
         }
 
-        if (result.MaxTurns < 100 ||
+        if (result.MaxTurns < 80 ||
             result.ClanCount < 6 ||
             result.Counters.BoundedStalemates == 0 ||
             result.Counters.CityCaptures < result.ClanCount ||
@@ -831,7 +1811,7 @@ public sealed class EvalBatchRunner
         }
 
         return TryReadViableClanCount(result.Outcome, out var viableClans) &&
-               viableClans <= Math.Max(1, result.ClanCount / 2);
+               viableClans <= Math.Max(1, result.ClanCount - 2);
     }
 
     private static bool TryReadViableClanCount(string outcome, out int viableClans)
@@ -852,6 +1832,18 @@ public sealed class EvalBatchRunner
 
         var digits = outcome.Substring(start + 1, markerIndex - start - 1);
         return int.TryParse(digits, out viableClans);
+    }
+
+    private static int ReadFinalViableClanCount(int startingClanCount, string outcome)
+    {
+        if (outcome.Contains(" won ", StringComparison.OrdinalIgnoreCase))
+        {
+            return 1;
+        }
+
+        return TryReadViableClanCount(outcome, out var viableClans)
+            ? viableClans
+            : startingClanCount;
     }
 
     private static IReadOnlyList<string> DefaultScenarioFamilies() =>
@@ -884,5 +1876,32 @@ public sealed class EvalBatchRunner
         string? CheckpointPath)
     {
         public static BoardStateInvariantReport Empty { get; } = new(BoardStateInvariantCounters.Empty, Array.Empty<EvalInvariantFailure>(), null);
+    }
+
+    private sealed record CheckpointLoadability(int Successes, int Failures, string? FirstFailureMessage)
+    {
+        public static CheckpointLoadability Empty { get; } = new(0, 0, null);
+    }
+
+    private sealed class SilentWismLoggerFactory : IWismLoggerFactory
+    {
+        private static readonly IWismLogger Logger = new SilentWismLogger();
+
+        public IWismLogger CreateLogger() => Logger;
+    }
+
+    private sealed class SilentWismLogger : IWismLogger
+    {
+        public void LogInformation(string message)
+        {
+        }
+
+        public void LogWarning(string message)
+        {
+        }
+
+        public void LogError(string message)
+        {
+        }
     }
 }

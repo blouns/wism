@@ -197,7 +197,9 @@ public sealed class PlaygroundScenarioRunner
         string size = "medium",
         string scenarioFamily = "standard",
         string? channel = null,
-        string checkpointMode = "full")
+        string checkpointMode = "full",
+        string aiProfile = "strategic",
+        int wallClockTimeoutSeconds = 0)
     {
         events.Clear();
         var normalizedScenarioFamily = NormalizeScenarioFamily(scenarioFamily);
@@ -225,7 +227,9 @@ public sealed class PlaygroundScenarioRunner
             ModRoot: resolvedModRoot,
             Size: string.Equals(size, "large", StringComparison.OrdinalIgnoreCase) ? "large" : "medium",
             ScenarioFamily: normalizedScenarioFamily,
-            CheckpointMode: ParseCheckpointMode(checkpointMode));
+            AiProfile: NormalizeAiProfile(aiProfile),
+            CheckpointMode: ParseCheckpointMode(checkpointMode),
+            WallClockTimeoutSeconds: Math.Max(0, wallClockTimeoutSeconds));
 
         var validation = new CampaignScenarioBuilder().Build(options);
         if (!validation.IsValid)
@@ -238,6 +242,7 @@ public sealed class PlaygroundScenarioRunner
                 Name: options.Name,
                 Seed: options.Seed,
                 ClanCount: options.ClanCount,
+                AiProfile: options.AiProfile,
                 Status: "Failed",
                 Outcome: validation.Summary,
                 Turns: 0,
@@ -256,10 +261,22 @@ public sealed class PlaygroundScenarioRunner
         PublishMapSnapshot();
         recorder.Checkpoint("setup", 0, "System", "Generated, loaded, and validated campaign start.");
 
+        var wallClockTimeout = ResolveCampaignWallClockTimeout(options);
+        var stopwatch = Stopwatch.StartNew();
+        var timedOut = false;
+        var missionCompleted = false;
+        var missionOutcome = string.Empty;
         var completedTurns = 0;
         VictoryOutcomeSnapshot? completedVictoryOutcome = null;
         for (var turn = 1; turn <= options.MaxTurns && CountViableClans() > 1 && completedVictoryOutcome == null; turn++)
         {
+            if (stopwatch.Elapsed > wallClockTimeout)
+            {
+                timedOut = true;
+                recorder.Checkpoint("campaign-timeout", completedTurns, "System", $"Campaign exceeded {wallClockTimeout.TotalSeconds:0}s wall-clock budget.");
+                break;
+            }
+
             var player = Game.Current.GetCurrentPlayer();
             if (!player.IsDead)
             {
@@ -269,7 +286,7 @@ public sealed class PlaygroundScenarioRunner
                 var endedTurn = false;
                 if (UsesClassicAiMission(options.ScenarioFamily))
                 {
-                    endedTurn = DriveClassicAiTurn(player, turn, recorder);
+                    endedTurn = DriveClassicAiTurn(player, turn, recorder, options.AiProfile);
                 }
                 else
                 {
@@ -286,11 +303,25 @@ public sealed class PlaygroundScenarioRunner
                 {
                     recorder.Checkpoint("turn-end", turn, player.Clan.ShortName, $"Ended {player.Clan.ShortName} turn.");
                     completedTurns = turn;
+                    if (TryCompleteClassicMission(options, recorder, out missionOutcome))
+                    {
+                        missionCompleted = true;
+                        recorder.Checkpoint("mission-complete", turn, player.Clan.ShortName, missionOutcome);
+                        break;
+                    }
+
                     continue;
                 }
 
                 ExecuteCampaignCommand(new EndTurnCommand(controllers.GameController, player), recorder);
                 recorder.Checkpoint("turn-end", turn, player.Clan.ShortName, $"Ended {player.Clan.ShortName} turn.");
+                if (TryCompleteClassicMission(options, recorder, out missionOutcome))
+                {
+                    missionCompleted = true;
+                    recorder.Checkpoint("mission-complete", turn, player.Clan.ShortName, missionOutcome);
+                    completedTurns = turn;
+                    break;
+                }
             }
 
             completedTurns = turn;
@@ -320,29 +351,40 @@ public sealed class PlaygroundScenarioRunner
                                          World.Current.GetCities().Count,
                                          DominanceGoalMode.Readiness)));
         Game.Current.SetVictoryOutcome(victoryOutcome);
-        var status = CountViableClans() <= 1 ? "Passed" : "Passed";
-        var outcome = victoryOutcome.OutcomeKind == VictoryOutcomeKind.DominanceVictory
+        var status = timedOut ? "Failed" : "Passed";
+        var outcome = timedOut
+            ? $"Campaign timed out after {completedTurns} turns and {wallClockTimeout.TotalSeconds:0}s wall-clock budget."
+            : missionCompleted
+            ? missionOutcome
+            : victoryOutcome.OutcomeKind == VictoryOutcomeKind.DominanceVictory
             ? $"{victoryOutcome.WinnerClanDisplayName} reached dominance after {completedTurns} turns with {victoryOutcome.LeaderCities}/{victoryOutcome.TotalCities} cities."
             : winner is not null
             ? $"{winner.Clan.DisplayName} won the generated campaign."
             : $"Bounded stalemate after {completedTurns} turns with {CountViableClans()} viable clans.";
         events.Add(outcome);
         recorder.Checkpoint(
-            victoryOutcome.OutcomeKind == VictoryOutcomeKind.DominanceVictory
-                ? "dominance-victory"
-                : winner is not null
-                    ? "victory"
-                    : "stalemate",
+            timedOut
+                ? "campaign-timeout"
+                : missionCompleted
+                    ? "mission-complete"
+                    : victoryOutcome.OutcomeKind == VictoryOutcomeKind.DominanceVictory
+                        ? "dominance-victory"
+                        : winner is not null
+                            ? "victory"
+                            : "stalemate",
             completedTurns,
             victoryOutcome.WinnerClanShortName ?? winner?.Clan.ShortName ?? "System",
             outcome);
 
         var report = CreateReport($"campaign:{options.Seed}:{options.ClanCount}", status, outcome, completedTurns);
+        stopwatch.Stop();
+        var telemetry = CreateCampaignTelemetry(recorder, options, stopwatch.Elapsed, wallClockTimeout, completedTurns);
         var result = new CampaignRunResult(
             SchemaVersion: 1,
             Name: options.Name,
             Seed: options.Seed,
             ClanCount: options.ClanCount,
+            AiProfile: options.AiProfile,
             Status: status,
             Outcome: outcome,
             Turns: completedTurns,
@@ -350,16 +392,96 @@ public sealed class PlaygroundScenarioRunner
             Checkpoints: recorder.Checkpoints.ToArray(),
             Moments: recorder.Moments.Select(moment => $"{moment.Kind}:{moment.Context}").ToArray(),
             FinalReport: report,
+            Telemetry: telemetry,
             VictoryOutcome: victoryOutcome);
         recorder.SaveManifest(result);
         return result;
     }
 
-    private bool DriveClassicAiTurn(Player player, int turn, CampaignRecorder recorder)
+    private static CampaignTelemetrySummary CreateCampaignTelemetry(
+        CampaignRecorder recorder,
+        CampaignOptions options,
+        TimeSpan runtime,
+        TimeSpan timeoutBudget,
+        int turnsCompleted)
+    {
+        var moments = recorder.Moments;
+        var commandTypeCounts = moments
+            .Where(moment => moment.Kind.Equals("pre-command", StringComparison.OrdinalIgnoreCase))
+            .Select(moment => ExtractCommandType(moment.Context))
+            .Where(commandType => !string.IsNullOrWhiteSpace(commandType))
+            .GroupBy(commandType => commandType, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);
+        var meaningfulEvents = moments.Count(moment =>
+            moment.Kind.Equals("battle", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Equals("city-capture", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Equals("search", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Equals("production", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Equals("production-start", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Equals("production-vector", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Equals("victory", StringComparison.OrdinalIgnoreCase));
+        var map = World.Current.Map;
+        var mapWidth = map.GetLength(0);
+        var mapHeight = map.GetLength(1);
+        var timeoutKind = moments.LastOrDefault(moment =>
+            moment.Kind.Equals("command-timeout", StringComparison.OrdinalIgnoreCase) ||
+            moment.Kind.Equals("campaign-timeout", StringComparison.OrdinalIgnoreCase))?.Kind;
+        var armyCount = Game.Current.Players.Sum(player => player.GetArmies().Count(army => !army.IsDead));
+        var cityCount = World.Current.GetCities().Count();
+        return new CampaignTelemetrySummary(
+            RuntimeSeconds: Math.Round(runtime.TotalSeconds, 3),
+            TimeoutBudgetSeconds: Math.Round(timeoutBudget.TotalSeconds, 3),
+            TimeoutBudgetUsedPercent: timeoutBudget.TotalSeconds <= 0 ? 0 : Math.Round(100.0 * runtime.TotalSeconds / timeoutBudget.TotalSeconds, 2),
+            TurnsCompleted: turnsCompleted,
+            SecondsPerTurn: turnsCompleted <= 0 ? 0 : Math.Round(runtime.TotalSeconds / turnsCompleted, 3),
+            CommandsExecuted: recorder.CommandIndex,
+            CommandsPerTurn: turnsCompleted <= 0 ? 0 : Math.Round(recorder.CommandIndex / (double)turnsCompleted, 3),
+            MeaningfulEvents: meaningfulEvents,
+            MeaningfulEventsPerTurn: turnsCompleted <= 0 ? 0 : Math.Round(meaningfulEvents / (double)turnsCompleted, 3),
+            MapWidth: mapWidth,
+            MapHeight: mapHeight,
+            TileCount: mapWidth * mapHeight,
+            FinalArmyCount: armyCount,
+            FinalCityCount: cityCount,
+            CommandTypeCounts: commandTypeCounts,
+            TimeoutKind: timeoutKind,
+            LastMomentKind: moments.LastOrDefault()?.Kind);
+    }
+
+    private static string ExtractCommandType(string context)
+    {
+        const string prefix = "Executing ";
+        if (!context.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
+
+        var end = context.IndexOf(':', prefix.Length);
+        return end <= prefix.Length ? string.Empty : context[prefix.Length..end].Trim();
+    }
+
+    private static TimeSpan ResolveCampaignWallClockTimeout(CampaignOptions options)
+    {
+        if (options.WallClockTimeoutSeconds > 0)
+        {
+            return TimeSpan.FromSeconds(options.WallClockTimeoutSeconds);
+        }
+
+        var seconds = options.MaxTurns * Math.Max(1, options.ClanCount);
+        if (string.Equals(options.Size, "large", StringComparison.OrdinalIgnoreCase))
+        {
+            seconds *= 2;
+        }
+
+        return TimeSpan.FromSeconds(Math.Clamp(seconds, 45, 300));
+    }
+
+    private bool DriveClassicAiTurn(Player player, int turn, CampaignRecorder recorder, string aiProfile)
     {
         player.IsHuman = false;
         var logger = loggerFactory.CreateLogger();
-        var provider = WarlordsClassicAiFactory.CreateCommandProvider(controllers, logger);
+        var provider = WarlordsClassicAiFactory.CreateCommandProvider(controllers, logger, aiProfile: aiProfile);
         provider.GenerateCommands();
 
         var commands = provider.GetBufferedCommands()
@@ -830,24 +952,6 @@ public sealed class PlaygroundScenarioRunner
             return;
         }
 
-        var adjacentCapturableCity = FindAdjacentCapturableCity(activeStack, player);
-        if (adjacentCapturableCity != null)
-        {
-            CaptureCity(activeStack, adjacentCapturableCity, player, turn, recorder, "Capturing adjacent empty city");
-            return;
-        }
-
-        var adjacentEnemy = FindAdjacentEnemyTile(activeStack, player);
-        if (adjacentEnemy != null)
-        {
-            recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking adjacent enemy at {adjacentEnemy.X},{adjacentEnemy.Y}.");
-            AttackUntilResolved(activeStack, adjacentEnemy);
-            recorder.CountCommand();
-            recorder.Checkpoint("battle", turn, player.Clan.ShortName, $"Resolved adjacent battle at {adjacentEnemy.X},{adjacentEnemy.Y}.");
-            DeselectIfNeeded(activeStack.Where(army => !army.IsDead).ToList(), recorder);
-            return;
-        }
-
         if (UsesSearchMission(scenarioFamily))
         {
             var targetLocation = FindNearestUnsearchedReachableLocation(activeStack);
@@ -867,6 +971,24 @@ public sealed class PlaygroundScenarioRunner
                 DeselectIfNeeded(currentSearchStack, recorder);
                 return;
             }
+        }
+
+        var adjacentCapturableCity = FindAdjacentCapturableCity(activeStack, player);
+        if (adjacentCapturableCity != null)
+        {
+            CaptureCity(activeStack, adjacentCapturableCity, player, turn, recorder, "Capturing adjacent empty city");
+            return;
+        }
+
+        var adjacentEnemy = FindAdjacentEnemyTile(activeStack, player);
+        if (adjacentEnemy != null)
+        {
+            recorder.Checkpoint("pre-battle", turn, player.Clan.ShortName, $"Attacking adjacent enemy at {adjacentEnemy.X},{adjacentEnemy.Y}.");
+            AttackUntilResolved(activeStack, adjacentEnemy);
+            recorder.CountCommand();
+            recorder.Checkpoint("battle", turn, player.Clan.ShortName, $"Resolved adjacent battle at {adjacentEnemy.X},{adjacentEnemy.Y}.");
+            DeselectIfNeeded(activeStack.Where(army => !army.IsDead).ToList(), recorder);
+            return;
         }
 
         var targetCity = UsesCaptureMission(scenarioFamily)
@@ -1231,6 +1353,13 @@ public sealed class PlaygroundScenarioRunner
         };
     }
 
+    private static string NormalizeAiProfile(string aiProfile)
+    {
+        return string.Equals(aiProfile, "tactical", StringComparison.OrdinalIgnoreCase)
+            ? "tactical"
+            : "strategic";
+    }
+
     private static bool UsesSearchMission(string scenarioFamily)
     {
         return scenarioFamily.Contains("search", StringComparison.OrdinalIgnoreCase) ||
@@ -1276,6 +1405,80 @@ public sealed class PlaygroundScenarioRunner
             DominanceGoalMode.Readiness);
         outcome = VictoryEvaluator.EvaluateDominance(World.Current, Game.Current.Players, turn, policy);
         return outcome.DominanceEligible;
+    }
+
+    private static bool TryCompleteClassicMission(
+        CampaignOptions options,
+        CampaignRecorder recorder,
+        out string outcome)
+    {
+        outcome = string.Empty;
+        if (!UsesClassicAiMission(options.ScenarioFamily))
+        {
+            return false;
+        }
+
+        if (UsesNeutralExpansionMission(options.ScenarioFamily))
+        {
+            var captures = recorder.Moments.Count(moment =>
+                moment.Kind.Equals("city-capture", StringComparison.OrdinalIgnoreCase));
+            if (captures < 2)
+            {
+                return false;
+            }
+
+            outcome = $"Neutral expansion objective met with {captures} city captures.";
+            return true;
+        }
+
+        if (!UsesProductionEconomy(options.ScenarioFamily))
+        {
+            return false;
+        }
+
+        var starts = recorder.Moments.Count(moment =>
+            moment.Kind.Equals("production-start", StringComparison.OrdinalIgnoreCase));
+        var vectors = recorder.Moments.Count(moment =>
+            moment.Kind.Equals("production-vector", StringComparison.OrdinalIgnoreCase));
+        var deliveries = recorder.Moments.Select(moment => ExtractDeliveredCount(moment.Context)).Sum();
+
+        if (starts < 2 || vectors < 1 || deliveries < 1)
+        {
+            return false;
+        }
+
+        outcome = $"Production economy objective met with {starts} production starts, {vectors} routed production vectors, and {deliveries} delivered army/armies.";
+        return true;
+    }
+
+    private static bool UsesNeutralExpansionMission(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("neutral-expansion", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int ExtractDeliveredCount(string value)
+    {
+        const string marker = " delivered";
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return 0;
+        }
+
+        var markerIndex = value.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (markerIndex <= 0)
+        {
+            return 0;
+        }
+
+        var start = markerIndex - 1;
+        while (start >= 0 && char.IsDigit(value[start]))
+        {
+            start--;
+        }
+
+        return int.TryParse(value.Substring(start + 1, markerIndex - start - 1), out var delivered)
+            ? delivered
+            : 0;
     }
 
     private void DeselectIfNeeded(List<Army> armies, CampaignRecorder recorder)

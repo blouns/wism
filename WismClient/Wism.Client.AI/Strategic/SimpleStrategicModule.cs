@@ -8,7 +8,7 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.AI.Strategic
 {
-    public class SimpleStrategicModule : IStrategicModule
+    public class SimpleStrategicModule : IStrategicModule, IAcceptedBidProvider
     {
         private List<IBid> acceptedBids = new List<IBid>();
 

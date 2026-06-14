@@ -22,6 +22,11 @@ dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 max
 dotnet run --project Wism.Agent.Playground -- campaign seed=20260601 clans=2 maxTurns=12 channel=eval:smoke
 dotnet run --project Wism.Agent.Playground -- campaign seed=5150 clans=4 maxTurns=1 size=large delayMs=1500
 dotnet run --project Wism.Agent.Playground -- campaign seed=5150 clans=8 maxTurns=2 size=large
+dotnet run --project Wism.Agent.Playground -- eval suite=smoke --quiet
+dotnet run --project Wism.Agent.Playground -- eval suite=focused --quiet
+dotnet run --project Wism.Agent.Playground -- eval suite=readiness workers=2 --quiet
+dotnet run --project Wism.Agent.Playground -- eval suite=readiness cases=1440 workers=6 timeoutProfile=legacy --quiet
+dotnet run --project Wism.Agent.Playground -- eval suite=readiness cases=1440 workers=6 timeoutProfile=calibrated --quiet
 dotnet run --project Wism.Agent.Playground -- eval seed=20260608 cases=50 maxTurns=12 scenarios=capture-pressure,ruin-search,production-economy,road-contact,siege-defense clans=2,4 sizes=medium --quiet
 dotnet run --project Wism.Agent.Playground -- jump checkpoint=<checkpoint-json>
 dotnet run --project Wism.Agent.Playground -- worktrees agents=4
@@ -48,7 +53,16 @@ dotnet run --project Wism.Agent.Playground -- worktrees agents=4
 - Campaigns default to deterministic channel IDs such as `playground:capture-pressure:20260601` when Companion telemetry or capture metadata is enabled.
 - `jump checkpoint=<path>` loads a saved campaign checkpoint through `LoadGameCommand` for debugging a recorded moment.
 - `eval` runs deterministic campaign batches, writes `eval-run.json`, `eval-case-result.jsonl`, `scorecard.json`, `learning-ledger.jsonl`, and `eval-summary.md`, and fails unless required scenario-family signals are present.
+- `eval` defaults to process-isolated cases. Each case runs through an `eval-case` child process with a hard wall-clock timeout, so one stuck large scenario becomes a structured failed row instead of blocking the whole batch.
+- Eval results are appended incrementally to `eval-case-result.jsonl`; `scorecard.partial.json` is updated during the run and removed after final `scorecard.json` and `eval-summary.md` are written.
+- `workers=N` enables bounded parallel eval execution. Keep routine development at `workers=1`; use small bounded pools such as `workers=2` for readiness slices after smoke/focused pass.
+- `eval suite=smoke|focused|readiness|marathon` selects standard Classic AI probe mixes. Use smoke/focused for development, readiness for release-facing confidence, and marathon only after readiness is already green.
+- `timeoutProfile=legacy|calibrated` makes budget comparisons repeatable. Use `legacy` for pre-calibration baselines and `calibrated` for current large-map probe budgets.
+- Eval scorecards include hard correctness gates, checkpoint loadability, Classic AI readiness gates, per-case first-turn quality metrics, and command-efficiency signal.
+- Eval case rows include compact `Telemetry` for long-haul diagnosis: runtime seconds, timeout budget used, seconds/turn, commands/turn, meaningful events/turn, map dimensions, tile count, final army/city counts, command type counts, timeout kind, and last moment kind. Treat this as the default signal for scale questions before enabling verbose traces.
+- Timeout classes are intentionally distinct: `campaign-timeout` means the campaign exceeded its wall-clock budget while still running, `command-timeout` means a buffered command made no bounded progress, and `case-timeout` means the isolated child process had to be killed.
 - Failed board-state invariant cases write `debug-packets.jsonl` beside the campaign manifest with tile, army, owner, checkpoint, suspected subsystem, and one-case repro context.
+- WismCompanion is optional debug/viewer infrastructure for evals. WismUnity remains the human-facing game surface and should be validated separately for release or demo readiness.
 - Keeps public WISM worktree creation as an explicit plan by default. The command output names separate branch/worktree pairs rooted at `HEAD`, which should be the committed playground scaffold.
 - Parallel experiments use child processes because the current game runtime has static `Game.Current` and `World.Current` state.
 

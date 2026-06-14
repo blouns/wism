@@ -47,6 +47,7 @@ namespace Wism.Client.AI.Framework
         {
             var commands = new List<ICommandAction>();
             LogDecisionStart(world);
+            strategicModule.UpdateGoals(world);
 
             foreach (var module in turnModules)
             {
@@ -66,10 +67,9 @@ namespace Wism.Client.AI.Framework
                 return commands;
             }
 
-            strategicModule.UpdateGoals(world);
             strategicModule.AllocateAssets(bids);
 
-            var winningBids = ((strategicModule as SimpleStrategicModule)?.GetAcceptedBids() ?? bids).ToList();
+            var winningBids = ((strategicModule as IAcceptedBidProvider)?.GetAcceptedBids() ?? bids).ToList();
             LogAcceptedBids(winningBids, bids);
 
             foreach (var bid in winningBids)

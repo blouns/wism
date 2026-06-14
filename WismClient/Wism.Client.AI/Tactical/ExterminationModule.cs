@@ -17,6 +17,7 @@ namespace Wism.Client.AI.Tactical
     public class ExterminationModule : ITacticalModule
     {
         private const double MinimumAttackWinProbability = 0.40;
+        private const int MaxCandidateEnemyTilesPerStack = 24;
 
         private readonly PathfindingService pathfindingService;
         private readonly IPathingStrategy pathingStrategy;
@@ -76,7 +77,14 @@ namespace Wism.Client.AI.Tactical
                     var estimate = this.combatEstimator.EstimateAttack(stackList, target);
                     var combatPressure = 0.10 + estimate.WinProbability;
                     var influence = combatPressure / (distance + 1);
-                    bids.Add(new SimpleBid(stackList, this, influence));
+                    bids.Add(new StrategicBid(
+                        stackList,
+                        this,
+                        influence,
+                        "Siege",
+                        targetCityShortName: target.City?.ShortName,
+                        targetX: target.X,
+                        targetY: target.Y));
                 }
             }
 
@@ -189,6 +197,10 @@ namespace Wism.Client.AI.Tactical
                 .Select(enemy => enemy.Tile)
                 .Where(tile => tile != null)
                 .Distinct()
+                .OrderBy(tile => AiUtilities.GetManhattanDistance(leader.Tile, tile))
+                .ThenBy(tile => tile.X)
+                .ThenBy(tile => tile.Y)
+                .Take(MaxCandidateEnemyTilesPerStack)
                 .Select(tile =>
                 {
                     var distance = AiUtilities.GetManhattanDistance(leader.Tile, tile);

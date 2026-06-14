@@ -16,14 +16,16 @@ namespace Wism.Client.AI.Tactical
     public class SearchModule : ITacticalModule
     {
         private const double CurrentLocationSearchUtility = 6.0;
-        private const double HeroExplorationTravelUtility = 4.0;
-        private const double TempleBlessingTravelUtility = 1.5;
+        private const double HeroExplorationTravelUtility = 14.0;
+        private const double TempleBlessingTravelUtility = 4.0;
         private const double OpportunisticSearchTravelUtility = 0.12;
+        private const int MaxCandidateLocationsPerStack = 16;
 
         private readonly ArmyController armyController;
         private readonly LocationController locationController;
         private readonly IPathingStrategy pathingStrategy;
         private readonly GarrisonPolicy garrisonPolicy;
+        private readonly bool allowTempleSearch;
         private readonly IWismLogger logger;
 
         public SearchModule(
@@ -40,12 +42,14 @@ namespace Wism.Client.AI.Tactical
             LocationController locationController,
             IPathingStrategy pathingStrategy,
             GarrisonPolicy garrisonPolicy,
-            IWismLogger logger)
+            IWismLogger logger,
+            bool allowTempleSearch = true)
         {
             this.armyController = armyController;
             this.locationController = locationController;
             this.pathingStrategy = pathingStrategy;
             this.garrisonPolicy = garrisonPolicy;
+            this.allowTempleSearch = allowTempleSearch;
             this.logger = logger;
         }
 
@@ -80,7 +84,7 @@ namespace Wism.Client.AI.Tactical
                     continue;
                 }
 
-                var target = FindBestSearchTarget(stack, locations);
+                var target = FindBestSearchTarget(stack, CandidateLocationsForStack(stack, locations));
                 if (target == null)
                 {
                     continue;
@@ -92,7 +96,14 @@ namespace Wism.Client.AI.Tactical
                     : GetTravelUtility(stack, target) / (distance + 1);
 
                 logger.LogInformation($"[Search] Bidding stack at ({stack[0].Tile.X},{stack[0].Tile.Y}) to search {target.ShortName} with utility {utility:0.000}.");
-                bids.Add(new SimpleBid(stack, this, utility));
+                bids.Add(new StrategicBid(
+                    stack,
+                    this,
+                    utility,
+                    "Search",
+                    targetLocationShortName: target.ShortName,
+                    targetX: target.X,
+                    targetY: target.Y));
             }
 
             return bids;
@@ -129,7 +140,7 @@ namespace Wism.Client.AI.Tactical
                 .OrderBy(location => location.ShortName)
                 .ToList();
 
-            var target = FindBestSearchTarget(armies, locations);
+            var target = FindBestSearchTarget(armies, CandidateLocationsForStack(armies, locations));
             if (target == null)
             {
                 return commands;
@@ -152,6 +163,21 @@ namespace Wism.Client.AI.Tactical
             return commands;
         }
 
+        private static List<Location> CandidateLocationsForStack(List<Army> armies, List<Location> locations)
+        {
+            if (armies == null || armies.Count == 0 || locations == null || locations.Count <= MaxCandidateLocationsPerStack)
+            {
+                return locations ?? new List<Location>();
+            }
+
+            return locations
+                .Where(location => location != null && location.Tile != null)
+                .OrderBy(location => AiUtilities.GetManhattanDistance(armies[0].Tile, location.Tile))
+                .ThenBy(location => location.ShortName)
+                .Take(MaxCandidateLocationsPerStack)
+                .ToList();
+        }
+
         private Location FindBestSearchTarget(List<Army> armies, List<Location> locations)
         {
             return locations
@@ -171,6 +197,11 @@ namespace Wism.Client.AI.Tactical
             switch (location.Kind)
             {
                 case "Temple":
+                    if (!allowTempleSearch)
+                    {
+                        return false;
+                    }
+
                     return armies.Any(army => army.Tile == location.Tile && army.MovesRemaining > 0);
                 case "Ruins":
                 case "Tomb":
@@ -188,7 +219,9 @@ namespace Wism.Client.AI.Tactical
             switch (location.Kind)
             {
                 case "Temple":
-                    return armies.Any();
+                    return allowTempleSearch &&
+                           (armies.Any(army => army.Tile == location.Tile) ||
+                            armies.Any(army => army is Hero));
                 case "Ruins":
                 case "Tomb":
                 case "Sage":

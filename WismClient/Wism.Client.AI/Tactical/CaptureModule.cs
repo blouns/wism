@@ -18,6 +18,7 @@ public class CaptureModule : ITacticalModule
     private const double MinimumBlockerAttackWinProbability = 0.40;
     private const double MinimumCityAttackWinProbability = 0.40;
     private const double MinimumEndgameCityAttackWinProbability = 0.20;
+    private const int MaxCandidateCitiesPerStack = 24;
 
     private readonly ArmyController armyController;
     private readonly CityController cityController;
@@ -89,7 +90,7 @@ public class CaptureModule : ITacticalModule
 
             var leader = stack[0];
 
-            var targetCity = FindBestCapturableCity(stack, cities);
+            var targetCity = FindBestCapturableCity(stack, CandidateCitiesForStack(leader.Tile, cities));
             if (targetCity == null)
             {
                 logger.LogInformation($"[Capture] No reachable cities found for stack at ({leader.Tile.X},{leader.Tile.Y}).");
@@ -105,7 +106,14 @@ public class CaptureModule : ITacticalModule
 
             logger.LogInformation($"[Capture] Bidding {bidArmies.Count} army/armies at ({leader.Tile.X},{leader.Tile.Y}) to target city at ({targetCity.Tile.X},{targetCity.Tile.Y}) with utility {utility:0.000}.");
 
-            bids.Add(new SimpleBid(bidArmies, this, utility));
+            bids.Add(new StrategicBid(
+                bidArmies,
+                this,
+                utility,
+                targetCity.Clan == null || targetCity.Clan.ShortName == "Neutral" ? "Expand" : "Siege",
+                targetCity.ShortName,
+                targetX: targetCity.X,
+                targetY: targetCity.Y));
         }
 
         return bids;
@@ -133,6 +141,10 @@ public class CaptureModule : ITacticalModule
         var army = armies[0];
         var capturableCities = world.GetCities()
             .Where(c => c.Clan != army.Player.Clan)
+            .OrderBy(c => this.cityTargetEvaluator.GetDistanceToCity(army.Tile, c))
+            .ThenByDescending(c => c.Income + c.Defense)
+            .ThenBy(c => c.ShortName)
+            .Take(MaxCandidateCitiesPerStack)
             .ToList();
 
         var target = FindBestCapturableCity(armies, capturableCities);
@@ -227,6 +239,22 @@ public class CaptureModule : ITacticalModule
         }
 
         return commands;
+    }
+
+    private List<City> CandidateCitiesForStack(Tile origin, List<City> cities)
+    {
+        if (origin == null || cities == null || cities.Count <= MaxCandidateCitiesPerStack)
+        {
+            return cities ?? new List<City>();
+        }
+
+        return cities
+            .Where(city => city != null && city.Tile != null)
+            .OrderBy(city => this.cityTargetEvaluator.GetDistanceToCity(origin, city))
+            .ThenByDescending(city => city.Income + city.Defense)
+            .ThenBy(city => city.ShortName)
+            .Take(MaxCandidateCitiesPerStack)
+            .ToList();
     }
 
 

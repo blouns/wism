@@ -53,19 +53,26 @@ try
             var campaignSize = ReadString(args, "size", "medium") ?? "medium";
             var campaignScenario = ReadString(args, "scenario", ReadString(args, "preset", selection.Launch.Scenario ?? "standard")) ?? "standard";
             var campaignCheckpointMode = ReadString(args, "checkpointMode", "full") ?? "full";
-            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs, campaignSize, campaignScenario, channel, campaignCheckpointMode);
+            var campaignAiProfile = ReadString(args, "aiProfile", "strategic") ?? "strategic";
+            var campaign = runner.Campaign(campaignSeed, campaignClans, maxTurns, campaignOut, campaignName, campaignModRoot, campaignDelayMs, campaignSize, campaignScenario, channel, campaignCheckpointMode, campaignAiProfile);
             PrintCampaign(campaign, quiet);
             return string.Equals(campaign.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "eval":
+            var evalSuiteName = ReadString(args, "suite", null);
+            var evalSuite = EvalSuiteCatalog.Resolve(evalSuiteName);
             var evalSeed = ReadInt(args, "seed", 20260608);
-            var evalCases = ReadInt(args, "cases", 50);
-            var evalMaxTurns = ReadInt(args, "maxTurns", 12);
+            var evalCases = ReadInt(args, "cases", evalSuite.Cases);
+            var evalMaxTurns = ReadInt(args, "maxTurns", evalSuite.MaxTurns);
             var evalOut = ReadString(args, "out", Path.Combine(FindRepositoryRoot(), "artifacts", "evals"));
             var evalModRoot = ReadString(args, "modRoot", null);
-            var evalScenarios = ReadCsv(args, "scenarios");
-            var evalClans = ReadIntCsv(args, "clans", new[] { 2, 4 });
-            var evalSizes = ReadCsv(args, "sizes");
-            var evalCheckpointMode = ReadString(args, "checkpointMode", "full") ?? "full";
+            var evalScenarios = HasArg(args, "scenarios") ? ReadCsv(args, "scenarios") : evalSuite.ScenarioFamilies;
+            var evalClans = HasArg(args, "clans") ? ReadIntCsv(args, "clans", evalSuite.ClanCounts) : evalSuite.ClanCounts;
+            var evalSizes = HasArg(args, "sizes") ? ReadCsv(args, "sizes") : evalSuite.Sizes;
+            var evalCheckpointMode = ReadString(args, "checkpointMode", evalSuite.CheckpointMode) ?? evalSuite.CheckpointMode;
+            var evalAiProfile = ReadString(args, "aiProfile", "strategic") ?? "strategic";
+            var evalWorkers = ReadInt(args, "workers", 1);
+            var evalProcessIsolated = ReadBool(args, "processIsolated", true);
+            var evalTimeoutProfile = ReadString(args, "timeoutProfile", "calibrated") ?? "calibrated";
             var eval = new EvalBatchRunner().Run(new EvalBatchOptions(
                 Seed: evalSeed,
                 Cases: evalCases,
@@ -75,9 +82,54 @@ try
                 ClanCounts: evalClans,
                 Sizes: evalSizes,
                 ModRoot: evalModRoot,
-                CheckpointMode: evalCheckpointMode));
+                AiProfile: evalAiProfile,
+                CheckpointMode: evalCheckpointMode,
+                Workers: evalWorkers,
+                ProcessIsolated: evalProcessIsolated,
+                TimeoutProfile: evalTimeoutProfile));
             PrintEval(eval, quiet);
             return string.Equals(eval.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+        case "eval-case":
+            var caseId = ReadString(args, "caseId", "case-0001") ?? "case-0001";
+            var caseIndex = ReadInt(args, "index", 1);
+            var caseSeed = ReadInt(args, "seed", 20260608);
+            var caseScenario = ReadString(args, "scenario", "standard") ?? "standard";
+            var caseClans = ReadInt(args, "clans", 2);
+            var caseMaxTurns = ReadInt(args, "maxTurns", 40);
+            var caseSize = ReadString(args, "size", "medium") ?? "medium";
+            var caseOut = ReadString(args, "out", Path.Combine(FindRepositoryRoot(), "artifacts", "evals"));
+            var caseResultPath = ReadString(args, "result", null);
+            var caseModRoot = ReadString(args, "modRoot", null);
+            var caseCheckpointMode = ReadString(args, "checkpointMode", "full") ?? "full";
+            var caseAiProfile = ReadString(args, "aiProfile", "strategic") ?? "strategic";
+            var caseWallClockTimeoutSeconds = ReadInt(args, "wallClockTimeoutSeconds", 0);
+            if (string.IsNullOrWhiteSpace(caseOut))
+            {
+                Console.Error.WriteLine("out=<path> is required.");
+                return 2;
+            }
+
+            var caseResult = new EvalBatchRunner().RunSingleCase(
+                caseId,
+                caseIndex,
+                caseSeed,
+                caseScenario,
+                caseClans,
+                caseMaxTurns,
+                caseSize,
+                caseOut,
+                caseModRoot,
+                caseCheckpointMode,
+                caseAiProfile,
+                caseWallClockTimeoutSeconds);
+            if (!string.IsNullOrWhiteSpace(caseResultPath))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(caseResultPath)!);
+                File.WriteAllText(caseResultPath, JsonSerializer.Serialize(caseResult, JsonOptions()));
+            }
+
+            PrintEvalCase(caseResult, quiet);
+            return string.Equals(caseResult.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
         case "jump":
             var checkpoint = ReadString(args, "checkpoint", null);
             if (string.IsNullOrWhiteSpace(checkpoint))
@@ -92,7 +144,7 @@ try
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|eval|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [checkpointMode=full|turns|summary] [sizes=medium,large] [preset=standard|capture-pressure|ruin-search|classic-ai-production-vectoring] [scenarios=a,b] [cases=50] [checkpoint=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|eval|eval-case|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [checkpointMode=full|turns|summary] [aiProfile=strategic|tactical] [timeoutProfile=legacy|calibrated] [suite=smoke|focused|readiness|marathon] [workers=N] [processIsolated=true|false] [sizes=medium,large] [preset=standard|capture-pressure|ruin-search|classic-ai-production-vectoring] [scenarios=a,b] [cases=50] [checkpoint=path]");
             return 2;
     }
 }
@@ -147,6 +199,17 @@ static void PrintEval(EvalRunResult result, bool quiet)
     Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions()));
 }
 
+static void PrintEvalCase(EvalCaseResult result, bool quiet)
+{
+    if (quiet)
+    {
+        Console.WriteLine($"{result.CaseId}:{result.Status}:{result.ScenarioFamily}:{result.Outcome}");
+        return;
+    }
+
+    Console.WriteLine(JsonSerializer.Serialize(result, JsonOptions()));
+}
+
 static int Exit(PlaygroundReport report) =>
     string.Equals(report.Status, "Passed", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
 
@@ -186,6 +249,12 @@ static int[] ReadIntCsv(IReadOnlyList<string> args, string name, IReadOnlyList<i
         .Select(value => value!.Value)
         .ToArray();
     return values.Length > 0 ? values : fallback.ToArray();
+}
+
+static bool HasArg(IReadOnlyList<string> args, string name)
+{
+    var prefix = name + "=";
+    return args.Any(arg => arg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 }
 
 static string DefaultCaptureName(string scenario)
