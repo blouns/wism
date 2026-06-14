@@ -244,7 +244,8 @@ public sealed class PlaygroundScenarioRunner
                 OutputDirectory: invalidRecorder.OutputDirectory,
                 Checkpoints: invalidRecorder.Checkpoints.ToArray(),
                 Moments: invalidRecorder.Moments.Select(moment => $"{moment.Kind}:{moment.Context}").ToArray(),
-                FinalReport: failed);
+                FinalReport: failed,
+                VictoryOutcome: VictoryEvaluator.None());
             invalidRecorder.SaveManifest(invalid);
             return invalid;
         }
@@ -256,7 +257,8 @@ public sealed class PlaygroundScenarioRunner
         recorder.Checkpoint("setup", 0, "System", "Generated, loaded, and validated campaign start.");
 
         var completedTurns = 0;
-        for (var turn = 1; turn <= options.MaxTurns && CountViableClans() > 1; turn++)
+        VictoryOutcomeSnapshot? completedVictoryOutcome = null;
+        for (var turn = 1; turn <= options.MaxTurns && CountViableClans() > 1 && completedVictoryOutcome == null; turn++)
         {
             var player = Game.Current.GetCurrentPlayer();
             if (!player.IsDead)
@@ -292,15 +294,48 @@ public sealed class PlaygroundScenarioRunner
             }
 
             completedTurns = turn;
+            if (TryCompleteDominanceVictory(options, turn, out var dominanceOutcome))
+            {
+                completedVictoryOutcome = dominanceOutcome;
+                var context = $"{dominanceOutcome.WinnerClanDisplayName} reached dominance: {dominanceOutcome.LeaderCities}/{dominanceOutcome.TotalCities} cities, lead {dominanceOutcome.LeadOverRunnerUpShare:0.##}.";
+                events.Add(context);
+                recorder.Checkpoint("dominance-victory", turn, dominanceOutcome.WinnerClanShortName ?? "System", context);
+            }
         }
 
         var winner = CountViableClans() == 1 ? Game.Current.Players.FirstOrDefault(IsViable) : null;
+        var victoryOutcome = completedVictoryOutcome ??
+                             (winner is not null
+                                 ? VictoryEvaluator.EvaluateDominance(
+                                     World.Current,
+                                     Game.Current.Players,
+                                     completedTurns,
+                                     DominanceVictoryPolicy.Disabled).WithOutcome(VictoryOutcomeKind.Conquest, false)
+                                 : VictoryEvaluator.EvaluateDominance(
+                                     World.Current,
+                                     Game.Current.Players,
+                                     completedTurns,
+                                     DominanceVictoryPolicy.ForEval(
+                                         CountViableClans(),
+                                         World.Current.GetCities().Count,
+                                         DominanceGoalMode.Readiness)));
+        Game.Current.SetVictoryOutcome(victoryOutcome);
         var status = CountViableClans() <= 1 ? "Passed" : "Passed";
-        var outcome = winner is not null
+        var outcome = victoryOutcome.OutcomeKind == VictoryOutcomeKind.DominanceVictory
+            ? $"{victoryOutcome.WinnerClanDisplayName} reached dominance after {completedTurns} turns with {victoryOutcome.LeaderCities}/{victoryOutcome.TotalCities} cities."
+            : winner is not null
             ? $"{winner.Clan.DisplayName} won the generated campaign."
             : $"Bounded stalemate after {completedTurns} turns with {CountViableClans()} viable clans.";
         events.Add(outcome);
-        recorder.Checkpoint(winner is not null ? "victory" : "stalemate", completedTurns, winner?.Clan.ShortName ?? "System", outcome);
+        recorder.Checkpoint(
+            victoryOutcome.OutcomeKind == VictoryOutcomeKind.DominanceVictory
+                ? "dominance-victory"
+                : winner is not null
+                    ? "victory"
+                    : "stalemate",
+            completedTurns,
+            victoryOutcome.WinnerClanShortName ?? winner?.Clan.ShortName ?? "System",
+            outcome);
 
         var report = CreateReport($"campaign:{options.Seed}:{options.ClanCount}", status, outcome, completedTurns);
         var result = new CampaignRunResult(
@@ -314,7 +349,8 @@ public sealed class PlaygroundScenarioRunner
             OutputDirectory: recorder.OutputDirectory,
             Checkpoints: recorder.Checkpoints.ToArray(),
             Moments: recorder.Moments.Select(moment => $"{moment.Kind}:{moment.Context}").ToArray(),
-            FinalReport: report);
+            FinalReport: report,
+            VictoryOutcome: victoryOutcome);
         recorder.SaveManifest(result);
         return result;
     }
@@ -1218,6 +1254,28 @@ public sealed class PlaygroundScenarioRunner
     private static bool UsesClassicAiMission(string scenarioFamily)
     {
         return scenarioFamily.Contains("classic-ai", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool UsesDominanceCompletion(CampaignOptions options)
+    {
+        return options.ScenarioFamily.Contains("classic-ai-conquest", StringComparison.OrdinalIgnoreCase) &&
+               !options.ScenarioFamily.Contains("endgame-cleanup", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool TryCompleteDominanceVictory(CampaignOptions options, int turn, out VictoryOutcomeSnapshot outcome)
+    {
+        outcome = VictoryEvaluator.None(turn);
+        if (!UsesDominanceCompletion(options))
+        {
+            return false;
+        }
+
+        var policy = DominanceVictoryPolicy.ForEval(
+            CountViableClans(),
+            World.Current.GetCities().Count,
+            DominanceGoalMode.Readiness);
+        outcome = VictoryEvaluator.EvaluateDominance(World.Current, Game.Current.Players, turn, policy);
+        return outcome.DominanceEligible;
     }
 
     private void DeselectIfNeeded(List<Army> armies, CampaignRecorder recorder)

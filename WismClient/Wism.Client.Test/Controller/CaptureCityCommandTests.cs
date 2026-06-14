@@ -41,6 +41,33 @@ namespace Wism.Client.Test.Controller
         }
 
         [Test]
+        public void CaptureCityCommand_CapturesEmptyEnemyCityWithUnselectedStackWithoutLeavingVisitors()
+        {
+            // Assemble
+            var controllers = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllers, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllers);
+
+            var player = Game.Current.Players[0];
+            var origin = World.Current.Map[6, 4];
+            var target = World.Current.Map[7, 4];
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+
+            // Act
+            var result = TestUtilities.ExecuteCommandUntilDone(
+                controllers.CommandController,
+                new CaptureCityCommand(controllers.CityController, player, origin.GetAllArmies(), target.City));
+
+            // Assert
+            Assert.That(result, Is.EqualTo(ActionState.Succeeded));
+            Assert.That(target.City.Clan, Is.EqualTo(player.Clan));
+            Assert.That(target.HasVisitingArmies(), Is.False);
+            Assert.That(target.GetAllArmies().Single(), Is.EqualTo(army));
+            Assert.That(origin.GetAllArmies(), Is.Empty);
+            Assert.That(Game.Current.GameState, Is.EqualTo(GameState.Ready));
+        }
+
+        [Test]
         public void CaptureCityCommand_DoesNotOverwriteHostileVisitingArmyOnCityFootprint()
         {
             var controllers = TestUtilities.CreateControllerProvider();

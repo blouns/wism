@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Wism.Client.Comparers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
@@ -41,7 +42,7 @@ namespace Assets.Scripts.UI
         private List<Army> GetSelectedArmysFromPanel()
         {
             List<Army> selectedArmys = new List<Army>();
-            for (int i = 0; i < this.selected.Length; i++)
+            for (int i = 0; i < this.armies.Count; i++)
             {
                 if (this.selected[i])
                 {
@@ -93,8 +94,9 @@ namespace Assets.Scripts.UI
 
             this.armies = new List<Army>();
             this.armies.AddRange(armies);
+            this.armies.Sort(new ByArmyViewingOrder());
 
-            RenderArmyRows(armies);
+            RenderArmyRows(this.armies);
 
             this.unityGame.InputManager.SetInputMode(InputMode.UI);
             this.gameObject.SetActive(true);

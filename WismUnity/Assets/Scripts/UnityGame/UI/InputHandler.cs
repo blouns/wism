@@ -121,31 +121,17 @@ namespace Assets.Scripts.UI
             }
 
             var armiesToSelect = new List<Army>();
+            var allArmies = tile.GetAllArmies();
+            allArmies.Sort(new ByArmyViewingOrder());
             if (selectAll)
             {
                 // Selecting all armies on tile
                 this.selectedArmyIndex = -1;
-                armiesToSelect = tile.GetAllArmies();
+                armiesToSelect = allArmies;
             }
-            else if ((tile.HasVisitingArmies() && tile.VisitingArmies.Count > 1) ||
-                     (!tile.HasVisitingArmies() && tile.HasArmies()))
+            else if (allArmies.Count > 0)
             {
-                // Select "top" army on tile
-                var allArmies = tile.GetAllArmies();
-                allArmies.Sort(new ByArmyViewingOrder());
-
-                this.selectedArmyIndex = 0;
-                armiesToSelect.Add(allArmies[0]);
-            }
-            else if (tile.HasVisitingArmies() && tile.VisitingArmies.Count == 1 &&
-                     tile.HasArmies())
-            {
-                // Cycle next army on tile
-                var allArmies = tile.GetAllArmies();
-                allArmies.Sort(new ByArmyViewingOrder());
-
-                // Now there are only Armies (no Visiting Armies)
-                this.selectedArmyIndex = (this.selectedArmyIndex + 1) % allArmies.Count;
+                this.selectedArmyIndex = GetNextSingleSelectionIndex(tile, allArmies);
                 armiesToSelect.Add(allArmies[this.selectedArmyIndex]);
             }
 
@@ -155,6 +141,27 @@ namespace Assets.Scripts.UI
                 this.gameManager.SelectArmies(armiesToSelect);
                 CenterOnTile(tile);
             }
+        }
+
+        private int GetNextSingleSelectionIndex(Tile tile, List<Army> allArmies)
+        {
+            if (!Game.Current.ArmiesSelected())
+            {
+                return 0;
+            }
+
+            var selectedArmies = Game.Current.GetSelectedArmies();
+            if (selectedArmies == null ||
+                selectedArmies.Count != 1 ||
+                selectedArmies[0].Tile != tile)
+            {
+                return 0;
+            }
+
+            var currentIndex = allArmies.IndexOf(selectedArmies[0]);
+            return currentIndex < 0
+                ? 0
+                : (currentIndex + 1) % allArmies.Count;
         }
 
         internal void DeselectObject()

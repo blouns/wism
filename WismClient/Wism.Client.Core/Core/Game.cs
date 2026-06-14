@@ -77,6 +77,8 @@ namespace Wism.Client.Core
 
         public bool IgnoreGameOver { get; set; }
 
+        public VictoryOutcomeSnapshot VictoryOutcome { get; private set; }
+
         /// <summary>
         ///     Returns the current game instance as a Singleton
         /// </summary>
@@ -191,6 +193,11 @@ namespace Wism.Client.Core
         {
             // For now just set it; later we can validate and manage the state machine
             this.GameState = newState;
+        }
+
+        public void SetVictoryOutcome(VictoryOutcomeSnapshot outcome)
+        {
+            this.VictoryOutcome = outcome ?? throw new ArgumentNullException(nameof(outcome));
         }
 
         /// <summary>

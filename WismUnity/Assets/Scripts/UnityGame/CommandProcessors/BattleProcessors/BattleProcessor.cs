@@ -30,9 +30,17 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
+            var attack = (AttackOnceCommand)command;
+            var targetTile = Wism.Client.Core.World.Current.Map[attack.X, attack.Y];
+            var defendingPlayer = BattlePresentation.ResolveDefendingPlayer(targetTile, attack.OriginalDefendingArmies);
+            var presentedBattle = BattlePresentation.ShouldPresent(attack.Player, defendingPlayer) ||
+                                  this.unityGame.WarPanel.gameObject.activeSelf;
             ActionState result = command.Execute();
 
-            this.unityGame.WarPanel.UpdateBattle(this.unityGame.CurrentAttackers, this.unityGame.CurrentDefenders);
+            if (presentedBattle)
+            {
+                this.unityGame.WarPanel.UpdateBattle(this.unityGame.CurrentAttackers, this.unityGame.CurrentDefenders);
+            }
 
             return result;
         }

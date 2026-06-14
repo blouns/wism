@@ -41,7 +41,7 @@ namespace Assets.Scripts.UI
         /// </summary>
         public void LateUpdate()
         {
-            if (!Game.IsInitialized())
+            if (!HasInitializedPlayers())
             {
                 return;
             }
@@ -59,6 +59,13 @@ namespace Assets.Scripts.UI
             }
 
             UpdateInformationPanel(this.inputHandler.GetCurrentTile());
+        }
+
+        private static bool HasInitializedPlayers()
+        {
+            return Game.IsInitialized() &&
+                   Game.Current.Players != null &&
+                   Game.Current.Players.Count > 0;
         }
 
         private void UpdateInformationPanel(Tile subject)

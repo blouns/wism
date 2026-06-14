@@ -46,7 +46,7 @@ public class PlaygroundScenarioRunnerTests
     [Test]
     public void WorktreePlan_DefaultsToBaselineTagAndSeparateBranches()
     {
-        var plan = PlaygroundScenarioRunner.CreateWorktreePlan(@"C:\repos\wism", 2);
+        var plan = PlaygroundScenarioRunner.CreateWorktreePlan("workspace", 2);
 
         Assert.That(plan.Agents, Has.Count.EqualTo(2));
         Assert.That(plan.BaseRef, Is.EqualTo("HEAD"));
@@ -426,6 +426,84 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void ClassicSurrender_RequiresSingleHumanFortyOneCitiesAndRunawayLead()
+    {
+        var standings = Enumerable.Range(0, 8)
+            .Select(index => new VictoryClanStanding(
+                $"Clan{index}",
+                $"Clan {index}",
+                index == 0 ? 41 : index == 1 ? 25 : 2,
+                3,
+                10,
+                index == 0,
+                false))
+            .ToArray();
+
+        var outcome = VictoryEvaluator.EvaluateClassicSurrender(standings, totalCities: 80, turn: 40);
+
+        Assert.That(outcome.OutcomeKind, Is.EqualTo(VictoryOutcomeKind.SurrenderOffered));
+        Assert.That(outcome.SurrenderEligible, Is.True);
+    }
+
+    [Test]
+    public void ClassicSurrender_DoesNotTriggerAtFortyCitiesOrCloseComputer()
+    {
+        var fortyCities = Enumerable.Range(0, 8)
+            .Select(index => new VictoryClanStanding($"Clan{index}", $"Clan {index}", index == 0 ? 40 : 2, 3, 10, index == 0, false))
+            .ToArray();
+        var closeComputer = Enumerable.Range(0, 8)
+            .Select(index => new VictoryClanStanding($"Clan{index}", $"Clan {index}", index == 0 ? 41 : index == 1 ? 27 : 2, 3, 10, index == 0, false))
+            .ToArray();
+
+        Assert.That(VictoryEvaluator.EvaluateClassicSurrender(fortyCities, 80, 40).SurrenderEligible, Is.False);
+        Assert.That(VictoryEvaluator.EvaluateClassicSurrender(closeComputer, 80, 40).SurrenderEligible, Is.False);
+    }
+
+    [Test]
+    public void DominancePolicy_IsMapRelativeAndRequiresStrongerTwoClanLead()
+    {
+        var twentyCityPolicy = DominanceVictoryPolicy.ForEval(8, 20, DominanceGoalMode.Readiness);
+        var twentyCityOutcome = VictoryEvaluator.EvaluateDominance(new[]
+        {
+            new VictoryClanStanding("A", "A", 11, 12, 60, false, false),
+            new VictoryClanStanding("B", "B", 5, 4, 20, false, false),
+            new VictoryClanStanding("C", "C", 1, 1, 5, false, false),
+            new VictoryClanStanding("D", "D", 1, 1, 5, false, false),
+            new VictoryClanStanding("E", "E", 1, 1, 5, false, false),
+            new VictoryClanStanding("F", "F", 1, 1, 5, false, false),
+            new VictoryClanStanding("G", "G", 0, 1, 0, false, false),
+            new VictoryClanStanding("H", "H", 0, 1, 0, false, false)
+        }, 20, 20, twentyCityPolicy);
+
+        var twoClanPolicy = DominanceVictoryPolicy.ForEval(2, 80, DominanceGoalMode.Readiness);
+        var twoClanOutcome = VictoryEvaluator.EvaluateDominance(new[]
+        {
+            new VictoryClanStanding("A", "A", 42, 10, 100, false, false),
+            new VictoryClanStanding("B", "B", 28, 9, 90, false, false)
+        }, 80, 40, twoClanPolicy);
+
+        Assert.That(twentyCityOutcome.DominanceEligible, Is.True);
+        Assert.That(twentyCityOutcome.LeaderCities, Is.EqualTo(11));
+        Assert.That(twoClanOutcome.DominanceEligible, Is.False);
+    }
+
+    [Test]
+    public void DominancePolicy_BlocksNeutralHeavyMaps()
+    {
+        var policy = DominanceVictoryPolicy.ForEval(4, 80, DominanceGoalMode.Readiness);
+        var outcome = VictoryEvaluator.EvaluateDominance(new[]
+        {
+            new VictoryClanStanding("A", "A", 44, 10, 100, false, false),
+            new VictoryClanStanding("B", "B", 20, 4, 20, false, false),
+            new VictoryClanStanding("C", "C", 1, 1, 5, false, false),
+            new VictoryClanStanding("D", "D", 1, 1, 5, false, false)
+        }, 80, 40, policy);
+
+        Assert.That(outcome.UnclaimedCityShare, Is.GreaterThan(0.15));
+        Assert.That(outcome.DominanceEligible, Is.False);
+    }
+
+    [Test]
     public void EvalScorecard_DoesNotRequireVictoryForClassicAiProductionVectoringSmoke()
     {
         var scorecard = EvalBatchRunner.BuildScorecard(new[]
@@ -531,6 +609,10 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(File.Exists(result.ScorecardPath), Is.True);
         Assert.That(File.Exists(result.LearningLedgerPath), Is.True);
         Assert.That(File.Exists(result.SummaryPath), Is.True);
+        var firstCaseJson = File.ReadLines(result.CaseResultsPath).First();
+        Assert.That(firstCaseJson, Does.Contain("\"VictoryOutcome\""));
+        Assert.That(firstCaseJson, Does.Contain("\"Metrics\""));
+        Assert.That(firstCaseJson, Does.Contain("\"OutcomeKind\""));
         Assert.That(result.Status, Is.EqualTo("Passed"));
         Assert.That(result.Scorecard.TotalCases, Is.EqualTo(5));
         Assert.That(result.Scorecard.ParseableCaseArtifacts, Is.EqualTo(5));
@@ -576,6 +658,18 @@ public class PlaygroundScenarioRunnerTests
             CampaignDirectory: null,
             CampaignManifestPath: null,
             Counters: counters,
+            VictoryOutcome: null,
+            Metrics: new EvalDominanceMetrics(
+                VictoryOutcomeKind.None.ToString(),
+                0,
+                0,
+                0,
+                0,
+                0,
+                false,
+                "none",
+                false,
+                true),
             DebugPacketPath: null,
             FailureClass: null,
             FailureMessage: null);

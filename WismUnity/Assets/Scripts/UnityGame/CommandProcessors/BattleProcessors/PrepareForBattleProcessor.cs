@@ -66,10 +66,17 @@ namespace Assets.Scripts.CommandProcessors
             }
             unityGame.CurrentDefenders = defenders;
 
-            var defendingPlayer = defenders.Count > 0
-                ? defenders[0].Player
-                : tile.City?.Player
-                  ?? throw new InvalidOperationException($"Expected a city at {prep.X},{prep.Y} for battle");
+            var defendingPlayer = BattlePresentation.ResolveDefendingPlayer(tile, defenders);
+            if (!BattlePresentation.ShouldPresent(prep.Player, defendingPlayer))
+            {
+                unityGame.InputManager.SetInputMode(InputMode.AITurn);
+                return command.Execute();
+            }
+
+            if (defendingPlayer == null)
+            {
+                return command.Execute();
+            }
 
 
             // 3) Determine modes
@@ -149,6 +156,25 @@ namespace Assets.Scripts.CommandProcessors
             // Set up war UI
             this.unityGame.WarPanel.Initialize(attackingArmies, defendingArmies, targetTile);
             this.unityGame.SetTime(this.unityGame.GameManager.WarTime);
+        }
+    }
+
+    internal static class BattlePresentation
+    {
+        public static Player ResolveDefendingPlayer(Tile targetTile, IList<Army> defenders)
+        {
+            if (defenders != null && defenders.Count > 0)
+            {
+                return defenders[0].Player;
+            }
+
+            return targetTile?.City?.Player;
+        }
+
+        public static bool ShouldPresent(Player attackingPlayer, Player defendingPlayer)
+        {
+            return (attackingPlayer?.IsHuman ?? false) ||
+                   (defendingPlayer?.IsHuman ?? false);
         }
     }
 }

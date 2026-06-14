@@ -193,6 +193,34 @@ namespace Wism.Client.Core
             this.myArmies.Add(army);
         }
 
+        internal void TransferArmyTo(Army army, Player newOwner)
+        {
+            if (army is null)
+            {
+                throw new ArgumentNullException(nameof(army));
+            }
+
+            if (newOwner is null)
+            {
+                throw new ArgumentNullException(nameof(newOwner));
+            }
+
+            if (!this.myArmies.Remove(army))
+            {
+                return;
+            }
+
+            var hero = army as Hero;
+            if (hero != null)
+            {
+                this.myHeros.Remove(hero);
+                newOwner.myHeros.Add(hero);
+            }
+
+            army.Player = newOwner;
+            newOwner.myArmies.Add(army);
+        }
+
         /// <summary>
         ///     Side-load a hero for loading only.
         /// </summary>

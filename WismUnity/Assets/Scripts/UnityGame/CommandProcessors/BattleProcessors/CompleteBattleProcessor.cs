@@ -39,10 +39,17 @@ namespace Assets.Scripts.CommandProcessors
             var completeBattle = (CompleteBattleCommand)command;
             var attackCommand = completeBattle.AttackCommand;
             var isHuman = attackCommand.Player.IsHuman;
+            var defendingPlayer = BattlePresentation.ResolveDefendingPlayer(
+                completeBattle.TargetTile,
+                attackCommand.OriginalDefendingArmies);
+            var presentedBattle = BattlePresentation.ShouldPresent(attackCommand.Player, defendingPlayer) ||
+                                  unityGame.WarPanel.gameObject.activeSelf;
 
-            // Tear down any war UI and hide the battlefield
-            unityGame.WarPanel.Teardown();
-            HideWarScene();
+            if (presentedBattle)
+            {
+                unityGame.WarPanel.Teardown();
+                HideWarScene();
+            }
 
             if (attackCommand.Result == ActionState.Failed)
             {

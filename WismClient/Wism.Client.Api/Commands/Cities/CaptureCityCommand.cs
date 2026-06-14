@@ -70,6 +70,11 @@ namespace Wism.Client.Commands.Cities
             }
 
             this.CityController.ClaimCity(this.City, this.Player);
+            if (targetTile.ContainsVisitingArmies(this.Armies))
+            {
+                targetTile.CommitVisitingArmies();
+            }
+
             Game.Current.DeselectArmies();
             return ActionState.Succeeded;
         }

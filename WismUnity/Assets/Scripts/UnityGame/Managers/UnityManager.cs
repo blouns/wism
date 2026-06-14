@@ -5,6 +5,7 @@ using Assets.Scripts.UI;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using Wism.Client.AI.CommandProviders;
 using Wism.Client.AI.Framework;
@@ -40,6 +41,7 @@ namespace Assets.Scripts.Managers
 
         // Telemetry
         private IMapSnapshotBroadcaster snapshotBroadcaster;
+        private UnitySocketTelemetryPublisher socketTelemetryPublisher;
         private float nextSnapshotTime = 0f;
         private const float snapshotInterval = 0.5f; // in seconds
 
@@ -79,6 +81,7 @@ namespace Assets.Scripts.Managers
         private ExecutionMode executionMode;
         private ProductionMode productionMode;
         private bool interactiveUI = true;
+        private bool runAiBeforeInitialHumanTurn;
 
         // AI
         private AdaptaCommandProvider adaptaProvider;
@@ -148,6 +151,8 @@ namespace Assets.Scripts.Managers
                 gameSettings = UnityGameFactory.CreateDefaultGameSettings();
             }
 
+            this.runAiBeforeInitialHumanTurn = gameSettings.IsNewGame && gameSettings.InteractiveUI;
+
             IntializeWismApi();            
             InitializeCommandProcessors();
             InitializeUI();
@@ -177,8 +182,21 @@ namespace Assets.Scripts.Managers
         private void InitializeSnapshotBroadcaster()
         {
             var builder = new MapSnapshotBuilder();
-            var emitter = new MapSnapshotEmitter(this.GameManager.LoggerFactory, CreateTelemetryContext());
+            var telemetryContext = CreateTelemetryContext();
+            this.socketTelemetryPublisher?.Dispose();
+            this.socketTelemetryPublisher = new UnitySocketTelemetryPublisher(
+                this.GameManager.LoggerFactory,
+                telemetryContext);
+            var emitter = new MapSnapshotEmitter(
+                this.GameManager.LoggerFactory,
+                telemetryContext,
+                this.socketTelemetryPublisher);
             this.snapshotBroadcaster = new UnityMapSnapshotBroadcaster(builder, emitter);
+        }
+
+        private void OnDestroy()
+        {
+            this.socketTelemetryPublisher?.Dispose();
         }
 
         private static TelemetryContext CreateTelemetryContext()
@@ -343,6 +361,7 @@ namespace Assets.Scripts.Managers
                     // Bootstrap game
                     case ExecutionMode.Bootstrap:
                         DoTasks();
+                        MoveInitialTurnToAiBeforeHumanHandoff();
                         this.ExecutionMode = ExecutionMode.Starting;
                         break;
 
@@ -398,6 +417,70 @@ namespace Assets.Scripts.Managers
             var startingTile = Game.Current.GetCurrentPlayer().Capitol.Tile;
             var worldVector = this.WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
             this.selectedArmyBox = Instantiate<GameObject>(this.SelectedBoxPrefab, worldVector, Quaternion.identity, this.WorldTilemap.transform).GetComponent<SelectedArmyBox>();
+        }
+
+        private void MoveInitialTurnToAiBeforeHumanHandoff()
+        {
+            if (!this.runAiBeforeInitialHumanTurn)
+            {
+                return;
+            }
+
+            this.runAiBeforeInitialHumanTurn = false;
+            if (!Game.IsInitialized() ||
+                Game.Current.Players == null ||
+                Game.Current.Players.Count < 2)
+            {
+                return;
+            }
+
+            var firstHuman = Game.Current.GetCurrentPlayer();
+            if (firstHuman == null || !firstHuman.IsHuman)
+            {
+                return;
+            }
+
+            var firstHumanIndex = Game.Current.Players.IndexOf(firstHuman);
+            var firstAiIndex = FindNextAiPlayerIndex(firstHumanIndex);
+            if (firstAiIndex < 0)
+            {
+                return;
+            }
+
+            SetCurrentPlayerIndex(firstAiIndex);
+            this.InputManager.SetInputMode(InputMode.AITurn);
+            LogInformation(
+                "Initial turn order: running AI turns before handing off to {0}.",
+                firstHuman.Clan.DisplayName);
+        }
+
+        private static int FindNextAiPlayerIndex(int startIndex)
+        {
+            var players = Game.Current.Players;
+            for (var offset = 1; offset < players.Count; offset++)
+            {
+                var index = (startIndex + offset) % players.Count;
+                var player = players[index];
+                if (player != null && !player.IsHuman && !player.IsDead)
+                {
+                    return index;
+                }
+            }
+
+            return -1;
+        }
+
+        private static void SetCurrentPlayerIndex(int index)
+        {
+            var property = typeof(Game).GetProperty(
+                "CurrentPlayerIndex",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (property == null)
+            {
+                throw new InvalidOperationException("Could not update initial turn order.");
+            }
+
+            property.SetValue(Game.Current, index);
         }
 
         internal void Draw()

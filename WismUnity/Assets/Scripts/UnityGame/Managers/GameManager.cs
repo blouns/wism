@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Wism.Client.Common;
 using Wism.Client.Core;
@@ -17,6 +18,7 @@ using Wism.Client.Commands.Games;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Data;
 using Assets.Scripts.UnityGame.ModKit;
+using Assets.Scripts.Persistance.Entities;
 
 namespace Assets.Scripts.Managers
 {
@@ -76,8 +78,23 @@ namespace Assets.Scripts.Managers
                 throw new System.ArgumentNullException(nameof(armies));
             }
 
+            var selectedArmies = Game.Current.GetSelectedArmies();
+            if (selectedArmies != null &&
+                selectedArmies.Count > 0 &&
+                !AreSameArmies(selectedArmies, armies))
+            {
+                this.commandController.AddCommand(
+                    new DeselectArmyCommand(this.provider.ArmyController, selectedArmies));
+            }
+
             this.commandController.AddCommand(
                 new SelectArmyCommand(this.provider.ArmyController, armies));
+        }
+
+        private static bool AreSameArmies(List<Army> first, List<Army> second)
+        {
+            return first.Count == second.Count &&
+                   !first.Except(second).Any();
         }
 
         public void DeselectArmies()
@@ -309,16 +326,48 @@ namespace Assets.Scripts.Managers
                 .GetComponent<UnityManager>();
             var snapshot = PersistanceManager.LoadEntities(filename, unityGame);
             var savedSelection = snapshot.ModKitSelection ?? snapshot.WismGameEntity?.ModKitSelection;
-            UnityModKitSelection.ApplySavedSelection(
-                unityGame,
-                savedSelection,
-                UnityModKitSelection.PluginModRoot);
+            if (savedSelection == null)
+            {
+                ApplyLegacySaveModContext(unityGame, snapshot);
+            }
+            else
+            {
+                UnityModKitSelection.ApplySavedSelection(
+                    unityGame,
+                    savedSelection,
+                    UnityModKitSelection.PluginModRoot);
+            }
 
             this.commandController.AddCommand(
                 new LoadGameCommand(this.provider.GameController, snapshot.WismGameEntity));
 
             // TODO: Ensure the Unity and Wism snapshots do not get out of sync
             PersistanceManager.SetLastSnapshot(snapshot);
+        }
+
+        private static void ApplyLegacySaveModContext(UnityManager unityGame, UnityGameEntity snapshot)
+        {
+            var worldName = snapshot.WismGameEntity?.World?.Name;
+            if (string.IsNullOrWhiteSpace(worldName))
+            {
+                worldName = string.IsNullOrWhiteSpace(snapshot.WorldName)
+                    ? DefaultWorld
+                    : snapshot.WorldName;
+            }
+
+            ModFactory.ModPath = DefaultModPath;
+            ModFactory.WorldPath = worldName;
+            ModFactory.ActiveFeaturePackIds = new List<string>();
+            ModFactory.ResetCache();
+            UnityModKitRuntimeSelection.Clear();
+
+            if (unityGame != null && unityGame.GameManager != null)
+            {
+                unityGame.GameManager.ModPath = DefaultModPath;
+                unityGame.GameManager.WorldName = worldName;
+            }
+
+            Debug.Log($"Applied legacy save mod context: {DefaultModPath}, world '{worldName}'.");
         }
 
         internal void SaveGame(string filename, string saveGameName)

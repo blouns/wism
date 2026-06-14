@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Wism.Client.Core;
 using Wism.Client.Data.Entities;
 
 namespace Wism.Agent.Playground;
@@ -43,9 +44,23 @@ public sealed record EvalCaseResult(
     string? CampaignDirectory,
     string? CampaignManifestPath,
     EvalCounters Counters,
+    VictoryOutcomeSnapshot? VictoryOutcome,
+    EvalDominanceMetrics Metrics,
     string? DebugPacketPath,
     string? FailureClass,
     string? FailureMessage);
+
+public sealed record EvalDominanceMetrics(
+    string OutcomeKind,
+    double LeaderCityShare,
+    double LeadOverRunnerUpShare,
+    double UnclaimedCityShare,
+    double LeaderArmyRatio,
+    double LeaderIncomeRatio,
+    bool DominanceEligible,
+    string DominancePolicyId,
+    bool SurrenderEligible,
+    bool IsInferred);
 
 public sealed record EvalDebugPacket(
     int SchemaVersion,
@@ -106,9 +121,15 @@ public sealed record EvalCounters(
     int InvalidCommands,
     int MixedClanTileStacks,
     int StaleVisitingArmies,
-    int GhostArmies)
+    int GhostArmies,
+    int DominanceVictories,
+    int SurrenderOffers,
+    int AcceptedSurrenders,
+    int RejectedSurrenders,
+    int InspectionModes,
+    int EndgameCleanupCompletions)
 {
-    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static EvalCounters operator +(EvalCounters left, EvalCounters right) =>
         new(
@@ -128,7 +149,13 @@ public sealed record EvalCounters(
             left.InvalidCommands + right.InvalidCommands,
             left.MixedClanTileStacks + right.MixedClanTileStacks,
             left.StaleVisitingArmies + right.StaleVisitingArmies,
-            left.GhostArmies + right.GhostArmies);
+            left.GhostArmies + right.GhostArmies,
+            left.DominanceVictories + right.DominanceVictories,
+            left.SurrenderOffers + right.SurrenderOffers,
+            left.AcceptedSurrenders + right.AcceptedSurrenders,
+            left.RejectedSurrenders + right.RejectedSurrenders,
+            left.InspectionModes + right.InspectionModes,
+            left.EndgameCleanupCompletions + right.EndgameCleanupCompletions);
 }
 
 public sealed class EvalBatchRunner
@@ -291,12 +318,18 @@ public sealed class EvalBatchRunner
             var parseable = TryReadManifest(manifestPath);
             var boardInvariants = InspectFinalBoardStateInvariants(campaign);
             var counters = CountSignals(campaign, boardInvariants.Counters);
+            var metrics = BuildDominanceMetrics(campaign.VictoryOutcome);
             var debugPacketPath = WriteDebugPackets(definition, campaign, boardInvariants);
             var hasCommandTimeout = counters.Timeouts > 0;
             var hasBoardInvariantFailure = counters.MixedClanTileStacks > 0 ||
                                            counters.StaleVisitingArmies > 0 ||
                                            counters.GhostArmies > 0;
-            var status = hasCommandTimeout || hasBoardInvariantFailure ? "Failed" : campaign.Status;
+            var requiresFullConquest = IsEndgameCleanupFocused(definition.ScenarioFamily);
+            var missingCleanupConquest = requiresFullConquest &&
+                                         campaign.VictoryOutcome?.OutcomeKind != VictoryOutcomeKind.Conquest;
+            var status = hasCommandTimeout || hasBoardInvariantFailure || missingCleanupConquest
+                ? "Failed"
+                : campaign.Status;
 
             return new EvalCaseResult(
                 CaseId: definition.CaseId,
@@ -313,13 +346,17 @@ public sealed class EvalBatchRunner
                 CampaignDirectory: campaign.OutputDirectory,
                 CampaignManifestPath: manifestPath,
                 Counters: counters,
+                VictoryOutcome: campaign.VictoryOutcome,
+                Metrics: metrics,
                 DebugPacketPath: debugPacketPath,
-                FailureClass: IsPassed(status) ? null : hasCommandTimeout ? "command-timeout" : hasBoardInvariantFailure ? "board-state-invariant" : "campaign-failed",
+                FailureClass: IsPassed(status) ? null : hasCommandTimeout ? "command-timeout" : hasBoardInvariantFailure ? "board-state-invariant" : missingCleanupConquest ? "endgame-cleanup-incomplete" : "campaign-failed",
                 FailureMessage: IsPassed(status) ? null : hasCommandTimeout
                     ? "A command exceeded the buffered in-progress execution limit."
                     : hasBoardInvariantFailure
                         ? $"Final checkpoint has {counters.MixedClanTileStacks} mixed-clan tile stack(s), {counters.StaleVisitingArmies} stale visiting army reference(s), and {counters.GhostArmies} ghost army reference(s)."
-                        : campaign.Outcome)
+                        : missingCleanupConquest
+                            ? $"Endgame cleanup requires full conquest; observed {campaign.VictoryOutcome?.OutcomeKind.ToString() ?? "None"}."
+                            : campaign.Outcome)
                 with { Status = status };
         }
         catch (Exception ex)
@@ -340,6 +377,8 @@ public sealed class EvalBatchRunner
                 CampaignDirectory: hasCampaignDirectory ? campaignDirectory : null,
                 CampaignManifestPath: hasCampaignDirectory ? manifestPath : null,
                 Counters: EvalCounters.Empty with { Crashes = 1 },
+                VictoryOutcome: null,
+                Metrics: BuildDominanceMetrics(null),
                 DebugPacketPath: null,
                 FailureClass: ex.GetType().Name,
                 FailureMessage: ex.ToString());
@@ -351,13 +390,14 @@ public sealed class EvalBatchRunner
         var moments = campaign.Moments.Select(moment => moment.ToLowerInvariant()).ToArray();
         var events = campaign.FinalReport.Events.Select(evt => evt.ToLowerInvariant()).ToArray();
         var text = moments.Concat(events).ToArray();
+        var outcomeKind = campaign.VictoryOutcome?.OutcomeKind ?? VictoryOutcomeKind.None;
 
         return new EvalCounters(
             Crashes: 0,
             Timeouts: CountContains(moments, "command-timeout"),
             ValidationFailures: campaign.Status.Equals("Failed", StringComparison.OrdinalIgnoreCase) &&
                                 campaign.Outcome.Contains("validation", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
-            Victories: campaign.Outcome.Contains(" won ", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
+            Victories: outcomeKind == VictoryOutcomeKind.Conquest || campaign.Outcome.Contains(" won ", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
             BoundedStalemates: campaign.Outcome.Contains("bounded stalemate", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
             CityCaptures: CountContains(moments, "city-capture") + CountContains(events, "captured "),
             Searches: CountContains(moments, "search") + CountContains(events, "searched "),
@@ -370,7 +410,43 @@ public sealed class EvalBatchRunner
             InvalidCommands: CountContains(text, "command failed:"),
             MixedClanTileStacks: boardInvariants.MixedClanTileStacks,
             StaleVisitingArmies: boardInvariants.StaleVisitingArmies,
-            GhostArmies: boardInvariants.GhostArmies);
+            GhostArmies: boardInvariants.GhostArmies,
+            DominanceVictories: outcomeKind == VictoryOutcomeKind.DominanceVictory ? 1 : 0,
+            SurrenderOffers: outcomeKind == VictoryOutcomeKind.SurrenderOffered ? 1 : 0,
+            AcceptedSurrenders: outcomeKind == VictoryOutcomeKind.AcceptedSurrender ? 1 : 0,
+            RejectedSurrenders: outcomeKind == VictoryOutcomeKind.RejectedSurrender ? 1 : 0,
+            InspectionModes: outcomeKind == VictoryOutcomeKind.InspectionMode ? 1 : 0,
+            EndgameCleanupCompletions: outcomeKind == VictoryOutcomeKind.Conquest ? 1 : 0);
+    }
+
+    private static EvalDominanceMetrics BuildDominanceMetrics(VictoryOutcomeSnapshot? outcome)
+    {
+        if (outcome == null)
+        {
+            return new EvalDominanceMetrics(
+                VictoryOutcomeKind.None.ToString(),
+                0,
+                0,
+                0,
+                0,
+                0,
+                false,
+                "none",
+                false,
+                true);
+        }
+
+        return new EvalDominanceMetrics(
+            outcome.OutcomeKind.ToString(),
+            outcome.LeaderCityShare,
+            outcome.LeadOverRunnerUpShare,
+            outcome.UnclaimedCityShare,
+            outcome.LeaderArmyRatio,
+            outcome.LeaderIncomeRatio,
+            outcome.DominanceEligible,
+            outcome.DominancePolicyId,
+            outcome.SurrenderEligible,
+            outcome.IsInferred);
     }
 
     private static BoardStateInvariantReport InspectFinalBoardStateInvariants(CampaignRunResult campaign)
@@ -640,6 +716,12 @@ public sealed class EvalBatchRunner
             $"- Production deliveries: {run.Scorecard.Counters.ProductionDeliveries}",
             $"- Production vectors: {run.Scorecard.Counters.ProductionVectors}",
             $"- Battles: {run.Scorecard.Counters.Battles}",
+            $"- Dominance victories: {run.Scorecard.Counters.DominanceVictories}",
+            $"- Surrender offers: {run.Scorecard.Counters.SurrenderOffers}",
+            $"- Accepted surrenders: {run.Scorecard.Counters.AcceptedSurrenders}",
+            $"- Rejected surrenders: {run.Scorecard.Counters.RejectedSurrenders}",
+            $"- Inspection modes: {run.Scorecard.Counters.InspectionModes}",
+            $"- Endgame cleanup completions: {run.Scorecard.Counters.EndgameCleanupCompletions}",
             $"- Invalid commands: {run.Scorecard.Counters.InvalidCommands}",
             $"- Mixed-clan tile stacks: {run.Scorecard.Counters.MixedClanTileStacks}",
             $"- Stale visiting armies: {run.Scorecard.Counters.StaleVisitingArmies}",
@@ -725,13 +807,16 @@ public sealed class EvalBatchRunner
     private static bool IsClassicAiFocused(string scenarioFamily) =>
         scenarioFamily.Contains("classic-ai", StringComparison.OrdinalIgnoreCase);
 
+    private static bool IsEndgameCleanupFocused(string scenarioFamily) =>
+        scenarioFamily.Contains("endgame-cleanup", StringComparison.OrdinalIgnoreCase);
+
     private static bool IsClassicAiConquestFocused(string scenarioFamily) =>
         IsClassicAiFocused(scenarioFamily) &&
         !IsProductionVectoringFocused(scenarioFamily);
 
     private static bool HasClassicAiConquestPressure(EvalCaseResult result)
     {
-        if (result.Counters.Victories > 0)
+        if (result.Counters.Victories > 0 || result.Counters.DominanceVictories > 0)
         {
             return true;
         }

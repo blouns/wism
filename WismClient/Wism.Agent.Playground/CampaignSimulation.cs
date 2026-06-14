@@ -32,7 +32,8 @@ public sealed record CampaignRunResult(
     string OutputDirectory,
     IReadOnlyList<string> Checkpoints,
     IReadOnlyList<string> Moments,
-    PlaygroundReport FinalReport);
+    PlaygroundReport FinalReport,
+    VictoryOutcomeSnapshot? VictoryOutcome);
 
 public sealed record CampaignMoment(
     string Kind,

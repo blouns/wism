@@ -82,11 +82,21 @@ namespace Assets.Scripts.UnityGame.ModKit
                 savedSelection == null ? string.Empty : savedSelection.World,
                 modRoot);
             var compatibility = ModKitSelectionService.VerifySavedSelection(modRoot, savedSelection, ResolveWismVersion());
+            report.modRoot = modRoot;
             ApplyCompatibility(report, compatibility);
             if (!compatibility.IsLoadable)
             {
                 throw new InvalidOperationException(report.outcome);
             }
+
+            if (string.IsNullOrWhiteSpace(report.worldName))
+            {
+                report.worldName = savedSelection == null || string.IsNullOrWhiteSpace(savedSelection.World)
+                    ? GameManager.DefaultWorld
+                    : savedSelection.World;
+            }
+
+            report.sceneModDrift = BuildDriftSummary(report.modRoot, report.worldName);
 
             ModFactory.ModPath = report.modRoot;
             ModFactory.WorldPath = report.worldName;
