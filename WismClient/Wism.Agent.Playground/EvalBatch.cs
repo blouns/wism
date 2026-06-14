@@ -133,7 +133,11 @@ public sealed record EvalInvariantFailure(
     int? Y,
     IReadOnlyList<int> ArmyIds,
     IReadOnlyList<string> Owners,
-    string Detail);
+    string Detail,
+    string? CheckpointPath = null,
+    int? Turn = null,
+    string? Clan = null,
+    int? CommandIndex = null);
 
 public sealed record EvalScorecard(
     int SchemaVersion,
@@ -1326,15 +1330,24 @@ public sealed class EvalBatchRunner
         var staleVisitingArmies = 0;
         var ghostArmies = 0;
         var firstFailureCheckpoint = checkpoints.LastOrDefault();
+        var momentsByCheckpoint = ReadCheckpointMoments(campaign.OutputDirectory);
         foreach (var checkpoint in checkpoints)
         {
             var report = InspectCheckpointBoardStateInvariants(checkpoint);
+            var checkpointName = Path.GetFileName(checkpoint);
+            momentsByCheckpoint.TryGetValue(checkpointName, out var moment);
             if (report.Failures.Count > 0 && failures.Count == 0)
             {
                 firstFailureCheckpoint = checkpoint;
             }
 
-            failures.AddRange(report.Failures);
+            failures.AddRange(report.Failures.Select(failure => failure with
+            {
+                CheckpointPath = checkpoint,
+                Turn = moment?.Turn,
+                Clan = moment?.Clan,
+                CommandIndex = moment?.CommandIndex
+            }));
             mixedClanTileStacks += report.Counters.MixedClanTileStacks;
             staleVisitingArmies += report.Counters.StaleVisitingArmies;
             ghostArmies += report.Counters.GhostArmies;
@@ -1347,6 +1360,39 @@ public sealed class EvalBatchRunner
                 ghostArmies),
             failures,
             firstFailureCheckpoint);
+    }
+
+    private static IReadOnlyDictionary<string, CampaignMoment> ReadCheckpointMoments(string outputDirectory)
+    {
+        var indexPath = Path.Combine(outputDirectory, "checkpoint-index.jsonl");
+        if (!File.Exists(indexPath))
+        {
+            return new Dictionary<string, CampaignMoment>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        var result = new Dictionary<string, CampaignMoment>(StringComparer.OrdinalIgnoreCase);
+        foreach (var line in File.ReadLines(indexPath))
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            try
+            {
+                var moment = JsonConvert.DeserializeObject<CampaignMoment>(line);
+                if (moment != null && !string.IsNullOrWhiteSpace(moment.CheckpointFile))
+                {
+                    result[moment.CheckpointFile] = moment;
+                }
+            }
+            catch
+            {
+                // Best-effort debug enrichment must not hide the invariant failure itself.
+            }
+        }
+
+        return result;
     }
 
     private static BoardStateInvariantReport InspectCheckpointBoardStateInvariants(string checkpoint)
