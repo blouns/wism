@@ -2,1725 +2,6 @@
   {
     "ClanName": "Neutral",
     "Defense": 4,
-    "DisplayName": "Deserton",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Deserton",
-    "X": 101,
-    "Y": 0
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Zaigonne",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Zaigonne",
-    "X": 80,
-    "Y": 3
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 6,
-    "DisplayName": "Bereri",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Bereri",
-    "X": 6,
-    "Y": 7
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Tal",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Tal",
-    "X": 35,
-    "Y": 3
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Minbourne",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 4,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Minbourne",
-    "X": 62,
-    "Y": 2
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Tirfing",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 9,
-        "Strength": 4,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Tirfing",
-    "X": 71,
-    "Y": 17
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Amenal",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Amenal",
-    "X": 10,
-    "Y": 17
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Pareth",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 5,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Pareth",
-    "X": 47,
-    "Y": 9
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Ungor",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Ungor",
-    "X": 83,
-    "Y": 8
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Gorag",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Gorag",
-    "X": 96,
-    "Y": 2
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 3,
-    "DisplayName": "Vival",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Vival",
-    "X": 3,
-    "Y": 10
-  },
-  {
-    "ClanName": "LordBane",
-    "Defense": 6,
-    "DisplayName": "Bane's Citadel",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "GiantWarriors",
-        "Moves": 10,
-        "Strength": 6,
-        "TurnsToProduce": 4,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 4,
-        "Upkeep": 8
-      },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "BanesCitadel",
-    "X": 98,
-    "Y": 9
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Needleton",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Needleton",
-    "X": 46,
-    "Y": 12
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Gunthang",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "ElvenArchers",
-        "Moves": 12,
-        "Strength": 4,
-        "TurnsToProduce": 3,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Pegasus",
-        "Moves": 16,
-        "Strength": 4,
-        "TurnsToProduce": 5,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "Gunthang",
-    "X": 34,
-    "Y": 6
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Deephallow",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Deephallow",
-    "X": 58,
-    "Y": 19
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Ak-Giriel",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "ElvenArchers",
-        "Moves": 12,
-        "Strength": 4,
-        "TurnsToProduce": 3,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Pegasus",
-        "Moves": 16,
-        "Strength": 4,
-        "TurnsToProduce": 7,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "AkGiriel",
-    "X": 16,
-    "Y": 15
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Ak-Enlie",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "ElvenArchers",
-        "Moves": 12,
-        "Strength": 4,
-        "TurnsToProduce": 3,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "AkEnlie",
-    "X": 14,
-    "Y": 16
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Ak-Farzon",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "ElvenArchers",
-        "Moves": 12,
-        "Strength": 4,
-        "TurnsToProduce": 3,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "AkFarzon",
-    "X": 28,
-    "Y": 14
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Meneloth",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 15,
-        "Strength": 5,
-        "TurnsToProduce": 5,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Meneloth",
-    "X": 69,
-    "Y": 26
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Malikor",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 13,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Malikor",
-    "X": 100,
-    "Y": 27
-  },
-  {
-    "ClanName": "Selentines",
-    "Defense": 6,
-    "DisplayName": "Enmouth",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 20,
-        "Strength": 6,
-        "TurnsToProduce": 4,
-        "Upkeep": 8
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 6,
-        "TurnsToProduce": 8,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Enmouth",
-    "X": 9,
-    "Y": 23
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Argrond",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 7,
-        "Strength": 6,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Argrond",
-    "X": 88,
-    "Y": 18
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Barthel",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Barthel",
-    "X": 30,
-    "Y": 15
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Marton",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 4,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Marton",
-    "X": 16,
-    "Y": 20
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Waybourne",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Waybourne",
-    "X": 2,
-    "Y": 26
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Dethal",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 5,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Dethal",
-    "X": 96,
-    "Y": 32
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Greenweigh",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "DwarvenLegion",
-        "Moves": 9,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Greenweigh",
-    "X": 23,
-    "Y": 27
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 3,
-    "DisplayName": "Upway",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Upway",
-    "X": 44,
-    "Y": 20
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Darclan",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Darclan",
-    "X": 83,
-    "Y": 28
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Maridun",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 18,
-        "Strength": 6,
-        "TurnsToProduce": 3,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Maridun",
-    "X": 49,
-    "Y": 19
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Jessarton",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 2,
-        "TurnsToProduce": 3,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 3,
-        "TurnsToProduce": 12,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Jessarton",
-    "X": 3,
-    "Y": 29
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Zhoran",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "DwarvenLegion",
-        "Moves": 9,
-        "Strength": 5,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Griffins",
-        "Moves": 16,
-        "Strength": 5,
-        "TurnsToProduce": 5,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "Zhoran",
-    "X": 27,
-    "Y": 36
-  },
-  {
-    "ClanName": "GreyDwarves",
-    "Defense": 6,
-    "DisplayName": "Khamar",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "DwarvenLegion",
-        "Moves": 9,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Griffins",
-        "Moves": 18,
-        "Strength": 6,
-        "TurnsToProduce": 5,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "Khamar",
-    "X": 34,
-    "Y": 37
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Upbourne",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Upbourne",
-    "X": 14,
-    "Y": 31
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Cragmorton",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "DwarvenLegion",
-        "Moves": 9,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Griffins",
-        "Moves": 16,
-        "Strength": 5,
-        "TurnsToProduce": 7,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "Cragmorton",
-    "X": 30,
-    "Y": 36
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 3,
-    "DisplayName": "Paynor",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Paynor",
-    "X": 84,
-    "Y": 40
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Carmel",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 12,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Carmel",
-    "X": 17,
-    "Y": 33
-  },
-  {
-    "ClanName": "HorseLords",
-    "Defense": 6,
-    "DisplayName": "Dunethal",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 19,
-        "Strength": 6,
-        "TurnsToProduce": 3,
-        "Upkeep": 6
-      }
-    ],
-    "ShortName": "Dunethal",
-    "X": 60,
-    "Y": 31
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Derridon",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 9,
-        "Strength": 3,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 18,
-        "Strength": 6,
-        "TurnsToProduce": 4,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Derridon",
-    "X": 49,
-    "Y": 26
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Fleymark",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 18,
-        "Strength": 6,
-        "TurnsToProduce": 3,
-        "Upkeep": 6
-      }
-    ],
-    "ShortName": "Fleymark",
-    "X": 74,
-    "Y": 31
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Pa-Kur",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 4,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "PaKur",
-    "X": 86,
-    "Y": 40
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Ar-Arak",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 4,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "ArArak",
-    "X": 102,
-    "Y": 39
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 6,
-    "DisplayName": "Dhar-Khosis",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "DwarvenLegion",
-        "Moves": 9,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Griffins",
-        "Moves": 16,
-        "Strength": 5,
-        "TurnsToProduce": 6,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "DharKhosis",
-    "X": 24,
-    "Y": 43
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Citadel Of Fire",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "CitadelOfFire",
-    "X": 50,
-    "Y": 45
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Citadel Of Ice",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "CitadelOfIce",
-    "X": 64,
-    "Y": 35
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 6,
-    "DisplayName": "Hithos",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 5,
-        "Upkeep": 8
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 20,
-        "Strength": 5,
-        "TurnsToProduce": 10,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Hithos",
-    "X": 10,
-    "Y": 42
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Ubar",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Ubar",
-    "X": 43,
-    "Y": 40
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Galin",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 8,
-        "Upkeep": 10
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Galin",
-    "X": 29,
-    "Y": 45
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Herzag",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 8
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 15,
-        "Strength": 5,
-        "TurnsToProduce": 13,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Herzag",
-    "X": 75,
-    "Y": 43
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Gimlad",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Gimlad",
-    "X": 97,
-    "Y": 44
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Vernon",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 7,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 6,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Vernon",
-    "X": 39,
-    "Y": 44
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Thurtz",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Thurtz",
-    "X": 90,
-    "Y": 46
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Kazrak",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Kazrak",
-    "X": 58,
-    "Y": 47
-  },
-  {
-    "ClanName": "OrcsOfKor",
-    "Defense": 6,
-    "DisplayName": "Kor",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "GiantWarriors",
-        "Moves": 10,
-        "Strength": 6,
-        "TurnsToProduce": 5,
-        "Upkeep": 6
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Kor",
-    "X": 99,
-    "Y": 43
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Ilnyr",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Ilnyr",
-    "X": 73,
-    "Y": 40
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Ohmsmouth",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 10,
-        "Upkeep": 18
-      }
-    ],
-    "ShortName": "Ohmsmouth",
-    "X": 11,
-    "Y": 48
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 3,
-    "DisplayName": "Himelton",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 5,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Himelton",
-    "X": 24,
-    "Y": 45
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Wellmore",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Wellmore",
-    "X": 2,
-    "Y": 52
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 6,
-    "DisplayName": "Balad Naran",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 15,
-        "Strength": 6,
-        "TurnsToProduce": 2,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "BaladNaran",
-    "X": 98,
-    "Y": 57
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Lador",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Lador",
-    "X": 27,
-    "Y": 55
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Duinoth",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 5,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Duinoth",
-    "X": 70,
-    "Y": 52
-  },
-  {
-    "ClanName": "StormGiants",
-    "Defense": 6,
-    "DisplayName": "Stormheim",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "GiantWarriors",
-        "Moves": 12,
-        "Strength": 6,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      }
-    ],
-    "ShortName": "Stormheim",
-    "X": 21,
-    "Y": 57
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Angbar",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 5,
-        "TurnsToProduce": 4,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Angbar",
-    "X": 45,
-    "Y": 52
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Ssuri",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 5,
-        "TurnsToProduce": 4,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Ssuri",
-    "X": 64,
-    "Y": 53
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
     "DisplayName": "Tasme",
     "Income": 20,
     "ProductionInfos": [
@@ -1732,23 +13,43 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
         "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
       }
     ],
     "ShortName": "Tasme",
-    "X": 4,
-    "Y": 56
+    "X": 8,
+    "Y": 112,
+    "SourceMapX": 8.5,
+    "SourceMapY": 112.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-07",
+    "SourceAnchorCells": "(8,112)|(8,113)|(9,112)|(9,113)"
   },
   {
     "ClanName": "Neutral",
     "Defense": 4,
-    "DisplayName": "Argenthorn",
+    "DisplayName": "Pa-Kur",
     "Income": 20,
     "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
       {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
@@ -1757,98 +58,22 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "ElvenArchers",
-        "Moves": 12,
-        "Strength": 4,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Pegasus",
-        "Moves": 16,
-        "Strength": 4,
-        "TurnsToProduce": 7,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "Argenthorn",
-    "X": 34,
-    "Y": 53
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 3,
-    "DisplayName": "Troy",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
-        "Moves": 15,
+        "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 4,
+        "TurnsToProduce": 6,
         "Upkeep": 8
       }
     ],
-    "ShortName": "Troy",
-    "X": 62,
-    "Y": 59
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Garom",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Garom",
-    "X": 84,
-    "Y": 55
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Quiesce",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Quiesce",
-    "X": 24,
-    "Y": 61
+    "ShortName": "PaKur",
+    "X": 86,
+    "Y": 79,
+    "SourceMapX": 86.5,
+    "SourceMapY": 79.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-66",
+    "SourceAnchorCells": "(86,79)|(86,80)|(87,79)|(87,80)"
   },
   {
     "ClanName": "Neutral",
@@ -1864,27 +89,1667 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
         "Strength": 5,
-        "TurnsToProduce": 5,
-        "Upkeep": 8
+        "TurnsToProduce": 2,
+        "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 11,
-        "Upkeep": 20
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
       }
     ],
     "ShortName": "Varde",
-    "X": 4,
-    "Y": 61
+    "X": 8,
+    "Y": 121,
+    "SourceMapX": 8.5,
+    "SourceMapY": 121.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-08",
+    "SourceAnchorCells": "(8,121)|(8,122)|(9,121)|(9,122)"
   },
   {
     "ClanName": "Neutral",
-    "Defense": 3,
+    "Defense": 4,
+    "DisplayName": "Khorfe",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Khorfe",
+    "X": 8,
+    "Y": 129,
+    "SourceMapX": 8.5,
+    "SourceMapY": 129.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-09",
+    "SourceAnchorCells": "(8,129)|(8,130)|(9,129)|(9,130)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Zaigonne",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Zaigonne",
+    "X": 83,
+    "Y": 4,
+    "SourceMapX": 83.5,
+    "SourceMapY": 4.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-62",
+    "SourceAnchorCells": "(83,4)|(83,5)|(84,4)|(84,5)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Argrond",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Argrond",
+    "X": 88,
+    "Y": 39,
+    "SourceMapX": 88.5,
+    "SourceMapY": 39.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-70",
+    "SourceAnchorCells": "(88,39)|(88,40)|(89,39)|(89,40)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Jessarton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Jessarton",
+    "X": 6,
+    "Y": 58,
+    "SourceMapX": 6.5,
+    "SourceMapY": 58.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-04",
+    "SourceAnchorCells": "(6,58)|(6,59)|(7,58)|(7,59)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Wellmore",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Wellmore",
+    "X": 4,
+    "Y": 103,
+    "SourceMapX": 4.5,
+    "SourceMapY": 103.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-02",
+    "SourceAnchorCells": "(4,103)|(4,104)|(5,103)|(5,104)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ak-Enlie",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "AkEnlie",
+    "X": 20,
+    "Y": 34,
+    "SourceMapX": 20.5,
+    "SourceMapY": 34.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-17",
+    "SourceAnchorCells": "(20,34)|(20,35)|(21,34)|(21,35)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Duinoth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Duinoth",
+    "X": 68,
+    "Y": 105,
+    "SourceMapX": 68.5,
+    "SourceMapY": 105.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-58",
+    "SourceAnchorCells": "(68,105)|(68,106)|(69,105)|(69,106)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Greenweigh",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Greenweigh",
+    "X": 29,
+    "Y": 52,
+    "SourceMapX": 29.5,
+    "SourceMapY": 52.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-23",
+    "SourceAnchorCells": "(29,52)|(29,53)|(30,52)|(30,53)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Kazrak",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Kazrak",
+    "X": 58,
+    "Y": 90,
+    "SourceMapX": 58.5,
+    "SourceMapY": 90.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-47",
+    "SourceAnchorCells": "(58,90)|(58,91)|(59,90)|(59,91)"
+  },
+  {
+    "ClanName": "OrcsOfKor",
+    "Defense": 6,
+    "DisplayName": "Kor",
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Kor",
+    "X": 100,
+    "Y": 90,
+    "SourceMapX": 100.5,
+    "SourceMapY": 90.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-80",
+    "SourceAnchorCells": "(100,90)|(100,91)|(101,90)|(101,91)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Vival",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Vival",
+    "X": 6,
+    "Y": 19,
+    "SourceMapX": 6.5,
+    "SourceMapY": 19.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-03",
+    "SourceAnchorCells": "(6,19)|(6,20)|(7,19)|(7,20)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Herzag",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Herzag",
+    "X": 78,
+    "Y": 87,
+    "SourceMapX": 78.5,
+    "SourceMapY": 87.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-61",
+    "SourceAnchorCells": "(78,87)|(78,88)|(79,87)|(79,88)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Carmel",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Carmel",
+    "X": 19,
+    "Y": 70,
+    "SourceMapX": 19.5,
+    "SourceMapY": 70.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-15",
+    "SourceAnchorCells": "(19,70)|(19,71)|(20,70)|(20,71)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ungor",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Ungor",
+    "X": 87,
+    "Y": 18,
+    "SourceMapX": 87.5,
+    "SourceMapY": 18.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-68",
+    "SourceAnchorCells": "(87,18)|(87,19)|(88,18)|(88,19)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Lador",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Lador",
+    "X": 31,
+    "Y": 105,
+    "SourceMapX": 31.5,
+    "SourceMapY": 105.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-24",
+    "SourceAnchorCells": "(31,105)|(31,106)|(32,105)|(32,106)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Waybourne",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Waybourne",
+    "X": 4,
+    "Y": 51,
+    "SourceMapX": 4.5,
+    "SourceMapY": 51.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-01",
+    "SourceAnchorCells": "(4,51)|(4,52)|(5,51)|(5,52)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Cragmorton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Cragmorton",
+    "X": 34,
+    "Y": 65,
+    "SourceMapX": 34.5,
+    "SourceMapY": 65.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-29",
+    "SourceAnchorCells": "(34,65)|(34,66)|(35,65)|(35,66)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Deephallow",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Deephallow",
+    "X": 60,
+    "Y": 30,
+    "SourceMapX": 60.5,
+    "SourceMapY": 30.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-50",
+    "SourceAnchorCells": "(60,30)|(60,31)|(61,30)|(61,31)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ak-Farzon",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "AkFarzon",
+    "X": 33,
+    "Y": 34,
+    "SourceMapX": 33.5,
+    "SourceMapY": 34.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-27",
+    "SourceAnchorCells": "(33,34)|(33,35)|(34,34)|(34,35)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ubar",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Ubar",
+    "X": 48,
+    "Y": 85,
+    "SourceMapX": 48.5,
+    "SourceMapY": 85.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-37",
+    "SourceAnchorCells": "(48,85)|(48,86)|(49,85)|(49,86)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Marton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Marton",
+    "X": 18,
+    "Y": 45,
+    "SourceMapX": 18.5,
+    "SourceMapY": 45.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-14",
+    "SourceAnchorCells": "(18,45)|(18,46)|(19,45)|(19,46)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gork",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Gork",
+    "X": 86,
+    "Y": 132,
+    "SourceMapX": 86.5,
+    "SourceMapY": 132.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-67",
+    "SourceAnchorCells": "(86,132)|(86,133)|(87,132)|(87,133)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Garom",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Garom",
+    "X": 87,
+    "Y": 114,
+    "SourceMapX": 87.5,
+    "SourceMapY": 114.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-69",
+    "SourceAnchorCells": "(87,114)|(87,115)|(88,114)|(88,115)"
+  },
+  {
+    "ClanName": "Elvallie",
+    "Defense": 6,
+    "DisplayName": "Elvallie",
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Elvallie",
+    "X": 41,
+    "Y": 124,
+    "SourceMapX": 41.5,
+    "SourceMapY": 124.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-33",
+    "SourceAnchorCells": "(41,124)|(41,125)|(42,124)|(42,125)"
+  },
+  {
+    "ClanName": "HorseLords",
+    "Defense": 6,
+    "DisplayName": "Dunethel",
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Dunethel",
+    "X": 60,
+    "Y": 71,
+    "SourceMapX": 60.5,
+    "SourceMapY": 71.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-51",
+    "SourceAnchorCells": "(60,71)|(60,72)|(61,71)|(61,72)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Beleri",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Beleri",
+    "X": 15,
+    "Y": 5,
+    "SourceMapX": 15.5,
+    "SourceMapY": 5.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-12",
+    "SourceAnchorCells": "(15,5)|(15,6)|(16,5)|(16,6)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Thurtz",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Thurtz",
+    "X": 85,
+    "Y": 89,
+    "SourceMapX": 85.5,
+    "SourceMapY": 89.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-65",
+    "SourceAnchorCells": "(85,89)|(85,90)|(86,89)|(86,90)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Himelton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Himelton",
+    "X": 22,
+    "Y": 95,
+    "SourceMapX": 22.5,
+    "SourceMapY": 95.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-19",
+    "SourceAnchorCells": "(22,95)|(22,96)|(23,95)|(23,96)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Zhoran",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Zhoran",
+    "X": 28,
+    "Y": 61,
+    "SourceMapX": 28.5,
+    "SourceMapY": 61.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-22",
+    "SourceAnchorCells": "(28,61)|(28,62)|(29,61)|(29,62)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Citadel of Ice",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "CitadelofIce",
+    "X": 63,
+    "Y": 81,
+    "SourceMapX": 63.5,
+    "SourceMapY": 81.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-53",
+    "SourceAnchorCells": "(63,81)|(63,82)|(64,81)|(64,82)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Minbourne",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Minbourne",
+    "X": 70,
+    "Y": 6,
+    "SourceMapX": 70.5,
+    "SourceMapY": 6.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-59",
+    "SourceAnchorCells": "(70,6)|(70,7)|(71,6)|(71,7)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Barthel",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Barthel",
+    "X": 32,
+    "Y": 40,
+    "SourceMapX": 32.5,
+    "SourceMapY": 40.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-26",
+    "SourceAnchorCells": "(32,40)|(32,41)|(33,40)|(33,41)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gildenhome",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Gildenhome",
+    "X": 33,
+    "Y": 125,
+    "SourceMapX": 33.5,
+    "SourceMapY": 125.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-28",
+    "SourceAnchorCells": "(33,125)|(33,126)|(34,125)|(34,126)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ssuri",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Ssuri",
+    "X": 59,
+    "Y": 111,
+    "SourceMapX": 59.5,
+    "SourceMapY": 111.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-49",
+    "SourceAnchorCells": "(59,111)|(59,112)|(60,111)|(60,112)"
+  },
+  {
+    "ClanName": "GreyDwarves",
+    "Defense": 6,
+    "DisplayName": "Khamar",
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Khamar",
+    "X": 39,
+    "Y": 62,
+    "SourceMapX": 39.5,
+    "SourceMapY": 62.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-31",
+    "SourceAnchorCells": "(39,62)|(39,63)|(40,62)|(40,63)"
+  },
+  {
+    "ClanName": "StormGiants",
+    "Defense": 6,
+    "DisplayName": "Stormheim",
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Stormheim",
+    "X": 19,
+    "Y": 107,
+    "SourceMapX": 19.5,
+    "SourceMapY": 107.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-16",
+    "SourceAnchorCells": "(19,107)|(19,108)|(20,107)|(20,108)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ar-Arak",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "ArArak",
+    "X": 95,
+    "Y": 79,
+    "SourceMapX": 95.5,
+    "SourceMapY": 79.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-77",
+    "SourceAnchorCells": "(95,79)|(95,80)|(96,79)|(96,80)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Hithos",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Hithos",
+    "X": 20,
+    "Y": 84,
+    "SourceMapX": 20.5,
+    "SourceMapY": 84.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-18",
+    "SourceAnchorCells": "(20,84)|(20,85)|(21,84)|(21,85)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ilnyr",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Ilnyr",
+    "X": 71,
+    "Y": 93,
+    "SourceMapX": 71.5,
+    "SourceMapY": 93.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-60",
+    "SourceAnchorCells": "(71,93)|(71,94)|(72,93)|(72,94)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Upway",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Upway",
+    "X": 46,
+    "Y": 53,
+    "SourceMapX": 46.5,
+    "SourceMapY": 53.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-36",
+    "SourceAnchorCells": "(46,53)|(46,54)|(47,53)|(47,54)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Dethal",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Dethal",
+    "X": 98,
+    "Y": 51,
+    "SourceMapX": 98.5,
+    "SourceMapY": 51.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-79",
+    "SourceAnchorCells": "(98,51)|(98,52)|(99,51)|(99,52)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Pareth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Pareth",
+    "X": 57,
+    "Y": 16,
+    "SourceMapX": 57.5,
+    "SourceMapY": 16.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-45",
+    "SourceAnchorCells": "(57,16)|(57,17)|(58,16)|(58,17)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Argenthorn",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Argenthorn",
+    "X": 42,
+    "Y": 113,
+    "SourceMapX": 42.5,
+    "SourceMapY": 113.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-34",
+    "SourceAnchorCells": "(42,113)|(42,114)|(43,113)|(43,114)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
     "DisplayName": "Charling",
     "Income": 20,
     "ProductionInfos": [
@@ -1894,18 +1759,7 @@
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      }
-    ],
-    "ShortName": "Charling",
-    "X": 43,
-    "Y": 66
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 6,
-    "DisplayName": "Hereuth",
-    "Income": 20,
-    "ProductionInfos": [
+      },
       {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
@@ -1913,6 +1767,30 @@
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Charling",
+    "X": 48,
+    "Y": 121,
+    "SourceMapX": 48.5,
+    "SourceMapY": 121.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-39",
+    "SourceAnchorCells": "(48,121)|(48,122)|(49,121)|(49,122)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Troy",
+    "Income": 20,
+    "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
@@ -1921,55 +1799,43 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Navy",
-        "Moves": 18,
-        "Strength": 5,
-        "TurnsToProduce": 13,
-        "Upkeep": 20
-      }
-    ],
-    "ShortName": "Hereuth",
-    "X": 75,
-    "Y": 62
-  },
-  {
-    "ClanName": "Elvallie",
-    "Defense": 6,
-    "DisplayName": "Elvallie",
-    "Income": 20,
-    "ProductionInfos": [
-      {
         "ArmyInfoName": "HeavyInfantry",
-        "Moves": 10,
+        "Moves": 8,
         "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "ElvenArchers",
-        "Moves": 12,
-        "Strength": 4,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Pegasus",
+        "ArmyInfoName": "Cavalry",
         "Moves": 16,
-        "Strength": 4,
+        "Strength": 6,
         "TurnsToProduce": 6,
-        "Upkeep": 16
+        "Upkeep": 8
       }
     ],
-    "ShortName": "Elvallie",
-    "X": 42,
-    "Y": 65
+    "ShortName": "Troy",
+    "X": 56,
+    "Y": 114,
+    "SourceMapX": 56.5,
+    "SourceMapY": 114.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-44",
+    "SourceAnchorCells": "(56,114)|(56,115)|(57,114)|(57,115)"
   },
   {
     "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Gildenhome",
+    "Defense": 4,
+    "DisplayName": "Vernon",
     "Income": 20,
     "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
       {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
@@ -1978,48 +1844,706 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "ElvenArchers",
-        "Moves": 12,
-        "Strength": 4,
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Vernon",
+    "X": 48,
+    "Y": 89,
+    "SourceMapX": 48.5,
+    "SourceMapY": 89.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-38",
+    "SourceAnchorCells": "(48,89)|(48,90)|(49,89)|(49,90)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Needleton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Pegasus",
-        "Moves": 16,
-        "Strength": 4,
-        "TurnsToProduce": 7,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "Gildenhome",
-    "X": 28,
-    "Y": 57
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 5,
-    "DisplayName": "Khorfe",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "DwarvenLegion",
-        "Moves": 9,
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
         "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Griffins",
+        "ArmyInfoName": "Cavalry",
         "Moves": 16,
-        "Strength": 5,
-        "TurnsToProduce": 8,
-        "Upkeep": 16
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
       }
     ],
-    "ShortName": "Khorfe",
-    "X": 4,
-    "Y": 65
+    "ShortName": "Needleton",
+    "X": 56,
+    "Y": 27,
+    "SourceMapX": 56.5,
+    "SourceMapY": 27.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-43",
+    "SourceAnchorCells": "(56,27)|(56,28)|(57,27)|(57,28)"
+  },
+  {
+    "ClanName": "LordBane",
+    "Defense": 6,
+    "DisplayName": "Bane\u0027s Citadel",
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "BanesCitadel",
+    "X": 92,
+    "Y": 24,
+    "SourceMapX": 92.5,
+    "SourceMapY": 24.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-74",
+    "SourceAnchorCells": "(92,24)|(92,25)|(93,24)|(93,25)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Upbourne",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Upbourne",
+    "X": 11,
+    "Y": 63,
+    "SourceMapX": 11.5,
+    "SourceMapY": 63.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-10",
+    "SourceAnchorCells": "(11,63)|(11,64)|(12,63)|(12,64)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gimlad",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Gimlad",
+    "X": 89,
+    "Y": 87,
+    "SourceMapX": 89.5,
+    "SourceMapY": 87.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-71",
+    "SourceAnchorCells": "(89,87)|(89,88)|(90,87)|(90,88)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Paynor",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Paynor",
+    "X": 83,
+    "Y": 65,
+    "SourceMapX": 83.5,
+    "SourceMapY": 65.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-63",
+    "SourceAnchorCells": "(83,65)|(83,66)|(84,65)|(84,66)"
+  },
+  {
+    "ClanName": "Selentines",
+    "Defense": 6,
+    "DisplayName": "Enmouth",
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Enmouth",
+    "X": 7,
+    "Y": 39,
+    "SourceMapX": 7.5,
+    "SourceMapY": 39.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-05",
+    "SourceAnchorCells": "(7,39)|(7,40)|(8,39)|(8,40)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ak-Giriel",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "AkGiriel",
+    "X": 28,
+    "Y": 31,
+    "SourceMapX": 28.5,
+    "SourceMapY": 31.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-21",
+    "SourceAnchorCells": "(28,31)|(28,32)|(29,31)|(29,32)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gorag",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Gorag",
+    "X": 94,
+    "Y": 18,
+    "SourceMapX": 94.5,
+    "SourceMapY": 18.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-76",
+    "SourceAnchorCells": "(94,18)|(94,19)|(95,18)|(95,19)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Darclan",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Darclan",
+    "X": 91,
+    "Y": 55,
+    "SourceMapX": 91.5,
+    "SourceMapY": 55.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-73",
+    "SourceAnchorCells": "(91,55)|(91,56)|(92,55)|(92,56)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Ohmsmouth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Ohmsmouth",
+    "X": 7,
+    "Y": 94,
+    "SourceMapX": 7.5,
+    "SourceMapY": 94.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-06",
+    "SourceAnchorCells": "(7,94)|(7,95)|(8,94)|(8,95)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Meneloth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Meneloth",
+    "X": 67,
+    "Y": 37,
+    "SourceMapX": 67.5,
+    "SourceMapY": 37.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-55",
+    "SourceAnchorCells": "(67,37)|(67,38)|(68,37)|(68,38)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Angbar",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Angbar",
+    "X": 54,
+    "Y": 109,
+    "SourceMapX": 54.5,
+    "SourceMapY": 109.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-42",
+    "SourceAnchorCells": "(54,109)|(54,110)|(55,109)|(55,110)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Malikor",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Malikor",
+    "X": 98,
+    "Y": 37,
+    "SourceMapX": 98.5,
+    "SourceMapY": 37.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-78",
+    "SourceAnchorCells": "(98,37)|(98,38)|(99,37)|(99,38)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Fleymark",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Fleymark",
+    "X": 68,
+    "Y": 73,
+    "SourceMapX": 68.5,
+    "SourceMapY": 73.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-57",
+    "SourceAnchorCells": "(68,73)|(68,74)|(69,73)|(69,74)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Citadel of Fire",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "CitadelofFire",
+    "X": 59,
+    "Y": 81,
+    "SourceMapX": 59.5,
+    "SourceMapY": 81.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-48",
+    "SourceAnchorCells": "(59,81)|(59,82)|(60,81)|(60,82)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Alfar\u0027s Gap",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "AlfarsGap",
+    "X": 22,
+    "Y": 141,
+    "SourceMapX": 22.5,
+    "SourceMapY": 141.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-20",
+    "SourceAnchorCells": "(22,141)|(22,142)|(23,141)|(23,142)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Deserton",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Deserton",
+    "X": 93,
+    "Y": 1,
+    "SourceMapX": 93.5,
+    "SourceMapY": 1.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-75",
+    "SourceAnchorCells": "(93,1)|(93,2)|(94,1)|(94,2)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Balad Naran",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "BaladNaran",
+    "X": 90,
+    "Y": 103,
+    "SourceMapX": 90.5,
+    "SourceMapY": 103.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-72",
+    "SourceAnchorCells": "(90,103)|(90,104)|(91,103)|(91,104)"
   },
   {
     "ClanName": "Neutral",
@@ -2028,12 +2552,43 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "GiantWarriors",
+        "ArmyInfoName": "LightInfantry",
         "Moves": 10,
-        "Strength": 6,
-        "TurnsToProduce": 3,
+        "Strength": 3,
+        "TurnsToProduce": 1,
         "Upkeep": 4
       },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Gluk",
+    "X": 84,
+    "Y": 129,
+    "SourceMapX": 84.5,
+    "SourceMapY": 129.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-64",
+    "SourceAnchorCells": "(84,129)|(84,130)|(85,129)|(85,130)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Amenal",
+    "Income": 20,
+    "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
@@ -2042,16 +2597,409 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
         "Strength": 5,
-        "TurnsToProduce": 3,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
         "Upkeep": 8
       }
     ],
-    "ShortName": "Gluk",
-    "X": 76,
-    "Y": 66
+    "ShortName": "Amenal",
+    "X": 12,
+    "Y": 14,
+    "SourceMapX": 12.5,
+    "SourceMapY": 14.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-11",
+    "SourceAnchorCells": "(12,14)|(12,15)|(13,14)|(13,15)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Galin",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Galin",
+    "X": 41,
+    "Y": 87,
+    "SourceMapX": 41.5,
+    "SourceMapY": 87.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-32",
+    "SourceAnchorCells": "(41,87)|(41,88)|(42,87)|(42,88)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Herueth",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Herueth",
+    "X": 65,
+    "Y": 122,
+    "SourceMapX": 65.5,
+    "SourceMapY": 122.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-54",
+    "SourceAnchorCells": "(65,122)|(65,123)|(66,122)|(66,123)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Derridon",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Derridon",
+    "X": 54,
+    "Y": 72,
+    "SourceMapX": 54.5,
+    "SourceMapY": 72.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-41",
+    "SourceAnchorCells": "(54,72)|(54,73)|(55,72)|(55,73)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Dhar-Khosis",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "DharKhosis",
+    "X": 37,
+    "Y": 80,
+    "SourceMapX": 37.5,
+    "SourceMapY": 80.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-30",
+    "SourceAnchorCells": "(37,80)|(37,81)|(38,80)|(38,81)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Maridun",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Maridun",
+    "X": 57,
+    "Y": 57,
+    "SourceMapX": 57.5,
+    "SourceMapY": 57.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-46",
+    "SourceAnchorCells": "(57,57)|(57,58)|(58,57)|(58,58)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Gunthang",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Gunthang",
+    "X": 32,
+    "Y": 30,
+    "SourceMapX": 32.5,
+    "SourceMapY": 30.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-25",
+    "SourceAnchorCells": "(32,30)|(32,31)|(33,30)|(33,31)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Quiesce",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Quiesce",
+    "X": 15,
+    "Y": 119,
+    "SourceMapX": 15.5,
+    "SourceMapY": 119.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-13",
+    "SourceAnchorCells": "(15,119)|(15,120)|(16,119)|(16,120)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Tirfing",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Tirfing",
+    "X": 68,
+    "Y": 11,
+    "SourceMapX": 68.5,
+    "SourceMapY": 11.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-56",
+    "SourceAnchorCells": "(68,11)|(68,12)|(69,11)|(69,12)"
+  },
+  {
+    "ClanName": "Sirians",
+    "Defense": 6,
+    "DisplayName": "Marthos",
+    "Income": 33,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Marthos",
+    "X": 62,
+    "Y": 143,
+    "SourceMapX": 62.5,
+    "SourceMapY": 143.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-52",
+    "SourceAnchorCells": "(62,143)|(62,144)|(63,143)|(63,144)"
+  },
+  {
+    "ClanName": "Neutral",
+    "Defense": 4,
+    "DisplayName": "Tal",
+    "Income": 20,
+    "ProductionInfos": [
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Cavalry",
+        "Moves": 16,
+        "Strength": 6,
+        "TurnsToProduce": 6,
+        "Upkeep": 8
+      }
+    ],
+    "ShortName": "Tal",
+    "X": 51,
+    "Y": 6,
+    "SourceMapX": 51.5,
+    "SourceMapY": 6.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-40",
+    "SourceAnchorCells": "(51,6)|(51,7)|(52,6)|(52,7)"
   },
   {
     "ClanName": "Neutral",
@@ -2060,125 +3008,35 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "ElvenArchers",
-        "Moves": 12,
-        "Strength": 4,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Pegasus",
-        "Moves": 16,
-        "Strength": 4,
-        "TurnsToProduce": 7,
-        "Upkeep": 16
-      }
-    ],
-    "ShortName": "Loremark",
-    "X": 31,
-    "Y": 72
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Gork",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "GiantWarriors",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 5,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
-      {
-        "ArmyInfoName": "WolfRiders",
-        "Moves": 14,
-        "Strength": 5,
-        "TurnsToProduce": 3,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "Gork",
-    "X": 87,
-    "Y": 61
-  },
-  {
-    "ClanName": "Neutral",
-    "Defense": 4,
-    "DisplayName": "Alfar's Gap",
-    "Income": 20,
-    "ProductionInfos": [
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 5,
-        "TurnsToProduce": 5,
-        "Upkeep": 8
-      }
-    ],
-    "ShortName": "AlfarsGap",
-    "X": 11,
-    "Y": 71
-  },
-  {
-    "ClanName": "Sirians",
-    "Defense": 6,
-    "DisplayName": "Marthos",
-    "Income": 20,
-    "ProductionInfos": [
       {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
         "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 4,
+        "TurnsToProduce": 6,
         "Upkeep": 8
-      },
-      {
-        "ArmyInfoName": "Pegasus",
-        "Moves": 15,
-        "Strength": 5,
-        "TurnsToProduce": 7,
-        "Upkeep": 16
       }
     ],
-    "ShortName": "Marthos",
-    "X": 71,
-    "Y": 62
+    "ShortName": "Loremark",
+    "X": 43,
+    "Y": 132,
+    "SourceMapX": 43.5,
+    "SourceMapY": 132.5,
+    "SourceConfidence": "high",
+    "SourceEvidence": "109x156-wordmap-exe-coordinate-exact-match",
+    "SourceAnchorId": "C27-35",
+    "SourceAnchorCells": "(43,132)|(43,133)|(44,132)|(44,133)"
   }
 ]

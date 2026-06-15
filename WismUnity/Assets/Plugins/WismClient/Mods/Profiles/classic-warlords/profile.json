@@ -4,19 +4,19 @@
   "version": "1.0.0",
   "minWismVersion": "0.1.0",
   "displayName": "Classic Warlords",
-  "baseWorld": "TestWorld",
+  "baseWorld": "Illuria",
   "modeId": "classic",
   "enabledPacks": [
     "pack-dusklands-visual",
     "pack-illurian-legends-flavor"
   ],
   "modRoot": "mod",
-  "unityScene": "Assets/Scenes/Test/TestWorld.unity",
+  "unityScene": "Assets/Scenes/Illuria.unity",
   "launch": {
-    "world": "TestWorld",
+    "world": "Illuria",
     "seed": 1990,
-    "clans": 2,
-    "maxTurns": 12,
+    "clans": 8,
+    "maxTurns": 0,
     "scenario": "standard"
   }
 }

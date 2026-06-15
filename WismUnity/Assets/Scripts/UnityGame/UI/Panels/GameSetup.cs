@@ -3,12 +3,14 @@ using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Wism.Client.Modules;
 using Wism.Client.Modules.Infos;
+using Wism.Client.Modules.Profiles;
 using Toggle = UnityEngine.UI.Toggle;
 
 public class GameSetup : MonoBehaviour
@@ -26,6 +28,7 @@ public class GameSetup : MonoBehaviour
     private Button startButton;
     private Text validationText;
     private ClanInfo[] availableClans = new ClanInfo[0];
+    private bool isInitializing;
 
     public void Start()
     {
@@ -34,11 +37,23 @@ public class GameSetup : MonoBehaviour
             throw new InvalidOperationException("Must have at least one player.");
         }
 
-        this.worldName = GetWorldNameFromPanel();
-        if (UnityModKitRuntimeSelection.HasSelection)
+        isInitializing = true;
+        try
         {
-            this.worldName = UnityModKitRuntimeSelection.CurrentSelection.World;
-            TrySelectWorldInPanel(this.worldName);
+            this.worldName = UnityModKitRuntimeSelection.HasSelection
+                ? UnityModKitRuntimeSelection.CurrentSelection.World
+                : ResolveDefaultWorldName();
+            EnsureWorldDropdownOptions(this.worldName);
+            EnsureDefaultModKitSelection();
+            if (UnityModKitRuntimeSelection.HasSelection)
+            {
+                this.worldName = UnityModKitRuntimeSelection.CurrentSelection.World;
+                TrySelectWorldInPanel(this.worldName);
+            }
+        }
+        finally
+        {
+            isInitializing = false;
         }
 
         this.startButton = GameObject.Find("StartButton")?.GetComponent<Button>();
@@ -69,6 +84,11 @@ public class GameSetup : MonoBehaviour
 
     public void OnWorldChange()
     {
+        if (isInitializing)
+        {
+            return;
+        }
+
         this.worldName = GetWorldNameFromPanel();
         if (UnityModKitRuntimeSelection.HasSelection &&
             !string.Equals(UnityModKitRuntimeSelection.CurrentSelection.World, this.worldName, StringComparison.OrdinalIgnoreCase))
@@ -194,7 +214,7 @@ public class GameSetup : MonoBehaviour
         }
         else
         {
-            ModFactory.ModPath = GameManager.DefaultModPath;
+            ModFactory.ModPath = ResolveDefaultModRoot();
             ModFactory.WorldPath = settings.WorldName;
             ModFactory.ActiveFeaturePackIds = new List<string>();
             ModFactory.ResetCache();
@@ -330,7 +350,7 @@ public class GameSetup : MonoBehaviour
             }
         }
 
-        ModFactory.ModPath = GameManager.DefaultModPath;
+        ModFactory.ModPath = ResolveDefaultModRoot();
         ModFactory.WorldPath = this.worldName;
         ModFactory.ActiveFeaturePackIds = new List<string>();
         ModFactory.ResetCache();
@@ -483,6 +503,97 @@ public class GameSetup : MonoBehaviour
             (loadRect.anchoredPosition.x + startRect.anchoredPosition.x) / 2f,
             loadRect.anchoredPosition.y);
         rect.sizeDelta = new Vector2(180f, loadRect.sizeDelta.y);
+    }
+
+    private static void EnsureDefaultModKitSelection()
+    {
+        if (UnityModKitRuntimeSelection.HasSelection)
+        {
+            return;
+        }
+
+        var report = UnityModKitSelection.Inspect(
+            ModularGameProfileCatalog.DefaultProfileId,
+            null,
+            string.Empty,
+            UnityModKitSelection.PluginModRoot);
+        if (report.isLoadable)
+        {
+            UnityModKitRuntimeSelection.Set(report);
+        }
+    }
+
+    private static string ResolveDefaultWorldName()
+    {
+        try
+        {
+            var selection = ModularGameProfileCatalog.ResolveFromModRoot(
+                UnityModKitSelection.PluginModRoot,
+                ModularGameProfileCatalog.DefaultProfileId,
+                null);
+            if (!string.IsNullOrWhiteSpace(selection.Launch.World))
+            {
+                return selection.Launch.World;
+            }
+
+            if (!string.IsNullOrWhiteSpace(selection.BaseWorld))
+            {
+                return selection.BaseWorld;
+            }
+        }
+        catch
+        {
+            // Fall back to the compiled Unity default if plugin MOD data is unavailable.
+        }
+
+        return GameManager.DefaultWorld;
+    }
+
+    private static string ResolveDefaultModRoot()
+    {
+        return Directory.Exists(UnityModKitSelection.PluginModRoot)
+            ? UnityModKitSelection.PluginModRoot
+            : GameManager.DefaultModPath;
+    }
+
+    private static void EnsureWorldDropdownOptions(string preferredWorld)
+    {
+        var dropdownObject = GameObject.Find("WorldDropdown");
+        if (dropdownObject == null)
+        {
+            return;
+        }
+
+        var dropdown = dropdownObject.GetComponent<Dropdown>();
+        if (dropdown == null)
+        {
+            return;
+        }
+
+        var worldsRoot = Path.Combine(ResolveDefaultModRoot(), ModFactory.WorldsPath);
+        if (!Directory.Exists(worldsRoot))
+        {
+            TrySelectWorldInPanel(preferredWorld);
+            return;
+        }
+
+        var worlds = Directory.GetDirectories(worldsRoot)
+            .Select(Path.GetFileName)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (worlds.Count == 0)
+        {
+            TrySelectWorldInPanel(preferredWorld);
+            return;
+        }
+
+        dropdown.ClearOptions();
+        dropdown.AddOptions(worlds);
+        var index = worlds.FindIndex(world =>
+            string.Equals(world, preferredWorld, StringComparison.OrdinalIgnoreCase));
+        dropdown.value = Math.Max(0, index);
+        dropdown.RefreshShownValue();
     }
 
     private static void TrySelectWorldInPanel(string worldName)

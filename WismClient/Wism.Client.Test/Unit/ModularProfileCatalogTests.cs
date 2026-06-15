@@ -25,13 +25,16 @@ public sealed class ModularProfileCatalogTests
         var selection = ModularGameProfileCatalog.Resolve(TestContext.CurrentContext.TestDirectory);
 
         Assert.That(selection.Profile.Id, Is.EqualTo("classic-warlords"));
-        Assert.That(selection.BaseWorld, Is.EqualTo("TestWorld"));
+        Assert.That(selection.BaseWorld, Is.EqualTo("Illuria"));
+        Assert.That(selection.Profile.UnityScene, Is.EqualTo("Assets/Scenes/Illuria.unity"));
         Assert.That(selection.PackIds, Is.EqualTo(new[]
         {
             "pack-dusklands-visual",
             "pack-illurian-legends-flavor"
         }));
-        Assert.That(selection.Launch.World, Is.EqualTo("TestWorld"));
+        Assert.That(selection.Launch.World, Is.EqualTo("Illuria"));
+        Assert.That(selection.Launch.Clans, Is.EqualTo(8));
+        Assert.That(selection.Launch.MaxTurns, Is.EqualTo(0));
     }
 
     [Test]
