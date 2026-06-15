@@ -110,10 +110,13 @@ public class CaptureModule : ITacticalModule
                 bidArmies,
                 this,
                 utility,
-                targetCity.Clan == null || targetCity.Clan.ShortName == "Neutral" ? "Expand" : "Siege",
+                targetCity.Clan == null || string.Equals(targetCity.Clan.ShortName, "Neutral", StringComparison.OrdinalIgnoreCase) ? "Expand" : "Siege",
                 targetCity.ShortName,
                 targetX: targetCity.X,
-                targetY: targetCity.Y));
+                targetY: targetCity.Y,
+                reason: captureArmies.Count > 0
+                    ? $"Adjacent legal capture of {targetCity.ShortName}."
+                    : $"Best reachable city pressure target {targetCity.ShortName}."));
         }
 
         return bids;
@@ -377,7 +380,7 @@ public class CaptureModule : ITacticalModule
                 origin.IsNeighbor(tile) &&
                 tile.HasRoom(1) &&
                 !tile.MusterArmy().Any(a => a.Clan != player.Clan) &&
-                army.MovesRemaining > tile.Terrain.MovementCost))
+                army.MovesRemaining >= tile.Terrain.MovementCost))
             .OrderBy(GetMobilityPriority)
             .ThenBy(army => army.Id)
             .Take(1)

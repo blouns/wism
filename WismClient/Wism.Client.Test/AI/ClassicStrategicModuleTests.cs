@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
+using Wism.Client.AI.Framework;
 using Wism.Client.Commands;
 using Wism.Client.Core;
 using Wism.Client.Data;
@@ -82,7 +83,31 @@ namespace Wism.Client.Test.AI
             var metadata = accepted as IStrategicBidMetadata;
             Assert.That(metadata, Is.Not.Null);
             Assert.That(metadata.TargetCityShortName, Is.EqualTo(targetObjective.TargetCityShortName));
+            Assert.That(metadata.Reason, Does.Contain(targetObjective.TargetCityShortName));
             Assert.That(accepted.Utility, Is.GreaterThan(unrelated.Utility));
+        }
+
+        [Test]
+        public void AiController_RecordsCompactDecisionTraceForAcceptedBid()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), player.Capitol.Tile);
+            var tactical = new TraceTacticalModule("Expand", "TestCity");
+            var controller = new AiController(
+                new SimpleStrategicModule(),
+                new List<ITacticalModule> { tactical });
+
+            controller.ExecuteTurnAndReturnCommands(World.Current);
+
+            var trace = controller.LastDecisionTraces.Single();
+            Assert.That(trace.ObjectiveKind, Is.EqualTo("Expand"));
+            Assert.That(trace.ModuleName, Is.EqualTo(nameof(TraceTacticalModule)));
+            Assert.That(trace.Target, Is.EqualTo("city:TestCity"));
+            Assert.That(trace.Reason, Does.Contain("TestCity"));
+            Assert.That(trace.ArmyIds, Does.Contain(army.Id));
+            Assert.That(trace.CommandNames, Is.Empty);
         }
 
         private sealed class NoOpTacticalModule : ITacticalModule
@@ -90,6 +115,37 @@ namespace Wism.Client.Test.AI
             public IEnumerable<IBid> GenerateBids(World world)
             {
                 return Enumerable.Empty<IBid>();
+            }
+
+            public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
+            {
+                return Enumerable.Empty<ICommandAction>();
+            }
+        }
+
+        private sealed class TraceTacticalModule : ITacticalModule
+        {
+            private readonly string objectiveKind;
+            private readonly string targetCityShortName;
+
+            public TraceTacticalModule(string objectiveKind, string targetCityShortName)
+            {
+                this.objectiveKind = objectiveKind;
+                this.targetCityShortName = targetCityShortName;
+            }
+
+            public IEnumerable<IBid> GenerateBids(World world)
+            {
+                var army = Game.Current.GetCurrentPlayer().GetArmies().Single();
+                return new IBid[]
+                {
+                    new StrategicBid(
+                        new List<Army> { army },
+                        this,
+                        10.0,
+                        objectiveKind,
+                        targetCityShortName)
+                };
             }
 
             public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)

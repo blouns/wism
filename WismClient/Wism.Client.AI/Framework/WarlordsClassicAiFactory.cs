@@ -29,7 +29,7 @@ namespace Wism.Client.AI.Framework
                     new CityDefenseModule(controllerProvider.ArmyController, logger),
                     new CaptureModule(controllerProvider.ArmyController, controllerProvider.CityController, garrisonPolicy, logger),
                     new ExterminationModule(pathfinder, pathingStrategy, controllerProvider.ArmyController, new CombatEstimator(), garrisonPolicy, logger),
-                    new SearchModule(controllerProvider.ArmyController, controllerProvider.LocationController, pathingStrategy, garrisonPolicy, logger, allowTempleSearch),
+                    new SearchModule(controllerProvider.ArmyController, controllerProvider.HeroController, controllerProvider.LocationController, pathingStrategy, garrisonPolicy, logger, allowTempleSearch),
                     new RallyModule(controllerProvider.ArmyController, pathingStrategy, garrisonPolicy, logger)
                 },
                 new List<ITurnModule>

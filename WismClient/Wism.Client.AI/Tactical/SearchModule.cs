@@ -4,6 +4,7 @@ using Wism.Client.AI.Framework;
 using Wism.Client.AI.Services;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Heros;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
@@ -22,6 +23,7 @@ namespace Wism.Client.AI.Tactical
         private const int MaxCandidateLocationsPerStack = 16;
 
         private readonly ArmyController armyController;
+        private readonly HeroController heroController;
         private readonly LocationController locationController;
         private readonly IPathingStrategy pathingStrategy;
         private readonly GarrisonPolicy garrisonPolicy;
@@ -33,7 +35,7 @@ namespace Wism.Client.AI.Tactical
             LocationController locationController,
             IPathingStrategy pathingStrategy,
             IWismLogger logger)
-            : this(armyController, locationController, pathingStrategy, GarrisonPolicy.None, logger)
+            : this(armyController, null, locationController, pathingStrategy, GarrisonPolicy.None, logger)
         {
         }
 
@@ -44,8 +46,21 @@ namespace Wism.Client.AI.Tactical
             GarrisonPolicy garrisonPolicy,
             IWismLogger logger,
             bool allowTempleSearch = true)
+            : this(armyController, null, locationController, pathingStrategy, garrisonPolicy, logger, allowTempleSearch)
+        {
+        }
+
+        public SearchModule(
+            ArmyController armyController,
+            HeroController heroController,
+            LocationController locationController,
+            IPathingStrategy pathingStrategy,
+            GarrisonPolicy garrisonPolicy,
+            IWismLogger logger,
+            bool allowTempleSearch = true)
         {
             this.armyController = armyController;
+            this.heroController = heroController;
             this.locationController = locationController;
             this.pathingStrategy = pathingStrategy;
             this.garrisonPolicy = garrisonPolicy;
@@ -62,6 +77,33 @@ namespace Wism.Client.AI.Tactical
                 return bids;
             }
 
+            var stacks = player.GetArmies()
+                .Where(army => army.MovesRemaining > 0)
+                .GroupBy(army => (army.Tile.X, army.Tile.Y));
+
+            foreach (var group in stacks)
+            {
+                var stack = this.garrisonPolicy.GetMobileArmies(group.ToList());
+                if (stack.Count == 0)
+                {
+                    continue;
+                }
+
+                var pickupHero = FindItemPickupHero(stack);
+                if (pickupHero != null)
+                {
+                    bids.Add(new StrategicBid(
+                        stack,
+                        this,
+                        CurrentLocationSearchUtility + 3.0,
+                        "Search",
+                        targetX: pickupHero.Tile.X,
+                        targetY: pickupHero.Tile.Y,
+                        reason: $"Hero {pickupHero.ShortName} can pick up {pickupHero.Tile.Items.Count} item(s)."));
+                    continue;
+                }
+            }
+
             var locations = world.GetLocations()
                 .Where(location => location != null && location.Tile != null && !location.Searched)
                 .OrderBy(location => location.ShortName)
@@ -71,10 +113,6 @@ namespace Wism.Client.AI.Tactical
             {
                 return bids;
             }
-
-            var stacks = player.GetArmies()
-                .Where(army => army.MovesRemaining > 0)
-                .GroupBy(army => (army.Tile.X, army.Tile.Y));
 
             foreach (var group in stacks)
             {
@@ -103,7 +141,8 @@ namespace Wism.Client.AI.Tactical
                     "Search",
                     targetLocationShortName: target.ShortName,
                     targetX: target.X,
-                    targetY: target.Y));
+                    targetY: target.Y,
+                    reason: $"Best reachable search target {target.ShortName}."));
             }
 
             return bids;
@@ -120,6 +159,14 @@ namespace Wism.Client.AI.Tactical
             armies = this.garrisonPolicy.GetMobileArmies(armies);
             if (armies.Count == 0)
             {
+                return commands;
+            }
+
+            var pickupHero = FindItemPickupHero(armies);
+            if (pickupHero != null)
+            {
+                logger.LogInformation($"[Search] Hero {pickupHero.ShortName} picking up {pickupHero.Tile.Items.Count} item(s).");
+                commands.Add(new TakeItemsCommand(this.heroController, pickupHero));
                 return commands;
             }
 
@@ -245,6 +292,21 @@ namespace Wism.Client.AI.Tactical
             }
 
             return OpportunisticSearchTravelUtility;
+        }
+
+        private Hero FindItemPickupHero(List<Army> armies)
+        {
+            if (this.heroController == null)
+            {
+                return null;
+            }
+
+            return armies
+                .OfType<Hero>()
+                .Where(hero => hero.MovesRemaining > 0)
+                .Where(hero => hero.Tile != null && hero.Tile.HasItems())
+                .OrderBy(hero => hero.ShortName)
+                .FirstOrDefault();
         }
 
         private static bool IsHeroExplorationLocation(Location location)

@@ -15,6 +15,7 @@ namespace Wism.Client.AI.Framework
         private readonly List<ITacticalModule> tacticalModules;
         private readonly List<ITurnModule> turnModules;
         private readonly IWismLogger logger;
+        private List<AiDecisionTrace> lastDecisionTraces = new List<AiDecisionTrace>();
 
         public AiController(IStrategicModule strategicModule, List<ITacticalModule> tacticalModules)
             : this(strategicModule, tacticalModules, new List<ITurnModule>(), null)
@@ -43,9 +44,12 @@ namespace Wism.Client.AI.Framework
             return tacticalModules.SelectMany(module => module.GenerateBids(world));
         }
 
+        public IReadOnlyList<AiDecisionTrace> LastDecisionTraces => lastDecisionTraces;
+
         public List<ICommandAction> ExecuteTurnAndReturnCommands(World world)
         {
             var commands = new List<ICommandAction>();
+            var traces = new List<AiDecisionTrace>();
             LogDecisionStart(world);
             strategicModule.UpdateGoals(world);
 
@@ -76,14 +80,51 @@ namespace Wism.Client.AI.Framework
             {
                 var generated = bid.Module.GenerateCommands(bid.Armies, world)?.ToList() ?? new List<ICommandAction>();
                 LogBidCommands(bid, generated);
+                traces.Add(CreateTrace(bid, generated));
                 if (generated.Count > 0)
                 {
                     commands.AddRange(generated);
                 }
             }
 
+            lastDecisionTraces = traces;
             LogDecisionComplete(commands);
             return commands;
+        }
+
+        private static AiDecisionTrace CreateTrace(IBid bid, List<ICommandAction> commands)
+        {
+            var metadata = bid as IStrategicBidMetadata;
+            return new AiDecisionTrace(
+                objectiveKind: metadata?.ObjectiveKind ?? "Unknown",
+                moduleName: bid?.Module?.GetType().Name ?? "Unknown",
+                score: bid?.Utility ?? 0,
+                target: DescribeTarget(metadata),
+                reason: metadata?.Reason ?? "No strategic reason recorded.",
+                armyIds: bid?.Armies?.Where(army => army != null).Select(army => army.Id).ToArray(),
+                commandNames: commands?.Select(command => command.GetType().Name).ToArray());
+        }
+
+        private static string DescribeTarget(IStrategicBidMetadata metadata)
+        {
+            if (metadata == null)
+            {
+                return "none";
+            }
+
+            if (!string.IsNullOrWhiteSpace(metadata.TargetCityShortName))
+            {
+                return "city:" + metadata.TargetCityShortName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(metadata.TargetLocationShortName))
+            {
+                return "location:" + metadata.TargetLocationShortName;
+            }
+
+            return metadata.TargetX.HasValue && metadata.TargetY.HasValue
+                ? "tile:" + metadata.TargetX.Value + "," + metadata.TargetY.Value
+                : "none";
         }
 
         private void LogDecisionStart(World world)
