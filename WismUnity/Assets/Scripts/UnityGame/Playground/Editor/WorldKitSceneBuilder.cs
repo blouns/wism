@@ -18,6 +18,12 @@ namespace WismUnity.Playground
     {
         const string SourceScenePath = "Assets/Scenes/Mini-Illuria.unity";
         const string PluginWorldsRoot = "Assets/Plugins/WismClient/Mods/Worlds";
+        const string CityMarkerPrefabPath = "Assets/Prefab/Editor/City.prefab";
+        const string LibraryMarkerPrefabPath = "Assets/Prefab/Editor/Library.prefab";
+        const string RuinsMarkerPrefabPath = "Assets/Prefab/Editor/Ruins.prefab";
+        const string SageMarkerPrefabPath = "Assets/Prefab/Editor/Sage.prefab";
+        const string TempleMarkerPrefabPath = "Assets/Prefab/Editor/Temple.prefab";
+        const string TombMarkerPrefabPath = "Assets/Prefab/Editor/Tomb.prefab";
 
         [MenuItem("WISM/World Kit/Build Near-Illuria Scene")]
         public static void BuildNearIlluriaScene()
@@ -241,11 +247,19 @@ namespace WismUnity.Playground
                 AddSceneCheck(sceneCityNames.SetEquals(expectedCityNames), checks, issues, "Scene city marker names match MOD data.", "Scene city marker names do not match MOD data.");
                 AddSceneCheck(sceneLocationNames.SetEquals(expectedLocationNames), checks, issues, "Scene location marker names match MOD data.", "Scene location marker names do not match MOD data.");
                 AddSceneCheck(sceneSiteAnchorIds.SetEquals(expectedSiteAnchorIds), checks, issues, "Scene site anchor marker ids match MOD data.", "Scene site anchor marker ids do not match MOD data.");
+                AddSceneCheck(FindSceneGameObjects(scene, "Cities").Count == 1, checks, issues, "Scene has one Cities container.", $"Scene has {FindSceneGameObjects(scene, "Cities").Count} Cities containers.");
+                AddSceneCheck(FindSceneGameObjects(scene, "Locations").Count == 1, checks, issues, "Scene has one Locations container.", $"Scene has {FindSceneGameObjects(scene, "Locations").Count} Locations containers.");
+                AddSceneCheck(cityContainer.GetComponent<CityContainer>() != null, checks, issues, "Cities container has CityContainer settings.", "Cities container is missing CityContainer settings.");
+                AddSceneCheck(locationContainer.GetComponent<LocationContainer>() != null, checks, issues, "Locations container has LocationContainer settings.", "Locations container is missing LocationContainer settings.");
+                AddSceneCheck(CityMarkersAreRuntimeReady(cityEntries), checks, issues, "City markers have City tag, CityEntry, and SpriteRenderer.", "One or more city markers are missing City tag, CityEntry, or SpriteRenderer.");
+                AddSceneCheck(LocationMarkersAreRuntimeReady(locationEntries), checks, issues, "Location markers have Location tag, LocationEntry, and SpriteRenderer.", "One or more location markers are missing Location tag, LocationEntry, or SpriteRenderer.");
                 AddSceneCheck(grid == null || IsZeroTransform(grid.transform), checks, issues, "Generated Grid transform is normalized.", "Generated Grid transform is not normalized; copied scene offset is still present.");
                 AddSceneCheck(IsZeroLocalTransform(tilemap.transform), checks, issues, "Generated WorldTilemap local transform is normalized.", "Generated WorldTilemap local transform is not normalized.");
                 AddSceneCheck(CityMarkerPositionsMatch(cityEntries, cities, mapHeight), checks, issues, "Scene city marker positions match flipped MOD coordinates.", "Scene city marker positions do not match flipped MOD coordinates.");
                 AddSceneCheck(LocationMarkerPositionsMatch(locationEntries, locations, mapHeight), checks, issues, "Scene location marker positions match flipped MOD coordinates.", "Scene location marker positions do not match flipped MOD coordinates.");
                 AddSceneCheck(SiteAnchorPositionsMatch(siteAnchorEntries, siteAnchors, mapHeight), checks, issues, "Scene site anchor marker positions match flipped MOD coordinates.", "Scene site anchor marker positions do not match flipped MOD coordinates.");
+                AddSceneCheck(CityFootprintsArePainted(tilemap, cities, mapHeight), checks, issues, "City markers line up with painted 2x2 city footprints.", "One or more city markers do not line up with painted 2x2 city footprints.");
+                AddSceneCheck(LocationTilesArePainted(tilemap, locations, mapHeight), checks, issues, "Location markers line up with painted location tiles.", "One or more location markers do not line up with painted location tiles.");
 
                 return new JObject
                 {
@@ -446,9 +460,10 @@ namespace WismUnity.Playground
 
         static void RebuildCityObjects(Scene scene, Tilemap tilemap, IReadOnlyList<JObject> cities, int mapHeight)
         {
-            var container = FindOrCreateRoot(scene, "Cities");
+            var container = EnsureSceneContainer<CityContainer>(scene, "Cities");
             ClearChildren(container);
             var tileAssets = LoadTileAssets();
+            var markerPrefab = GetCityMarkerPrefab(container);
 
             foreach (var city in cities)
             {
@@ -462,20 +477,20 @@ namespace WismUnity.Playground
                 tilemap.SetTile(new Vector3Int(x + 1, y, 0), cityTile);
                 tilemap.SetTile(new Vector3Int(x + 1, y - 1, 0), cityTile);
 
-                var go = new GameObject(shortName);
-                go.transform.SetParent(container.transform, false);
-                go.transform.position = new Vector3(x, y - 1, 0);
+                var go = InstantiateMarker(markerPrefab, scene, container.transform, shortName);
+                go.tag = "City";
+                go.transform.position = tilemap.CellToWorld(new Vector3Int(x, y - 1, 0));
                 go.transform.localScale = new Vector3(2f, 2f, 1f);
-                go.AddComponent<CityEntry>().cityShortName = shortName;
+                EnsureComponent<CityEntry>(go).cityShortName = shortName;
+                EnsureComponent<SpriteRenderer>(go);
             }
         }
 
         static void RebuildLocationObjects(Scene scene, Tilemap tilemap, IReadOnlyList<JObject> locations, int mapHeight)
         {
-            var container = FindOrCreateRoot(scene, "Locations");
+            var container = EnsureSceneContainer<LocationContainer>(scene, "Locations");
             ClearChildren(container);
             var tileAssets = LoadTileAssets();
-
             foreach (var location in locations)
             {
                 var x = location.Value<int>("X");
@@ -487,11 +502,12 @@ namespace WismUnity.Playground
                     tilemap.SetTile(new Vector3Int(x, y, 0), tileAsset);
                 }
 
-                var go = new GameObject(shortName);
-                go.transform.SetParent(container.transform, false);
-                go.transform.position = new Vector3(x, y, 0);
+                var go = InstantiateMarker(GetLocationMarkerPrefab(terrain), scene, container.transform, shortName);
+                go.tag = "Location";
+                go.transform.position = GetCellCenter(tilemap, new Vector3Int(x, y, 0));
                 go.transform.localScale = Vector3.one;
-                go.AddComponent<LocationEntry>().locationShortName = shortName;
+                EnsureComponent<LocationEntry>(go).locationShortName = shortName;
+                EnsureComponent<SpriteRenderer>(go);
             }
         }
 
@@ -527,7 +543,7 @@ namespace WismUnity.Playground
                 .Where(city => !string.IsNullOrWhiteSpace(city.Value<string>("ShortName")))
                 .ToDictionary(
                     city => city.Value<string>("ShortName"),
-                    city => new Vector2Int(city.Value<int>("X"), ToUnityY(city.Value<int>("Y"), mapHeight) - 1),
+                    city => new Vector2(city.Value<int>("X"), ToUnityY(city.Value<int>("Y"), mapHeight) - 1),
                     StringComparer.OrdinalIgnoreCase);
 
             return entries.All(entry =>
@@ -541,7 +557,7 @@ namespace WismUnity.Playground
                 .Where(location => !string.IsNullOrWhiteSpace(location.Value<string>("ShortName")))
                 .ToDictionary(
                     location => location.Value<string>("ShortName"),
-                    location => new Vector2Int(location.Value<int>("X"), ToUnityY(location.Value<int>("Y"), mapHeight)),
+                    location => new Vector2(location.Value<int>("X") + 0.5f, ToUnityY(location.Value<int>("Y"), mapHeight) + 0.5f),
                     StringComparer.OrdinalIgnoreCase);
 
             return entries.All(entry =>
@@ -555,7 +571,7 @@ namespace WismUnity.Playground
                 .Where(anchor => !string.IsNullOrWhiteSpace(anchor.Value<string>("AnchorId")))
                 .ToDictionary(
                     anchor => anchor.Value<string>("AnchorId"),
-                    anchor => new Vector2Int(anchor.Value<int>("X"), ToUnityY(anchor.Value<int>("Y"), mapHeight)),
+                    anchor => new Vector2(anchor.Value<int>("X"), ToUnityY(anchor.Value<int>("Y"), mapHeight)),
                     StringComparer.OrdinalIgnoreCase);
 
             return entries.All(entry =>
@@ -563,7 +579,42 @@ namespace WismUnity.Playground
                 PositionMatches(entry.transform.position, position));
         }
 
-        static bool PositionMatches(Vector3 actual, Vector2Int expected)
+        static bool CityMarkersAreRuntimeReady(IEnumerable<CityEntry> entries)
+        {
+            return entries.All(entry =>
+                entry.CompareTag("City") &&
+                entry.GetComponent<CityEntry>() != null &&
+                entry.GetComponent<SpriteRenderer>() != null);
+        }
+
+        static bool LocationMarkersAreRuntimeReady(IEnumerable<LocationEntry> entries)
+        {
+            return entries.All(entry =>
+                entry.CompareTag("Location") &&
+                entry.GetComponent<LocationEntry>() != null &&
+                entry.GetComponent<SpriteRenderer>() != null);
+        }
+
+        static bool CityFootprintsArePainted(Tilemap tilemap, IReadOnlyList<JObject> cities, int mapHeight)
+        {
+            return cities.All(city =>
+            {
+                var x = city.Value<int>("X");
+                var y = ToUnityY(city.Value<int>("Y"), mapHeight);
+                return tilemap.GetTile(new Vector3Int(x, y, 0)) is CityTile &&
+                       tilemap.GetTile(new Vector3Int(x + 1, y, 0)) is CityTile &&
+                       tilemap.GetTile(new Vector3Int(x, y - 1, 0)) is CityTile &&
+                       tilemap.GetTile(new Vector3Int(x + 1, y - 1, 0)) is CityTile;
+            });
+        }
+
+        static bool LocationTilesArePainted(Tilemap tilemap, IReadOnlyList<JObject> locations, int mapHeight)
+        {
+            return locations.All(location =>
+                tilemap.GetTile(new Vector3Int(location.Value<int>("X"), ToUnityY(location.Value<int>("Y"), mapHeight), 0)) is LocationTile);
+        }
+
+        static bool PositionMatches(Vector3 actual, Vector2 expected)
         {
             return Mathf.Approximately(actual.x, expected.x) &&
                    Mathf.Approximately(actual.y, expected.y);
@@ -614,6 +665,88 @@ namespace WismUnity.Playground
         static int ToUnityY(int sourceY, int mapHeight)
         {
             return mapHeight - 1 - sourceY;
+        }
+
+        static Vector3 GetCellCenter(Tilemap tilemap, Vector3Int cell)
+        {
+            var origin = tilemap.CellToWorld(cell);
+            return new Vector3(
+                origin.x + tilemap.cellSize.x * 0.5f,
+                origin.y + tilemap.cellSize.y * 0.5f,
+                origin.z);
+        }
+
+        static GameObject EnsureSceneContainer<T>(Scene scene, string name) where T : Component
+        {
+            var matches = FindSceneGameObjects(scene, name);
+            foreach (var match in matches)
+            {
+                UnityEngine.Object.DestroyImmediate(match);
+            }
+
+            var keeper = new GameObject(name);
+            SceneManager.MoveGameObjectToScene(keeper, scene);
+            keeper.AddComponent<T>();
+            return keeper;
+        }
+
+        static GameObject InstantiateMarker(GameObject prefab, Scene scene, Transform parent, string name)
+        {
+            var marker = prefab != null
+                ? PrefabUtility.InstantiatePrefab(prefab, scene) as GameObject
+                : new GameObject(name);
+
+            marker ??= new GameObject(name);
+            marker.name = name;
+            marker.transform.SetParent(parent, false);
+            return marker;
+        }
+
+        static GameObject GetCityMarkerPrefab(GameObject cityContainer)
+        {
+            return cityContainer.GetComponent<CityContainer>()?.CityPrefab
+                ?? AssetDatabase.LoadAssetAtPath<GameObject>(CityMarkerPrefabPath);
+        }
+
+        static GameObject GetLocationMarkerPrefab(string terrain)
+        {
+            return (terrain ?? string.Empty).ToLowerInvariant() switch
+            {
+                "library" => AssetDatabase.LoadAssetAtPath<GameObject>(LibraryMarkerPrefabPath),
+                "sage" => AssetDatabase.LoadAssetAtPath<GameObject>(SageMarkerPrefabPath),
+                "temple" => AssetDatabase.LoadAssetAtPath<GameObject>(TempleMarkerPrefabPath),
+                "tomb" => AssetDatabase.LoadAssetAtPath<GameObject>(TombMarkerPrefabPath),
+                _ => AssetDatabase.LoadAssetAtPath<GameObject>(RuinsMarkerPrefabPath)
+            };
+        }
+
+        static T EnsureComponent<T>(GameObject go) where T : Component
+        {
+            return go.GetComponent<T>() ?? go.AddComponent<T>();
+        }
+
+        static List<GameObject> FindSceneGameObjects(Scene scene, string name)
+        {
+            var matches = new List<GameObject>();
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                FindNamedObjects(root.transform, name, matches);
+            }
+
+            return matches;
+        }
+
+        static void FindNamedObjects(Transform transform, string name, ICollection<GameObject> matches)
+        {
+            if (string.Equals(transform.name, name, StringComparison.OrdinalIgnoreCase))
+            {
+                matches.Add(transform.gameObject);
+            }
+
+            foreach (Transform child in transform)
+            {
+                FindNamedObjects(child, name, matches);
+            }
         }
 
         static Dictionary<string, TileBase> LoadTileAssets()
