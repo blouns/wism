@@ -149,11 +149,13 @@ namespace WismUnity.Playground
                 var siteAnchors = LoadOptionalRecords(Path.Combine(worldRoot, "SiteAnchor.json"));
 
                 ConfigureGeneratedContainers(scene, cities.Count, locations.Count);
+                NormalizeGeneratedScene(scene, tilemap);
                 ClearEditorTileCaches();
-                PaintTerrain(tilemap, tiles);
-                RebuildCityObjects(scene, tilemap, cities);
-                RebuildLocationObjects(scene, tilemap, locations);
-                RebuildSiteAnchorObjects(scene, siteAnchors);
+                var mapHeight = ComputeMapHeight(tiles);
+                PaintTerrain(tilemap, tiles, mapHeight);
+                RebuildCityObjects(scene, tilemap, cities, mapHeight);
+                RebuildLocationObjects(scene, tilemap, locations, mapHeight);
+                RebuildSiteAnchorObjects(scene, siteAnchors, mapHeight);
                 EnsureBuildSettings(targetScenePath);
 
                 EditorSceneManager.MarkSceneDirty(scene);
@@ -224,6 +226,9 @@ namespace WismUnity.Playground
                 var sceneSiteAnchorIds = siteAnchorEntries
                     .Select(entry => entry.siteAnchorId)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var mapHeight = ComputeMapHeight(tiles);
+                var grid = scene.GetRootGameObjects()
+                    .FirstOrDefault(go => string.Equals(go.name, "Grid", StringComparison.OrdinalIgnoreCase));
 
                 var checks = new JArray();
                 var issues = new JArray();
@@ -236,6 +241,11 @@ namespace WismUnity.Playground
                 AddSceneCheck(sceneCityNames.SetEquals(expectedCityNames), checks, issues, "Scene city marker names match MOD data.", "Scene city marker names do not match MOD data.");
                 AddSceneCheck(sceneLocationNames.SetEquals(expectedLocationNames), checks, issues, "Scene location marker names match MOD data.", "Scene location marker names do not match MOD data.");
                 AddSceneCheck(sceneSiteAnchorIds.SetEquals(expectedSiteAnchorIds), checks, issues, "Scene site anchor marker ids match MOD data.", "Scene site anchor marker ids do not match MOD data.");
+                AddSceneCheck(grid == null || IsZeroTransform(grid.transform), checks, issues, "Generated Grid transform is normalized.", "Generated Grid transform is not normalized; copied scene offset is still present.");
+                AddSceneCheck(IsZeroLocalTransform(tilemap.transform), checks, issues, "Generated WorldTilemap local transform is normalized.", "Generated WorldTilemap local transform is not normalized.");
+                AddSceneCheck(CityMarkerPositionsMatch(cityEntries, cities, mapHeight), checks, issues, "Scene city marker positions match flipped MOD coordinates.", "Scene city marker positions do not match flipped MOD coordinates.");
+                AddSceneCheck(LocationMarkerPositionsMatch(locationEntries, locations, mapHeight), checks, issues, "Scene location marker positions match flipped MOD coordinates.", "Scene location marker positions do not match flipped MOD coordinates.");
+                AddSceneCheck(SiteAnchorPositionsMatch(siteAnchorEntries, siteAnchors, mapHeight), checks, issues, "Scene site anchor marker positions match flipped MOD coordinates.", "Scene site anchor marker positions do not match flipped MOD coordinates.");
 
                 return new JObject
                 {
@@ -415,7 +425,7 @@ namespace WismUnity.Playground
             return tilemap;
         }
 
-        static void PaintTerrain(Tilemap tilemap, IReadOnlyList<JObject> tiles)
+        static void PaintTerrain(Tilemap tilemap, IReadOnlyList<JObject> tiles, int mapHeight)
         {
             tilemap.ClearAllTiles();
             var tileAssets = LoadTileAssets();
@@ -427,14 +437,14 @@ namespace WismUnity.Playground
                     tileAsset = tileAssets["Grass"];
                 }
 
-                tilemap.SetTile(new Vector3Int(tile.Value<int>("X"), tile.Value<int>("Y"), 0), tileAsset);
+                tilemap.SetTile(new Vector3Int(tile.Value<int>("X"), ToUnityY(tile.Value<int>("Y"), mapHeight), 0), tileAsset);
             }
 
             tilemap.CompressBounds();
             tilemap.RefreshAllTiles();
         }
 
-        static void RebuildCityObjects(Scene scene, Tilemap tilemap, IReadOnlyList<JObject> cities)
+        static void RebuildCityObjects(Scene scene, Tilemap tilemap, IReadOnlyList<JObject> cities, int mapHeight)
         {
             var container = FindOrCreateRoot(scene, "Cities");
             ClearChildren(container);
@@ -443,7 +453,7 @@ namespace WismUnity.Playground
             foreach (var city in cities)
             {
                 var x = city.Value<int>("X");
-                var y = city.Value<int>("Y");
+                var y = ToUnityY(city.Value<int>("Y"), mapHeight);
                 var clan = city.Value<string>("ClanName") ?? "Neutral";
                 var shortName = city.Value<string>("ShortName") ?? "City";
                 var cityTile = FindCityTile(tileAssets, clan);
@@ -460,7 +470,7 @@ namespace WismUnity.Playground
             }
         }
 
-        static void RebuildLocationObjects(Scene scene, Tilemap tilemap, IReadOnlyList<JObject> locations)
+        static void RebuildLocationObjects(Scene scene, Tilemap tilemap, IReadOnlyList<JObject> locations, int mapHeight)
         {
             var container = FindOrCreateRoot(scene, "Locations");
             ClearChildren(container);
@@ -469,7 +479,7 @@ namespace WismUnity.Playground
             foreach (var location in locations)
             {
                 var x = location.Value<int>("X");
-                var y = location.Value<int>("Y");
+                var y = ToUnityY(location.Value<int>("Y"), mapHeight);
                 var shortName = location.Value<string>("ShortName") ?? "Location";
                 var terrain = location.Value<string>("Terrain") ?? location.Value<string>("Kind") ?? "Ruins";
                 if (tileAssets.TryGetValue(terrain, out var tileAsset))
@@ -479,13 +489,13 @@ namespace WismUnity.Playground
 
                 var go = new GameObject(shortName);
                 go.transform.SetParent(container.transform, false);
-                go.transform.position = new Vector3(x, y - 1, 0);
+                go.transform.position = new Vector3(x, y, 0);
                 go.transform.localScale = Vector3.one;
                 go.AddComponent<LocationEntry>().locationShortName = shortName;
             }
         }
 
-        static void RebuildSiteAnchorObjects(Scene scene, IReadOnlyList<JObject> siteAnchors)
+        static void RebuildSiteAnchorObjects(Scene scene, IReadOnlyList<JObject> siteAnchors, int mapHeight)
         {
             var container = FindOrCreateRoot(scene, "SiteAnchors");
             ClearChildren(container);
@@ -493,11 +503,11 @@ namespace WismUnity.Playground
             foreach (var anchor in siteAnchors)
             {
                 var x = anchor.Value<int>("X");
-                var y = anchor.Value<int>("Y");
+                var y = ToUnityY(anchor.Value<int>("Y"), mapHeight);
                 var anchorId = anchor.Value<string>("AnchorId") ?? anchor.Value<string>("ShortName") ?? "SiteAnchor";
                 var go = new GameObject(anchorId);
                 go.transform.SetParent(container.transform, false);
-                go.transform.position = new Vector3(x, y - 1, 0);
+                go.transform.position = new Vector3(x, y, 0);
                 go.transform.localScale = Vector3.one;
 
                 var entry = go.AddComponent<IlluriaSiteAnchorEntry>();
@@ -509,6 +519,101 @@ namespace WismUnity.Playground
                 entry.terrain = anchor.Value<string>("Terrain") ?? string.Empty;
                 entry.sourceNote = anchor.Value<string>("SourceNote") ?? string.Empty;
             }
+        }
+
+        static bool CityMarkerPositionsMatch(IEnumerable<CityEntry> entries, IReadOnlyList<JObject> cities, int mapHeight)
+        {
+            var expected = cities
+                .Where(city => !string.IsNullOrWhiteSpace(city.Value<string>("ShortName")))
+                .ToDictionary(
+                    city => city.Value<string>("ShortName"),
+                    city => new Vector2Int(city.Value<int>("X"), ToUnityY(city.Value<int>("Y"), mapHeight) - 1),
+                    StringComparer.OrdinalIgnoreCase);
+
+            return entries.All(entry =>
+                expected.TryGetValue(entry.cityShortName, out var position) &&
+                PositionMatches(entry.transform.position, position));
+        }
+
+        static bool LocationMarkerPositionsMatch(IEnumerable<LocationEntry> entries, IReadOnlyList<JObject> locations, int mapHeight)
+        {
+            var expected = locations
+                .Where(location => !string.IsNullOrWhiteSpace(location.Value<string>("ShortName")))
+                .ToDictionary(
+                    location => location.Value<string>("ShortName"),
+                    location => new Vector2Int(location.Value<int>("X"), ToUnityY(location.Value<int>("Y"), mapHeight)),
+                    StringComparer.OrdinalIgnoreCase);
+
+            return entries.All(entry =>
+                expected.TryGetValue(entry.locationShortName, out var position) &&
+                PositionMatches(entry.transform.position, position));
+        }
+
+        static bool SiteAnchorPositionsMatch(IEnumerable<IlluriaSiteAnchorEntry> entries, IReadOnlyList<JObject> siteAnchors, int mapHeight)
+        {
+            var expected = siteAnchors
+                .Where(anchor => !string.IsNullOrWhiteSpace(anchor.Value<string>("AnchorId")))
+                .ToDictionary(
+                    anchor => anchor.Value<string>("AnchorId"),
+                    anchor => new Vector2Int(anchor.Value<int>("X"), ToUnityY(anchor.Value<int>("Y"), mapHeight)),
+                    StringComparer.OrdinalIgnoreCase);
+
+            return entries.All(entry =>
+                expected.TryGetValue(entry.siteAnchorId, out var position) &&
+                PositionMatches(entry.transform.position, position));
+        }
+
+        static bool PositionMatches(Vector3 actual, Vector2Int expected)
+        {
+            return Mathf.Approximately(actual.x, expected.x) &&
+                   Mathf.Approximately(actual.y, expected.y);
+        }
+
+        static bool IsZeroTransform(Transform transform)
+        {
+            return IsZeroLocalTransform(transform) &&
+                   Mathf.Approximately(transform.position.x, 0f) &&
+                   Mathf.Approximately(transform.position.y, 0f) &&
+                   Mathf.Approximately(transform.position.z, 0f);
+        }
+
+        static bool IsZeroLocalTransform(Transform transform)
+        {
+            return Mathf.Approximately(transform.localPosition.x, 0f) &&
+                   Mathf.Approximately(transform.localPosition.y, 0f) &&
+                   Mathf.Approximately(transform.localPosition.z, 0f) &&
+                   Mathf.Approximately(transform.localScale.x, 1f) &&
+                   Mathf.Approximately(transform.localScale.y, 1f) &&
+                   Mathf.Approximately(transform.localScale.z, 1f);
+        }
+
+        static void NormalizeGeneratedScene(Scene scene, Tilemap tilemap)
+        {
+            var grid = scene.GetRootGameObjects()
+                .FirstOrDefault(go => string.Equals(go.name, "Grid", StringComparison.OrdinalIgnoreCase));
+            if (grid != null)
+            {
+                grid.transform.position = Vector3.zero;
+                grid.transform.localPosition = Vector3.zero;
+                grid.transform.localScale = Vector3.one;
+                grid.transform.rotation = Quaternion.identity;
+            }
+
+            tilemap.transform.localPosition = Vector3.zero;
+            tilemap.transform.localScale = Vector3.one;
+            tilemap.transform.localRotation = Quaternion.identity;
+        }
+
+        static int ComputeMapHeight(IReadOnlyList<JObject> tiles)
+        {
+            return tiles.Count == 0
+                ? 0
+                : tiles.Max(tile => tile.Value<int>("Y")) + 1;
+        }
+
+        static int ToUnityY(int sourceY, int mapHeight)
+        {
+            return mapHeight - 1 - sourceY;
         }
 
         static Dictionary<string, TileBase> LoadTileAssets()
