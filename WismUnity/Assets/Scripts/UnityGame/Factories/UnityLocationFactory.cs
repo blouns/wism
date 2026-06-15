@@ -51,26 +51,34 @@ namespace Assets.Scripts.UnityGame.Factories
                 (IEnumerable<LocationInfo>)ModFactory.LoadLocationInfos(path));
             this.debugManager.LogInformation("Loaded LocationInfos: " + path);
 
-            var locations = new LocationEntity[locationNames.Count];
-            int locationIndex = 0;
+            var locations = new List<LocationEntity>();
+            var unmatchedLocationNames = new List<string>(locationNames.Keys);
             foreach (LocationInfo ci in locationInfos)
             {
                 if (locationNames.ContainsKey(ci.ShortName))
                 {
                     var go = locationNames[ci.ShortName];
                     var coords = unityManger.WorldTilemap.ConvertUnityToGameVector(go.transform.position);
-                    locations[locationIndex++] = new LocationEntity()
+                    locations.Add(new LocationEntity()
                     {
                         LocationShortName = ci.ShortName,
                         X = coords.x,
                         Y = coords.y
-                    };
+                    });
+                    unmatchedLocationNames.Remove(ci.ShortName);
                 }
+            }
+
+            if (unmatchedLocationNames.Count > 0)
+            {
+                this.debugManager.LogInformation(
+                    "Skipped scene Location GameObjects with no matching Location.json entry: " +
+                    string.Join(", ", unmatchedLocationNames));
             }
 
             this.debugManager.LogInformation("Updated locations with coordinates from scene");
 
-            return locations;
+            return locations.ToArray();
         }
     }
 }

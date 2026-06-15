@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Assets.Scripts;
 using Assets.Scripts.Editors;
+using Assets.Scripts.Managers;
 using Assets.Scripts.Tiles;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
@@ -155,7 +157,7 @@ namespace WismUnity.Playground
                 var siteAnchors = LoadOptionalRecords(Path.Combine(worldRoot, "SiteAnchor.json"));
 
                 ConfigureGeneratedContainers(scene, cities.Count, locations.Count);
-                NormalizeGeneratedScene(scene, tilemap);
+                NormalizeGeneratedScene(scene, tilemap, world);
                 ClearEditorTileCaches();
                 var mapHeight = ComputeMapHeight(tiles);
                 PaintTerrain(tilemap, tiles, mapHeight);
@@ -260,6 +262,12 @@ namespace WismUnity.Playground
                 AddSceneCheck(SiteAnchorPositionsMatch(siteAnchorEntries, siteAnchors, mapHeight), checks, issues, "Scene site anchor marker positions match flipped MOD coordinates.", "Scene site anchor marker positions do not match flipped MOD coordinates.");
                 AddSceneCheck(CityFootprintsArePainted(tilemap, cities, mapHeight), checks, issues, "City markers line up with painted 2x2 city footprints.", "One or more city markers do not line up with painted 2x2 city footprints.");
                 AddSceneCheck(LocationTilesArePainted(tilemap, locations, mapHeight), checks, issues, "Location markers line up with painted location tiles.", "One or more location markers do not line up with painted location tiles.");
+                AddSceneCheck(
+                    SceneUsesGeneratedWorldDefaults(scene, world),
+                    checks,
+                    issues,
+                    "Scene GameManager and UnityGameFactory use generated world defaults.",
+                    "Scene GameManager or UnityGameFactory still points at stale world/mod defaults.");
 
                 return new JObject
                 {
@@ -638,7 +646,7 @@ namespace WismUnity.Playground
                    Mathf.Approximately(transform.localScale.z, 1f);
         }
 
-        static void NormalizeGeneratedScene(Scene scene, Tilemap tilemap)
+        static void NormalizeGeneratedScene(Scene scene, Tilemap tilemap, string world)
         {
             var grid = scene.GetRootGameObjects()
                 .FirstOrDefault(go => string.Equals(go.name, "Grid", StringComparison.OrdinalIgnoreCase));
@@ -653,6 +661,36 @@ namespace WismUnity.Playground
             tilemap.transform.localPosition = Vector3.zero;
             tilemap.transform.localScale = Vector3.one;
             tilemap.transform.localRotation = Quaternion.identity;
+
+            foreach (var gameManager in scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<GameManager>(true)))
+            {
+                gameManager.WorldName = world;
+                gameManager.ModPath = GameManager.DefaultModPath;
+            }
+
+            foreach (var gameFactory in scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<UnityGameFactory>(true)))
+            {
+                gameFactory.WorldName = world;
+                gameFactory.ModPath = GameManager.DefaultModPath;
+            }
+        }
+
+        static bool SceneUsesGeneratedWorldDefaults(Scene scene, string world)
+        {
+            var gameManagers = scene.GetRootGameObjects()
+                .SelectMany(root => root.GetComponentsInChildren<GameManager>(true))
+                .ToArray();
+            var gameFactories = scene.GetRootGameObjects()
+                .SelectMany(root => root.GetComponentsInChildren<UnityGameFactory>(true))
+                .ToArray();
+
+            return gameManagers.Length > 0 &&
+                   gameManagers.All(manager =>
+                       string.Equals(manager.WorldName, world, StringComparison.OrdinalIgnoreCase) &&
+                       string.Equals(manager.ModPath, GameManager.DefaultModPath, StringComparison.OrdinalIgnoreCase)) &&
+                   gameFactories.All(factory =>
+                       string.Equals(factory.WorldName, world, StringComparison.OrdinalIgnoreCase) &&
+                       string.Equals(factory.ModPath, GameManager.DefaultModPath, StringComparison.OrdinalIgnoreCase));
         }
 
         static int ComputeMapHeight(IReadOnlyList<JObject> tiles)
