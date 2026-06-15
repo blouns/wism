@@ -68,6 +68,7 @@
     <ProjectReference Include="..\Wism.Client.AI\Wism.Client.AI.csproj" />
     <ProjectReference Include="..\Wism.Client.Api\Wism.Client.Api.csproj" />
     <ProjectReference Include="..\Wism.Client.Core\Wism.Client.Core.csproj" />
+    <ProjectReference Include="..\Wism.Client.Terminal\Wism.Client.Terminal.csproj" />
   </ItemGroup>
 
   <ItemGroup>

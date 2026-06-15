@@ -26,6 +26,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wism.Agent.Playground", "Wi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wism.ModKit.Cli", "Wism.ModKit.Cli\Wism.ModKit.Cli.csproj", "{BBF67880-921C-49B3-9B3F-2C5A6B45FC0F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wism.Client.Terminal", "Wism.Client.Terminal\Wism.Client.Terminal.csproj", "{1A3BF606-EAA7-4723-9D27-93E5127C861B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,10 @@ Global
 		{BBF67880-921C-49B3-9B3F-2C5A6B45FC0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBF67880-921C-49B3-9B3F-2C5A6B45FC0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBF67880-921C-49B3-9B3F-2C5A6B45FC0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A3BF606-EAA7-4723-9D27-93E5127C861B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A3BF606-EAA7-4723-9D27-93E5127C861B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A3BF606-EAA7-4723-9D27-93E5127C861B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A3BF606-EAA7-4723-9D27-93E5127C861B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

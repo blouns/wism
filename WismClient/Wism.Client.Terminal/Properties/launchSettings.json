@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Wism.Client.Terminal": {
+      "commandName": "Project",
+      "commandLineArgs": "play profile=classic-warlords world=Illuria"
+    },
+    "wism render-test": {
+      "commandName": "Project",
+      "commandLineArgs": "render-test width=100 height=32 --no-color"
+    }
+  }
+}
