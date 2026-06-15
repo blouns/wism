@@ -519,15 +519,19 @@ public sealed class PlaygroundScenarioRunner
             throw new ArgumentException("Checkpoint path is required.", nameof(checkpointPath));
         }
 
-        var modRoot = ConfigureModPath(null, "Illuria");
-        ModFactory.WorldPath = "Illuria";
-        MapBuilder.Initialize(modRoot, "Illuria");
         var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
         var snapshot = JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(checkpointPath), settings)
             ?? throw new InvalidDataException($"Could not load checkpoint {checkpointPath}.");
+        var world = snapshot.World?.Name ?? "Illuria";
+        var catalogWorld = world.StartsWith("GeneratedCampaign_", StringComparison.OrdinalIgnoreCase) ||
+                           world.StartsWith("GeneratedMiniIlluriaLarge_", StringComparison.OrdinalIgnoreCase)
+            ? "Mini-Illuria"
+            : world;
+        var modRoot = ConfigureModPath(null, catalogWorld);
+        ModFactory.WorldPath = catalogWorld;
+        MapBuilder.Initialize(modRoot, catalogWorld);
         Execute(new LoadGameCommand(controllers.GameController, snapshot));
 
-        var world = snapshot.World?.Name ?? "Unknown";
         var clan = Game.Current.GetCurrentPlayer().Clan.ShortName;
         events.Add($"Jump loaded {Path.GetFileName(checkpointPath)} for world {world}, turn {Game.Current.GetCurrentPlayer().Turn}, clan {clan}, command index unavailable from snapshot.");
         return CreateReport("jump", "Passed", $"Loaded {world} at clan {clan}.", Game.Current.GetCurrentPlayer().Turn);
