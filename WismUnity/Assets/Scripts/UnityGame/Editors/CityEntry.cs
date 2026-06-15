@@ -15,8 +15,9 @@ namespace Assets.Scripts.Editors
 
             var coords = worldTilemap.ConvertUnityToGameVector(this.gameObject.transform.position);
 
-            // Center on top-left of city
-            return new Vector2Int(coords.x, coords.y + 1);
+            // City markers are centered on the 2x2 footprint. Convert back to
+            // the top-left tile used by WismClient city coordinates.
+            return new Vector2Int(coords.x - 1, coords.y);
         }
 
 #if UNITY_EDITOR
