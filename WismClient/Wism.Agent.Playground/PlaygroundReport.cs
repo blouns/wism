@@ -15,7 +15,8 @@ public sealed record PlayerSummary(
     bool IsDead,
     int ArmyCount,
     int CityCount,
-    int Gold);
+    int Gold,
+    string AiPersonality);
 
 public sealed record WorktreePlan(
     string Root,

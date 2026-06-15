@@ -32,7 +32,37 @@ namespace Wism.Client.Test.AI
             Assert.That(plan.Objectives, Is.Not.Empty);
             Assert.That(plan.Objectives.Select(objective => objective.Kind), Does.Contain("Produce"));
             Assert.That(plan.Objectives.Any(objective => objective.Kind == "Expand" || objective.Kind == "Siege"), Is.True);
+            Assert.That(plan.PersonalityProfile, Is.EqualTo("balanced"));
             Assert.That(Game.Current.StrategicPlans.Single().ClanShortName, Is.EqualTo(player.Clan.ShortName));
+        }
+
+        [Test]
+        public void Planner_AppliesOptionalPersonalityWeightsDeterministically()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), player.Capitol.Tile);
+
+            var balanced = new ClassicStrategicPlanner().Reconcile(World.Current);
+            var balancedExpansion = balanced.Objectives.First(objective => objective.Kind == "Expand");
+
+            player.Clan.Info.Personality = new ClanPersonalityInfo
+            {
+                Profile = "opportunist-test",
+                Opportunist = 2.0,
+                Explorer = 2.0,
+                Aggressive = 1.0,
+                Raider = 1.0,
+                Defender = 1.0,
+                Economy = 1.0
+            };
+
+            var opportunist = new ClassicStrategicPlanner().Reconcile(World.Current);
+            var opportunistExpansion = opportunist.Objectives.First(objective => objective.Kind == "Expand");
+
+            Assert.That(opportunist.PersonalityProfile, Is.EqualTo("opportunist-test"));
+            Assert.That(opportunistExpansion.Priority, Is.GreaterThan(balancedExpansion.Priority));
         }
 
         [Test]

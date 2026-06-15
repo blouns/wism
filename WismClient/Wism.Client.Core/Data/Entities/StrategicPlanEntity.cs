@@ -15,6 +15,8 @@ namespace Wism.Client.Data.Entities
 
         [DataMember] public string Posture { get; set; }
 
+        [DataMember] public string PersonalityProfile { get; set; }
+
         [DataMember] public StrategicObjectiveEntity[] Objectives { get; set; }
     }
 }
