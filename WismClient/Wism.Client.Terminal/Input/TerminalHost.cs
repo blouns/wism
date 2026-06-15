@@ -13,7 +13,7 @@ public sealed class TerminalHost
     public int Run(TerminalGameSession session)
     {
         var viewport = new Viewport(session.MapWidth, session.MapHeight);
-        FollowSelected(viewport);
+        TerminalInputActions.FollowSelected(viewport);
         var options = new RenderOptions
         {
             TileMode = session.Options.TileMode,
@@ -30,7 +30,7 @@ public sealed class TerminalHost
             {
                 if (follow)
                 {
-                    FollowSelected(viewport);
+                    TerminalInputActions.FollowSelected(viewport);
                 }
 
                 var frame = renderer.Render(session, viewport, Console.WindowWidth, Console.WindowHeight, options with { ShowHelp = showHelp });
@@ -66,6 +66,9 @@ public sealed class TerminalHost
                     case ConsoleKey.A:
                         session.TryMoveOrAttackTo(viewport.CursorX, viewport.CursorY);
                         follow = true;
+                        break;
+                    case ConsoleKey.Enter:
+                        TerminalInputActions.ClickCursor(session, viewport, ref follow);
                         break;
                     case ConsoleKey.D:
                         session.TryDefend();
@@ -110,16 +113,16 @@ public sealed class TerminalHost
                         options = options with { TileMode = PreviousMode(options.TileMode) };
                         break;
                     case ConsoleKey.UpArrow:
-                        HandleMove(session, viewport, 0, 1, ref follow);
+                        TerminalInputActions.MoveCursor(viewport, 0, 1, ref follow);
                         break;
                     case ConsoleKey.DownArrow:
-                        HandleMove(session, viewport, 0, -1, ref follow);
+                        TerminalInputActions.MoveCursor(viewport, 0, -1, ref follow);
                         break;
                     case ConsoleKey.LeftArrow:
-                        HandleMove(session, viewport, -1, 0, ref follow);
+                        TerminalInputActions.MoveCursor(viewport, -1, 0, ref follow);
                         break;
                     case ConsoleKey.RightArrow:
-                        HandleMove(session, viewport, 1, 0, ref follow);
+                        TerminalInputActions.MoveCursor(viewport, 1, 0, ref follow);
                         break;
                     case ConsoleKey.Oem1:
                         ReadAndExecuteCommand(session, viewport, ref follow);
@@ -136,25 +139,6 @@ public sealed class TerminalHost
         return 0;
     }
 
-    private static void HandleMove(TerminalGameSession session, Viewport viewport, int dx, int dy, ref bool follow)
-    {
-        if (WismGame.Current.ArmiesSelected())
-        {
-            var selected = WismGame.Current.GetSelectedArmies();
-            var origin = selected?[0].Tile;
-            if (origin != null)
-            {
-                session.TryMoveOrAttackTo(origin.X + dx, origin.Y + dy);
-                FollowSelected(viewport);
-                follow = true;
-                return;
-            }
-        }
-
-        viewport.MoveCursor(dx, dy);
-        follow = false;
-    }
-
     private static void ReadAndExecuteCommand(TerminalGameSession session, Viewport viewport, ref bool follow)
     {
         LeaveAlternateScreen();
@@ -164,17 +148,6 @@ public sealed class TerminalHost
         session.Recorder.RecordInput(":" + line);
         CommandPalette.Execute(session, viewport, line);
         follow = false;
-    }
-
-    private static void FollowSelected(Viewport viewport)
-    {
-        var selected = WismGame.Current.GetSelectedArmies();
-        if (selected == null || selected.Count == 0)
-        {
-            return;
-        }
-
-        viewport.CenterOn(selected[0].X, selected[0].Y);
     }
 
     private static TileRenderMode NextMode(TileRenderMode mode) =>

@@ -27,6 +27,7 @@ public static class AgentScriptRunner
         var lines = ReadInput(options.InputScript);
         using var writer = CreateWriter(options.OutputPath);
         var renderer = new TerminalMapRenderer();
+        var follow = selected != null && selected.Count > 0;
         foreach (var line in lines)
         {
             if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith('#'))
@@ -43,19 +44,24 @@ public static class AgentScriptRunner
             }
             else if (trimmed.Equals("up", StringComparison.OrdinalIgnoreCase))
             {
-                viewport.MoveCursor(0, 1);
+                TerminalInputActions.MoveCursor(viewport, 0, 1, ref follow);
             }
             else if (trimmed.Equals("down", StringComparison.OrdinalIgnoreCase))
             {
-                viewport.MoveCursor(0, -1);
+                TerminalInputActions.MoveCursor(viewport, 0, -1, ref follow);
             }
             else if (trimmed.Equals("left", StringComparison.OrdinalIgnoreCase))
             {
-                viewport.MoveCursor(-1, 0);
+                TerminalInputActions.MoveCursor(viewport, -1, 0, ref follow);
             }
             else if (trimmed.Equals("right", StringComparison.OrdinalIgnoreCase))
             {
-                viewport.MoveCursor(1, 0);
+                TerminalInputActions.MoveCursor(viewport, 1, 0, ref follow);
+            }
+            else if (trimmed.Equals("enter", StringComparison.OrdinalIgnoreCase) ||
+                     trimmed.Equals("click", StringComparison.OrdinalIgnoreCase))
+            {
+                TerminalInputActions.ClickCursor(session, viewport, ref follow);
             }
             else
             {

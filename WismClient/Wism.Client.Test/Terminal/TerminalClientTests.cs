@@ -3,6 +3,7 @@ using System.IO;
 using NUnit.Framework;
 using Wism.Client.Terminal.Cli;
 using Wism.Client.Terminal.Game;
+using Wism.Client.Terminal.Input;
 using Wism.Client.Terminal.Rendering;
 using WismGame = Wism.Client.Core.Game;
 
@@ -150,6 +151,44 @@ public sealed class TerminalClientTests
             Assert.That(text, Does.Contain("WISM Terminal"));
             Assert.That(text, Does.Contain("INSPECTOR"));
             Assert.That(text, Does.Contain("MINIMAP"));
+        }
+        finally
+        {
+            session.CompleteRecording();
+        }
+    }
+
+    [Test]
+    public void TerminalInputActions_MoveCursor_DoesNotMoveSelectedArmy()
+    {
+        var session = TerminalGameSession.Create(new TerminalLaunchOptions
+        {
+            World = "Illuria",
+            RecordRoot = recordingRoot,
+            NoColor = true
+        });
+
+        try
+        {
+            var selected = WismGame.Current.GetSelectedArmies();
+
+            Assert.That(selected, Is.Not.Null);
+            Assert.That(selected, Has.Count.GreaterThan(0));
+
+            var army = selected![0];
+            var originalX = army.X;
+            var originalY = army.Y;
+            var viewport = new Viewport(session.MapWidth, session.MapHeight);
+            viewport.CenterOn(originalX, originalY);
+            var follow = true;
+
+            TerminalInputActions.MoveCursor(viewport, 1, 0, ref follow);
+
+            Assert.That(viewport.CursorX, Is.EqualTo(originalX + 1));
+            Assert.That(viewport.CursorY, Is.EqualTo(originalY));
+            Assert.That(army.X, Is.EqualTo(originalX));
+            Assert.That(army.Y, Is.EqualTo(originalY));
+            Assert.That(follow, Is.False);
         }
         finally
         {

@@ -46,7 +46,7 @@ public sealed class TerminalMapRenderer
         var player = WismGame.Current.GetCurrentPlayer();
         var title = $" WISM Terminal | {session.WorldName} {session.MapWidth}x{session.MapHeight} | {player.Clan.DisplayName} | Turn {player.Turn} | Gold {player.Gold} ";
         frame.WriteText(0, 0, Fit(title, frame.Width), ConsoleColor.White, ConsoleColor.DarkBlue);
-        frame.WriteText(0, 1, Fit(" ?:help  :commands  arrows:pan/move  tab/space:next  e:end  q:quit", frame.Width), ConsoleColor.Gray);
+        frame.WriteText(0, 1, Fit(" ?:help  :commands  arrows:cursor  enter:click  tab/space:next  e:end  q:quit", frame.Width), ConsoleColor.Gray);
     }
 
     private static void DrawMap(
@@ -248,9 +248,10 @@ public sealed class TerminalMapRenderer
         var lines = new[]
         {
             "WISM TERMINAL KEYS",
-            "Arrows: move selected stack, otherwise move cursor/pan",
+            "Arrows: move the map cursor / hover tile",
+            "Enter: click cursor tile to select, move, or attack",
             "S select cursor stack   Esc deselect   Space/Tab next army",
-            "M move selected stack to cursor   A attack cursor",
+            "M/A move or attack selected stack at cursor",
             "D defend   Q quit stack for turn   Z search   T take   O drop",
             "P show production choices at cursor city",
             "E end turn   : command palette   +/- tile density   F follow",

@@ -16,12 +16,12 @@ public static class KeyHelp
           wism render-test
 
         Keys:
-          Arrows      Move selected stack; otherwise move cursor/pan
+          Arrows      Move the map cursor / hover tile
+          Enter       Click cursor tile: select, move, or attack
           S           Select the stack at the cursor
           Space/Tab   Select next movable army
           Esc         Deselect armies
-          M           Move selected stack to cursor
-          A           Attack cursor target
+          M / A       Move or attack selected stack at cursor
           D           Defend selected stack
           Q           Quit selected stack for the turn
           Z           Search current site
