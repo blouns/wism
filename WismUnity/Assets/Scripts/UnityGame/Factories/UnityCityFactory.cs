@@ -57,14 +57,14 @@ namespace Assets.Scripts.UnityGame.Factories
                 if (citiesNames.ContainsKey(ci.ShortName))
                 {
                     var go = citiesNames[ci.ShortName];
-                    var coords = unityManager.WorldTilemap.ConvertUnityToGameVector(go.transform.position);
+                    var coords = go.GetComponent<CityEntry>().GetGameCoordinates();
                     cities[cityIndex++] = new CityEntity()
                     {
                         CityShortName = ci.ShortName,
                         Defense = ci.Defense,
                         ClanShortName = ci.ClanName,
                         X = coords.x,
-                        Y = coords.y + 1    // +1 Adjustment for city object overlay alignment (anchor)
+                        Y = coords.y
                     };
                 }
             }

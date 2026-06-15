@@ -479,7 +479,7 @@ namespace WismUnity.Playground
 
                 var go = InstantiateMarker(markerPrefab, scene, container.transform, shortName);
                 go.tag = "City";
-                go.transform.position = tilemap.CellToWorld(new Vector3Int(x, y - 1, 0));
+                go.transform.position = GetCityFootprintCenter(tilemap, x, y);
                 go.transform.localScale = new Vector3(2f, 2f, 1f);
                 EnsureComponent<CityEntry>(go).cityShortName = shortName;
                 EnsureComponent<SpriteRenderer>(go);
@@ -543,7 +543,7 @@ namespace WismUnity.Playground
                 .Where(city => !string.IsNullOrWhiteSpace(city.Value<string>("ShortName")))
                 .ToDictionary(
                     city => city.Value<string>("ShortName"),
-                    city => new Vector2(city.Value<int>("X"), ToUnityY(city.Value<int>("Y"), mapHeight) - 1),
+                    city => GetCityFootprintCenter(city.Value<int>("X"), ToUnityY(city.Value<int>("Y"), mapHeight)),
                     StringComparer.OrdinalIgnoreCase);
 
             return entries.All(entry =>
@@ -674,6 +674,20 @@ namespace WismUnity.Playground
                 origin.x + tilemap.cellSize.x * 0.5f,
                 origin.y + tilemap.cellSize.y * 0.5f,
                 origin.z);
+        }
+
+        static Vector3 GetCityFootprintCenter(Tilemap tilemap, int x, int topY)
+        {
+            var origin = tilemap.CellToWorld(new Vector3Int(x, topY, 0));
+            return new Vector3(
+                origin.x + tilemap.cellSize.x,
+                origin.y,
+                origin.z);
+        }
+
+        static Vector2 GetCityFootprintCenter(int x, int topY)
+        {
+            return new Vector2(x + 1, topY);
         }
 
         static GameObject EnsureSceneContainer<T>(Scene scene, string name) where T : Component
