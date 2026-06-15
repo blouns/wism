@@ -789,6 +789,57 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void ClassicSurrender_DoesNotTriggerForMultiHumanOrAiOnlyGames()
+    {
+        var multiHuman = Enumerable.Range(0, 8)
+            .Select(index => new VictoryClanStanding(
+                $"Clan{index}",
+                $"Clan {index}",
+                index == 0 ? 41 : index == 1 ? 25 : 2,
+                3,
+                10,
+                index < 2,
+                false))
+            .ToArray();
+        var aiOnly = Enumerable.Range(0, 8)
+            .Select(index => new VictoryClanStanding(
+                $"Clan{index}",
+                $"Clan {index}",
+                index == 0 ? 41 : index == 1 ? 25 : 2,
+                3,
+                10,
+                false,
+                false))
+            .ToArray();
+
+        Assert.That(VictoryEvaluator.EvaluateClassicSurrender(multiHuman, 80, 40).SurrenderEligible, Is.False);
+        Assert.That(VictoryEvaluator.EvaluateClassicSurrender(aiOnly, 80, 40).SurrenderEligible, Is.False);
+    }
+
+    [Test]
+    public void ClassicSurrender_RejectRecordsOutcomeAndContinuesGame()
+    {
+        Game.CreateEmpty();
+        var standings = Enumerable.Range(0, 8)
+            .Select(index => new VictoryClanStanding(
+                $"Clan{index}",
+                $"Clan {index}",
+                index == 0 ? 41 : index == 1 ? 25 : 2,
+                3,
+                10,
+                index == 0,
+                false))
+            .ToArray();
+        var offer = VictoryEvaluator.EvaluateClassicSurrender(standings, totalCities: 80, turn: 40);
+
+        VictoryEvaluator.RejectSurrender(Game.Current, offer);
+
+        Assert.That(Game.Current.VictoryOutcome.OutcomeKind, Is.EqualTo(VictoryOutcomeKind.RejectedSurrender));
+        Assert.That(Game.Current.VictoryOutcome.SurrenderEligible, Is.False);
+        Assert.That(Game.Current.GameState, Is.Not.EqualTo(GameState.GameOver));
+    }
+
+    [Test]
     public void DominancePolicy_IsMapRelativeAndRequiresStrongerTwoClanLead()
     {
         var twentyCityPolicy = DominanceVictoryPolicy.ForEval(8, 20, DominanceGoalMode.Readiness);
