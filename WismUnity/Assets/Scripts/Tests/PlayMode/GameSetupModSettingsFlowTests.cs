@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 using Assets.Scripts.UI.Panels;
 using Assets.Scripts.UnityGame.ModKit;
@@ -45,10 +46,14 @@ public sealed class GameSetupModSettingsFlowTests
         yield return WaitForGameSetup();
 
         Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("GameSetup"));
-        Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Null);
         Assert.That(FindButton("AdvancedModsButton").GetComponentInChildren<Text>().text, Does.Contain("M</color>ods..."));
         Assert.That(FindButton("StartButton").GetComponentInChildren<Text>().text, Does.Contain("S</color>tart"));
         Assert.That(GameObject.Find("GameSetupValidationText"), Is.Not.Null);
+        Assert.That(FindDropdown("WorldDropdown").options.Select(option => option.text), Does.Contain("Illuria"));
+        Assert.That(FindDropdown("WorldDropdown").options[FindDropdown("WorldDropdown").value].text, Is.EqualTo("Illuria"));
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Not.Null);
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.ProfileId, Is.EqualTo("classic-warlords"));
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.World, Is.EqualTo("Illuria"));
     }
 
     [UnityTest]
@@ -82,6 +87,15 @@ public sealed class GameSetupModSettingsFlowTests
         var button = go.GetComponent<Button>();
         Assert.That(button, Is.Not.Null, "Could not find Button on: " + name);
         return button;
+    }
+
+    static Dropdown FindDropdown(string name)
+    {
+        var go = GameObject.Find(name);
+        Assert.That(go, Is.Not.Null, "Could not find dropdown object: " + name);
+        var dropdown = go.GetComponent<Dropdown>();
+        Assert.That(dropdown, Is.Not.Null, "Could not find Dropdown on: " + name);
+        return dropdown;
     }
 
     static void Click(Component component)

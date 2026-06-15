@@ -33,8 +33,8 @@ namespace Assets.Scripts.Managers
         public float StandardTime = 0.25f;
         public float WarTime = 1.0f;
         public const int MaxArmies = Army.MaxArmies;
-        public readonly static string DefaultWorld = @"Mini-Illuria";
-        public readonly static string DefaultModPath = @"Assets\Mod";
+        public readonly static string DefaultWorld = @"Illuria";
+        public readonly static string DefaultModPath = UnityModKitSelection.PluginModRoot;
         public readonly static string DefaultWorldModPath = @$"{DefaultModPath}\{ModFactory.WorldsPath}\{DefaultWorld}";
 
         [SerializeField]

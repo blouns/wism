@@ -21,6 +21,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Test/TestWorld.unity
     guid: 4025c7c8c3e1865449468f55d996df25
   - enabled: 1
-    path: Assets/Scenes/Near-Illuria.unity
-    guid: d91887eb1512e5c4bb0659b9807cba9f
+    path: Assets/Scenes/Illuria.unity
+    guid: ead3a14cad8644c44ae9975f8911da92
   m_configObjects: {}

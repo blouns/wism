@@ -159,8 +159,8 @@ internal sealed class CampaignScenarioBuilder
         var modRoot = ResolveModRoot(options.ModRoot);
         ModFactory.ModPath = modRoot;
         ModFactory.WorldsPath = "Worlds";
-        ModFactory.WorldPath = "Illuria";
-        MapBuilder.Initialize(modRoot, "Illuria");
+        ModFactory.WorldPath = "Mini-Illuria";
+        MapBuilder.Initialize(modRoot, "Mini-Illuria");
 
         var clanCount = Math.Clamp(options.ClanCount, 2, ClanOrder.Length);
         Game.CreateEmpty();

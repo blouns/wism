@@ -43,7 +43,9 @@ public sealed class ModSettingsUiTests
         yield return WaitForModSettings();
 
         Assert.That(FindDropdown("ProfileDropdown").options.Select(option => option.text), Does.Contain("classic-warlords"));
+        Assert.That(FindDropdown("WorldDropdown").options.Select(option => option.text), Does.Contain("Illuria"));
         Assert.That(FindDropdown("WorldDropdown").options.Select(option => option.text), Does.Contain("TestWorld"));
+        Assert.That(FindDropdown("WorldDropdown").options[FindDropdown("WorldDropdown").value].text, Is.EqualTo("Illuria"));
         Assert.That(GameObject.Find("PackToggle:pack-illurian-legends-flavor"), Is.Not.Null);
         Assert.That(GameObject.Find("PackToggle:pack-dusklands-visual"), Is.Not.Null);
     }
@@ -233,7 +235,8 @@ public sealed class ModSettingsUiTests
         Click(FindButton("BackButton"));
         yield return new WaitUntil(() => SceneManager.GetActiveScene().name == "GameSetup");
 
-        Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Null);
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection, Is.Not.Null);
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.World, Is.EqualTo("Illuria"));
         Assert.That(GameObject.Find("AdvancedModsButton"), Is.Not.Null);
     }
 
