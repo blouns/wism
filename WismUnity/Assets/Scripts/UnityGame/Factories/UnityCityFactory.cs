@@ -50,28 +50,36 @@ namespace Assets.Scripts.UnityGame.Factories
             var cityInfos = new List<CityInfo>(ModFactory.LoadCityInfos(path));
             this.debugManager.LogInformation("Loaded CityInfos: " + path);
 
-            var cities = new CityEntity[citiesNames.Count];
-            int cityIndex = 0;
+            var cities = new List<CityEntity>();
+            var unmatchedCityNames = new List<string>(citiesNames.Keys);
             foreach (CityInfo ci in cityInfos)
             {
                 if (citiesNames.ContainsKey(ci.ShortName))
                 {
                     var go = citiesNames[ci.ShortName];
                     var coords = go.GetComponent<CityEntry>().GetGameCoordinates();
-                    cities[cityIndex++] = new CityEntity()
+                    cities.Add(new CityEntity()
                     {
                         CityShortName = ci.ShortName,
                         Defense = ci.Defense,
                         ClanShortName = ci.ClanName,
                         X = coords.x,
                         Y = coords.y
-                    };
+                    });
+                    unmatchedCityNames.Remove(ci.ShortName);
                 }
+            }
+
+            if (unmatchedCityNames.Count > 0)
+            {
+                this.debugManager.LogInformation(
+                    "Skipped scene City GameObjects with no matching City.json entry: " +
+                    string.Join(", ", unmatchedCityNames));
             }
 
             this.debugManager.LogInformation("Updated cities with coordinates from scene");
 
-            return cities;
+            return cities.ToArray();
         }
     }
 }

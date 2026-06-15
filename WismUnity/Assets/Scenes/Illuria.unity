@@ -14170,8 +14170,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   StandardTime: 0.25
   WarTime: 1
-  worldName: Mini-Illuria
-  modPath: Assets\Mod
+  worldName: Illuria
+  modPath: Assets\Plugins\WismClient\Mods
 --- !u!114 &2053934882
 MonoBehaviour:
   m_ObjectHideFlags: 0
