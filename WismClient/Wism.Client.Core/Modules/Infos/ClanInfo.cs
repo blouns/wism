@@ -16,6 +16,8 @@ namespace Wism.Client.Modules.Infos
 
         [DataMember] public int StartingGold { get; set; } = 1000;
 
+        [DataMember] public ClanPersonalityInfo Personality { get; set; }
+
         public static ClanInfo GetClanInfo(string id)
         {
             var info = ModFactory.FindClanInfo(id);

@@ -5,6 +5,7 @@ using Wism.Client.AI.Framework;
 using Wism.Client.Core;
 using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
+using Wism.Client.Modules.Infos;
 
 namespace Wism.Client.AI.Strategic
 {
@@ -25,6 +26,7 @@ namespace Wism.Client.AI.Strategic
             var staleObjectives = MarkStale(previous, world, player);
             var activeObjectives = new List<StrategicObjectiveEntity>();
             var assignedArmyIds = new HashSet<int>();
+            var personality = player.Clan.Info?.Personality ?? ClanPersonalityInfo.Balanced;
 
             activeObjectives.AddRange(CreateDefenseObjectives(world, player, assignedArmyIds));
             activeObjectives.AddRange(CreateSearchObjectives(world, player, assignedArmyIds));
@@ -34,6 +36,7 @@ namespace Wism.Client.AI.Strategic
 
             var objectives = staleObjectives
                 .Concat(activeObjectives)
+                .Select(objective => ApplyPersonality(objective, personality))
                 .OrderByDescending(objective => objective.Priority)
                 .ThenBy(objective => objective.Kind)
                 .ThenBy(objective => objective.TargetCityShortName)
@@ -49,6 +52,7 @@ namespace Wism.Client.AI.Strategic
                 Turn = player.Turn,
                 Revision = (previous?.Revision ?? 0) + 1,
                 Posture = SelectPosture(world, player),
+                PersonalityProfile = ResolvePersonalityProfile(personality),
                 Objectives = objectives
             };
 
@@ -321,6 +325,59 @@ namespace Wism.Client.AI.Strategic
                 Status = "Active",
                 StaleReason = null
             };
+        }
+
+        private static StrategicObjectiveEntity ApplyPersonality(
+            StrategicObjectiveEntity objective,
+            ClanPersonalityInfo personality)
+        {
+            if (objective == null || personality == null)
+            {
+                return objective;
+            }
+
+            objective.Priority *= ResolveWeight(objective.Kind, personality);
+            return objective;
+        }
+
+        private static double ResolveWeight(string objectiveKind, ClanPersonalityInfo personality)
+        {
+            double weight;
+            switch (objectiveKind)
+            {
+                case "Defend":
+                    weight = personality.Defender;
+                    break;
+                case "Search":
+                    weight = personality.Explorer;
+                    break;
+                case "Expand":
+                    weight = (personality.Explorer + personality.Opportunist) / 2.0;
+                    break;
+                case "Siege":
+                    weight = (personality.Aggressive + personality.Raider) / 2.0;
+                    break;
+                case "Produce":
+                    weight = personality.Economy;
+                    break;
+                default:
+                    weight = 1.0;
+                    break;
+            }
+
+            if (double.IsNaN(weight) || double.IsInfinity(weight))
+            {
+                return 1.0;
+            }
+
+            return Math.Max(0.25, Math.Min(3.0, weight));
+        }
+
+        private static string ResolvePersonalityProfile(ClanPersonalityInfo personality)
+        {
+            return string.IsNullOrWhiteSpace(personality.Profile)
+                ? "balanced"
+                : personality.Profile.Trim();
         }
 
         private static int[] AssignNearestArmies(

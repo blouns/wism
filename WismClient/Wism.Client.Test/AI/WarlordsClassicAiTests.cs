@@ -6,6 +6,7 @@ using Wism.Client.AI.Tactical;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Commands.Cities;
+using Wism.Client.Commands.Heros;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
@@ -906,6 +907,38 @@ namespace Wism.Client.Test.AI
                 Assert.That(commands.OfType<MoveOnceCommand>().Any(), Is.False);
                 Assert.That(hero.Tile, Is.EqualTo(originTile));
                 Assert.That(hero.MovesRemaining, Is.EqualTo(1));
+            });
+        }
+
+        [Test]
+        public void WarlordsClassicAI_PicksUpLooseItemBeforeContinuingSearchPath()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            player.IsHuman = false;
+
+            var originTile = World.Current.Map[19, 5];
+            var hero = player.HireHero(originTile);
+            var artifact = new Wism.Client.MapObjects.Artifact(ModFactory.FindArtifactInfo("Firesword"));
+            originTile.AddItem(artifact);
+
+            var commander = WarlordsClassicAiFactory.CreateCommandProvider(controllerProvider, logger);
+            commander.GenerateCommands();
+
+            var take = commander.GetBufferedCommands().OfType<TakeItemsCommand>().FirstOrDefault();
+            Assert.That(take, Is.Not.Null);
+
+            var result = take.Execute();
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.EqualTo(ActionState.Succeeded));
+                Assert.That(originTile.ContainsItem(artifact), Is.False);
+                Assert.That(hero.Items, Does.Contain(artifact));
             });
         }
 

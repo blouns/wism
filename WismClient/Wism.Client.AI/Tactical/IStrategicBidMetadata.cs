@@ -11,5 +11,7 @@ namespace Wism.Client.AI.Tactical
         int? TargetX { get; }
 
         int? TargetY { get; }
+
+        string Reason { get; }
     }
 }

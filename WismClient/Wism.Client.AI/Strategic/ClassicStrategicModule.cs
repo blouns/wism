@@ -177,6 +177,8 @@ namespace Wism.Client.AI.Strategic
             public int? TargetX => metadata?.TargetX;
 
             public int? TargetY => metadata?.TargetY;
+
+            public string Reason => metadata?.Reason ?? "Strategic weight applied without bid reason.";
         }
     }
 }

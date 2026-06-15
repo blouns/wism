@@ -8,6 +8,7 @@ using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Cities;
 using Wism.Client.Commands.Players;
 using Wism.Client.Common;
 using Wism.Client.Controllers;
@@ -230,6 +231,49 @@ namespace Wism.Client.Test.AI
             });
 
             Assert.That(commands, Is.Not.Null);
+        }
+
+        [Test]
+        public void CaptureModule_CapturesEmptyAdjacentCityWhenArmyHasExactlyEnoughMovement()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var sirians = Game.Current.Players[0];
+            var targetCity = Wism.Client.MapObjects.City.Create(new CityInfo
+            {
+                ShortName = "ExactMove",
+                DisplayName = "Exact Move",
+                Defense = 1,
+                Income = 10,
+                ProductionInfos = new[]
+                {
+                    new ProductionInfo
+                    {
+                        ArmyInfoName = "LightInfantry",
+                        Moves = 10,
+                        Strength = 3,
+                        TurnsToProduce = 1,
+                        Upkeep = 4
+                    }
+                }
+            });
+            World.Current.AddCity(targetCity, World.Current.Map[7, 4]);
+            var adjacentTile = World.Current.Map[6, 4];
+            var army = sirians.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), adjacentTile);
+            army.MovesRemaining = targetCity.Tile.Terrain.MovementCost;
+
+            var captureModule = new CaptureModule(
+                controllerProvider.ArmyController,
+                controllerProvider.CityController,
+                logger);
+
+            var commands = captureModule.GenerateCommands(new List<Army> { army }, World.Current).ToList();
+
+            Assert.That(commands, Has.One.InstanceOf<CaptureCityCommand>());
         }
 
        

@@ -263,7 +263,7 @@ namespace Wism.Client.Core
             var ordered = OrderStandings(standings).ToArray();
             var leader = ordered.FirstOrDefault();
             var runnerUp = ordered.Skip(1).FirstOrDefault();
-            var human = humans.SingleOrDefault();
+            var human = humans.Length == 1 ? humans[0] : null;
             var strongestComputerCities = computers.Length == 0 ? 0 : computers.Max(standing => standing.CityCount);
             var surrenderEligible = human != null &&
                                     humans.Length == 1 &&

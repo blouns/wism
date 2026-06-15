@@ -1567,7 +1567,8 @@ public sealed class PlaygroundScenarioRunner
                 IsDead: player.IsDead,
                 ArmyCount: player.GetArmies().Count,
                 CityCount: player.GetCities().Count,
-                Gold: player.Gold)).ToArray(),
+                Gold: player.Gold,
+                AiPersonality: player.Clan.Info?.Personality?.Profile ?? "balanced")).ToArray(),
             Events: events.ToArray(),
             Map: RenderMap());
     }
