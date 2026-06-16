@@ -18,6 +18,12 @@ namespace Assets.Scripts.Tiles
 
         public static bool HasTile(ITilemap tilemap, Vector3Int position)
         {
+            var unityTilemap = tilemap.GetComponent<Tilemap>();
+            if (unityTilemap != null && !unityTilemap.cellBounds.Contains(position))
+            {
+                return true;
+            }
+
             return ((tilemap.GetTile(position) is WaterTile) ||
                     (tilemap.GetTile(position) is BridgeTile));
         }

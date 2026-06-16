@@ -34,6 +34,11 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!Game.IsInitialized() || World.Current?.Map == null)
+        {
+            return;
+        }
+
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             var unityManager = GetUnityManager();
@@ -53,9 +58,14 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
             var rect = panelRect.rect;
             float miniNormalX = Mathf.Clamp01((localPoint.x - rect.xMin) / rect.width);
             float miniNormalY = Mathf.Clamp01((localPoint.y - rect.yMin) / rect.height);
+            if (localPoint.x < rect.xMin || localPoint.x > rect.xMax ||
+                localPoint.y < rect.yMin || localPoint.y > rect.yMax)
+            {
+                return;
+            }
 
-            float x = miniNormalX * World.Current.Map.GetUpperBound(0);
-            float y = miniNormalY * World.Current.Map.GetUpperBound(1);
+            float x = miniNormalX * World.Current.Map.GetLength(0);
+            float y = miniNormalY * World.Current.Map.GetLength(1);
 
             this.mainCameraFollow.SetCameraTarget(new Vector3(x, y, 0f));
         }

@@ -5,7 +5,7 @@ public class MapCrosshairs : MonoBehaviour
 {
     private Camera mainCamera;
     private RectTransform crosshairsRect;
-    private RectTransform minimapPanelRect;
+    private RectTransform minimapMapRect;
 
     public void LateUpdate()
     {
@@ -14,30 +14,44 @@ public class MapCrosshairs : MonoBehaviour
 
     private void MoveCrosshairs()
     {
+        if (!Game.IsInitialized() || World.Current?.Map == null)
+        {
+            return;
+        }
+
         var camera = GetMainCamera();
         var center = camera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, 0f));
 
-        var minimapPanelRect = GetMinimapPanelRect();
+        var minimapMapRect = GetMinimapMapRect();
 
-        float newXPercent = center.x / (float)World.Current.Map.GetUpperBound(0);
-        float newYPercent = center.y / (float)World.Current.Map.GetUpperBound(1);
-        float newX = minimapPanelRect.sizeDelta.x * newXPercent - (minimapPanelRect.sizeDelta.x / 2f);
-        float newY = minimapPanelRect.sizeDelta.y * newYPercent - (minimapPanelRect.sizeDelta.y / 2f);
+        var mapWidth = Mathf.Max(1, World.Current.Map.GetLength(0));
+        var mapHeight = Mathf.Max(1, World.Current.Map.GetLength(1));
+        float newXPercent = Mathf.Clamp01(center.x / mapWidth);
+        float newYPercent = Mathf.Clamp01(center.y / mapHeight);
+        float newX = minimapMapRect.rect.width * newXPercent - (minimapMapRect.rect.width / 2f);
+        float newY = minimapMapRect.rect.height * newYPercent - (minimapMapRect.rect.height / 2f);
 
-        // TODO: Clamp to minimap
         var crossRect = GetCrosshairsRect();
-        crossRect.localPosition = new Vector3(newX, newY, 0f);
+        var viewportHeight = camera.orthographicSize * 2f;
+        var viewportWidth = viewportHeight * camera.aspect;
+        crossRect.sizeDelta = new Vector2(
+            Mathf.Clamp((viewportWidth / mapWidth) * minimapMapRect.rect.width, 8f, minimapMapRect.rect.width),
+            Mathf.Clamp((viewportHeight / mapHeight) * minimapMapRect.rect.height, 8f, minimapMapRect.rect.height));
+        crossRect.localPosition = new Vector3(
+            Mathf.Clamp(newX, -(minimapMapRect.rect.width / 2f), minimapMapRect.rect.width / 2f),
+            Mathf.Clamp(newY, -(minimapMapRect.rect.height / 2f), minimapMapRect.rect.height / 2f),
+            0f);
     }
 
-    private RectTransform GetMinimapPanelRect()
+    private RectTransform GetMinimapMapRect()
     {
-        if (this.minimapPanelRect == null)
+        if (this.minimapMapRect == null)
         {
-            this.minimapPanelRect = UnityUtilities.GameObjectHardFind("MinimapPanel")
+            this.minimapMapRect = UnityUtilities.GameObjectHardFind("Minimap")
                 .GetComponent<RectTransform>();
         }
 
-        return this.minimapPanelRect;
+        return this.minimapMapRect;
     }
 
     private RectTransform GetCrosshairsRect()

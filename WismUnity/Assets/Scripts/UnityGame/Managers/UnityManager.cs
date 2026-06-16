@@ -74,6 +74,7 @@ namespace Assets.Scripts.Managers
         public GameObject SelectedBoxPrefab;
         private SelectedArmyBox selectedArmyBox;
         private Camera mainCamera;
+        private Camera minimapCamera;
         private CameraFollow cameraFollow;
 
         private bool isInitialized;
@@ -85,6 +86,9 @@ namespace Assets.Scripts.Managers
 
         // AI
         private AdaptaCommandProvider adaptaProvider;
+        private float nextAiGenerationTime;
+        private const float AiGenerationRetryDelaySeconds = 0.25f;
+        private const double SlowAiGenerationWarningMs = 250d;
 
         public List<Army> CurrentAttackers { get; set; }
         public List<Army> CurrentDefenders { get; set; }
@@ -235,6 +239,8 @@ namespace Assets.Scripts.Managers
                 this.DebugManager.LogInformation("Loading a game...");
                 GetComponent<UnityGameFactory>().LoadNewGame();
             }
+
+            ConfigureWorldCameras();
         }
 
         private void InitializeUI()
@@ -281,6 +287,7 @@ namespace Assets.Scripts.Managers
                 // City processors
                 new BuildCityDefensesProcessor(this.GameManager.LoggerFactory, this),
                 new RazeCityDefensesProcessor(this.GameManager.LoggerFactory, this),
+                new RazeTowerProcessor(this.GameManager.LoggerFactory, this),
 
                 // Game processors
                 new LoadGameProcessor(this.GameManager.LoggerFactory, this),
@@ -407,7 +414,31 @@ namespace Assets.Scripts.Managers
 
                 if (!this.provider.CommandController.CommandExists(this.LastCommandId + 1))
                 {
+                    if (Time.unscaledTime < this.nextAiGenerationTime)
+                    {
+                        return;
+                    }
+
+                    var start = System.Diagnostics.Stopwatch.StartNew();
                     this.adaptaProvider.GenerateCommands();
+                    start.Stop();
+
+                    if (start.Elapsed.TotalMilliseconds >= SlowAiGenerationWarningMs)
+                    {
+                        LogInformation(
+                            "AI command generation for {0} took {1:0}ms.",
+                            currentPlayer.Clan.ShortName,
+                            start.Elapsed.TotalMilliseconds);
+                    }
+
+                    if (!this.provider.CommandController.CommandExists(this.LastCommandId + 1))
+                    {
+                        this.nextAiGenerationTime = Time.unscaledTime + AiGenerationRetryDelaySeconds;
+                    }
+                    else
+                    {
+                        this.nextAiGenerationTime = 0f;
+                    }
                 }
             }
         }
@@ -772,12 +803,59 @@ namespace Assets.Scripts.Managers
                 {
                     this.mainCamera = camera;
                 }
+                else if (camera.CompareTag("MinimapCamera") || camera.name == "MinimapCamera")
+                {
+                    this.minimapCamera = camera;
+                }
             }
 
             if (this.mainCamera == null)
             {
                 throw new InvalidOperationException("Could not find the MainCamera.");
             }
+        }
+
+        private void ConfigureWorldCameras()
+        {
+            if (!Game.IsInitialized() || World.Current?.Map == null)
+            {
+                return;
+            }
+
+            var mapWidth = World.Current.Map.GetLength(0);
+            var mapHeight = World.Current.Map.GetLength(1);
+            if (mapWidth <= 0 || mapHeight <= 0)
+            {
+                return;
+            }
+
+            this.cameraFollow?.ConfigureBoundsFromCurrentWorld();
+
+            if (this.minimapCamera == null)
+            {
+                var minimapObject = GameObject.FindGameObjectWithTag("MinimapCamera");
+                if (minimapObject != null)
+                {
+                    this.minimapCamera = minimapObject.GetComponent<Camera>();
+                }
+            }
+
+            if (this.minimapCamera == null)
+            {
+                return;
+            }
+
+            this.minimapCamera.orthographic = true;
+            var aspect = this.minimapCamera.targetTexture != null && this.minimapCamera.targetTexture.height > 0
+                ? this.minimapCamera.targetTexture.width / (float)this.minimapCamera.targetTexture.height
+                : this.minimapCamera.aspect;
+            aspect = Mathf.Max(0.01f, aspect);
+
+            this.minimapCamera.orthographicSize = Mathf.Max(mapHeight / 2f, (mapWidth / 2f) / aspect);
+            this.minimapCamera.transform.position = new Vector3(
+                mapWidth / 2f,
+                mapHeight / 2f,
+                this.minimapCamera.transform.position.z == 0f ? -10f : this.minimapCamera.transform.position.z);
         }
 
         internal void SetCameraTarget(Transform transform)

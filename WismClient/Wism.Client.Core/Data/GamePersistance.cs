@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Wism.Client.Core;
@@ -191,6 +191,8 @@ namespace Wism.Client.Data
                         Items = SnapshotItems(tile.Items),
                         LocationShortName = tile.HasLocation() ? tile.Location.ShortName : null,
                         TerrainShortName = tile.Terrain.ShortName,
+                        TowerOwnerClanShortName = tile.TowerOwnerClanShortName,
+                        IsTowerRazed = tile.IsTowerRazed,
                         VisitingArmyIds = ConvertToArmyIds(tile.VisitingArmies),
                         X = tile.X,
                         Y = tile.Y

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Wism.Client.Core;
 using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
@@ -31,6 +31,8 @@ namespace Wism.Client.Factories
                     tile.X = tileEntity.X;
                     tile.Y = tileEntity.Y;
                     tile.Terrain = MapBuilder.TerrainKinds[tileEntity.TerrainShortName];
+                    tile.TowerOwnerClanShortName = tileEntity.TowerOwnerClanShortName;
+                    tile.IsTowerRazed = tileEntity.IsTowerRazed;
 
                     // Items
                     if (tileEntity.Items != null)

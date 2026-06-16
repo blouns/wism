@@ -12,7 +12,14 @@
     "SourceRecordIndex": 1,
     "SourceFileOffset": 326346,
     "SourceKindCode": 3,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Temple",
+    "VisualClass": "Temple",
+    "VisualTerrain": "Temple",
+    "SpriteTreatment": "temple sprite treatment",
+    "SearchOrStatusTreatment": "Temple",
+    "SourceMapWordAtCell": "0x8B07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "SeeroftheRiver",
@@ -27,7 +34,14 @@
     "SourceRecordIndex": 2,
     "SourceFileOffset": 326374,
     "SourceKindCode": 2,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Sage",
+    "VisualClass": "Sage/Oracle",
+    "VisualTerrain": "Sage",
+    "SpriteTreatment": "oracle/sage/special-site sprite treatment",
+    "SearchOrStatusTreatment": "Sage",
+    "SourceMapWordAtCell": "0x8B07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "TempleofEmrik",
@@ -42,7 +56,14 @@
     "SourceRecordIndex": 3,
     "SourceFileOffset": 326402,
     "SourceKindCode": 3,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Temple",
+    "VisualClass": "Temple",
+    "VisualTerrain": "Temple",
+    "SpriteTreatment": "temple sprite treatment",
+    "SearchOrStatusTreatment": "Temple",
+    "SourceMapWordAtCell": "0x8B07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "GoldenLibrary",
@@ -57,7 +78,14 @@
     "SourceRecordIndex": 4,
     "SourceFileOffset": 326430,
     "SourceKindCode": 1,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Library",
+    "VisualClass": "Library",
+    "VisualTerrain": "Library",
+    "SpriteTreatment": "library/special-site sprite treatment",
+    "SearchOrStatusTreatment": "Library",
+    "SourceMapWordAtCell": "0x8B07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "GreatLibrary",
@@ -72,7 +100,14 @@
     "SourceRecordIndex": 5,
     "SourceFileOffset": 326458,
     "SourceKindCode": 1,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Library",
+    "VisualClass": "Library",
+    "VisualTerrain": "Library",
+    "SpriteTreatment": "library/special-site sprite treatment",
+    "SearchOrStatusTreatment": "Library",
+    "SourceMapWordAtCell": "0x8B07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "TempleofMiridine",
@@ -87,7 +122,14 @@
     "SourceRecordIndex": 6,
     "SourceFileOffset": 326486,
     "SourceKindCode": 3,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Temple",
+    "VisualClass": "Temple",
+    "VisualTerrain": "Temple",
+    "SpriteTreatment": "temple sprite treatment",
+    "SearchOrStatusTreatment": "Temple",
+    "SourceMapWordAtCell": "0x8B07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "TempleofLurinth",
@@ -102,7 +144,14 @@
     "SourceRecordIndex": 7,
     "SourceFileOffset": 326514,
     "SourceKindCode": 3,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Temple",
+    "VisualClass": "Temple",
+    "VisualTerrain": "Temple",
+    "SpriteTreatment": "temple sprite treatment",
+    "SearchOrStatusTreatment": "Temple",
+    "SourceMapWordAtCell": "0x8B07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "GrandOracle",
@@ -117,7 +166,14 @@
     "SourceRecordIndex": 8,
     "SourceFileOffset": 326542,
     "SourceKindCode": 2,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Sage",
+    "VisualClass": "Sage/Oracle",
+    "VisualTerrain": "Sage",
+    "SpriteTreatment": "oracle/sage/special-site sprite treatment",
+    "SearchOrStatusTreatment": "Sage",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "GreyportRuins",
@@ -132,11 +188,18 @@
     "SourceRecordIndex": 9,
     "SourceFileOffset": 326570,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Ruins",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "ruins sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "EmperorsCrypt",
-    "DisplayName": "Emperors\u0027 Crypt",
+    "DisplayName": "Emperors' Crypt",
     "Kind": "Ruins",
     "Terrain": "Ruins",
     "X": 18,
@@ -147,7 +210,14 @@
     "SourceRecordIndex": 10,
     "SourceFileOffset": 326598,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tomb/Crypt",
+    "VisualTerrain": "Tomb",
+    "SpriteTreatment": "tomb/crypt sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "HarvestStone",
@@ -162,7 +232,14 @@
     "SourceRecordIndex": 11,
     "SourceFileOffset": 326626,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Stone/Monolith",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "stone/monolith ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "OldWoodsTower",
@@ -177,11 +254,18 @@
     "SourceRecordIndex": 12,
     "SourceFileOffset": 326654,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tower",
+    "VisualTerrain": "Tower",
+    "SpriteTreatment": "tower sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "DruidsTemple",
-    "DisplayName": "Druids\u0027 Temple",
+    "DisplayName": "Druids' Temple",
     "Kind": "Ruins",
     "Terrain": "Ruins",
     "X": 49,
@@ -192,7 +276,14 @@
     "SourceRecordIndex": 13,
     "SourceFileOffset": 326682,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Temple",
+    "VisualTerrain": "Temple",
+    "SpriteTreatment": "temple sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "RuinsofKabor",
@@ -207,11 +298,18 @@
     "SourceRecordIndex": 14,
     "SourceFileOffset": 326710,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Ruins",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "ruins sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "NirnsCrypt",
-    "DisplayName": "Nirn\u0027s Crypt",
+    "DisplayName": "Nirn's Crypt",
     "Kind": "Ruins",
     "Terrain": "Ruins",
     "X": 45,
@@ -222,11 +320,18 @@
     "SourceRecordIndex": 15,
     "SourceFileOffset": 326738,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tomb/Crypt",
+    "VisualTerrain": "Tomb",
+    "SpriteTreatment": "tomb/crypt sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "NirnsDeep",
-    "DisplayName": "Nirn\u0027s Deep",
+    "DisplayName": "Nirn's Deep",
     "Kind": "Ruins",
     "Terrain": "Ruins",
     "X": 55,
@@ -237,11 +342,18 @@
     "SourceRecordIndex": 16,
     "SourceFileOffset": 326766,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Ruins",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "ruins sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "MirksDecay",
-    "DisplayName": "Mirk\u0027s Decay",
+    "DisplayName": "Mirk's Decay",
     "Kind": "Ruins",
     "Terrain": "Ruins",
     "X": 69,
@@ -252,11 +364,18 @@
     "SourceRecordIndex": 17,
     "SourceFileOffset": 326794,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Ruins",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "ruins sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "WizardsHearth",
-    "DisplayName": "Wizard\u0027s Hearth",
+    "DisplayName": "Wizard's Hearth",
     "Kind": "Ruins",
     "Terrain": "Ruins",
     "X": 68,
@@ -267,7 +386,14 @@
     "SourceRecordIndex": 18,
     "SourceFileOffset": 326822,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Other Ruins-family",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "generic ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "DragonHalls",
@@ -282,7 +408,14 @@
     "SourceRecordIndex": 19,
     "SourceFileOffset": 326850,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Other Ruins-family",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "generic ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "Bridgetower",
@@ -297,7 +430,14 @@
     "SourceRecordIndex": 20,
     "SourceFileOffset": 326878,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tower",
+    "VisualTerrain": "Tower",
+    "SpriteTreatment": "tower sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "CryptofMolok",
@@ -312,7 +452,14 @@
     "SourceRecordIndex": 21,
     "SourceFileOffset": 326906,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tomb/Crypt",
+    "VisualTerrain": "Tomb",
+    "SpriteTreatment": "tomb/crypt sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "HallsofChaos",
@@ -327,7 +474,14 @@
     "SourceRecordIndex": 22,
     "SourceFileOffset": 326934,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Other Ruins-family",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "generic ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "DragontowerRuins",
@@ -342,7 +496,14 @@
     "SourceRecordIndex": 23,
     "SourceFileOffset": 326962,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tower",
+    "VisualTerrain": "Tower",
+    "SpriteTreatment": "tower sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "NevDolar",
@@ -357,7 +518,14 @@
     "SourceRecordIndex": 24,
     "SourceFileOffset": 326990,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Ruins",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "ruins sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "TheOldInn",
@@ -372,7 +540,14 @@
     "SourceRecordIndex": 25,
     "SourceFileOffset": 327018,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Other Ruins-family",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "generic ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "ThroneofHoran",
@@ -387,7 +562,14 @@
     "SourceRecordIndex": 26,
     "SourceFileOffset": 327046,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Throne",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "throne ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "ThroneofBalnor",
@@ -402,11 +584,18 @@
     "SourceRecordIndex": 27,
     "SourceFileOffset": 327074,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Throne",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "throne ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "GiantsTomb",
-    "DisplayName": "Giant\u0027s Tomb",
+    "DisplayName": "Giant's Tomb",
     "Kind": "Ruins",
     "Terrain": "Ruins",
     "X": 33,
@@ -417,7 +606,14 @@
     "SourceRecordIndex": 28,
     "SourceFileOffset": 327102,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tomb/Crypt",
+    "VisualTerrain": "Tomb",
+    "SpriteTreatment": "tomb/crypt sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "TowerofDeath",
@@ -432,7 +628,14 @@
     "SourceRecordIndex": 29,
     "SourceFileOffset": 327130,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tower",
+    "VisualTerrain": "Tower",
+    "SpriteTreatment": "tower sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "RuinsofHaviel",
@@ -447,7 +650,14 @@
     "SourceRecordIndex": 30,
     "SourceFileOffset": 327158,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Ruins",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "ruins sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "DuskStone",
@@ -462,7 +672,14 @@
     "SourceRecordIndex": 31,
     "SourceFileOffset": 327186,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Stone/Monolith",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "stone/monolith ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "DawnStone",
@@ -477,7 +694,14 @@
     "SourceRecordIndex": 32,
     "SourceFileOffset": 327214,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Stone/Monolith",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "stone/monolith ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "Gemhold",
@@ -492,7 +716,14 @@
     "SourceRecordIndex": 33,
     "SourceFileOffset": 327242,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Other Ruins-family",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "generic ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "DarkBarrows",
@@ -507,7 +738,14 @@
     "SourceRecordIndex": 34,
     "SourceFileOffset": 327270,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tomb/Crypt",
+    "VisualTerrain": "Tomb",
+    "SpriteTreatment": "tomb/crypt sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "DwarfHalls",
@@ -522,7 +760,14 @@
     "SourceRecordIndex": 35,
     "SourceFileOffset": 327298,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Other Ruins-family",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "generic ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "Guardian",
@@ -537,7 +782,14 @@
     "SourceRecordIndex": 36,
     "SourceFileOffset": 327326,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Other Ruins-family",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "generic ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "TowerofNight",
@@ -552,7 +804,14 @@
     "SourceRecordIndex": 37,
     "SourceFileOffset": 327354,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tower",
+    "VisualTerrain": "Tower",
+    "SpriteTreatment": "tower sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "CryptofBaal",
@@ -567,7 +826,14 @@
     "SourceRecordIndex": 38,
     "SourceFileOffset": 327382,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tomb/Crypt",
+    "VisualTerrain": "Tomb",
+    "SpriteTreatment": "tomb/crypt sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8A07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "TombofNaar",
@@ -582,7 +848,14 @@
     "SourceRecordIndex": 39,
     "SourceFileOffset": 327410,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Tomb/Crypt",
+    "VisualTerrain": "Tomb",
+    "SpriteTreatment": "tomb/crypt sprite treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0x8C07",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class"
   },
   {
     "ShortName": "Monolyth",
@@ -597,6 +870,15 @@
     "SourceRecordIndex": 40,
     "SourceFileOffset": 327438,
     "SourceKindCode": 4,
-    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map."
+    "SourceNote": "Original Warlords unpacked EXE fixed site record table binds this display name, kind, and coordinate in the corrected 109x156 map.",
+    "OriginalKind": "Ruins",
+    "VisualClass": "Stone/Monolith",
+    "VisualTerrain": "Ruins",
+    "SpriteTreatment": "stone/monolith ruins-family treatment",
+    "SearchOrStatusTreatment": "Ruins",
+    "SourceMapWordAtCell": "0xA407",
+    "SourceVisualEvidence": "decoded-original-site-record-visual-class",
+    "RenderInUnity": false,
+    "UnityPlacementNote": "Decoded Monolyth coordinate is currently a water cell; hide the marker until original-game evidence resolves the correct visual placement."
   }
 ]

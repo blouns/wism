@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Wism.Client.Core;
@@ -189,7 +189,7 @@ namespace Wism.Client.Factories
                 if (armiesToTile.ContainsKey(army.Id))
                 {
                     var tile = armiesToTile[army.Id];
-                    tile.AddArmies(new List<Army> { army });
+                    tile.AddArmies(new List<Army> { army }, claimNearbyTowers: false);
                 }
                 else if (visitingToTile.ContainsKey(army.Id))
                 {

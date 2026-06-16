@@ -1,4 +1,4 @@
-﻿using System.Runtime.Serialization;
+using System.Runtime.Serialization;
 
 namespace Wism.Client.Data.Entities
 {
@@ -16,6 +16,10 @@ namespace Wism.Client.Data.Entities
         [DataMember] public string CityShortName { get; set; }
 
         [DataMember] public string LocationShortName { get; set; }
+
+        [DataMember(EmitDefaultValue = false)] public string TowerOwnerClanShortName { get; set; }
+
+        [DataMember(EmitDefaultValue = false)] public bool IsTowerRazed { get; set; }
 
         [DataMember] public int[] ArmyIds { get; set; }
 

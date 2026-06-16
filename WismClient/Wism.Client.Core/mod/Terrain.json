@@ -120,6 +120,22 @@
     "DisplayName": "Tower"
   },
   {
+    "ShortName": "SnowPeak",
+    "AllowFlight": true,
+    "AllowFloat": false,
+    "AllowWalk": false,
+    "Movement": 5,
+    "DisplayName": "Snow Peak"
+  },
+  {
+    "ShortName": "Volcano",
+    "AllowFlight": true,
+    "AllowFloat": false,
+    "AllowWalk": false,
+    "Movement": 5,
+    "DisplayName": "Volcano"
+  },
+  {
     "ShortName": "Void",
     "AllowFlight": false,
     "AllowFloat": false,

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Wism.Client.Core;
@@ -51,6 +51,8 @@ namespace Wism.Client.MapObjects
 
         public override string ShortName => this.Info.ShortName;
         public string Kind => this.Info.Kind;
+        public string VisualTerrain => this.Info.VisualTerrain;
+        public bool IsTowerSite => string.Equals(this.VisualTerrain, "Tower", StringComparison.OrdinalIgnoreCase);
         public IBoon Boon { get; set; }
         public string Monster { get; set; }
         public bool Searched { get; set; }

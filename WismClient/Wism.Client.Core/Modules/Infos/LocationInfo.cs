@@ -18,5 +18,7 @@ namespace Wism.Client.Modules.Infos
         [DataMember] public string Kind { get; set; } = "Ruins";
 
         [DataMember] public string Terrain { get; set; } = "Ruins";
+
+        [DataMember(EmitDefaultValue = false)] public string VisualTerrain { get; set; }
     }
 }

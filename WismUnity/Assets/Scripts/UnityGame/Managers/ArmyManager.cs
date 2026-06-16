@@ -1,6 +1,7 @@
-﻿using Assets.Scripts.Armies;
+using Assets.Scripts.Armies;
 using Assets.Scripts.Editors;
 using Assets.Scripts.Tilemaps;
+using Assets.Scripts.UnityGame.Mapping;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -207,6 +208,8 @@ namespace Assets.Scripts.Managers
                     flagGO.UpdateFlagSize();
                 }
             }
+
+            RefreshTowerOwnershipVisuals();
         }
 
         internal void InstantiateArmy(Army army, Vector3 worldVector)
@@ -218,5 +221,50 @@ namespace Assets.Scripts.Managers
             ArmyGameObject ago = new ArmyGameObject(army, armyGO);
             this.ArmyDictionary.Add(army.Id, ago);
         }
+        private void RefreshTowerOwnershipVisuals()
+        {
+            if (this.worldTilemap == null)
+            {
+                return;
+            }
+
+            Tile[,] map;
+            try
+            {
+                map = World.Current.Map;
+            }
+            catch (InvalidOperationException)
+            {
+                return;
+            }
+
+            if (map == null)
+            {
+                return;
+            }
+
+            var towerVisuals = FindObjectsOfType<TowerOwnershipVisual>(true);
+            foreach (var towerVisual in towerVisuals)
+            {
+                var coords = this.worldTilemap.ConvertUnityToGameVector(towerVisual.transform.position);
+                if (coords.x < 0 ||
+                    coords.y < 0 ||
+                    coords.x > map.GetUpperBound(0) ||
+                    coords.y > map.GetUpperBound(1))
+                {
+                    continue;
+                }
+
+                var towerTile = map[coords.x, coords.y];
+                if (!towerTile.IsTower())
+                {
+                    towerVisual.SetRazed();
+                    continue;
+                }
+
+                towerVisual.SetOwner(towerTile.TowerOwnerClanShortName);
+            }
+        }
+
     }
 }

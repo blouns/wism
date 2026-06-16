@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Wism.Client.Common;
 using Wism.Client.Factories;
@@ -135,7 +135,18 @@ namespace Wism.Client.Core
 
             location.Tile = tile;
             tile.Location = location;
-            tile.Terrain = location.Terrain;
+            if (location.IsTowerSite)
+            {
+                tile.Terrain = tile.IsTowerRazed
+                    ? MapBuilder.TerrainKinds["Ruins"]
+                    : MapBuilder.TerrainKinds["Tower"];
+            }
+            else
+            {
+                tile.Terrain = location.Terrain;
+                tile.IsTowerRazed = false;
+                tile.TowerOwnerClanShortName = null;
+            }
 
             // Add location for tracking
             this.locations.Add(location);

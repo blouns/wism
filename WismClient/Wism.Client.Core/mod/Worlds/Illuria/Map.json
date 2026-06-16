@@ -3,7 +3,7 @@
   "MapXUpperBound": 109,
   "MapYUpperBound": 156,
   "SourceMapLayout": "Illuria.map 109x156 one little-endian word per cell",
-  "SourceSeed": "C:\\Users\\Brian\\OneDrive\\Games\\warlords\\.disassembled\\reports\\illuria_map_export_current\\illuria_wism_scene_seed_current.json",
+  "SourceSeed": "illuria_wism_scene_seed_current.json",
   "Tiles": [
     {
       "X": 0,
@@ -3682,9 +3682,9 @@
     {
       "X": 7,
       "Y": 3,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -10843,9 +10843,9 @@
     {
       "X": 4,
       "Y": 9,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -14044,9 +14044,9 @@
     {
       "X": 77,
       "Y": 11,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -15201,44 +15201,48 @@
       "Y": 12,
       "TerrainShortName": "Road",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "calibrated road connector near bridge",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 142,
-      "SourceRawWord": "0x8E07"
+      "SourceRawWord": "0x8E07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 74,
       "Y": 12,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 252,
-      "SourceRawWord": "0xFC07"
+      "SourceRawWord": "0xFC07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 75,
       "Y": 12,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 253,
-      "SourceRawWord": "0xFD07"
+      "SourceRawWord": "0xFD07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 76,
       "Y": 12,
       "TerrainShortName": "Road",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "calibrated road connector near bridge",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 142,
-      "SourceRawWord": "0x8E07"
+      "SourceRawWord": "0x8E07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 77,
@@ -16442,9 +16446,9 @@
     {
       "X": 77,
       "Y": 13,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -20237,9 +20241,9 @@
     {
       "X": 95,
       "Y": 16,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Hill",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -22514,9 +22518,9 @@
     {
       "X": 84,
       "Y": 18,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Hill",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -27640,9 +27644,9 @@
     {
       "X": 5,
       "Y": 23,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -32634,9 +32638,9 @@
     {
       "X": 23,
       "Y": 27,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -36176,9 +36180,9 @@
     {
       "X": 18,
       "Y": 30,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -36990,9 +36994,9 @@
     {
       "X": 92,
       "Y": 30,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -43304,9 +43308,9 @@
     {
       "X": 12,
       "Y": 36,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -45779,9 +45783,9 @@
     {
       "X": 19,
       "Y": 38,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Forest",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -47022,9 +47026,9 @@
     {
       "X": 23,
       "Y": 39,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -49035,9 +49039,9 @@
     {
       "X": 97,
       "Y": 40,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Hill",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -49959,9 +49963,9 @@
     {
       "X": 72,
       "Y": 41,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -50014,9 +50018,9 @@
     {
       "X": 77,
       "Y": 41,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -50454,13 +50458,14 @@
     {
       "X": 8,
       "Y": 42,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 9,
@@ -50564,9 +50569,9 @@
     {
       "X": 18,
       "Y": 42,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -51171,33 +51176,36 @@
       "Y": 42,
       "TerrainShortName": "Road",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "calibrated road connector near bridge",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 142,
-      "SourceRawWord": "0x8E07"
+      "SourceRawWord": "0x8E07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 74,
       "Y": 42,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 252,
-      "SourceRawWord": "0xFC07"
+      "SourceRawWord": "0xFC07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 75,
       "Y": 42,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 253,
-      "SourceRawWord": "0xFD07"
+      "SourceRawWord": "0xFD07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 76,
@@ -51653,13 +51661,14 @@
     {
       "X": 8,
       "Y": 43,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 9,
@@ -51752,13 +51761,14 @@
     {
       "X": 17,
       "Y": 43,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 18,
@@ -51928,13 +51938,14 @@
     {
       "X": 33,
       "Y": 43,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 34,
@@ -52104,9 +52115,9 @@
     {
       "X": 49,
       "Y": 43,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -52137,9 +52148,9 @@
     {
       "X": 52,
       "Y": 43,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -52357,9 +52368,9 @@
     {
       "X": 72,
       "Y": 43,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -52412,9 +52423,9 @@
     {
       "X": 77,
       "Y": 43,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -52533,9 +52544,9 @@
     {
       "X": 88,
       "Y": 43,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Hill",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -52951,13 +52962,14 @@
     {
       "X": 17,
       "Y": 44,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 18,
@@ -53127,13 +53139,14 @@
     {
       "X": 33,
       "Y": 44,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 34,
@@ -53182,9 +53195,9 @@
     {
       "X": 38,
       "Y": 44,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -53380,13 +53393,14 @@
     {
       "X": 56,
       "Y": 44,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 57,
@@ -54579,13 +54593,14 @@
     {
       "X": 56,
       "Y": 45,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 57,
@@ -64270,9 +64285,9 @@
     {
       "X": 65,
       "Y": 53,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Forest",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -67922,9 +67937,9 @@
     {
       "X": 70,
       "Y": 56,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Forest",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -70320,9 +70335,9 @@
     {
       "X": 70,
       "Y": 58,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Forest",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -80759,9 +80774,9 @@
     {
       "X": 38,
       "Y": 67,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Hill",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -94509,9 +94524,9 @@
     {
       "X": 89,
       "Y": 78,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -94542,9 +94557,9 @@
     {
       "X": 92,
       "Y": 78,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -97567,9 +97582,9 @@
     {
       "X": 40,
       "Y": 81,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Hill",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -99690,9 +99705,9 @@
     {
       "X": 15,
       "Y": 83,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -100196,24 +100211,26 @@
     {
       "X": 61,
       "Y": 83,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 252,
-      "SourceRawWord": "0xFC07"
+      "SourceRawWord": "0xFC07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 62,
       "Y": 83,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 253,
-      "SourceRawWord": "0xFD07"
+      "SourceRawWord": "0xFD07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 63,
@@ -101120,13 +101137,14 @@
     {
       "X": 36,
       "Y": 84,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 37,
@@ -102319,13 +102337,14 @@
     {
       "X": 36,
       "Y": 85,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 37,
@@ -103507,9 +103526,9 @@
     {
       "X": 35,
       "Y": 86,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -103529,9 +103548,9 @@
     {
       "X": 37,
       "Y": 86,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -104838,13 +104857,14 @@
     {
       "X": 47,
       "Y": 87,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 48,
@@ -106037,13 +106057,14 @@
     {
       "X": 47,
       "Y": 88,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 48,
@@ -108963,9 +108984,9 @@
     {
       "X": 95,
       "Y": 90,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -109634,13 +109655,14 @@
     {
       "X": 47,
       "Y": 91,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 48,
@@ -110833,13 +110855,14 @@
     {
       "X": 47,
       "Y": 92,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 48,
@@ -110987,24 +111010,26 @@
     {
       "X": 61,
       "Y": 92,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 252,
-      "SourceRawWord": "0xFC07"
+      "SourceRawWord": "0xFC07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 62,
       "Y": 92,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 253,
-      "SourceRawWord": "0xFD07"
+      "SourceRawWord": "0xFD07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 63,
@@ -111317,9 +111342,9 @@
     {
       "X": 91,
       "Y": 92,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -112175,13 +112200,14 @@
     {
       "X": 60,
       "Y": 93,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 61,
@@ -113374,13 +113400,14 @@
     {
       "X": 60,
       "Y": 94,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 61,
@@ -114727,24 +114754,26 @@
     {
       "X": 74,
       "Y": 95,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 252,
-      "SourceRawWord": "0xFC07"
+      "SourceRawWord": "0xFC07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 75,
       "Y": 95,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 253,
-      "SourceRawWord": "0xFD07"
+      "SourceRawWord": "0xFD07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 76,
@@ -115904,13 +115933,14 @@
     {
       "X": 72,
       "Y": 96,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 73,
@@ -116003,9 +116033,9 @@
     {
       "X": 81,
       "Y": 96,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -117103,13 +117133,14 @@
     {
       "X": 72,
       "Y": 97,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 73,
@@ -119501,9 +119532,9 @@
     {
       "X": 72,
       "Y": 99,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -119710,9 +119741,9 @@
     {
       "X": 91,
       "Y": 99,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -119732,9 +119763,9 @@
     {
       "X": 93,
       "Y": 99,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain corrected to grass from neighboring land",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -120920,13 +120951,14 @@
     {
       "X": 92,
       "Y": 100,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 250,
-      "SourceRawWord": "0xFA07"
+      "SourceRawWord": "0xFA07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 93,
@@ -121404,9 +121436,9 @@
     {
       "X": 27,
       "Y": 101,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -121679,9 +121711,9 @@
     {
       "X": 52,
       "Y": 101,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -121701,9 +121733,9 @@
     {
       "X": 54,
       "Y": 101,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -122119,13 +122151,14 @@
     {
       "X": 92,
       "Y": 101,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 251,
-      "SourceRawWord": "0xFB07"
+      "SourceRawWord": "0xFB07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 93,
@@ -122383,24 +122416,26 @@
     {
       "X": 7,
       "Y": 102,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 252,
-      "SourceRawWord": "0xFC07"
+      "SourceRawWord": "0xFC07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 8,
       "Y": 102,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 253,
-      "SourceRawWord": "0xFD07"
+      "SourceRawWord": "0xFD07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 9,
@@ -132899,9 +132934,9 @@
     {
       "X": 91,
       "Y": 110,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -133790,9 +133825,9 @@
     {
       "X": 63,
       "Y": 111,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -135286,9 +135321,9 @@
     {
       "X": 90,
       "Y": 112,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -142282,9 +142317,9 @@
     {
       "X": 72,
       "Y": 118,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -145494,24 +145529,26 @@
     {
       "X": 37,
       "Y": 121,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 252,
-      "SourceRawWord": "0xFC07"
+      "SourceRawWord": "0xFC07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 38,
       "Y": 121,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 253,
-      "SourceRawWord": "0xFD07"
+      "SourceRawWord": "0xFD07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 39,
@@ -145890,9 +145927,9 @@
     {
       "X": 73,
       "Y": 121,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -146891,9 +146928,9 @@
     {
       "X": 55,
       "Y": 122,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -147100,35 +147137,38 @@
     {
       "X": 74,
       "Y": 122,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 252,
-      "SourceRawWord": "0xFC07"
+      "SourceRawWord": "0xFC07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 75,
       "Y": 122,
-      "TerrainShortName": "Road",
+      "TerrainShortName": "Bridge",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "inferred bridge over water",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 253,
-      "SourceRawWord": "0xFD07"
+      "SourceRawWord": "0xFD07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 76,
       "Y": 122,
       "TerrainShortName": "Road",
       "SourceTerrainFamily": "road",
-      "SourceTerrainSubType": "calibrated road",
-      "SourceConfidence": "high",
+      "SourceTerrainSubType": "calibrated road connector near bridge",
+      "SourceConfidence": "medium",
       "SourceRawLowByte": 7,
       "SourceRawHighByte": 142,
-      "SourceRawWord": "0x8E07"
+      "SourceRawWord": "0x8E07",
+      "SourceNote": "Inferred bridge from a road cell crossing water in the corrected Illuria 109x156 map."
     },
     {
       "X": 77,
@@ -148288,9 +148328,9 @@
     {
       "X": 73,
       "Y": 123,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -148838,9 +148878,9 @@
     {
       "X": 14,
       "Y": 124,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -150125,9 +150165,9 @@
     {
       "X": 22,
       "Y": 125,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -151709,9 +151749,9 @@
     {
       "X": 57,
       "Y": 126,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -151885,9 +151925,9 @@
     {
       "X": 73,
       "Y": 126,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Water",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -152446,9 +152486,9 @@
     {
       "X": 15,
       "Y": 127,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -152523,9 +152563,9 @@
     {
       "X": 22,
       "Y": 127,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -155471,9 +155511,9 @@
     {
       "X": 72,
       "Y": 129,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -160102,9 +160142,9 @@
     {
       "X": 57,
       "Y": 133,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -163622,9 +163662,9 @@
     {
       "X": 50,
       "Y": 136,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -165041,9 +165081,9 @@
     {
       "X": 70,
       "Y": 137,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Hill",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -165690,9 +165730,9 @@
     {
       "X": 20,
       "Y": 138,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -166020,9 +166060,9 @@
     {
       "X": 50,
       "Y": 138,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -166086,9 +166126,9 @@
     {
       "X": 56,
       "Y": 138,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Road",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -169727,9 +169767,9 @@
     {
       "X": 60,
       "Y": 141,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,
@@ -169804,9 +169844,9 @@
     {
       "X": 67,
       "Y": 141,
-      "TerrainShortName": "Ruins",
+      "TerrainShortName": "Grass",
       "SourceTerrainFamily": "non-terrain",
-      "SourceTerrainSubType": "named-site",
+      "SourceTerrainSubType": "structural site anchor; visual terrain inferred from neighbors",
       "SourceConfidence": "high",
       "SourceRawLowByte": 23,
       "SourceRawHighByte": 129,

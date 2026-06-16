@@ -3,12 +3,6 @@ using Wism.Client.Core;
 
 public class CameraFollow : MonoBehaviour
 {
-    // TODO: Make this dynamic to tilemap and screen
-    private const float FullHDXMinClamp = 19.2f;
-    private const float FullHDXMaxClamp = 65.8f;
-    private const float FullHDYMinClamp = 8.5f;
-    private const float FullHDYMaxClamp = 70.1f;
-
     public Transform target;
     public float speed;
     public float scale;
@@ -23,12 +17,17 @@ public class CameraFollow : MonoBehaviour
     private bool isDragging;
     private bool centered;
     private Camera followCamera;
+    private int lastMapWidth;
+    private int lastMapHeight;
+    private int lastScreenWidth;
+    private int lastScreenHeight;
+    private float lastCameraAspect;
 
     // Start is called before the first frame update
     void Start()
     {
         this.followCamera = GetComponent<Camera>();
-        this.followCamera.orthographicSize = (Screen.height / 100f) / this.scale;
+        ConfigureBoundsFromCurrentWorld();
     }
 
     public void LateUpdate()
@@ -39,6 +38,70 @@ public class CameraFollow : MonoBehaviour
         }
 
         HandleCameraMove();
+    }
+
+    public void ConfigureBoundsFromCurrentWorld()
+    {
+        if (this.followCamera == null)
+        {
+            this.followCamera = GetComponent<Camera>();
+        }
+
+        if (this.followCamera == null)
+        {
+            return;
+        }
+
+        if (this.scale > 0f)
+        {
+            this.followCamera.orthographicSize = (Screen.height / 100f) / this.scale;
+        }
+
+        if (!Game.IsInitialized() || World.Current?.Map == null)
+        {
+            return;
+        }
+
+        var mapWidth = World.Current.Map.GetLength(0);
+        var mapHeight = World.Current.Map.GetLength(1);
+        if (mapWidth <= 0 || mapHeight <= 0)
+        {
+            return;
+        }
+
+        if (mapWidth == this.lastMapWidth &&
+            mapHeight == this.lastMapHeight &&
+            Screen.width == this.lastScreenWidth &&
+            Screen.height == this.lastScreenHeight &&
+            Mathf.Approximately(this.followCamera.aspect, this.lastCameraAspect))
+        {
+            return;
+        }
+
+        this.lastMapWidth = mapWidth;
+        this.lastMapHeight = mapHeight;
+        this.lastScreenWidth = Screen.width;
+        this.lastScreenHeight = Screen.height;
+        this.lastCameraAspect = this.followCamera.aspect;
+
+        var halfHeight = this.followCamera.orthographicSize;
+        var halfWidth = halfHeight * this.followCamera.aspect;
+
+        this.xMinClamp = halfWidth;
+        this.xMaxClamp = Mathf.Max(halfWidth, mapWidth - halfWidth);
+        if (this.xMaxClamp <= this.xMinClamp)
+        {
+            this.xMinClamp = mapWidth / 2f;
+            this.xMaxClamp = mapWidth / 2f;
+        }
+
+        this.yMinClamp = halfHeight;
+        this.yMaxClamp = Mathf.Max(halfHeight, mapHeight - halfHeight);
+        if (this.yMaxClamp <= this.yMinClamp)
+        {
+            this.yMinClamp = mapHeight / 2f;
+            this.yMaxClamp = mapHeight / 2f;
+        }
     }
 
     public void ResetCamera()
@@ -95,6 +158,8 @@ public class CameraFollow : MonoBehaviour
 
     private Vector3 ClampVectorToTilemap(Vector3 vector)
     {
+        ConfigureBoundsFromCurrentWorld();
+
         return new Vector3(
             Mathf.Clamp(vector.x, this.xMinClamp, this.xMaxClamp),
             Mathf.Clamp(vector.y, this.yMinClamp, this.yMaxClamp),

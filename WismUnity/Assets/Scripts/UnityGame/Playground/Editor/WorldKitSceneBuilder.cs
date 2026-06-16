@@ -13,6 +13,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 namespace WismUnity.Playground
 {
@@ -26,6 +27,7 @@ namespace WismUnity.Playground
         const string SageMarkerPrefabPath = "Assets/Prefab/Editor/Sage.prefab";
         const string TempleMarkerPrefabPath = "Assets/Prefab/Editor/Temple.prefab";
         const string TombMarkerPrefabPath = "Assets/Prefab/Editor/Tomb.prefab";
+        const string TowerMarkerPrefabPath = "Assets/Prefab/Editor/Tower.prefab";
 
         [MenuItem("WISM/World Kit/Build Near-Illuria Scene")]
         public static void BuildNearIlluriaScene()
@@ -156,13 +158,15 @@ namespace WismUnity.Playground
                 var locations = LoadRecords(Path.Combine(worldRoot, "Location.json"));
                 var siteAnchors = LoadOptionalRecords(Path.Combine(worldRoot, "SiteAnchor.json"));
 
-                ConfigureGeneratedContainers(scene, cities.Count, locations.Count);
-                NormalizeGeneratedScene(scene, tilemap, world);
-                ClearEditorTileCaches();
+                var visibleLocations = GetUnityVisibleLocations(locations);
+                var mapWidth = ComputeMapWidth(tiles);
                 var mapHeight = ComputeMapHeight(tiles);
+                ConfigureGeneratedContainers(scene, cities.Count, visibleLocations.Count);
+                NormalizeGeneratedScene(scene, tilemap, world, mapWidth, mapHeight);
+                ClearEditorTileCaches();
                 PaintTerrain(tilemap, tiles, mapHeight);
                 RebuildCityObjects(scene, tilemap, cities, mapHeight);
-                RebuildLocationObjects(scene, tilemap, locations, mapHeight);
+                RebuildLocationObjects(scene, tilemap, visibleLocations, mapHeight);
                 RebuildSiteAnchorObjects(scene, siteAnchors, mapHeight);
                 EnsureBuildSettings(targetScenePath);
 
@@ -196,7 +200,8 @@ namespace WismUnity.Playground
                 var cities = LoadRecords(Path.Combine(worldRoot, "City.json"));
                 var locations = LoadRecords(Path.Combine(worldRoot, "Location.json"));
                 var siteAnchors = LoadOptionalRecords(Path.Combine(worldRoot, "SiteAnchor.json"));
-                ConfigureGeneratedContainers(scene, cities.Count, locations.Count);
+                var visibleLocations = GetUnityVisibleLocations(locations);
+                ConfigureGeneratedContainers(scene, cities.Count, visibleLocations.Count);
                 ClearEditorTileCaches();
                 var bounds = tilemap.cellBounds;
                 var tileBlocks = tilemap.GetTilesBlock(bounds);
@@ -217,7 +222,7 @@ namespace WismUnity.Playground
                     .Select(city => city.Value<string>("ShortName"))
                     .Where(name => !string.IsNullOrWhiteSpace(name))
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
-                var expectedLocationNames = locations
+                var expectedLocationNames = visibleLocations
                     .Select(location => location.Value<string>("ShortName"))
                     .Where(name => !string.IsNullOrWhiteSpace(name))
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -234,6 +239,7 @@ namespace WismUnity.Playground
                 var sceneSiteAnchorIds = siteAnchorEntries
                     .Select(entry => entry.siteAnchorId)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var mapWidth = ComputeMapWidth(tiles);
                 var mapHeight = ComputeMapHeight(tiles);
                 var grid = scene.GetRootGameObjects()
                     .FirstOrDefault(go => string.Equals(go.name, "Grid", StringComparison.OrdinalIgnoreCase));
@@ -244,7 +250,7 @@ namespace WismUnity.Playground
                 AddSceneCheck(bounds.size.x == 109 && bounds.size.y == 156, checks, issues, "Tilemap bounds are 109x156.", $"Tilemap bounds are {bounds.size.x}x{bounds.size.y}.");
                 AddSceneCheck(populatedTiles == tiles.Count, checks, issues, $"Tilemap has {tiles.Count} populated tiles.", $"Tilemap has {populatedTiles}/{tiles.Count} populated tiles.");
                 AddSceneCheck(cityEntries.Length == cities.Count, checks, issues, $"Scene has {cities.Count} city markers.", $"Scene has {cityEntries.Length}/{cities.Count} city markers.");
-                AddSceneCheck(locationEntries.Length == locations.Count, checks, issues, $"Scene has {locations.Count} location markers.", $"Scene has {locationEntries.Length}/{locations.Count} location markers.");
+                AddSceneCheck(locationEntries.Length == visibleLocations.Count, checks, issues, $"Scene has {visibleLocations.Count} location markers.", $"Scene has {locationEntries.Length}/{visibleLocations.Count} location markers.");
                 AddSceneCheck(siteAnchorEntries.Length == siteAnchors.Count, checks, issues, $"Scene has {siteAnchors.Count} structural site anchor markers.", $"Scene has {siteAnchorEntries.Length}/{siteAnchors.Count} structural site anchor markers.");
                 AddSceneCheck(sceneCityNames.SetEquals(expectedCityNames), checks, issues, "Scene city marker names match MOD data.", "Scene city marker names do not match MOD data.");
                 AddSceneCheck(sceneLocationNames.SetEquals(expectedLocationNames), checks, issues, "Scene location marker names match MOD data.", "Scene location marker names do not match MOD data.");
@@ -258,10 +264,22 @@ namespace WismUnity.Playground
                 AddSceneCheck(grid == null || IsZeroTransform(grid.transform), checks, issues, "Generated Grid transform is normalized.", "Generated Grid transform is not normalized; copied scene offset is still present.");
                 AddSceneCheck(IsZeroLocalTransform(tilemap.transform), checks, issues, "Generated WorldTilemap local transform is normalized.", "Generated WorldTilemap local transform is not normalized.");
                 AddSceneCheck(CityMarkerPositionsMatch(cityEntries, cities, mapHeight), checks, issues, "Scene city marker positions match flipped MOD coordinates.", "Scene city marker positions do not match flipped MOD coordinates.");
-                AddSceneCheck(LocationMarkerPositionsMatch(locationEntries, locations, mapHeight), checks, issues, "Scene location marker positions match flipped MOD coordinates.", "Scene location marker positions do not match flipped MOD coordinates.");
+                AddSceneCheck(LocationMarkerPositionsMatch(locationEntries, visibleLocations, mapHeight), checks, issues, "Scene location marker positions match flipped MOD coordinates.", "Scene location marker positions do not match flipped MOD coordinates.");
                 AddSceneCheck(SiteAnchorPositionsMatch(siteAnchorEntries, siteAnchors, mapHeight), checks, issues, "Scene site anchor marker positions match flipped MOD coordinates.", "Scene site anchor marker positions do not match flipped MOD coordinates.");
                 AddSceneCheck(CityFootprintsArePainted(tilemap, cities, mapHeight), checks, issues, "City markers line up with painted 2x2 city footprints.", "One or more city markers do not line up with painted 2x2 city footprints.");
-                AddSceneCheck(LocationTilesArePainted(tilemap, locations, mapHeight), checks, issues, "Location markers line up with painted location tiles.", "One or more location markers do not line up with painted location tiles.");
+                AddSceneCheck(LocationTilesArePainted(tilemap, visibleLocations, mapHeight), checks, issues, "Location markers line up with painted location tiles.", "One or more location markers do not line up with painted location tiles.");
+                AddSceneCheck(
+                    MinimapCameraMatchesMap(scene, mapWidth, mapHeight),
+                    checks,
+                    issues,
+                    "Minimap camera frames the full generated world.",
+                    "Minimap camera does not frame the full generated world.");
+                AddSceneCheck(
+                    MinimapUiMatchesMap(scene, mapWidth, mapHeight),
+                    checks,
+                    issues,
+                    "Minimap UI image, click rect, and viewport marker use production map geometry.",
+                    "Minimap UI image, click rect, or viewport marker does not match production map geometry.");
                 AddSceneCheck(
                     SceneUsesGeneratedWorldDefaults(scene, world),
                     checks,
@@ -290,10 +308,12 @@ namespace WismUnity.Playground
                         ["cityMarkers"] = cityEntries.Length,
                         ["expectedCities"] = cities.Count,
                         ["locationMarkers"] = locationEntries.Length,
-                        ["expectedLocations"] = locations.Count,
+                        ["expectedLocations"] = visibleLocations.Count,
                         ["siteAnchorMarkers"] = siteAnchorEntries.Length,
                         ["expectedSiteAnchors"] = siteAnchors.Count
                     },
+                    ["minimap"] = GetMinimapProof(scene, mapWidth, mapHeight),
+                    ["minimapUi"] = GetMinimapUiProof(scene, mapWidth, mapHeight),
                     ["checks"] = checks,
                     ["issues"] = issues
                 };
@@ -504,13 +524,13 @@ namespace WismUnity.Playground
                 var x = location.Value<int>("X");
                 var y = ToUnityY(location.Value<int>("Y"), mapHeight);
                 var shortName = location.Value<string>("ShortName") ?? "Location";
-                var terrain = location.Value<string>("Terrain") ?? location.Value<string>("Kind") ?? "Ruins";
-                if (tileAssets.TryGetValue(terrain, out var tileAsset))
+                var visualTerrain = ResolveLocationVisualTerrain(location);
+                if (tileAssets.TryGetValue(visualTerrain, out var tileAsset))
                 {
                     tilemap.SetTile(new Vector3Int(x, y, 0), tileAsset);
                 }
 
-                var go = InstantiateMarker(GetLocationMarkerPrefab(terrain), scene, container.transform, shortName);
+                var go = InstantiateMarker(GetLocationMarkerPrefab(visualTerrain), scene, container.transform, shortName);
                 go.tag = "Location";
                 go.transform.position = GetCellCenter(tilemap, new Vector3Int(x, y, 0));
                 go.transform.localScale = Vector3.one;
@@ -619,7 +639,136 @@ namespace WismUnity.Playground
         static bool LocationTilesArePainted(Tilemap tilemap, IReadOnlyList<JObject> locations, int mapHeight)
         {
             return locations.All(location =>
-                tilemap.GetTile(new Vector3Int(location.Value<int>("X"), ToUnityY(location.Value<int>("Y"), mapHeight), 0)) is LocationTile);
+            {
+                var visualTerrain = ResolveLocationVisualTerrain(location);
+                var tile = tilemap.GetTile(new Vector3Int(location.Value<int>("X"), ToUnityY(location.Value<int>("Y"), mapHeight), 0));
+                return IsExpectedLocationTile(tile, visualTerrain);
+            });
+        }
+
+        static bool MinimapCameraMatchesMap(Scene scene, int mapWidth, int mapHeight)
+        {
+            var camera = FindMinimapCamera(scene);
+            if (camera == null || mapWidth <= 0 || mapHeight <= 0)
+            {
+                return false;
+            }
+
+            var aspect = GetMinimapCameraAspect(camera);
+            var expectedSize = Mathf.Max(mapHeight / 2f, (mapWidth / 2f) / aspect);
+            return Mathf.Abs(camera.orthographicSize - expectedSize) <= 0.01f &&
+                   Mathf.Abs(camera.transform.position.x - mapWidth / 2f) <= 0.01f &&
+                   Mathf.Abs(camera.transform.position.y - mapHeight / 2f) <= 0.01f;
+        }
+
+        static JObject GetMinimapProof(Scene scene, int mapWidth, int mapHeight)
+        {
+            var camera = FindMinimapCamera(scene);
+            if (camera == null)
+            {
+                return new JObject
+                {
+                    ["cameraFound"] = false,
+                    ["expectedWidth"] = mapWidth,
+                    ["expectedHeight"] = mapHeight
+                };
+            }
+
+            return new JObject
+            {
+                ["cameraFound"] = true,
+                ["expectedWidth"] = mapWidth,
+                ["expectedHeight"] = mapHeight,
+                ["orthographicSize"] = camera.orthographicSize,
+                ["positionX"] = camera.transform.position.x,
+                ["positionY"] = camera.transform.position.y,
+                ["targetTextureWidth"] = camera.targetTexture != null ? camera.targetTexture.width : 0,
+                ["targetTextureHeight"] = camera.targetTexture != null ? camera.targetTexture.height : 0
+            };
+        }
+
+        static bool MinimapUiMatchesMap(Scene scene, int mapWidth, int mapHeight)
+        {
+            var ui = GetMinimapUi(scene);
+            if (ui.Panel == null || ui.Map == null || ui.Crosshairs == null || mapWidth <= 0 || mapHeight <= 0)
+            {
+                return false;
+            }
+
+            var expectedAspect = mapWidth / (float)mapHeight;
+            var rawImage = ui.Map.GetComponent<RawImage>();
+            var crosshairParent = ui.Crosshairs.transform.parent as RectTransform;
+            return RectAspectMatches(ui.Map, expectedAspect) &&
+                   ui.Panel.rect.width > ui.Map.rect.width &&
+                   ui.Panel.rect.height > ui.Map.rect.height &&
+                   Mathf.Abs(ui.Map.anchoredPosition.x) <= 0.01f &&
+                   Mathf.Abs(ui.Map.anchoredPosition.y) <= 0.01f &&
+                   rawImage != null &&
+                   rawImage.color.a >= 0.99f &&
+                   rawImage.texture is RenderTexture &&
+                   RectAspectMatches(ui.Map, ((RenderTexture)rawImage.texture).width / (float)((RenderTexture)rawImage.texture).height, 0.01f) &&
+                   crosshairParent == ui.Map &&
+                   ui.Crosshairs.rect.width > 0f &&
+                   ui.Crosshairs.rect.height > 0f;
+        }
+
+        static JObject GetMinimapUiProof(Scene scene, int mapWidth, int mapHeight)
+        {
+            var ui = GetMinimapUi(scene);
+            var rawImage = ui.Map != null ? ui.Map.GetComponent<RawImage>() : null;
+            var renderTexture = rawImage?.texture as RenderTexture;
+            return new JObject
+            {
+                ["expectedAspect"] = mapHeight > 0 ? mapWidth / (float)mapHeight : 0f,
+                ["panelFound"] = ui.Panel != null,
+                ["mapFound"] = ui.Map != null,
+                ["crosshairsFound"] = ui.Crosshairs != null,
+                ["panelWidth"] = ui.Panel != null ? ui.Panel.rect.width : 0f,
+                ["panelHeight"] = ui.Panel != null ? ui.Panel.rect.height : 0f,
+                ["mapWidth"] = ui.Map != null ? ui.Map.rect.width : 0f,
+                ["mapHeight"] = ui.Map != null ? ui.Map.rect.height : 0f,
+                ["mapAspect"] = ui.Map != null && ui.Map.rect.height > 0f ? ui.Map.rect.width / ui.Map.rect.height : 0f,
+                ["mapAlpha"] = rawImage != null ? rawImage.color.a : 0f,
+                ["renderTextureWidth"] = renderTexture != null ? renderTexture.width : 0,
+                ["renderTextureHeight"] = renderTexture != null ? renderTexture.height : 0,
+                ["crosshairsParent"] = ui.Crosshairs?.transform.parent != null ? ui.Crosshairs.transform.parent.name : string.Empty,
+                ["crosshairsWidth"] = ui.Crosshairs != null ? ui.Crosshairs.rect.width : 0f,
+                ["crosshairsHeight"] = ui.Crosshairs != null ? ui.Crosshairs.rect.height : 0f
+            };
+        }
+
+        static bool RectAspectMatches(RectTransform rect, float expectedAspect, float tolerance = 0.005f)
+        {
+            return rect != null &&
+                   rect.rect.height > 0f &&
+                   Mathf.Abs((rect.rect.width / rect.rect.height) - expectedAspect) <= tolerance;
+        }
+
+        static (RectTransform Panel, RectTransform Map, RectTransform Crosshairs) GetMinimapUi(Scene scene)
+        {
+            var panel = FindSceneGameObjects(scene, "MinimapPanel")
+                .Select(go => go.GetComponent<RectTransform>())
+                .FirstOrDefault(rect => rect != null);
+            var map = FindSceneGameObjects(scene, "Minimap")
+                .Select(go => go.GetComponent<RectTransform>())
+                .FirstOrDefault(rect => rect != null);
+            var crosshairs = FindSceneGameObjects(scene, "Crosshairs")
+                .Select(go => go.GetComponent<RectTransform>())
+                .FirstOrDefault(rect => rect != null);
+            return (panel, map, crosshairs);
+        }
+
+        static bool IsExpectedLocationTile(TileBase tile, string visualTerrain)
+        {
+            return NormalizeLocationVisualTerrain(visualTerrain) switch
+            {
+                "Library" => tile is LibraryTile,
+                "Sage" => tile is SageTile,
+                "Temple" => tile is TempleTile,
+                "Tomb" => tile is TombTile,
+                "Tower" => tile != null && tile.name.IndexOf("tower", StringComparison.OrdinalIgnoreCase) >= 0,
+                _ => tile is RuinsTile
+            };
         }
 
         static bool PositionMatches(Vector3 actual, Vector2 expected)
@@ -646,7 +795,7 @@ namespace WismUnity.Playground
                    Mathf.Approximately(transform.localScale.z, 1f);
         }
 
-        static void NormalizeGeneratedScene(Scene scene, Tilemap tilemap, string world)
+        static void NormalizeGeneratedScene(Scene scene, Tilemap tilemap, string world, int mapWidth, int mapHeight)
         {
             var grid = scene.GetRootGameObjects()
                 .FirstOrDefault(go => string.Equals(go.name, "Grid", StringComparison.OrdinalIgnoreCase));
@@ -661,6 +810,8 @@ namespace WismUnity.Playground
             tilemap.transform.localPosition = Vector3.zero;
             tilemap.transform.localScale = Vector3.one;
             tilemap.transform.localRotation = Quaternion.identity;
+            ConfigureMinimapCamera(scene, mapWidth, mapHeight);
+            ConfigureMinimapPanel(scene, mapWidth, mapHeight);
 
             foreach (var gameManager in scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<GameManager>(true)))
             {
@@ -698,6 +849,13 @@ namespace WismUnity.Playground
             return tiles.Count == 0
                 ? 0
                 : tiles.Max(tile => tile.Value<int>("Y")) + 1;
+        }
+
+        static int ComputeMapWidth(IReadOnlyList<JObject> tiles)
+        {
+            return tiles.Count == 0
+                ? 0
+                : tiles.Max(tile => tile.Value<int>("X")) + 1;
         }
 
         static int ToUnityY(int sourceY, int mapHeight)
@@ -762,14 +920,150 @@ namespace WismUnity.Playground
 
         static GameObject GetLocationMarkerPrefab(string terrain)
         {
-            return (terrain ?? string.Empty).ToLowerInvariant() switch
+            return NormalizeLocationVisualTerrain(terrain) switch
             {
-                "library" => AssetDatabase.LoadAssetAtPath<GameObject>(LibraryMarkerPrefabPath),
-                "sage" => AssetDatabase.LoadAssetAtPath<GameObject>(SageMarkerPrefabPath),
-                "temple" => AssetDatabase.LoadAssetAtPath<GameObject>(TempleMarkerPrefabPath),
-                "tomb" => AssetDatabase.LoadAssetAtPath<GameObject>(TombMarkerPrefabPath),
+                "Library" => AssetDatabase.LoadAssetAtPath<GameObject>(LibraryMarkerPrefabPath),
+                "Sage" => AssetDatabase.LoadAssetAtPath<GameObject>(SageMarkerPrefabPath),
+                "Temple" => AssetDatabase.LoadAssetAtPath<GameObject>(TempleMarkerPrefabPath),
+                "Tomb" => AssetDatabase.LoadAssetAtPath<GameObject>(TombMarkerPrefabPath),
+                "Tower" => AssetDatabase.LoadAssetAtPath<GameObject>(TowerMarkerPrefabPath),
                 _ => AssetDatabase.LoadAssetAtPath<GameObject>(RuinsMarkerPrefabPath)
             };
+        }
+
+        static string ResolveLocationVisualTerrain(JObject location)
+        {
+            return NormalizeLocationVisualTerrain(
+                location.Value<string>("VisualTerrain") ??
+                location.Value<string>("VisualClass") ??
+                location.Value<string>("Kind") ??
+                location.Value<string>("Terrain"));
+        }
+
+        static string NormalizeLocationVisualTerrain(string terrain)
+        {
+            switch ((terrain ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "library":
+                    return "Library";
+                case "sage":
+                case "sage/oracle":
+                case "oracle":
+                    return "Sage";
+                case "temple":
+                    return "Temple";
+                case "tomb":
+                case "tomb/crypt":
+                case "crypt":
+                    return "Tomb";
+                case "tower":
+                    return "Tower";
+                case "ruins":
+                case "stone/monolith":
+                case "stone":
+                case "monolith":
+                case "throne":
+                case "other ruins-family":
+                    return "Ruins";
+                default:
+                    return "Ruins";
+            }
+        }
+
+        static void ConfigureMinimapCamera(Scene scene, int mapWidth, int mapHeight)
+        {
+            var cameraObject = FindMinimapCamera(scene);
+
+            if (cameraObject == null || mapWidth <= 0 || mapHeight <= 0)
+            {
+                return;
+            }
+
+            cameraObject.orthographic = true;
+            var aspect = GetMinimapCameraAspect(cameraObject);
+            cameraObject.orthographicSize = Mathf.Max(mapHeight / 2f, (mapWidth / 2f) / aspect);
+            cameraObject.transform.position = new Vector3(
+                mapWidth / 2f,
+                mapHeight / 2f,
+                cameraObject.transform.position.z);
+        }
+
+        static Camera FindMinimapCamera(Scene scene)
+        {
+            return scene.GetRootGameObjects()
+                .SelectMany(root => root.GetComponentsInChildren<Camera>(true))
+                .FirstOrDefault(camera => camera.CompareTag("MinimapCamera") || string.Equals(camera.name, "MinimapCamera", StringComparison.OrdinalIgnoreCase));
+        }
+
+        static float GetMinimapCameraAspect(Camera camera)
+        {
+            var aspect = camera.targetTexture != null && camera.targetTexture.height > 0
+                ? camera.targetTexture.width / (float)camera.targetTexture.height
+                : camera.aspect;
+            return Mathf.Max(0.01f, aspect);
+        }
+
+        static void ConfigureMinimapPanel(Scene scene, int mapWidth, int mapHeight)
+        {
+            if (mapHeight <= 0)
+            {
+                return;
+            }
+
+            var mapAspect = mapWidth / (float)mapHeight;
+            var ui = GetMinimapUi(scene);
+            var minimapPanel = ui.Panel;
+            var minimap = ui.Map;
+            var crosshairs = ui.Crosshairs;
+            const float frameBorder = 0.58f;
+
+            var mapHeightUi = minimap != null && minimap.sizeDelta.y > 0f
+                ? minimap.sizeDelta.y
+                : 10.44f;
+            var mapWidthUi = mapHeightUi * mapAspect;
+
+            if (minimapPanel != null)
+            {
+                minimapPanel.sizeDelta = new Vector2(mapWidthUi + frameBorder * 2f, mapHeightUi + frameBorder * 2f);
+                EditorUtility.SetDirty(minimapPanel);
+                var collider = minimapPanel.GetComponent<BoxCollider2D>();
+                if (collider != null)
+                {
+                    collider.size = new Vector2(mapWidthUi, mapHeightUi);
+                    collider.offset = Vector2.zero;
+                    EditorUtility.SetDirty(collider);
+                }
+            }
+
+            if (minimap != null)
+            {
+                minimap.anchorMin = new Vector2(0.5f, 0.5f);
+                minimap.anchorMax = new Vector2(0.5f, 0.5f);
+                minimap.pivot = new Vector2(0.5f, 0.5f);
+                minimap.sizeDelta = new Vector2(mapWidthUi, mapHeightUi);
+                minimap.anchoredPosition = Vector2.zero;
+                var image = minimap.GetComponent<RawImage>();
+                if (image != null)
+                {
+                    var color = image.color;
+                    color.a = 1f;
+                    image.color = color;
+                    image.raycastTarget = true;
+                    EditorUtility.SetDirty(image);
+                }
+                EditorUtility.SetDirty(minimap);
+            }
+
+            if (crosshairs != null && minimap != null)
+            {
+                crosshairs.SetParent(minimap, false);
+                crosshairs.anchorMin = new Vector2(0.5f, 0.5f);
+                crosshairs.anchorMax = new Vector2(0.5f, 0.5f);
+                crosshairs.pivot = new Vector2(0.5f, 0.5f);
+                crosshairs.sizeDelta = new Vector2(Mathf.Max(0.8f, mapWidthUi * 0.08f), Mathf.Max(0.8f, mapHeightUi * 0.08f));
+                crosshairs.anchoredPosition = Vector2.zero;
+                EditorUtility.SetDirty(crosshairs);
+            }
         }
 
         static T EnsureComponent<T>(GameObject go) where T : Component
@@ -813,6 +1107,8 @@ namespace WismUnity.Playground
                 ["Road"] = "Assets/PalletTiles/road_tile.asset",
                 ["Bridge"] = "Assets/PalletTiles/bridge_tile.asset",
                 ["Marsh"] = "Assets/PalletTiles/marsh.asset",
+                ["SnowPeak"] = "Assets/PalletTiles/mountain_snow_tile.asset",
+                ["Volcano"] = "Assets/PalletTiles/mountain_volcano_tile.asset",
                 ["Library"] = "Assets/PalletTiles/library_tile.asset",
                 ["Ruins"] = "Assets/PalletTiles/ruins_tile.asset",
                 ["Sage"] = "Assets/PalletTiles/sage_tile.asset",
@@ -940,6 +1236,18 @@ namespace WismUnity.Playground
             return JArray.Parse(File.ReadAllText(path))
                 .OfType<JObject>()
                 .ToArray();
+        }
+
+        static IReadOnlyList<JObject> GetUnityVisibleLocations(IReadOnlyList<JObject> locations)
+        {
+            return locations
+                .Where(IsUnityVisibleLocation)
+                .ToArray();
+        }
+
+        static bool IsUnityVisibleLocation(JObject location)
+        {
+            return location.Value<bool?>("RenderInUnity") != false;
         }
 
         static IReadOnlyList<JObject> LoadOptionalRecords(string path)

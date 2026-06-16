@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,6 +39,10 @@ namespace Wism.Client.Core
         ///     May have zero or one location (e.g. Sage, Tower, Ruins, Temple)
         /// </summary>
         public Location Location { get; set; }
+
+        public string TowerOwnerClanShortName { get; set; }
+
+        public bool IsTowerRazed { get; set; }
 
         public List<Artifact> Items { get; internal set; }
 
@@ -175,7 +179,7 @@ namespace Wism.Client.Core
         ///     Adds a set of armies to the tile
         /// </summary>
         /// <param name="newArmies">Armies to add</param>
-        public void AddArmies(List<Army> newArmies)
+        public void AddArmies(List<Army> newArmies, bool claimNearbyTowers = true)
         {
             if (!this.HasRoom(newArmies.Count))
             {
@@ -189,6 +193,10 @@ namespace Wism.Client.Core
 
             this.Armies.AddRange(newArmies);
             newArmies.ForEach(a => a.Tile = this);
+            if (claimNearbyTowers)
+            {
+                this.ClaimNearbyTowers(newArmies);
+            }
         }
 
         /// <summary>
@@ -361,6 +369,30 @@ namespace Wism.Client.Core
             return this.Location != null;
         }
 
+        public bool IsTower()
+        {
+            return !this.IsTowerRazed &&
+                   this.Terrain != null &&
+                   this.Terrain.ShortName == "Tower";
+        }
+
+        public bool IsTowerSite()
+        {
+            return this.Location != null && this.Location.IsTowerSite;
+        }
+
+        public void RazeTower()
+        {
+            if (!this.IsTower())
+            {
+                throw new InvalidOperationException("Cannot raze a tile that is not an active tower.");
+            }
+
+            this.IsTowerRazed = true;
+            this.TowerOwnerClanShortName = null;
+            this.Terrain = MapBuilder.TerrainKinds["Ruins"];
+        }
+
         /// <summary>
         ///     Print the tile
         /// </summary>
@@ -449,9 +481,11 @@ namespace Wism.Client.Core
                 this.Armies = new List<Army>();
             }
 
+            var committedArmies = new List<Army>(this.VisitingArmies);
             this.Armies.AddRange(this.VisitingArmies);
             this.Armies.Sort(new ByArmyViewingOrder());
             this.VisitingArmies = null;
+            this.ClaimNearbyTowers(committedArmies);
         }
 
         /// <summary>
@@ -463,6 +497,37 @@ namespace Wism.Client.Core
             if (this.City != null)
             {
                 this.City.Claim(player);
+            }
+
+            if (this.IsTower() && player?.Clan != null)
+            {
+                this.TowerOwnerClanShortName = player.Clan.ShortName;
+            }
+        }
+
+        private void ClaimNearbyTowers(List<Army> armies)
+        {
+            if (armies == null || armies.Count == 0 || armies[0].Player == null)
+            {
+                return;
+            }
+
+            Tile[,] nineGrid;
+            try
+            {
+                nineGrid = this.GetNineGrid();
+            }
+            catch (InvalidOperationException)
+            {
+                return;
+            }
+
+            foreach (var tile in nineGrid)
+            {
+                if (tile != null && tile.IsTower())
+                {
+                    tile.Claim(armies[0].Player);
+                }
             }
         }
 

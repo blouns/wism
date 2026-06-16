@@ -286,10 +286,18 @@ namespace Assets.Scripts.Managers
             }
 
             var armies = Game.Current.GetSelectedArmies();
-            var city = armies[0].Tile.City;
+            var selectedTile = armies[0].Tile;
+            var city = selectedTile.City;
             if (city == null)
             {
-                NotifyUser("Only cities can only be razed.");
+                if (selectedTile.IsTower())
+                {
+                    this.commandController.AddCommand(
+                        new RazeTowerCommand(armies, selectedTile));
+                    return;
+                }
+
+                NotifyUser("Only cities and towers can be razed.");
                 return;
             }
 
