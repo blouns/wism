@@ -699,6 +699,29 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(result.Status, Is.EqualTo("Passed"));
         Assert.That(result.Scorecard.Counters.ProductionVectors, Is.GreaterThan(0));
         Assert.That(result.Scorecard.Gates.Single(gate => gate.Name == "production-vectoring-signal").Passed, Is.True);
+        Assert.That(result.Scorecard.Gates.Single(gate => gate.Name == "strategic-plan-created").Passed, Is.True);
+    }
+
+    [Test]
+    public void EvalBatch_ClassicAiDefendedSiegeSummaryCheckpointsPreserveStrategicEvidence()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "evals");
+        var result = new EvalBatchRunner().Run(new EvalBatchOptions(
+            Seed: 20260616,
+            Cases: 3,
+            MaxTurns: 60,
+            OutputRoot: outputRoot,
+            ScenarioFamilies: new[] { "classic-ai-defended-siege" },
+            ClanCounts: new[] { 2 },
+            Sizes: new[] { "medium" },
+            ModRoot: null,
+            AiProfile: "strategic",
+            CheckpointMode: "summary",
+            ProcessIsolated: false));
+
+        Assert.That(result.Status, Is.EqualTo("Passed"));
+        Assert.That(result.Scorecard.Gates.Single(gate => gate.Name == "classic-ai-siege").Passed, Is.True);
+        Assert.That(result.Scorecard.Gates.Single(gate => gate.Name == "strategic-plan-created").Passed, Is.True);
     }
 
     [Test]

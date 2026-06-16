@@ -871,6 +871,61 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void WarlordsClassicAI_LeavesHeroFreeForNearbySearchWhenCombatArmiesCanPressureCity()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            player.IsHuman = false;
+
+            var tiles = FindClearAdjacentTilesAwayFromCapturableCities(player);
+            var ruins = MapBuilder.FindLocation("Stonehenge");
+            World.Current.AddLocation(ruins, tiles.LocationTile);
+            var hero = player.HireHero(tiles.OriginTile);
+            var infantry = player.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tiles.OriginTile);
+
+            var neutralCityTile = FindClearCityTileAwayFrom(tiles.OriginTile, minimumDistance: 4);
+            var neutralCity = Wism.Client.MapObjects.City.Create(CreateTestCityInfo(
+                "ParallelPressureTown",
+                "Parallel Pressure Town"));
+            World.Current.AddCity(neutralCity, neutralCityTile);
+
+            var searchBid = new SearchModule(
+                    controllerProvider.ArmyController,
+                    controllerProvider.LocationController,
+                    Game.Current.PathingStrategy,
+                    new GarrisonPolicy(),
+                    logger)
+                .GenerateBids(World.Current)
+                .Where(bid => bid.Armies.Contains(hero))
+                .OrderByDescending(bid => bid.Utility)
+                .FirstOrDefault();
+
+            var captureBid = new CaptureModule(
+                    controllerProvider.ArmyController,
+                    controllerProvider.CityController,
+                    new GarrisonPolicy(),
+                    logger)
+                .GenerateBids(World.Current)
+                .Where(bid => bid.Armies.Contains(infantry))
+                .OrderByDescending(bid => bid.Utility)
+                .FirstOrDefault();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(searchBid, Is.Not.Null);
+                Assert.That(searchBid.Armies, Is.EquivalentTo(new[] { hero }));
+                Assert.That(captureBid, Is.Not.Null);
+                Assert.That(captureBid.Armies, Does.Contain(infantry));
+                Assert.That(captureBid.Armies, Does.Not.Contain(hero));
+            });
+        }
+
+        [Test]
         public void WarlordsClassicAI_DoesNotQueueSearchMoveWhenNextStepCostsTooMuch()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
@@ -940,6 +995,39 @@ namespace Wism.Client.Test.AI
                 Assert.That(originTile.ContainsItem(artifact), Is.False);
                 Assert.That(hero.Items, Does.Contain(artifact));
             });
+        }
+
+        [Test]
+        public void WarlordsClassicAI_SearchesCurrentRuinsBeforeLeavingForOtherPressure()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            player.IsHuman = false;
+
+            var tiles = FindClearAdjacentTilesAwayFromCapturableCities(player);
+            var ruins = MapBuilder.FindLocation("Stonehenge");
+            World.Current.AddLocation(ruins, tiles.OriginTile);
+            player.HireHero(tiles.OriginTile);
+            player.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), tiles.OriginTile);
+
+            var neutralCity = Wism.Client.MapObjects.City.Create(CreateTestCityInfo(
+                "SearchThenPressureTown",
+                "Search Then Pressure Town"));
+            World.Current.AddCity(neutralCity, FindClearCityTileAwayFrom(tiles.OriginTile, minimumDistance: 4));
+
+            var commander = WarlordsClassicAiFactory.CreateCommandProvider(
+                controllerProvider,
+                logger,
+                aiProfile: "strategic");
+            commander.GenerateCommands();
+
+            var commands = commander.GetBufferedCommands();
+            Assert.That(commands.OfType<SearchRuinsCommand>().Any(), Is.True);
         }
 
         [Test]

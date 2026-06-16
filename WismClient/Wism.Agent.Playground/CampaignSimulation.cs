@@ -812,6 +812,8 @@ internal sealed class CampaignRecorder
         if (kind.Equals("command-timeout", StringComparison.OrdinalIgnoreCase) ||
             kind.Equals("invalid", StringComparison.OrdinalIgnoreCase) ||
             kind.Equals("setup", StringComparison.OrdinalIgnoreCase) ||
+            kind.Equals("mission-complete", StringComparison.OrdinalIgnoreCase) ||
+            kind.Equals("dominance-victory", StringComparison.OrdinalIgnoreCase) ||
             kind.Equals("victory", StringComparison.OrdinalIgnoreCase) ||
             kind.Equals("stalemate", StringComparison.OrdinalIgnoreCase))
         {

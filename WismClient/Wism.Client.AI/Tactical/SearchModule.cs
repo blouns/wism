@@ -17,6 +17,7 @@ namespace Wism.Client.AI.Tactical
     public class SearchModule : ITacticalModule
     {
         private const double CurrentLocationSearchUtility = 6.0;
+        private const double ImmediateLocationSearchUtility = 80.0;
         private const double HeroExplorationTravelUtility = 14.0;
         private const double TempleBlessingTravelUtility = 4.0;
         private const double OpportunisticSearchTravelUtility = 0.12;
@@ -102,6 +103,28 @@ namespace Wism.Client.AI.Tactical
                         reason: $"Hero {pickupHero.ShortName} can pick up {pickupHero.Tile.Items.Count} item(s)."));
                     continue;
                 }
+
+                var currentTile = stack[0].Tile;
+                if (currentTile != null && currentTile.HasLocation() && CanSearch(stack, currentTile.Location))
+                {
+                    var searchArmies = SelectSearchArmies(stack, currentTile.Location);
+                    if (searchArmies.Count > 0)
+                    {
+                        var utility = IsHeroExplorationLocation(currentTile.Location)
+                            ? ImmediateLocationSearchUtility
+                            : CurrentLocationSearchUtility;
+                        bids.Add(new StrategicBid(
+                            searchArmies,
+                            this,
+                            utility,
+                            "Search",
+                            targetLocationShortName: currentTile.Location.ShortName,
+                            targetX: currentTile.Location.X,
+                            targetY: currentTile.Location.Y,
+                            reason: $"Search current location {currentTile.Location.ShortName}."));
+                        continue;
+                    }
+                }
             }
 
             var locations = world.GetLocations()
@@ -128,14 +151,20 @@ namespace Wism.Client.AI.Tactical
                     continue;
                 }
 
-                var distance = AiUtilities.GetManhattanDistance(stack[0].Tile, target.Tile);
+                var searchArmies = SelectSearchArmies(stack, target);
+                if (searchArmies.Count == 0)
+                {
+                    continue;
+                }
+
+                var distance = AiUtilities.GetManhattanDistance(searchArmies[0].Tile, target.Tile);
                 var utility = distance == 0
                     ? CurrentLocationSearchUtility
-                    : GetTravelUtility(stack, target) / (distance + 1);
+                    : GetTravelUtility(searchArmies, target) / (distance + 1);
 
-                logger.LogInformation($"[Search] Bidding stack at ({stack[0].Tile.X},{stack[0].Tile.Y}) to search {target.ShortName} with utility {utility:0.000}.");
+                logger.LogInformation($"[Search] Bidding {searchArmies.Count} army/armies at ({searchArmies[0].Tile.X},{searchArmies[0].Tile.Y}) to search {target.ShortName} with utility {utility:0.000}.");
                 bids.Add(new StrategicBid(
-                    stack,
+                    searchArmies,
                     this,
                     utility,
                     "Search",
@@ -320,6 +349,37 @@ namespace Wism.Client.AI.Tactical
                     return true;
                 default:
                     return false;
+            }
+        }
+
+        private static List<Army> SelectSearchArmies(List<Army> armies, Location location)
+        {
+            if (armies == null || armies.Count == 0 || location == null)
+            {
+                return new List<Army>();
+            }
+
+            switch (location.Kind)
+            {
+                case "Ruins":
+                case "Tomb":
+                case "Sage":
+                case "Library":
+                    return armies
+                        .OfType<Hero>()
+                        .OrderBy(hero => AiUtilities.GetManhattanDistance(hero.Tile, location.Tile))
+                        .ThenBy(hero => hero.Id)
+                        .Cast<Army>()
+                        .Take(1)
+                        .ToList();
+                case "Temple":
+                    return armies
+                        .OrderByDescending(army => army is Hero)
+                        .ThenBy(army => army.Id)
+                        .Take(1)
+                        .ToList();
+                default:
+                    return new List<Army>();
             }
         }
 

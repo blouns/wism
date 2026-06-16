@@ -98,7 +98,7 @@ public class CaptureModule : ITacticalModule
             }
 
             var captureArmies = SelectDirectCaptureArmies(stack, targetCity);
-            var bidArmies = captureArmies.Count > 0 ? captureArmies : stack;
+            var bidArmies = captureArmies.Count > 0 ? captureArmies : SelectCityPressureArmies(stack);
             var targetScore = this.cityTargetEvaluator.Score(bidArmies, targetCity);
             var utility = captureArmies.Count > 0
                 ? ImmediateCaptureUtility + targetScore
@@ -385,6 +385,23 @@ public class CaptureModule : ITacticalModule
             .ThenBy(army => army.Id)
             .Take(1)
             .ToList();
+    }
+
+    private static List<Army> SelectCityPressureArmies(List<Army> armies)
+    {
+        armies = GetUsableSameTileArmies(armies);
+        if (armies.Count == 0)
+        {
+            return new List<Army>();
+        }
+
+        var combatArmies = armies
+            .Where(army => !(army is Hero))
+            .OrderByDescending(army => army.Strength + army.MovesRemaining)
+            .ThenBy(army => army.Id)
+            .ToList();
+
+        return combatArmies.Count > 0 ? combatArmies : armies;
     }
 
     private static int GetMobilityPriority(Army army)
