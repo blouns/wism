@@ -337,12 +337,6 @@ namespace WismCompanion.UI
                 }
             }
 
-            // Influence heat: above terrain, below units so stacks stay readable.
-            var tileRegion = new Rect(mapLayout.Viewport.x, mapLayout.Viewport.y,
-                mapLayout.TilesW * mapLayout.Tile, mapLayout.TilesH * mapLayout.Tile);
-            influence.DrawHeat(mgc, p, tileRegion, mapLayout.OriginX, mapLayout.OriginY,
-                mapLayout.TilesW, mapLayout.TilesH, map.InvertYAxis, MapToViewport, mapLayout.Tile);
-
             if (map.Cities != null)
             {
                 foreach (var city in map.Cities)
@@ -350,6 +344,12 @@ namespace WismCompanion.UI
                     DrawCity(mgc, p, city);
                 }
             }
+
+            // Influence heat: above terrain and city tiles, below units so stacks stay readable.
+            var tileRegion = new Rect(mapLayout.Viewport.x, mapLayout.Viewport.y,
+                mapLayout.TilesW * mapLayout.Tile, mapLayout.TilesH * mapLayout.Tile);
+            influence.DrawHeat(mgc, p, tileRegion, mapLayout.OriginX, mapLayout.OriginY,
+                mapLayout.TilesW, mapLayout.TilesH, map.InvertYAxis, MapToViewport, mapLayout.Tile);
 
             foreach (var kvp in armyStacks)
             {
