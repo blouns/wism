@@ -1359,9 +1359,18 @@ public sealed class PlaygroundScenarioRunner
 
     private static string NormalizeAiProfile(string aiProfile)
     {
-        return string.Equals(aiProfile, "tactical", StringComparison.OrdinalIgnoreCase)
-            ? "tactical"
-            : "strategic";
+        if (string.Equals(aiProfile, "tactical", StringComparison.OrdinalIgnoreCase))
+        {
+            return "tactical";
+        }
+
+        if (string.Equals(aiProfile, "strategic-baseline", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(aiProfile, "strategic-no-im", StringComparison.OrdinalIgnoreCase))
+        {
+            return "strategic-baseline";
+        }
+
+        return "strategic";
     }
 
     private static bool UsesSearchMission(string scenarioFamily)

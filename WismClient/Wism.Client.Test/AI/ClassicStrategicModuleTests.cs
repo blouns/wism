@@ -4,12 +4,14 @@ using NUnit.Framework;
 using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
 using Wism.Client.AI.Framework;
+using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.Commands;
 using Wism.Client.Core;
 using Wism.Client.Data;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules.Infos;
+using Wism.Client.Pathing;
 using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.AI
@@ -63,6 +65,42 @@ namespace Wism.Client.Test.AI
 
             Assert.That(opportunist.PersonalityProfile, Is.EqualTo("opportunist-test"));
             Assert.That(opportunistExpansion.Priority, Is.GreaterThan(balancedExpansion.Priority));
+        }
+
+        [Test]
+        public void Planner_UsesInfluenceTensionForDefensiveRecovery()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), player.Capitol.Tile);
+            var advisor = new ScriptedSpatialAdvisor();
+            advisor.Set(player.Capitol.Tile, enemy: 0.50, tension: -0.25);
+
+            var plan = new ClassicStrategicPlanner(advisor).Reconcile(World.Current);
+
+            Assert.That(plan.Posture, Is.EqualTo("DefensiveRecovery"));
+            var defense = plan.Objectives.FirstOrDefault(objective => objective.Kind == "Defend");
+            Assert.That(defense, Is.Not.Null);
+            Assert.That(defense.TargetCityShortName, Is.EqualTo(player.Capitol.ShortName));
+        }
+
+        [Test]
+        public void Planner_AssignsArmiesByRouteDistanceBeforeManhattanDistance()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            var manhattanNear = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[4, 4]);
+            var routeNear = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[1, 1]);
+            var pathing = new ScriptedPathingStrategy();
+            pathing.SetDistance(manhattanNear.Tile, 30);
+            pathing.SetDistance(routeNear.Tile, 3);
+
+            var plan = new ClassicStrategicPlanner(null, pathing).Reconcile(World.Current);
+
+            var expansion = plan.Objectives.First(objective => objective.Kind == "Expand");
+            Assert.That(expansion.AssignedArmyIds.First(), Is.EqualTo(routeNear.Id));
         }
 
         [Test]
@@ -150,6 +188,68 @@ namespace Wism.Client.Test.AI
             public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
             {
                 return Enumerable.Empty<ICommandAction>();
+            }
+        }
+
+        private sealed class ScriptedSpatialAdvisor : ISpatialAdvisor
+        {
+            private readonly Dictionary<(int X, int Y), (double Friendly, double Enemy, double Tension)> values =
+                new Dictionary<(int X, int Y), (double Friendly, double Enemy, double Tension)>();
+
+            public void Set(Tile tile, double friendly = 0.0, double enemy = 0.0, double tension = 0.0)
+            {
+                values[(tile.X, tile.Y)] = (friendly, enemy, tension);
+            }
+
+            public void Update()
+            {
+            }
+
+            public double GetInfluence(Tile tile) => GetFriendly(tile);
+
+            public double GetFriendly(Tile tile) => tile == null ? 0.0 : GetFriendly(tile.X, tile.Y);
+
+            public double GetEnemy(Tile tile) => tile == null ? 0.0 : GetEnemy(tile.X, tile.Y);
+
+            public double GetTension(Tile tile) => tile == null ? 0.0 : GetTension(tile.X, tile.Y);
+
+            public double GetRawFriendly(Tile tile) => GetFriendly(tile);
+
+            public double GetRawEnemy(Tile tile) => GetEnemy(tile);
+
+            public bool IsFrontLine(Tile tile) => tile != null && GetEnemy(tile) > 0.0 && System.Math.Abs(GetTension(tile)) < 0.05;
+
+            public Tile GetGradientStep(Tile from, bool ascendFriendly) => from;
+
+            public double GetFriendly(int x, int y) => values.TryGetValue((x, y), out var value) ? value.Friendly : 0.0;
+
+            public double GetEnemy(int x, int y) => values.TryGetValue((x, y), out var value) ? value.Enemy : 0.0;
+
+            public double GetTension(int x, int y) => values.TryGetValue((x, y), out var value) ? value.Tension : 0.0;
+        }
+
+        private sealed class ScriptedPathingStrategy : IPathingStrategy
+        {
+            private readonly Dictionary<(int X, int Y), float> distances = new Dictionary<(int X, int Y), float>();
+
+            public void SetDistance(Tile start, float distance)
+            {
+                distances[(start.X, start.Y)] = distance;
+            }
+
+            public void FindShortestRoute(
+                Tile[,] map,
+                List<Army> armies,
+                Tile target,
+                out IList<Tile> fastestRoute,
+                out float distance,
+                bool ignoreClan = false)
+            {
+                var start = armies.First().Tile;
+                distance = distances.TryGetValue((start.X, start.Y), out var scripted)
+                    ? scripted
+                    : 999;
+                fastestRoute = new List<Tile> { start, target };
             }
         }
 
