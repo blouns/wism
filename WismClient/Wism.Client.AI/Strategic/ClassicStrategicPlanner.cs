@@ -17,6 +17,7 @@ namespace Wism.Client.AI.Strategic
         private const int OpeningExpansionCityCount = 4;
         private const double InfluenceThreatFloor = 0.02;
         private const double InfluenceThreatTensionCeiling = 0.05;
+        private const int RouteDistancePathingTileLimit = 2500;
 
         private readonly ISpatialAdvisor spatialAdvisor;
         private readonly IPathingStrategy pathingStrategy;
@@ -478,7 +479,8 @@ namespace Wism.Client.AI.Strategic
                 return int.MaxValue;
             }
 
-            if (pathingStrategy == null || World.Current?.Map == null)
+            var map = World.Current?.Map;
+            if (pathingStrategy == null || map == null || IsLargeRouteEstimateMap(map))
             {
                 return AiUtilities.GetManhattanDistance(army.Tile, target);
             }
@@ -486,7 +488,7 @@ namespace Wism.Client.AI.Strategic
             try
             {
                 pathingStrategy.FindShortestRoute(
-                    World.Current.Map,
+                    map,
                     new List<Army> { army },
                     target,
                     out var path,
@@ -504,6 +506,11 @@ namespace Wism.Client.AI.Strategic
             {
                 return AiUtilities.GetManhattanDistance(army.Tile, target);
             }
+        }
+
+        private static bool IsLargeRouteEstimateMap(Tile[,] map)
+        {
+            return map.GetLength(0) * map.GetLength(1) > RouteDistancePathingTileLimit;
         }
 
         private static bool IsNeutral(City city)

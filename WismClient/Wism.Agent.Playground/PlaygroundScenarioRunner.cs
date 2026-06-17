@@ -33,6 +33,7 @@ public sealed class PlaygroundScenarioRunner
 
     private readonly List<string> events = new();
     private readonly ControllerProvider controllers;
+    private readonly CampaignTimingAccumulator campaignTimings = new();
     private StandardProcessor? companionProcessor;
     private MapSnapshotEmitter? mapSnapshotEmitter;
     private CaptureRecorder? captureRecorder;
@@ -202,6 +203,7 @@ public sealed class PlaygroundScenarioRunner
         int wallClockTimeoutSeconds = 0)
     {
         events.Clear();
+        campaignTimings.Clear();
         var normalizedScenarioFamily = NormalizeScenarioFamily(scenarioFamily);
         var boundedClans = Math.Clamp(clans, 2, 8);
         var campaignName = string.IsNullOrWhiteSpace(name) ? $"campaign-{seed}-{boundedClans}clans" : name;
@@ -235,7 +237,7 @@ public sealed class PlaygroundScenarioRunner
         if (!validation.IsValid)
         {
             var failed = CreateReport("campaign", "Failed", validation.Summary, turns: 0);
-            var invalidRecorder = new CampaignRecorder(options);
+            var invalidRecorder = new CampaignRecorder(options, campaignTimings);
             invalidRecorder.Checkpoint("invalid", 0, "System", validation.Summary);
             var invalid = new CampaignRunResult(
                 SchemaVersion: 1,
@@ -255,7 +257,7 @@ public sealed class PlaygroundScenarioRunner
             return invalid;
         }
 
-        var recorder = new CampaignRecorder(options);
+        var recorder = new CampaignRecorder(options, campaignTimings);
         events.Add($"Campaign seed {options.Seed} generated {options.ClanCount} clans for {options.ScenarioFamily}.");
         events.Add($"World {World.Current.Name} dimensions: {World.Current.Map.GetLength(0)}x{World.Current.Map.GetLength(1)}.");
         PublishMapSnapshot();
@@ -378,7 +380,7 @@ public sealed class PlaygroundScenarioRunner
 
         var report = CreateReport($"campaign:{options.Seed}:{options.ClanCount}", status, outcome, completedTurns);
         stopwatch.Stop();
-        var telemetry = CreateCampaignTelemetry(recorder, options, stopwatch.Elapsed, wallClockTimeout, completedTurns);
+        var telemetry = CreateCampaignTelemetry(recorder, options, stopwatch.Elapsed, wallClockTimeout, completedTurns, campaignTimings);
         var result = new CampaignRunResult(
             SchemaVersion: 1,
             Name: options.Name,
@@ -403,7 +405,8 @@ public sealed class PlaygroundScenarioRunner
         CampaignOptions options,
         TimeSpan runtime,
         TimeSpan timeoutBudget,
-        int turnsCompleted)
+        int turnsCompleted,
+        CampaignTimingAccumulator timings)
     {
         var moments = recorder.Moments;
         var commandTypeCounts = moments
@@ -445,6 +448,7 @@ public sealed class PlaygroundScenarioRunner
             FinalArmyCount: armyCount,
             FinalCityCount: cityCount,
             CommandTypeCounts: commandTypeCounts,
+            SystemTimings: timings.Snapshot(),
             TimeoutKind: timeoutKind,
             LastMomentKind: moments.LastOrDefault()?.Kind);
     }
@@ -481,8 +485,12 @@ public sealed class PlaygroundScenarioRunner
     {
         player.IsHuman = false;
         var logger = loggerFactory.CreateLogger();
-        var provider = WarlordsClassicAiFactory.CreateCommandProvider(controllers, logger, aiProfile: aiProfile);
-        provider.GenerateCommands();
+        var provider = WarlordsClassicAiFactory.CreateCommandProvider(
+            controllers,
+            logger,
+            aiProfile: aiProfile,
+            timingSink: (name, elapsed) => campaignTimings.Record(name, elapsed));
+        campaignTimings.Measure("strategic-objective-refresh", provider.GenerateCommands);
 
         var commands = provider.GetBufferedCommands()
             .OfType<Command>()
@@ -820,13 +828,17 @@ public sealed class PlaygroundScenarioRunner
 
     private ActionState ExecuteCampaignCommand(Command command, CampaignRecorder recorder, bool logFailure = true)
     {
+        var stopwatch = Stopwatch.StartNew();
         var result = Execute(command, logFailure);
+        stopwatch.Stop();
+        RecordCommandTiming(command, stopwatch.Elapsed);
         recorder.CountCommand();
         return result;
     }
 
     private ActionState ExecuteBufferedCampaignCommand(Command command, CampaignRecorder recorder, bool logFailure = true)
     {
+        var stopwatch = Stopwatch.StartNew();
         var previousProgress = GetCommandProgressSignature(command);
         var noProgressIterations = 0;
         var result = ExecuteCommand(command);
@@ -864,8 +876,37 @@ public sealed class PlaygroundScenarioRunner
             events.Add($"Command failed: {command.GetType().Name}");
         }
 
+        stopwatch.Stop();
+        RecordCommandTiming(command, stopwatch.Elapsed);
         recorder.CountCommand();
         return result;
+    }
+
+    private void RecordCommandTiming(Command command, TimeSpan elapsed)
+    {
+        campaignTimings.Record("command-loop", elapsed);
+        var timingClass = ClassifyCommandTiming(command);
+        if (!string.IsNullOrWhiteSpace(timingClass))
+        {
+            campaignTimings.Record(timingClass, elapsed);
+        }
+    }
+
+    private static string? ClassifyCommandTiming(Command command)
+    {
+        var commandName = command.GetType().Name;
+        if (command is ReviewProductionCommand or RenewProductionCommand or StartProductionCommand ||
+            commandName.Contains("Production", StringComparison.OrdinalIgnoreCase))
+        {
+            return "production-routing";
+        }
+
+        return commandName.Contains("Search", StringComparison.OrdinalIgnoreCase) ||
+               commandName.Contains("Move", StringComparison.OrdinalIgnoreCase) ||
+               commandName.Contains("Path", StringComparison.OrdinalIgnoreCase) ||
+               commandName.Contains("SelectArmy", StringComparison.OrdinalIgnoreCase)
+            ? "pathfinding-search"
+            : null;
     }
 
     private static string GetCommandProgressSignature(Command command)

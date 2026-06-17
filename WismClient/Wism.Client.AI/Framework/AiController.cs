@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.AI.Strategic;
@@ -17,6 +19,7 @@ namespace Wism.Client.AI.Framework
         private readonly List<ITurnModule> turnModules;
         private readonly IWismLogger logger;
         private readonly ISpatialAdvisor spatialAdvisor;
+        private readonly Action<string, TimeSpan> timingSink;
         private List<AiDecisionTrace> lastDecisionTraces = new List<AiDecisionTrace>();
 
         public AiController(IStrategicModule strategicModule, List<ITacticalModule> tacticalModules)
@@ -34,13 +37,15 @@ namespace Wism.Client.AI.Framework
             List<ITacticalModule> tacticalModules,
             List<ITurnModule> turnModules,
             IWismLogger logger,
-            ISpatialAdvisor spatialAdvisor = null)
+            ISpatialAdvisor spatialAdvisor = null,
+            Action<string, TimeSpan> timingSink = null)
         {
             this.strategicModule = strategicModule;
             this.tacticalModules = tacticalModules ?? new List<ITacticalModule>();
             this.turnModules = turnModules ?? new List<ITurnModule>();
             this.logger = logger;
             this.spatialAdvisor = spatialAdvisor ?? new ForwardFeedInfluenceMap();
+            this.timingSink = timingSink;
         }
 
         /// <summary>
@@ -65,13 +70,17 @@ namespace Wism.Client.AI.Framework
 
             // Refresh the shared spatial picture once, before any module reads it (A2). All
             // downstream strategic/tactical consumers query this single cached flood per turn.
-            this.spatialAdvisor.Update();
+            Measure("spatial-advisor-update", () => this.spatialAdvisor.Update());
 
-            strategicModule.UpdateGoals(world);
+            Measure("strategic-goal-update", () => strategicModule.UpdateGoals(world));
 
             foreach (var module in turnModules)
             {
-                var generated = module.GenerateCommands(world)?.ToList() ?? new List<ICommandAction>();
+                List<ICommandAction> generated = null;
+                Measure("turn-module-generation", () =>
+                {
+                    generated = module.GenerateCommands(world)?.ToList() ?? new List<ICommandAction>();
+                });
                 LogTurnModuleCommands(module, generated);
                 if (generated.Count > 0)
                 {
@@ -79,7 +88,11 @@ namespace Wism.Client.AI.Framework
                 }
             }
 
-            var bids = GetBids(world).ToList();
+            List<IBid> bids = null;
+            Measure("tactical-bid-generation", () =>
+            {
+                bids = GetBids(world).ToList();
+            });
             LogBids("Candidate", bids);
             if (bids.Count == 0)
             {
@@ -87,14 +100,22 @@ namespace Wism.Client.AI.Framework
                 return commands;
             }
 
-            strategicModule.AllocateAssets(bids);
+            Measure("strategic-asset-allocation", () => strategicModule.AllocateAssets(bids));
 
             var winningBids = ((strategicModule as IAcceptedBidProvider)?.GetAcceptedBids() ?? bids).ToList();
             LogAcceptedBids(winningBids, bids);
 
             foreach (var bid in winningBids)
             {
-                var generated = bid.Module.GenerateCommands(bid.Armies, world)?.ToList() ?? new List<ICommandAction>();
+                List<ICommandAction> generated = null;
+                var bidModuleName = bid.Module?.GetType().Name ?? "Unknown";
+                Measure(
+                    "accepted-bid-command-generation",
+                    () =>
+                    {
+                        generated = bid.Module.GenerateCommands(bid.Armies, world)?.ToList() ?? new List<ICommandAction>();
+                    },
+                    "accepted-bid-command-generation:" + bidModuleName);
                 LogBidCommands(bid, generated);
                 traces.Add(CreateTrace(bid, generated));
                 if (generated.Count > 0)
@@ -106,6 +127,30 @@ namespace Wism.Client.AI.Framework
             lastDecisionTraces = traces;
             LogDecisionComplete(commands);
             return commands;
+        }
+
+        private void Measure(string name, Action action, string secondaryName = null)
+        {
+            if (this.timingSink == null)
+            {
+                action();
+                return;
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+            try
+            {
+                action();
+            }
+            finally
+            {
+                stopwatch.Stop();
+                this.timingSink(name, stopwatch.Elapsed);
+                if (!string.IsNullOrWhiteSpace(secondaryName))
+                {
+                    this.timingSink(secondaryName, stopwatch.Elapsed);
+                }
+            }
         }
 
         private static AiDecisionTrace CreateTrace(IBid bid, List<ICommandAction> commands)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Wism.Client.AI.CommandProviders;
 using Wism.Client.AI.InfluenceMaps;
@@ -16,7 +17,8 @@ namespace Wism.Client.AI.Framework
             ControllerProvider controllerProvider,
             IWismLogger logger,
             IPathingStrategy pathingStrategy = null,
-            string aiProfile = "tactical")
+            string aiProfile = "tactical",
+            Action<string, TimeSpan> timingSink = null)
         {
             pathingStrategy = pathingStrategy ?? new AStarPathingStrategy();
             var pathfinder = new PathfindingService(pathingStrategy);
@@ -44,18 +46,20 @@ namespace Wism.Client.AI.Framework
                     new ProductionModule(controllerProvider.CityController, logger)
                 },
                 logger,
-                spatialAdvisor);
+                spatialAdvisor,
+                timingSink);
         }
 
         public static AdaptaCommandProvider CreateCommandProvider(
             ControllerProvider controllerProvider,
             IWismLogger logger,
             IPathingStrategy pathingStrategy = null,
-            string aiProfile = "tactical")
+            string aiProfile = "tactical",
+            Action<string, TimeSpan> timingSink = null)
         {
             return new AdaptaCommandProvider(
                 logger,
-                CreateController(controllerProvider, logger, pathingStrategy, aiProfile),
+                CreateController(controllerProvider, logger, pathingStrategy, aiProfile, timingSink),
                 controllerProvider);
         }
 
@@ -76,7 +80,8 @@ namespace Wism.Client.AI.Framework
 
         private static bool UsesInfluenceMap(string aiProfile)
         {
-            return !string.Equals(aiProfile, "strategic-baseline", System.StringComparison.OrdinalIgnoreCase) &&
+            return !string.Equals(aiProfile, "strategic", System.StringComparison.OrdinalIgnoreCase) &&
+                   !string.Equals(aiProfile, "strategic-baseline", System.StringComparison.OrdinalIgnoreCase) &&
                    !string.Equals(aiProfile, "strategic-no-im", System.StringComparison.OrdinalIgnoreCase);
         }
     }
