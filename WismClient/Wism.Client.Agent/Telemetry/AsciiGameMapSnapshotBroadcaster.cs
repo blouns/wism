@@ -1,4 +1,5 @@
-﻿using Wism.Client.Api.Telemetry;
+﻿using Wism.Client.AI.InfluenceMaps;
+using Wism.Client.Api.Telemetry;
 using Wism.Client.Core.Telemetry;
 
 namespace Wism.Client.Agent.Telemetry
@@ -20,6 +21,10 @@ namespace Wism.Client.Agent.Telemetry
             {
                 // Mark for inversion in the companion renderer
                 snapshot.InvertYAxis = true;
+
+                // Attach the current player's spatial influence field for the overlay (A3).
+                // Observation-only: a fresh deterministic flood, no effect on AI decisions.
+                snapshot.Influence = InfluenceFieldExporter.BuildForCurrentPlayer();
 
                 emitter.Publish(snapshot);
             }
