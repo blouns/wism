@@ -47,6 +47,13 @@ namespace WismCompanion.UI
         private bool follow;
         private Button followBtn;
 
+        // Influence overlay (V1 Aurora): animated spatial heat layer + its driving ticker.
+        private readonly InfluenceOverlay influence = new InfluenceOverlay();
+        private IVisualElementScheduledItem overlayTicker;
+        private Toggle masterToggle;
+        private Slider opacitySlider;
+        private readonly Dictionary<InfluenceChannel, Button> channelButtons = new();
+
         // Tile lookup for adjacency: (x,y) → cleaned terrain name
         private readonly Dictionary<(int, int), string> tileTypes = new();
 
@@ -74,6 +81,77 @@ namespace WismCompanion.UI
             followBtn.style.bottom = 10;
             followBtn.style.left = 10;
             Add(followBtn);
+
+            BuildInfluenceToolbar();
+        }
+
+        // ---- Influence overlay toolbar + lifecycle -----------------------------------
+
+        private void BuildInfluenceToolbar()
+        {
+            var bar = new VisualElement();
+            bar.AddToClassList("influence-bar");
+            bar.style.position = Position.Absolute;
+            bar.style.top = 10;
+            bar.style.left = 10;
+            bar.style.flexDirection = FlexDirection.Row;
+            bar.style.alignItems = Align.Center;
+
+            masterToggle = new Toggle("Influence") { value = false };
+            masterToggle.AddToClassList("influence-toggle");
+            masterToggle.RegisterValueChangedCallback(e => { influence.Enabled = e.newValue; RefreshOverlayState(); });
+            bar.Add(masterToggle);
+
+            foreach (InfluenceChannel ch in Enum.GetValues(typeof(InfluenceChannel)))
+            {
+                var captured = ch;
+                var btn = new Button(() => { influence.Channel = captured; UpdateChannelButtons(); RefreshOverlayState(); }) { text = ch.ToString() };
+                btn.AddToClassList("map-btn");
+                channelButtons[ch] = btn;
+                bar.Add(btn);
+            }
+
+            var front = new Toggle("Front") { value = influence.ShowFront };
+            front.RegisterValueChangedCallback(e => { influence.ShowFront = e.newValue; RefreshOverlayState(); });
+            bar.Add(front);
+
+            var sparkle = new Toggle("Sparkle") { value = influence.ShowSparkle };
+            sparkle.RegisterValueChangedCallback(e => { influence.ShowSparkle = e.newValue; RefreshOverlayState(); });
+            bar.Add(sparkle);
+
+            opacitySlider = new Slider(0.1f, 1f) { value = influence.Opacity };
+            opacitySlider.style.width = 90;
+            opacitySlider.RegisterValueChangedCallback(e => { influence.Opacity = e.newValue; MarkDirtyRepaint(); });
+            bar.Add(opacitySlider);
+
+            Add(bar);
+            UpdateChannelButtons();
+        }
+
+        private void UpdateChannelButtons()
+        {
+            foreach (var kvp in channelButtons)
+                kvp.Value.EnableInClassList("map-btn--active", kvp.Key == influence.Channel);
+        }
+
+        private void RefreshOverlayState()
+        {
+            if (influence.Animating)
+            {
+                if (overlayTicker == null) overlayTicker = schedule.Execute(OverlayTick).Every(33);
+                else overlayTicker.Resume();
+            }
+            else
+            {
+                overlayTicker?.Pause();
+            }
+            MarkDirtyRepaint();
+        }
+
+        private void OverlayTick()
+        {
+            influence.Tick(Time.realtimeSinceStartup);
+            MarkDirtyRepaint();
         }
 
         public void SetSnapshot(MapSnapshot snapshot)
@@ -133,6 +211,9 @@ namespace WismCompanion.UI
                     cameraInitialized = true;
                 }
             }
+
+            influence.SetField(snapshot?.Influence);
+            RefreshOverlayState();
 
             MarkDirtyRepaint();
         }
@@ -204,6 +285,9 @@ namespace WismCompanion.UI
                 }
             }
 
+            // Influence heat: above terrain, below units so stacks stay readable.
+            influence.DrawHeat(p, mapLayout.OriginX, mapLayout.OriginY, mapLayout.TilesW, mapLayout.TilesH, MapToViewport, mapLayout.Tile);
+
             if (map.Cities != null)
             {
                 foreach (var city in map.Cities)
@@ -216,6 +300,9 @@ namespace WismCompanion.UI
             {
                 DrawArmy(mgc, p, kvp.Value.army, kvp.Value.count);
             }
+
+            // Front-line seam, ripples, and sparkle: on top of everything.
+            influence.DrawEffects(p, mapLayout.OriginX, mapLayout.OriginY, mapLayout.TilesW, mapLayout.TilesH, MapToViewport, mapLayout.Tile);
 
             if (map.SelectedArmy?.Position != null)
             {

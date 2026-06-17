@@ -290,6 +290,27 @@
     background-color: rgba(66, 104, 168, 0.92);
 }
 
+/* ---- Influence overlay toolbar ---- */
+.influence-bar {
+    padding: 4px 6px 4px 6px;
+    background-color: rgba(18, 20, 24, 0.82);
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgb(48, 51, 58);
+}
+
+.influence-toggle {
+    margin-right: 8px;
+    color: rgb(210, 213, 219);
+    font-size: 11px;
+}
+
+.influence-toggle > .unity-label {
+    min-width: auto;
+    color: rgb(120, 226, 255);
+    -unity-font-style: bold;
+}
+
 /* ---- Inspector ---- */
 .inspector-scroll {
     flex-grow: 1;
