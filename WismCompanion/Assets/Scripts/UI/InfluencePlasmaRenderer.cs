@@ -112,8 +112,14 @@ namespace WismCompanion.UI
         public void Dispose()
         {
             if (heatRt != null) { heatRt.Release(); heatRt = null; }
-            if (fieldTex != null) { Object.Destroy(fieldTex); fieldTex = null; }
-            if (material != null) { Object.Destroy(material); material = null; }
+            if (fieldTex != null) { DestroyOwned(fieldTex); fieldTex = null; }
+            if (material != null) { DestroyOwned(material); material = null; }
+        }
+
+        private static void DestroyOwned(Object obj)
+        {
+            if (Application.isPlaying) Object.Destroy(obj);
+            else Object.DestroyImmediate(obj);
         }
     }
 }
