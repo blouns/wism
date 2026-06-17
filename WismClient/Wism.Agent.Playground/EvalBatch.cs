@@ -1864,7 +1864,8 @@ public sealed class EvalBatchRunner
 
     private static bool HasClassicAiConquestPressure(EvalCaseResult result)
     {
-        if (result.Counters.Victories > 0)
+        if (result.Counters.Victories > 0 ||
+            result.Counters.DominanceVictories > 0)
         {
             return true;
         }

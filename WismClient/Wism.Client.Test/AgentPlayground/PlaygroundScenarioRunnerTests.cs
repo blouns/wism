@@ -552,6 +552,29 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void EvalScorecard_CountsDominanceVictoryAsClassicAiConquestPressure()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-conquest",
+                clanCount: 6,
+                maxTurns: 80,
+                outcome: "The Sirians reached dominance after 79 turns with 7/12 cities.",
+                counters: EvalCounters.Empty with
+                {
+                    DominanceVictories = 1,
+                    CityCaptures = 12,
+                    Battles = 12
+                })
+        });
+
+        Assert.That(scorecard.Status, Is.EqualTo("Passed"));
+        Assert.That(scorecard.ClassicAiReadiness.CasesWithConquestPressure, Is.EqualTo(1));
+        Assert.That(scorecard.Gates.Single(gate => gate.Name == "classic-ai-victory-pressure").Passed, Is.True);
+    }
+
+    [Test]
     public void EvalScorecard_PassesEightClanClassicAiReadinessWithViableClanReduction()
     {
         var scorecard = EvalBatchRunner.BuildScorecard(new[]
