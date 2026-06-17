@@ -8,10 +8,10 @@ Shader "Wism/InfluencePlasma"
     {
         _MainTex ("Field (R=tension01,G=friendly,B=enemy)", 2D) = "black" {}
         _Opacity ("Opacity", Range(0,1)) = 0.75
-        _FlowSpeed ("Flow Speed", Float) = 0.12
-        _FlowScale ("Flow Scale", Float) = 4.0
-        _Warp ("Warp Amount", Float) = 0.06
-        _Glow ("Glow", Float) = 1.2
+        _FlowSpeed ("Flow Speed", Float) = 0.22
+        _FlowScale ("Flow Scale", Float) = 5.0
+        _Warp ("Warp Amount", Float) = 0.13
+        _Glow ("Glow", Float) = 1.5
         _Channel ("Channel (0=tension,1=friendly,2=enemy)", Float) = 0
         [HDR] _FriendlyA ("Friendly Near", Color) = (0.15, 0.85, 1.0, 1.0)
         [HDR] _FriendlyB ("Friendly Far", Color) = (0.25, 0.45, 1.0, 1.0)
@@ -78,11 +78,12 @@ Shader "Wism/InfluencePlasma"
             {
                 float t = _Time.y;
 
-                // Domain-warp the sample point with flowing fbm so the field looks fluid.
-                float2 flow = float2(
-                    fbm(i.uv * _FlowScale + t * _FlowSpeed),
-                    fbm(i.uv * _FlowScale - t * _FlowSpeed + 5.2));
-                float2 uv = i.uv + (flow - 0.5) * _Warp;
+                // Two-octave domain warp so the field churns and folds like liquid.
+                float2 w1 = float2(fbm(i.uv * _FlowScale + t * _FlowSpeed),
+                                   fbm(i.uv * _FlowScale - t * _FlowSpeed + 5.2));
+                float2 w2 = float2(fbm((i.uv * _FlowScale * 2.3) - (t * _FlowSpeed * 1.7) + 11.0),
+                                   fbm((i.uv * _FlowScale * 2.3) + (t * _FlowSpeed * 1.3) + 2.0));
+                float2 uv = i.uv + ((w1 - 0.5) * _Warp) + ((w2 - 0.5) * _Warp * 0.5);
 
                 float4 f = tex2D(_MainTex, uv);
                 float tension  = f.r * 2.0 - 1.0;   // unpack 0..1 -> -1..1
@@ -95,11 +96,17 @@ Shader "Wism/InfluencePlasma"
                 else if (_Channel < 1.5) { mag = friendly;     col = friendlyRamp(mag); }
                 else                     { mag = enemy;        col = enemyRamp(mag); }
 
-                float shimmer = 0.85 + 0.15 * sin(t * 2.0 + (i.uv.x + i.uv.y) * 20.0);
-                float a = smoothstep(0.02, 0.6, mag) * _Opacity * shimmer;
+                // Crackle: a high-frequency animated flicker that lives in the hot regions.
+                float crackle = fbm((i.uv * 26.0) + (t * 1.7));
+                float spark = pow(saturate(crackle), 6.0) * smoothstep(0.15, 0.6, mag);
 
-                col *= _Glow;
-                return float4(col, saturate(a));
+                // Gamma-lift so weak influence still reads — density visible across a wide area.
+                float lift = pow(saturate(mag), 0.55);
+                float shimmer = 0.88 + (0.12 * sin((t * 2.0) + ((i.uv.x + i.uv.y) * 20.0)));
+                float a = saturate((lift * _Opacity * shimmer) + (spark * 0.5 * _Opacity));
+
+                col = (col * _Glow) + spark.xxx * 1.2;   // sparks flare white-hot
+                return float4(col, a);
             }
             ENDCG
         }

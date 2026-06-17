@@ -61,7 +61,11 @@ namespace Wism.Client.AI.InfluenceMaps
                 return null;
             }
 
-            var advisor = new ForwardFeedInfluenceMap();
+            // Visualization-tuned flood: a gentler decay spreads influence across far more of the
+            // map and a smaller calibration denominator makes typical stacks read clearly. This is
+            // a separate instance from the AI's decision field, so it changes only the overlay.
+            var advisor = new ForwardFeedInfluenceMap { Lambda = 0.18 };
+            advisor.CalibrationReference /= 4.0;
             advisor.Update();
             return Export(advisor, map.GetLength(0), map.GetLength(1));
         }

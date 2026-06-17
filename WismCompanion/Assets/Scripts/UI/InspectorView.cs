@@ -33,6 +33,20 @@ namespace WismCompanion.UI
                 content.Add(Field("Has city", selection.Tile.HasCity ? "yes" : "no"));
             }
 
+            var inf = map?.Influence;
+            if (inf != null && inf.Width > 0 && selection.X >= 0 && selection.Y >= 0 &&
+                selection.X < inf.Width && selection.Y < inf.Height)
+            {
+                var idx = inf.IndexOf(selection.X, selection.Y);
+                content.Add(Header("Influence"));
+                if (inf.Friendly != null && idx < inf.Friendly.Length)
+                    content.Add(Field("Friendly", inf.Friendly[idx].ToString("0.00")));
+                if (inf.Enemy != null && idx < inf.Enemy.Length)
+                    content.Add(Field("Enemy", inf.Enemy[idx].ToString("0.00")));
+                if (inf.Tension != null && idx < inf.Tension.Length)
+                    content.Add(Field("Tension", inf.Tension[idx].ToString("+0.00;-0.00;0.00")));
+            }
+
             if (selection.City != null)
             {
                 content.Add(Header("City"));

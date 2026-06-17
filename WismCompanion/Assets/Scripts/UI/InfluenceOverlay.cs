@@ -38,10 +38,12 @@ namespace WismCompanion.UI
     {
         private const float LerpPerSecond = 3.0f;   // field morph speed (≈0.6s to converge)
         private const float ShimmerSpeed = 2.2f;    // flow shimmer rate
-        private const float RippleSpeed = 6.0f;     // ring expansion, tiles/second
-        private const float RippleLife = 1.1f;      // seconds
+        private const float RippleSpeed = 2.4f;     // ring expansion, tiles/second (slow = it lingers)
+        private const float RippleLife = 2.6f;      // seconds — rings hang out and crackle
         private const float SignFlipEpsilon = 0.06f; // |Δtension| needed to count as a real flip
-        private const int MaxRipples = 64;
+        private const float PulseInterval = 1.3f;   // heartbeat: re-emit rings from hot cells
+        private const float PulseThreshold = 0.5f;  // |tension| a cell needs to pulse
+        private const int MaxRipples = 96;
 
         public bool Enabled { get; set; }
         public bool ShowFront { get; set; } = true;
@@ -71,6 +73,7 @@ namespace WismCompanion.UI
         private float[] targetT, targetF, targetE;       // latest snapshot
         private float lastNow = -1f;
         private float clock;
+        private float pulseTimer;
         private bool morphing;
 
         private readonly List<Ripple> ripples = new();
@@ -135,6 +138,39 @@ namespace WismCompanion.UI
             }
         }
 
+        // Periodically re-emit rings from the strongest cells so hotspots keep crackling.
+        private void EmitHeartbeatRipples()
+        {
+            if (displayT == null) return;
+            var added = 0;
+            for (var y = 1; y < height - 1 && added < 8; y += 2)
+            {
+                for (var x = 1; x < width - 1 && added < 8; x += 2)
+                {
+                    var v = displayT[(y * width) + x];
+                    if (Mathf.Abs(v) < PulseThreshold || !IsTensionLocalMax(x, y, Mathf.Abs(v))) continue;
+                    if (ripples.Count >= MaxRipples) return;
+                    ripples.Add(new Ripple { X = x, Y = y, Age = 0f, Sign = Mathf.Sign(v) });
+                    added++;
+                }
+            }
+        }
+
+        private bool IsTensionLocalMax(int x, int y, float mag)
+        {
+            for (var dy = -1; dy <= 1; dy++)
+            {
+                for (var dx = -1; dx <= 1; dx++)
+                {
+                    if (dx == 0 && dy == 0) continue;
+                    var nx = x + dx; var ny = y + dy;
+                    if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                    if (Mathf.Abs(displayT[(ny * width) + nx]) > mag) return false;
+                }
+            }
+            return true;
+        }
+
         /// <summary>Advance morph + ripples. <paramref name="now"/> is realtime seconds.</summary>
         public void Tick(float now)
         {
@@ -163,6 +199,15 @@ namespace WismCompanion.UI
                 rip.Age += dt;
                 if (rip.Age >= RippleLife) ripples.RemoveAt(r);
                 else ripples[r] = rip;
+            }
+
+            // Heartbeat: keep emitting rings from the hottest cells so the field stays alive
+            // between turns ("hangs out and crackles") instead of pulsing once on a sign flip.
+            pulseTimer += dt;
+            if (Enabled && pulseTimer >= PulseInterval)
+            {
+                pulseTimer = 0f;
+                EmitHeartbeatRipples();
             }
 
             ember.Enabled = Enabled && ShowEmbers;
@@ -254,7 +299,8 @@ namespace WismCompanion.UI
                 var center = new Vector2(pos.x + tile * 0.5f, pos.y + tile * 0.5f);
                 var radius = tile * (0.3f + RippleSpeed * rip.Age);
                 var ringColor = rip.Sign >= 0f ? pal.FriendlyNear : pal.EnemyNear;
-                ringColor.a = (1f - t) * 0.8f * Opacity;
+                var crackle = 0.6f + 0.4f * Mathf.Sin((clock * 22f) + (rip.X * 1.3f) + rip.Y);
+                ringColor.a = (1f - t) * 0.85f * Opacity * crackle;
                 StrokeCircle(p, center, radius, ringColor, Mathf.Lerp(3f, 0.5f, t));
             }
 
@@ -282,8 +328,9 @@ namespace WismCompanion.UI
                     if (!IsFront(x, y, here)) continue;
 
                     var pos = mapToViewport(x, y);
-                    var pulse = 0.6f + 0.4f * Mathf.Sin(clock * 3.4f + (x + y) * 0.6f);
-                    var seam = new Color(1f, 1f, 0.78f, Mathf.Clamp01(pulse) * 0.85f * Opacity);
+                    // Higher-frequency flicker so the front line crackles rather than gently pulses.
+                    var pulse = 0.5f + 0.5f * Mathf.Sin(clock * 9f + (x * 1.7f + y * 2.3f));
+                    var seam = new Color(1f, 1f, 0.78f, Mathf.Clamp01(pulse) * 0.9f * Opacity);
                     var c = new Vector2(pos.x + tile * 0.5f, pos.y + tile * 0.5f);
                     StrokeCircle(p, c, tile * 0.18f, seam, Mathf.Max(1.5f, tile * 0.08f));
                 }
@@ -459,9 +506,9 @@ namespace WismCompanion.UI
 
         private static float Smooth(float m)
         {
-            // Ease-in so weak influence stays faint and strong influence reads boldly.
-            m = Mathf.Clamp01(m);
-            return m * m * (3f - 2f * m) * 0.85f;
+            // Gamma lift so weak influence still reads — density is visible across a wide area
+            // instead of vanishing a few tiles out from each source.
+            return Mathf.Pow(Mathf.Clamp01(m), 0.55f);
         }
 
         // ---- Painter2D primitives ----------------------------------------------------
