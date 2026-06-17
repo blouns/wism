@@ -92,6 +92,7 @@ public sealed record EvalCaseTelemetry(
     int FinalArmyCount,
     int FinalCityCount,
     IReadOnlyDictionary<string, int> CommandTypeCounts,
+    IReadOnlyDictionary<string, EvalTimingSummary> SystemTimings,
     string? TimeoutKind,
     string? LastMomentKind)
 {
@@ -111,9 +112,17 @@ public sealed record EvalCaseTelemetry(
         0,
         0,
         new Dictionary<string, int>(),
+        new Dictionary<string, EvalTimingSummary>(),
         null,
         null);
 }
+
+public sealed record EvalTimingSummary(
+    string Name,
+    int Count,
+    double TotalSeconds,
+    double AverageSeconds,
+    double MaxSeconds);
 
 public sealed record EvalDebugPacket(
     int SchemaVersion,
@@ -1142,6 +1151,15 @@ public sealed class EvalBatchRunner
             FinalArmyCount: source.FinalArmyCount,
             FinalCityCount: source.FinalCityCount,
             CommandTypeCounts: source.CommandTypeCounts,
+            SystemTimings: (source.SystemTimings ?? new Dictionary<string, CampaignTimingSummary>()).ToDictionary(
+                pair => pair.Key,
+                pair => new EvalTimingSummary(
+                    pair.Value.Name,
+                    pair.Value.Count,
+                    pair.Value.TotalSeconds,
+                    pair.Value.AverageSeconds,
+                    pair.Value.MaxSeconds),
+                StringComparer.OrdinalIgnoreCase),
             TimeoutKind: source.TimeoutKind ?? DetectTimeoutKind(campaign),
             LastMomentKind: source.LastMomentKind);
     }

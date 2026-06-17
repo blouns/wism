@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Newtonsoft.Json;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
@@ -53,6 +54,7 @@ public sealed record CampaignTelemetrySummary(
     int FinalArmyCount,
     int FinalCityCount,
     IReadOnlyDictionary<string, int> CommandTypeCounts,
+    IReadOnlyDictionary<string, CampaignTimingSummary> SystemTimings,
     string? TimeoutKind,
     string? LastMomentKind);
 
@@ -63,6 +65,78 @@ public sealed record CampaignMoment(
     int CommandIndex,
     string CheckpointFile,
     string Context);
+
+public sealed record CampaignTimingSummary(
+    string Name,
+    int Count,
+    double TotalSeconds,
+    double AverageSeconds,
+    double MaxSeconds);
+
+internal sealed class CampaignTimingAccumulator
+{
+    private readonly Dictionary<string, CampaignTimingStats> timings = new(StringComparer.OrdinalIgnoreCase);
+
+    public void Clear() => this.timings.Clear();
+
+    public void Record(string name, TimeSpan elapsed)
+    {
+        if (!this.timings.TryGetValue(name, out var stats))
+        {
+            stats = new CampaignTimingStats(name);
+            this.timings[name] = stats;
+        }
+
+        stats.Add(elapsed);
+    }
+
+    public void Measure(string name, Action action)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            action();
+        }
+        finally
+        {
+            stopwatch.Stop();
+            this.Record(name, stopwatch.Elapsed);
+        }
+    }
+
+    public IReadOnlyDictionary<string, CampaignTimingSummary> Snapshot() => this.timings
+        .OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
+        .ToDictionary(pair => pair.Key, pair => pair.Value.ToSummary(), StringComparer.OrdinalIgnoreCase);
+}
+
+internal sealed class CampaignTimingStats
+{
+    private TimeSpan total = TimeSpan.Zero;
+    private TimeSpan max = TimeSpan.Zero;
+
+    public CampaignTimingStats(string name) => this.Name = name;
+
+    public string Name { get; }
+
+    public int Count { get; private set; }
+
+    public void Add(TimeSpan elapsed)
+    {
+        this.Count++;
+        this.total += elapsed;
+        if (elapsed > this.max)
+        {
+            this.max = elapsed;
+        }
+    }
+
+    public CampaignTimingSummary ToSummary() => new(
+        this.Name,
+        this.Count,
+        Math.Round(this.total.TotalSeconds, 3),
+        this.Count <= 0 ? 0 : Math.Round(this.total.TotalSeconds / this.Count, 3),
+        Math.Round(this.max.TotalSeconds, 3));
+}
 
 internal sealed record CampaignOptions(
     int Seed,
@@ -757,15 +831,17 @@ internal sealed class CampaignRecorder
 {
     private readonly string outputDirectory;
     private readonly CampaignCheckpointMode checkpointMode;
+    private readonly CampaignTimingAccumulator? timings;
     private readonly List<string> checkpoints = new();
     private readonly List<CampaignMoment> moments = new();
     private int commandIndex;
     private bool prepared;
 
-    public CampaignRecorder(CampaignOptions options)
+    public CampaignRecorder(CampaignOptions options, CampaignTimingAccumulator? timings = null)
     {
         this.outputDirectory = Path.Combine(options.OutputRoot, Sanitize(options.Name));
         this.checkpointMode = options.CheckpointMode;
+        this.timings = timings;
     }
 
     public string OutputDirectory => this.outputDirectory;
@@ -783,25 +859,33 @@ internal sealed class CampaignRecorder
 
     public string Checkpoint(string kind, int turn, string clan, string context)
     {
-        this.PrepareOutputDirectory();
-        var fileName = string.Empty;
-        if (this.ShouldWriteSnapshot(kind))
+        var stopwatch = Stopwatch.StartNew();
+        try
         {
-            fileName = $"{this.checkpoints.Count:0000}-{kind}-turn{turn:000}-{Sanitize(clan)}.json";
-            var path = Path.Combine(this.outputDirectory, fileName);
-            var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
-            File.WriteAllText(path, JsonConvert.SerializeObject(Game.Current.Snapshot(), settings));
-            this.checkpoints.Add(path);
+            this.PrepareOutputDirectory();
+            var fileName = string.Empty;
+            if (this.ShouldWriteSnapshot(kind))
+            {
+                fileName = $"{this.checkpoints.Count:0000}-{kind}-turn{turn:000}-{Sanitize(clan)}.json";
+                var path = Path.Combine(this.outputDirectory, fileName);
+                var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
+                File.WriteAllText(path, JsonConvert.SerializeObject(Game.Current.Snapshot(), settings));
+                this.checkpoints.Add(path);
+            }
+
+            var moment = new CampaignMoment(kind, clan, turn, this.commandIndex, fileName, context);
+            this.moments.Add(moment);
+            File.AppendAllText(
+                Path.Combine(this.outputDirectory, "checkpoint-index.jsonl"),
+                JsonConvert.SerializeObject(moment) + Environment.NewLine);
+            return fileName.Length == 0 ? string.Empty : Path.Combine(this.outputDirectory, fileName);
         }
-
-        var moment = new CampaignMoment(kind, clan, turn, this.commandIndex, fileName, context);
-        this.moments.Add(moment);
-        File.AppendAllText(
-            Path.Combine(this.outputDirectory, "checkpoint-index.jsonl"),
-            JsonConvert.SerializeObject(moment) + Environment.NewLine);
-        return fileName.Length == 0 ? string.Empty : Path.Combine(this.outputDirectory, fileName);
+        finally
+        {
+            stopwatch.Stop();
+            this.timings?.Record("checkpoint-load", stopwatch.Elapsed);
+        }
     }
-
     private bool ShouldWriteSnapshot(string kind)
     {
         if (this.checkpointMode == CampaignCheckpointMode.Full)

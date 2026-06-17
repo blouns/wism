@@ -91,6 +91,17 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void Factory_WiresNoOpSpatialAdvisor_ForStrategicProfile()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            var controller = WarlordsClassicAiFactory.CreateController(controllerProvider, logger, aiProfile: "strategic");
+
+            Assert.That(controller.SpatialAdvisor, Is.TypeOf<NoOpSpatialAdvisor>());
+        }
+
+        [Test]
         public void Factory_WiresNoOpSpatialAdvisor_ForStrategicBaselineProfile()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();

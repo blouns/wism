@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System;
 using Wism.Client.AI.Tactical;
 using Wism.Client.Commands.Armies;
@@ -26,6 +26,7 @@ public class CaptureModule : ITacticalModule
     private readonly CityTargetEvaluator cityTargetEvaluator;
     private readonly CombatEstimator combatEstimator;
     private readonly IWismLogger logger;
+    private readonly Dictionary<string, string> bidTargetByArmyKey = new Dictionary<string, string>();
 
     public CaptureModule(ArmyController armyController, IWismLogger logger)
         : this(armyController, null, GarrisonPolicy.None, logger)
@@ -62,6 +63,7 @@ public class CaptureModule : ITacticalModule
     {
         var bids = new List<IBid>();
         var player = Game.Current.GetCurrentPlayer();
+        this.bidTargetByArmyKey.Clear();
 
         var cities = world.GetCities()
             .Where(c => c.Clan != player.Clan)
@@ -105,6 +107,7 @@ public class CaptureModule : ITacticalModule
                 : targetScore;
 
             logger.LogInformation($"[Capture] Bidding {bidArmies.Count} army/armies at ({leader.Tile.X},{leader.Tile.Y}) to target city at ({targetCity.Tile.X},{targetCity.Tile.Y}) with utility {utility:0.000}.");
+            RememberBidTarget(bidArmies, targetCity);
 
             bids.Add(new StrategicBid(
                 bidArmies,
@@ -142,15 +145,19 @@ public class CaptureModule : ITacticalModule
             : new List<Army>();
 
         var army = armies[0];
-        var capturableCities = world.GetCities()
-            .Where(c => c.Clan != army.Player.Clan)
-            .OrderBy(c => this.cityTargetEvaluator.GetDistanceToCity(army.Tile, c))
-            .ThenByDescending(c => c.Income + c.Defense)
-            .ThenBy(c => c.ShortName)
-            .Take(MaxCandidateCitiesPerStack)
-            .ToList();
+        var target = FindRememberedBidTarget(armies, world);
+        if (target == null)
+        {
+            var capturableCities = world.GetCities()
+                .Where(c => c.Clan != army.Player.Clan)
+                .OrderBy(c => this.cityTargetEvaluator.GetDistanceToCity(army.Tile, c))
+                .ThenByDescending(c => c.Income + c.Defense)
+                .ThenBy(c => c.ShortName)
+                .Take(MaxCandidateCitiesPerStack)
+                .ToList();
 
-        var target = FindBestCapturableCity(armies, capturableCities);
+            target = FindBestCapturableCity(armies, capturableCities);
+        }
         if (target == null)
             return commands;
 
@@ -212,7 +219,7 @@ public class CaptureModule : ITacticalModule
                 return commands;
             }
 
-            var blocker = FindEnemyBlockerOnRoute(armies, attackPosition);
+            var blocker = FindEnemyBlockerOnRoute(armies, attackPosition, out var routeToAttackPosition);
             if (blocker != null)
             {
                 var estimate = this.combatEstimator.EstimateAttack(armies, blocker);
@@ -234,7 +241,7 @@ public class CaptureModule : ITacticalModule
             }
 
             logger.LogInformation($"[Capture] Army moving toward city at ({attackPosition.X},{attackPosition.Y})");
-            AiUtilities.GenerateMoveCommands(armyController, armies, commands, attackPosition, logger: logger);
+            AiUtilities.GenerateMoveCommands(armyController, armies, commands, attackPosition, routeToAttackPosition, logger);
         }
         else
         {
@@ -242,6 +249,46 @@ public class CaptureModule : ITacticalModule
         }
 
         return commands;
+    }
+
+    private void RememberBidTarget(List<Army> armies, City city)
+    {
+        var key = GetArmyKey(armies);
+        if (!string.IsNullOrWhiteSpace(key) && city != null && !string.IsNullOrWhiteSpace(city.ShortName))
+        {
+            this.bidTargetByArmyKey[key] = city.ShortName;
+        }
+    }
+
+    private City FindRememberedBidTarget(List<Army> armies, World world)
+    {
+        var key = GetArmyKey(armies);
+        if (string.IsNullOrWhiteSpace(key) ||
+            !this.bidTargetByArmyKey.TryGetValue(key, out var cityShortName))
+        {
+            return null;
+        }
+
+        var playerClan = armies[0].Player?.Clan;
+        return world.GetCities()
+            .FirstOrDefault(city =>
+                city != null &&
+                city.Tile != null &&
+                city.Clan != playerClan &&
+                string.Equals(city.ShortName, cityShortName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string GetArmyKey(IEnumerable<Army> armies)
+    {
+        if (armies == null)
+        {
+            return string.Empty;
+        }
+
+        return string.Join(",", armies
+            .Where(army => army != null)
+            .Select(army => army.Id)
+            .OrderBy(id => id));
     }
 
     private List<City> CandidateCitiesForStack(Tile origin, List<City> cities)
@@ -437,8 +484,9 @@ public class CaptureModule : ITacticalModule
             .FirstOrDefault();
     }
 
-    private Tile FindEnemyBlockerOnRoute(List<Army> armies, Tile destination)
+    private Tile FindEnemyBlockerOnRoute(List<Army> armies, Tile destination, out IList<Tile> path)
     {
+        path = null;
         armies = GetUsableSameTileArmies(armies);
         if (armies == null || armies.Count == 0 || destination == null)
         {
@@ -449,7 +497,7 @@ public class CaptureModule : ITacticalModule
             World.Current.Map,
             armies,
             destination,
-            out var path,
+            out path,
             out _,
             ignoreClan: false);
 
