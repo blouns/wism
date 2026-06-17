@@ -33,6 +33,7 @@ namespace Assets.Scripts.Telemetry
 
         private readonly IWismLogger logger;
         private readonly TelemetryContext telemetryContext;
+        private readonly ITelemetryPublisher fallbackPublisher;
         private readonly TcpListener listener;
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly Dictionary<int, ClientConnection> clients = new Dictionary<int, ClientConnection>();
@@ -48,6 +49,7 @@ namespace Assets.Scripts.Telemetry
         public UnitySocketTelemetryPublisher(
             IWismLoggerFactory loggerFactory,
             TelemetryContext telemetryContext = null,
+            ITelemetryPublisher fallbackPublisher = null,
             int port = DefaultPort)
         {
             if (loggerFactory is null)
@@ -57,6 +59,7 @@ namespace Assets.Scripts.Telemetry
 
             this.logger = loggerFactory.CreateLogger();
             this.telemetryContext = telemetryContext;
+            this.fallbackPublisher = fallbackPublisher;
 
             try
             {
@@ -81,8 +84,14 @@ namespace Assets.Scripts.Telemetry
             }
 
             var target = GetTarget(payload);
-            if (target == null || !this.listening || this.disposed)
+            if (target == null || this.disposed)
             {
+                return;
+            }
+
+            if (!this.listening)
+            {
+                this.fallbackPublisher?.Publish(payload);
                 return;
             }
 

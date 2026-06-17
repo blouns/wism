@@ -10,14 +10,14 @@ namespace WismCompanion.App
 {
     /// <summary>
     /// Entry point for the standalone companion. Auto-starts on play/build (no scene wiring needed),
-    /// loads the UI Toolkit document from Resources, connects to the SignalR host, and pumps inbound
-    /// hub messages onto the Unity main thread each frame.
+    /// loads the UI Toolkit document from Resources, connects to the selected telemetry endpoint,
+    /// and pumps inbound messages onto the Unity main thread each frame.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class CompanionBootstrap : MonoBehaviour
     {
-        // Default to the WebSocket transport (connects to Wism.SignalR.Host). A direct named-pipe
-        // transport is still available by entering "pipe://wism-commands" in the connection field.
+        // Default to WismUnity's direct WebSocket telemetry socket. The standalone SignalR bridge is
+        // available by entering "signalr://localhost:5000/gameHub" in the connection field.
         private const string DefaultEndpoint = "ws://localhost:5000/gameHub";
 
         private const float ChannelPruneInterval = 15f;
@@ -89,19 +89,35 @@ namespace WismCompanion.App
 
         private void StartClient(string endpoint)
         {
+            SignalRHostLauncher.EnsureRunningForEndpoint(endpoint);
             client = CreateTransport(endpoint);
-            controller?.SetHostUrl(client.Endpoint);
+            controller?.SetHostUrl(GetDisplayEndpoint(endpoint, client.Endpoint));
             controller?.SetConnectionStatus(CompanionConnectionStatus.Connecting, client.StatusDetail);
             client.Start();
         }
 
+        private static string GetDisplayEndpoint(string requestedEndpoint, string transportEndpoint)
+        {
+            if (SignalRHostLauncher.TryNormalizeBridgeUrl(requestedEndpoint, out _))
+            {
+                return requestedEndpoint.Trim();
+            }
+
+            return transportEndpoint;
+        }
+
         /// <summary>
-        /// Picks a transport from the endpoint scheme: <c>ws/wss/http/https</c> → SignalR WebSocket
-        /// (remote/multi-client), otherwise a direct named pipe (<c>pipe://name</c> or a bare name).
+        /// Picks a transport from the endpoint scheme: <c>ws/wss/http/https/signalr</c> → SignalR JSON
+        /// over WebSocket, otherwise a direct named pipe (<c>pipe://name</c> or a bare name).
         /// </summary>
         private static ICompanionTransport CreateTransport(string endpoint)
         {
             var value = string.IsNullOrWhiteSpace(endpoint) ? DefaultEndpoint : endpoint.Trim();
+
+            if (SignalRHostLauncher.TryNormalizeBridgeUrl(value, out var bridgeUrl))
+            {
+                return new SignalRJsonClient(bridgeUrl);
+            }
 
             if (value.StartsWith("ws://", StringComparison.OrdinalIgnoreCase) ||
                 value.StartsWith("wss://", StringComparison.OrdinalIgnoreCase) ||

@@ -190,7 +190,8 @@ namespace Assets.Scripts.Managers
             this.socketTelemetryPublisher?.Dispose();
             this.socketTelemetryPublisher = new UnitySocketTelemetryPublisher(
                 this.GameManager.LoggerFactory,
-                telemetryContext);
+                telemetryContext,
+                new NamedPipeTelemetryPublisher(this.GameManager.LoggerFactory, telemetryContext));
             var emitter = new MapSnapshotEmitter(
                 this.GameManager.LoggerFactory,
                 telemetryContext,

@@ -54,7 +54,7 @@
                     <ui:Label name="empty-status" text="Waiting for a connection…" class="empty-status" />
                 </ui:VisualElement>
                 <ui:Label name="empty-host" text="ws://localhost:5000/gameHub" class="empty-host" />
-                <ui:Label text="Start Wism.SignalR.Host, then launch a WISM game." class="empty-hint" />
+                <ui:Label text="Press Play in WismUnity to publish live telemetry." class="empty-hint" />
             </ui:VisualElement>
         </ui:VisualElement>
 
