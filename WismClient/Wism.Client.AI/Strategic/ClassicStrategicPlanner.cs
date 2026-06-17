@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.AI.Framework;
+using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.Core;
 using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules.Infos;
+using Wism.Client.Pathing;
 
 namespace Wism.Client.AI.Strategic
 {
@@ -13,6 +15,27 @@ namespace Wism.Client.AI.Strategic
     {
         private const int DefenseThreatRadius = 4;
         private const int OpeningExpansionCityCount = 4;
+        private const double InfluenceThreatFloor = 0.02;
+        private const double InfluenceThreatTensionCeiling = 0.05;
+
+        private readonly ISpatialAdvisor spatialAdvisor;
+        private readonly IPathingStrategy pathingStrategy;
+
+        public ClassicStrategicPlanner()
+            : this(null, null)
+        {
+        }
+
+        public ClassicStrategicPlanner(ISpatialAdvisor spatialAdvisor)
+            : this(spatialAdvisor, null)
+        {
+        }
+
+        public ClassicStrategicPlanner(ISpatialAdvisor spatialAdvisor, IPathingStrategy pathingStrategy)
+        {
+            this.spatialAdvisor = spatialAdvisor;
+            this.pathingStrategy = pathingStrategy;
+        }
 
         public StrategicPlanEntity Reconcile(World world)
         {
@@ -84,45 +107,45 @@ namespace Wism.Client.AI.Strategic
             Game.Current.StrategicPlans = plans;
         }
 
-        private static string SelectPosture(World world, Player player)
+        private string SelectPosture(World world, Player player)
         {
+            if (player.GetCities().Any(city => IsCityUnderThreat(city.Tile, player)))
+            {
+                return "DefensiveRecovery";
+            }
+
             if (player.GetCities().Count < OpeningExpansionCityCount &&
                 world.GetCities().Any(city => IsNeutral(city)))
             {
                 return "OpeningExpansion";
             }
 
-            if (player.GetCities().Any(city => CountNearbyEnemyArmies(city.Tile, player, DefenseThreatRadius) > 0))
-            {
-                return "DefensiveRecovery";
-            }
-
             var viableEnemies = Game.Current.Players.Count(other => other != player && !other.IsDead);
             return viableEnemies <= 1 ? "Conquest" : "BalancedPressure";
         }
 
-        private static IEnumerable<StrategicObjectiveEntity> CreateDefenseObjectives(
+        private IEnumerable<StrategicObjectiveEntity> CreateDefenseObjectives(
             World world,
             Player player,
             HashSet<int> assignedArmyIds)
         {
             foreach (var city in player.GetCities()
                          .Where(city => city?.Tile != null)
-                         .Where(city => CountNearbyEnemyArmies(city.Tile, player, DefenseThreatRadius) > 0)
-                         .OrderByDescending(city => CountNearbyEnemyArmies(city.Tile, player, DefenseThreatRadius))
+                         .Where(city => IsCityUnderThreat(city.Tile, player))
+                         .OrderByDescending(city => GetDefensePressure(city.Tile, player))
                          .ThenBy(city => city.ShortName))
             {
                 var assigned = AssignNearestArmies(player, city.Tile, assignedArmyIds, 3);
                 yield return CreateObjective(
                     "Defend",
-                    priority: 100 + CountNearbyEnemyArmies(city.Tile, player, DefenseThreatRadius),
+                    priority: 100 + GetDefensePressure(city.Tile, player),
                     targetCity: city,
                     assignedArmyIds: assigned,
                     assignedCityShortNames: new[] { city.ShortName });
             }
         }
 
-        private static IEnumerable<StrategicObjectiveEntity> CreateSearchObjectives(
+        private IEnumerable<StrategicObjectiveEntity> CreateSearchObjectives(
             World world,
             Player player,
             HashSet<int> assignedArmyIds)
@@ -161,7 +184,7 @@ namespace Wism.Client.AI.Strategic
             }
         }
 
-        private static IEnumerable<StrategicObjectiveEntity> CreateExpansionObjectives(
+        private IEnumerable<StrategicObjectiveEntity> CreateExpansionObjectives(
             World world,
             Player player,
             HashSet<int> assignedArmyIds)
@@ -182,7 +205,7 @@ namespace Wism.Client.AI.Strategic
             }
         }
 
-        private static IEnumerable<StrategicObjectiveEntity> CreateSiegeObjectives(
+        private IEnumerable<StrategicObjectiveEntity> CreateSiegeObjectives(
             World world,
             Player player,
             HashSet<int> assignedArmyIds)
@@ -380,7 +403,7 @@ namespace Wism.Client.AI.Strategic
                 : personality.Profile.Trim();
         }
 
-        private static int[] AssignNearestArmies(
+        private int[] AssignNearestArmies(
             Player player,
             Tile target,
             HashSet<int> assignedArmyIds,
@@ -394,7 +417,7 @@ namespace Wism.Client.AI.Strategic
             return player.GetArmies()
                 .Where(army => army != null && !army.IsDead && army.Tile != null && army.MovesRemaining > 0)
                 .Where(army => !assignedArmyIds.Contains(army.Id))
-                .OrderBy(army => AiUtilities.GetManhattanDistance(army.Tile, target))
+                .OrderBy(army => EstimateRouteDistance(army, target))
                 .ThenByDescending(army => army.Strength + army.Moves)
                 .ThenBy(army => army.Id)
                 .Take(maxArmies)
@@ -406,7 +429,7 @@ namespace Wism.Client.AI.Strategic
                 .ToArray();
         }
 
-        private static int DistanceToNearestArmy(Player player, Tile target)
+        private int DistanceToNearestArmy(Player player, Tile target)
         {
             if (target == null)
             {
@@ -415,9 +438,72 @@ namespace Wism.Client.AI.Strategic
 
             return player.GetArmies()
                 .Where(army => army != null && !army.IsDead && army.Tile != null)
-                .Select(army => AiUtilities.GetManhattanDistance(army.Tile, target))
+                .Select(army => EstimateRouteDistance(army, target))
                 .DefaultIfEmpty(int.MaxValue)
                 .Min();
+        }
+
+        private bool IsCityUnderThreat(Tile tile, Player player)
+        {
+            if (tile == null)
+            {
+                return false;
+            }
+
+            var enemyInfluence = spatialAdvisor?.GetEnemy(tile) ?? 0.0;
+            if (enemyInfluence > InfluenceThreatFloor)
+            {
+                return (spatialAdvisor?.GetTension(tile) ?? 0.0) <= InfluenceThreatTensionCeiling;
+            }
+
+            return CountNearbyEnemyArmies(tile, player, DefenseThreatRadius) > 0;
+        }
+
+        private double GetDefensePressure(Tile tile, Player player)
+        {
+            var enemyInfluence = spatialAdvisor?.GetEnemy(tile) ?? 0.0;
+            if (enemyInfluence > InfluenceThreatFloor)
+            {
+                var tension = spatialAdvisor?.GetTension(tile) ?? 0.0;
+                return 1.0 + (enemyInfluence * 10.0) + Math.Max(0.0, -tension * 10.0);
+            }
+
+            return CountNearbyEnemyArmies(tile, player, DefenseThreatRadius);
+        }
+
+        private int EstimateRouteDistance(Army army, Tile target)
+        {
+            if (army?.Tile == null || target == null)
+            {
+                return int.MaxValue;
+            }
+
+            if (pathingStrategy == null || World.Current?.Map == null)
+            {
+                return AiUtilities.GetManhattanDistance(army.Tile, target);
+            }
+
+            try
+            {
+                pathingStrategy.FindShortestRoute(
+                    World.Current.Map,
+                    new List<Army> { army },
+                    target,
+                    out var path,
+                    out var distance,
+                    ignoreClan: true);
+
+                if (path == null || path.Count == 0 || float.IsInfinity(distance) || float.IsNaN(distance))
+                {
+                    return int.MaxValue;
+                }
+
+                return (int)Math.Ceiling(distance);
+            }
+            catch
+            {
+                return AiUtilities.GetManhattanDistance(army.Tile, target);
+            }
         }
 
         private static bool IsNeutral(City city)

@@ -14,6 +14,8 @@ using System.Linq;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Commands;
 using Wism.Client.AI.CommandProviders;
+using Wism.Client.AI.InfluenceMaps;
+using Wism.Client.MapObjects;
 using System.Reflection;
 
 namespace Wism.Client.Test.AI
@@ -204,6 +206,43 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void ExterminationModule_PrefersLowerEnemyInfluenceWeakPoint_WhenCombatAndDistanceMatch()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+
+            var player = Game.Current.Players[0];
+            var enemy = Game.Current.Players[1];
+            var playerTile = World.Current.Map[6, 4];
+            var highInfluenceEnemyTile = World.Current.Map[6, 5];
+            var weakPointEnemyTile = World.Current.Map[7, 4];
+
+            player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), playerTile);
+            enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), highInfluenceEnemyTile);
+            enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), weakPointEnemyTile);
+            var advisor = new ScriptedSpatialAdvisor();
+            advisor.Set(highInfluenceEnemyTile, enemy: 0.90);
+            advisor.Set(weakPointEnemyTile, enemy: 0.10);
+
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+            var pathing = new AStarPathingStrategy();
+            var module = new ExterminationModule(
+                new PathfindingService(pathing),
+                pathing,
+                controllerProvider.ArmyController,
+                new CombatEstimator(),
+                GarrisonPolicy.None,
+                logger,
+                advisor);
+
+            var bid = module.GenerateBids(World.Current).Single() as IStrategicBidMetadata;
+
+            Assert.That(bid, Is.Not.Null);
+            Assert.That(bid.TargetX, Is.EqualTo(weakPointEnemyTile.X));
+            Assert.That(bid.TargetY, Is.EqualTo(weakPointEnemyTile.Y));
+        }
+
+        [Test]
         public void ExterminationModule_GeneratesMoveCommand_WhenEnemyNearby()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
@@ -377,6 +416,42 @@ namespace Wism.Client.Test.AI
             var aiController = new AiController(new SimpleStrategicModule(), new List<ITacticalModule> { exterminationModule });
 
             return new AdaptaCommandProvider(logger, aiController, controllerProvider);
+        }
+
+        private sealed class ScriptedSpatialAdvisor : ISpatialAdvisor
+        {
+            private readonly Dictionary<(int X, int Y), double> enemy = new Dictionary<(int X, int Y), double>();
+
+            public void Set(Tile tile, double enemy)
+            {
+                this.enemy[(tile.X, tile.Y)] = enemy;
+            }
+
+            public void Update()
+            {
+            }
+
+            public double GetInfluence(Tile tile) => 0.0;
+
+            public double GetFriendly(Tile tile) => 0.0;
+
+            public double GetEnemy(Tile tile) => tile == null ? 0.0 : GetEnemy(tile.X, tile.Y);
+
+            public double GetTension(Tile tile) => -GetEnemy(tile);
+
+            public double GetRawFriendly(Tile tile) => 0.0;
+
+            public double GetRawEnemy(Tile tile) => GetEnemy(tile);
+
+            public bool IsFrontLine(Tile tile) => false;
+
+            public Tile GetGradientStep(Tile from, bool ascendFriendly) => from;
+
+            public double GetFriendly(int x, int y) => 0.0;
+
+            public double GetEnemy(int x, int y) => enemy.TryGetValue((x, y), out var value) ? value : 0.0;
+
+            public double GetTension(int x, int y) => -GetEnemy(x, y);
         }
 
         private static List<ICommandAction> GetTestCommands(ITacticalModule module, World world, IWismLogger logger = null)

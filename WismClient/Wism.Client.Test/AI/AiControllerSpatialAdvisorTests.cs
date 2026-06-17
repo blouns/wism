@@ -90,6 +90,17 @@ namespace Wism.Client.Test.AI
             Assert.That(controller.SpatialAdvisor, Is.TypeOf<ForwardFeedInfluenceMap>());
         }
 
+        [Test]
+        public void Factory_WiresNoOpSpatialAdvisor_ForStrategicBaselineProfile()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            var controller = WarlordsClassicAiFactory.CreateController(controllerProvider, logger, aiProfile: "strategic-baseline");
+
+            Assert.That(controller.SpatialAdvisor, Is.TypeOf<NoOpSpatialAdvisor>());
+        }
+
         private sealed class CountingSpatialAdvisor : ISpatialAdvisor
         {
             public int UpdateCount { get; private set; }

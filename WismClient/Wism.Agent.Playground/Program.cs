@@ -144,7 +144,7 @@ try
             Console.WriteLine(JsonSerializer.Serialize(plan, JsonOptions()));
             return 0;
         default:
-            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|eval|eval-case|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [checkpointMode=full|turns|summary] [aiProfile=strategic|tactical] [timeoutProfile=legacy|calibrated] [suite=smoke|focused|readiness|human-readiness|marathon] [workers=N] [processIsolated=true|false] [sizes=medium,large] [preset=standard|capture-pressure|ruin-search|classic-ai-production-vectoring] [scenarios=a,b] [cases=50] [checkpoint=path]");
+            Console.WriteLine("Usage: Wism.Agent.Playground [sample|win|lose|parallel|companion|world|record|campaign|eval|eval-case|jump|worktrees] [--quiet] [profile=classic-warlords] [packs=a,b] [agents=N] [scenario=win] [name=CapturedAsciiWin] [out=path] [generateTest=true] [delayMs=300] [channel=id] [world=TestWorld] [modRoot=path] [seed=1990] [clans=2..8] [maxTurns=40] [size=medium|large] [checkpointMode=full|turns|summary] [aiProfile=strategic|strategic-baseline|tactical] [timeoutProfile=legacy|calibrated] [suite=smoke|focused|readiness|human-readiness|marathon] [workers=N] [processIsolated=true|false] [sizes=medium,large] [preset=standard|capture-pressure|ruin-search|classic-ai-production-vectoring] [scenarios=a,b] [cases=50] [checkpoint=path]");
             return 2;
     }
 }

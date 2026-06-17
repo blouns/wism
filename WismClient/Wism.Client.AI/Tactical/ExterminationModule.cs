@@ -11,6 +11,7 @@ using Wism.Client.Pathing;
 using Wism.Client.AI.Framework;
 using System.Linq;
 using Wism.Client.Common;
+using Wism.Client.AI.InfluenceMaps;
 
 namespace Wism.Client.AI.Tactical
 {
@@ -18,6 +19,7 @@ namespace Wism.Client.AI.Tactical
     {
         private const double MinimumAttackWinProbability = 0.40;
         private const int MaxCandidateEnemyTilesPerStack = 24;
+        private const double WeakPointInfluenceWeight = 0.35;
 
         private readonly PathfindingService pathfindingService;
         private readonly IPathingStrategy pathingStrategy;
@@ -25,6 +27,7 @@ namespace Wism.Client.AI.Tactical
         private readonly CombatEstimator combatEstimator;
         private readonly GarrisonPolicy garrisonPolicy;
         private readonly IWismLogger logger;
+        private readonly ISpatialAdvisor spatialAdvisor;
 
         public ExterminationModule(PathfindingService pathfindingService, IPathingStrategy pathingStrategy, ArmyController armyController, IWismLogger logger)
             : this(pathfindingService, pathingStrategy, armyController, new CombatEstimator(), GarrisonPolicy.None, logger)
@@ -42,7 +45,8 @@ namespace Wism.Client.AI.Tactical
             ArmyController armyController,
             CombatEstimator combatEstimator,
             GarrisonPolicy garrisonPolicy,
-            IWismLogger logger)
+            IWismLogger logger,
+            ISpatialAdvisor spatialAdvisor = null)
         {
             this.pathfindingService = pathfindingService;
             this.pathingStrategy = pathingStrategy;
@@ -50,6 +54,7 @@ namespace Wism.Client.AI.Tactical
             this.combatEstimator = combatEstimator;
             this.garrisonPolicy = garrisonPolicy;
             this.logger = logger;
+            this.spatialAdvisor = spatialAdvisor;
         }
 
         public IEnumerable<IBid> GenerateBids(World world)
@@ -76,7 +81,7 @@ namespace Wism.Client.AI.Tactical
                     var distance = AiUtilities.GetManhattanDistance(leader.Tile, target);
                     var estimate = this.combatEstimator.EstimateAttack(stackList, target);
                     var combatPressure = 0.10 + estimate.WinProbability;
-                    var influence = combatPressure / (distance + 1);
+                    var influence = ApplyWeakPointInfluence(target, combatPressure / (distance + 1));
                     bids.Add(new StrategicBid(
                         stackList,
                         this,
@@ -205,11 +210,12 @@ namespace Wism.Client.AI.Tactical
                 {
                     var distance = AiUtilities.GetManhattanDistance(leader.Tile, tile);
                     var estimate = this.combatEstimator.EstimateAttack(armies, tile);
-                    var score = (0.10 + estimate.WinProbability) / (distance + 1);
-                    return new { Tile = tile, Distance = distance, Estimate = estimate, Score = score };
+                    var score = ApplyWeakPointInfluence(tile, (0.10 + estimate.WinProbability) / (distance + 1));
+                    return new { Tile = tile, Distance = distance, Estimate = estimate, Score = score, EnemyInfluence = GetEnemyInfluence(tile) };
                 })
                 .OrderByDescending(candidate => candidate.Score)
                 .ThenByDescending(candidate => candidate.Estimate.WinProbability)
+                .ThenBy(candidate => candidate.EnemyInfluence)
                 .ThenBy(candidate => candidate.Distance)
                 .ThenBy(candidate => candidate.Tile.X)
                 .ThenBy(candidate => candidate.Tile.Y)
@@ -230,6 +236,33 @@ namespace Wism.Client.AI.Tactical
             {
                 logger.LogWarning("[Extermination] WARNING: AI is trying to move onto the enemy tile!");
             }
+        }
+
+        private double ApplyWeakPointInfluence(Tile tile, double baseScore)
+        {
+            var enemyInfluence = GetEnemyInfluence(tile);
+            if (enemyInfluence <= 0.0)
+            {
+                return baseScore;
+            }
+
+            return baseScore * (1.0 + (1.0 - enemyInfluence) * WeakPointInfluenceWeight);
+        }
+
+        private double GetEnemyInfluence(Tile tile)
+        {
+            if (tile == null || spatialAdvisor == null)
+            {
+                return 0.0;
+            }
+
+            var enemyInfluence = spatialAdvisor.GetEnemy(tile);
+            if (double.IsNaN(enemyInfluence) || double.IsInfinity(enemyInfluence))
+            {
+                return 0.0;
+            }
+
+            return System.Math.Max(0.0, System.Math.Min(1.0, enemyInfluence));
         }
 
     }

@@ -25,15 +25,17 @@ namespace Wism.Client.AI.Framework
 
             // Single shared spatial advisor: the controller floods it once per turn and exposes
             // the cached instance for strategic/tactical consumers (Workstream A2).
-            var spatialAdvisor = new ForwardFeedInfluenceMap();
+            var spatialAdvisor = UsesInfluenceMap(aiProfile)
+                ? (ISpatialAdvisor)new ForwardFeedInfluenceMap()
+                : new NoOpSpatialAdvisor();
 
             return new AiController(
-                CreateStrategicModule(aiProfile),
+                CreateStrategicModule(aiProfile, spatialAdvisor, pathingStrategy),
                 new List<ITacticalModule>
                 {
                     new CityDefenseModule(controllerProvider.ArmyController, logger),
                     new CaptureModule(controllerProvider.ArmyController, controllerProvider.CityController, garrisonPolicy, logger),
-                    new ExterminationModule(pathfinder, pathingStrategy, controllerProvider.ArmyController, new CombatEstimator(), garrisonPolicy, logger),
+                    new ExterminationModule(pathfinder, pathingStrategy, controllerProvider.ArmyController, new CombatEstimator(), garrisonPolicy, logger, spatialAdvisor),
                     new SearchModule(controllerProvider.ArmyController, controllerProvider.HeroController, controllerProvider.LocationController, pathingStrategy, garrisonPolicy, logger, allowTempleSearch),
                     new RallyModule(controllerProvider.ArmyController, pathingStrategy, garrisonPolicy, logger)
                 },
@@ -57,16 +59,25 @@ namespace Wism.Client.AI.Framework
                 controllerProvider);
         }
 
-        private static IStrategicModule CreateStrategicModule(string aiProfile)
+        private static IStrategicModule CreateStrategicModule(
+            string aiProfile,
+            ISpatialAdvisor spatialAdvisor,
+            IPathingStrategy pathingStrategy)
         {
             return !UsesClassicStrategicProfile(aiProfile)
                 ? (IStrategicModule)new SimpleStrategicModule()
-                : new ClassicStrategicModule();
+                : new ClassicStrategicModule(new ClassicStrategicPlanner(spatialAdvisor, pathingStrategy));
         }
 
         private static bool UsesClassicStrategicProfile(string aiProfile)
         {
             return !string.Equals(aiProfile, "tactical", System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool UsesInfluenceMap(string aiProfile)
+        {
+            return !string.Equals(aiProfile, "strategic-baseline", System.StringComparison.OrdinalIgnoreCase) &&
+                   !string.Equals(aiProfile, "strategic-no-im", System.StringComparison.OrdinalIgnoreCase);
         }
     }
 }

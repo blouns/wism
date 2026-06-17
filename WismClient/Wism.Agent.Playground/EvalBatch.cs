@@ -1185,31 +1185,60 @@ public sealed class EvalBatchRunner
 
     private static (int Created, int Active, int Stale, int Defend) CountStrategicObjectives(CampaignRunResult campaign)
     {
-        var checkpoint = campaign.Checkpoints.LastOrDefault();
-        if (string.IsNullOrWhiteSpace(checkpoint) || !File.Exists(checkpoint))
+        if (campaign.Checkpoints == null || campaign.Checkpoints.Count == 0)
         {
             return (0, 0, 0, 0);
         }
 
-        try
-        {
-            var snapshot = JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(checkpoint));
-            var objectives = snapshot?.StrategicPlans?
-                .Where(plan => plan?.Objectives != null)
-                .SelectMany(plan => plan.Objectives)
-                .Where(objective => objective != null)
-                .ToArray() ?? Array.Empty<StrategicObjectiveEntity>();
+        var created = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var active = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var stale = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var defend = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            return (
-                objectives.Length,
-                objectives.Count(objective => string.Equals(objective.Status, "Active", StringComparison.OrdinalIgnoreCase)),
-                objectives.Count(objective => string.Equals(objective.Status, "Stale", StringComparison.OrdinalIgnoreCase)),
-                objectives.Count(objective => string.Equals(objective.Kind, "Defend", StringComparison.OrdinalIgnoreCase)));
-        }
-        catch
+        foreach (var checkpoint in campaign.Checkpoints)
         {
-            return (0, 0, 0, 0);
+            if (string.IsNullOrWhiteSpace(checkpoint) || !File.Exists(checkpoint))
+            {
+                continue;
+            }
+
+            try
+            {
+                var snapshot = JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(checkpoint));
+                foreach (var plan in snapshot?.StrategicPlans ?? Array.Empty<StrategicPlanEntity>())
+                {
+                    if (plan?.Objectives == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var objective in plan.Objectives.Where(objective => objective != null))
+                    {
+                        var key = $"{plan.ClanShortName}:{objective.Id}";
+                        created.Add(key);
+                        if (string.Equals(objective.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                        {
+                            active.Add(key);
+                        }
+
+                        if (string.Equals(objective.Status, "Stale", StringComparison.OrdinalIgnoreCase))
+                        {
+                            stale.Add(key);
+                        }
+
+                        if (string.Equals(objective.Kind, "Defend", StringComparison.OrdinalIgnoreCase))
+                        {
+                            defend.Add(key);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
         }
+
+        return (created.Count, active.Count, stale.Count, defend.Count);
     }
 
     private static ClassicAiReadinessScorecard BuildClassicAiReadinessScorecard(IReadOnlyList<EvalCaseResult> cases)
@@ -1841,8 +1870,9 @@ public sealed class EvalBatchRunner
         scenarioFamily.Contains("conquest", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsDefenseProbe(string scenarioFamily) =>
-        scenarioFamily.Contains("defense", StringComparison.OrdinalIgnoreCase) ||
-        scenarioFamily.Contains("defended", StringComparison.OrdinalIgnoreCase);
+        !IsSiegeProbe(scenarioFamily) &&
+        (scenarioFamily.Contains("defense", StringComparison.OrdinalIgnoreCase) ||
+         scenarioFamily.Contains("defended", StringComparison.OrdinalIgnoreCase));
 
     private static bool IsEconomyProbe(string scenarioFamily) =>
         scenarioFamily.Contains("economy", StringComparison.OrdinalIgnoreCase) ||
