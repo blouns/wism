@@ -129,6 +129,10 @@ namespace WismCompanion.UI
             flow.RegisterValueChangedCallback(e => { influence.ShowGradient = e.newValue; RefreshOverlayState(); });
             bar.Add(flow);
 
+            var embers = new Toggle("Embers") { value = influence.ShowEmbers };
+            embers.RegisterValueChangedCallback(e => { influence.ShowEmbers = e.newValue; RefreshOverlayState(); });
+            bar.Add(embers);
+
             paletteButton = new Button(CyclePalette) { text = influence.Palette.ToString() };
             paletteButton.AddToClassList("map-btn");
             bar.Add(paletteButton);
@@ -327,8 +331,8 @@ namespace WismCompanion.UI
                 DrawArmy(mgc, p, kvp.Value.army, kvp.Value.count);
             }
 
-            // Flow chevrons, front-line seam, ripples, and sparkle: on top of everything.
-            influence.DrawEffects(p, mapLayout.OriginX, mapLayout.OriginY, mapLayout.TilesW, mapLayout.TilesH, map.InvertYAxis, MapToViewport, mapLayout.Tile);
+            // Flow chevrons, front-line seam, ripples, sparkle, and embers: on top of everything.
+            influence.DrawEffects(p, mapLayout.OriginX, mapLayout.OriginY, mapLayout.TilesW, mapLayout.TilesH, map.InvertYAxis, MapToViewport, MapToViewportF, mapLayout.Tile);
 
             if (map.SelectedArmy?.Position != null)
             {
@@ -599,6 +603,17 @@ namespace WismCompanion.UI
             var relY = mapY - mapLayout.OriginY;
             var screenRow = map.InvertYAxis ? mapLayout.TilesH - 1 - relY : relY;
             return new Vector2(mapLayout.Viewport.x + relX * mapLayout.Tile, mapLayout.Viewport.y + screenRow * mapLayout.Tile);
+        }
+
+        // Continuous map→screen for sub-tile positions (ember particles). The within-cell Y offset
+        // flips under InvertYAxis, so this can't reuse the integer tile mapper.
+        private Vector2 MapToViewportF(float mapX, float mapY)
+        {
+            var x = mapLayout.Viewport.x + (mapX - mapLayout.OriginX) * mapLayout.Tile;
+            var y = map.InvertYAxis
+                ? mapLayout.Viewport.y + (mapLayout.OriginY + mapLayout.TilesH - mapY) * mapLayout.Tile
+                : mapLayout.Viewport.y + (mapY - mapLayout.OriginY) * mapLayout.Tile;
+            return new Vector2(x, y);
         }
 
         // ---- Input -------------------------------------------------------------------

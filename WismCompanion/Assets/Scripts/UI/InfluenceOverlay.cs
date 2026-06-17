@@ -57,10 +57,14 @@ namespace WismCompanion.UI
 
         public InfluencePalette Palette { get; set; } = InfluencePalette.Aurora;
 
+        /// <summary>When true, stream glowing ember particles along the gradient (stretch).</summary>
+        public bool ShowEmbers { get; set; }
+
         public bool HasField => width > 0 && height > 0;
         public bool Animating => Enabled && HasField;
 
         private readonly InfluencePlasmaRenderer plasma = new InfluencePlasmaRenderer();
+        private readonly EmberField ember = new EmberField();
         private RenderTexture heatRt;
         private int width, height;
         private float[] displayT, displayF, displayE;   // smoothed (what we draw)
@@ -105,6 +109,7 @@ namespace WismCompanion.UI
             targetT = newT;
             targetF = newF;
             targetE = newE;
+            ember.SetField(displayT, width, height);
         }
 
         private void SpawnRipplesForSignFlips(float[] newT)
@@ -159,6 +164,9 @@ namespace WismCompanion.UI
                 if (rip.Age >= RippleLife) ripples.RemoveAt(r);
                 else ripples[r] = rip;
             }
+
+            ember.Enabled = Enabled && ShowEmbers;
+            ember.Tick(dt);
 
             // GPU path: re-blit the morphed field through the plasma material this frame. The field
             // texture only re-uploads while morphing; the flow animates purely in the shader.
@@ -221,7 +229,7 @@ namespace WismCompanion.UI
 
         /// <summary>Paint the front-line seam, ripples, and sparkle. Call after units, on top.</summary>
         public void DrawEffects(Painter2D p, int originX, int originY, int tilesW, int tilesH,
-            bool invertY, Func<int, int, Vector2> mapToViewport, float tile)
+            bool invertY, Func<int, int, Vector2> mapToViewport, Func<float, float, Vector2> mapToViewportF, float tile)
         {
             if (!Enabled || !HasField || displayT == null) return;
 
@@ -253,6 +261,11 @@ namespace WismCompanion.UI
             if (ShowSparkle)
             {
                 DrawSparkle(p, originX, originY, tilesW, tilesH, mapToViewport, tile);
+            }
+
+            if (ShowEmbers)
+            {
+                ember.Draw(p, originX, originY, tilesW, tilesH, mapToViewportF, tile, pal.FriendlyNear, pal.EnemyNear, Opacity);
             }
         }
 
