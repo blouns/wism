@@ -731,6 +731,11 @@ namespace Assets.Scripts.Managers
             messageBox.Notify(formatted);
         }
 
+        internal bool ShouldPresentFor(Player player)
+        {
+            return this.InteractiveUI && (player?.IsHuman ?? false);
+        }
+
         private void DrawSelectedArmiesBox()
         {
             if (this.selectedArmyBox == null)

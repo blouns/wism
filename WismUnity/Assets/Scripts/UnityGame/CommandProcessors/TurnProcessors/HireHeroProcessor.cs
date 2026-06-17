@@ -101,10 +101,13 @@ namespace Assets.Scripts.CommandProcessors
                 return;
             }
 
-            this.unityGame.NotifyUser(this.heroBringsAlliesMsg,
-                allies.Count,
-                allies[0].DisplayName,
-                this.heroName);
+            if (this.unityGame.ShouldPresentFor(player))
+            {
+                this.unityGame.NotifyUser(this.heroBringsAlliesMsg,
+                    allies.Count,
+                    allies[0].DisplayName,
+                    this.heroName);
+            }
 
             this.unityGame.GameManager.ConscriptArmies(player, tile, allies);
         }

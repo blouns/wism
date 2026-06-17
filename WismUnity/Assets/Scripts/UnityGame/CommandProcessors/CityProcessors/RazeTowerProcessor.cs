@@ -34,9 +34,13 @@ namespace Assets.Scripts.CommandProcessors
             if (state == ActionState.Succeeded)
             {
                 MarkTowerRazed(towerCommand);
-                this.unityGame.NotifyUser("Tower razed.");
+                if (this.unityGame.ShouldPresentFor(towerCommand.Player))
+                {
+                    this.unityGame.NotifyUser("Tower razed.");
+                }
             }
-            else if (!string.IsNullOrWhiteSpace(towerCommand.FailureReason))
+            else if (this.unityGame.ShouldPresentFor(towerCommand.Player) &&
+                !string.IsNullOrWhiteSpace(towerCommand.FailureReason))
             {
                 this.unityGame.NotifyUser(towerCommand.FailureReason);
             }
