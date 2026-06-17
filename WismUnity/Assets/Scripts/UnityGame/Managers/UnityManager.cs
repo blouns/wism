@@ -87,7 +87,7 @@ namespace Assets.Scripts.Managers
         // AI
         private AdaptaCommandProvider adaptaProvider;
         private float nextAiGenerationTime;
-        private const float AiGenerationRetryDelaySeconds = 0.25f;
+        private const float AiGenerationRetryDelaySeconds = 0.05f;
         private const double SlowAiGenerationWarningMs = 250d;
 
         public List<Army> CurrentAttackers { get; set; }

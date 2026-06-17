@@ -95,7 +95,18 @@ namespace Assets.Scripts.UI
 
         private bool IsMoveable()
         {
-            return Game.Current.ArmiesSelected();
+            if (this.transform.name != "WorldTilemap" || !Game.Current.ArmiesSelected())
+            {
+                return false;
+            }
+
+            Tile tile = GetCurrentTile();
+            if (tile == null)
+            {
+                return false;
+            }
+
+            return tile.CanTraverseHere(Game.Current.GetSelectedArmies());
         }
 
         private bool IsMagnifyable()
@@ -110,12 +121,16 @@ namespace Assets.Scripts.UI
                 return false;
             }
 
-            Tile tile = GetCurrentTile();
+            if (!Game.Current.ArmiesSelected())
+            {
+                return false;
+            }
 
-            return
-                Game.Current.ArmiesSelected() &&
-                    (tile.HasArmies() && (tile.Armies[0].Clan != Game.Current.GetCurrentPlayer().Clan) ||
-                    (tile.HasCity() && (tile.City.Clan != Game.Current.GetCurrentPlayer().Clan)));
+            Tile tile = GetCurrentTile();
+            var armies = Game.Current.GetSelectedArmies();
+            return tile != null &&
+                tile.CanAttackHere(armies) &&
+                InputHandler.IsAdjacentForAttack(tile, armies);
         }
 
         private bool IsInformational()

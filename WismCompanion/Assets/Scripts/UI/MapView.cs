@@ -45,6 +45,7 @@ namespace WismCompanion.UI
         private bool dragging;
         private Vector2 lastPointer;
         private bool follow;
+        private string lastFollowPlayer;
         private Button followBtn;
 
         // Influence overlay (V1 Aurora): animated spatial heat layer + its driving ticker.
@@ -60,6 +61,9 @@ namespace WismCompanion.UI
 
         // Per-position army stacks: (x,y) → (representative army, count)
         private readonly Dictionary<(int, int), (ArmyDto army, int count)> armyStacks = new();
+
+        // Explicit locations win over terrain labels for overlays.
+        private readonly Dictionary<(int, int), LocationDto> locationsByPosition = new();
 
         public event Action<MapSelection> SelectionChanged;
 
@@ -186,6 +190,7 @@ namespace WismCompanion.UI
             map = snapshot;
             tileTypes.Clear();
             armyStacks.Clear();
+            locationsByPosition.Clear();
 
             if (snapshot != null)
             {
@@ -203,6 +208,15 @@ namespace WismCompanion.UI
                     foreach (var t in snapshot.Tiles)
                     {
                         tileTypes[(t.X, t.Y)] = MapColors.CleanTerrainName(t.TerrainType);
+                    }
+                }
+
+                if (snapshot.Locations != null)
+                {
+                    foreach (var location in snapshot.Locations)
+                    {
+                        if (location?.Position == null) continue;
+                        locationsByPosition[(location.Position.X, location.Position.Y)] = location;
                     }
                 }
 
@@ -224,7 +238,16 @@ namespace WismCompanion.UI
                     }
                 }
 
-                if (snapshot.SelectedArmy?.Position != null)
+                var shouldFocusCapital = follow &&
+                    snapshot.CurrentCapital?.Position != null &&
+                    !string.Equals(snapshot.CurrentPlayer, lastFollowPlayer, StringComparison.OrdinalIgnoreCase);
+                if (shouldFocusCapital)
+                {
+                    cameraCenter = new Vector2(snapshot.CurrentCapital.Position.X, snapshot.CurrentCapital.Position.Y);
+                    cameraInitialized = true;
+                    ZoomToFollow();
+                }
+                else if (snapshot.SelectedArmy?.Position != null)
                 {
                     cameraCenter = new Vector2(snapshot.SelectedArmy.Position.X, snapshot.SelectedArmy.Position.Y);
                     cameraInitialized = true;
@@ -237,6 +260,8 @@ namespace WismCompanion.UI
                         : new Vector2(snapshot.Width / 2f, snapshot.Height / 2f);
                     cameraInitialized = true;
                 }
+
+                lastFollowPlayer = snapshot.CurrentPlayer;
             }
 
             influence.SetField(snapshot?.Influence);
@@ -301,7 +326,7 @@ namespace WismCompanion.UI
                     }
 
                     // Location sprite overlay (Ruins, Temple, etc.)
-                    var locTex = SpriteRegistry.GetLocation(clean);
+                    var locTex = SpriteRegistry.GetLocation(GetLocationType(tile.X, tile.Y, clean));
                     if (locTex != null)
                     {
                         DrawQuad(mgc, locTex, rect);
@@ -390,7 +415,7 @@ namespace WismCompanion.UI
             var t = mapLayout.Tile;
             var rect = new Rect(pos.x, pos.y, t, t);
 
-            var unitTex = SpriteRegistry.GetArmy(army.Owner, army.IsHero);
+            var unitTex = SpriteRegistry.GetArmy(army.Owner, army.UnitType ?? army.Name, army.IsHero);
             if (unitTex != null)
             {
                 // Flag sprite and unit sprite are 40×40 companions: flag content sits in the left
@@ -402,7 +427,9 @@ namespace WismCompanion.UI
             }
             else
             {
-                // Fallback: colored diamond with clan color
+                var flagTex = SpriteRegistry.GetFlag(army.Owner, stackCount);
+                if (flagTex != null) DrawQuad(mgc, flagTex, rect);
+
                 var cx = pos.x + t / 2f;
                 var cy = pos.y + t / 2f;
                 var r = t * 0.28f;
@@ -410,14 +437,22 @@ namespace WismCompanion.UI
                 p.BeginPath();
                 p.MoveTo(new Vector2(cx, cy - r));
                 p.LineTo(new Vector2(cx + r, cy));
-                p.LineTo(new Vector2(cx, cy + r));
+                p.LineTo(new Vector2(cx + r * 0.35f, cy + r));
+                p.LineTo(new Vector2(cx - r * 0.35f, cy + r));
                 p.LineTo(new Vector2(cx - r, cy));
                 p.ClosePath();
                 p.Fill();
-                p.strokeColor = army.IsHero ? Color.yellow : Color.black;
-                p.lineWidth = army.IsHero ? 2f : 1f;
+                p.strokeColor = army.CanFly ? new Color(0.45f, 0.85f, 1f) : army.IsSpecial ? new Color(1f, 0.75f, 0.2f) : Color.black;
+                p.lineWidth = army.CanFly || army.IsSpecial ? 2f : 1f;
                 p.Stroke();
             }
+        }
+
+        private string GetLocationType(int x, int y, string terrainFallback)
+        {
+            return locationsByPosition.TryGetValue((x, y), out var location) && !string.IsNullOrWhiteSpace(location.Type)
+                ? location.Type
+                : terrainFallback;
         }
 
         private void DrawMinimap(Painter2D p)
