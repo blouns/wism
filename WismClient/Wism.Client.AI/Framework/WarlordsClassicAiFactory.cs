@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Wism.Client.AI.CommandProviders;
+using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.AI.Services;
 using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
@@ -22,6 +23,10 @@ namespace Wism.Client.AI.Framework
             var garrisonPolicy = new GarrisonPolicy();
             var allowTempleSearch = !UsesClassicStrategicProfile(aiProfile);
 
+            // Single shared spatial advisor: the controller floods it once per turn and exposes
+            // the cached instance for strategic/tactical consumers (Workstream A2).
+            var spatialAdvisor = new ForwardFeedInfluenceMap();
+
             return new AiController(
                 CreateStrategicModule(aiProfile),
                 new List<ITacticalModule>
@@ -36,7 +41,8 @@ namespace Wism.Client.AI.Framework
                 {
                     new ProductionModule(controllerProvider.CityController, logger)
                 },
-                logger);
+                logger,
+                spatialAdvisor);
         }
 
         public static AdaptaCommandProvider CreateCommandProvider(

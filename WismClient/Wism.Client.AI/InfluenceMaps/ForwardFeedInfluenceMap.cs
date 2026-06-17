@@ -68,6 +68,14 @@ namespace Wism.Client.AI.InfluenceMaps
         public void Update()
         {
             var game = Game.Current;
+            var world = World.Current;
+            if (game == null || world?.Map == null)
+            {
+                // No live game/map (e.g. a turn driven without world state): leave the field empty
+                // rather than throwing, so the per-turn wiring is safe to call unconditionally.
+                return;
+            }
+
             var me = game.GetCurrentPlayer();
 
             var friendly = new List<InfluenceSource>();
@@ -85,7 +93,7 @@ namespace Wism.Client.AI.InfluenceMaps
                 CollectCitySources(player, bucket);
             }
 
-            this.Compute(World.Current.Map, friendly, enemy);
+            this.Compute(world.Map, friendly, enemy);
         }
 
         /// <summary>
