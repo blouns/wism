@@ -41,9 +41,14 @@ namespace WismCompanion.UI
         public InfluenceChannel Channel { get; set; } = InfluenceChannel.Tension;
         public float Opacity { get; set; } = 0.75f;
 
+        /// <summary>When true, render the GPU "Plasma" path; falls back to Painter2D if it fails.</summary>
+        public bool UseGpu { get; set; } = true;
+
         public bool HasField => width > 0 && height > 0;
         public bool Animating => Enabled && HasField;
 
+        private readonly InfluencePlasmaRenderer plasma = new InfluencePlasmaRenderer();
+        private RenderTexture heatRt;
         private int width, height;
         private float[] displayT, displayF, displayE;   // smoothed (what we draw)
         private float[] targetT, targetF, targetE;       // latest snapshot
@@ -137,16 +142,44 @@ namespace WismCompanion.UI
                 if (rip.Age >= RippleLife) ripples.RemoveAt(r);
                 else ripples[r] = rip;
             }
+
+            // GPU path: re-blit the morphed field through the plasma material this frame.
+            heatRt = Enabled && UseGpu && HasField && displayT != null
+                ? plasma.Render(displayT, displayF, displayE, width, height, Opacity, (int)Channel)
+                : null;
         }
 
         // ---- Drawing -----------------------------------------------------------------
 
         /// <summary>Paint the heat field. Call after terrain, before units, so stacks stay readable.</summary>
-        public void DrawHeat(Painter2D p, int originX, int originY, int tilesW, int tilesH,
+        public void DrawHeat(MeshGenerationContext mgc, Painter2D p, Rect tileRegion,
+            int originX, int originY, int tilesW, int tilesH, bool invertY,
             Func<int, int, Vector2> mapToViewport, float tile)
         {
             if (!Enabled || !HasField || displayT == null) return;
 
+            // Plasma: one smooth textured quad over the visible window, UV-tracked to pan/zoom.
+            if (heatRt != null)
+            {
+                var uMin = originX / (float)width;
+                var uMax = (originX + tilesW) / (float)width;
+                float vTop, vBottom;
+                if (invertY) { vTop = (originY + tilesH) / (float)height; vBottom = originY / (float)height; }
+                else { vTop = originY / (float)height; vBottom = (originY + tilesH) / (float)height; }
+
+                var mesh = mgc.Allocate(4, 6, heatRt);
+                var col = (Color32)Color.white;
+                var z = Vertex.nearZ;
+                mesh.SetNextVertex(new Vertex { position = new Vector3(tileRegion.xMin, tileRegion.yMin, z), tint = col, uv = new Vector2(uMin, vTop) });
+                mesh.SetNextVertex(new Vertex { position = new Vector3(tileRegion.xMax, tileRegion.yMin, z), tint = col, uv = new Vector2(uMax, vTop) });
+                mesh.SetNextVertex(new Vertex { position = new Vector3(tileRegion.xMax, tileRegion.yMax, z), tint = col, uv = new Vector2(uMax, vBottom) });
+                mesh.SetNextVertex(new Vertex { position = new Vector3(tileRegion.xMin, tileRegion.yMax, z), tint = col, uv = new Vector2(uMin, vBottom) });
+                mesh.SetNextIndex(0); mesh.SetNextIndex(1); mesh.SetNextIndex(2);
+                mesh.SetNextIndex(0); mesh.SetNextIndex(2); mesh.SetNextIndex(3);
+                return;
+            }
+
+            // Aurora fallback: per-tile translucent fills.
             for (var y = originY; y < originY + tilesH; y++)
             {
                 for (var x = originX; x < originX + tilesW; x++)
@@ -162,6 +195,9 @@ namespace WismCompanion.UI
                 }
             }
         }
+
+        /// <summary>Release GPU resources; call when the owning element detaches.</summary>
+        public void Dispose() => plasma.Dispose();
 
         /// <summary>Paint the front-line seam, ripples, and sparkle. Call after units, on top.</summary>
         public void DrawEffects(Painter2D p, int originX, int originY, int tilesW, int tilesH,

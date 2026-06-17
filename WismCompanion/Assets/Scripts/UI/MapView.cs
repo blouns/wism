@@ -73,6 +73,7 @@ namespace WismCompanion.UI
             RegisterCallback<PointerUpEvent>(OnPointerUp);
             RegisterCallback<WheelEvent>(OnWheel);
             RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
+            RegisterCallback<DetachFromPanelEvent>(_ => influence.Dispose());
 
             // Follow button: overlaid in the bottom-left corner of the map.
             followBtn = new Button(ToggleFollow) { text = "Follow" };
@@ -118,6 +119,10 @@ namespace WismCompanion.UI
             var sparkle = new Toggle("Sparkle") { value = influence.ShowSparkle };
             sparkle.RegisterValueChangedCallback(e => { influence.ShowSparkle = e.newValue; RefreshOverlayState(); });
             bar.Add(sparkle);
+
+            var plasma = new Toggle("Plasma") { value = influence.UseGpu };
+            plasma.RegisterValueChangedCallback(e => { influence.UseGpu = e.newValue; RefreshOverlayState(); });
+            bar.Add(plasma);
 
             opacitySlider = new Slider(0.1f, 1f) { value = influence.Opacity };
             opacitySlider.style.width = 90;
@@ -286,7 +291,10 @@ namespace WismCompanion.UI
             }
 
             // Influence heat: above terrain, below units so stacks stay readable.
-            influence.DrawHeat(p, mapLayout.OriginX, mapLayout.OriginY, mapLayout.TilesW, mapLayout.TilesH, MapToViewport, mapLayout.Tile);
+            var tileRegion = new Rect(mapLayout.Viewport.x, mapLayout.Viewport.y,
+                mapLayout.TilesW * mapLayout.Tile, mapLayout.TilesH * mapLayout.Tile);
+            influence.DrawHeat(mgc, p, tileRegion, mapLayout.OriginX, mapLayout.OriginY,
+                mapLayout.TilesW, mapLayout.TilesH, map.InvertYAxis, MapToViewport, mapLayout.Tile);
 
             if (map.Cities != null)
             {
