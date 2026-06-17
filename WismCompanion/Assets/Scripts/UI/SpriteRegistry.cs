@@ -114,12 +114,28 @@ namespace WismCompanion.UI
             return Load($"city/{key}_castle_{CityQuadrantNames[quadrant]}");
         }
 
-        public static Texture2D GetArmy(string clanName, bool isHero)
+        public static Texture2D GetArmy(string clanName, string unitType, bool isHero)
         {
             EnsureLoaded();
             var key = NormalizeClan(clanName);
-            return isHero ? Load($"army/{key}_hero") : Load($"army/{key}_infantry");
+            if (isHero)
+            {
+                return Load($"army/{key}_hero");
+            }
+
+            foreach (var unitKey in GetArmyUnitCandidates(unitType))
+            {
+                var texture = Load($"army/{key}_{unitKey}");
+                if (texture != null)
+                {
+                    return texture;
+                }
+            }
+
+            return null;
         }
+
+        public static string NormalizeArmyUnit(string unitType) => NormalizeUnit(unitType);
 
         /// <param name="count">Stack depth 1–8</param>
         public static Texture2D GetFlag(string clanName, int count)
@@ -144,6 +160,53 @@ namespace WismCompanion.UI
                 "horselords" => "horselords",
                 "lordbane"   => "lordbane",
                 _            => "neutral"
+            };
+        }
+
+        private static IEnumerable<string> GetArmyUnitCandidates(string unitType)
+        {
+            var normalized = NormalizeUnit(unitType);
+            if (!string.IsNullOrEmpty(normalized))
+            {
+                yield return normalized;
+            }
+
+            switch (normalized)
+            {
+                case "lightinfantry":
+                    yield return "light_infantry";
+                    yield return "infantry";
+                    break;
+                case "heavyinfantry":
+                    yield return "heavy_infantry";
+                    break;
+                case "dwarvenlegion":
+                    yield return "dwarvenlegions";
+                    break;
+                case "demons":
+                    yield return "demon";
+                    break;
+            }
+        }
+
+        private static string NormalizeUnit(string unitType)
+        {
+            if (string.IsNullOrWhiteSpace(unitType)) return string.Empty;
+
+            var compact = unitType.Trim()
+                .Replace(" ", string.Empty)
+                .Replace("_", string.Empty)
+                .Replace("-", string.Empty)
+                .ToLowerInvariant();
+
+            return compact switch
+            {
+                "lightinfantry" => "lightinfantry",
+                "heavyinfantry" => "heavyinfantry",
+                "dwarvenlegions" => "dwarvenlegion",
+                "dwarvenlegion" => "dwarvenlegion",
+                "wolfriders" => "wolfriders",
+                _ => compact
             };
         }
 

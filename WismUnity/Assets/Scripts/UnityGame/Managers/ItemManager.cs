@@ -17,6 +17,8 @@ namespace Assets.Scripts.Managers
         private WorldTilemap worldTilemap;
         private readonly Dictionary<Artifact, GameObject> itemGameObjects = new Dictionary<Artifact, GameObject>();
         private bool isInitialized;
+        private bool missingCompanionPrefabWarned;
+        private bool missingItemPrefabWarned;
 
         public void Start()
         {
@@ -46,7 +48,10 @@ namespace Assets.Scripts.Managers
                 if (!this.itemGameObjects.ContainsKey(item))
                 {
                     itemGO = InstantiateItemGo(item);
-                    this.itemGameObjects.Add(item, itemGO);
+                    if (itemGO != null)
+                    {
+                        this.itemGameObjects.Add(item, itemGO);
+                    }
                 }
             }
 
@@ -74,20 +79,40 @@ namespace Assets.Scripts.Managers
         private GameObject InstantiateItemGo(Artifact item)
         {
             Vector3 worldVector = this.worldTilemap.ConvertGameToUnityVector(item.X, item.Y);
-            GameObject go = null;
-
-            if (item.CompanionInteraction != null)
+            GameObject prefab = ResolvePrefab(item);
+            if (prefab == null)
             {
-                // The "Item" is a Companion!
-                go = Instantiate<GameObject>(this.companionPrefab, worldVector, Quaternion.identity, this.worldTilemap.transform);
-            }
-            else
-            {
-                // Normal Item
-                go = Instantiate<GameObject>(this.itemPrefab, worldVector, Quaternion.identity, this.worldTilemap.transform);
+                return null;
             }
 
-            return go;
+            return Instantiate<GameObject>(prefab, worldVector, Quaternion.identity, this.worldTilemap.transform);
+        }
+
+        private GameObject ResolvePrefab(Artifact item)
+        {
+            if (item.CompanionInteraction == null)
+            {
+                if (this.itemPrefab == null && !this.missingItemPrefabWarned)
+                {
+                    Debug.LogWarning("ItemManager cannot render artifacts because itemPrefab is not assigned.");
+                    this.missingItemPrefabWarned = true;
+                }
+
+                return this.itemPrefab;
+            }
+
+            if (this.companionPrefab != null)
+            {
+                return this.companionPrefab;
+            }
+
+            if (!this.missingCompanionPrefabWarned)
+            {
+                Debug.LogWarning("ItemManager companionPrefab is not assigned; rendering companion artifacts with itemPrefab.");
+                this.missingCompanionPrefabWarned = true;
+            }
+
+            return this.itemPrefab;
         }
 
         private void Initialize()

@@ -36,7 +36,7 @@ namespace Assets.Scripts.CommandProcessors
         {
             var startTurn = (StartTurnCommand)command;
 
-            if (!this.unityGame.InteractiveUI)
+            if (!this.unityGame.ShouldPresentFor(startTurn.Player))
             {
                 return command.Execute();
             }

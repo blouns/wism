@@ -45,13 +45,25 @@ namespace WismCompanion.UI
         private bool dragging;
         private Vector2 lastPointer;
         private bool follow;
+        private string lastFollowPlayer;
         private Button followBtn;
+
+        // Influence overlay (V1 Aurora): animated spatial heat layer + its driving ticker.
+        private readonly InfluenceOverlay influence = new InfluenceOverlay();
+        private IVisualElementScheduledItem overlayTicker;
+        private Toggle masterToggle;
+        private Slider opacitySlider;
+        private Button paletteButton;
+        private readonly Dictionary<InfluenceChannel, Button> channelButtons = new();
 
         // Tile lookup for adjacency: (x,y) → cleaned terrain name
         private readonly Dictionary<(int, int), string> tileTypes = new();
 
         // Per-position army stacks: (x,y) → (representative army, count)
         private readonly Dictionary<(int, int), (ArmyDto army, int count)> armyStacks = new();
+
+        // Explicit locations win over terrain labels for overlays.
+        private readonly Dictionary<(int, int), LocationDto> locationsByPosition = new();
 
         public event Action<MapSelection> SelectionChanged;
 
@@ -66,6 +78,7 @@ namespace WismCompanion.UI
             RegisterCallback<PointerUpEvent>(OnPointerUp);
             RegisterCallback<WheelEvent>(OnWheel);
             RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
+            RegisterCallback<DetachFromPanelEvent>(_ => influence.Dispose());
 
             // Follow button: overlaid in the bottom-left corner of the map.
             followBtn = new Button(ToggleFollow) { text = "Follow" };
@@ -74,6 +87,102 @@ namespace WismCompanion.UI
             followBtn.style.bottom = 10;
             followBtn.style.left = 10;
             Add(followBtn);
+
+            BuildInfluenceToolbar();
+        }
+
+        // ---- Influence overlay toolbar + lifecycle -----------------------------------
+
+        private void BuildInfluenceToolbar()
+        {
+            var bar = new VisualElement();
+            bar.AddToClassList("influence-bar");
+            bar.style.position = Position.Absolute;
+            bar.style.top = 10;
+            bar.style.left = 10;
+            bar.style.flexDirection = FlexDirection.Row;
+            bar.style.alignItems = Align.Center;
+
+            masterToggle = new Toggle("Influence") { value = false };
+            masterToggle.AddToClassList("influence-toggle");
+            masterToggle.RegisterValueChangedCallback(e => { influence.Enabled = e.newValue; RefreshOverlayState(); });
+            bar.Add(masterToggle);
+
+            foreach (InfluenceChannel ch in Enum.GetValues(typeof(InfluenceChannel)))
+            {
+                var captured = ch;
+                var btn = new Button(() => { influence.Channel = captured; UpdateChannelButtons(); RefreshOverlayState(); }) { text = ch.ToString() };
+                btn.AddToClassList("map-btn");
+                channelButtons[ch] = btn;
+                bar.Add(btn);
+            }
+
+            var front = new Toggle("Front") { value = influence.ShowFront };
+            front.RegisterValueChangedCallback(e => { influence.ShowFront = e.newValue; RefreshOverlayState(); });
+            bar.Add(front);
+
+            var sparkle = new Toggle("Sparkle") { value = influence.ShowSparkle };
+            sparkle.RegisterValueChangedCallback(e => { influence.ShowSparkle = e.newValue; RefreshOverlayState(); });
+            bar.Add(sparkle);
+
+            var plasma = new Toggle("Plasma") { value = influence.UseGpu };
+            plasma.RegisterValueChangedCallback(e => { influence.UseGpu = e.newValue; RefreshOverlayState(); });
+            bar.Add(plasma);
+
+            var flow = new Toggle("Flow") { value = influence.ShowGradient };
+            flow.RegisterValueChangedCallback(e => { influence.ShowGradient = e.newValue; RefreshOverlayState(); });
+            bar.Add(flow);
+
+            var embers = new Toggle("Embers") { value = influence.ShowEmbers };
+            embers.RegisterValueChangedCallback(e => { influence.ShowEmbers = e.newValue; RefreshOverlayState(); });
+            bar.Add(embers);
+
+            paletteButton = new Button(CyclePalette) { text = influence.Palette.ToString() };
+            paletteButton.AddToClassList("map-btn");
+            bar.Add(paletteButton);
+
+            opacitySlider = new Slider(0.1f, 1f) { value = influence.Opacity };
+            opacitySlider.style.width = 90;
+            opacitySlider.RegisterValueChangedCallback(e => { influence.Opacity = e.newValue; MarkDirtyRepaint(); });
+            bar.Add(opacitySlider);
+
+            Add(bar);
+            UpdateChannelButtons();
+        }
+
+        private void UpdateChannelButtons()
+        {
+            foreach (var kvp in channelButtons)
+                kvp.Value.EnableInClassList("map-btn--active", kvp.Key == influence.Channel);
+        }
+
+        private void CyclePalette()
+        {
+            var values = (InfluencePalette[])Enum.GetValues(typeof(InfluencePalette));
+            var next = (Array.IndexOf(values, influence.Palette) + 1) % values.Length;
+            influence.Palette = values[next];
+            if (paletteButton != null) paletteButton.text = influence.Palette.ToString();
+            RefreshOverlayState();
+        }
+
+        private void RefreshOverlayState()
+        {
+            if (influence.Animating)
+            {
+                if (overlayTicker == null) overlayTicker = schedule.Execute(OverlayTick).Every(33);
+                else overlayTicker.Resume();
+            }
+            else
+            {
+                overlayTicker?.Pause();
+            }
+            MarkDirtyRepaint();
+        }
+
+        private void OverlayTick()
+        {
+            influence.Tick(Time.realtimeSinceStartup);
+            MarkDirtyRepaint();
         }
 
         public void SetSnapshot(MapSnapshot snapshot)
@@ -81,6 +190,7 @@ namespace WismCompanion.UI
             map = snapshot;
             tileTypes.Clear();
             armyStacks.Clear();
+            locationsByPosition.Clear();
 
             if (snapshot != null)
             {
@@ -98,6 +208,15 @@ namespace WismCompanion.UI
                     foreach (var t in snapshot.Tiles)
                     {
                         tileTypes[(t.X, t.Y)] = MapColors.CleanTerrainName(t.TerrainType);
+                    }
+                }
+
+                if (snapshot.Locations != null)
+                {
+                    foreach (var location in snapshot.Locations)
+                    {
+                        if (location?.Position == null) continue;
+                        locationsByPosition[(location.Position.X, location.Position.Y)] = location;
                     }
                 }
 
@@ -119,7 +238,16 @@ namespace WismCompanion.UI
                     }
                 }
 
-                if (snapshot.SelectedArmy?.Position != null)
+                var shouldFocusCapital = follow &&
+                    snapshot.CurrentCapital?.Position != null &&
+                    !string.Equals(snapshot.CurrentPlayer, lastFollowPlayer, StringComparison.OrdinalIgnoreCase);
+                if (shouldFocusCapital)
+                {
+                    cameraCenter = new Vector2(snapshot.CurrentCapital.Position.X, snapshot.CurrentCapital.Position.Y);
+                    cameraInitialized = true;
+                    ZoomToFollow();
+                }
+                else if (snapshot.SelectedArmy?.Position != null)
                 {
                     cameraCenter = new Vector2(snapshot.SelectedArmy.Position.X, snapshot.SelectedArmy.Position.Y);
                     cameraInitialized = true;
@@ -132,7 +260,12 @@ namespace WismCompanion.UI
                         : new Vector2(snapshot.Width / 2f, snapshot.Height / 2f);
                     cameraInitialized = true;
                 }
+
+                lastFollowPlayer = snapshot.CurrentPlayer;
             }
+
+            influence.SetField(snapshot?.Influence);
+            RefreshOverlayState();
 
             MarkDirtyRepaint();
         }
@@ -193,7 +326,7 @@ namespace WismCompanion.UI
                     }
 
                     // Location sprite overlay (Ruins, Temple, etc.)
-                    var locTex = SpriteRegistry.GetLocation(clean);
+                    var locTex = SpriteRegistry.GetLocation(GetLocationType(tile.X, tile.Y, clean));
                     if (locTex != null)
                     {
                         DrawQuad(mgc, locTex, rect);
@@ -212,10 +345,19 @@ namespace WismCompanion.UI
                 }
             }
 
+            // Influence heat: above terrain and city tiles, below units so stacks stay readable.
+            var tileRegion = new Rect(mapLayout.Viewport.x, mapLayout.Viewport.y,
+                mapLayout.TilesW * mapLayout.Tile, mapLayout.TilesH * mapLayout.Tile);
+            influence.DrawHeat(mgc, p, tileRegion, mapLayout.OriginX, mapLayout.OriginY,
+                mapLayout.TilesW, mapLayout.TilesH, map.InvertYAxis, MapToViewport, mapLayout.Tile);
+
             foreach (var kvp in armyStacks)
             {
                 DrawArmy(mgc, p, kvp.Value.army, kvp.Value.count);
             }
+
+            // Flow chevrons, front-line seam, ripples, sparkle, and embers: on top of everything.
+            influence.DrawEffects(p, mapLayout.OriginX, mapLayout.OriginY, mapLayout.TilesW, mapLayout.TilesH, map.InvertYAxis, MapToViewport, MapToViewportF, mapLayout.Tile);
 
             if (map.SelectedArmy?.Position != null)
             {
@@ -273,7 +415,7 @@ namespace WismCompanion.UI
             var t = mapLayout.Tile;
             var rect = new Rect(pos.x, pos.y, t, t);
 
-            var unitTex = SpriteRegistry.GetArmy(army.Owner, army.IsHero);
+            var unitTex = SpriteRegistry.GetArmy(army.Owner, army.UnitType ?? army.Name, army.IsHero);
             if (unitTex != null)
             {
                 // Flag sprite and unit sprite are 40×40 companions: flag content sits in the left
@@ -285,7 +427,9 @@ namespace WismCompanion.UI
             }
             else
             {
-                // Fallback: colored diamond with clan color
+                var flagTex = SpriteRegistry.GetFlag(army.Owner, stackCount);
+                if (flagTex != null) DrawQuad(mgc, flagTex, rect);
+
                 var cx = pos.x + t / 2f;
                 var cy = pos.y + t / 2f;
                 var r = t * 0.28f;
@@ -293,14 +437,22 @@ namespace WismCompanion.UI
                 p.BeginPath();
                 p.MoveTo(new Vector2(cx, cy - r));
                 p.LineTo(new Vector2(cx + r, cy));
-                p.LineTo(new Vector2(cx, cy + r));
+                p.LineTo(new Vector2(cx + r * 0.35f, cy + r));
+                p.LineTo(new Vector2(cx - r * 0.35f, cy + r));
                 p.LineTo(new Vector2(cx - r, cy));
                 p.ClosePath();
                 p.Fill();
-                p.strokeColor = army.IsHero ? Color.yellow : Color.black;
-                p.lineWidth = army.IsHero ? 2f : 1f;
+                p.strokeColor = army.CanFly ? new Color(0.45f, 0.85f, 1f) : army.IsSpecial ? new Color(1f, 0.75f, 0.2f) : Color.black;
+                p.lineWidth = army.CanFly || army.IsSpecial ? 2f : 1f;
                 p.Stroke();
             }
+        }
+
+        private string GetLocationType(int x, int y, string terrainFallback)
+        {
+            return locationsByPosition.TryGetValue((x, y), out var location) && !string.IsNullOrWhiteSpace(location.Type)
+                ? location.Type
+                : terrainFallback;
         }
 
         private void DrawMinimap(Painter2D p)
@@ -486,6 +638,17 @@ namespace WismCompanion.UI
             var relY = mapY - mapLayout.OriginY;
             var screenRow = map.InvertYAxis ? mapLayout.TilesH - 1 - relY : relY;
             return new Vector2(mapLayout.Viewport.x + relX * mapLayout.Tile, mapLayout.Viewport.y + screenRow * mapLayout.Tile);
+        }
+
+        // Continuous map→screen for sub-tile positions (ember particles). The within-cell Y offset
+        // flips under InvertYAxis, so this can't reuse the integer tile mapper.
+        private Vector2 MapToViewportF(float mapX, float mapY)
+        {
+            var x = mapLayout.Viewport.x + (mapX - mapLayout.OriginX) * mapLayout.Tile;
+            var y = map.InvertYAxis
+                ? mapLayout.Viewport.y + (mapLayout.OriginY + mapLayout.TilesH - mapY) * mapLayout.Tile
+                : mapLayout.Viewport.y + (mapY - mapLayout.OriginY) * mapLayout.Tile;
+            return new Vector2(x, y);
         }
 
         // ---- Input -------------------------------------------------------------------

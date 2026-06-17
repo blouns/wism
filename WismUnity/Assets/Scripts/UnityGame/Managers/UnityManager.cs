@@ -87,7 +87,7 @@ namespace Assets.Scripts.Managers
         // AI
         private AdaptaCommandProvider adaptaProvider;
         private float nextAiGenerationTime;
-        private const float AiGenerationRetryDelaySeconds = 0.25f;
+        private const float AiGenerationRetryDelaySeconds = 0.05f;
         private const double SlowAiGenerationWarningMs = 250d;
 
         public List<Army> CurrentAttackers { get; set; }
@@ -190,7 +190,8 @@ namespace Assets.Scripts.Managers
             this.socketTelemetryPublisher?.Dispose();
             this.socketTelemetryPublisher = new UnitySocketTelemetryPublisher(
                 this.GameManager.LoggerFactory,
-                telemetryContext);
+                telemetryContext,
+                new NamedPipeTelemetryPublisher(this.GameManager.LoggerFactory, telemetryContext));
             var emitter = new MapSnapshotEmitter(
                 this.GameManager.LoggerFactory,
                 telemetryContext,
@@ -728,6 +729,11 @@ namespace Assets.Scripts.Managers
             }
 
             messageBox.Notify(formatted);
+        }
+
+        internal bool ShouldPresentFor(Player player)
+        {
+            return this.InteractiveUI && (player?.IsHuman ?? false);
         }
 
         private void DrawSelectedArmiesBox()

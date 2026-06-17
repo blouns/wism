@@ -53,6 +53,7 @@ namespace Assets.Scripts.UI
             this.productionCity = city;
             this.unityManager = unityManager;
             this.armyManager = unityManager.GetComponent<ArmyManager>();
+            this.armySelectedIndex = -1;
 
             InitializeProduction();
         }

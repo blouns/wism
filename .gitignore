@@ -212,6 +212,9 @@ PublishScripts/
 **/packages/*
 # except build/, which is used as an MSBuild target.
 !**/packages/build/
+!WismCompanion/Packages/
+!WismCompanion/Packages/manifest.json
+!WismCompanion/Packages/packages-lock.json
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/packages/repositories.config
 # NuGet v3's project.json files produces more ignoreable files

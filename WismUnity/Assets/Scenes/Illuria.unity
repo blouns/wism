@@ -14375,7 +14375,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   itemPrefab: {fileID: 6827403243111678267, guid: d177b2e3e4c0bd14aba58ad4d7b56feb,
     type: 3}
-  companionPrefab: {fileID: 0}
+  companionPrefab: {fileID: 6827403243111678267, guid: bb71311eb8145984cbc5ba8c474b227a,
+    type: 3}
 --- !u!114 &2053934889
 MonoBehaviour:
   m_ObjectHideFlags: 0

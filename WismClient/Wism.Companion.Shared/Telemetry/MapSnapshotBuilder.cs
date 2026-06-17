@@ -36,22 +36,7 @@ namespace Wism.Client.Api.Telemetry
 
                 var armies = GameStateExport.GetAllArmies()
                     .Where(a => a?.Tile != null)
-                    .Select(a => new ArmyDto
-                    {
-                        Name = a.ShortName,
-                        Owner = a.Player.Clan.ShortName,
-                        Health = a.HitPoints,
-                        Strength = a.Strength,
-                        Moves = a.Moves,
-                        IsHero = a is Hero,
-                        IsSpecial = a.IsSpecial(),
-                        CanFly = a.CanFly,
-                        Position = new PositionDto
-                        {
-                            X = a.Tile.X,
-                            Y = a.Tile.Y
-                        }
-                    }).ToList();
+                    .Select(ToArmyDto).ToList();
 
                 var cities = GameStateExport.GetCities()
                     .Where(c => c?.Tile != null)
@@ -86,7 +71,7 @@ namespace Wism.Client.Api.Telemetry
                     .Select(t => new LocationDto
                     {
                         Name = t.Location?.ShortName ?? "Unknown",
-                        Type = t.Location?.GetType()?.Name ?? "UnknownType",
+                        Type = GetLocationType(t),
                         Position = new PositionDto { X = t.X, Y = t.Y }
                     }).ToList();
 
@@ -104,25 +89,14 @@ namespace Wism.Client.Api.Telemetry
 
                 if (Game.IsInitialized())
                 {
+                    var currentPlayer = Game.Current.GetCurrentPlayer();
+                    snapshot.CurrentPlayer = currentPlayer?.Clan?.ShortName;
+                    snapshot.CurrentCapital = ToCityDto(currentPlayer?.Capitol);
+
                     var selected = Game.Current.GetSelectedArmies()?.FirstOrDefault();
                     if (selected != null)
                     {
-                        snapshot.SelectedArmy = new ArmyDto
-                        {
-                            Name = selected.ShortName,
-                            Owner = selected.Player.Clan.ShortName,
-                            Health = selected.HitPoints,
-                            Strength = selected.Strength,
-                            Moves = selected.Moves,
-                            IsHero = selected is Hero,
-                            IsSpecial = selected.IsSpecial(),
-                            CanFly = selected.CanFly,
-                            Position = new PositionDto
-                            {
-                                X = selected.Tile.X,
-                                Y = selected.Tile.Y
-                            }
-                        };
+                        snapshot.SelectedArmy = ToArmyDto(selected);
                     }
                 }
 
@@ -133,6 +107,59 @@ namespace Wism.Client.Api.Telemetry
                 Console.WriteLine("[Snapshot] Error during TryBuild: " + ex.Message);
                 throw;
             }
+        }
+
+        private static ArmyDto ToArmyDto(Army army)
+        {
+            return new ArmyDto
+            {
+                Name = army.ShortName,
+                UnitType = army.ShortName,
+                Owner = army.Player?.Clan?.ShortName ?? "Unknown",
+                Health = army.HitPoints,
+                Strength = army.Strength,
+                Moves = army.Moves,
+                IsHero = army is Hero,
+                IsSpecial = army.IsSpecial(),
+                CanFly = army.CanFly,
+                Position = army.Tile == null ? null : new PositionDto
+                {
+                    X = army.Tile.X,
+                    Y = army.Tile.Y
+                }
+            };
+        }
+
+        private static CityDto? ToCityDto(City? city)
+        {
+            if (city?.Tile == null)
+            {
+                return null;
+            }
+
+            return new CityDto
+            {
+                Name = city.ShortName,
+                Owner = city.Player?.Clan?.ShortName ?? "Unknown",
+                Defense = city.Defense,
+                Position = new PositionDto
+                {
+                    X = city.Tile.X,
+                    Y = city.Tile.Y
+                }
+            };
+        }
+
+        private static string GetLocationType(Tile tile)
+        {
+            if (string.Equals(tile?.Terrain?.ShortName, "Ruins", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Ruins";
+            }
+
+            return tile?.Location?.VisualTerrain ??
+                tile?.Location?.Kind ??
+                "UnknownType";
         }
     }
 }

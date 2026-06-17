@@ -3,6 +3,7 @@
     public class ArmyDto
     {
         public string Name { get; set; }
+        public string? UnitType { get; set; }
         public string Owner { get; set; }
         public int Health { get; set; }
         public int Strength { get; set; }

@@ -55,6 +55,11 @@ namespace Assets.Scripts.CommandProcessors
 
         private void HandleGameOver(EndTurnCommand command)
         {
+            if (!this.unityGame.ShouldPresentFor(command.Player))
+            {
+                return;
+            }
+
             if (command.Player.GetCities().Count == 0)
             {
                 var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")

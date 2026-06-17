@@ -29,6 +29,15 @@ namespace WismCompanion.Tests
             Assert.That(MapColors.ClanColor(" Sirians "), Is.EqualTo(MapColors.ClanColor("Sirians")));
         }
 
+        [TestCase("Light Infantry", "lightinfantry")]
+        [TestCase("HeavyInfantry", "heavyinfantry")]
+        [TestCase("DwarvenLegions", "dwarvenlegion")]
+        [TestCase("Wolf Riders", "wolfriders")]
+        public void SpriteRegistry_NormalizeArmyUnit_UsesResourceKeys(string raw, string expected)
+        {
+            Assert.That(SpriteRegistry.NormalizeArmyUnit(raw), Is.EqualTo(expected));
+        }
+
         [Test]
         public void InspectorView_ShowEmptyWritesHint()
         {

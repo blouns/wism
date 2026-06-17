@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
 using Wism.Client.Commands;
@@ -15,6 +16,7 @@ namespace Wism.Client.AI.Framework
         private readonly List<ITacticalModule> tacticalModules;
         private readonly List<ITurnModule> turnModules;
         private readonly IWismLogger logger;
+        private readonly ISpatialAdvisor spatialAdvisor;
         private List<AiDecisionTrace> lastDecisionTraces = new List<AiDecisionTrace>();
 
         public AiController(IStrategicModule strategicModule, List<ITacticalModule> tacticalModules)
@@ -31,13 +33,22 @@ namespace Wism.Client.AI.Framework
             IStrategicModule strategicModule,
             List<ITacticalModule> tacticalModules,
             List<ITurnModule> turnModules,
-            IWismLogger logger)
+            IWismLogger logger,
+            ISpatialAdvisor spatialAdvisor = null)
         {
             this.strategicModule = strategicModule;
             this.tacticalModules = tacticalModules ?? new List<ITacticalModule>();
             this.turnModules = turnModules ?? new List<ITurnModule>();
             this.logger = logger;
+            this.spatialAdvisor = spatialAdvisor ?? new ForwardFeedInfluenceMap();
         }
+
+        /// <summary>
+        ///     The shared, terrain-aware spatial advisor (forward-feed influence map). It is
+        ///     refreshed exactly once per AI turn in <see cref="ExecuteTurnAndReturnCommands"/>;
+        ///     strategic and tactical modules read this single cached instance.
+        /// </summary>
+        public ISpatialAdvisor SpatialAdvisor => this.spatialAdvisor;
 
         public IEnumerable<IBid> GetBids(World world)
         {
@@ -51,6 +62,11 @@ namespace Wism.Client.AI.Framework
             var commands = new List<ICommandAction>();
             var traces = new List<AiDecisionTrace>();
             LogDecisionStart(world);
+
+            // Refresh the shared spatial picture once, before any module reads it (A2). All
+            // downstream strategic/tactical consumers query this single cached flood per turn.
+            this.spatialAdvisor.Update();
+
             strategicModule.UpdateGoals(world);
 
             foreach (var module in turnModules)

@@ -51,11 +51,13 @@ namespace Assets.Scripts.CommandProcessors
                 HideWarScene();
             }
 
-            if (attackCommand.Result == ActionState.Failed)
+            var completeResult = command.Execute();
+
+            if (attackCommand.Result == ActionState.Failed || completeResult == ActionState.Failed)
             {
                 inputManager.InputHandler.DeselectObject();
             }
-            else if (attackCommand.Result == ActionState.Succeeded && isHuman)
+            else if (attackCommand.Result == ActionState.Succeeded && completeResult == ActionState.Succeeded && isHuman)
             {
                 OpenProductionPanelIfClaimingCity(attackCommand);
             }
@@ -68,7 +70,7 @@ namespace Assets.Scripts.CommandProcessors
                     : InputMode.AITurn);
             }
 
-            return command.Execute();
+            return completeResult;
         }
 
 
