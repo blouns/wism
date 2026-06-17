@@ -52,6 +52,7 @@ namespace WismCompanion.UI
         private IVisualElementScheduledItem overlayTicker;
         private Toggle masterToggle;
         private Slider opacitySlider;
+        private Button paletteButton;
         private readonly Dictionary<InfluenceChannel, Button> channelButtons = new();
 
         // Tile lookup for adjacency: (x,y) → cleaned terrain name
@@ -124,6 +125,14 @@ namespace WismCompanion.UI
             plasma.RegisterValueChangedCallback(e => { influence.UseGpu = e.newValue; RefreshOverlayState(); });
             bar.Add(plasma);
 
+            var flow = new Toggle("Flow") { value = influence.ShowGradient };
+            flow.RegisterValueChangedCallback(e => { influence.ShowGradient = e.newValue; RefreshOverlayState(); });
+            bar.Add(flow);
+
+            paletteButton = new Button(CyclePalette) { text = influence.Palette.ToString() };
+            paletteButton.AddToClassList("map-btn");
+            bar.Add(paletteButton);
+
             opacitySlider = new Slider(0.1f, 1f) { value = influence.Opacity };
             opacitySlider.style.width = 90;
             opacitySlider.RegisterValueChangedCallback(e => { influence.Opacity = e.newValue; MarkDirtyRepaint(); });
@@ -137,6 +146,15 @@ namespace WismCompanion.UI
         {
             foreach (var kvp in channelButtons)
                 kvp.Value.EnableInClassList("map-btn--active", kvp.Key == influence.Channel);
+        }
+
+        private void CyclePalette()
+        {
+            var values = (InfluencePalette[])Enum.GetValues(typeof(InfluencePalette));
+            var next = (Array.IndexOf(values, influence.Palette) + 1) % values.Length;
+            influence.Palette = values[next];
+            if (paletteButton != null) paletteButton.text = influence.Palette.ToString();
+            RefreshOverlayState();
         }
 
         private void RefreshOverlayState()
@@ -309,8 +327,8 @@ namespace WismCompanion.UI
                 DrawArmy(mgc, p, kvp.Value.army, kvp.Value.count);
             }
 
-            // Front-line seam, ripples, and sparkle: on top of everything.
-            influence.DrawEffects(p, mapLayout.OriginX, mapLayout.OriginY, mapLayout.TilesW, mapLayout.TilesH, MapToViewport, mapLayout.Tile);
+            // Flow chevrons, front-line seam, ripples, and sparkle: on top of everything.
+            influence.DrawEffects(p, mapLayout.OriginX, mapLayout.OriginY, mapLayout.TilesW, mapLayout.TilesH, map.InvertYAxis, MapToViewport, mapLayout.Tile);
 
             if (map.SelectedArmy?.Position != null)
             {

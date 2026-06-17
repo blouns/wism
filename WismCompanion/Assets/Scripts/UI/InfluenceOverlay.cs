@@ -14,6 +14,14 @@ namespace WismCompanion.UI
         Enemy
     }
 
+    /// <summary>Bright diverging colour schemes for the heat field.</summary>
+    public enum InfluencePalette
+    {
+        Aurora,
+        Inferno,
+        Viridis
+    }
+
     /// <summary>
     /// The "Aurora" spatial overlay (V1): a translucent, animated heat layer painted over the map
     /// with <see cref="Painter2D"/>. The field arrives once per AI turn, so liveliness is animated
@@ -44,6 +52,11 @@ namespace WismCompanion.UI
         /// <summary>When true, render the GPU "Plasma" path; falls back to Painter2D if it fails.</summary>
         public bool UseGpu { get; set; } = true;
 
+        /// <summary>When true, draw flow chevrons drifting along the tension gradient.</summary>
+        public bool ShowGradient { get; set; }
+
+        public InfluencePalette Palette { get; set; } = InfluencePalette.Aurora;
+
         public bool HasField => width > 0 && height > 0;
         public bool Animating => Enabled && HasField;
 
@@ -54,6 +67,7 @@ namespace WismCompanion.UI
         private float[] targetT, targetF, targetE;       // latest snapshot
         private float lastNow = -1f;
         private float clock;
+        private bool morphing;
 
         private readonly List<Ripple> ripples = new();
         private struct Ripple { public int X, Y; public float Age; public float Sign; }
@@ -128,12 +142,15 @@ namespace WismCompanion.UI
 
             var k = Mathf.Clamp01(dt * LerpPerSecond);
             var n = Math.Min(displayT.Length, targetT.Length);
+            var moving = false;
             for (var i = 0; i < n; i++)
             {
+                if (!moving && Mathf.Abs(targetT[i] - displayT[i]) > 0.002f) moving = true;
                 displayT[i] += (targetT[i] - displayT[i]) * k;
                 displayF[i] += (targetF[i] - displayF[i]) * k;
                 displayE[i] += (targetE[i] - displayE[i]) * k;
             }
+            morphing = moving;
 
             for (var r = ripples.Count - 1; r >= 0; r--)
             {
@@ -143,9 +160,12 @@ namespace WismCompanion.UI
                 else ripples[r] = rip;
             }
 
-            // GPU path: re-blit the morphed field through the plasma material this frame.
+            // GPU path: re-blit the morphed field through the plasma material this frame. The field
+            // texture only re-uploads while morphing; the flow animates purely in the shader.
+            var pal = ResolvePalette(Palette);
             heatRt = Enabled && UseGpu && HasField && displayT != null
-                ? plasma.Render(displayT, displayF, displayE, width, height, Opacity, (int)Channel)
+                ? plasma.Render(displayT, displayF, displayE, width, height, Opacity, (int)Channel,
+                    morphing, pal.FriendlyNear, pal.FriendlyFar, pal.EnemyNear, pal.EnemyFar)
                 : null;
         }
 
@@ -201,9 +221,16 @@ namespace WismCompanion.UI
 
         /// <summary>Paint the front-line seam, ripples, and sparkle. Call after units, on top.</summary>
         public void DrawEffects(Painter2D p, int originX, int originY, int tilesW, int tilesH,
-            Func<int, int, Vector2> mapToViewport, float tile)
+            bool invertY, Func<int, int, Vector2> mapToViewport, float tile)
         {
             if (!Enabled || !HasField || displayT == null) return;
+
+            var pal = ResolvePalette(Palette);
+
+            if (ShowGradient)
+            {
+                DrawGradientChevrons(p, originX, originY, tilesW, tilesH, invertY, mapToViewport, tile);
+            }
 
             if (ShowFront)
             {
@@ -218,7 +245,7 @@ namespace WismCompanion.UI
                 var pos = mapToViewport(rip.X, rip.Y);
                 var center = new Vector2(pos.x + tile * 0.5f, pos.y + tile * 0.5f);
                 var radius = tile * (0.3f + RippleSpeed * rip.Age);
-                var ringColor = rip.Sign >= 0f ? Friendly : Enemy;
+                var ringColor = rip.Sign >= 0f ? pal.FriendlyNear : pal.EnemyNear;
                 ringColor.a = (1f - t) * 0.8f * Opacity;
                 StrokeCircle(p, center, radius, ringColor, Mathf.Lerp(3f, 0.5f, t));
             }
@@ -290,6 +317,43 @@ namespace WismCompanion.UI
             }
         }
 
+        private void DrawGradientChevrons(Painter2D p, int originX, int originY, int tilesW, int tilesH,
+            bool invertY, Func<int, int, Vector2> mapToViewport, float tile)
+        {
+            var step = tile < 22f ? 3 : 2; // sparser when zoomed out
+            for (var y = originY; y < originY + tilesH; y += step)
+            {
+                for (var x = originX; x < originX + tilesW; x += step)
+                {
+                    if (x <= 0 || y <= 0 || x >= width - 1 || y >= height - 1) continue;
+                    var row = y * width;
+                    var gx = displayT[row + x + 1] - displayT[row + x - 1];
+                    var gy = displayT[((y + 1) * width) + x] - displayT[((y - 1) * width) + x];
+                    var mag = Mathf.Sqrt(gx * gx + gy * gy);
+                    if (mag < 0.05f) continue;
+
+                    // Flow toward the enemy = descending tension = -gradient. Screen Y may invert.
+                    var dir = new Vector2(-gx, invertY ? gy : -gy) / mag;
+                    var perp = new Vector2(-dir.y, dir.x);
+
+                    var pos = mapToViewport(x, y);
+                    var basePt = new Vector2(pos.x + tile * 0.5f, pos.y + tile * 0.5f);
+                    var phase = Mathf.Repeat((clock * 0.6f) + (x * 0.13f + y * 0.21f), 1f);
+                    var center = basePt + dir * ((phase - 0.5f) * tile * 0.8f);
+                    var a = Mathf.Sin(phase * Mathf.PI) * 0.5f * Opacity * Mathf.Clamp01(mag * 4f);
+                    if (a < 0.02f) continue;
+
+                    var tip = center + dir * (tile * 0.18f);
+                    var bl = center - dir * (tile * 0.06f) + perp * (tile * 0.12f);
+                    var br = center - dir * (tile * 0.06f) - perp * (tile * 0.12f);
+                    var col = new Color(0.85f, 0.95f, 1f, a);
+                    var lw = Mathf.Max(1f, tile * 0.05f);
+                    StrokeLine(p, tip, bl, col, lw);
+                    StrokeLine(p, tip, br, col, lw);
+                }
+            }
+        }
+
         private float ChannelMagnitude(int x, int y)
         {
             var i = (y * width) + x;
@@ -318,30 +382,58 @@ namespace WismCompanion.UI
 
         // ---- Palette -----------------------------------------------------------------
 
-        private static readonly Color Friendly = new(0.15f, 0.85f, 1f);   // electric cyan
-        private static readonly Color FriendlyHot = new(0.25f, 0.45f, 1f); // deep blue
-        private static readonly Color Enemy = new(1f, 0.45f, 0.1f);        // orange
-        private static readonly Color EnemyHot = new(1f, 0.12f, 0.12f);    // red
+        private readonly struct Palette4
+        {
+            public Palette4(Color friendlyNear, Color friendlyFar, Color enemyNear, Color enemyFar)
+            {
+                FriendlyNear = friendlyNear;
+                FriendlyFar = friendlyFar;
+                EnemyNear = enemyNear;
+                EnemyFar = enemyFar;
+            }
+
+            public Color FriendlyNear { get; }
+            public Color FriendlyFar { get; }
+            public Color EnemyNear { get; }
+            public Color EnemyFar { get; }
+        }
+
+        private static Palette4 ResolvePalette(InfluencePalette palette)
+        {
+            switch (palette)
+            {
+                case InfluencePalette.Inferno:
+                    return new Palette4(new Color(1f, 0.95f, 0.5f), new Color(1f, 0.5f, 0f),
+                        new Color(0.95f, 0.2f, 0.7f), new Color(0.4f, 0f, 0.5f));
+                case InfluencePalette.Viridis:
+                    return new Palette4(new Color(0.13f, 0.57f, 0.55f), new Color(0.99f, 0.91f, 0.14f),
+                        new Color(0.27f, 0f, 0.33f), new Color(0.19f, 0.41f, 0.56f));
+                default: // Aurora — electric cyan/blue friendly, orange/red enemy.
+                    return new Palette4(new Color(0.15f, 0.85f, 1f), new Color(0.25f, 0.45f, 1f),
+                        new Color(1f, 0.45f, 0.1f), new Color(1f, 0.12f, 0.12f));
+            }
+        }
 
         private Color HeatColor(float tension, float friendly, float enemy, int x, int y)
         {
+            var pal = ResolvePalette(Palette);
             float mag;
             Color baseColor;
             switch (Channel)
             {
                 case InfluenceChannel.Friendly:
                     mag = Mathf.Clamp01(friendly);
-                    baseColor = Color.Lerp(Friendly, FriendlyHot, mag);
+                    baseColor = Color.Lerp(pal.FriendlyNear, pal.FriendlyFar, mag);
                     break;
                 case InfluenceChannel.Enemy:
                     mag = Mathf.Clamp01(enemy);
-                    baseColor = Color.Lerp(Enemy, EnemyHot, mag);
+                    baseColor = Color.Lerp(pal.EnemyNear, pal.EnemyFar, mag);
                     break;
                 default: // Tension: sign picks the ramp, magnitude its intensity.
                     mag = Mathf.Clamp01(Mathf.Abs(tension));
                     baseColor = tension >= 0f
-                        ? Color.Lerp(Friendly, FriendlyHot, mag)
-                        : Color.Lerp(Enemy, EnemyHot, mag);
+                        ? Color.Lerp(pal.FriendlyNear, pal.FriendlyFar, mag)
+                        : Color.Lerp(pal.EnemyNear, pal.EnemyFar, mag);
                     break;
             }
 
@@ -371,6 +463,16 @@ namespace WismCompanion.UI
             p.LineTo(new Vector2(r.xMin, r.yMax));
             p.ClosePath();
             p.Fill();
+        }
+
+        private static void StrokeLine(Painter2D p, Vector2 a, Vector2 b, Color color, float lineWidth)
+        {
+            p.strokeColor = color;
+            p.lineWidth = lineWidth;
+            p.BeginPath();
+            p.MoveTo(a);
+            p.LineTo(b);
+            p.Stroke();
         }
 
         private static void StrokeCircle(Painter2D p, Vector2 center, float radius, Color color, float lineWidth)

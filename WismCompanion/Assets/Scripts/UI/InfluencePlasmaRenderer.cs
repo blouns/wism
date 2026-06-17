@@ -24,6 +24,7 @@ namespace WismCompanion.UI
         private Color[] scratch;
         private int width, height;
         private bool failed;
+        private bool pendingUpload;
 
         public bool Ready => material != null && heatRt != null && fieldTex != null && !failed;
 
@@ -66,29 +67,43 @@ namespace WismCompanion.UI
             if (!heatRt.Create()) { failed = true; return false; }
 
             scratch = new Color[w * h];
+            pendingUpload = true;
             return true;
         }
 
-        /// <summary>Upload the field, blit through the plasma material, and return the heat texture (or null).</summary>
-        public RenderTexture Render(float[] tension, float[] friendly, float[] enemy, int w, int h, float opacity, int channel)
+        /// <summary>
+        /// Upload the field (only when <paramref name="uploadField"/> or resources were just (re)made),
+        /// apply palette + params, blit through the plasma material, and return the heat texture (or null).
+        /// </summary>
+        public RenderTexture Render(float[] tension, float[] friendly, float[] enemy, int w, int h,
+            float opacity, int channel, bool uploadField,
+            Color friendlyNear, Color friendlyFar, Color enemyNear, Color enemyFar)
         {
             if (w <= 0 || h <= 0 || tension == null) return null;
             if (!EnsureResources(w, h)) return null;
 
-            var n = w * h;
-            for (var i = 0; i < n; i++)
+            if (uploadField || pendingUpload)
             {
-                var ten = i < tension.Length ? tension[i] : 0f;
-                var fr = friendly != null && i < friendly.Length ? friendly[i] : 0f;
-                var en = enemy != null && i < enemy.Length ? enemy[i] : 0f;
-                scratch[i] = new Color((ten + 1f) * 0.5f, fr, en, 1f);
-            }
+                var n = w * h;
+                for (var i = 0; i < n; i++)
+                {
+                    var ten = i < tension.Length ? tension[i] : 0f;
+                    var fr = friendly != null && i < friendly.Length ? friendly[i] : 0f;
+                    var en = enemy != null && i < enemy.Length ? enemy[i] : 0f;
+                    scratch[i] = new Color((ten + 1f) * 0.5f, fr, en, 1f);
+                }
 
-            fieldTex.SetPixels(scratch);
-            fieldTex.Apply(false);
+                fieldTex.SetPixels(scratch);
+                fieldTex.Apply(false);
+                pendingUpload = false;
+            }
 
             material.SetFloat("_Opacity", opacity);
             material.SetFloat("_Channel", channel);
+            material.SetColor("_FriendlyA", friendlyNear);
+            material.SetColor("_FriendlyB", friendlyFar);
+            material.SetColor("_EnemyA", enemyNear);
+            material.SetColor("_EnemyB", enemyFar);
 
             Graphics.Blit(fieldTex, heatRt, material);
             return heatRt;

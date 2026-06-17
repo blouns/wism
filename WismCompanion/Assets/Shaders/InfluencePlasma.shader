@@ -13,6 +13,10 @@ Shader "Wism/InfluencePlasma"
         _Warp ("Warp Amount", Float) = 0.06
         _Glow ("Glow", Float) = 1.2
         _Channel ("Channel (0=tension,1=friendly,2=enemy)", Float) = 0
+        [HDR] _FriendlyA ("Friendly Near", Color) = (0.15, 0.85, 1.0, 1.0)
+        [HDR] _FriendlyB ("Friendly Far", Color) = (0.25, 0.45, 1.0, 1.0)
+        [HDR] _EnemyA ("Enemy Near", Color) = (1.0, 0.45, 0.1, 1.0)
+        [HDR] _EnemyB ("Enemy Far", Color) = (1.0, 0.12, 0.12, 1.0)
     }
     SubShader
     {
@@ -31,6 +35,7 @@ Shader "Wism/InfluencePlasma"
 
             sampler2D _MainTex;
             float _Opacity, _FlowSpeed, _FlowScale, _Warp, _Glow, _Channel;
+            float4 _FriendlyA, _FriendlyB, _EnemyA, _EnemyB;
 
             struct appdata { float4 vertex : POSITION; float2 uv : TEXCOORD0; };
             struct v2f { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };
@@ -66,8 +71,8 @@ Shader "Wism/InfluencePlasma"
                 return s;
             }
 
-            float3 friendlyRamp(float m) { return lerp(float3(0.15, 0.85, 1.0), float3(0.25, 0.45, 1.0), m); }
-            float3 enemyRamp(float m)    { return lerp(float3(1.0, 0.45, 0.1), float3(1.0, 0.12, 0.12), m); }
+            float3 friendlyRamp(float m) { return lerp(_FriendlyA.rgb, _FriendlyB.rgb, m); }
+            float3 enemyRamp(float m)    { return lerp(_EnemyA.rgb, _EnemyB.rgb, m); }
 
             float4 frag(v2f i) : SV_Target
             {
