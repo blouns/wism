@@ -12,6 +12,13 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Assets.Scripts.UnityGame.ModKit;
+using Wism.Client.AI.Services;
+using Wism.Client.AI.Tactical;
+using Wism.Client.Common;
+using Wism.Client.Controllers;
+using Wism.Client.Core;
+using Wism.Client.MapObjects;
+using Wism.Client.Pathing;
 
 namespace WismUnity.EditorBridge
 {
@@ -174,6 +181,226 @@ namespace WismUnity.EditorBridge
             });
         }
 
+        [McpTool("WismUnity.GetWorldState", "Returns a read-only WISM game and world snapshot from the current Unity runtime state.", Groups = new[] { Group, "game" }, EnabledByDefault = true)]
+        public static object GetWorldState()
+        {
+            if (!TryGetRuntime(out var game, out var world, out var unavailable))
+                return unavailable;
+
+            var map = world.Map;
+            var currentPlayer = SafeCurrentPlayer(game);
+            var selectedArmies = game.ArmiesSelected()
+                ? game.GetSelectedArmies()
+                : new List<Army>();
+
+            return Response.Success("WISM world state loaded.", new
+            {
+                initialized = true,
+                world = new
+                {
+                    name = world.Name,
+                    width = map.GetLength(0),
+                    height = map.GetLength(1),
+                    cityCount = world.GetCities().Count,
+                    locationCount = world.GetLocations().Count,
+                    looseItemCount = world.GetLooseItems().Count
+                },
+                game = new
+                {
+                    state = game.GameState.ToString(),
+                    randomSeed = game.RandomSeed,
+                    currentPlayer = currentPlayer != null ? PlayerSummary(currentPlayer, true) : null,
+                    selectedStack = StackSummary(selectedArmies)
+                },
+                players = game.Players
+                    .Select(player => PlayerSummary(player, player == currentPlayer))
+                    .ToArray(),
+                cities = world.GetCities()
+                    .OrderBy(city => city.ShortName)
+                    .Select(CitySummary)
+                    .ToArray(),
+                locations = world.GetLocations()
+                    .OrderBy(location => location.ShortName)
+                    .Select(LocationSummary)
+                    .ToArray(),
+                timestampUtc = DateTime.UtcNow.ToString("O")
+            });
+        }
+
+        [McpTool("WismUnity.GetLegalActions", "Returns read-only legal action hints for the current WISM selection without enqueueing commands.", Groups = new[] { Group, "game", "actions" }, EnabledByDefault = true)]
+        public static object GetLegalActions()
+        {
+            if (!TryGetRuntime(out var game, out var world, out var unavailable))
+                return unavailable;
+
+            if (!game.ArmiesSelected())
+            {
+                return Response.Success("No WISM armies are selected.", new
+                {
+                    initialized = true,
+                    gameState = game.GameState.ToString(),
+                    currentPlayer = PlayerSummary(game.GetCurrentPlayer(), true),
+                    selected = false,
+                    actions = new[]
+                    {
+                        new { kind = "select-next-army", legal = true, reason = "No selected stack; existing turn flow can select the next movable army." },
+                        new { kind = "end-turn", legal = true, reason = "No selected stack is active." }
+                    },
+                    timestampUtc = DateTime.UtcNow.ToString("O")
+                });
+            }
+
+            var armies = game.GetSelectedArmies();
+            var origin = armies[0].Tile;
+            var location = origin.Location;
+            var city = origin.City;
+            var currentPlayer = game.GetCurrentPlayer();
+            var immediateActions = new List<object>
+            {
+                new { kind = "deselect-armies", legal = true, reason = "A stack is selected." },
+                new { kind = "defend-armies", legal = true, reason = "A stack is selected." },
+                new { kind = "quit-armies", legal = true, reason = "A stack is selected." }
+            };
+
+            if (location != null)
+            {
+                immediateActions.Add(new
+                {
+                    kind = "search-location",
+                    legal = !location.Searched,
+                    reason = location.Searched ? "Location has already been searched." : "Selected stack is on a searchable location.",
+                    location = LocationSummary(location)
+                });
+            }
+
+            if (city != null)
+            {
+                immediateActions.Add(new
+                {
+                    kind = "build-city-defense",
+                    legal = city.Clan == currentPlayer.Clan && city.Defense < City.MaxDefense,
+                    reason = city.Clan == currentPlayer.Clan ? "Selected stack is in a friendly city." : "Selected stack is not in a friendly city.",
+                    city = CitySummary(city)
+                });
+                immediateActions.Add(new
+                {
+                    kind = "capture-city",
+                    legal = city.Clan != currentPlayer.Clan && city.MusterArmies().All(army => army.Clan == currentPlayer.Clan),
+                    reason = city.Clan == currentPlayer.Clan ? "City is already friendly." : "Selected stack is in a non-friendly city.",
+                    city = CitySummary(city)
+                });
+            }
+
+            return Response.Success("WISM legal action hints loaded.", new
+            {
+                initialized = true,
+                gameState = game.GameState.ToString(),
+                currentPlayer = PlayerSummary(currentPlayer, true),
+                selected = true,
+                selectedStack = StackSummary(armies),
+                currentTile = TileSummary(origin),
+                immediateActions = immediateActions.ToArray(),
+                adjacentActions = AdjacentActionSummaries(world, armies, origin),
+                timestampUtc = DateTime.UtcNow.ToString("O")
+            });
+        }
+
+        [McpTool("WismUnity.EvaluateBoard", "Returns read-only board evaluation metrics for the current WISM game state.", Groups = new[] { Group, "game", "ai" }, EnabledByDefault = true)]
+        public static object EvaluateBoard()
+        {
+            if (!TryGetRuntime(out var game, out var world, out var unavailable))
+                return unavailable;
+
+            var currentPlayer = game.GetCurrentPlayer();
+            var players = game.Players
+                .Select(player => new
+                {
+                    player = PlayerSummary(player, player == currentPlayer),
+                    military = new
+                    {
+                        armyCount = player.GetArmies().Count,
+                        heroCount = player.GetHeros().Count,
+                        totalStrength = player.GetArmies().Where(army => !army.IsDead).Sum(army => army.Strength),
+                        totalMovesRemaining = player.GetArmies().Where(army => !army.IsDead).Sum(army => army.MovesRemaining)
+                    },
+                    economy = new
+                    {
+                        gold = player.Gold,
+                        income = player.GetIncome(),
+                        upkeep = player.GetUpkeep(),
+                        netIncome = player.GetIncome() - player.GetUpkeep(),
+                        cityCount = player.GetCities().Count
+                    },
+                    map = new
+                    {
+                        adjacentEnemyStacks = CountAdjacentEnemyStacks(world, player),
+                        capturableCityCount = world.GetCities().Count(city => city.Clan != player.Clan)
+                    }
+                })
+                .OrderByDescending(row => row.economy.cityCount)
+                .ThenByDescending(row => row.military.totalStrength)
+                .ToArray();
+
+            return Response.Success("WISM board evaluation loaded.", new
+            {
+                initialized = true,
+                world = new
+                {
+                    name = world.Name,
+                    width = world.Map.GetLength(0),
+                    height = world.Map.GetLength(1),
+                    cityCount = world.GetCities().Count,
+                    neutralCityCount = world.GetCities().Count(city => city.Clan == null),
+                    searchableRemaining = world.GetLocations().Count(location => !location.Searched)
+                },
+                currentPlayer = PlayerSummary(currentPlayer, true),
+                players,
+                notes = new[]
+                {
+                    "Evaluation is read-only and uses current WismClient state.",
+                    "Scores are descriptive metrics, not a game-state mutation or command execution."
+                },
+                timestampUtc = DateTime.UtcNow.ToString("O")
+            });
+        }
+
+        [McpTool("WismUnity.RunAITurnPreview", "Returns read-only tactical AI bid previews for the current WISM turn without adding commands.", Groups = new[] { Group, "game", "ai" }, EnabledByDefault = true)]
+        public static object RunAITurnPreview()
+        {
+            if (!TryGetRuntime(out var game, out var world, out var unavailable))
+                return unavailable;
+
+            var loggerFactory = new WismLoggerFactory();
+            var logger = loggerFactory.CreateLogger();
+            var armyController = new ArmyController(loggerFactory);
+            var pathingStrategy = new AStarPathingStrategy();
+            var modules = new ITacticalModule[]
+            {
+                new CaptureModule(armyController, logger),
+                new ExterminationModule(new PathfindingService(pathingStrategy), pathingStrategy, armyController, logger)
+            };
+
+            var bids = modules
+                .SelectMany(module => SafeBids(module, world))
+                .OrderByDescending(bid => bid.Utility)
+                .ThenBy(bid => bid.Module.GetType().Name)
+                .Take(24)
+                .Select(BidSummary)
+                .ToArray();
+
+            return Response.Success("WISM AI tactical preview loaded.", new
+            {
+                initialized = true,
+                previewAvailable = true,
+                readOnly = true,
+                currentPlayer = PlayerSummary(game.GetCurrentPlayer(), true),
+                bidCount = bids.Length,
+                bids,
+                note = "Preview calls tactical bid generation only; it does not enqueue or execute commands.",
+                timestampUtc = DateTime.UtcNow.ToString("O")
+            });
+        }
+
         [McpTool("WismUnity.GetModKitStatus", "Returns a read-only Mod Kit profile, pack, validation, scene, and MOD data status report.", Groups = new[] { Group, "modkit" }, EnabledByDefault = true)]
         public static object GetModKitStatus(WismUnityModKitStatusRequest request)
         {
@@ -289,6 +516,376 @@ namespace WismUnity.EditorBridge
             return normalized.StartsWith(projectRoot, StringComparison.OrdinalIgnoreCase)
                 ? normalized.Substring(projectRoot.Length).TrimStart('/')
                 : Path.GetFileName(normalized);
+        }
+
+        static bool TryGetRuntime(out Game game, out World world, out object unavailable)
+        {
+            game = null;
+            world = null;
+
+            if (!Game.IsInitialized())
+            {
+                unavailable = Response.Success("WISM game is not initialized.", new
+                {
+                    initialized = false,
+                    reason = "Game.Current is not available. Enter Play Mode or initialize the Unity playground first.",
+                    activeScene = SceneInfo(EditorSceneManager.GetActiveScene()),
+                    timestampUtc = DateTime.UtcNow.ToString("O")
+                });
+                return false;
+            }
+
+            try
+            {
+                game = Game.Current;
+                world = World.Current;
+                unavailable = null;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                unavailable = Response.Error("WISM_RUNTIME_UNAVAILABLE", new { reason = ex.Message });
+                return false;
+            }
+        }
+
+        static Player SafeCurrentPlayer(Game game)
+        {
+            try
+            {
+                return game.GetCurrentPlayer();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        static object PlayerSummary(Player player, bool isCurrent)
+        {
+            if (player == null)
+                return null;
+
+            return new
+            {
+                clan = ClanSummary(player.Clan),
+                isCurrent,
+                isHuman = player.IsHuman,
+                isDead = player.IsDead,
+                turn = player.Turn,
+                gold = player.Gold,
+                income = player.GetIncome(),
+                upkeep = player.GetUpkeep(),
+                cityCount = player.GetCities().Count,
+                armyCount = player.GetArmies().Count,
+                heroCount = player.GetHeros().Count,
+                capitol = player.Capitol != null ? CitySummary(player.Capitol) : null
+            };
+        }
+
+        static object ClanSummary(Clan clan)
+        {
+            if (clan == null)
+                return null;
+
+            return new
+            {
+                shortName = clan.ShortName,
+                displayName = clan.DisplayName
+            };
+        }
+
+        static object CitySummary(City city)
+        {
+            if (city == null)
+                return null;
+
+            return new
+            {
+                shortName = city.ShortName,
+                displayName = city.DisplayName,
+                owner = ClanSummary(city.Clan),
+                x = city.X,
+                y = city.Y,
+                defense = city.Defense,
+                income = city.Income,
+                garrisonCount = city.MusterArmies().Count,
+                production = ProductionSummary(city.Barracks)
+            };
+        }
+
+        static object ProductionSummary(Barracks barracks)
+        {
+            if (barracks == null)
+                return null;
+
+            var productionKinds = barracks.GetProductionKinds()
+                .Select(info => new
+                {
+                    armyInfoName = info.ArmyInfoName,
+                    turnsToProduce = info.TurnsToProduce,
+                    upkeep = info.Upkeep,
+                    strength = info.Strength,
+                    moves = info.Moves,
+                    producedCount = barracks.GetProductionNumber(info.ArmyInfoName)
+                })
+                .Cast<object>()
+                .ToArray();
+
+            var armyInTraining = barracks.ArmyInTraining;
+
+            return new
+            {
+                isProducing = barracks.ProducingArmy(),
+                armyInTraining = armyInTraining != null
+                    ? new
+                    {
+                        army = armyInTraining.ArmyInfo?.DisplayName,
+                        armyShortName = armyInTraining.ArmyInfo?.ShortName,
+                        turnsToProduce = armyInTraining.TurnsToProduce,
+                        destinationCity = armyInTraining.DestinationCity?.ShortName
+                    }
+                    : null,
+                deliveries = barracks.HasDeliveries()
+                    ? barracks.ArmiesToDeliver
+                        .Select(delivery => new
+                        {
+                            army = delivery.ArmyInfo?.DisplayName,
+                            armyShortName = delivery.ArmyInfo?.ShortName,
+                            turnsToDeliver = delivery.TurnsToDeliver,
+                            destinationCity = delivery.DestinationCity?.ShortName
+                        })
+                        .Cast<object>()
+                        .ToArray()
+                    : Array.Empty<object>(),
+                productionKinds
+            };
+        }
+
+        static object LocationSummary(Location location)
+        {
+            if (location == null)
+                return null;
+
+            return new
+            {
+                shortName = location.ShortName,
+                displayName = location.DisplayName,
+                kind = location.Kind,
+                x = location.X,
+                y = location.Y,
+                searched = location.Searched,
+                hasMonster = location.HasMonster(),
+                hasBoon = location.HasBoon()
+            };
+        }
+
+        static object StackSummary(IReadOnlyList<Army> armies)
+        {
+            if (armies == null || armies.Count == 0)
+            {
+                return new
+                {
+                    count = 0,
+                    x = 0,
+                    y = 0,
+                    owner = (object)null,
+                    armies = Array.Empty<object>()
+                };
+            }
+
+            var tile = armies[0].Tile;
+            return new
+            {
+                count = armies.Count,
+                x = tile?.X ?? 0,
+                y = tile?.Y ?? 0,
+                owner = ClanSummary(armies[0].Clan),
+                totalStrength = armies.Where(army => !army.IsDead).Sum(army => army.Strength),
+                minMovesRemaining = armies.Where(army => !army.IsDead).Select(army => army.MovesRemaining).DefaultIfEmpty(0).Min(),
+                armies = armies.Select(ArmySummary).ToArray()
+            };
+        }
+
+        static object ArmySummary(Army army)
+        {
+            if (army == null)
+                return null;
+
+            return new
+            {
+                id = army.Id,
+                shortName = army.ShortName,
+                displayName = army.DisplayName,
+                kind = army.KindName,
+                owner = ClanSummary(army.Clan),
+                x = army.X,
+                y = army.Y,
+                strength = army.Strength,
+                moves = army.Moves,
+                movesRemaining = army.MovesRemaining,
+                canWalk = army.CanWalk,
+                canFloat = army.CanFloat,
+                canFly = army.CanFly,
+                isHero = army is Hero,
+                isSpecial = army.IsSpecial(),
+                isDefending = army.IsDefending,
+                isDead = army.IsDead
+            };
+        }
+
+        static object TileSummary(Tile tile)
+        {
+            if (tile == null)
+                return null;
+
+            return new
+            {
+                x = tile.X,
+                y = tile.Y,
+                terrain = tile.Terrain != null
+                    ? new
+                    {
+                        shortName = tile.Terrain.ShortName,
+                        displayName = tile.Terrain.DisplayName,
+                        movementCost = tile.Terrain.MovementCost
+                    }
+                    : null,
+                city = tile.City != null ? CitySummary(tile.City) : null,
+                location = tile.Location != null ? LocationSummary(tile.Location) : null,
+                armyCount = tile.GetAllArmies().Count,
+                armies = tile.GetAllArmies().Select(ArmySummary).ToArray()
+            };
+        }
+
+        static object[] AdjacentActionSummaries(World world, List<Army> armies, Tile origin)
+        {
+            var actions = new List<object>();
+            var map = world.Map;
+
+            for (var y = origin.Y - 1; y <= origin.Y + 1; y++)
+            {
+                for (var x = origin.X - 1; x <= origin.X + 1; x++)
+                {
+                    if (x == origin.X && y == origin.Y)
+                        continue;
+
+                    if (x < map.GetLowerBound(0) || x > map.GetUpperBound(0) ||
+                        y < map.GetLowerBound(1) || y > map.GetUpperBound(1))
+                        continue;
+
+                    var target = map[x, y];
+                    var action = AdjacentActionSummary(armies, target);
+                    actions.Add(action);
+                }
+            }
+
+            return actions.ToArray();
+        }
+
+        static object AdjacentActionSummary(List<Army> armies, Tile target)
+        {
+            var canTraverse = SafeBool(() => target.CanTraverseHere(armies));
+            var canAttack = SafeBool(() => target.CanAttackHere(armies));
+            var hasSufficientMoves = SafeBool(() =>
+            {
+                var armiesWithMoves = Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armies, target);
+                return Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(armiesWithMoves, target);
+            });
+
+            var kind = "blocked";
+            var legal = false;
+            var reason = "Target tile is not traversable for the selected stack.";
+
+            if (canAttack && hasSufficientMoves)
+            {
+                legal = true;
+                kind = target.HasArmies() ? "attack" : "capture-city";
+                reason = target.HasArmies()
+                    ? "Target contains hostile armies."
+                    : "Target contains a non-friendly city that can be attacked or captured.";
+            }
+            else if (canTraverse && hasSufficientMoves)
+            {
+                legal = true;
+                kind = "move";
+                reason = "Target is traversable and the selected stack has enough moves.";
+            }
+            else if (canTraverse)
+            {
+                reason = "Target is traversable but selected stack lacks sufficient moves.";
+            }
+
+            return new
+            {
+                kind,
+                legal,
+                reason,
+                target = TileSummary(target)
+            };
+        }
+
+        static bool SafeBool(Func<bool> evaluate)
+        {
+            try
+            {
+                return evaluate();
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        static int CountAdjacentEnemyStacks(World world, Player player)
+        {
+            var count = 0;
+            foreach (var army in player.GetArmies().Where(army => !army.IsDead && army.Tile != null))
+            {
+                var map = world.Map;
+                for (var y = army.Tile.Y - 1; y <= army.Tile.Y + 1; y++)
+                {
+                    for (var x = army.Tile.X - 1; x <= army.Tile.X + 1; x++)
+                    {
+                        if (x == army.Tile.X && y == army.Tile.Y)
+                            continue;
+
+                        if (x < map.GetLowerBound(0) || x > map.GetUpperBound(0) ||
+                            y < map.GetLowerBound(1) || y > map.GetUpperBound(1))
+                            continue;
+
+                        var tile = map[x, y];
+                        if (tile.GetAllArmies().Any(other => other.Clan != player.Clan))
+                            count++;
+                    }
+                }
+            }
+
+            return count;
+        }
+
+        static IEnumerable<IBid> SafeBids(ITacticalModule module, World world)
+        {
+            try
+            {
+                return module.GenerateBids(world) ?? Enumerable.Empty<IBid>();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"WismUnity AI preview skipped {module.GetType().Name}: {ex.Message}");
+                return Enumerable.Empty<IBid>();
+            }
+        }
+
+        static object BidSummary(IBid bid)
+        {
+            return new
+            {
+                module = bid.Module.GetType().Name,
+                utility = Math.Round(bid.Utility, 4),
+                stack = StackSummary(bid.Armies),
+                primaryArmy = bid.Armies != null && bid.Armies.Count > 0 ? ArmySummary(bid.Armies[0]) : null
+            };
         }
     }
 }
