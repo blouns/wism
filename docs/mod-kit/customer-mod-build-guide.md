@@ -34,6 +34,29 @@ Run Mod Kit commands from `WismClient`:
 cd WismClient
 ```
 
+## How The CLI Finds Your Pack
+
+When `Wism.ModKit.Cli` runs inside the repository, it resolves the repository
+root and uses this source mod folder by default:
+
+```text
+WismClient/Wism.Client.Core/mod/
+```
+
+So this command:
+
+```powershell
+dotnet run --project Wism.ModKit.Cli -- validate profile=classic-warlords packs=pack-my-first-flavor
+```
+
+looks for:
+
+```text
+WismClient/Wism.Client.Core/mod/FeaturePacks/pack-my-first-flavor/pack.json
+```
+
+You do not need to pass a path for the normal V1 workflow.
+
 ## Create A Flavor Pack
 
 This example creates `pack-my-first-flavor`.
