@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Managers;
+using Assets.Scripts.Managers;
 using Assets.Scripts.UnityGame.Factories;
 using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
@@ -90,7 +90,7 @@ namespace Assets.Scripts
             // Game settings
             this.debugManager.LogInformation("Creating new game settings...");
             GameEntity settings = new GameEntity();
-            settings.Random = new RandomEntity() { Seed = newGameEntity.RandomSeed };
+            settings.Random = new RandomEntity() { Seed = ResolveRandomSeed(newGameEntity.RandomSeed) };
             settings.WarStrategy = CreateDefaultWarStrategy();
             settings.MovementStrategies = CreateDefaultMovementStrategies();
             settings.TraversalStrategies = CreateDefaultTraversalStrategies();
@@ -110,6 +110,19 @@ namespace Assets.Scripts
 
             this.debugManager.LogInformation("Initializing game...");
             this.unityManager.GameManager.NewGame(settings);
+        }
+
+        private static int ResolveRandomSeed(int requestedSeed)
+        {
+            if (requestedSeed > 0)
+            {
+                return requestedSeed;
+            }
+
+            var generatedSeed = Guid.NewGuid().GetHashCode();
+            return generatedSeed == int.MinValue
+                ? int.MaxValue
+                : Math.Abs(generatedSeed);
         }
 
         private AssemblyEntity CreateDefaultPathingStrategy()
@@ -197,7 +210,7 @@ namespace Assets.Scripts
             settings.WorldName = GameManager.DefaultWorld;
             settings.InteractiveUI = true;
             settings.RandomStartLocations = false;
-            settings.RandomSeed = GameManager.DefaultRandom;
+            settings.RandomSeed = 0;
             settings.IsNewGame = true;
             CreateDefaultPlayers(settings);
 

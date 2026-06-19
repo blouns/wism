@@ -1,5 +1,4 @@
 using Assets.Scripts.UnityGame.Persistance.Entities;
-using Wism.Client.Core;
 using Wism.Client.Data.Entities;
 
 namespace Assets.Scripts.UnityGame.ModKit
@@ -31,9 +30,8 @@ namespace Assets.Scripts.UnityGame.ModKit
 
             settings.ModKitSelection = CurrentSelection;
             settings.WorldName = CurrentSelection.World;
-            settings.RandomSeed = settings.RandomSeed == 0
-                ? Game.DefaultRandomSeed
-                : settings.RandomSeed;
+            // A zero seed means Unity should generate a fresh seed when creating the game.
+            // Explicit scenario/test seeds remain deterministic.
         }
     }
 }

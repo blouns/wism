@@ -28,11 +28,10 @@ namespace Wism.Client.Pathing
             fastestRoute = new List<Tile>();
             distance = int.MaxValue;
 
-            // TODO: Switch to priority queue for performance (eliminate the sorting)
-            var queue = new List<PathNode>();
+            var queue = new PathNodeQueue();
+            var visited = new HashSet<PathNode>();
 
-            // Build graph and initialize queue of unvisited nodes
-            var graph = BuildGraph(map, queue, armiesToMove, target, ignoreClan);
+            var graph = BuildGraph(map, armiesToMove, target, ignoreClan);
 
             // Distance from source to source is zero
             var sourceX = armiesToMove[0].X;
@@ -49,13 +48,18 @@ namespace Wism.Client.Pathing
             }
 
             source.Distance = 0.0f;
+            queue.Enqueue(source, source.Distance);
 
             while (queue.Count > 0)
             {
-                // Node with least distance will be selected
-                queue.Sort(new DistanceComparer());
-                var currentNode = queue[0];
-                queue.RemoveAt(0);
+                var currentEntry = queue.Dequeue();
+                var currentNode = currentEntry.Node;
+                if (visited.Contains(currentNode) || currentEntry.Distance > currentNode.Distance)
+                {
+                    continue;
+                }
+
+                visited.Add(currentNode);
 
                 if (currentNode.Value == target)
                 {
@@ -79,13 +83,12 @@ namespace Wism.Client.Pathing
 
                 foreach (var neighbor in currentNode.Neighbors)
                 {
-                    UpdateNeighborIfShorter(queue, currentNode, neighbor, armiesToMove);
+                    UpdateNeighborIfShorter(queue, visited, currentNode, neighbor, armiesToMove);
                 }
             }
         }
 
-        private static PathNode[,] BuildGraph(Tile[,] map, List<PathNode> queue, List<Army> armies, Tile target,
-            bool ignoreClan)
+        private static PathNode[,] BuildGraph(Tile[,] map, List<Army> armies, Tile target, bool ignoreClan)
         {
             var mapSizeX = map.GetLength(0);
             var mapSizeY = map.GetLength(1);
@@ -104,7 +107,6 @@ namespace Wism.Client.Pathing
                         node.Value = map[x, y];
                         node.Previous = null;
                         graph[x, y] = node;
-                        queue.Add(node);
                     }
                 }
             }
@@ -204,20 +206,112 @@ namespace Wism.Client.Pathing
         }
 
         private static void UpdateNeighborIfShorter(
-            List<PathNode> queue,
+            PathNodeQueue queue,
+            HashSet<PathNode> visited,
             PathNode currentNode,
             PathNode neighborNode,
             List<Army> armiesToMove)
         {
-            if (queue.Contains(neighborNode))
+            if (neighborNode == null || visited.Contains(neighborNode))
             {
-                var altDistance = currentNode.Distance + currentNode.GetDistanceTo(neighborNode, armiesToMove);
-                if (altDistance < neighborNode.Distance)
+                return;
+            }
+
+            var altDistance = currentNode.Distance + currentNode.GetDistanceTo(neighborNode, armiesToMove);
+            if (altDistance < neighborNode.Distance)
+            {
+                neighborNode.Distance = altDistance;
+                neighborNode.Previous = currentNode;
+                queue.Enqueue(neighborNode, altDistance);
+            }
+        }
+
+        private readonly struct PathNodeQueueEntry
+        {
+            public PathNodeQueueEntry(PathNode node, float distance)
+            {
+                Node = node;
+                Distance = distance;
+            }
+
+            public PathNode Node { get; }
+            public float Distance { get; }
+        }
+
+        private sealed class PathNodeQueue
+        {
+            private readonly List<PathNodeQueueEntry> entries = new List<PathNodeQueueEntry>();
+
+            public int Count => this.entries.Count;
+
+            public void Enqueue(PathNode node, float distance)
+            {
+                this.entries.Add(new PathNodeQueueEntry(node, distance));
+                SiftUp(this.entries.Count - 1);
+            }
+
+            public PathNodeQueueEntry Dequeue()
+            {
+                var result = this.entries[0];
+                var lastIndex = this.entries.Count - 1;
+                this.entries[0] = this.entries[lastIndex];
+                this.entries.RemoveAt(lastIndex);
+                if (this.entries.Count > 0)
                 {
-                    // Shorter path found
-                    neighborNode.Distance = altDistance;
-                    neighborNode.Previous = currentNode;
+                    SiftDown(0);
                 }
+
+                return result;
+            }
+
+            private void SiftUp(int index)
+            {
+                while (index > 0)
+                {
+                    var parent = (index - 1) / 2;
+                    if (this.entries[parent].Distance <= this.entries[index].Distance)
+                    {
+                        break;
+                    }
+
+                    Swap(parent, index);
+                    index = parent;
+                }
+            }
+
+            private void SiftDown(int index)
+            {
+                while (true)
+                {
+                    var left = index * 2 + 1;
+                    var right = left + 1;
+                    var smallest = index;
+
+                    if (left < this.entries.Count && this.entries[left].Distance < this.entries[smallest].Distance)
+                    {
+                        smallest = left;
+                    }
+
+                    if (right < this.entries.Count && this.entries[right].Distance < this.entries[smallest].Distance)
+                    {
+                        smallest = right;
+                    }
+
+                    if (smallest == index)
+                    {
+                        break;
+                    }
+
+                    Swap(index, smallest);
+                    index = smallest;
+                }
+            }
+
+            private void Swap(int left, int right)
+            {
+                var temp = this.entries[left];
+                this.entries[left] = this.entries[right];
+                this.entries[right] = temp;
             }
         }
     }

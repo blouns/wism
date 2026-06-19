@@ -165,6 +165,7 @@ namespace WismUnity.Playground
                 NormalizeGeneratedScene(scene, tilemap, world, mapWidth, mapHeight);
                 ClearEditorTileCaches();
                 PaintTerrain(tilemap, tiles, mapHeight);
+                NormalizeRoadSquares(tilemap);
                 RebuildCityObjects(scene, tilemap, cities, mapHeight);
                 RebuildLocationObjects(scene, tilemap, visibleLocations, mapHeight);
                 RebuildSiteAnchorObjects(scene, siteAnchors, mapHeight);
@@ -268,6 +269,7 @@ namespace WismUnity.Playground
                 AddSceneCheck(SiteAnchorPositionsMatch(siteAnchorEntries, siteAnchors, mapHeight), checks, issues, "Scene site anchor marker positions match flipped MOD coordinates.", "Scene site anchor marker positions do not match flipped MOD coordinates.");
                 AddSceneCheck(CityFootprintsArePainted(tilemap, cities, mapHeight), checks, issues, "City markers line up with painted 2x2 city footprints.", "One or more city markers do not line up with painted 2x2 city footprints.");
                 AddSceneCheck(LocationTilesArePainted(tilemap, visibleLocations, mapHeight), checks, issues, "Location markers line up with painted location tiles.", "One or more location markers do not line up with painted location tiles.");
+                AddSceneCheck(CountRoadSquareBlocks(tilemap) == 0, checks, issues, "Generated roads contain no 2x2 square blocks.", $"Generated roads contain {CountRoadSquareBlocks(tilemap)} 2x2 square block(s).");
                 AddSceneCheck(
                     MinimapCameraMatchesMap(scene, mapWidth, mapHeight),
                     checks,
@@ -486,6 +488,113 @@ namespace WismUnity.Playground
             tilemap.RefreshAllTiles();
         }
 
+        static void NormalizeRoadSquares(Tilemap tilemap)
+        {
+            var tileAssets = LoadTileAssets();
+            if (!tileAssets.TryGetValue("Road", out var roadTile) || !tileAssets.TryGetValue("Grass", out var grassTile))
+            {
+                return;
+            }
+
+            var guard = 0;
+            while (guard++ < 256)
+            {
+                var cleared = false;
+                var bounds = tilemap.cellBounds;
+                for (var x = bounds.xMin; x < bounds.xMax - 1; x++)
+                {
+                    for (var y = bounds.yMin; y < bounds.yMax - 1; y++)
+                    {
+                        if (!IsRoadSquareBlock(tilemap, roadTile, x, y))
+                        {
+                            continue;
+                        }
+
+                        tilemap.SetTile(FindRoadSquareCellToClear(tilemap, roadTile, x, y), grassTile);
+                        cleared = true;
+                    }
+                }
+
+                if (!cleared)
+                {
+                    break;
+                }
+            }
+        }
+
+        static int CountRoadSquareBlocks(Tilemap tilemap)
+        {
+            var tileAssets = LoadTileAssets();
+            if (!tileAssets.TryGetValue("Road", out var roadTile))
+            {
+                return 0;
+            }
+
+            var count = 0;
+            var bounds = tilemap.cellBounds;
+            for (var x = bounds.xMin; x < bounds.xMax - 1; x++)
+            {
+                for (var y = bounds.yMin; y < bounds.yMax - 1; y++)
+                {
+                    if (IsRoadSquareBlock(tilemap, roadTile, x, y))
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
+        }
+
+        static bool IsRoadSquareBlock(Tilemap tilemap, TileBase roadTile, int x, int y)
+        {
+            return tilemap.GetTile(new Vector3Int(x, y, 0)) == roadTile &&
+                   tilemap.GetTile(new Vector3Int(x + 1, y, 0)) == roadTile &&
+                   tilemap.GetTile(new Vector3Int(x, y + 1, 0)) == roadTile &&
+                   tilemap.GetTile(new Vector3Int(x + 1, y + 1, 0)) == roadTile;
+        }
+
+        static Vector3Int FindRoadSquareCellToClear(Tilemap tilemap, TileBase roadTile, int x, int y)
+        {
+            var cells = new[]
+            {
+                new Vector3Int(x, y, 0),
+                new Vector3Int(x + 1, y, 0),
+                new Vector3Int(x, y + 1, 0),
+                new Vector3Int(x + 1, y + 1, 0)
+            };
+
+            return cells
+                .OrderBy(cell => CountExternalRoadNeighbors(tilemap, roadTile, cell, x, y))
+                .ThenByDescending(cell => cell.y)
+                .ThenByDescending(cell => cell.x)
+                .First();
+        }
+
+        static int CountExternalRoadNeighbors(Tilemap tilemap, TileBase roadTile, Vector3Int cell, int squareX, int squareY)
+        {
+            var count = 0;
+            foreach (var neighbor in new[]
+            {
+                new Vector3Int(cell.x - 1, cell.y, cell.z),
+                new Vector3Int(cell.x + 1, cell.y, cell.z),
+                new Vector3Int(cell.x, cell.y - 1, cell.z),
+                new Vector3Int(cell.x, cell.y + 1, cell.z)
+            })
+            {
+                if (neighbor.x >= squareX && neighbor.x <= squareX + 1 && neighbor.y >= squareY && neighbor.y <= squareY + 1)
+                {
+                    continue;
+                }
+
+                if (tilemap.GetTile(neighbor) == roadTile)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
         static void RebuildCityObjects(Scene scene, Tilemap tilemap, IReadOnlyList<JObject> cities, int mapHeight)
         {
             var container = EnsureSceneContainer<CityContainer>(scene, "Cities");
@@ -933,6 +1042,18 @@ namespace WismUnity.Playground
 
         static string ResolveLocationVisualTerrain(JObject location)
         {
+            var visualTerrain = NormalizeLocationVisualTerrain(
+                location.Value<string>("VisualTerrain") ??
+                location.Value<string>("VisualClass"));
+            var kindTerrain = NormalizeLocationVisualTerrain(
+                location.Value<string>("Kind") ??
+                location.Value<string>("Terrain"));
+
+            if (visualTerrain == "Tower" && kindTerrain != "Tower")
+            {
+                return kindTerrain;
+            }
+
             return NormalizeLocationVisualTerrain(
                 location.Value<string>("VisualTerrain") ??
                 location.Value<string>("VisualClass") ??

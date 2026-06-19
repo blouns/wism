@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using Assets.Scripts.Editors;
 using Assets.Scripts.Tilemaps;
 using NUnit.Framework;
@@ -48,5 +49,88 @@ public class CityEntryCoordinateTests
             Object.Destroy(worldTilemapObject);
             Object.Destroy(grid);
         }
+    }
+
+    [UnityTest]
+    public IEnumerator LocationEntry_ReturnsTileCoordinateForCenteredLocationMarker()
+    {
+        var grid = new GameObject("SyntheticGrid");
+        var worldTilemapObject = new GameObject("SyntheticWorldTilemap");
+        var marker = new GameObject("SyntheticLocationMarker");
+
+        try
+        {
+            grid.AddComponent<Grid>();
+            worldTilemapObject.transform.SetParent(grid.transform, false);
+            worldTilemapObject.tag = "WorldTilemap";
+
+            var tilemap = worldTilemapObject.AddComponent<Tilemap>();
+            worldTilemapObject.AddComponent<TilemapRenderer>();
+            worldTilemapObject.AddComponent<WorldTilemap>();
+
+            var cell = new Vector3Int(7, 9, 0);
+            var boundsTile = ScriptableObject.CreateInstance<Tile>();
+            tilemap.SetTile(Vector3Int.zero, boundsTile);
+            tilemap.SetTile(cell, boundsTile);
+
+            marker.transform.position = tilemap.GetCellCenterWorld(cell);
+            var locationEntry = marker.AddComponent<LocationEntry>();
+
+            yield return null;
+
+            var coords = locationEntry.GetGameCoordinates();
+            Assert.AreEqual(cell.x, coords.x);
+            Assert.AreEqual(cell.y, coords.y);
+        }
+        finally
+        {
+            Object.Destroy(marker);
+            Object.Destroy(worldTilemapObject);
+            Object.Destroy(grid);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator WorldTilemap_RoundTripsTileCentersForSelectedReticlePlacement()
+    {
+        var grid = new GameObject("SyntheticGrid");
+        var worldTilemapObject = new GameObject("SyntheticWorldTilemap");
+
+        try
+        {
+            grid.AddComponent<Grid>();
+            worldTilemapObject.transform.SetParent(grid.transform, false);
+
+            var tilemap = worldTilemapObject.AddComponent<Tilemap>();
+            worldTilemapObject.AddComponent<TilemapRenderer>();
+            var worldTilemap = worldTilemapObject.AddComponent<WorldTilemap>();
+
+            var boundsTile = ScriptableObject.CreateInstance<Tile>();
+            tilemap.SetTile(Vector3Int.zero, boundsTile);
+            tilemap.SetTile(new Vector3Int(12, 11, 0), boundsTile);
+
+            yield return null;
+
+            var worldPosition = worldTilemap.ConvertGameToUnityVector(12, 11);
+            var coords = worldTilemap.ConvertUnityToGameVector(worldPosition);
+
+            Assert.AreEqual(12, coords.x);
+            Assert.AreEqual(11, coords.y);
+            Assert.AreEqual(tilemap.GetCellCenterWorld(new Vector3Int(12, 11, 0)).x, worldPosition.x, 0.001f);
+            Assert.AreEqual(tilemap.GetCellCenterWorld(new Vector3Int(12, 11, 0)).y, worldPosition.y, 0.001f);
+        }
+        finally
+        {
+            Object.Destroy(worldTilemapObject);
+            Object.Destroy(grid);
+        }
+    }
+
+    [Test]
+    public void UnityDefaultGameSettings_LeaveSeedUnspecified()
+    {
+        var settings = UnityGameFactory.CreateDefaultGameSettings();
+
+        Assert.AreEqual(0, settings.RandomSeed);
     }
 }

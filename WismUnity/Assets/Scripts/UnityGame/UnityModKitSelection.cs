@@ -173,7 +173,7 @@ namespace Assets.Scripts.UnityGame.ModKit
                     : !string.IsNullOrWhiteSpace(selection.Launch.World)
                         ? selection.Launch.World
                         : selection.BaseWorld;
-                report.seed = selection.Launch.Seed ?? GameManager.DefaultRandom;
+                report.seed = selection.Launch.Seed ?? 0;
                 report.packCount = selection.Packs.Count;
                 report.availablePacks = ModularGameProfileCatalog.DiscoverPacksFromModRoot(report.modRoot)
                     .Select(pack => pack.Id)

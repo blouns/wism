@@ -26,7 +26,9 @@ public class CaptureModule : ITacticalModule
     private readonly CityTargetEvaluator cityTargetEvaluator;
     private readonly CombatEstimator combatEstimator;
     private readonly IWismLogger logger;
+    private readonly bool shouldLog;
     private readonly Dictionary<string, string> bidTargetByArmyKey = new Dictionary<string, string>();
+    private readonly Dictionary<string, City> bidTargetCityByArmyKey = new Dictionary<string, City>();
 
     public CaptureModule(ArmyController armyController, IWismLogger logger)
         : this(armyController, null, GarrisonPolicy.None, logger)
@@ -57,6 +59,8 @@ public class CaptureModule : ITacticalModule
         this.cityTargetEvaluator = cityTargetEvaluator;
         this.combatEstimator = combatEstimator;
         this.logger = logger;
+        this.shouldLog = logger != null &&
+                         !string.Equals(logger.GetType().Name, "SilentWismLogger", StringComparison.Ordinal);
     }
 
     public IEnumerable<IBid> GenerateBids(World world)
@@ -64,6 +68,7 @@ public class CaptureModule : ITacticalModule
         var bids = new List<IBid>();
         var player = Game.Current.GetCurrentPlayer();
         this.bidTargetByArmyKey.Clear();
+        this.bidTargetCityByArmyKey.Clear();
 
         var cities = world.GetCities()
             .Where(c => c.Clan != player.Clan)
@@ -71,13 +76,16 @@ public class CaptureModule : ITacticalModule
 
         if (cities.Count == 0)
         {
-            logger.LogInformation("[Capture] No capturable cities found.");
+            LogInformation("[Capture] No capturable cities found.");
             return bids;
         }
 
-        foreach (var city in cities)
+        if (shouldLog)
         {
-            logger.LogInformation($"[Capture] Found city at ({city.Tile.X},{city.Tile.Y}) owned by {city.Clan?.ShortName ?? "Neutral"}.");
+            foreach (var city in cities)
+            {
+                LogInformation($"[Capture] Found city at ({city.Tile.X},{city.Tile.Y}) owned by {city.Clan?.ShortName ?? "Neutral"}.");
+            }
         }
 
         var stacks = player.GetArmies()
@@ -95,7 +103,11 @@ public class CaptureModule : ITacticalModule
             var targetCity = FindBestCapturableCity(stack, CandidateCitiesForStack(leader.Tile, cities));
             if (targetCity == null)
             {
-                logger.LogInformation($"[Capture] No reachable cities found for stack at ({leader.Tile.X},{leader.Tile.Y}).");
+                if (shouldLog)
+                {
+                    logger.LogInformation($"[Capture] No reachable cities found for stack at ({leader.Tile.X},{leader.Tile.Y}).");
+                }
+
                 continue;
             }
 
@@ -106,7 +118,11 @@ public class CaptureModule : ITacticalModule
                 ? ImmediateCaptureUtility + targetScore
                 : targetScore;
 
-            logger.LogInformation($"[Capture] Bidding {bidArmies.Count} army/armies at ({leader.Tile.X},{leader.Tile.Y}) to target city at ({targetCity.Tile.X},{targetCity.Tile.Y}) with utility {utility:0.000}.");
+            if (shouldLog)
+            {
+                logger.LogInformation($"[Capture] Bidding {bidArmies.Count} army/armies at ({leader.Tile.X},{leader.Tile.Y}) to target city at ({targetCity.Tile.X},{targetCity.Tile.Y}) with utility {utility:0.000}.");
+            }
+
             RememberBidTarget(bidArmies, targetCity);
 
             bids.Add(new StrategicBid(
@@ -164,7 +180,11 @@ public class CaptureModule : ITacticalModule
         var captureArmies = SelectDirectCaptureArmies(armies, target);
         if (captureArmies.Count > 0)
         {
-            logger.LogInformation($"[Capture] Army capturing city at ({target.Tile.X},{target.Tile.Y})");
+            if (shouldLog)
+            {
+                logger.LogInformation($"[Capture] Army capturing city at ({target.Tile.X},{target.Tile.Y})");
+            }
+
             commands.Add(new CaptureCityCommand(cityController, army.Player, captureArmies, target));
             return commands;
         }
@@ -178,12 +198,19 @@ public class CaptureModule : ITacticalModule
             var minimumWinProbability = GetMinimumCityAttackWinProbability(armies, target);
             if (estimate.DefenderCount > 0 && estimate.WinProbability < minimumWinProbability)
             {
-                logger.LogInformation(
-                    $"[Capture] Holding before low-odds city attack at ({attackTile.X},{attackTile.Y}); win probability {estimate.WinProbability:0.000}, required {minimumWinProbability:0.000}.");
+                if (shouldLog)
+                {
+                    logger.LogInformation(
+                        $"[Capture] Holding before low-odds city attack at ({attackTile.X},{attackTile.Y}); win probability {estimate.WinProbability:0.000}, required {minimumWinProbability:0.000}.");
+                }
+
                 return commands;
             }
 
-            logger.LogInformation($"[Capture] Army attacking city tile at ({attackTile.X},{attackTile.Y})");
+            if (shouldLog)
+            {
+                logger.LogInformation($"[Capture] Army attacking city tile at ({attackTile.X},{attackTile.Y})");
+            }
 
             var raw = AiUtilities.GenerateAttackCommands(
                 armyController, armies, new List<ICommandAction>(), attackTile);
@@ -195,7 +222,7 @@ public class CaptureModule : ITacticalModule
                     && sel.Armies.Count == current.Count
                     && !sel.Armies.Except(current).Any())
                 {
-                    logger.LogInformation("[Capture] Skipping duplicate SelectArmyCommand");
+                    LogInformation("[Capture] Skipping duplicate SelectArmyCommand");
                     continue;
                 }
 
@@ -215,7 +242,11 @@ public class CaptureModule : ITacticalModule
         {
             if (attackPosition == army.Tile)
             {
-                logger.LogInformation($"[Capture] Stack is already at the best attack position for city at ({target.Tile.X},{target.Tile.Y}).");
+                if (shouldLog)
+                {
+                    logger.LogInformation($"[Capture] Stack is already at the best attack position for city at ({target.Tile.X},{target.Tile.Y}).");
+                }
+
                 return commands;
             }
 
@@ -225,8 +256,12 @@ public class CaptureModule : ITacticalModule
                 var estimate = this.combatEstimator.EstimateAttack(armies, blocker);
                 if (estimate.WinProbability >= MinimumBlockerAttackWinProbability)
                 {
-                    logger.LogInformation(
-                        $"[Capture] Attacking enemy blocker at ({blocker.X},{blocker.Y}) on route to city with win probability {estimate.WinProbability:0.000}.");
+                    if (shouldLog)
+                    {
+                        logger.LogInformation(
+                            $"[Capture] Attacking enemy blocker at ({blocker.X},{blocker.Y}) on route to city with win probability {estimate.WinProbability:0.000}.");
+                    }
+
                     commands.AddRange(AiUtilities.GenerateAttackCommands(
                         armyController,
                         armies,
@@ -235,17 +270,28 @@ public class CaptureModule : ITacticalModule
                     return commands;
                 }
 
-                logger.LogInformation(
-                    $"[Capture] Holding before low-odds blocker at ({blocker.X},{blocker.Y}); win probability {estimate.WinProbability:0.000}.");
+                if (shouldLog)
+                {
+                    logger.LogInformation(
+                        $"[Capture] Holding before low-odds blocker at ({blocker.X},{blocker.Y}); win probability {estimate.WinProbability:0.000}.");
+                }
+
                 return commands;
             }
 
-            logger.LogInformation($"[Capture] Army moving toward city at ({attackPosition.X},{attackPosition.Y})");
+            if (shouldLog)
+            {
+                logger.LogInformation($"[Capture] Army moving toward city at ({attackPosition.X},{attackPosition.Y})");
+            }
+
             AiUtilities.GenerateMoveCommands(armyController, armies, commands, attackPosition, routeToAttackPosition, logger);
         }
         else
         {
-            logger.LogWarning($"[Capture] Could not find valid attack position for city at ({target.Tile.X},{target.Tile.Y})");
+            if (shouldLog)
+            {
+                logger.LogWarning($"[Capture] Could not find valid attack position for city at ({target.Tile.X},{target.Tile.Y})");
+            }
         }
 
         return commands;
@@ -257,25 +303,41 @@ public class CaptureModule : ITacticalModule
         if (!string.IsNullOrWhiteSpace(key) && city != null && !string.IsNullOrWhiteSpace(city.ShortName))
         {
             this.bidTargetByArmyKey[key] = city.ShortName;
+            this.bidTargetCityByArmyKey[key] = city;
         }
     }
 
     private City FindRememberedBidTarget(List<Army> armies, World world)
     {
         var key = GetArmyKey(armies);
-        if (string.IsNullOrWhiteSpace(key) ||
-            !this.bidTargetByArmyKey.TryGetValue(key, out var cityShortName))
+        if (string.IsNullOrWhiteSpace(key))
         {
             return null;
         }
 
         var playerClan = armies[0].Player?.Clan;
+        if (this.bidTargetCityByArmyKey.TryGetValue(key, out var rememberedCity) &&
+            IsValidRememberedTarget(rememberedCity, playerClan))
+        {
+            return rememberedCity;
+        }
+
+        if (!this.bidTargetByArmyKey.TryGetValue(key, out var cityShortName))
+        {
+            return null;
+        }
+
         return world.GetCities()
             .FirstOrDefault(city =>
-                city != null &&
-                city.Tile != null &&
-                city.Clan != playerClan &&
+                IsValidRememberedTarget(city, playerClan) &&
                 string.Equals(city.ShortName, cityShortName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsValidRememberedTarget(City city, Clan playerClan)
+    {
+        return city != null &&
+               city.Tile != null &&
+               city.Clan != playerClan;
     }
 
     private static string GetArmyKey(IEnumerable<Army> armies)
@@ -321,12 +383,15 @@ public class CaptureModule : ITacticalModule
             .Where(city => CanPursueCity(armies, city))
             .ToList();
 
-        foreach (var city in viableCities
-            .OrderByDescending(c => this.cityTargetEvaluator.Score(armies, c))
-            .ThenBy(c => this.cityTargetEvaluator.GetDistanceToCity(armies[0].Tile, c))
-            .ThenBy(c => c.ShortName))
+        if (shouldLog)
         {
-            logger.LogInformation($"[Capture] Considering city at ({city.Tile.X},{city.Tile.Y}) owned by {city.Clan?.ShortName ?? "Neutral"} with pressure {this.cityTargetEvaluator.Score(armies, city):0.000}.");
+            foreach (var city in viableCities
+                .OrderByDescending(c => this.cityTargetEvaluator.Score(armies, c))
+                .ThenBy(c => this.cityTargetEvaluator.GetDistanceToCity(armies[0].Tile, c))
+                .ThenBy(c => c.ShortName))
+            {
+                logger.LogInformation($"[Capture] Considering city at ({city.Tile.X},{city.Tile.Y}) owned by {city.Clan?.ShortName ?? "Neutral"} with pressure {this.cityTargetEvaluator.Score(armies, city):0.000}.");
+            }
         }
 
         return this.cityTargetEvaluator.SelectTarget(armies, viableCities);
@@ -364,8 +429,12 @@ public class CaptureModule : ITacticalModule
             return true;
         }
 
-        logger.LogInformation(
-            $"[Capture] Skipping defended city at ({city.Tile.X},{city.Tile.Y}); best win probability {bestWinProbability:0.000}.");
+        if (shouldLog)
+        {
+            logger.LogInformation(
+                $"[Capture] Skipping defended city at ({city.Tile.X},{city.Tile.Y}); best win probability {bestWinProbability:0.000}.");
+        }
+
         return false;
     }
 
@@ -552,4 +621,22 @@ public class CaptureModule : ITacticalModule
     {
         return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
     }
+
+    private void LogInformation(string message)
+    {
+        if (shouldLog)
+        {
+            logger.LogInformation(message);
+        }
+    }
+
+    private void LogWarning(string message)
+    {
+        if (shouldLog)
+        {
+            logger.LogWarning(message);
+        }
+    }
 }
+
+

@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.Tilemaps;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Wism.Client.Core;
 
 namespace Assets.Scripts.UI
@@ -28,8 +29,29 @@ namespace Assets.Scripts.UI
 
         public void OnMouseOver()
         {
+            ApplyMouseOverCursor();
+        }
+
+        public void Update()
+        {
+            if (this.transform.name != "WorldTilemap")
+            {
+                return;
+            }
+
+            ApplyMouseOverCursor();
+        }
+
+        private void ApplyMouseOverCursor()
+        {
             if (!Game.IsInitialized())
             {
+                return;
+            }
+
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                this.cursorManager.PointCursor();
                 return;
             }
 
@@ -89,6 +111,7 @@ namespace Assets.Scripts.UI
 
             Tile tile = GetCurrentTile();
             return
+                tile != null &&
                 (tile.HasCity()) &&
                 (tile.City.Clan == Game.Current.GetCurrentPlayer().Clan);
         }
@@ -135,7 +158,7 @@ namespace Assets.Scripts.UI
 
         private bool IsInformational()
         {
-            return (this.transform.name == "WorldTilemap");
+            return this.transform.name == "WorldTilemap" && GetCurrentTile() != null;
         }
 
         private bool IsSelectable()
@@ -148,6 +171,7 @@ namespace Assets.Scripts.UI
             Tile tile = GetCurrentTile();
 
             return
+                tile != null &&
                 (tile.HasAnyArmies() &&
                 (tile.GetAllArmies()[0].Clan == Game.Current.GetCurrentPlayer().Clan));
         }
@@ -166,12 +190,7 @@ namespace Assets.Scripts.UI
 
         private Tile GetCurrentTile()
         {
-            var worldVector = this.mainCamera.ScreenToWorldPoint(Input.mousePosition);
-            var gameCoords = this.worldTilemap.ConvertUnityToGameVector(worldVector);
-            var tile = World.Current.Map[
-                Mathf.Clamp(gameCoords.x, World.Current.Map.GetLowerBound(0), World.Current.Map.GetUpperBound(0)),
-                Mathf.Clamp(gameCoords.y, World.Current.Map.GetLowerBound(1), World.Current.Map.GetUpperBound(1))];
-            return tile;
+            return this.worldTilemap.GetTileAtScreenPosition(this.mainCamera, Input.mousePosition);
         }
 
         private Vector3 GetMoveHeading()

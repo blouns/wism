@@ -264,7 +264,7 @@ public class GameSetup : MonoBehaviour
         settings.RandomStartLocations = false;
         settings.InteractiveUI = true;
         settings.IsNewGame = true;
-        settings.RandomSeed = GameManager.DefaultRandom;
+        settings.RandomSeed = 0;
         UnityModKitRuntimeSelection.ApplyTo(settings);
 
         return settings;
