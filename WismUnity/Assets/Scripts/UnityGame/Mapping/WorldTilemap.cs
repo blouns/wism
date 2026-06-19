@@ -134,7 +134,7 @@ namespace Assets.Scripts.Tilemaps
 
         public Vector2Int ConvertUnityToGameVector(Vector3 worldVector)
         {
-            return MapUtilities.ConvertUnityToGameVector(worldVector);
+            return MapUtilities.ConvertUnityToGameVector(worldVector, this);
         }
 
         private TileBase[] GetUnityTiles(out int xSize, out int ySize)
@@ -154,12 +154,17 @@ namespace Assets.Scripts.Tilemaps
 
         public Tile GetClickedTile(Camera followCamera)
         {
+            return GetTileAtScreenPosition(followCamera, Input.mousePosition);
+        }
+
+        public Tile GetTileAtScreenPosition(Camera followCamera, Vector3 screenPosition)
+        {
             if (followCamera == null || World.Current?.Map == null)
             {
                 return null;
             }
 
-            Vector3 worldPoint = followCamera.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 worldPoint = followCamera.ScreenToWorldPoint(screenPosition);
             var gameCoord = ConvertUnityToGameVector(worldPoint);
             if (gameCoord.x < 0 ||
                 gameCoord.y < 0 ||
@@ -169,9 +174,7 @@ namespace Assets.Scripts.Tilemaps
                 return null;
             }
 
-            Tile gameTile = World.Current.Map[gameCoord.x, gameCoord.y];
-
-            return gameTile;
+            return World.Current.Map[gameCoord.x, gameCoord.y];
         }
     }
 }

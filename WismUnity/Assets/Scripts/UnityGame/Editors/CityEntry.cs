@@ -8,6 +8,16 @@ namespace Assets.Scripts.Editors
     {
         public string cityShortName;
 
+        private void Awake()
+        {
+            HideRuntimeMarkerSprite();
+        }
+
+        private void OnEnable()
+        {
+            HideRuntimeMarkerSprite();
+        }
+
         public Vector2Int GetGameCoordinates()
         {
             var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
@@ -15,9 +25,24 @@ namespace Assets.Scripts.Editors
 
             var coords = worldTilemap.ConvertUnityToGameVector(this.gameObject.transform.position);
 
-            // City markers are centered on the 2x2 footprint. Convert back to
-            // the top-left tile used by WismClient city coordinates.
-            return new Vector2Int(coords.x - 1, coords.y);
+            // City markers are centered on the 2x2 footprint. The generic
+            // tile conversion reports the cell immediately below that anchor;
+            // move back to the top-left tile used by WismClient cities.
+            return new Vector2Int(coords.x, coords.y + 1);
+        }
+
+        private void HideRuntimeMarkerSprite()
+        {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
+            var spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.enabled = false;
+            }
         }
 
 #if UNITY_EDITOR
