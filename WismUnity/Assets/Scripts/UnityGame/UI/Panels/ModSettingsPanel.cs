@@ -67,15 +67,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
     {
         EnsureCamera();
         EnsureEventSystem();
-        var canvas = GetComponentInParent<Canvas>();
-        if (canvas == null)
-        {
-            canvas = gameObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            gameObject.AddComponent<CanvasScaler>();
-            gameObject.AddComponent<GraphicRaycaster>();
-        }
-        ConfigureCanvas(canvas);
+        ScreenOverlayCanvasHost.Ensure(gameObject, sortingOrder: 10);
 
         var root = CreatePanel(transform, "Mod Settings", new Vector2(32f, 32f), new Vector2(-32f, -32f));
         LayoutElement(root, 0, 760, 0);
@@ -550,21 +542,6 @@ public sealed class ModSettingsPanel : MonoBehaviour
         }
 
         new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-    }
-
-    static void ConfigureCanvas(Canvas canvas)
-    {
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        var scaler = canvas.GetComponent<CanvasScaler>() ?? canvas.gameObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1280, 720);
-        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-        scaler.matchWidthOrHeight = 0.5f;
-
-        if (canvas.GetComponent<GraphicRaycaster>() == null)
-        {
-            canvas.gameObject.AddComponent<GraphicRaycaster>();
-        }
     }
 
     static GameObject CreatePanel(Transform parent, string name, Vector2 offsetMin, Vector2 offsetMax)

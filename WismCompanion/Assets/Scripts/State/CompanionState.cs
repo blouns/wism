@@ -19,6 +19,7 @@ namespace WismCompanion.State
         private readonly Dictionary<string, DateTime> lastActiveByChannel =
             new(StringComparer.OrdinalIgnoreCase);
         private readonly LogBuffer log = new();
+        private readonly ReplayBuffer replay = new();
 
         /// <summary>Raised when the active channel's map or log changed (UI should refresh).</summary>
         public event Action Changed;
@@ -32,6 +33,8 @@ namespace WismCompanion.State
 
         public long TotalEventsReceived { get; private set; }
 
+        public ReplayViewMode ReplayMode => replay.Mode;
+
         public void SelectChannel(string channelId)
         {
             if (string.IsNullOrWhiteSpace(channelId) || string.Equals(channelId, SelectedChannel, StringComparison.OrdinalIgnoreCase))
@@ -40,6 +43,7 @@ namespace WismCompanion.State
             }
 
             SelectedChannel = channelId;
+            replay.SelectChannel(channelId);
             Changed?.Invoke();
         }
 
@@ -52,6 +56,7 @@ namespace WismCompanion.State
 
             var channel = TelemetryContext.ChannelIdOrDefault(map.Telemetry);
             latestByChannel[channel] = map;
+            replay.RecordMap(map);
             log.Add(CompanionLogEntry.FromMap(map));
             TotalEventsReceived++;
             TrackChannel(channel);
@@ -66,6 +71,7 @@ namespace WismCompanion.State
             }
 
             var channel = TelemetryContext.ChannelIdOrDefault(command.Telemetry);
+            replay.RecordCommand(command);
             log.Add(CompanionLogEntry.FromCommand(command));
             TotalEventsReceived++;
             TrackChannel(channel);
@@ -82,7 +88,71 @@ namespace WismCompanion.State
             return latestByChannel.TryGetValue(channelId, out var map) ? map : null;
         }
 
+        public MapSnapshot GetVisibleMap(string channelId)
+        {
+            return replay.GetVisibleMap(channelId, GetLatestMap(channelId));
+        }
+
         public IReadOnlyList<CompanionLogEntry> GetLog(string channelId) => log.GetEntries(channelId);
+
+        public string ReplayStatusText => replay.GetStatusText(SelectedChannel);
+
+        public IReadOnlyList<ReplayTurn> GetReplayTurns(string channelId) => replay.GetTurns(channelId);
+
+        public bool EnterReplay()
+        {
+            var changed = replay.EnterReplay(SelectedChannel);
+            if (changed)
+            {
+                Changed?.Invoke();
+            }
+
+            return changed;
+        }
+
+        public void GoLive()
+        {
+            replay.GoLive(SelectedChannel);
+            Changed?.Invoke();
+        }
+
+        public void PreviousReplayFrame()
+        {
+            if (replay.PreviousFrame(SelectedChannel))
+            {
+                Changed?.Invoke();
+            }
+        }
+
+        public void NextReplayFrame()
+        {
+            if (replay.NextFrame(SelectedChannel))
+            {
+                Changed?.Invoke();
+            }
+        }
+
+        public void PreviousReplayTurn()
+        {
+            if (replay.PreviousTurn(SelectedChannel))
+            {
+                Changed?.Invoke();
+            }
+        }
+
+        public void NextReplayTurn()
+        {
+            if (replay.NextTurn(SelectedChannel))
+            {
+                Changed?.Invoke();
+            }
+        }
+
+        public string ExportReplayJson(string channelId = null) =>
+            replay.ExportJson(string.IsNullOrWhiteSpace(channelId) ? SelectedChannel : channelId);
+
+        public string SaveReplayJson(string directory, string channelId = null) =>
+            replay.SaveJson(string.IsNullOrWhiteSpace(channelId) ? SelectedChannel : channelId, directory);
 
         /// <summary>
         /// Removes channels that have not received any message within <paramref name="timeout"/>.

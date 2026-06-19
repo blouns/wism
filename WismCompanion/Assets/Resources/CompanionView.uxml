@@ -10,6 +10,16 @@
             <ui:VisualElement class="vsep" />
             <ui:Label text="Channel" class="channel-label" />
             <ui:DropdownField name="channel-dropdown" class="channel" />
+            <ui:VisualElement class="vsep" />
+            <ui:VisualElement name="replay-dot" class="replay-dot" />
+            <ui:Label name="replay-status-label" text="Live: recording" class="replay-status" />
+            <ui:Button name="replay-prev-turn" text="|&lt;" class="replay-btn" />
+            <ui:Button name="replay-prev-frame" text="&lt;" class="replay-btn" />
+            <ui:Button name="replay-button" text="Replay" class="replay-btn" />
+            <ui:Button name="replay-next-frame" text="&gt;" class="replay-btn" />
+            <ui:Button name="replay-next-turn" text="&gt;|" class="replay-btn" />
+            <ui:Button name="replay-live" text="Live" class="replay-btn replay-btn--active" />
+            <ui:Button name="replay-save" text="Save" class="replay-btn" />
             <ui:VisualElement class="spacer" />
             <ui:Label name="stats-label" text="0 events" class="stats" />
         </ui:VisualElement>

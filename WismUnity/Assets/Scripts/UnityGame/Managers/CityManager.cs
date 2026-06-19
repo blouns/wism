@@ -32,8 +32,7 @@ namespace Assets.Scripts.Managers
 
         public void Reset()
         {
-            this.worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
-                .GetComponent<WorldTilemap>();
+            EnsureWorldTilemap();
 
             // Reset all cities to neutral
             foreach (var city in World.Current.GetCities())
@@ -83,8 +82,7 @@ namespace Assets.Scripts.Managers
 
         public void DrawCities()
         {
-            this.worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
-                .GetComponent<WorldTilemap>();
+            EnsureWorldTilemap();
 
             // Draw player-owned cities
             foreach (var player in Game.Current.Players)
@@ -143,6 +141,17 @@ namespace Assets.Scripts.Managers
             // BUGBUG: This does not work. Image is reset to the original neutral castle instead.
             this.worldTilemap.SetTile(worldVector, ScriptableObject.CreateInstance<RuinsTile>());
             this.worldTilemap.RefreshTile(worldVector);
+        }
+
+        private void EnsureWorldTilemap()
+        {
+            if (this.worldTilemap != null)
+            {
+                return;
+            }
+
+            this.worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
+                .GetComponent<WorldTilemap>();
         }
     }
 }

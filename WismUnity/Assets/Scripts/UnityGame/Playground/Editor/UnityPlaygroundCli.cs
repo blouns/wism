@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Assets.Scripts.Managers;
+using Assets.Scripts.Tilemaps;
 using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Wism.Client.Commands;
 using Wism.Client.Core;
 
@@ -239,6 +242,13 @@ namespace WismUnity.Playground
             if (string.Equals(scenarioName, "save-load-smoke", StringComparison.OrdinalIgnoreCase))
             {
                 RunSaveLoadSmoke(options, report, unityManager);
+                return;
+            }
+
+            if (string.Equals(scenarioName, "viewport-input-proof", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(scenarioName, "resolution-input-proof", StringComparison.OrdinalIgnoreCase))
+            {
+                RunViewportInputProof(options, report, unityManager);
                 return;
             }
 
@@ -643,6 +653,432 @@ namespace WismUnity.Playground
             }
         }
 
+        static void RunViewportInputProof(
+            UnityPlaygroundOptions options,
+            UnityPlaygroundReport report,
+            UnityManager unityManager)
+        {
+            var requestedWidth = options.ScreenWidth > 0 ? options.ScreenWidth : Screen.width;
+            var requestedHeight = options.ScreenHeight > 0 ? options.ScreenHeight : Screen.height;
+            var gameViewSizeApplied = false;
+            var gameViewSizeEvidence = "No explicit screen target requested.";
+            var selectedGameViewWidth = 0;
+            var selectedGameViewHeight = 0;
+            var selectedGameViewEvidence = "Selected Editor GameView size was not inspected.";
+            if (options.ScreenWidth > 0 && options.ScreenHeight > 0)
+            {
+                Screen.SetResolution(options.ScreenWidth, options.ScreenHeight, false);
+                gameViewSizeApplied = TryApplyEditorGameViewSize(
+                    options.ScreenWidth,
+                    options.ScreenHeight,
+                    string.IsNullOrWhiteSpace(options.ScreenLabel) ? options.RunId : options.ScreenLabel,
+                    out gameViewSizeEvidence);
+                TryReadSelectedEditorGameViewSize(out selectedGameViewWidth, out selectedGameViewHeight, out selectedGameViewEvidence);
+                report.events.Add($"Requested Game view resolution {options.ScreenWidth}x{options.ScreenHeight}.");
+                report.events.Add(gameViewSizeEvidence);
+                report.events.Add(selectedGameViewEvidence);
+            }
+
+            var sample = CollectViewportInputSample(
+                unityManager.gameObject.scene,
+                options,
+                requestedWidth,
+                requestedHeight,
+                gameViewSizeApplied,
+                gameViewSizeEvidence,
+                selectedGameViewWidth,
+                selectedGameViewHeight,
+                selectedGameViewEvidence);
+            var passed = sample.uiPanel != null &&
+                         sample.uiPanel.found &&
+                         sample.uiPanel.active &&
+                         sample.uiPanel.width > 0f &&
+                         sample.uiPanel.height > 0f &&
+                         string.Equals(sample.screenToMap.status, "Passed", StringComparison.OrdinalIgnoreCase) &&
+                         string.Equals(sample.minimap.status, "Passed", StringComparison.OrdinalIgnoreCase) &&
+                         (!options.RequireActualResolution ||
+                          sample.actualResolutionMatchesRequested ||
+                          sample.selectedGameViewSizeMatchesRequested);
+
+            if (options.CaptureScreenshot)
+            {
+                sample.screenshotPath = CaptureScreenshot(options.OutputDirectory, options.RunId + "-" + SafeFileName(sample.label));
+                report.screenshots.Add(new UnityPlaygroundScreenshotEntry
+                {
+                    label = sample.label,
+                    path = sample.screenshotPath
+                });
+            }
+
+            report.viewportInputProof = new UnityPlaygroundViewportInputProof
+            {
+                status = passed ? "Passed" : "Failed",
+                outcome = passed
+                    ? "Viewport, UI panel, screen-to-map, and minimap coordinate proofs passed for the requested target."
+                    : "One or more viewport, UI, screen-to-map, or minimap coordinate proofs failed.",
+                supportedTargets = SupportedViewportTargets(),
+                fixedSizeAssumptions = FixedSizeAssumptions(),
+                sample = sample
+            };
+            report.scenario = new UnityPlaygroundScenarioSummary
+            {
+                name = "viewport-input-proof",
+                status = passed ? "Passed" : "Failed",
+                outcome = report.viewportInputProof.outcome,
+                maxTicks = options.MaxTicks,
+                ticksRun = 0,
+                startLastCommandId = unityManager.LastCommandId,
+                endLastCommandId = unityManager.LastCommandId,
+                queuedCommandCount = 0,
+                executedCommandCount = 0,
+                startingClan = CurrentClanName(),
+                endingClan = CurrentClanName()
+            };
+
+            report.events.Add($"viewport-input-proof {sample.label}: requested={sample.requestedWidth}x{sample.requestedHeight}, actual={sample.actualWidth}x{sample.actualHeight}, actualMatch={sample.actualResolutionMatchesRequested}, selectedGameView={sample.selectedGameViewWidth}x{sample.selectedGameViewHeight}, selectedMatch={sample.selectedGameViewSizeMatchesRequested}, minimap={sample.minimap.status}, screenToMap={sample.screenToMap.status}.");
+            if (!passed)
+            {
+                report.status = "Failed";
+                report.outcome = report.scenario.outcome;
+            }
+        }
+
+        static UnityPlaygroundViewportSample CollectViewportInputSample(
+            Scene scene,
+            UnityPlaygroundOptions options,
+            int requestedWidth,
+            int requestedHeight,
+            bool gameViewSizeApplied,
+            string gameViewSizeEvidence,
+            int selectedGameViewWidth,
+            int selectedGameViewHeight,
+            string selectedGameViewEvidence)
+        {
+            var label = string.IsNullOrWhiteSpace(options.ScreenLabel)
+                ? $"{requestedWidth}x{requestedHeight}"
+                : options.ScreenLabel;
+            var mainCamera = FindSceneObject(scene, "MainCamera")?.GetComponent<Camera>();
+            var tilemap = FindSceneObject(scene, "WorldTilemap")?.GetComponent<WorldTilemap>();
+            if (tilemap != null)
+            {
+                tilemap.Start();
+            }
+
+            var world = TryGetCurrentWorld();
+            var mapWidth = world?.Map?.GetLength(0) ?? 0;
+            var mapHeight = world?.Map?.GetLength(1) ?? 0;
+            return new UnityPlaygroundViewportSample
+            {
+                label = label,
+                requestedWidth = requestedWidth,
+                requestedHeight = requestedHeight,
+                actualWidth = Screen.width,
+                actualHeight = Screen.height,
+                actualResolutionMatchesRequested = Screen.width == requestedWidth && Screen.height == requestedHeight,
+                selectedGameViewSizeMatchesRequested = selectedGameViewWidth == requestedWidth && selectedGameViewHeight == requestedHeight,
+                selectedGameViewWidth = selectedGameViewWidth,
+                selectedGameViewHeight = selectedGameViewHeight,
+                selectedGameViewEvidence = selectedGameViewEvidence,
+                gameViewSizeApplied = gameViewSizeApplied,
+                gameViewSizeEvidence = gameViewSizeEvidence,
+                resolutionEvidence = Screen.width == requestedWidth && Screen.height == requestedHeight
+                    ? $"Actual Game view resolution matched requested {requestedWidth}x{requestedHeight}."
+                    : $"Actual Game view resolution was {Screen.width}x{Screen.height} after requested {requestedWidth}x{requestedHeight}.",
+                cameraAspect = mainCamera != null ? mainCamera.aspect : 0f,
+                cameraOrthographicSize = mainCamera != null ? mainCamera.orthographicSize : 0f,
+                cursorScale = CursorManager.CalculateViewportScale(Screen.height, 0.45f, 1f),
+                uiPanel = CollectUiPanelProof(scene),
+                screenToMap = CollectScreenToMapProof(mainCamera, tilemap),
+                minimap = CollectMinimapProof(scene, mapWidth, mapHeight)
+            };
+        }
+
+        static bool TryApplyEditorGameViewSize(int width, int height, string label, out string evidence)
+        {
+            evidence = "Editor GameView size reflection was not attempted.";
+            if (width <= 0 || height <= 0)
+            {
+                evidence = "Editor GameView size reflection skipped because requested dimensions were invalid.";
+                return false;
+            }
+
+            try
+            {
+                var editorAssembly = typeof(EditorWindow).Assembly;
+                var gameViewType = editorAssembly.GetType("UnityEditor.GameView");
+                var gameViewSizesType = editorAssembly.GetType("UnityEditor.GameViewSizes");
+                var gameViewSizeType = editorAssembly.GetType("UnityEditor.GameViewSize");
+                var gameViewSizeTypeEnum = editorAssembly.GetType("UnityEditor.GameViewSizeType");
+                if (gameViewType == null ||
+                    gameViewSizesType == null ||
+                    gameViewSizeType == null ||
+                    gameViewSizeTypeEnum == null)
+                {
+                    evidence = "Editor GameView reflection types were unavailable.";
+                    return false;
+                }
+
+                var singletonType = typeof(ScriptableSingleton<>).MakeGenericType(gameViewSizesType);
+                var instance = singletonType
+                    .GetProperty("instance", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                    ?.GetValue(null);
+                var getGroup = gameViewSizesType.GetMethod("GetGroup", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (instance == null || getGroup == null)
+                {
+                    evidence = "Editor GameView size singleton or group accessor was unavailable.";
+                    return false;
+                }
+
+                var group = getGroup.Invoke(instance, new object[] { GameViewSizeGroupType.Standalone });
+                if (group == null)
+                {
+                    evidence = "Editor GameView Standalone size group was unavailable.";
+                    return false;
+                }
+
+                var groupType = group.GetType();
+                var getBuiltinCount = groupType.GetMethod("GetBuiltinCount", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var getCustomCount = groupType.GetMethod("GetCustomCount", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var addCustomSize = groupType.GetMethod("AddCustomSize", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var removeCustomSize = groupType.GetMethod("RemoveCustomSize", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var getGameViewSize = groupType.GetMethod("GetGameViewSize", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (addCustomSize == null || getGameViewSize == null)
+                {
+                    evidence = "Editor GameView size group mutation methods were unavailable.";
+                    return false;
+                }
+
+                var builtinCount = getBuiltinCount != null ? (int)getBuiltinCount.Invoke(group, null) : 0;
+                var totalCount = builtinCount + (getCustomCount != null ? (int)getCustomCount.Invoke(group, null) : 0);
+                for (var index = totalCount - 1; index >= builtinCount; index--)
+                {
+                    var existingSize = getGameViewSize.Invoke(group, new object[] { index });
+                    if (existingSize == null)
+                    {
+                        continue;
+                    }
+
+                    var existingWidth = (int)(gameViewSizeType.GetProperty("width")?.GetValue(existingSize) ?? -1);
+                    var existingHeight = (int)(gameViewSizeType.GetProperty("height")?.GetValue(existingSize) ?? -1);
+                    if (existingWidth == width && existingHeight == height)
+                    {
+                        SelectEditorGameViewSize(gameViewType, index, width, height);
+                        evidence = $"Selected existing Editor GameView size {width}x{height} at index {index}.";
+                        return true;
+                    }
+                }
+
+                var fixedResolution = Enum.Parse(gameViewSizeTypeEnum, "FixedResolution");
+                var customSize = Activator.CreateInstance(gameViewSizeType, fixedResolution, width, height, label);
+                addCustomSize.Invoke(group, new[] { customSize });
+                var customIndex = builtinCount + (getCustomCount != null ? (int)getCustomCount.Invoke(group, null) : 1) - 1;
+                SelectEditorGameViewSize(gameViewType, customIndex, width, height);
+                evidence = $"Added and selected Editor GameView fixed resolution {width}x{height} at index {customIndex}.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                evidence = $"Editor GameView size reflection failed: {ex.GetType().Name}: {ex.Message}";
+                return false;
+            }
+        }
+
+        static bool TryReadSelectedEditorGameViewSize(out int width, out int height, out string evidence)
+        {
+            width = 0;
+            height = 0;
+            evidence = "Selected Editor GameView size reflection was not attempted.";
+            try
+            {
+                var editorAssembly = typeof(EditorWindow).Assembly;
+                var gameViewType = editorAssembly.GetType("UnityEditor.GameView");
+                var gameViewSizesType = editorAssembly.GetType("UnityEditor.GameViewSizes");
+                var gameViewSizeType = editorAssembly.GetType("UnityEditor.GameViewSize");
+                if (gameViewType == null || gameViewSizesType == null || gameViewSizeType == null)
+                {
+                    evidence = "Selected Editor GameView reflection types were unavailable.";
+                    return false;
+                }
+
+                var gameView = EditorWindow.GetWindow(gameViewType);
+                var selectedSizeIndex = gameViewType.GetProperty("selectedSizeIndex", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var index = selectedSizeIndex != null ? (int)selectedSizeIndex.GetValue(gameView) : -1;
+                if (index < 0)
+                {
+                    evidence = "Selected Editor GameView size index was unavailable.";
+                    return false;
+                }
+
+                var singletonType = typeof(ScriptableSingleton<>).MakeGenericType(gameViewSizesType);
+                var instance = singletonType
+                    .GetProperty("instance", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                    ?.GetValue(null);
+                var getGroup = gameViewSizesType.GetMethod("GetGroup", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var group = getGroup?.Invoke(instance, new object[] { GameViewSizeGroupType.Standalone });
+                var getGameViewSize = group?.GetType().GetMethod("GetGameViewSize", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var selectedSize = getGameViewSize?.Invoke(group, new object[] { index });
+                if (selectedSize == null)
+                {
+                    evidence = $"Selected Editor GameView size object was unavailable for index {index}.";
+                    return false;
+                }
+
+                width = (int)(gameViewSizeType.GetProperty("width")?.GetValue(selectedSize) ?? 0);
+                height = (int)(gameViewSizeType.GetProperty("height")?.GetValue(selectedSize) ?? 0);
+                evidence = $"Selected Editor GameView fixed size reports {width}x{height} at index {index}.";
+                return width > 0 && height > 0;
+            }
+            catch (Exception ex)
+            {
+                evidence = $"Selected Editor GameView size reflection failed: {ex.GetType().Name}: {ex.Message}";
+                return false;
+            }
+        }
+
+        static void SelectEditorGameViewSize(Type gameViewType, int index, int width, int height)
+        {
+            var gameView = EditorWindow.GetWindow(gameViewType);
+            var selectedSizeIndex = gameViewType.GetProperty("selectedSizeIndex", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            selectedSizeIndex?.SetValue(gameView, index);
+            gameView.minSize = new Vector2(width, height);
+            gameView.position = new Rect(0f, 0f, width, height);
+            gameView.Repaint();
+            EditorApplication.QueuePlayerLoopUpdate();
+        }
+
+        static UnityPlaygroundUiPanelProof CollectUiPanelProof(Scene scene)
+        {
+            var panelObject = FindSceneObject(scene, "MinimapPanel");
+            var panel = panelObject?.GetComponent<RectTransform>();
+            var graphic = panelObject?.GetComponent<Graphic>();
+            return new UnityPlaygroundUiPanelProof
+            {
+                name = "MinimapPanel",
+                found = panel != null,
+                active = panelObject != null && panelObject.activeInHierarchy,
+                width = panel != null ? panel.rect.width : 0f,
+                height = panel != null ? panel.rect.height : 0f,
+                anchoredX = panel != null ? panel.anchoredPosition.x : 0f,
+                anchoredY = panel != null ? panel.anchoredPosition.y : 0f,
+                raycastTarget = graphic != null ? graphic.raycastTarget.ToString() : "missing"
+            };
+        }
+
+        static UnityPlaygroundScreenToMapProof CollectScreenToMapProof(Camera mainCamera, WorldTilemap tilemap)
+        {
+            var screenX = Screen.width * 0.5f;
+            var screenY = Screen.height * 0.5f;
+            if (mainCamera == null || tilemap == null)
+            {
+                return new UnityPlaygroundScreenToMapProof
+                {
+                    status = "Failed",
+                    evidence = "MainCamera or WorldTilemap was missing.",
+                    screenX = screenX,
+                    screenY = screenY,
+                    tileX = -1,
+                    tileY = -1
+                };
+            }
+
+            var tile = tilemap.GetTileAtScreenPosition(mainCamera, new Vector3(screenX, screenY, 0f));
+            return new UnityPlaygroundScreenToMapProof
+            {
+                status = tile != null ? "Passed" : "Failed",
+                evidence = tile != null
+                    ? $"Screen center resolves to map tile {tile.X},{tile.Y}."
+                    : "Screen center did not resolve to an in-bounds map tile.",
+                screenX = screenX,
+                screenY = screenY,
+                tileX = tile != null ? tile.X : -1,
+                tileY = tile != null ? tile.Y : -1
+            };
+        }
+
+        static UnityPlaygroundMinimapProof CollectMinimapProof(Scene scene, int mapWidth, int mapHeight)
+        {
+            var minimapObject = FindSceneObject(scene, "Minimap");
+            var minimapRect = minimapObject?.GetComponent<RectTransform>();
+            if (minimapRect == null)
+            {
+                return new UnityPlaygroundMinimapProof
+                {
+                    status = "Failed",
+                    evidence = "Minimap RectTransform was missing."
+                };
+            }
+
+            var corners = new Vector3[4];
+            minimapRect.GetWorldCorners(corners);
+            var center = (corners[0] + corners[2]) * 0.5f;
+            var screenPoint = RectTransformUtility.WorldToScreenPoint(null, center);
+            var projected = MinimapInteraction.TryProjectMinimapScreenPointToMapTarget(
+                minimapRect,
+                screenPoint,
+                null,
+                mapWidth,
+                mapHeight,
+                out var target);
+            var expectedX = mapWidth * 0.5f;
+            var expectedY = mapHeight * 0.5f;
+            var targetMatches = projected &&
+                                Mathf.Abs(target.x - expectedX) <= 0.51f &&
+                                Mathf.Abs(target.y - expectedY) <= 0.51f;
+            return new UnityPlaygroundMinimapProof
+            {
+                status = targetMatches ? "Passed" : "Failed",
+                evidence = targetMatches
+                    ? $"Minimap center projects to map target {target.x:0.##},{target.y:0.##}."
+                    : "Minimap center did not project to the expected map target.",
+                screenX = screenPoint.x,
+                screenY = screenPoint.y,
+                targetX = projected ? target.x : -1f,
+                targetY = projected ? target.y : -1f,
+                expectedX = expectedX,
+                expectedY = expectedY
+            };
+        }
+
+        static UnityPlaygroundViewportTarget[] SupportedViewportTargets()
+        {
+            return new[]
+            {
+                new UnityPlaygroundViewportTarget
+                {
+                    label = "baseline-window",
+                    width = 1280,
+                    height = 720,
+                    purpose = "Primary windowed desktop baseline and CanvasScaler reference resolution."
+                },
+                new UnityPlaygroundViewportTarget
+                {
+                    label = "common-window",
+                    width = 1366,
+                    height = 768,
+                    purpose = "Common compact laptop/windowed target."
+                },
+                new UnityPlaygroundViewportTarget
+                {
+                    label = "full-hd",
+                    width = 1920,
+                    height = 1080,
+                    purpose = "Primary full-size desktop target."
+                }
+            };
+        }
+
+        static string[] FixedSizeAssumptions()
+        {
+            return new[]
+            {
+                "CameraFollow derives orthographic size from Screen.height and its scene scale field.",
+                "CursorManager scales overlay cursors against a 720px reference height and clamps the result.",
+                "WorldTilemap screen picking converts Input.mousePosition through the main camera ScreenToWorldPoint path.",
+                "MinimapInteraction maps the Minimap RectTransform local point into World.Current.Map dimensions.",
+                "MinimapPanel and Minimap RectTransform geometry are the click target for the minimap path."
+            };
+        }
+
         static int EnsureRunning(UnityManager unityManager)
         {
             var ticks = 0;
@@ -976,8 +1412,49 @@ namespace WismUnity.Playground
         static string CaptureScreenshot(string outputDirectory, string runId)
         {
             var path = Path.Combine(outputDirectory, $"{runId}.png");
-            ScreenCapture.CaptureScreenshot(path);
+            var width = Mathf.Max(1, Screen.width);
+            var height = Mathf.Max(1, Screen.height);
+            var camera = UnityEngine.Object.FindObjectsOfType<Camera>()
+                .Where(item => item != null && item.enabled && item.gameObject.activeInHierarchy)
+                .OrderBy(item => item.depth)
+                .FirstOrDefault();
+            if (camera == null)
+            {
+                ScreenCapture.CaptureScreenshot(path);
+                return path;
+            }
+
+            var previousTarget = camera.targetTexture;
+            var previousActive = RenderTexture.active;
+            var renderTexture = new RenderTexture(width, height, 24);
+            var texture = new Texture2D(width, height, TextureFormat.RGB24, false);
+            try
+            {
+                camera.targetTexture = renderTexture;
+                RenderTexture.active = renderTexture;
+                camera.Render();
+                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                texture.Apply();
+                File.WriteAllBytes(path, texture.EncodeToPNG());
+            }
+            finally
+            {
+                camera.targetTexture = previousTarget;
+                RenderTexture.active = previousActive;
+                renderTexture.Release();
+                UnityEngine.Object.DestroyImmediate(renderTexture);
+                UnityEngine.Object.DestroyImmediate(texture);
+            }
+
             return path;
+        }
+
+        static string SafeFileName(string value)
+        {
+            var invalid = Path.GetInvalidFileNameChars();
+            return new string((value ?? string.Empty)
+                .Select(ch => invalid.Contains(ch) ? '-' : ch)
+                .ToArray());
         }
 
         static void WriteManifest(string outputDirectory, UnityPlaygroundReport report)
@@ -998,6 +1475,15 @@ namespace WismUnity.Playground
                     yield return nested;
                 }
             }
+        }
+
+        static GameObject FindSceneObject(Scene scene, string name)
+        {
+            return scene.IsValid()
+                ? scene.GetRootGameObjects()
+                    .SelectMany(Flatten)
+                    .FirstOrDefault(go => string.Equals(go.name, name, StringComparison.OrdinalIgnoreCase))
+                : null;
         }
 
         static string[] GetLoadedDirtyScenes()
@@ -1036,6 +1522,10 @@ namespace WismUnity.Playground
             public bool Fuzz;
             public int MaxCommandStalls = 12;
             public string HumanDecisionScriptPath = string.Empty;
+            public int ScreenWidth = 0;
+            public int ScreenHeight = 0;
+            public string ScreenLabel = string.Empty;
+            public bool RequireActualResolution;
 
             public static UnityPlaygroundOptions FromCommandLine(string[] args)
             {
@@ -1065,6 +1555,10 @@ namespace WismUnity.Playground
                 options.Fuzz = ReadBool(values, "fuzz", false);
                 options.MaxCommandStalls = ReadInt(values, "maxCommandStalls", options.MaxCommandStalls);
                 options.HumanDecisionScriptPath = Read(values, "humanDecisionScript", Read(values, "human-decision-script", options.HumanDecisionScriptPath));
+                options.ScreenWidth = ReadInt(values, "screenWidth", ReadInt(values, "screen-width", options.ScreenWidth));
+                options.ScreenHeight = ReadInt(values, "screenHeight", ReadInt(values, "screen-height", options.ScreenHeight));
+                options.ScreenLabel = Read(values, "screenLabel", Read(values, "screen-label", options.ScreenLabel));
+                options.RequireActualResolution = ReadBool(values, "requireActualResolution", ReadBool(values, "require-actual-resolution", false));
                 var outputRoot = Read(values, "out", options.OutputDirectory);
                 options.OutputDirectory = Path.GetFullPath(Path.Combine(outputRoot, options.RunId));
                 return options;

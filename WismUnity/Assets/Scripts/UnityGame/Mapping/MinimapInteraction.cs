@@ -13,11 +13,7 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
     void Start()
     {
         AddPhysics2DRaycaster();
-
-        this.mainCameraFollow = UnityUtilities.GameObjectHardFind("MainCamera")
-            .GetComponent<CameraFollow>();
-        this.mainCamera = UnityUtilities.GameObjectHardFind("MainCamera")
-            .GetComponent<Camera>();
+        EnsureCameraReferences();
     }
 
     void AddPhysics2DRaycaster()
@@ -46,29 +42,56 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
 
             RectTransform panelRect = UnityUtilities.GameObjectHardFind("Minimap")
                 .GetComponent<RectTransform>();
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            if (!TryProjectMinimapScreenPointToMapTarget(
                 panelRect,
                 eventData.position,
                 eventData.pressEventCamera,
-                out var localPoint))
+                World.Current.Map.GetLength(0),
+                World.Current.Map.GetLength(1),
+                out var target))
             {
                 return;
             }
 
-            var rect = panelRect.rect;
-            float miniNormalX = Mathf.Clamp01((localPoint.x - rect.xMin) / rect.width);
-            float miniNormalY = Mathf.Clamp01((localPoint.y - rect.yMin) / rect.height);
-            if (localPoint.x < rect.xMin || localPoint.x > rect.xMax ||
-                localPoint.y < rect.yMin || localPoint.y > rect.yMax)
-            {
-                return;
-            }
-
-            float x = miniNormalX * World.Current.Map.GetLength(0);
-            float y = miniNormalY * World.Current.Map.GetLength(1);
-
-            this.mainCameraFollow.SetCameraTarget(new Vector3(x, y, 0f));
+            EnsureCameraReferences();
+            this.mainCameraFollow.SetCameraTarget(target);
         }
+    }
+
+    public static bool TryProjectMinimapScreenPointToMapTarget(
+        RectTransform panelRect,
+        Vector2 screenPosition,
+        Camera eventCamera,
+        int mapWidth,
+        int mapHeight,
+        out Vector3 target)
+    {
+        target = Vector3.zero;
+        if (panelRect == null || mapWidth <= 0 || mapHeight <= 0)
+        {
+            return false;
+        }
+
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            panelRect,
+            screenPosition,
+            eventCamera,
+            out var localPoint))
+        {
+            return false;
+        }
+
+        var rect = panelRect.rect;
+        if (localPoint.x < rect.xMin || localPoint.x > rect.xMax ||
+            localPoint.y < rect.yMin || localPoint.y > rect.yMax)
+        {
+            return false;
+        }
+
+        float miniNormalX = Mathf.Clamp01((localPoint.x - rect.xMin) / rect.width);
+        float miniNormalY = Mathf.Clamp01((localPoint.y - rect.yMin) / rect.height);
+        target = new Vector3(miniNormalX * mapWidth, miniNormalY * mapHeight, 0f);
+        return true;
     }
 
     private UnityManager GetUnityManager()
@@ -80,5 +103,20 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
         }
 
         return this.unityManager;
+    }
+
+    private void EnsureCameraReferences()
+    {
+        if (this.mainCameraFollow == null)
+        {
+            this.mainCameraFollow = UnityUtilities.GameObjectHardFind("MainCamera")
+                .GetComponent<CameraFollow>();
+        }
+
+        if (this.mainCamera == null)
+        {
+            this.mainCamera = UnityUtilities.GameObjectHardFind("MainCamera")
+                .GetComponent<Camera>();
+        }
     }
 }

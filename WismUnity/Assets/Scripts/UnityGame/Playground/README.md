@@ -18,6 +18,17 @@ Run with the Unity editor closed:
 The runner writes `manifest.json` under the requested artifact root and restores the original editor scene setup without saving.
 Add `advanceBootstrap=true` only when you intentionally want the runner to tick the runtime bootstrap path in editor/batchmode.
 
+Use `scenario=viewport-input-proof` with `screenWidth=<w>` and
+`screenHeight=<h>` to capture beta-readiness evidence for a specific supported
+desktop/windowed target. The manifest records the supported viewport list, known
+fixed-size assumptions, MinimapPanel geometry, screen-to-map conversion, minimap
+coordinate projection, and an optional screenshot when `screenshot=true`.
+Add `requireActualResolution=true` when the proof must fail unless either the
+runtime `Screen.width`/`Screen.height` or the selected Editor GameView fixed
+resolution matches the requested target. In non-batch Editor runs, the manifest
+records both values because edit-mode `Screen` dimensions can differ from the
+selected GameView size.
+
 Add `profile=<id>` and `packs=a,b` to exercise the Mod Kit selection path. When
 these arguments are present, the runner resolves the profile from
 `Assets\Plugins\WismClient\Mods`, applies the selected packs to `ModFactory`,

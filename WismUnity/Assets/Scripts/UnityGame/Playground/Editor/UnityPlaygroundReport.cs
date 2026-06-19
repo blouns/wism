@@ -29,6 +29,7 @@ namespace WismUnity.Playground
         public UnityPlaygroundScenarioSummary scenario;
         public UnityPlaygroundConsoleSummary console;
         public UnityPlaygroundMixedModeSummary mixedMode;
+        public UnityPlaygroundViewportInputProof viewportInputProof;
         public List<UnityPlaygroundInvariantEntry> invariants = new List<UnityPlaygroundInvariantEntry>();
         public List<UnityPlaygroundScreenshotEntry> screenshots = new List<UnityPlaygroundScreenshotEntry>();
         public List<UnityPlaygroundCommandTraceEntry> commandTrace = new List<UnityPlaygroundCommandTraceEntry>();
@@ -101,6 +102,87 @@ namespace WismUnity.Playground
         public string humanDecisionScriptPath;
         public string[] humanClans = new string[0];
         public string[] aiClans = new string[0];
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundViewportInputProof
+    {
+        public string status;
+        public string outcome;
+        public UnityPlaygroundViewportTarget[] supportedTargets = new UnityPlaygroundViewportTarget[0];
+        public string[] fixedSizeAssumptions = new string[0];
+        public UnityPlaygroundViewportSample sample;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundViewportTarget
+    {
+        public string label;
+        public int width;
+        public int height;
+        public string purpose;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundViewportSample
+    {
+        public string label;
+        public int requestedWidth;
+        public int requestedHeight;
+        public int actualWidth;
+        public int actualHeight;
+        public bool actualResolutionMatchesRequested;
+        public bool selectedGameViewSizeMatchesRequested;
+        public int selectedGameViewWidth;
+        public int selectedGameViewHeight;
+        public string selectedGameViewEvidence;
+        public bool gameViewSizeApplied;
+        public string gameViewSizeEvidence;
+        public string resolutionEvidence;
+        public float cameraAspect;
+        public float cameraOrthographicSize;
+        public float cursorScale;
+        public UnityPlaygroundUiPanelProof uiPanel;
+        public UnityPlaygroundScreenToMapProof screenToMap;
+        public UnityPlaygroundMinimapProof minimap;
+        public string screenshotPath;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundUiPanelProof
+    {
+        public string name;
+        public bool found;
+        public bool active;
+        public float width;
+        public float height;
+        public float anchoredX;
+        public float anchoredY;
+        public string raycastTarget;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundScreenToMapProof
+    {
+        public string status;
+        public string evidence;
+        public float screenX;
+        public float screenY;
+        public int tileX;
+        public int tileY;
+    }
+
+    [System.Serializable]
+    public sealed class UnityPlaygroundMinimapProof
+    {
+        public string status;
+        public string evidence;
+        public float screenX;
+        public float screenY;
+        public float targetX;
+        public float targetY;
+        public float expectedX;
+        public float expectedY;
     }
 
     [System.Serializable]

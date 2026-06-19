@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
 using WismCompanion.State;
@@ -26,6 +27,15 @@ namespace WismCompanion.UI
         private readonly Label statusLabel;
         private readonly DropdownField channelDropdown;
         private readonly Label statsLabel;
+        private readonly VisualElement replayDot;
+        private readonly Label replayStatusLabel;
+        private readonly Button replayButton;
+        private readonly Button replayPreviousTurnButton;
+        private readonly Button replayPreviousFrameButton;
+        private readonly Button replayNextFrameButton;
+        private readonly Button replayNextTurnButton;
+        private readonly Button replayLiveButton;
+        private readonly Button replaySaveButton;
 
         private readonly VisualElement emptyState;
         private readonly VisualElement emptySpinner;
@@ -48,6 +58,15 @@ namespace WismCompanion.UI
             statusLabel = root.Q<Label>("status-label");
             channelDropdown = root.Q<DropdownField>("channel-dropdown");
             statsLabel = root.Q<Label>("stats-label");
+            replayDot = root.Q<VisualElement>("replay-dot");
+            replayStatusLabel = root.Q<Label>("replay-status-label");
+            replayButton = root.Q<Button>("replay-button");
+            replayPreviousTurnButton = root.Q<Button>("replay-prev-turn");
+            replayPreviousFrameButton = root.Q<Button>("replay-prev-frame");
+            replayNextFrameButton = root.Q<Button>("replay-next-frame");
+            replayNextTurnButton = root.Q<Button>("replay-next-turn");
+            replayLiveButton = root.Q<Button>("replay-live");
+            replaySaveButton = root.Q<Button>("replay-save");
 
             emptyState = root.Q<VisualElement>("empty-state");
             emptySpinner = root.Q<VisualElement>("empty-spinner");
@@ -78,6 +97,21 @@ namespace WismCompanion.UI
             {
                 connectButton.clicked += () => ConnectRequested?.Invoke(hostField != null ? hostField.value : null);
             }
+
+            if (replayButton != null)
+                replayButton.clicked += () => state.EnterReplay();
+            if (replayPreviousTurnButton != null)
+                replayPreviousTurnButton.clicked += () => state.PreviousReplayTurn();
+            if (replayPreviousFrameButton != null)
+                replayPreviousFrameButton.clicked += () => state.PreviousReplayFrame();
+            if (replayNextFrameButton != null)
+                replayNextFrameButton.clicked += () => state.NextReplayFrame();
+            if (replayNextTurnButton != null)
+                replayNextTurnButton.clicked += () => state.NextReplayTurn();
+            if (replayLiveButton != null)
+                replayLiveButton.clicked += () => state.GoLive();
+            if (replaySaveButton != null)
+                replaySaveButton.clicked += SaveReplay;
 
             channelDropdown?.RegisterValueChangedCallback(evt =>
             {
@@ -166,10 +200,11 @@ namespace WismCompanion.UI
         private void Refresh()
         {
             var channel = state.SelectedChannel;
-            var map = state.GetLatestMap(channel);
+            var map = state.GetVisibleMap(channel);
 
             mapView.SetSnapshot(map);
             logView.SetEntries(state.GetLog(channel));
+            RefreshReplayControls();
 
             if (statsLabel != null)
             {
@@ -181,7 +216,7 @@ namespace WismCompanion.UI
                 {
                     var armies = map.Armies?.Count ?? 0;
                     var cities = map.Cities?.Count ?? 0;
-                    statsLabel.text = $"{map.Width}x{map.Height} · {armies} armies · {cities} cities · {state.TotalEventsReceived} events";
+                    statsLabel.text = $"{map.Width}x{map.Height} · {armies} armies · {cities} cities · {state.TotalEventsReceived} events · {state.ReplayStatusText}";
                 }
             }
 
@@ -224,7 +259,60 @@ namespace WismCompanion.UI
 
         private void OnMapSelection(MapSelection selection)
         {
-            inspector.Show(selection, state.GetLatestMap(state.SelectedChannel));
+            inspector.Show(selection, state.GetVisibleMap(state.SelectedChannel));
+        }
+
+        private void RefreshReplayControls()
+        {
+            var isReplay = state.ReplayMode == ReplayViewMode.Replay;
+            var hasFrames = state.GetReplayTurns(state.SelectedChannel).Count > 0;
+
+            if (replayDot != null)
+            {
+                replayDot.style.backgroundColor = isReplay
+                    ? new Color(0.55f, 0.55f, 0.58f)
+                    : new Color(0.88f, 0.22f, 0.24f);
+                replayDot.tooltip = isReplay ? "Replay mode" : "Recording live telemetry";
+            }
+
+            if (replayStatusLabel != null)
+            {
+                replayStatusLabel.text = state.ReplayStatusText;
+            }
+
+            replayButton?.SetEnabled(hasFrames);
+            replayPreviousTurnButton?.SetEnabled(hasFrames);
+            replayPreviousFrameButton?.SetEnabled(hasFrames);
+            replayNextFrameButton?.SetEnabled(hasFrames);
+            replayNextTurnButton?.SetEnabled(hasFrames);
+            replayLiveButton?.SetEnabled(hasFrames);
+            replaySaveButton?.SetEnabled(hasFrames);
+            replayLiveButton?.EnableInClassList("replay-btn--active", !isReplay);
+            replayButton?.EnableInClassList("replay-btn--active", isReplay);
+        }
+
+        private void SaveReplay()
+        {
+            try
+            {
+                var directory = Path.Combine(Application.persistentDataPath, "Replays");
+                var path = state.SaveReplayJson(directory);
+                if (replayStatusLabel != null)
+                {
+                    replayStatusLabel.text = $"Saved {Path.GetFileName(path)}";
+                    replayStatusLabel.tooltip = path;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (replayStatusLabel != null)
+                {
+                    replayStatusLabel.text = "Replay save failed";
+                    replayStatusLabel.tooltip = ex.Message;
+                }
+
+                Debug.LogException(ex);
+            }
         }
 
         private void SetLogMode(LogViewMode mode, Button rawBtn, Button simpleBtn)

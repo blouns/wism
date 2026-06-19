@@ -102,6 +102,48 @@
     -unity-text-align: middle-right;
 }
 
+.replay-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 5px;
+    background-color: rgb(224, 56, 62);
+    margin-right: 6px;
+}
+
+.replay-status {
+    width: 150px;
+    color: rgb(170, 174, 182);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 4px;
+}
+
+.replay-btn {
+    height: 22px;
+    min-width: 28px;
+    padding-left: 7px;
+    padding-right: 7px;
+    font-size: 11px;
+    background-color: rgb(40, 42, 48);
+    color: rgb(160, 164, 172);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(58, 61, 68);
+    margin-left: 3px;
+}
+
+.replay-btn:hover {
+    background-color: rgb(50, 53, 60);
+    color: rgb(210, 213, 219);
+}
+
+.replay-btn--active {
+    background-color: rgb(54, 88, 145);
+    color: rgb(238, 240, 244);
+    border-color: rgb(66, 104, 168);
+}
+
 /* ---- Body layout ---- */
 .body {
     flex-direction: row;
