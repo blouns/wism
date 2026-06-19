@@ -29,6 +29,7 @@ public class CaptureModule : ITacticalModule
     private readonly bool shouldLog;
     private readonly Dictionary<string, string> bidTargetByArmyKey = new Dictionary<string, string>();
     private readonly Dictionary<string, City> bidTargetCityByArmyKey = new Dictionary<string, City>();
+    private readonly Dictionary<int, City> bidTargetCityByLeadArmyId = new Dictionary<int, City>();
 
     public CaptureModule(ArmyController armyController, IWismLogger logger)
         : this(armyController, null, GarrisonPolicy.None, logger)
@@ -69,6 +70,7 @@ public class CaptureModule : ITacticalModule
         var player = Game.Current.GetCurrentPlayer();
         this.bidTargetByArmyKey.Clear();
         this.bidTargetCityByArmyKey.Clear();
+        this.bidTargetCityByLeadArmyId.Clear();
 
         var cities = world.GetCities()
             .Where(c => c.Clan != player.Clan)
@@ -299,6 +301,11 @@ public class CaptureModule : ITacticalModule
 
     private void RememberBidTarget(List<Army> armies, City city)
     {
+        if (armies != null && armies.Count > 0 && armies[0] != null && city != null)
+        {
+            this.bidTargetCityByLeadArmyId[armies[0].Id] = city;
+        }
+
         var key = GetArmyKey(armies);
         if (!string.IsNullOrWhiteSpace(key) && city != null && !string.IsNullOrWhiteSpace(city.ShortName))
         {
@@ -309,13 +316,24 @@ public class CaptureModule : ITacticalModule
 
     private City FindRememberedBidTarget(List<Army> armies, World world)
     {
+        if (armies == null || armies.Count == 0 || armies[0] == null)
+        {
+            return null;
+        }
+
+        var playerClan = armies[0].Player?.Clan;
+        if (this.bidTargetCityByLeadArmyId.TryGetValue(armies[0].Id, out var leadRememberedCity) &&
+            IsValidRememberedTarget(leadRememberedCity, playerClan))
+        {
+            return leadRememberedCity;
+        }
+
         var key = GetArmyKey(armies);
         if (string.IsNullOrWhiteSpace(key))
         {
             return null;
         }
 
-        var playerClan = armies[0].Player?.Clan;
         if (this.bidTargetCityByArmyKey.TryGetValue(key, out var rememberedCity) &&
             IsValidRememberedTarget(rememberedCity, playerClan))
         {

@@ -34,13 +34,15 @@ namespace Wism.Client.AI.Services
 
             var attackerModifier = orderedAttackers.Sum(army => army.GetAttackModifier(targetTile));
             var defenderModifier = orderedDefenders.Sum(army => army.GetDefenseModifier());
+            var probabilityCache = new double?[orderedAttackers.Count + 1, orderedDefenders.Count + 1];
             var winProbability = EstimateStackWinProbability(
                 orderedAttackers,
                 orderedDefenders,
                 attackerModifier,
                 defenderModifier,
                 0,
-                0);
+                0,
+                probabilityCache);
 
             return new CombatEstimate(winProbability, orderedAttackers.Count, orderedDefenders.Count);
         }
@@ -51,7 +53,8 @@ namespace Wism.Client.AI.Services
             int attackerModifier,
             int defenderModifier,
             int attackerIndex,
-            int defenderIndex)
+            int defenderIndex,
+            double?[,] probabilityCache)
         {
             if (defenderIndex >= defenders.Count)
             {
@@ -63,24 +66,34 @@ namespace Wism.Client.AI.Services
                 return 0.0;
             }
 
+            var cached = probabilityCache[attackerIndex, defenderIndex];
+            if (cached.HasValue)
+            {
+                return cached.Value;
+            }
+
             var attackStrength = ClampCombatStrength(attackers[attackerIndex].Strength + attackerModifier);
             var defenseStrength = ClampCombatStrength(defenders[defenderIndex].Strength + defenderModifier);
             var duelWin = EstimateDuelWinProbability(attackStrength, defenseStrength);
 
-            return (duelWin * EstimateStackWinProbability(
+            var estimate = (duelWin * EstimateStackWinProbability(
                     attackers,
                     defenders,
                     attackerModifier,
                     defenderModifier,
                     attackerIndex,
-                    defenderIndex + 1)) +
+                    defenderIndex + 1,
+                    probabilityCache)) +
                 ((1.0 - duelWin) * EstimateStackWinProbability(
                     attackers,
                     defenders,
                     attackerModifier,
                     defenderModifier,
                     attackerIndex + 1,
-                    defenderIndex));
+                    defenderIndex,
+                    probabilityCache));
+            probabilityCache[attackerIndex, defenderIndex] = estimate;
+            return estimate;
         }
 
         private static double EstimateDuelWinProbability(int attackStrength, int defenseStrength)
