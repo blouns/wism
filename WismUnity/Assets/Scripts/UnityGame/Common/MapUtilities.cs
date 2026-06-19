@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Tilemaps;
+using Assets.Scripts.Tilemaps;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -15,11 +15,15 @@ namespace Assets.Scripts.Common
             return worldVector;
         }
 
-        internal static Vector2Int ConvertUnityToGameVector(Vector3 worldVector)
+        internal static Vector2Int ConvertUnityToGameVector(Vector3 worldVector, WorldTilemap worldTilemap)
         {
-            // TODO: Add support to adjust to tilemap coordinates in case
-            //       the tilemap is translated to another location. 
-            return new Vector2Int(Mathf.FloorToInt(worldVector.x), Mathf.FloorToInt(worldVector.y));
+            var tileMap = worldTilemap.GetComponent<Tilemap>();
+            var adjustedWorldVector = worldVector;
+            adjustedWorldVector.x -= tileMap.cellBounds.xMin - tileMap.tileAnchor.x;
+            adjustedWorldVector.y -= tileMap.cellBounds.yMin - tileMap.tileAnchor.y;
+
+            var cell = tileMap.WorldToCell(adjustedWorldVector);
+            return new Vector2Int(cell.x - 1, cell.y - 1);
         }
     }
 }
