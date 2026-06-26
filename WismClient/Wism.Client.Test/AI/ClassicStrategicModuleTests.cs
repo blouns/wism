@@ -6,6 +6,8 @@ using Wism.Client.AI.Tactical;
 using Wism.Client.AI.Framework;
 using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.Commands;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Data;
 using Wism.Client.Factories;
@@ -178,6 +180,51 @@ namespace Wism.Client.Test.AI
             Assert.That(trace.CommandNames, Is.Empty);
         }
 
+        [Test]
+        public void AiController_SuppressesRepeatedIdenticalCommandBatchWithinTurn()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[4, 4]);
+            var target = World.Current.Map[5, 4];
+            var tactical = new RepeatingMoveTacticalModule(controllerProvider.ArmyController, army, target);
+            var controller = new AiController(
+                new SimpleStrategicModule(),
+                new List<ITacticalModule> { tactical });
+
+            var first = controller.ExecuteTurnAndReturnCommands(World.Current);
+            var second = controller.ExecuteTurnAndReturnCommands(World.Current);
+
+            Assert.That(
+                first.OfType<MoveOnceCommand>().Any(command => command.X == target.X && command.Y == target.Y),
+                Is.True);
+            Assert.That(second, Is.Empty);
+        }
+
+        [Test]
+        public void AiController_FallsBackWhenWinningBidProducesNoCommands()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[4, 4]);
+            var target = World.Current.Map[5, 4];
+            var blockedWinner = new NoCommandBidTacticalModule(army);
+            var fallback = new FallbackMoveTacticalModule(controllerProvider.ArmyController, army, target);
+            var controller = new AiController(
+                new SimpleStrategicModule(),
+                new List<ITacticalModule> { blockedWinner, fallback });
+
+            var commands = controller.ExecuteTurnAndReturnCommands(World.Current);
+
+            Assert.That(
+                commands.OfType<MoveOnceCommand>().Any(command => command.X == target.X && command.Y == target.Y),
+                Is.True);
+            Assert.That(controller.LastDecisionTraces.Select(trace => trace.ModuleName), Does.Contain(nameof(NoCommandBidTacticalModule)));
+            Assert.That(controller.LastDecisionTraces.Select(trace => trace.ModuleName), Does.Contain(nameof(FallbackMoveTacticalModule)));
+        }
+
         private sealed class NoOpTacticalModule : ITacticalModule
         {
             public IEnumerable<IBid> GenerateBids(World world)
@@ -188,6 +235,114 @@ namespace Wism.Client.Test.AI
             public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
             {
                 return Enumerable.Empty<ICommandAction>();
+            }
+        }
+
+        private sealed class RepeatingMoveTacticalModule : ITacticalModule
+        {
+            private readonly ArmyController armyController;
+            private readonly Army army;
+            private readonly Tile target;
+
+            public RepeatingMoveTacticalModule(ArmyController armyController, Army army, Tile target)
+            {
+                this.armyController = armyController;
+                this.army = army;
+                this.target = target;
+            }
+
+            public IEnumerable<IBid> GenerateBids(World world)
+            {
+                return new IBid[]
+                {
+                    new StrategicBid(
+                        new List<Army> { army },
+                        this,
+                        10.0,
+                        "Expand",
+                        targetX: target.X,
+                        targetY: target.Y,
+                        reason: "Repeatable move for loop detector.")
+                };
+            }
+
+            public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
+            {
+                return new ICommandAction[]
+                {
+                    new SelectArmyCommand(armyController, armies),
+                    new MoveOnceCommand(armyController, armies, target.X, target.Y),
+                    new DeselectArmyCommand(armyController, armies)
+                };
+            }
+        }
+
+        private sealed class NoCommandBidTacticalModule : ITacticalModule
+        {
+            private readonly Army army;
+
+            public NoCommandBidTacticalModule(Army army)
+            {
+                this.army = army;
+            }
+
+            public IEnumerable<IBid> GenerateBids(World world)
+            {
+                return new IBid[]
+                {
+                    new StrategicBid(
+                        new List<Army> { army },
+                        this,
+                        100.0,
+                        "Search",
+                        targetX: army.Tile.X,
+                        targetY: army.Tile.Y,
+                        reason: "Impossible high-priority objective.")
+                };
+            }
+
+            public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
+            {
+                return Enumerable.Empty<ICommandAction>();
+            }
+        }
+
+        private sealed class FallbackMoveTacticalModule : ITacticalModule
+        {
+            private readonly ArmyController armyController;
+            private readonly Army army;
+            private readonly Tile target;
+
+            public FallbackMoveTacticalModule(ArmyController armyController, Army army, Tile target)
+            {
+                this.armyController = armyController;
+                this.army = army;
+                this.target = target;
+            }
+
+            public IEnumerable<IBid> GenerateBids(World world)
+            {
+                return new IBid[]
+                {
+                    new StrategicBid(
+                        new List<Army> { army },
+                        this,
+                        10.0,
+                        "Fallback",
+                        targetX: target.X,
+                        targetY: target.Y,
+                        reason: "Lower-priority objective remains executable.")
+                };
+            }
+
+            public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
+            {
+                return new ICommandAction[]
+                {
+                    new SelectArmyCommand(armyController, armies),
+                    new MoveOnceCommand(armyController, armies, target.X, target.Y),
+                    new DeselectArmyCommand(armyController, armies)
+                };
             }
         }
 

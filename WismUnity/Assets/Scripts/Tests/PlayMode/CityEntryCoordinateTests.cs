@@ -126,11 +126,89 @@ public class CityEntryCoordinateTests
         }
     }
 
+    [UnityTest]
+    public IEnumerator WorldTilemap_ConvertsWholeVisibleTileToSameGameCoordinate()
+    {
+        var grid = new GameObject("SyntheticGrid");
+        var worldTilemapObject = new GameObject("SyntheticWorldTilemap");
+
+        try
+        {
+            grid.AddComponent<Grid>();
+            worldTilemapObject.transform.SetParent(grid.transform, false);
+
+            var tilemap = worldTilemapObject.AddComponent<Tilemap>();
+            worldTilemapObject.AddComponent<TilemapRenderer>();
+            var worldTilemap = worldTilemapObject.AddComponent<WorldTilemap>();
+
+            var boundsTile = ScriptableObject.CreateInstance<Tile>();
+            tilemap.SetTile(Vector3Int.zero, boundsTile);
+            tilemap.SetTile(new Vector3Int(12, 11, 0), boundsTile);
+
+            yield return null;
+
+            var center = worldTilemap.ConvertGameToUnityVector(12, 11);
+            var xInset = tilemap.cellSize.x * 0.49f;
+            var yInset = tilemap.cellSize.y * 0.49f;
+
+            AssertGameCoords(worldTilemap, center, 12, 11);
+            AssertGameCoords(worldTilemap, center + new Vector3(-xInset, 0f, 0f), 12, 11);
+            AssertGameCoords(worldTilemap, center + new Vector3(xInset, 0f, 0f), 12, 11);
+            AssertGameCoords(worldTilemap, center + new Vector3(0f, -yInset, 0f), 12, 11);
+            AssertGameCoords(worldTilemap, center + new Vector3(0f, yInset, 0f), 12, 11);
+        }
+        finally
+        {
+            Object.Destroy(worldTilemapObject);
+            Object.Destroy(grid);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator WorldTilemap_NormalizesClickCoordinatesFromOffsetTilemapBounds()
+    {
+        var grid = new GameObject("SyntheticGrid");
+        var worldTilemapObject = new GameObject("SyntheticWorldTilemap");
+
+        try
+        {
+            grid.AddComponent<Grid>();
+            worldTilemapObject.transform.SetParent(grid.transform, false);
+
+            var tilemap = worldTilemapObject.AddComponent<Tilemap>();
+            worldTilemapObject.AddComponent<TilemapRenderer>();
+            var worldTilemap = worldTilemapObject.AddComponent<WorldTilemap>();
+
+            var boundsTile = ScriptableObject.CreateInstance<Tile>();
+            tilemap.SetTile(new Vector3Int(-3, 4, 0), boundsTile);
+            tilemap.SetTile(new Vector3Int(2, 9, 0), boundsTile);
+            tilemap.CompressBounds();
+
+            yield return null;
+
+            AssertGameCoords(worldTilemap, tilemap.GetCellCenterWorld(new Vector3Int(-3, 4, 0)), 0, 0);
+            AssertGameCoords(worldTilemap, tilemap.GetCellCenterWorld(new Vector3Int(2, 9, 0)), 5, 5);
+        }
+        finally
+        {
+            Object.Destroy(worldTilemapObject);
+            Object.Destroy(grid);
+        }
+    }
+
     [Test]
     public void UnityDefaultGameSettings_LeaveSeedUnspecified()
     {
         var settings = UnityGameFactory.CreateDefaultGameSettings();
 
         Assert.AreEqual(0, settings.RandomSeed);
+    }
+
+    private static void AssertGameCoords(WorldTilemap worldTilemap, Vector3 worldPosition, int expectedX, int expectedY)
+    {
+        var coords = worldTilemap.ConvertUnityToGameVector(worldPosition);
+
+        Assert.AreEqual(expectedX, coords.x);
+        Assert.AreEqual(expectedY, coords.y);
     }
 }

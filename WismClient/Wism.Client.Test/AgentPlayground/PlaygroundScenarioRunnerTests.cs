@@ -275,6 +275,42 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void Campaign_ClassicAiBlockedSearchTensionAttacksInsteadOfStalling()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 20260619,
+            clans: 2,
+            maxTurns: 4,
+            outputRoot: outputRoot,
+            name: "ClassicAiBlockedSearchTension",
+            scenarioFamily: "classic-ai-blocked-search-tension",
+            checkpointMode: "summary",
+            aiProfile: "strategic");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.Moments, Has.Some.StartsWith("pre-command:").And.Contains("AttackOnceCommand"));
+    }
+
+    [Test]
+    public void Campaign_ClassicAiContestedSiegeTensionResolvesBattle()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 20260620,
+            clans: 2,
+            maxTurns: 6,
+            outputRoot: outputRoot,
+            name: "ClassicAiContestedSiegeTension",
+            scenarioFamily: "classic-ai-contested-siege-tension",
+            checkpointMode: "summary",
+            aiProfile: "strategic");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.Moments, Has.Some.StartsWith("battle:"));
+    }
+
+    [Test]
     public void Campaign_SixClanPressureUsesValidIlluriaOutpostNames()
     {
         var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");
@@ -605,6 +641,8 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(suite.ClanCounts, Is.EquivalentTo(new[] { 2, 4, 8 }));
         Assert.That(suite.CheckpointMode, Is.EqualTo("summary"));
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-defended-siege"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-blocked-search-tension"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-contested-siege-tension"));
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-target-captured-recovery"));
     }
 
@@ -621,7 +659,9 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-neutral-expansion"));
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-road-contact"));
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-ruin-search"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-blocked-search-tension"));
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-defended-siege"));
+        Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-contested-siege-tension"));
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-production-economy"));
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-production-vectoring"));
         Assert.That(suite.ScenarioFamilies, Does.Contain("classic-ai-conquest"));

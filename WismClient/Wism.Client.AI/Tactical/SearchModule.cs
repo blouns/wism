@@ -145,6 +145,12 @@ namespace Wism.Client.AI.Tactical
                     continue;
                 }
 
+                if (HasAdjacentAttackableEnemy(stack))
+                {
+                    logger.LogInformation($"[Search] Skipping travel search for stack at ({stack[0].Tile.X},{stack[0].Tile.Y}) because an adjacent enemy is attackable.");
+                    continue;
+                }
+
                 var target = FindBestSearchTarget(stack, CandidateLocationsForStack(stack, locations));
                 if (target == null)
                 {
@@ -222,6 +228,24 @@ namespace Wism.Client.AI.Tactical
                 return commands;
             }
 
+            if (IsEnemyOccupied(target.Tile, armies))
+            {
+                if (target.Tile.CanAttackHere(armies) && AiUtilities.IsInAttackRange(armies, target.Tile))
+                {
+                    logger.LogInformation($"[Search] Target {target.ShortName} is occupied by an enemy; attacking blocker at ({target.X},{target.Y}).");
+                    return AiUtilities.GenerateAttackCommands(armyController, armies, commands, target.Tile);
+                }
+
+                logger.LogInformation($"[Search] Target {target.ShortName} is occupied by an enemy; no search move queued.");
+                return commands;
+            }
+
+            if (HasAdjacentAttackableEnemy(armies))
+            {
+                logger.LogInformation("[Search] Adjacent enemy is attackable; no search move queued.");
+                return commands;
+            }
+
             pathingStrategy.FindShortestRoute(
                 World.Current.Map,
                 armies,
@@ -258,9 +282,50 @@ namespace Wism.Client.AI.Tactical
         {
             return locations
                 .Where(location => CanSearchKindEventually(armies, location))
+                .Where(location => !IsEnemyOccupied(location.Tile, armies))
                 .OrderBy(location => AiUtilities.GetManhattanDistance(armies[0].Tile, location.Tile))
                 .ThenBy(location => location.ShortName)
                 .FirstOrDefault();
+        }
+
+        private static bool IsEnemyOccupied(Tile tile, List<Army> armies)
+        {
+            if (tile == null || armies == null || armies.Count == 0)
+            {
+                return false;
+            }
+
+            var clan = armies[0].Clan;
+            return tile.GetAllArmies().Any(army => army.Clan != clan);
+        }
+
+        private static bool HasAdjacentAttackableEnemy(List<Army> armies)
+        {
+            if (armies == null || armies.Count == 0 || armies[0].Tile == null)
+            {
+                return false;
+            }
+
+            var origin = armies[0].Tile;
+            var neighbors = origin.GetNineGrid();
+            for (var x = 0; x <= neighbors.GetUpperBound(0); x++)
+            {
+                for (var y = 0; y <= neighbors.GetUpperBound(1); y++)
+                {
+                    var tile = neighbors[x, y];
+                    if (tile == null || tile == origin || !origin.IsNeighbor(tile) || !IsEnemyOccupied(tile, armies))
+                    {
+                        continue;
+                    }
+
+                    if (tile.CanAttackHere(armies) && AiUtilities.IsInAttackRange(armies, tile))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private bool CanSearch(List<Army> armies, Location location)

@@ -720,6 +720,59 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void WarlordsClassicAI_AttacksEnemyOccupyingAdjacentSearchTemple()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            var enemy = Game.Current.Players[1];
+            player.IsHuman = false;
+
+            var originTile = World.Current.Map[0, 1];
+            var templeTile = World.Current.Map[1, 1];
+            Assert.That(IsClearTile(originTile), Is.True);
+            Assert.That(IsClearTile(templeTile), Is.True);
+            var temple = Wism.Client.MapObjects.Location.Create(new LocationInfo
+            {
+                ShortName = "BlockedTemple",
+                DisplayName = "Blocked Temple",
+                Kind = "Temple",
+                Terrain = "Temple"
+            });
+            World.Current.AddLocation(temple, templeTile);
+            Assert.That(templeTile.Location.Kind, Is.EqualTo("Temple"));
+            Assert.That(originTile.HasLocation(), Is.False);
+
+            var hero = player.HireHero(player.Capitol.Tile);
+            hero.Tile.RemoveArmies(new[] { (Wism.Client.MapObjects.Army)hero }.ToList());
+            originTile.AddArmy(hero);
+
+            var enemyStagingTile = FindClearAdjacentTile(enemy.Capitol);
+            var blocker = enemy.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), enemyStagingTile);
+            enemyStagingTile.RemoveArmies(new[] { blocker }.ToList());
+            templeTile.AddArmy(blocker);
+
+            var commander = WarlordsClassicAiFactory.CreateCommandProvider(controllerProvider, logger);
+            commander.GenerateCommands();
+
+            var commands = commander.GetBufferedCommands();
+            var attack = commands
+                .OfType<AttackOnceCommand>()
+                .FirstOrDefault(command => command.X == templeTile.X && command.Y == templeTile.Y);
+
+            Assert.That(attack, Is.Not.Null);
+            Assert.That(
+                commands
+                    .OfType<MoveOnceCommand>()
+                    .Any(command => command.X == templeTile.X && command.Y == templeTile.Y),
+                Is.False);
+        }
+
+        [Test]
         public void WarlordsClassicAI_DoesNotSendNonHeroAcrossMapForTempleSearch()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();

@@ -18,12 +18,8 @@ namespace Assets.Scripts.Common
         internal static Vector2Int ConvertUnityToGameVector(Vector3 worldVector, WorldTilemap worldTilemap)
         {
             var tileMap = worldTilemap.GetComponent<Tilemap>();
-            var adjustedWorldVector = worldVector;
-            adjustedWorldVector.x -= tileMap.cellBounds.xMin - tileMap.tileAnchor.x;
-            adjustedWorldVector.y -= tileMap.cellBounds.yMin - tileMap.tileAnchor.y;
-
-            var cell = tileMap.WorldToCell(adjustedWorldVector);
-            return new Vector2Int(cell.x - 1, cell.y - 1);
+            var cell = tileMap.WorldToCell(worldVector);
+            return new Vector2Int(cell.x - tileMap.cellBounds.xMin, cell.y - tileMap.cellBounds.yMin);
         }
     }
 }

@@ -6,6 +6,7 @@ using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.AI.Strategic;
 using Wism.Client.AI.Tactical;
 using Wism.Client.Commands;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
@@ -14,13 +15,17 @@ namespace Wism.Client.AI.Framework
 {
     public class AiController
     {
+        private const int RepeatedCommandSignatureLimit = 2;
+
         private readonly IStrategicModule strategicModule;
         private readonly List<ITacticalModule> tacticalModules;
         private readonly List<ITurnModule> turnModules;
         private readonly IWismLogger logger;
         private readonly ISpatialAdvisor spatialAdvisor;
         private readonly Action<string, TimeSpan> timingSink;
+        private readonly Dictionary<string, int> commandSignatureCounts = new Dictionary<string, int>();
         private List<AiDecisionTrace> lastDecisionTraces = new List<AiDecisionTrace>();
+        private string commandSignatureTurnContext;
 
         public AiController(IStrategicModule strategicModule, List<ITacticalModule> tacticalModules)
             : this(strategicModule, tacticalModules, new List<ITurnModule>(), null)
@@ -105,10 +110,30 @@ namespace Wism.Client.AI.Framework
             var winningBids = ((strategicModule as IAcceptedBidProvider)?.GetAcceptedBids() ?? bids).ToList();
             LogAcceptedBids(winningBids, bids);
 
-            foreach (var bid in winningBids)
+            var winningBidSet = new HashSet<IBid>(winningBids);
+            var commandBids = winningBids
+                .Concat(bids
+                    .Where(bid => !winningBidSet.Contains(bid))
+                    .OrderByDescending(bid => bid.Utility)
+                    .ThenBy(bid => bid.Armies?.Where(army => army != null).Select(army => army.Id).DefaultIfEmpty(int.MaxValue).Min()))
+                .ToList();
+            var reservedArmyIds = new HashSet<int>();
+
+            foreach (var bid in commandBids)
             {
+                if (HasReservedArmy(bid, reservedArmyIds))
+                {
+                    continue;
+                }
+
                 List<ICommandAction> generated = null;
                 var bidModuleName = bid.Module?.GetType().Name ?? "Unknown";
+                if (!winningBidSet.Contains(bid))
+                {
+                    logger?.LogInformation(
+                        $"[Adapta] Trying fallback bid module={bidModuleName} utility={bid.Utility:0.000} armies={DescribeArmies(bid.Armies)}.");
+                }
+
                 Measure(
                     "accepted-bid-command-generation",
                     () =>
@@ -116,11 +141,13 @@ namespace Wism.Client.AI.Framework
                         generated = bid.Module.GenerateCommands(bid.Armies, world)?.ToList() ?? new List<ICommandAction>();
                     },
                     "accepted-bid-command-generation:" + bidModuleName);
+                generated = SuppressRepeatedCommandBatch(bid, generated);
                 LogBidCommands(bid, generated);
                 traces.Add(CreateTrace(bid, generated));
                 if (generated.Count > 0)
                 {
                     commands.AddRange(generated);
+                    ReserveArmies(bid, reservedArmyIds);
                 }
             }
 
@@ -280,6 +307,119 @@ namespace Wism.Client.AI.Framework
             }
 
             logger.LogInformation($"[Adapta] Decision complete generated={commands.Count} command(s): {DescribeCommands(commands)}.");
+        }
+
+        private List<ICommandAction> SuppressRepeatedCommandBatch(IBid bid, List<ICommandAction> commands)
+        {
+            if (commands == null || commands.Count == 0)
+            {
+                return commands ?? new List<ICommandAction>();
+            }
+
+            var turnContext = CreateTurnContextKey();
+            if (!string.Equals(commandSignatureTurnContext, turnContext, StringComparison.Ordinal))
+            {
+                commandSignatureCounts.Clear();
+                commandSignatureTurnContext = turnContext;
+            }
+
+            var signature = CreateCommandBatchSignature(bid, commands);
+            commandSignatureCounts.TryGetValue(signature, out var count);
+            count++;
+            commandSignatureCounts[signature] = count;
+
+            if (count < RepeatedCommandSignatureLimit)
+            {
+                return commands;
+            }
+
+            logger?.LogWarning(
+                $"[Adapta] Suppressing repeated command batch after {count} identical attempt(s): {signature}.");
+            return new List<ICommandAction>();
+        }
+
+        private static string CreateTurnContextKey()
+        {
+            var player = Game.Current?.GetCurrentPlayer();
+            return player == null
+                ? "none"
+                : $"{player.Clan?.ShortName ?? player.GetDisplayName()}:{player.Turn}";
+        }
+
+        private static string CreateCommandBatchSignature(IBid bid, IReadOnlyList<ICommandAction> commands)
+        {
+            var metadata = bid as IStrategicBidMetadata;
+            var armies = DescribeArmyStateForSignature(bid?.Armies);
+            var commandBatch = string.Join("|", commands.Select(DescribeCommandForSignature));
+            return string.Join(
+                ";",
+                bid?.Module?.GetType().Name ?? "Unknown",
+                metadata?.ObjectiveKind ?? "Unknown",
+                metadata?.TargetCityShortName ?? string.Empty,
+                metadata?.TargetLocationShortName ?? string.Empty,
+                metadata?.TargetX?.ToString() ?? string.Empty,
+                metadata?.TargetY?.ToString() ?? string.Empty,
+                armies,
+                commandBatch);
+        }
+
+        private static string DescribeCommandForSignature(ICommandAction command)
+        {
+            switch (command)
+            {
+                case MoveOnceCommand move:
+                    return $"{nameof(MoveOnceCommand)}:{DescribeArmyIds(move.Armies)}->{move.X},{move.Y}";
+                case AttackOnceCommand attack:
+                    return $"{nameof(AttackOnceCommand)}:{DescribeArmyIds(attack.Armies)}->{attack.X},{attack.Y}";
+                case ArmyCommand armyCommand:
+                    return $"{command.GetType().Name}:{DescribeArmyIds(armyCommand.Armies)}";
+                default:
+                    return command?.GetType().Name ?? "null";
+            }
+        }
+
+        private static string DescribeArmyStateForSignature(IReadOnlyCollection<Army> armies)
+        {
+            if (armies == null || armies.Count == 0)
+            {
+                return "none";
+            }
+
+            return string.Join(
+                ",",
+                armies
+                    .Where(army => army != null)
+                    .OrderBy(army => army.Id)
+                    .Select(army => $"{army.Id}@{DescribeTile(army.Tile)}:{army.MovesRemaining}"));
+        }
+
+        private static string DescribeArmyIds(IReadOnlyCollection<Army> armies)
+        {
+            if (armies == null || armies.Count == 0)
+            {
+                return "none";
+            }
+
+            return string.Join(",", armies.Where(army => army != null).OrderBy(army => army.Id).Select(army => army.Id));
+        }
+
+        private static bool HasReservedArmy(IBid bid, HashSet<int> reservedArmyIds)
+        {
+            return bid?.Armies != null &&
+                   bid.Armies.Any(army => army != null && reservedArmyIds.Contains(army.Id));
+        }
+
+        private static void ReserveArmies(IBid bid, HashSet<int> reservedArmyIds)
+        {
+            if (bid?.Armies == null)
+            {
+                return;
+            }
+
+            foreach (var army in bid.Armies.Where(army => army != null))
+            {
+                reservedArmyIds.Add(army.Id);
+            }
         }
 
         private static string DescribePlayer(Player player)

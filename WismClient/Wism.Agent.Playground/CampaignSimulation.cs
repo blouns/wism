@@ -665,6 +665,8 @@ internal sealed class CampaignScenarioBuilder
 
     private static void AddScenarioProbeArmies(string scenarioFamily, int clanCount)
     {
+        AddModuleTensionProbeArmies(scenarioFamily);
+
         if (!scenarioFamily.Contains("siege", StringComparison.OrdinalIgnoreCase) &&
             !scenarioFamily.Contains("lost-battle", StringComparison.OrdinalIgnoreCase))
         {
@@ -684,6 +686,101 @@ internal sealed class CampaignScenarioBuilder
 
             city.Clan.Player.ConscriptArmy(ArmyInfo.GetArmyInfo(defenderName), city.Tile);
         }
+    }
+
+    private static void AddModuleTensionProbeArmies(string scenarioFamily)
+    {
+        if (!UsesModuleTension(scenarioFamily) || Game.Current.Players.Count < 2)
+        {
+            return;
+        }
+
+        if (scenarioFamily.Contains("blocked-search", StringComparison.OrdinalIgnoreCase))
+        {
+            AddBlockedSearchProbe();
+        }
+
+        if (scenarioFamily.Contains("contested-siege", StringComparison.OrdinalIgnoreCase))
+        {
+            AddContestedSiegeProbe();
+        }
+    }
+
+    private static void AddBlockedSearchProbe()
+    {
+        var location = World.Current.GetLocations().FirstOrDefault();
+        if (location == null)
+        {
+            return;
+        }
+
+        var attacker = Game.Current.Players[0];
+        var blocker = Game.Current.Players[1];
+        var stagingTile = FindAdjacentOpenTile(location.Tile, attacker);
+        if (stagingTile == null)
+        {
+            return;
+        }
+
+        attacker.ConscriptArmy(ArmyInfo.GetArmyInfo("HeavyInfantry"), stagingTile);
+        blocker.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), location.Tile);
+    }
+
+    private static void AddContestedSiegeProbe()
+    {
+        var outpost = OutpostOrder
+            .Select(name => World.Current.FindCity(name))
+            .FirstOrDefault(city => city?.Clan?.Player != null && city.Clan.Player != Game.Current.Players[0]);
+        if (outpost == null)
+        {
+            return;
+        }
+
+        var attacker = Game.Current.Players[0];
+        var defender = outpost.Clan.Player;
+        var stagingTile = FindAdjacentOpenTile(outpost.Tile, attacker);
+        if (stagingTile == null)
+        {
+            return;
+        }
+
+        attacker.ConscriptArmy(ArmyInfo.GetArmyInfo("HeavyInfantry"), stagingTile);
+        defender.ConscriptArmy(ArmyInfo.GetArmyInfo("HeavyInfantry"), outpost.Tile);
+    }
+
+    private static Tile? FindAdjacentOpenTile(Tile target, Player owner)
+    {
+        var probeInfo = ArmyInfo.GetArmyInfo("HeavyInfantry");
+        var candidates = new[]
+        {
+            (target.X - 1, target.Y),
+            (target.X + 1, target.Y),
+            (target.X, target.Y - 1),
+            (target.X, target.Y + 1)
+        };
+
+        foreach (var (x, y) in candidates)
+        {
+            if (x <= 0 || y <= 0 || x >= World.Current.Map.GetLength(0) - 1 || y >= World.Current.Map.GetLength(1) - 1)
+            {
+                continue;
+            }
+
+            var tile = World.Current.Map[x, y];
+            if (!Game.Current.TraversalStrategy.CanTraverse(owner.Clan, probeInfo, tile))
+            {
+                continue;
+            }
+
+            if (tile.MusterArmy().Any(army => army.Clan != owner.Clan))
+            {
+                continue;
+            }
+
+            return tile;
+        }
+
+        return null;
     }
 
     private static (int X, int Y) StepToward((int X, int Y) start, (int X, int Y) target, int steps)
@@ -801,6 +898,13 @@ internal sealed class CampaignScenarioBuilder
     {
         return scenarioFamily.Contains("search", StringComparison.OrdinalIgnoreCase) ||
                scenarioFamily.Contains("ruin", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool UsesModuleTension(string scenarioFamily)
+    {
+        return scenarioFamily.Contains("tension", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("blocked-search", StringComparison.OrdinalIgnoreCase) ||
+               scenarioFamily.Contains("contested-siege", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ResolveModRoot(string? requestedModRoot)

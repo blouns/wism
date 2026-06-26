@@ -25,10 +25,9 @@ namespace Assets.Scripts.Editors
 
             var coords = worldTilemap.ConvertUnityToGameVector(this.gameObject.transform.position);
 
-            // City markers are centered on the 2x2 footprint. The generic
-            // tile conversion reports the cell immediately below that anchor;
-            // move back to the top-left tile used by WismClient cities.
-            return new Vector2Int(coords.x, coords.y + 1);
+            // City markers are centered horizontally across the 2x2 footprint.
+            // Move back to the top-left tile used by WismClient cities.
+            return new Vector2Int(coords.x - 1, coords.y);
         }
 
         private void HideRuntimeMarkerSprite()

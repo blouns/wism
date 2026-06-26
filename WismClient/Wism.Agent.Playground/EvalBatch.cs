@@ -255,7 +255,9 @@ public static class EvalSuiteCatalog
             "classic-ai-road-contact",
             "classic-ai-production-economy",
             "classic-ai-ruin-search",
+            "classic-ai-blocked-search-tension",
             "classic-ai-defended-siege",
+            "classic-ai-contested-siege-tension",
             "classic-ai-lost-battle-recovery",
             "classic-ai-target-captured-recovery",
             "classic-ai-conquest"
@@ -267,7 +269,9 @@ public static class EvalSuiteCatalog
             "classic-ai-neutral-expansion",
             "classic-ai-road-contact",
             "classic-ai-ruin-search",
+            "classic-ai-blocked-search-tension",
             "classic-ai-defended-siege",
+            "classic-ai-contested-siege-tension",
             "classic-ai-production-economy",
             "classic-ai-production-vectoring",
             "classic-ai-lost-battle-recovery",
@@ -1968,6 +1972,7 @@ public sealed class EvalBatchRunner
         {
             "capture-pressure",
             "ruin-search",
+            "blocked-search-tension",
             "production-economy",
             "road-contact",
             "siege-defense"

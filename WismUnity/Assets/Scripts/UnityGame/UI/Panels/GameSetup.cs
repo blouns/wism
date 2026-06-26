@@ -28,6 +28,8 @@ public class GameSetup : MonoBehaviour
     private Button startButton;
     private Text validationText;
     private ClanInfo[] availableClans = new ClanInfo[0];
+    private static readonly string[] PlayerRoleLabels = new[] { "Human", "Knight", "Baron", "Lord", "Warlord" };
+    private int[] playerRoleIndexes = Array.Empty<int>();
     private bool isInitializing;
 
     public void Start()
@@ -60,8 +62,11 @@ public class GameSetup : MonoBehaviour
         EnsureModSettingsButton();
         NormalizeShortcutLabels();
         EnsureValidationText();
+        EnsureOptionToggles();
         RefreshAvailableClans();
-        ConfigurePlayerRows();
+        EnsurePlayerRoleState();
+        ConfigurePlayerRows(resetSelection: true);
+        WirePlayerRowEvents();
         UpdateStartValidation();
     }
 
@@ -89,7 +94,14 @@ public class GameSetup : MonoBehaviour
             return;
         }
 
-        this.worldName = GetWorldNameFromPanel();
+        var selectedWorldName = GetWorldNameFromPanel();
+        if (string.Equals(this.worldName, selectedWorldName, StringComparison.OrdinalIgnoreCase))
+        {
+            UpdateStartValidation();
+            return;
+        }
+
+        this.worldName = selectedWorldName;
         if (UnityModKitRuntimeSelection.HasSelection &&
             !string.Equals(UnityModKitRuntimeSelection.CurrentSelection.World, this.worldName, StringComparison.OrdinalIgnoreCase))
         {
@@ -97,7 +109,7 @@ public class GameSetup : MonoBehaviour
         }
 
         RefreshAvailableClans();
-        ConfigurePlayerRows();
+        ConfigurePlayerRows(resetSelection: true);
         UpdateStartValidation();
     }
 
@@ -128,7 +140,6 @@ public class GameSetup : MonoBehaviour
         if (!string.IsNullOrWhiteSpace(selectedScene))
         {
             SceneManager.LoadScene(selectedScene);
-            SceneManager.UnloadSceneAsync(1);
             return;
         }
 
@@ -142,7 +153,6 @@ public class GameSetup : MonoBehaviour
 #endif
 
         SceneManager.LoadScene(scenePath + worldName);
-        SceneManager.UnloadSceneAsync(1);
     }
 
     private static string ResolveSelectedUnityScene()
@@ -261,8 +271,8 @@ public class GameSetup : MonoBehaviour
         UnityNewGameEntity settings = new UnityNewGameEntity();
         settings.Players = GetSelectedPlayersFromPanel();
         settings.WorldName = this.worldName;
-        settings.RandomStartLocations = false;
-        settings.InteractiveUI = true;
+        settings.RandomStartLocations = GetToggleValue("RandomStartToggle", defaultValue: false);
+        settings.InteractiveUI = GetToggleValue("InteractiveToggle", defaultValue: true);
         settings.IsNewGame = true;
         settings.RandomSeed = 0;
         UnityModKitRuntimeSelection.ApplyTo(settings);
@@ -278,7 +288,7 @@ public class GameSetup : MonoBehaviour
             if (this.playerToggles[i].isOn)
             {
                 var playerEntity = new UnityPlayerEntity();
-                playerEntity.IsHuman = true;
+                playerEntity.IsHuman = GetPlayerRoleIndex(i) == 0;
                 playerEntity.ClanName = GetClanName(i);
                 playerEntities.Add(playerEntity);
             }
@@ -356,7 +366,7 @@ public class GameSetup : MonoBehaviour
         ModFactory.ResetCache();
     }
 
-    private void ConfigurePlayerRows()
+    private void ConfigurePlayerRows(bool resetSelection)
     {
         var startClans = LoadStartClanNames(this.worldName);
         for (int i = 0; i < this.playerToggles.Length; i++)
@@ -364,13 +374,27 @@ public class GameSetup : MonoBehaviour
             var toggle = this.playerToggles[i];
             var hasClan = i < availableClans.Length;
             toggle.interactable = hasClan;
-            toggle.isOn = hasClan && startClans.Contains(availableClans[i].ShortName);
+            if (resetSelection)
+            {
+                toggle.isOn = hasClan && startClans.Contains(availableClans[i].ShortName);
+            }
+            else if (!hasClan)
+            {
+                toggle.isOn = false;
+            }
 
             var label = toggle.GetComponentInChildren<Text>(true);
             if (label != null)
             {
                 label.text = hasClan ? availableClans[i].DisplayName : "Unavailable";
             }
+
+            if (!hasClan && i < this.playerRoleIndexes.Length)
+            {
+                this.playerRoleIndexes[i] = 0;
+            }
+
+            SetPlayerRoleLabel(i);
         }
     }
 
@@ -460,6 +484,7 @@ public class GameSetup : MonoBehaviour
             return;
         }
 
+        AlignShortcutLabelStack(buttonObject);
         foreach (var label in buttonObject.GetComponentsInChildren<Text>(true))
         {
             label.supportRichText = true;
@@ -621,6 +646,142 @@ public class GameSetup : MonoBehaviour
         dropdown.RefreshShownValue();
     }
 
+    private static void AlignShortcutLabelStack(GameObject buttonObject)
+    {
+        var labels = buttonObject.GetComponentsInChildren<Text>(true);
+        if (labels.Length < 2)
+        {
+            return;
+        }
+
+        var reference = labels[0].rectTransform;
+        for (int i = 1; i < labels.Length; i++)
+        {
+            var rect = labels[i].rectTransform;
+            rect.anchorMin = reference.anchorMin;
+            rect.anchorMax = reference.anchorMax;
+            rect.pivot = reference.pivot;
+            rect.anchoredPosition = reference.anchoredPosition;
+            rect.sizeDelta = reference.sizeDelta;
+            labels[i].alignment = labels[0].alignment;
+        }
+    }
+
+    private static void EnsureOptionToggles()
+    {
+        var randomStartToggle = GameObject.Find("RandomStartToggle")?.GetComponent<Toggle>();
+        if (randomStartToggle != null)
+        {
+            randomStartToggle.interactable = true;
+        }
+
+        var interactiveToggle = GameObject.Find("InteractiveToggle")?.GetComponent<Toggle>();
+        if (interactiveToggle != null)
+        {
+            interactiveToggle.interactable = true;
+            if (!interactiveToggle.isOn)
+            {
+                interactiveToggle.isOn = true;
+            }
+        }
+    }
+
+    private static bool GetToggleValue(string objectName, bool defaultValue)
+    {
+        var toggle = GameObject.Find(objectName)?.GetComponent<Toggle>();
+        return toggle == null ? defaultValue : toggle.isOn;
+    }
+
+    private void EnsurePlayerRoleState()
+    {
+        if (this.playerRoleIndexes.Length == this.playerToggles.Length)
+        {
+            return;
+        }
+
+        this.playerRoleIndexes = new int[this.playerToggles.Length];
+    }
+
+    private void WirePlayerRowEvents()
+    {
+        for (int i = 0; i < this.playerToggles.Length; i++)
+        {
+            var rowIndex = i;
+            this.playerToggles[i].onValueChanged.AddListener(_ => OnPlayerSelectionChange());
+            foreach (var text in GetRoleTexts(rowIndex))
+            {
+                text.raycastTarget = true;
+                var button = text.GetComponent<Button>() ?? text.gameObject.AddComponent<Button>();
+                button.transition = Selectable.Transition.ColorTint;
+                button.targetGraphic = text;
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(() => CyclePlayerRole(rowIndex));
+            }
+        }
+    }
+
+    private void OnPlayerSelectionChange()
+    {
+        if (isInitializing)
+        {
+            return;
+        }
+
+        UpdateStartValidation();
+    }
+
+    private void CyclePlayerRole(int playerIndex)
+    {
+        if (playerIndex < 0 || playerIndex >= this.playerRoleIndexes.Length)
+        {
+            return;
+        }
+
+        this.playerRoleIndexes[playerIndex] = (this.playerRoleIndexes[playerIndex] + 1) % PlayerRoleLabels.Length;
+        SetPlayerRoleLabel(playerIndex);
+        UpdateStartValidation();
+    }
+
+    private int GetPlayerRoleIndex(int playerIndex)
+    {
+        return playerIndex >= 0 && playerIndex < this.playerRoleIndexes.Length
+            ? this.playerRoleIndexes[playerIndex]
+            : 0;
+    }
+
+    private void SetPlayerRoleLabel(int playerIndex)
+    {
+        if (playerIndex < 0 || playerIndex >= this.playerToggles.Length)
+        {
+            return;
+        }
+
+        var role = PlayerRoleLabels[GetPlayerRoleIndex(playerIndex)];
+        foreach (var text in GetRoleTexts(playerIndex))
+        {
+            text.text = role;
+        }
+    }
+
+    private IEnumerable<Text> GetRoleTexts(int playerIndex)
+    {
+        if (playerIndex < 0 || playerIndex >= this.playerToggles.Length)
+        {
+            return Enumerable.Empty<Text>();
+        }
+
+        return this.playerToggles[playerIndex]
+            .GetComponentsInChildren<Text>(true)
+            .Where(text => PlayerRoleLabels.Contains(NormalizeRoleLabelText(text.text), StringComparer.OrdinalIgnoreCase))
+            .ToArray();
+    }
+
+    private static string NormalizeRoleLabelText(string text)
+    {
+        return string.IsNullOrWhiteSpace(text)
+            ? string.Empty
+            : text.Trim();
+    }
     private readonly struct GameSetupValidation
     {
         private GameSetupValidation(bool isValid, string message)
@@ -643,3 +804,6 @@ public class GameSetup : MonoBehaviour
         }
     }
 }
+
+
+

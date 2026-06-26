@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public sealed class ScenePrefabReferenceTests
 {
     private const string ItemManagerTypeName = "Assets.Scripts.Managers.ItemManager";
+    private const string CityManagerTypeName = "Assets.Scripts.Managers.CityManager";
 
     [Test]
     public void BuildScenes_ItemManagers_HaveRequiredPrefabsAssigned()
@@ -34,6 +35,37 @@ public sealed class ScenePrefabReferenceTests
                     var serialized = new SerializedObject(behaviour);
                     AddMissingPrefabFailure(failures, scene.path, behaviour, serialized, "itemPrefab");
                     AddMissingPrefabFailure(failures, scene.path, behaviour, serialized, "companionPrefab");
+                }
+            }
+        }
+
+        Assert.That(failures, Is.Empty, string.Join("\n", failures));
+    }
+
+    [Test]
+    public void BuildScenes_CityManagers_HaveRuinsTileAssigned()
+    {
+        var failures = new List<string>();
+
+        foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
+        {
+            if (!scene.enabled || string.IsNullOrWhiteSpace(scene.path))
+            {
+                continue;
+            }
+
+            Scene openedScene = EditorSceneManager.OpenScene(scene.path, OpenSceneMode.Single);
+            foreach (GameObject root in openedScene.GetRootGameObjects())
+            {
+                foreach (MonoBehaviour behaviour in root.GetComponentsInChildren<MonoBehaviour>(true))
+                {
+                    if (behaviour == null || behaviour.GetType().FullName != CityManagerTypeName)
+                    {
+                        continue;
+                    }
+
+                    var serialized = new SerializedObject(behaviour);
+                    AddMissingPrefabFailure(failures, scene.path, behaviour, serialized, "ruinsTile");
                 }
             }
         }

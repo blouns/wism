@@ -83,6 +83,7 @@ namespace Assets.Scripts.Managers
         private ProductionMode productionMode;
         private bool interactiveUI = true;
         private bool runAiBeforeInitialHumanTurn;
+        private bool repaintCityTilesAfterNewGame;
 
         // AI
         private AdaptaCommandProvider adaptaProvider;
@@ -156,6 +157,7 @@ namespace Assets.Scripts.Managers
             }
 
             this.runAiBeforeInitialHumanTurn = gameSettings.IsNewGame && gameSettings.InteractiveUI;
+            this.repaintCityTilesAfterNewGame = gameSettings.IsNewGame;
 
             IntializeWismApi();            
             InitializeCommandProcessors();
@@ -369,6 +371,7 @@ namespace Assets.Scripts.Managers
                     // Bootstrap game
                     case ExecutionMode.Bootstrap:
                         DoTasks();
+                        RepaintCityTilesAfterNewGameIfReady();
                         MoveInitialTurnToAiBeforeHumanHandoff();
                         this.ExecutionMode = ExecutionMode.Starting;
                         break;
@@ -484,6 +487,17 @@ namespace Assets.Scripts.Managers
             LogInformation(
                 "Initial turn order: running AI turns before handing off to {0}.",
                 firstHuman.Clan.DisplayName);
+        }
+
+        private void RepaintCityTilesAfterNewGameIfReady()
+        {
+            if (!this.repaintCityTilesAfterNewGame || !Game.IsInitialized())
+            {
+                return;
+            }
+
+            GetComponent<CityManager>().Reset();
+            this.repaintCityTilesAfterNewGame = false;
         }
 
         private static int FindNextAiPlayerIndex(int startIndex)

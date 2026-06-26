@@ -59,6 +59,8 @@ namespace Assets.Scripts.Managers
 
         public void Raze(City city)
         {
+            EnsureWorldTilemap();
+
             SetRuinsTile(city.Tile.X, city.Tile.Y);
             SetRuinsTile(city.Tile.X + 1, city.Tile.Y);
             SetRuinsTile(city.Tile.X, city.Tile.Y - 1);
@@ -138,8 +140,13 @@ namespace Assets.Scripts.Managers
         private void SetRuinsTile(int x, int y)
         {
             var worldVector = this.worldTilemap.ConvertGameToUnityVector(x, y);
-            // BUGBUG: This does not work. Image is reset to the original neutral castle instead.
-            this.worldTilemap.SetTile(worldVector, ScriptableObject.CreateInstance<RuinsTile>());
+            if (this.ruinsTile == null)
+            {
+                Debug.LogError("CityManager cannot draw razed city ruins because no RuinsTile asset is assigned.");
+                return;
+            }
+
+            this.worldTilemap.SetTile(worldVector, this.ruinsTile);
             this.worldTilemap.RefreshTile(worldVector);
         }
 
