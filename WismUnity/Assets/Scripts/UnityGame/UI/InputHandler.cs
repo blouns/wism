@@ -101,6 +101,12 @@ namespace Assets.Scripts.UI
                         this.unityManager.ShowProductionPanel(tile.City);
                     }
                     break;
+                case ProductionMode.SelectDestination:
+                    if (tile.HasCity())
+                    {
+                        this.unityManager.SelectProductionDestination(tile.City);
+                    }
+                    break;
                 default:
                     // Do nothing
                     break;
