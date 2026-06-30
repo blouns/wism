@@ -38,6 +38,8 @@ namespace Assets.Scripts.UI
         private Text cityText;
         private Text statusText;
         private Text routeText;
+        private Text deliveryText;
+        private RectTransform minimapPanel;
         private Button destinationJumpButton;
         private Button[] sourceJumpButtons;
 
@@ -404,11 +406,12 @@ namespace Assets.Scripts.UI
             panelRect.anchorMax = new Vector2(1f, 0f);
             panelRect.pivot = new Vector2(0.5f, 0f);
             panelRect.anchoredPosition = new Vector2(0f, 6f);
-            panelRect.sizeDelta = new Vector2(0f, 176f);
+            panelRect.sizeDelta = new Vector2(0f, 264f);
 
             this.modeText = WismUiFactory.CreateText(panel, "ProductionModeText", string.Empty, 18, TextAnchor.MiddleCenter);
             this.cityText = WismUiFactory.CreateText(panel, "ProductionCityText", string.Empty, 16, TextAnchor.MiddleLeft);
             this.routeText = WismUiFactory.CreateText(panel, "ProductionRouteText", string.Empty, 14, TextAnchor.MiddleLeft);
+            this.deliveryText = WismUiFactory.CreateText(panel, "ProductionDeliveryText", string.Empty, 14, TextAnchor.MiddleLeft);
             this.statusText = WismUiFactory.CreateText(panel, "ProductionStatusText", string.Empty, 14, TextAnchor.MiddleLeft);
 
             var row = WismUiFactory.CreateRow(panel, "ProductionNavigationRow");
@@ -427,6 +430,8 @@ namespace Assets.Scripts.UI
                 this.sourceJumpButtons[i] = WismUiFactory.CreateButton(jumpRow, $"SourceProductionCityButton{i + 1}", $"^{i + 1}");
                 this.sourceJumpButtons[i].onClick.AddListener(() => OnSourceJumpClick(sourceIndex));
             }
+
+            this.minimapPanel = ProductionManagementUi.CreateMinimapPanel(panel, "ProductionMinimapOverlay");
         }
 
         private void RefreshDynamicControls()
@@ -442,7 +447,13 @@ namespace Assets.Scripts.UI
                 : "City Production";
             this.cityText.text = $"{selected.CityName}: {(selected.IsIdle ? "Idle" : selected.CurrentArmyName)}";
             this.routeText.text = BuildRouteText(selected);
+            if (this.deliveryText != null)
+            {
+                this.deliveryText.text = BuildDeliveryText(selected);
+            }
+
             RefreshJumpControls(selected);
+            RefreshMinimapControls();
             SetStatus(this.selectingDestination ? "Choose a destination city." : BuildStatusText(selected));
         }
 
@@ -493,6 +504,37 @@ namespace Assets.Scripts.UI
                 ? "Deliveries: none"
                 : $"Deliveries: {string.Join(", ", ToIncomingLabels(selected.OutgoingDeliveries))}";
             return $"{route} | {incoming} | {deliveries}";
+        }
+
+        private string BuildDeliveryText(ProductionCityViewModel selected)
+        {
+            if (selected.IncomingSources.Count == 0 && selected.OutgoingDeliveries.Count == 0)
+            {
+                return "No routed production or delivery in transit.";
+            }
+
+            var incoming = selected.IncomingSources.Count == 0
+                ? "Sources: none"
+                : $"Sources: {string.Join(", ", ToIncomingLabels(selected.IncomingSources))}";
+            var deliveries = selected.OutgoingDeliveries.Count == 0
+                ? "Transit: none"
+                : $"Transit: {string.Join(", ", ToIncomingLabels(selected.OutgoingDeliveries))}";
+            return $"{incoming} | {deliveries}";
+        }
+
+        private void RefreshMinimapControls()
+        {
+            if (this.minimapPanel == null)
+            {
+                return;
+            }
+
+            var showMinimap = this.panelMode == ProductionPanelMode.Management;
+            this.minimapPanel.gameObject.SetActive(showMinimap);
+            if (showMinimap)
+            {
+                ProductionManagementUi.RebuildMinimapMarkers(this.minimapPanel, this.viewModel.MinimapMarkers);
+            }
         }
 
         private void RefreshJumpControls(ProductionCityViewModel selected)

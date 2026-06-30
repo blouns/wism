@@ -8,6 +8,7 @@ namespace Assets.Scripts.UI
 
         public readonly Color PanelBackground = new Color32(44, 54, 72, 255);
         public readonly Color PanelBorder = new Color32(199, 204, 211, 255);
+        public readonly Color MinimapBackground = new Color32(30, 38, 48, 255);
         public readonly Color Text = new Color32(236, 238, 226, 255);
         public readonly Color MutedText = new Color32(181, 187, 184, 255);
         public readonly Color Button = new Color32(78, 96, 122, 255);
