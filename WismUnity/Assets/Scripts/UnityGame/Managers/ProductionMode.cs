@@ -4,6 +4,7 @@
     {
         None,
         SelectCity,
+        SelectDestination,
         CitySelected,
         SelectProduction
     }

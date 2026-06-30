@@ -240,8 +240,8 @@ namespace Assets.Scripts.CommandProcessors
             {
                 // Transition state to production
                 this.unityGame.InputManager.InputHandler.DeselectObject();
-                this.unityGame.SetProductionMode(ProductionMode.SelectCity);
-                this.unityGame.ShowProductionPanel(player.Capitol);
+                this.unityGame.SetProductionMode(ProductionMode.CitySelected);
+                this.unityGame.ShowProductionManagementPanel(player);
             }
         }
 

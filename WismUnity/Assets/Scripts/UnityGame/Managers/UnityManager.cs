@@ -664,6 +664,19 @@ namespace Assets.Scripts.Managers
             this.productionPanel.SetActive(true);
         }
 
+        internal void ShowProductionManagementPanel(Player player)
+        {
+            this.productionPanel.GetComponent<CityProduction>()
+                            .InitializeManagement(this, player);
+            this.productionPanel.SetActive(true);
+        }
+
+        internal void SelectProductionDestination(City city)
+        {
+            this.productionPanel.GetComponent<CityProduction>()
+                            .SelectDestination(city);
+        }
+
         internal Camera GetMainCamera()
         {
             return this.mainCamera;
