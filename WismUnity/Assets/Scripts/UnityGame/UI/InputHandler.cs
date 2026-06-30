@@ -95,10 +95,9 @@ namespace Assets.Scripts.UI
             switch (this.unityManager.ProductionMode)
             {
                 case ProductionMode.SelectCity:
-                    if (tile.HasCity() &&
-                        tile.City.Clan == Game.Current.GetCurrentPlayer().Clan)
+                    if (ProductionPanelEntryPolicy.TryGetOwnedCity(tile, Game.Current.GetCurrentPlayer()?.Clan, out var city))
                     {
-                        this.unityManager.ShowProductionPanel(tile.City);
+                        this.unityManager.ShowProductionPanel(city);
                     }
                     break;
                 case ProductionMode.SelectDestination:

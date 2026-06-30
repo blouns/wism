@@ -226,7 +226,7 @@ namespace Wism.Client.Factories
             {
                 foreach (var citySnapshot in snapshot.World.Cities)
                 {
-                    var city = CityFactory.Load(citySnapshot, world);
+                    var city = CityFactory.LoadCity(citySnapshot, world);
 
                     // Add late-bound properties
                     if (cityToPlayer.ContainsKey(city.ShortName))
@@ -238,6 +238,11 @@ namespace Wism.Client.Factories
                     {
                         capitolToPlayer[city.ShortName].Capitol = city;
                     }
+                }
+
+                foreach (var citySnapshot in snapshot.World.Cities)
+                {
+                    CityFactory.LoadBarracks(citySnapshot, world);
                 }
             }
         }

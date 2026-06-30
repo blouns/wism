@@ -299,8 +299,7 @@ namespace Assets.Scripts.UI
                 return;
             }
 
-            if (destinationCity == null ||
-                destinationCity.Clan != Game.Current.GetCurrentPlayer().Clan)
+            if (!ProductionPanelEntryPolicy.IsOwnedCity(destinationCity, Game.Current.GetCurrentPlayer()?.Clan))
             {
                 SetStatus("Choose an owned destination city.");
                 return;

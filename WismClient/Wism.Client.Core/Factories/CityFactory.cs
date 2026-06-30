@@ -12,6 +12,13 @@ namespace Wism.Client.Factories
     {
         public static City Load(CityEntity snapshot, World world)
         {
+            var city = LoadCity(snapshot, world);
+            LoadBarracks(snapshot, world, city.Barracks);
+            return city;
+        }
+
+        internal static City LoadCity(CityEntity snapshot, World world)
+        {
             if (snapshot is null)
             {
                 throw new ArgumentNullException(nameof(snapshot));
@@ -27,8 +34,6 @@ namespace Wism.Client.Factories
             var city = world.Map[snapshot.X, snapshot.Y].City;
             city.Defense = snapshot.Defense;
             city.Id = snapshot.Id;
-
-            LoadBarracks(snapshot, world, city.Barracks);
 
             return city;
         }
@@ -48,6 +53,27 @@ namespace Wism.Client.Factories
             MapBuilder.AddCity(world, cityEntity.X, cityEntity.Y, cityEntity.CityShortName, cityEntity.ClanShortName);
 
             return world.Map[cityEntity.X, cityEntity.Y].City;
+        }
+
+        internal static void LoadBarracks(CityEntity snapshot, World world)
+        {
+            if (snapshot is null)
+            {
+                throw new ArgumentNullException(nameof(snapshot));
+            }
+
+            if (world is null)
+            {
+                throw new ArgumentNullException(nameof(world));
+            }
+
+            var city = world.FindCity(snapshot.CityShortName);
+            if (city == null)
+            {
+                throw new InvalidOperationException($"Could not find loaded city '{snapshot.CityShortName}'.");
+            }
+
+            LoadBarracks(snapshot, world, city.Barracks);
         }
 
         private static void LoadBarracks(CityEntity snapshot, World world, Barracks barracks)

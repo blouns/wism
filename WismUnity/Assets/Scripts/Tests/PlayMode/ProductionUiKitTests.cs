@@ -2,6 +2,7 @@ using Assets.Scripts.UI;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using Wism.Client.Core;
@@ -61,6 +62,57 @@ public sealed class ProductionUiKitTests
         Assert.That(ProductionPanelMode.SingleCity, Is.Not.EqualTo(ProductionPanelMode.Management));
         Assert.That(ProductionModeNames.SingleCityEntry, Is.EqualTo("P-then-city"));
         Assert.That(ProductionModeNames.ManagementEntry, Is.EqualTo("owned-city-management"));
+    }
+
+    [Test]
+    public void ProductionPanelEntryPolicy_PThenCityRequiresOwnedCity()
+    {
+        var currentClan = CreateClan("Current");
+        var enemyClan = CreateClan("Enemy");
+        var ownedTile = TileWithCity(CreateCity(1, "Owned"), currentClan);
+        var enemyTile = TileWithCity(CreateCity(2, "Enemy"), enemyClan);
+        var neutralTile = TileWithCity(CreateCity(3, "Neutral"), null);
+        var emptyTile = new Tile { X = 4, Y = 4 };
+
+        Assert.That(ProductionPanelEntryPolicy.TryGetOwnedCity(ownedTile, currentClan, out var selectedCity), Is.True);
+        Assert.That(selectedCity, Is.EqualTo(ownedTile.City));
+        Assert.That(ProductionPanelEntryPolicy.TryGetOwnedCity(enemyTile, currentClan, out _), Is.False);
+        Assert.That(ProductionPanelEntryPolicy.TryGetOwnedCity(neutralTile, currentClan, out _), Is.False);
+        Assert.That(ProductionPanelEntryPolicy.TryGetOwnedCity(emptyTile, currentClan, out _), Is.False);
+        Assert.That(ProductionPanelEntryPolicy.TryGetOwnedCity(null, currentClan, out _), Is.False);
+    }
+
+    [Test]
+    public void ProductionPanelEntryPolicy_DestinationUsesOwnedCityGate()
+    {
+        var currentClan = CreateClan("Current");
+        var enemyClan = CreateClan("Enemy");
+        var ownedCity = CityWithClan(CreateCity(1, "Owned"), currentClan);
+        var enemyCity = CityWithClan(CreateCity(2, "Enemy"), enemyClan);
+        var neutralCity = CityWithClan(CreateCity(3, "Neutral"), null);
+
+        Assert.That(ProductionPanelEntryPolicy.IsOwnedCity(ownedCity, currentClan), Is.True);
+        Assert.That(ProductionPanelEntryPolicy.IsOwnedCity(enemyCity, currentClan), Is.False);
+        Assert.That(ProductionPanelEntryPolicy.IsOwnedCity(neutralCity, currentClan), Is.False);
+        Assert.That(ProductionPanelEntryPolicy.IsOwnedCity(null, currentClan), Is.False);
+        Assert.That(ProductionPanelEntryPolicy.IsOwnedCity(ownedCity, null), Is.False);
+    }
+
+    [Test]
+    public void ProductionViewModels_KeepPThenCityAndOwnedCityManagementDataSeparate()
+    {
+        var garom = CreateCity(1, "Garom");
+        var ungor = CreateCity(2, "Ungor");
+
+        var singleCity = ProductionPanelViewModelBuilder.BuildSingleCity(garom);
+        var management = ProductionPanelViewModelBuilder.BuildManagement(new[] { garom, ungor }, garom);
+
+        Assert.That(singleCity.Mode, Is.EqualTo(ProductionPanelMode.SingleCity));
+        Assert.That(singleCity.Cities.Count, Is.EqualTo(1));
+        Assert.That(singleCity.Cities[0].City, Is.EqualTo(garom));
+        Assert.That(management.Mode, Is.EqualTo(ProductionPanelMode.Management));
+        Assert.That(management.Cities.Count, Is.EqualTo(2));
+        Assert.That(management.Cities.Select(city => city.City), Is.EquivalentTo(new[] { garom, ungor }));
     }
 
     [Test]
@@ -215,6 +267,31 @@ public sealed class ProductionUiKitTests
         return city;
     }
 
+    private static Clan CreateClan(string shortName)
+    {
+        return Clan.Create(new ClanInfo
+        {
+            ShortName = shortName,
+            DisplayName = shortName,
+            StartingGold = 1000
+        });
+    }
+
+    private static Tile TileWithCity(City city, Clan clan)
+    {
+        CityWithClan(city, clan);
+        var tile = new Tile { X = city.Tile.X, Y = city.Tile.Y, City = city };
+        city.Tile = tile;
+        return tile;
+    }
+
+    private static City CityWithClan(City city, Clan clan)
+    {
+        typeof(City).GetProperty(nameof(City.Clan), BindingFlags.Instance | BindingFlags.Public)
+            .GetSetMethod(true)
+            .Invoke(city, new object[] { clan });
+        return city;
+    }
     private static ArmyInTraining Training(City source, City destination, ArmyInfo army, int turnsToProduce, int turnsToDeliver)
     {
         return new ArmyInTraining
