@@ -21,6 +21,23 @@ namespace Assets.Scripts.Managers
         AITurn
     }
 
+    public enum GameKeyboardAction
+    {
+        None,
+        OpenProductionManagement,
+        LoadGame
+    }
+
+    public static class GameKeyboardShortcuts
+    {
+        public static GameKeyboardAction ResolveLKey(bool shiftHeld)
+        {
+            return shiftHeld
+                ? GameKeyboardAction.LoadGame
+                : GameKeyboardAction.OpenProductionManagement;
+        }
+    }
+
     public class InputManager : MonoBehaviour
     {
         private UnityManager unityManager;
@@ -267,7 +284,16 @@ namespace Assets.Scripts.Managers
             }
             else if (Input.GetKeyDown(KeyCode.L))
             {
-                this.UnityManager.HandleSaveLoadPicker(false);
+                var shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                switch (GameKeyboardShortcuts.ResolveLKey(shiftHeld))
+                {
+                    case GameKeyboardAction.OpenProductionManagement:
+                        this.UnityManager.ShowProductionManagementPanelForCurrentPlayer();
+                        break;
+                    case GameKeyboardAction.LoadGame:
+                        this.UnityManager.HandleSaveLoadPicker(false);
+                        break;
+                }
             }
             else if (Input.GetKeyDown(KeyCode.Slash))
             {

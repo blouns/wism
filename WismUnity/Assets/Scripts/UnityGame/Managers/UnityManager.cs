@@ -671,6 +671,19 @@ namespace Assets.Scripts.Managers
             this.productionPanel.SetActive(true);
         }
 
+        internal void ShowProductionManagementPanelForCurrentPlayer()
+        {
+            var player = Game.Current?.GetCurrentPlayer();
+            if (player == null || player.GetCities().Count == 0)
+            {
+                NotifyUser("No owned cities to manage.");
+                return;
+            }
+
+            SetProductionMode(ProductionMode.CitySelected);
+            ShowProductionManagementPanel(player);
+        }
+
         internal void SelectProductionDestination(City city)
         {
             this.productionPanel.GetComponent<CityProduction>()

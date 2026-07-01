@@ -1,3 +1,4 @@
+using Assets.Scripts.Managers;
 using Assets.Scripts.UI;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -62,6 +63,13 @@ public sealed class ProductionUiKitTests
         Assert.That(ProductionPanelMode.SingleCity, Is.Not.EqualTo(ProductionPanelMode.Management));
         Assert.That(ProductionModeNames.SingleCityEntry, Is.EqualTo("P-then-city"));
         Assert.That(ProductionModeNames.ManagementEntry, Is.EqualTo("owned-city-management"));
+    }
+
+    [Test]
+    public void GameKeyboardShortcuts_LaunchesOwnedCitiesManagementWithL()
+    {
+        Assert.That(GameKeyboardShortcuts.ResolveLKey(shiftHeld: false), Is.EqualTo(GameKeyboardAction.OpenProductionManagement));
+        Assert.That(GameKeyboardShortcuts.ResolveLKey(shiftHeld: true), Is.EqualTo(GameKeyboardAction.LoadGame));
     }
 
     [Test]
