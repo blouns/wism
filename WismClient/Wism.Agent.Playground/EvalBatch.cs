@@ -916,7 +916,7 @@ public sealed class EvalBatchRunner
         var current = new DirectoryInfo(Environment.CurrentDirectory);
         while (current is not null)
         {
-            if (Directory.Exists(Path.Combine(current.FullName, ".git")) &&
+            if ((Directory.Exists(Path.Combine(current.FullName, ".git")) || File.Exists(Path.Combine(current.FullName, ".git"))) &&
                 Directory.Exists(Path.Combine(current.FullName, "WismClient")))
             {
                 return current.FullName;
