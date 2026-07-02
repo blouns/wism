@@ -43,7 +43,7 @@ namespace Wism.Client.AI.Framework
                 },
                 new List<ITurnModule>
                 {
-                    new ProductionModule(controllerProvider.CityController, logger)
+                    new ProductionModule(controllerProvider.CityController, logger, UsesCandidateProductionProfile(aiProfile))
                 },
                 logger,
                 spatialAdvisor,
@@ -78,11 +78,17 @@ namespace Wism.Client.AI.Framework
             return !string.Equals(aiProfile, "tactical", System.StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool UsesCandidateProductionProfile(string aiProfile)
+        {
+            return string.Equals(aiProfile, "strategic-candidate-production", System.StringComparison.OrdinalIgnoreCase);
+        }
+
         private static bool UsesInfluenceMap(string aiProfile)
         {
             return !string.Equals(aiProfile, "strategic", System.StringComparison.OrdinalIgnoreCase) &&
                    !string.Equals(aiProfile, "strategic-baseline", System.StringComparison.OrdinalIgnoreCase) &&
-                   !string.Equals(aiProfile, "strategic-no-im", System.StringComparison.OrdinalIgnoreCase);
+                   !string.Equals(aiProfile, "strategic-no-im", System.StringComparison.OrdinalIgnoreCase) &&
+                   !UsesCandidateProductionProfile(aiProfile);
         }
     }
 }

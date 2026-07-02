@@ -1411,6 +1411,11 @@ public sealed class PlaygroundScenarioRunner
             return "strategic-baseline";
         }
 
+        if (string.Equals(aiProfile, "strategic-candidate-production", StringComparison.OrdinalIgnoreCase))
+        {
+            return "strategic-candidate-production";
+        }
+
         return "strategic";
     }
 

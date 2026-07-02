@@ -19,23 +19,36 @@ namespace Wism.Client.AI.Strategic
     {
         private const int MinimumDestinationDistanceGain = 4;
         private const int MaximumVectorDestinationLoad = 3;
+        private const int CandidateVectorDestinationLoad = 4;
         private const int LongRangePressureDistance = 8;
 
         private readonly CityController cityController;
         private readonly CityTargetEvaluator cityTargetEvaluator;
         private readonly IWismLogger logger;
+        private readonly bool useExpandedProductionRouting;
         private readonly HashSet<string> handledTurns = new HashSet<string>();
 
         public ProductionModule(CityController cityController, IWismLogger logger)
-            : this(cityController, new CityTargetEvaluator(), logger)
+            : this(cityController, logger, false)
+        {
+        }
+
+        public ProductionModule(CityController cityController, IWismLogger logger, bool useExpandedProductionRouting)
+            : this(cityController, new CityTargetEvaluator(), logger, useExpandedProductionRouting)
         {
         }
 
         public ProductionModule(CityController cityController, CityTargetEvaluator cityTargetEvaluator, IWismLogger logger)
+            : this(cityController, cityTargetEvaluator, logger, false)
+        {
+        }
+
+        public ProductionModule(CityController cityController, CityTargetEvaluator cityTargetEvaluator, IWismLogger logger, bool useExpandedProductionRouting)
         {
             this.cityController = cityController;
             this.cityTargetEvaluator = cityTargetEvaluator;
             this.logger = logger;
+            this.useExpandedProductionRouting = useExpandedProductionRouting;
         }
 
         public IEnumerable<ICommandAction> GenerateCommands(World world)
@@ -109,6 +122,9 @@ namespace Wism.Client.AI.Strategic
             }
 
             var productionDistance = this.cityTargetEvaluator.GetDistanceToCity(productionCity.Tile, target);
+            var maximumDestinationLoad = this.useExpandedProductionRouting
+                ? CandidateVectorDestinationLoad
+                : MaximumVectorDestinationLoad;
             var destination = ownedCities
                 .Where(city => city != null && city != productionCity)
                 .Select(city => new
@@ -118,7 +134,7 @@ namespace Wism.Client.AI.Strategic
                     DistanceFromProduction = this.cityTargetEvaluator.GetDistanceToCity(productionCity.Tile, city)
                 })
                 .Where(candidate => candidate.DistanceToTarget < productionDistance)
-                .Where(candidate => GetDestinationLoad(candidate.City, ownedCities) < MaximumVectorDestinationLoad)
+                .Where(candidate => GetDestinationLoad(candidate.City, ownedCities) < maximumDestinationLoad)
                 .OrderBy(candidate => candidate.DistanceToTarget)
                 .ThenBy(candidate => candidate.DistanceFromProduction)
                 .ThenBy(candidate => candidate.City.ShortName)
