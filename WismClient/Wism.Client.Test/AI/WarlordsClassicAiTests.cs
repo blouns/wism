@@ -172,6 +172,42 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void WarlordsClassicAI_StrategicProductionVectorsToModeratelyLoadedForwardCity()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            player.IsHuman = false;
+            var forwardCity = player.Capitol;
+
+            while (forwardCity.MusterArmies().Count(army => army.Clan == player.Clan) < 3)
+            {
+                player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), forwardCity.Tile);
+            }
+
+            var rearCity = Wism.Client.MapObjects.City.Create(CreateTestCityInfo("StrategicCapFourRearForge", "Strategic Cap Four Rear Forge"));
+            World.Current.AddCity(rearCity, World.Current.Map[2, 12]);
+            player.ClaimCity(rearCity);
+
+            var commander = WarlordsClassicAiFactory.CreateCommandProvider(
+                controllerProvider,
+                logger,
+                aiProfile: "strategic");
+            commander.GenerateCommands();
+
+            var rearProduction = commander.GetBufferedCommands()
+                .OfType<StartProductionCommand>()
+                .FirstOrDefault(command => command.ProductionCity == rearCity);
+
+            Assert.That(rearProduction, Is.Not.Null);
+            Assert.That(rearProduction.DestinationCity, Is.EqualTo(forwardCity));
+        }
+
+        [Test]
         public void WarlordsClassicAI_DoesNotVectorProductionToCrowdedForwardCity()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();

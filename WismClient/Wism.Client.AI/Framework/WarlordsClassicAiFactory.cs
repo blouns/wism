@@ -80,7 +80,8 @@ namespace Wism.Client.AI.Framework
 
         private static bool UsesCandidateProductionProfile(string aiProfile)
         {
-            return string.Equals(aiProfile, "strategic-candidate-production", System.StringComparison.OrdinalIgnoreCase);
+            return string.Equals(aiProfile, "strategic", System.StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(aiProfile, "strategic-candidate-production", System.StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool UsesInfluenceMap(string aiProfile)
