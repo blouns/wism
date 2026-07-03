@@ -19,7 +19,7 @@ namespace Wism.Client.AI.Strategic
     {
         private const int MinimumDestinationDistanceGain = 3;
         private const int MaximumVectorDestinationLoad = 3;
-        private const int CandidateVectorDestinationLoad = 4;
+        private const int CandidateVectorDestinationLoad = 5;
         private const int LongRangePressureDistance = 8;
 
         private readonly CityController cityController;
