@@ -17,7 +17,7 @@ namespace Wism.Client.AI.Strategic
 {
     public class ProductionModule : ITurnModule
     {
-        private const int MinimumDestinationDistanceGain = 4;
+        private const int MinimumDestinationDistanceGain = 3;
         private const int MaximumVectorDestinationLoad = 3;
         private const int CandidateVectorDestinationLoad = 4;
         private const int LongRangePressureDistance = 8;

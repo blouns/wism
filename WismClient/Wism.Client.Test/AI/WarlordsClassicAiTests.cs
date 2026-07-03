@@ -208,6 +208,58 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void WarlordsClassicAI_StrategicProductionVectorsOnThreeTileDistanceGain()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            var logger = TestUtilities.CreateLogFactory().CreateLogger();
+
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(controllerProvider);
+
+            var player = Game.Current.GetCurrentPlayer();
+            var enemy = Game.Current.Players.First(other => other != player);
+            player.IsHuman = false;
+
+            var tiles = FindProductionRoutingThresholdTiles(player, requiredGain: 3);
+
+            var destination = Wism.Client.MapObjects.City.Create(CreateTestCityInfo(
+                "ThresholdForward",
+                "Threshold Forward"));
+            World.Current.AddCity(destination, tiles.Destination);
+            player.ClaimCity(destination);
+
+            var productionCity = Wism.Client.MapObjects.City.Create(CreateTestCityInfo(
+                "ThresholdRear",
+                "Threshold Rear"));
+            World.Current.AddCity(productionCity, tiles.Production);
+            player.ClaimCity(productionCity);
+
+            var pressureTarget = Wism.Client.MapObjects.City.Create(new CityInfo
+            {
+                ShortName = "ThresholdPrize",
+                DisplayName = "Threshold Prize",
+                Defense = 100,
+                Income = 200,
+                ProductionInfos = CreateTestCityInfo("ThresholdPrizeTemplate", "Threshold Prize Template").ProductionInfos
+            });
+            World.Current.AddCity(pressureTarget, tiles.Target);
+            enemy.ClaimCity(pressureTarget);
+
+            var commander = WarlordsClassicAiFactory.CreateCommandProvider(
+                controllerProvider,
+                logger,
+                aiProfile: "strategic");
+            commander.GenerateCommands();
+
+            var production = commander.GetBufferedCommands()
+                .OfType<StartProductionCommand>()
+                .FirstOrDefault(command => command.ProductionCity == productionCity);
+
+            Assert.That(production, Is.Not.Null);
+            Assert.That(production.DestinationCity, Is.EqualTo(destination));
+        }
+
+        [Test]
         public void WarlordsClassicAI_DoesNotVectorProductionToCrowdedForwardCity()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
@@ -1659,6 +1711,91 @@ namespace Wism.Client.Test.AI
 
             Assert.Fail("Could not find clear city tile for hero exploration test.");
             return null;
+        }
+
+        private static (Tile Production, Tile Destination, Tile Target) FindProductionRoutingThresholdTiles(
+            Player player,
+            int requiredGain)
+        {
+            var map = World.Current.Map;
+            for (var targetX = map.GetLength(0) - 2; targetX >= 0; targetX--)
+            {
+                for (var targetY = map.GetLength(1) - 1; targetY >= 1; targetY--)
+                {
+                    var target = map[targetX, targetY];
+                    if (!CanPlaceCityAt(target))
+                    {
+                        continue;
+                    }
+
+                    for (var destinationX = 0; destinationX < map.GetLength(0) - 1; destinationX++)
+                    {
+                        for (var destinationY = 1; destinationY < map.GetLength(1); destinationY++)
+                        {
+                            var destination = map[destinationX, destinationY];
+                            if (!CanPlaceCityAt(destination) ||
+                                CityFootprintsOverlap(destination, target))
+                            {
+                                continue;
+                            }
+
+                            var destinationDistance = DistanceToCityFootprint(destination, target);
+                            if (player.GetCities().Any(city => DistanceToCityFootprint(city.Tile, target) <= destinationDistance))
+                            {
+                                continue;
+                            }
+
+                            for (var productionX = 0; productionX < map.GetLength(0) - 1; productionX++)
+                            {
+                                for (var productionY = 1; productionY < map.GetLength(1); productionY++)
+                                {
+                                    var production = map[productionX, productionY];
+                                    if (!CanPlaceCityAt(production) ||
+                                        CityFootprintsOverlap(production, target) ||
+                                        CityFootprintsOverlap(production, destination))
+                                    {
+                                        continue;
+                                    }
+
+                                    var productionDistance = DistanceToCityFootprint(production, target);
+                                    if (productionDistance - destinationDistance == requiredGain)
+                                    {
+                                        return (production, destination, target);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Assert.Fail("Could not find clear production routing threshold tiles.");
+            return (null, null, null);
+        }
+
+        private static int DistanceToCityFootprint(Tile origin, Tile cityOrigin)
+        {
+            return CityFootprint(cityOrigin)
+                .Min(tile => System.Math.Abs(origin.X - tile.X) + System.Math.Abs(origin.Y - tile.Y));
+        }
+
+        private static bool CityFootprintsOverlap(Tile first, Tile second)
+        {
+            return CityFootprint(first).Any(firstTile =>
+                CityFootprint(second).Any(secondTile =>
+                    firstTile.X == secondTile.X &&
+                    firstTile.Y == secondTile.Y));
+        }
+
+        private static Tile[] CityFootprint(Tile origin)
+        {
+            return new[]
+            {
+                World.Current.Map[origin.X, origin.Y],
+                World.Current.Map[origin.X, origin.Y - 1],
+                World.Current.Map[origin.X + 1, origin.Y],
+                World.Current.Map[origin.X + 1, origin.Y - 1]
+            };
         }
 
         private static bool CanPlaceCityAt(Tile tile)
