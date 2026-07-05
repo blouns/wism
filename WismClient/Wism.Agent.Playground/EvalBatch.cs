@@ -298,6 +298,10 @@ public sealed record EvalCounters(
     int Searches,
     int ProductionStarts,
     int ProductionDeliveries,
+    int ProductionDeliveryBattleConversions,
+    int ProductionDeliveryCaptureConversions,
+    int ProductionDeliveryPressureConversions,
+    int ProductionDeliveryIdleWindows,
     int Battles,
     int SaveLoadSuccesses,
     int StuckOrNoOpTurns,
@@ -314,7 +318,7 @@ public sealed record EvalCounters(
     int InspectionModes,
     int EndgameCleanupCompletions)
 {
-    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static EvalCounters operator +(EvalCounters left, EvalCounters right) =>
         new(
@@ -327,6 +331,10 @@ public sealed record EvalCounters(
             left.Searches + right.Searches,
             left.ProductionStarts + right.ProductionStarts,
             left.ProductionDeliveries + right.ProductionDeliveries,
+            left.ProductionDeliveryBattleConversions + right.ProductionDeliveryBattleConversions,
+            left.ProductionDeliveryCaptureConversions + right.ProductionDeliveryCaptureConversions,
+            left.ProductionDeliveryPressureConversions + right.ProductionDeliveryPressureConversions,
+            left.ProductionDeliveryIdleWindows + right.ProductionDeliveryIdleWindows,
             left.Battles + right.Battles,
             left.SaveLoadSuccesses + right.SaveLoadSuccesses,
             left.StuckOrNoOpTurns + right.StuckOrNoOpTurns,
@@ -342,6 +350,15 @@ public sealed record EvalCounters(
             left.RejectedSurrenders + right.RejectedSurrenders,
             left.InspectionModes + right.InspectionModes,
             left.EndgameCleanupCompletions + right.EndgameCleanupCompletions);
+}
+
+internal sealed record ProductionDeliveryConversionCounters(
+    int BattleConversions,
+    int CaptureConversions,
+    int PressureConversions,
+    int IdleWindows)
+{
+    public static ProductionDeliveryConversionCounters Empty { get; } = new(0, 0, 0, 0);
 }
 
 public sealed class EvalBatchRunner
@@ -1049,6 +1066,11 @@ public sealed class EvalBatchRunner
     private static EvalCounters CountSignals(CampaignRunResult campaign, BoardStateInvariantCounters boardInvariants)
     {
         var moments = campaign.Moments.Select(moment => moment.ToLowerInvariant()).ToArray();
+        var momentDetails = ReadMomentDetails(campaign).ToArray();
+        var productionDeliveries = momentDetails.Length > 0
+            ? CountStructuredProductionDeliveries(momentDetails)
+            : CountProductionDeliveries(moments);
+        var deliveryConversions = CountProductionDeliveryConversions(momentDetails);
         var events = campaign.FinalReport.Events.Select(evt => evt.ToLowerInvariant()).ToArray();
         var text = moments.Concat(events).ToArray();
         var outcomeKind = campaign.VictoryOutcome?.OutcomeKind ?? VictoryOutcomeKind.None;
@@ -1063,7 +1085,11 @@ public sealed class EvalBatchRunner
             CityCaptures: CountContains(moments, "city-capture") + CountContains(events, "captured "),
             Searches: CountExecutedSearchCommands(campaign) ?? CountContains(moments, "search") + CountContains(events, "searched "),
             ProductionStarts: CountContains(moments, "production-start") + CountContains(events, " started "),
-            ProductionDeliveries: CountProductionDeliveries(moments),
+            ProductionDeliveries: productionDeliveries,
+            ProductionDeliveryBattleConversions: deliveryConversions.BattleConversions,
+            ProductionDeliveryCaptureConversions: deliveryConversions.CaptureConversions,
+            ProductionDeliveryPressureConversions: deliveryConversions.PressureConversions,
+            ProductionDeliveryIdleWindows: deliveryConversions.IdleWindows,
             Battles: CountContains(moments, "battle") + CountContains(events, "battle resolved"),
             SaveLoadSuccesses: 0,
             StuckOrNoOpTurns: CountContains(text, "no actionable") + CountContains(text, "stuck"),
@@ -1695,6 +1721,10 @@ public sealed class EvalBatchRunner
             $"- Searches: {run.Scorecard.Counters.Searches}",
             $"- Production starts: {run.Scorecard.Counters.ProductionStarts}",
             $"- Production deliveries: {run.Scorecard.Counters.ProductionDeliveries}",
+            $"- Production delivery battle conversions: {run.Scorecard.Counters.ProductionDeliveryBattleConversions}",
+            $"- Production delivery capture conversions: {run.Scorecard.Counters.ProductionDeliveryCaptureConversions}",
+            $"- Production delivery pressure conversions: {run.Scorecard.Counters.ProductionDeliveryPressureConversions}",
+            $"- Production delivery idle windows: {run.Scorecard.Counters.ProductionDeliveryIdleWindows}",
             $"- Production vectors: {run.Scorecard.Counters.ProductionVectors}",
             $"- Battles: {run.Scorecard.Counters.Battles}",
             $"- Invalid commands: {run.Scorecard.Counters.InvalidCommands}",
@@ -1776,6 +1806,73 @@ public sealed class EvalBatchRunner
     private static int CountProductionDeliveries(IEnumerable<string> moments) =>
         moments.Select(ExtractDeliveredCount).Sum();
 
+    private static int CountStructuredProductionDeliveries(IEnumerable<CampaignMoment> moments) =>
+        moments.Where(IsProductionDeliveryMoment).Sum(moment => ExtractDeliveredCount(moment.Context));
+
+    private static ProductionDeliveryConversionCounters CountProductionDeliveryConversions(IReadOnlyList<CampaignMoment> moments)
+    {
+        const int battleWindowTurns = 10;
+        const int captureWindowTurns = 15;
+
+        var deliveries = moments
+            .Where(IsProductionDeliveryMoment)
+            .OrderBy(moment => moment.Turn)
+            .ToArray();
+        if (deliveries.Length == 0)
+        {
+            return ProductionDeliveryConversionCounters.Empty;
+        }
+
+        var battleTurns = moments
+            .Where(moment => moment.Kind.Contains("battle", StringComparison.OrdinalIgnoreCase))
+            .Select(moment => moment.Turn)
+            .OrderBy(turn => turn)
+            .ToArray();
+        var captureTurns = moments
+            .Where(moment => moment.Kind.Contains("city-capture", StringComparison.OrdinalIgnoreCase))
+            .Select(moment => moment.Turn)
+            .OrderBy(turn => turn)
+            .ToArray();
+
+        var battleConversions = 0;
+        var captureConversions = 0;
+        var pressureConversions = 0;
+
+        foreach (var delivery in deliveries)
+        {
+            var deliveredCount = ExtractDeliveredCount(delivery.Context);
+            var hasBattle = HasTurnWithinWindow(battleTurns, delivery.Turn, battleWindowTurns);
+            var hasCapture = HasTurnWithinWindow(captureTurns, delivery.Turn, captureWindowTurns);
+            if (hasBattle)
+            {
+                battleConversions += deliveredCount;
+            }
+
+            if (hasCapture)
+            {
+                captureConversions += deliveredCount;
+            }
+
+            if (hasBattle || hasCapture)
+            {
+                pressureConversions += deliveredCount;
+            }
+        }
+
+        return new ProductionDeliveryConversionCounters(
+            battleConversions,
+            captureConversions,
+            pressureConversions,
+            Math.Max(0, deliveries.Sum(delivery => ExtractDeliveredCount(delivery.Context)) - pressureConversions));
+    }
+
+    private static bool IsProductionDeliveryMoment(CampaignMoment moment) =>
+        moment.Kind.Equals("production", StringComparison.OrdinalIgnoreCase) &&
+        ExtractDeliveredCount(moment.Context) > 0;
+
+    private static bool HasTurnWithinWindow(IReadOnlyList<int> turns, int startTurn, int windowTurns) =>
+        turns.Any(turn => turn >= startTurn && turn <= startTurn + windowTurns);
+
     private static int CountUsefulCommandMoments(IEnumerable<CampaignMoment> moments) =>
         moments.Count(moment =>
             moment.Kind.Contains("city-capture", StringComparison.OrdinalIgnoreCase) ||
@@ -1825,7 +1922,7 @@ public sealed class EvalBatchRunner
 
     private static int? FirstProductionDeliveryTurn(IEnumerable<CampaignMoment> moments) =>
         moments
-            .Where(moment => moment.Context.Contains(" delivered", StringComparison.OrdinalIgnoreCase))
+            .Where(IsProductionDeliveryMoment)
             .Select(moment => (int?)moment.Turn)
             .OrderBy(turn => turn)
             .FirstOrDefault();

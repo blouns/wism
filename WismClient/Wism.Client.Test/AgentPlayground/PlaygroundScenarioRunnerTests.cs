@@ -444,6 +444,40 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void EvalScorecard_AggregatesProductionDeliveryConversionCounters()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-production-economy",
+                counters: EvalCounters.Empty with
+                {
+                    ProductionDeliveries = 3,
+                    ProductionDeliveryBattleConversions = 2,
+                    ProductionDeliveryCaptureConversions = 1,
+                    ProductionDeliveryPressureConversions = 2,
+                    ProductionDeliveryIdleWindows = 1
+                }),
+            EvalCase(
+                scenarioFamily: "classic-ai-conquest",
+                counters: EvalCounters.Empty with
+                {
+                    ProductionDeliveries = 2,
+                    ProductionDeliveryBattleConversions = 1,
+                    ProductionDeliveryCaptureConversions = 1,
+                    ProductionDeliveryPressureConversions = 1,
+                    ProductionDeliveryIdleWindows = 1
+                })
+        });
+
+        Assert.That(scorecard.Counters.ProductionDeliveries, Is.EqualTo(5));
+        Assert.That(scorecard.Counters.ProductionDeliveryBattleConversions, Is.EqualTo(3));
+        Assert.That(scorecard.Counters.ProductionDeliveryCaptureConversions, Is.EqualTo(2));
+        Assert.That(scorecard.Counters.ProductionDeliveryPressureConversions, Is.EqualTo(3));
+        Assert.That(scorecard.Counters.ProductionDeliveryIdleWindows, Is.EqualTo(2));
+    }
+
+    [Test]
     public void EvalScorecard_FailsWhenBoardStateInvariantsAreBroken()
     {
         var scorecard = EvalBatchRunner.BuildScorecard(new[]
