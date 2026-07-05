@@ -686,6 +686,29 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void EvalScorecard_CountsShortConquestRunsInVictoryPressureDenominator()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-conquest",
+                clanCount: 4,
+                maxTurns: 60,
+                outcome: "Bounded stalemate after 60 turns with 4 viable clans.",
+                counters: EvalCounters.Empty with
+                {
+                    BoundedStalemates = 1,
+                    CityCaptures = 4,
+                    Battles = 4
+                })
+        });
+
+        var gate = scorecard.Gates.Single(gate => gate.Name == "classic-ai-victory-pressure");
+        Assert.That(gate.Passed, Is.False);
+        Assert.That(gate.Detail, Does.StartWith("0/1 classic AI conquest cases"));
+    }
+
+    [Test]
     public void EvalScorecard_PassesEightClanClassicAiReadinessWithViableClanReduction()
     {
         var scorecard = EvalBatchRunner.BuildScorecard(new[]
@@ -782,6 +805,24 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(combinations, Does.Contain("classic-ai-neutral-expansion|2|large"));
         Assert.That(combinations, Does.Contain("classic-ai-road-contact|4|medium"));
         Assert.That(combinations, Does.Contain("classic-ai-road-contact|4|large"));
+    }
+
+    [Test]
+    public void EvalScorecard_FailsWhenRequestedScenarioFamilyDoesNotMaterialize()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(
+            new[]
+            {
+                EvalCase(
+                    scenarioFamily: "classic-ai-neutral-expansion",
+                    counters: EvalCounters.Empty with { CityCaptures = 1 })
+            },
+            new[] { "classic-ai-neutral-expansion", "classic-ai-conquest" });
+
+        var gate = scorecard.Gates.Single(gate => gate.Name == "scenario-family-coverage");
+        Assert.That(gate.Passed, Is.False);
+        Assert.That(scorecard.MissingScenarioFamilies, Is.EquivalentTo(new[] { "classic-ai-conquest" }));
+        Assert.That(gate.Detail, Does.Contain("classic-ai-conquest"));
     }
 
     [Test]

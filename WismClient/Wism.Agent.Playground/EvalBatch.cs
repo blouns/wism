@@ -157,6 +157,9 @@ public sealed record EvalScorecard(
     int ParseableCaseArtifacts,
     double ParseableCaseArtifactPercent,
     IReadOnlyList<string> ScenarioFamilies,
+    IReadOnlyList<string> RequestedScenarioFamilies,
+    IReadOnlyList<string> MaterializedScenarioFamilies,
+    IReadOnlyList<string> MissingScenarioFamilies,
     EvalCounters Counters,
     ClassicAiReadinessScorecard ClassicAiReadiness,
     IReadOnlyList<EvalGateResult> Gates);
@@ -430,7 +433,7 @@ public sealed class EvalBatchRunner
             .OrderBy(result => result.Index)
             .ToArray();
 
-        var scorecard = BuildScorecard(results);
+        var scorecard = BuildScorecard(results, ResolveScenarioFamilies(options));
         var status = scorecard.Gates.All(gate => gate.Passed) ? "Passed" : "Failed";
         scorecard = scorecard with { Status = status };
 
@@ -490,7 +493,7 @@ public sealed class EvalBatchRunner
             wallClockTimeoutSeconds > 0 ? wallClockTimeoutSeconds : ResolveCaseWallClockTimeoutSeconds(definition, "calibrated"));
     }
 
-    public static EvalScorecard BuildScorecard(IReadOnlyList<EvalCaseResult> cases)
+    public static EvalScorecard BuildScorecard(IReadOnlyList<EvalCaseResult> cases, IReadOnlyList<string>? requestedScenarioFamilies = null)
     {
         var counters = cases.Aggregate(EvalCounters.Empty, (current, result) => current + result.Counters);
         var total = cases.Count;
@@ -502,6 +505,16 @@ public sealed class EvalBatchRunner
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
             .ToArray();
+        var requestedFamilies = (requestedScenarioFamilies ?? families)
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var missingFamilies = requestedFamilies
+            .Where(requested => !families.Contains(requested, StringComparer.OrdinalIgnoreCase))
+            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var hasRequestedCoverage = requestedScenarioFamilies != null && requestedFamilies.Length > 0;
         var hasCaptureCases = cases.Any(result => IsCaptureFocused(result.ScenarioFamily));
         var hasSearchCases = cases.Any(result => IsSearchFocused(result.ScenarioFamily));
         var hasProductionCases = cases.Any(result => IsProductionFocused(result.ScenarioFamily));
@@ -544,6 +557,12 @@ public sealed class EvalBatchRunner
                 classicAiConquestCases.Length == 0 || classicAiPressurePercent >= 50,
                 $"{classicAiPressureCount}/{classicAiConquestCases.Length} classic AI conquest cases won or materially reduced viable clans ({classicAiPressurePercent:0.##}%)"),
             new EvalGateResult(
+                "scenario-family-coverage",
+                !hasRequestedCoverage || missingFamilies.Length == 0,
+                hasRequestedCoverage
+                    ? $"{families.Length}/{requestedFamilies.Length} requested scenario families materialized; missing: {(missingFamilies.Length == 0 ? "none" : string.Join(",", missingFamilies))}"
+                    : "no requested scenario family contract supplied"),
+            new EvalGateResult(
                 "strategic-plan-created",
                 strategicProfileCases.Length == 0 || strategicObjectiveCases == strategicProfileCases.Length,
                 $"{strategicObjectiveCases}/{strategicProfileCases.Length} strategic-profile cases persisted active or stale objectives")
@@ -558,6 +577,9 @@ public sealed class EvalBatchRunner
             ParseableCaseArtifacts: parseable,
             ParseableCaseArtifactPercent: parseablePercent,
             ScenarioFamilies: families,
+            RequestedScenarioFamilies: requestedFamilies,
+            MaterializedScenarioFamilies: families,
+            MissingScenarioFamilies: missingFamilies,
             Counters: counters,
             ClassicAiReadiness: readiness,
             Gates: gates);
@@ -565,7 +587,7 @@ public sealed class EvalBatchRunner
 
 	private static IEnumerable<EvalCaseDefinition> BuildCases(EvalBatchOptions options)
 	{
-		var scenarios = options.ScenarioFamilies.Count > 0 ? options.ScenarioFamilies : DefaultScenarioFamilies();
+		var scenarios = ResolveScenarioFamilies(options);
 		var clans = options.ClanCounts.Count > 0 ? options.ClanCounts : new[] { 2, 4 };
 		var sizes = options.Sizes.Count > 0 ? options.Sizes : new[] { "medium" };
 		var combinations = scenarios
@@ -587,6 +609,9 @@ public sealed class EvalBatchRunner
 				Size: combination.Size);
 		}
 	}
+
+    private static IReadOnlyList<string> ResolveScenarioFamilies(EvalBatchOptions options) =>
+        options.ScenarioFamilies.Count > 0 ? options.ScenarioFamilies : DefaultScenarioFamilies();
 
 	private static int ResolveCaseMaxTurns(int requestedMaxTurns, string scenarioFamily, string size, int clanCount, string timeoutProfile)
 	{
@@ -1754,6 +1779,9 @@ public sealed class EvalBatchRunner
             $"Passed cases: {run.Scorecard.PassedCases}",
             $"Failed cases: {run.Scorecard.FailedCases}",
             $"Parseable artifacts: {run.Scorecard.ParseableCaseArtifacts}/{run.Scorecard.TotalCases} ({run.Scorecard.ParseableCaseArtifactPercent:0.##}%)",
+            $"Requested scenario families: {string.Join(", ", run.Scorecard.RequestedScenarioFamilies)}",
+            $"Materialized scenario families: {string.Join(", ", run.Scorecard.MaterializedScenarioFamilies)}",
+            $"Missing scenario families: {(run.Scorecard.MissingScenarioFamilies.Count == 0 ? "none" : string.Join(", ", run.Scorecard.MissingScenarioFamilies))}",
             string.Empty,
             "## Signals",
             string.Empty,
@@ -2072,9 +2100,7 @@ public sealed class EvalBatchRunner
         scenarioFamily.Contains("conquest", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsClassicAiConquestPressureCase(EvalCaseResult result) =>
-        IsClassicAiConquestFocused(result.ScenarioFamily) &&
-        result.ClanCount >= 6 &&
-        result.MaxTurns >= 80;
+        IsClassicAiConquestFocused(result.ScenarioFamily);
 
     private static bool IsClassicAiCapabilityProbe(EvalCaseResult result) =>
         result.MaxTurns >= 20 ||
