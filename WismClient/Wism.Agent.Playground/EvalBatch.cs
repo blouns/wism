@@ -316,9 +316,18 @@ public sealed record EvalCounters(
     int AcceptedSurrenders,
     int RejectedSurrenders,
     int InspectionModes,
+    int StrategicGoalsCreated,
+    int StrategicGoalsAssigned,
+    int StrategicGoalsAdvanced,
+    int StrategicGoalsBlocked,
+    int StrategicGoalsRetargeted,
+    int StrategicGoalsSatisfied,
+    int StrategicGoalsAbandoned,
+    int StrategicGoalsFailed,
+    int StrategicGoalsStale,
     int EndgameCleanupCompletions)
 {
-    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static EvalCounters operator +(EvalCounters left, EvalCounters right) =>
         new(
@@ -349,6 +358,15 @@ public sealed record EvalCounters(
             left.AcceptedSurrenders + right.AcceptedSurrenders,
             left.RejectedSurrenders + right.RejectedSurrenders,
             left.InspectionModes + right.InspectionModes,
+            left.StrategicGoalsCreated + right.StrategicGoalsCreated,
+            left.StrategicGoalsAssigned + right.StrategicGoalsAssigned,
+            left.StrategicGoalsAdvanced + right.StrategicGoalsAdvanced,
+            left.StrategicGoalsBlocked + right.StrategicGoalsBlocked,
+            left.StrategicGoalsRetargeted + right.StrategicGoalsRetargeted,
+            left.StrategicGoalsSatisfied + right.StrategicGoalsSatisfied,
+            left.StrategicGoalsAbandoned + right.StrategicGoalsAbandoned,
+            left.StrategicGoalsFailed + right.StrategicGoalsFailed,
+            left.StrategicGoalsStale + right.StrategicGoalsStale,
             left.EndgameCleanupCompletions + right.EndgameCleanupCompletions);
 }
 
@@ -359,6 +377,20 @@ internal sealed record ProductionDeliveryConversionCounters(
     int IdleWindows)
 {
     public static ProductionDeliveryConversionCounters Empty { get; } = new(0, 0, 0, 0);
+}
+
+internal sealed record StrategicGoalLifecycleCounters(
+    int Created,
+    int Assigned,
+    int Advanced,
+    int Blocked,
+    int Retargeted,
+    int Satisfied,
+    int Abandoned,
+    int Failed,
+    int Stale)
+{
+    public static StrategicGoalLifecycleCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 
 public sealed class EvalBatchRunner
@@ -1071,6 +1103,7 @@ public sealed class EvalBatchRunner
             ? CountStructuredProductionDeliveries(momentDetails)
             : CountProductionDeliveries(moments);
         var deliveryConversions = CountProductionDeliveryConversions(momentDetails);
+        var strategicGoalLifecycle = CountStrategicGoalLifecycle(momentDetails);
         var events = campaign.FinalReport.Events.Select(evt => evt.ToLowerInvariant()).ToArray();
         var text = moments.Concat(events).ToArray();
         var outcomeKind = campaign.VictoryOutcome?.OutcomeKind ?? VictoryOutcomeKind.None;
@@ -1104,6 +1137,15 @@ public sealed class EvalBatchRunner
             AcceptedSurrenders: outcomeKind == VictoryOutcomeKind.AcceptedSurrender ? 1 : 0,
             RejectedSurrenders: outcomeKind == VictoryOutcomeKind.RejectedSurrender ? 1 : 0,
             InspectionModes: outcomeKind == VictoryOutcomeKind.InspectionMode ? 1 : 0,
+            StrategicGoalsCreated: strategicGoalLifecycle.Created,
+            StrategicGoalsAssigned: strategicGoalLifecycle.Assigned,
+            StrategicGoalsAdvanced: strategicGoalLifecycle.Advanced,
+            StrategicGoalsBlocked: strategicGoalLifecycle.Blocked,
+            StrategicGoalsRetargeted: strategicGoalLifecycle.Retargeted,
+            StrategicGoalsSatisfied: strategicGoalLifecycle.Satisfied,
+            StrategicGoalsAbandoned: strategicGoalLifecycle.Abandoned,
+            StrategicGoalsFailed: strategicGoalLifecycle.Failed,
+            StrategicGoalsStale: strategicGoalLifecycle.Stale,
             EndgameCleanupCompletions: outcomeKind == VictoryOutcomeKind.Conquest ? 1 : 0);
     }
 
@@ -1751,6 +1793,15 @@ public sealed class EvalBatchRunner
             $"- Strategic objectives active: {run.Cases.Sum(result => result.Metrics.StrategicObjectiveActiveCount)}",
             $"- Strategic objectives stale: {run.Cases.Sum(result => result.Metrics.StrategicObjectiveStaleCount)}",
             $"- Strategic Defend objectives: {run.Cases.Sum(result => result.Metrics.StrategicDefendObjectiveCount)}",
+            $"- Strategic goal events created: {run.Scorecard.Counters.StrategicGoalsCreated}",
+            $"- Strategic goal events assigned: {run.Scorecard.Counters.StrategicGoalsAssigned}",
+            $"- Strategic goal events advanced: {run.Scorecard.Counters.StrategicGoalsAdvanced}",
+            $"- Strategic goal events blocked: {run.Scorecard.Counters.StrategicGoalsBlocked}",
+            $"- Strategic goal events retargeted: {run.Scorecard.Counters.StrategicGoalsRetargeted}",
+            $"- Strategic goal events satisfied: {run.Scorecard.Counters.StrategicGoalsSatisfied}",
+            $"- Strategic goal events abandoned: {run.Scorecard.Counters.StrategicGoalsAbandoned}",
+            $"- Strategic goal events failed: {run.Scorecard.Counters.StrategicGoalsFailed}",
+            $"- Strategic goal events stale: {run.Scorecard.Counters.StrategicGoalsStale}",
             string.Empty,
             "## Gates",
             string.Empty
@@ -1872,6 +1923,52 @@ public sealed class EvalBatchRunner
 
     private static bool HasTurnWithinWindow(IReadOnlyList<int> turns, int startTurn, int windowTurns) =>
         turns.Any(turn => turn >= startTurn && turn <= startTurn + windowTurns);
+
+    private static StrategicGoalLifecycleCounters CountStrategicGoalLifecycle(IEnumerable<CampaignMoment> moments)
+    {
+        var events = moments
+            .Where(moment => moment.Kind.Equals("strategic-goal-event", StringComparison.OrdinalIgnoreCase))
+            .Select(moment => ExtractKeyValue(moment.Context, "eventType"))
+            .Where(eventType => !string.IsNullOrWhiteSpace(eventType))
+            .ToArray();
+        if (events.Length == 0)
+        {
+            return StrategicGoalLifecycleCounters.Empty;
+        }
+
+        return new StrategicGoalLifecycleCounters(
+            Created: CountEvent(events, "created"),
+            Assigned: CountEvent(events, "assigned"),
+            Advanced: CountEvent(events, "advanced"),
+            Blocked: CountEvent(events, "blocked"),
+            Retargeted: CountEvent(events, "retargeted"),
+            Satisfied: CountEvent(events, "satisfied"),
+            Abandoned: CountEvent(events, "abandoned"),
+            Failed: CountEvent(events, "failed"),
+            Stale: CountEvent(events, "stale"));
+    }
+
+    private static int CountEvent(IEnumerable<string> events, string eventType) =>
+        events.Count(value => value.Equals(eventType, StringComparison.OrdinalIgnoreCase));
+
+    private static string ExtractKeyValue(string context, string key)
+    {
+        if (string.IsNullOrWhiteSpace(context) || string.IsNullOrWhiteSpace(key))
+        {
+            return string.Empty;
+        }
+
+        var prefix = key + "=";
+        foreach (var segment in context.Split(';'))
+        {
+            if (segment.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return segment[prefix.Length..].Trim();
+            }
+        }
+
+        return string.Empty;
+    }
 
     private static int CountUsefulCommandMoments(IEnumerable<CampaignMoment> moments) =>
         moments.Count(moment =>

@@ -26,5 +26,19 @@ namespace Wism.Client.Data.Entities
         [DataMember] public string Status { get; set; }
 
         [DataMember] public string StaleReason { get; set; }
+
+        [DataMember] public string GoalId { get; set; }
+
+        [DataMember] public string State { get; set; }
+
+        [DataMember] public int CreatedTurn { get; set; }
+
+        [DataMember] public int UpdatedTurn { get; set; }
+
+        [DataMember] public string Reason { get; set; }
+
+        [DataMember] public string BlockingReason { get; set; }
+
+        [DataMember] public string ParentGoalId { get; set; }
     }
 }

@@ -57,6 +57,7 @@ namespace Wism.Client.AI.Strategic
             activeObjectives.AddRange(CreateExpansionObjectives(world, player, assignedArmyIds));
             activeObjectives.AddRange(CreateSiegeObjectives(world, player, assignedArmyIds));
             activeObjectives.AddRange(CreateProductionObjectives(world, player));
+            HydrateLifecycle(activeObjectives, previous, player.Turn);
 
             var objectives = staleObjectives
                 .Concat(activeObjectives)
@@ -269,8 +270,58 @@ namespace Wism.Client.AI.Strategic
 
             objective.Status = "Stale";
             objective.StaleReason = staleReason;
+            objective.State = "Failed";
+            objective.BlockingReason = staleReason;
+            objective.UpdatedTurn = player.Turn;
             objective.Priority = Math.Min(objective.Priority, 5);
             return objective;
+        }
+
+        private static void HydrateLifecycle(
+            IEnumerable<StrategicObjectiveEntity> objectives,
+            StrategicPlanEntity previous,
+            int turn)
+        {
+            var previousById = (previous?.Objectives ?? new StrategicObjectiveEntity[0])
+                .Where(objective => objective != null && !string.IsNullOrWhiteSpace(ResolveGoalId(objective)))
+                .GroupBy(ResolveGoalId, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+            foreach (var objective in objectives.Where(objective => objective != null))
+            {
+                var goalId = ResolveGoalId(objective);
+                objective.GoalId = goalId;
+                objective.CreatedTurn = previousById.TryGetValue(goalId, out var prior) && prior.CreatedTurn > 0
+                    ? prior.CreatedTurn
+                    : turn;
+                objective.UpdatedTurn = turn;
+                objective.State = HasAssignments(objective) ? "Assigned" : "Active";
+                objective.BlockingReason = null;
+                objective.Reason = string.IsNullOrWhiteSpace(objective.Reason)
+                    ? DescribeObjectiveReason(objective)
+                    : objective.Reason;
+            }
+        }
+
+        private static bool HasAssignments(StrategicObjectiveEntity objective) =>
+            (objective.AssignedArmyIds != null && objective.AssignedArmyIds.Length > 0) ||
+            (objective.AssignedCityShortNames != null && objective.AssignedCityShortNames.Length > 0);
+
+        private static string ResolveGoalId(StrategicObjectiveEntity objective) =>
+            !string.IsNullOrWhiteSpace(objective.GoalId)
+                ? objective.GoalId
+                : !string.IsNullOrWhiteSpace(objective.Id)
+                    ? objective.Id
+                    : $"{objective.Kind}:{objective.TargetCityShortName ?? objective.TargetLocationShortName ?? $"{objective.TargetX},{objective.TargetY}"}";
+
+        private static string DescribeObjectiveReason(StrategicObjectiveEntity objective)
+        {
+            var target = objective.TargetCityShortName ??
+                         objective.TargetLocationShortName ??
+                         (objective.TargetX.HasValue && objective.TargetY.HasValue
+                             ? $"{objective.TargetX},{objective.TargetY}"
+                             : "available target");
+            return $"{objective.Kind} goal for {target}.";
         }
 
         private static string GetStaleReason(StrategicObjectiveEntity objective, World world, Player player)
@@ -338,6 +389,7 @@ namespace Wism.Client.AI.Strategic
             return new StrategicObjectiveEntity
             {
                 Id = $"{kind}:{targetName}",
+                GoalId = $"{kind}:{targetName}",
                 Kind = kind,
                 TargetCityShortName = targetCity?.ShortName,
                 TargetLocationShortName = targetLocation?.ShortName,
@@ -347,7 +399,11 @@ namespace Wism.Client.AI.Strategic
                 AssignedCityShortNames = assignedCityShortNames ?? new string[0],
                 Priority = priority,
                 Status = "Active",
-                StaleReason = null
+                State = "Active",
+                StaleReason = null,
+                BlockingReason = null,
+                ParentGoalId = null,
+                Reason = $"{kind} goal for {targetName}."
             };
         }
 

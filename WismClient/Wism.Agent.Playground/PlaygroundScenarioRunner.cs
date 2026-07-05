@@ -491,6 +491,7 @@ public sealed class PlaygroundScenarioRunner
             aiProfile: aiProfile,
             timingSink: (name, elapsed) => campaignTimings.Record(name, elapsed));
         campaignTimings.Measure("strategic-objective-refresh", provider.GenerateCommands);
+        EmitStrategicGoalEvents(player, turn, recorder);
 
         var commands = provider.GetBufferedCommands()
             .OfType<Command>()
@@ -518,6 +519,62 @@ public sealed class PlaygroundScenarioRunner
         }
 
         return endedTurn;
+    }
+
+    private static void EmitStrategicGoalEvents(Player player, int turn, CampaignRecorder recorder)
+    {
+        var plan = Game.Current.StrategicPlans?
+            .FirstOrDefault(candidate => string.Equals(candidate.ClanShortName, player.Clan.ShortName, StringComparison.OrdinalIgnoreCase));
+        if (plan?.Objectives == null)
+        {
+            return;
+        }
+
+        foreach (var objective in plan.Objectives.Where(objective => objective != null))
+        {
+            if (string.Equals(objective.Status, "Stale", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(objective.State, "Failed", StringComparison.OrdinalIgnoreCase))
+            {
+                recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicGoalEvent(objective, "failed"));
+                continue;
+            }
+
+            var wasCreatedThisTurn = objective.CreatedTurn == turn;
+            if (wasCreatedThisTurn)
+            {
+                recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicGoalEvent(objective, "created"));
+            }
+
+            if (wasCreatedThisTurn &&
+                ((objective.AssignedArmyIds != null && objective.AssignedArmyIds.Length > 0) ||
+                 (objective.AssignedCityShortNames != null && objective.AssignedCityShortNames.Length > 0)))
+            {
+                recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicGoalEvent(objective, "assigned"));
+            }
+        }
+    }
+
+    private static string FormatStrategicGoalEvent(StrategicObjectiveEntity objective, string eventType)
+    {
+        var assignedAssetCount =
+            (objective.AssignedArmyIds?.Length ?? 0) +
+            (objective.AssignedCityShortNames?.Length ?? 0);
+        var target = objective.TargetCityShortName ??
+                     objective.TargetLocationShortName ??
+                     (objective.TargetX.HasValue && objective.TargetY.HasValue
+                         ? $"{objective.TargetX},{objective.TargetY}"
+                         : "none");
+        return string.Join(
+            ";",
+            $"goalId={objective.GoalId ?? objective.Id}",
+            $"goalType={objective.Kind}",
+            $"eventType={eventType}",
+            $"state={objective.State ?? objective.Status}",
+            $"target={target}",
+            $"score={objective.Priority:0.###}",
+            $"assignedAssetCount={assignedAssetCount}",
+            $"reason={objective.Reason ?? objective.StaleReason ?? "none"}",
+            $"blockingReason={objective.BlockingReason ?? objective.StaleReason ?? "none"}");
     }
 
     public PlaygroundReport Jump(string checkpointPath)

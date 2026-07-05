@@ -478,6 +478,47 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void EvalScorecard_AggregatesStrategicGoalLifecycleCounters()
+    {
+        var scorecard = EvalBatchRunner.BuildScorecard(new[]
+        {
+            EvalCase(
+                scenarioFamily: "classic-ai-conquest",
+                counters: EvalCounters.Empty with
+                {
+                    StrategicGoalsCreated = 4,
+                    StrategicGoalsAssigned = 3,
+                    StrategicGoalsAdvanced = 2,
+                    StrategicGoalsBlocked = 1,
+                    StrategicGoalsRetargeted = 1,
+                    StrategicGoalsSatisfied = 1,
+                    StrategicGoalsAbandoned = 1,
+                    StrategicGoalsFailed = 1,
+                    StrategicGoalsStale = 1
+                }),
+            EvalCase(
+                scenarioFamily: "classic-ai-defended-siege",
+                counters: EvalCounters.Empty with
+                {
+                    StrategicGoalsCreated = 2,
+                    StrategicGoalsAssigned = 2,
+                    StrategicGoalsBlocked = 1,
+                    StrategicGoalsFailed = 1
+                })
+        });
+
+        Assert.That(scorecard.Counters.StrategicGoalsCreated, Is.EqualTo(6));
+        Assert.That(scorecard.Counters.StrategicGoalsAssigned, Is.EqualTo(5));
+        Assert.That(scorecard.Counters.StrategicGoalsAdvanced, Is.EqualTo(2));
+        Assert.That(scorecard.Counters.StrategicGoalsBlocked, Is.EqualTo(2));
+        Assert.That(scorecard.Counters.StrategicGoalsRetargeted, Is.EqualTo(1));
+        Assert.That(scorecard.Counters.StrategicGoalsSatisfied, Is.EqualTo(1));
+        Assert.That(scorecard.Counters.StrategicGoalsAbandoned, Is.EqualTo(1));
+        Assert.That(scorecard.Counters.StrategicGoalsFailed, Is.EqualTo(2));
+        Assert.That(scorecard.Counters.StrategicGoalsStale, Is.EqualTo(1));
+    }
+
+    [Test]
     public void EvalScorecard_FailsWhenBoardStateInvariantsAreBroken()
     {
         var scorecard = EvalBatchRunner.BuildScorecard(new[]

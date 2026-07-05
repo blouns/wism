@@ -41,6 +41,28 @@ namespace Wism.Client.Test.AI
         }
 
         [Test]
+        public void Planner_PopulatesStableGoalLifecycleMetadata()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), player.Capitol.Tile);
+
+            var first = new ClassicStrategicPlanner().Reconcile(World.Current);
+            var firstExpansion = first.Objectives.First(objective => objective.Kind == "Expand");
+            var second = new ClassicStrategicPlanner().Reconcile(World.Current);
+            var secondExpansion = second.Objectives.First(objective => objective.Id == firstExpansion.Id);
+
+            Assert.That(firstExpansion.GoalId, Is.EqualTo(firstExpansion.Id));
+            Assert.That(firstExpansion.CreatedTurn, Is.EqualTo(player.Turn));
+            Assert.That(firstExpansion.UpdatedTurn, Is.EqualTo(player.Turn));
+            Assert.That(firstExpansion.State, Is.EqualTo("Assigned"));
+            Assert.That(firstExpansion.Reason, Does.Contain(firstExpansion.TargetCityShortName));
+            Assert.That(secondExpansion.GoalId, Is.EqualTo(firstExpansion.GoalId));
+            Assert.That(secondExpansion.CreatedTurn, Is.EqualTo(firstExpansion.CreatedTurn));
+        }
+
+        [Test]
         public void Planner_AppliesOptionalPersonalityWeightsDeterministically()
         {
             var controllerProvider = TestUtilities.CreateControllerProvider();
@@ -121,6 +143,8 @@ namespace Wism.Client.Test.AI
             Assert.That(loaded.ClanShortName, Is.EqualTo(original.ClanShortName));
             Assert.That(loaded.Revision, Is.EqualTo(original.Revision));
             Assert.That(loaded.Objectives.Select(objective => objective.Id), Is.EquivalentTo(original.Objectives.Select(objective => objective.Id)));
+            Assert.That(loaded.Objectives.Select(objective => objective.GoalId), Is.EquivalentTo(original.Objectives.Select(objective => objective.GoalId)));
+            Assert.That(loaded.Objectives.All(objective => !string.IsNullOrWhiteSpace(objective.State)), Is.True);
         }
 
         [Test]
