@@ -398,7 +398,7 @@ public class CaptureModule : ITacticalModule
         }
 
         var viableCities = cities
-            .Where(city => CanPursueCity(armies, city))
+            .Where(city => CanPursueCity(armies, city) && CanQueueCityPressureCommand(armies, city))
             .ToList();
 
         if (shouldLog)
@@ -413,6 +413,46 @@ public class CaptureModule : ITacticalModule
         }
 
         return this.cityTargetEvaluator.SelectTarget(armies, viableCities);
+    }
+
+    private bool CanQueueCityPressureCommand(List<Army> armies, City city)
+    {
+        armies = GetUsableSameTileArmies(armies);
+        if (armies == null || armies.Count == 0 || city == null)
+        {
+            return false;
+        }
+
+        if (SelectDirectCaptureArmies(armies, city).Count > 0)
+        {
+            return true;
+        }
+
+        var attackTile = FindAttackableCityTile(armies, city);
+        if (attackTile != null)
+        {
+            var estimate = this.combatEstimator.EstimateAttack(armies, attackTile);
+            return estimate.DefenderCount == 0 ||
+                   estimate.WinProbability >= GetMinimumCityAttackWinProbability(armies, city);
+        }
+
+        var attackPosition = AiUtilities.FindAttackPosition(
+            city.Tile,
+            armies,
+            Game.Current.PathingStrategy,
+            logger);
+        if (attackPosition == null || attackPosition == armies[0].Tile)
+        {
+            return false;
+        }
+
+        var blocker = FindEnemyBlockerOnRoute(armies, attackPosition, out var routeToAttackPosition);
+        if (blocker != null)
+        {
+            return this.combatEstimator.EstimateAttack(armies, blocker).WinProbability >= MinimumBlockerAttackWinProbability;
+        }
+
+        return routeToAttackPosition != null && routeToAttackPosition.Count > 1;
     }
 
     private bool CanPursueCity(List<Army> armies, City city)

@@ -24,6 +24,7 @@ namespace Wism.Client.AI.Framework
         private readonly ISpatialAdvisor spatialAdvisor;
         private readonly Action<string, TimeSpan> timingSink;
         private readonly Dictionary<string, int> commandSignatureCounts = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> blockedBidCounts = new Dictionary<string, int>();
         private List<AiDecisionTrace> lastDecisionTraces = new List<AiDecisionTrace>();
         private string commandSignatureTurnContext;
 
@@ -111,12 +112,7 @@ namespace Wism.Client.AI.Framework
             LogAcceptedBids(winningBids, bids);
 
             var winningBidSet = new HashSet<IBid>(winningBids);
-            var commandBids = winningBids
-                .Concat(bids
-                    .Where(bid => !winningBidSet.Contains(bid))
-                    .OrderByDescending(bid => bid.Utility)
-                    .ThenBy(bid => bid.Armies?.Where(army => army != null).Select(army => army.Id).DefaultIfEmpty(int.MaxValue).Min()))
-                .ToList();
+            var commandBids = OrderCommandBidsForRecovery(winningBids, bids, winningBidSet).ToList();
             var reservedArmyIds = new HashSet<int>();
 
             foreach (var bid in commandBids)
@@ -144,7 +140,9 @@ namespace Wism.Client.AI.Framework
                 var generatedBeforeSuppression = generated.Count;
                 generated = SuppressRepeatedCommandBatch(bid, generated);
                 LogBidCommands(bid, generated);
-                traces.Add(CreateTrace(bid, generated, generatedBeforeSuppression));
+                var trace = CreateTrace(bid, generated, generatedBeforeSuppression);
+                traces.Add(trace);
+                UpdateBlockedBidMemory(bid, trace);
                 if (generated.Count > 0)
                 {
                     commands.AddRange(generated);
@@ -155,6 +153,31 @@ namespace Wism.Client.AI.Framework
             lastDecisionTraces = traces;
             LogDecisionComplete(commands);
             return commands;
+        }
+
+        private IEnumerable<IBid> OrderCommandBidsForRecovery(
+            List<IBid> winningBids,
+            List<IBid> bids,
+            HashSet<IBid> winningBidSet)
+        {
+            EnsureTurnContext();
+
+            var ordered = winningBids
+                .Concat(bids
+                    .Where(bid => !winningBidSet.Contains(bid))
+                    .OrderByDescending(bid => bid.Utility)
+                    .ThenBy(bid => bid.Armies?.Where(army => army != null).Select(army => army.Id).DefaultIfEmpty(int.MaxValue).Min()))
+                .Select((bid, index) => new
+                {
+                    Bid = bid,
+                    Index = index,
+                    BlockedCount = GetBlockedBidCount(bid)
+                });
+
+            return ordered
+                .OrderBy(item => item.BlockedCount > 0 ? 1 : 0)
+                .ThenBy(item => item.Index)
+                .Select(item => item.Bid);
         }
 
         private void Measure(string name, Action action, string secondaryName = null)
@@ -323,12 +346,7 @@ namespace Wism.Client.AI.Framework
                 return commands ?? new List<ICommandAction>();
             }
 
-            var turnContext = CreateTurnContextKey();
-            if (!string.Equals(commandSignatureTurnContext, turnContext, StringComparison.Ordinal))
-            {
-                commandSignatureCounts.Clear();
-                commandSignatureTurnContext = turnContext;
-            }
+            EnsureTurnContext();
 
             var signature = CreateCommandBatchSignature(bid, commands);
             commandSignatureCounts.TryGetValue(signature, out var count);
@@ -343,6 +361,70 @@ namespace Wism.Client.AI.Framework
             logger?.LogWarning(
                 $"[Adapta] Suppressing repeated command batch after {count} identical attempt(s): {signature}.");
             return new List<ICommandAction>();
+        }
+
+        private void EnsureTurnContext()
+        {
+            var turnContext = CreateTurnContextKey();
+            if (string.Equals(commandSignatureTurnContext, turnContext, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            commandSignatureCounts.Clear();
+            blockedBidCounts.Clear();
+            commandSignatureTurnContext = turnContext;
+        }
+
+        private int GetBlockedBidCount(IBid bid)
+        {
+            var key = CreateBidRecoveryKey(bid);
+            if (key == null)
+            {
+                return 0;
+            }
+
+            return blockedBidCounts.TryGetValue(key, out var count) ? count : 0;
+        }
+
+        private void UpdateBlockedBidMemory(IBid bid, AiDecisionTrace trace)
+        {
+            var key = CreateBidRecoveryKey(bid);
+            if (key == null || trace == null)
+            {
+                return;
+            }
+
+            if (string.Equals(trace.Outcome, "blocked", StringComparison.OrdinalIgnoreCase))
+            {
+                blockedBidCounts.TryGetValue(key, out var count);
+                blockedBidCounts[key] = count + 1;
+                return;
+            }
+
+            if (string.Equals(trace.Outcome, "executed", StringComparison.OrdinalIgnoreCase))
+            {
+                blockedBidCounts.Remove(key);
+            }
+        }
+
+        private static string CreateBidRecoveryKey(IBid bid)
+        {
+            if (bid == null)
+            {
+                return null;
+            }
+
+            var metadata = bid as IStrategicBidMetadata;
+            return string.Join(
+                ";",
+                bid.Module?.GetType().Name ?? "Unknown",
+                metadata?.ObjectiveKind ?? "Unknown",
+                metadata?.TargetCityShortName ?? string.Empty,
+                metadata?.TargetLocationShortName ?? string.Empty,
+                metadata?.TargetX?.ToString() ?? string.Empty,
+                metadata?.TargetY?.ToString() ?? string.Empty,
+                DescribeArmyIds(bid.Armies));
         }
 
         private static string CreateTurnContextKey()

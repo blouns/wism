@@ -254,6 +254,42 @@ namespace Wism.Client.Test.AI
             Assert.That(controller.LastDecisionTraces.First(trace => trace.ModuleName == nameof(FallbackMoveTacticalModule)).Outcome, Is.EqualTo("executed"));
         }
 
+        [Test]
+        public void AiController_PrioritizesExecutableFallbackAfterBidBlocks()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), World.Current.Map[4, 4]);
+            var target = World.Current.Map[5, 4];
+            var blockedWinner = new NoCommandBidTacticalModule(army, army.Tile.X, army.Tile.Y);
+            var fallback = new FallbackMoveTacticalModule(controllerProvider.ArmyController, army, target);
+            var controller = new AiController(
+                new SimpleStrategicModule(),
+                new List<ITacticalModule> { blockedWinner, fallback });
+
+            ExecuteCommandsUntilDone(controller.ExecuteTurnAndReturnCommands(World.Current));
+            var second = controller.ExecuteTurnAndReturnCommands(World.Current);
+
+            Assert.That(
+                second.OfType<MoveOnceCommand>().Any(command => command.X == target.X && command.Y == target.Y),
+                Is.True);
+            Assert.That(controller.LastDecisionTraces.Select(trace => trace.ModuleName), Is.EquivalentTo(new[] { nameof(FallbackMoveTacticalModule) }));
+            Assert.That(controller.LastDecisionTraces.Single().Outcome, Is.EqualTo("executed"));
+        }
+
+        private static void ExecuteCommandsUntilDone(IEnumerable<ICommandAction> commands)
+        {
+            foreach (var command in commands)
+            {
+                var result = command.Execute();
+                while (result == ActionState.InProgress)
+                {
+                    result = command.Execute();
+                }
+            }
+        }
+
         private sealed class NoOpTacticalModule : ITacticalModule
         {
             public IEnumerable<IBid> GenerateBids(World world)
@@ -309,10 +345,14 @@ namespace Wism.Client.Test.AI
         private sealed class NoCommandBidTacticalModule : ITacticalModule
         {
             private readonly Army army;
+            private readonly int? targetX;
+            private readonly int? targetY;
 
-            public NoCommandBidTacticalModule(Army army)
+            public NoCommandBidTacticalModule(Army army, int? targetX = null, int? targetY = null)
             {
                 this.army = army;
+                this.targetX = targetX;
+                this.targetY = targetY;
             }
 
             public IEnumerable<IBid> GenerateBids(World world)
@@ -324,8 +364,8 @@ namespace Wism.Client.Test.AI
                         this,
                         100.0,
                         "Search",
-                        targetX: army.Tile.X,
-                        targetY: army.Tile.Y,
+                        targetX: targetX ?? army.Tile.X,
+                        targetY: targetY ?? army.Tile.Y,
                         reason: "Impossible high-priority objective.")
                 };
             }
