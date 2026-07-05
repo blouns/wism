@@ -12,7 +12,9 @@ namespace Wism.Client.AI.Framework
             string target,
             string reason,
             IReadOnlyList<int> armyIds,
-            IReadOnlyList<string> commandNames)
+            IReadOnlyList<string> commandNames,
+            string outcome = null,
+            string blockingReason = null)
         {
             ObjectiveKind = objectiveKind;
             ModuleName = moduleName;
@@ -21,6 +23,8 @@ namespace Wism.Client.AI.Framework
             Reason = reason;
             ArmyIds = armyIds ?? new int[0];
             CommandNames = commandNames ?? new string[0];
+            Outcome = outcome ?? (CommandNames.Count > 0 ? "executed" : "blocked");
+            BlockingReason = blockingReason;
         }
 
         public string ObjectiveKind { get; }
@@ -36,5 +40,9 @@ namespace Wism.Client.AI.Framework
         public IReadOnlyList<int> ArmyIds { get; }
 
         public IReadOnlyList<string> CommandNames { get; }
+
+        public string Outcome { get; }
+
+        public string BlockingReason { get; }
     }
 }

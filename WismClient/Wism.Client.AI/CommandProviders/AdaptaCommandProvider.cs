@@ -66,5 +66,7 @@ namespace Wism.Client.AI.CommandProviders
         {
             return bufferedCommands;
         }
+
+        public IReadOnlyList<AiDecisionTrace> LastDecisionTraces => aiController.LastDecisionTraces;
     }
 }

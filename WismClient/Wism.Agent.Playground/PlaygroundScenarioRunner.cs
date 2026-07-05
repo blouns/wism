@@ -492,6 +492,7 @@ public sealed class PlaygroundScenarioRunner
             timingSink: (name, elapsed) => campaignTimings.Record(name, elapsed));
         campaignTimings.Measure("strategic-objective-refresh", provider.GenerateCommands);
         EmitStrategicGoalEvents(player, turn, recorder);
+        EmitStrategicTraceEvents(player, turn, recorder, provider.LastDecisionTraces);
 
         var commands = provider.GetBufferedCommands()
             .OfType<Command>()
@@ -519,6 +520,49 @@ public sealed class PlaygroundScenarioRunner
         }
 
         return endedTurn;
+    }
+
+    private static void EmitStrategicTraceEvents(
+        Player player,
+        int turn,
+        CampaignRecorder recorder,
+        IReadOnlyList<AiDecisionTrace> traces)
+    {
+        if (traces == null || traces.Count == 0)
+        {
+            return;
+        }
+
+        var blockedSeen = false;
+        foreach (var trace in traces.Where(trace => trace != null))
+        {
+            if (string.Equals(trace.Outcome, "blocked", StringComparison.OrdinalIgnoreCase))
+            {
+                blockedSeen = true;
+                recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicTraceEvent(trace, "blocked"));
+                continue;
+            }
+
+            if (blockedSeen && string.Equals(trace.Outcome, "executed", StringComparison.OrdinalIgnoreCase))
+            {
+                recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicTraceEvent(trace, "retargeted"));
+            }
+        }
+    }
+
+    private static string FormatStrategicTraceEvent(AiDecisionTrace trace, string eventType)
+    {
+        return string.Join(
+            ";",
+            $"goalId={trace.ObjectiveKind}:{trace.Target}",
+            $"goalType={trace.ObjectiveKind}",
+            $"eventType={eventType}",
+            $"state={(eventType == "blocked" ? "Blocked" : "Retargeted")}",
+            $"target={trace.Target}",
+            $"score={trace.Score:0.###}",
+            $"assignedAssetCount={trace.ArmyIds?.Count ?? 0}",
+            $"reason={trace.Reason ?? "none"}",
+            $"blockingReason={trace.BlockingReason ?? "none"}");
     }
 
     private static void EmitStrategicGoalEvents(Player player, int turn, CampaignRecorder recorder)

@@ -141,9 +141,10 @@ namespace Wism.Client.AI.Framework
                         generated = bid.Module.GenerateCommands(bid.Armies, world)?.ToList() ?? new List<ICommandAction>();
                     },
                     "accepted-bid-command-generation:" + bidModuleName);
+                var generatedBeforeSuppression = generated.Count;
                 generated = SuppressRepeatedCommandBatch(bid, generated);
                 LogBidCommands(bid, generated);
-                traces.Add(CreateTrace(bid, generated));
+                traces.Add(CreateTrace(bid, generated, generatedBeforeSuppression));
                 if (generated.Count > 0)
                 {
                     commands.AddRange(generated);
@@ -180,9 +181,13 @@ namespace Wism.Client.AI.Framework
             }
         }
 
-        private static AiDecisionTrace CreateTrace(IBid bid, List<ICommandAction> commands)
+        private static AiDecisionTrace CreateTrace(IBid bid, List<ICommandAction> commands, int generatedBeforeSuppression)
         {
             var metadata = bid as IStrategicBidMetadata;
+            var outcome = commands != null && commands.Count > 0 ? "executed" : "blocked";
+            var blockingReason = outcome == "blocked"
+                ? generatedBeforeSuppression > 0 ? "repeated-command-batch" : "no-executable-command"
+                : null;
             return new AiDecisionTrace(
                 objectiveKind: metadata?.ObjectiveKind ?? "Unknown",
                 moduleName: bid?.Module?.GetType().Name ?? "Unknown",
@@ -190,7 +195,9 @@ namespace Wism.Client.AI.Framework
                 target: DescribeTarget(metadata),
                 reason: metadata?.Reason ?? "No strategic reason recorded.",
                 armyIds: bid?.Armies?.Where(army => army != null).Select(army => army.Id).ToArray(),
-                commandNames: commands?.Select(command => command.GetType().Name).ToArray());
+                commandNames: commands?.Select(command => command.GetType().Name).ToArray(),
+                outcome: outcome,
+                blockingReason: blockingReason);
         }
 
         private static string DescribeTarget(IStrategicBidMetadata metadata)

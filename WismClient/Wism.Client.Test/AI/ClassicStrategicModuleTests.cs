@@ -224,6 +224,8 @@ namespace Wism.Client.Test.AI
                 first.OfType<MoveOnceCommand>().Any(command => command.X == target.X && command.Y == target.Y),
                 Is.True);
             Assert.That(second, Is.Empty);
+            Assert.That(controller.LastDecisionTraces.Single().Outcome, Is.EqualTo("blocked"));
+            Assert.That(controller.LastDecisionTraces.Single().BlockingReason, Is.EqualTo("repeated-command-batch"));
         }
 
         [Test]
@@ -247,6 +249,9 @@ namespace Wism.Client.Test.AI
                 Is.True);
             Assert.That(controller.LastDecisionTraces.Select(trace => trace.ModuleName), Does.Contain(nameof(NoCommandBidTacticalModule)));
             Assert.That(controller.LastDecisionTraces.Select(trace => trace.ModuleName), Does.Contain(nameof(FallbackMoveTacticalModule)));
+            Assert.That(controller.LastDecisionTraces.First(trace => trace.ModuleName == nameof(NoCommandBidTacticalModule)).Outcome, Is.EqualTo("blocked"));
+            Assert.That(controller.LastDecisionTraces.First(trace => trace.ModuleName == nameof(NoCommandBidTacticalModule)).BlockingReason, Is.EqualTo("no-executable-command"));
+            Assert.That(controller.LastDecisionTraces.First(trace => trace.ModuleName == nameof(FallbackMoveTacticalModule)).Outcome, Is.EqualTo("executed"));
         }
 
         private sealed class NoOpTacticalModule : ITacticalModule
