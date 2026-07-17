@@ -270,11 +270,22 @@ namespace Wism.Client.AI.Strategic
 
             objective.Status = "Stale";
             objective.StaleReason = staleReason;
-            objective.State = "Failed";
+            objective.State = IsSatisfiedStaleReason(objective, staleReason) ? "Satisfied" : "Failed";
             objective.BlockingReason = staleReason;
             objective.UpdatedTurn = player.Turn;
             objective.Priority = Math.Min(objective.Priority, 5);
             return objective;
+        }
+
+        private static bool IsSatisfiedStaleReason(StrategicObjectiveEntity objective, string staleReason)
+        {
+            if (objective == null)
+            {
+                return false;
+            }
+
+            return string.Equals(objective.Kind, "Siege", StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(staleReason, "target-city-already-owned", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void HydrateLifecycle(

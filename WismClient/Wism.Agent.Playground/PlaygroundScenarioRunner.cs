@@ -576,6 +576,18 @@ public sealed class PlaygroundScenarioRunner
 
         foreach (var objective in plan.Objectives.Where(objective => objective != null))
         {
+            if (string.Equals(objective.State, "Satisfied", StringComparison.OrdinalIgnoreCase))
+            {
+                recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicGoalEvent(objective, "satisfied"));
+                continue;
+            }
+
+            if (string.Equals(objective.State, "Advanced", StringComparison.OrdinalIgnoreCase))
+            {
+                recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicGoalEvent(objective, "advanced"));
+                continue;
+            }
+
             if (string.Equals(objective.Status, "Stale", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(objective.State, "Failed", StringComparison.OrdinalIgnoreCase))
             {

@@ -10,6 +10,7 @@ using Wism.Client.Commands.Armies;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Data;
+using Wism.Client.Data.Entities;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules.Infos;
@@ -60,6 +61,57 @@ namespace Wism.Client.Test.AI
             Assert.That(firstExpansion.Reason, Does.Contain(firstExpansion.TargetCityShortName));
             Assert.That(secondExpansion.GoalId, Is.EqualTo(firstExpansion.GoalId));
             Assert.That(secondExpansion.CreatedTurn, Is.EqualTo(firstExpansion.CreatedTurn));
+        }
+
+        [Test]
+        public void Planner_MarksSameOwnerSiegeObjectiveSatisfiedWhenTargetWasCaptured()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            var targetCity = World.Current.Map[7, 4].City;
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), player.Capitol.Tile);
+            Game.Current.StrategicPlans = new[]
+            {
+                new StrategicPlanEntity
+                {
+                    SchemaVersion = 1,
+                    ClanShortName = player.Clan.ShortName,
+                    Turn = player.Turn,
+                    Revision = 1,
+                    Posture = "BalancedPressure",
+                    PersonalityProfile = "balanced",
+                    Objectives = new[]
+                    {
+                        new StrategicObjectiveEntity
+                        {
+                            Id = $"Siege:{targetCity.ShortName}",
+                            GoalId = $"Siege:{targetCity.ShortName}",
+                            Kind = "Siege",
+                            TargetCityShortName = targetCity.ShortName,
+                            AssignedArmyIds = new[] { army.Id },
+                            AssignedCityShortNames = new string[0],
+                            Priority = 50,
+                            Status = "Active",
+                            State = "Assigned",
+                            CreatedTurn = player.Turn,
+                            UpdatedTurn = player.Turn,
+                            Reason = $"Siege goal for {targetCity.ShortName}."
+                        }
+                    }
+                }
+            };
+            controllerProvider.CityController.ClaimCity(targetCity, player);
+
+            var plan = new ClassicStrategicPlanner().Reconcile(World.Current);
+
+            var satisfied = plan.Objectives.Single(objective =>
+                objective.Kind == "Siege" &&
+                objective.TargetCityShortName == targetCity.ShortName);
+            Assert.That(satisfied.Status, Is.EqualTo("Stale"));
+            Assert.That(satisfied.State, Is.EqualTo("Satisfied"));
+            Assert.That(satisfied.BlockingReason, Is.EqualTo("target-city-already-owned"));
+            Assert.That(satisfied.Priority, Is.EqualTo(5));
         }
 
         [Test]
