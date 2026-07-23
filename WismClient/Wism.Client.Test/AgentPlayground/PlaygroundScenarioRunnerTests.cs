@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -729,6 +731,35 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(scorecard.Gates.Single(gate => gate.Name == "classic-ai-victory-pressure").Passed, Is.True);
     }
 
+    private static string CreateBlockedStrategicTraceKey(CampaignMoment moment)
+    {
+        if (!moment.Kind.Equals("strategic-goal-event", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
+
+        var fields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var part in moment.Context.Split(';'))
+        {
+            var pair = part.Split('=', 2);
+            if (pair.Length == 2)
+            {
+                fields[pair[0]] = pair[1];
+            }
+        }
+
+        if (!fields.TryGetValue("eventType", out var eventType) ||
+            !eventType.Equals("blocked", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
+
+        fields.TryGetValue("goalType", out var goalType);
+        fields.TryGetValue("target", out var target);
+        fields.TryGetValue("blockingReason", out var blockingReason);
+        return string.Join(";", moment.Turn, moment.Clan, goalType ?? "none", target ?? "none", blockingReason ?? "none");
+    }
+
     [Test]
     public void EvalSuiteCatalog_ResolvesReadinessDefaults()
     {
@@ -885,6 +916,38 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(result.Scorecard.Gates.Single(gate => gate.Name == "strategic-plan-created").Passed, Is.True);
     }
 
+    [Test]
+    public void EvalBatch_ClassicAiTargetCapturedRecoveryDeduplicatesSameTurnBlockedTraceTargets()
+    {
+        var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "evals");
+        var result = new EvalBatchRunner().RunSingleCase(
+            caseId: "case-0006",
+            index: 6,
+            seed: 20260724,
+            scenarioFamily: "classic-ai-target-captured-recovery",
+            clanCount: 8,
+            maxTurns: 60,
+            size: "medium",
+            outputDirectory: outputRoot,
+            modRoot: null,
+            checkpointMode: "summary",
+            aiProfile: "strategic");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+
+        var indexPath = Path.Combine(result.CampaignDirectory!, "checkpoint-index.jsonl");
+        var duplicateBlockedKeys = File.ReadLines(indexPath)
+            .Select(line => JsonConvert.DeserializeObject<CampaignMoment>(line))
+            .Where(moment => moment != null)
+            .Select(CreateBlockedStrategicTraceKey)
+            .Where(key => !string.IsNullOrWhiteSpace(key))
+            .GroupBy(key => key, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Select(group => $"{group.Key} x{group.Count()}")
+            .ToArray();
+
+        Assert.That(duplicateBlockedKeys, Is.Empty, string.Join(Environment.NewLine, duplicateBlockedKeys));
+    }
     [Test]
     public void EvalBatch_ClassicAiDefendedSiegeSummaryCheckpointsPreserveStrategicEvidence()
     {

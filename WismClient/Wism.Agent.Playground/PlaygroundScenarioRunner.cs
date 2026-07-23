@@ -534,12 +534,17 @@ public sealed class PlaygroundScenarioRunner
         }
 
         var blockedSeen = false;
+        var blockedEventKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var trace in traces.Where(trace => trace != null))
         {
             if (string.Equals(trace.Outcome, "blocked", StringComparison.OrdinalIgnoreCase))
             {
                 blockedSeen = true;
-                recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicTraceEvent(trace, "blocked"));
+                if (blockedEventKeys.Add(CreateStrategicTraceEventKey(trace)))
+                {
+                    recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicTraceEvent(trace, "blocked"));
+                }
+
                 continue;
             }
 
@@ -548,6 +553,15 @@ public sealed class PlaygroundScenarioRunner
                 recorder.Checkpoint("strategic-goal-event", turn, player.Clan.ShortName, FormatStrategicTraceEvent(trace, "retargeted"));
             }
         }
+    }
+
+    private static string CreateStrategicTraceEventKey(AiDecisionTrace trace)
+    {
+        return string.Join(
+            ";",
+            trace.ObjectiveKind ?? "none",
+            trace.Target ?? "none",
+            trace.BlockingReason ?? "none");
     }
 
     private static string FormatStrategicTraceEvent(AiDecisionTrace trace, string eventType)
