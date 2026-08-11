@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Modules;
@@ -67,6 +68,8 @@ namespace Wism.Client.MapObjects
         /// </summary>
         public void Raze()
         {
+            this.RerouteIncomingProduction(this.Player);
+
             var tiles = this.GetTiles();
             for (var i = 0; i < 4; i++)
             {
@@ -226,6 +229,19 @@ namespace Wism.Client.MapObjects
             foreach (var otherCity in cities)
             {
                 otherCity.Barracks.CancelDelivery(this);
+            }
+        }
+
+        private void RerouteIncomingProduction(Player player)
+        {
+            if (player == null)
+            {
+                return;
+            }
+
+            foreach (var otherCity in player.GetCities().Where(city => city != this))
+            {
+                otherCity.Barracks.RerouteDeliveryToSource(this);
             }
         }
 
