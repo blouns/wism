@@ -264,7 +264,7 @@ namespace Wism.Client.Data
 
         private static CityEntity[] SnapshotCities(World world)
         {
-            var cities = world.GetCities();
+            var cities = world.GetCities().FindAll(city => city.Tile != null && city.Tile.HasCity());
             if (cities == null || cities.Count == 0)
             {
                 return null;

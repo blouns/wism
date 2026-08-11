@@ -597,6 +597,10 @@ namespace Wism.Client.Core
 
             // Remove city from Player tracking
             this.myCities.Remove(city);
+            if (this.Capitol == city)
+            {
+                this.Capitol = null;
+            }
         }
 
         public override bool Equals(object obj)
