@@ -283,6 +283,7 @@ public class ProductionDeliveryTests
         var ruins = destinationCity.GetTiles();
         Assert.Multiple(() =>
         {
+            Assert.That(ruins, Has.Length.EqualTo(4));
             Assert.That(ruins, Has.All.Matches<Tile>(tile => tile.Terrain.ShortName == "Ruins"));
             Assert.That(sourceCity.Barracks.ArmyInTraining.DestinationCity, Is.Null);
             Assert.That(sourceCity.Barracks.ArmiesToDeliver.Single().DestinationCity, Is.Null);
