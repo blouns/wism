@@ -9,6 +9,8 @@ using Wism.Client.Core;
 using Wism.Client.Data.Entities;
 using Wism.Client.Data;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Wism.Client.Test")]
+
 namespace Wism.Agent.Playground;
 
 public sealed record EvalBatchOptions(
@@ -305,6 +307,7 @@ public sealed record EvalCounters(
     int ProductionDeliveryCaptureConversions,
     int ProductionDeliveryPressureConversions,
     int ProductionDeliveryIdleWindows,
+    int ProductionDeliveryUnresolvedWindows,
     int Battles,
     int SaveLoadSuccesses,
     int StuckOrNoOpTurns,
@@ -330,7 +333,7 @@ public sealed record EvalCounters(
     int StrategicGoalsStale,
     int EndgameCleanupCompletions)
 {
-    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static EvalCounters operator +(EvalCounters left, EvalCounters right) =>
         new(
@@ -347,6 +350,7 @@ public sealed record EvalCounters(
             left.ProductionDeliveryCaptureConversions + right.ProductionDeliveryCaptureConversions,
             left.ProductionDeliveryPressureConversions + right.ProductionDeliveryPressureConversions,
             left.ProductionDeliveryIdleWindows + right.ProductionDeliveryIdleWindows,
+            left.ProductionDeliveryUnresolvedWindows + right.ProductionDeliveryUnresolvedWindows,
             left.Battles + right.Battles,
             left.SaveLoadSuccesses + right.SaveLoadSuccesses,
             left.StuckOrNoOpTurns + right.StuckOrNoOpTurns,
@@ -377,9 +381,10 @@ internal sealed record ProductionDeliveryConversionCounters(
     int BattleConversions,
     int CaptureConversions,
     int PressureConversions,
-    int IdleWindows)
+    int IdleWindows,
+    int UnresolvedWindows)
 {
-    public static ProductionDeliveryConversionCounters Empty { get; } = new(0, 0, 0, 0);
+    public static ProductionDeliveryConversionCounters Empty { get; } = new(0, 0, 0, 0, 0);
 }
 
 internal sealed record StrategicGoalLifecycleCounters(
@@ -1127,7 +1132,7 @@ public sealed class EvalBatchRunner
         var productionDeliveries = momentDetails.Length > 0
             ? CountStructuredProductionDeliveries(momentDetails)
             : CountProductionDeliveries(moments);
-        var deliveryConversions = CountProductionDeliveryConversions(momentDetails);
+        var deliveryConversions = CountProductionDeliveryConversions(momentDetails, campaign.Turns);
         var strategicGoalLifecycle = CountStrategicGoalLifecycle(momentDetails);
         var events = campaign.FinalReport.Events.Select(evt => evt.ToLowerInvariant()).ToArray();
         var text = moments.Concat(events).ToArray();
@@ -1148,6 +1153,7 @@ public sealed class EvalBatchRunner
             ProductionDeliveryCaptureConversions: deliveryConversions.CaptureConversions,
             ProductionDeliveryPressureConversions: deliveryConversions.PressureConversions,
             ProductionDeliveryIdleWindows: deliveryConversions.IdleWindows,
+            ProductionDeliveryUnresolvedWindows: deliveryConversions.UnresolvedWindows,
             Battles: CountContains(moments, "battle") + CountContains(events, "battle resolved"),
             SaveLoadSuccesses: 0,
             StuckOrNoOpTurns: CountContains(text, "no actionable") + CountContains(text, "stuck"),
@@ -1795,6 +1801,7 @@ public sealed class EvalBatchRunner
             $"- Production delivery capture conversions: {run.Scorecard.Counters.ProductionDeliveryCaptureConversions}",
             $"- Production delivery pressure conversions: {run.Scorecard.Counters.ProductionDeliveryPressureConversions}",
             $"- Production delivery idle windows: {run.Scorecard.Counters.ProductionDeliveryIdleWindows}",
+            $"- Production delivery unresolved windows: {run.Scorecard.Counters.ProductionDeliveryUnresolvedWindows}",
             $"- Production vectors: {run.Scorecard.Counters.ProductionVectors}",
             $"- Battles: {run.Scorecard.Counters.Battles}",
             $"- Invalid commands: {run.Scorecard.Counters.InvalidCommands}",
@@ -1888,7 +1895,9 @@ public sealed class EvalBatchRunner
     private static int CountStructuredProductionDeliveries(IEnumerable<CampaignMoment> moments) =>
         moments.Where(IsProductionDeliveryMoment).Sum(moment => ExtractDeliveredCount(moment.Context));
 
-    private static ProductionDeliveryConversionCounters CountProductionDeliveryConversions(IReadOnlyList<CampaignMoment> moments)
+    internal static ProductionDeliveryConversionCounters CountProductionDeliveryConversions(
+        IReadOnlyList<CampaignMoment> moments,
+        int observedThroughTurn)
     {
         const int battleWindowTurns = 10;
         const int captureWindowTurns = 15;
@@ -1916,6 +1925,8 @@ public sealed class EvalBatchRunner
         var battleConversions = 0;
         var captureConversions = 0;
         var pressureConversions = 0;
+        var idleWindows = 0;
+        var unresolvedWindows = 0;
 
         foreach (var delivery in deliveries)
         {
@@ -1936,13 +1947,22 @@ public sealed class EvalBatchRunner
             {
                 pressureConversions += deliveredCount;
             }
+            else if (observedThroughTurn >= delivery.Turn + captureWindowTurns)
+            {
+                idleWindows += deliveredCount;
+            }
+            else
+            {
+                unresolvedWindows += deliveredCount;
+            }
         }
 
         return new ProductionDeliveryConversionCounters(
             battleConversions,
             captureConversions,
             pressureConversions,
-            Math.Max(0, deliveries.Sum(delivery => ExtractDeliveredCount(delivery.Context)) - pressureConversions));
+            idleWindows,
+            unresolvedWindows);
     }
 
     private static bool IsProductionDeliveryMoment(CampaignMoment moment) =>

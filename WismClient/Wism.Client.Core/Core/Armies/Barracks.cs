@@ -338,6 +338,24 @@ namespace Wism.Client.Core
             }
         }
 
+        internal void RerouteDeliveryToSource(City city)
+        {
+            if (this.ArmyInTraining?.DestinationCity == city)
+            {
+                this.ArmyInTraining.DestinationCity = null;
+            }
+
+            if (!this.HasDeliveries())
+            {
+                return;
+            }
+
+            foreach (var army in this.ArmiesToDeliver.Where(army => army.DestinationCity == city))
+            {
+                army.DestinationCity = null;
+            }
+        }
+
         public void StopProduction()
         {
             this.ArmyInTraining = null;

@@ -251,6 +251,65 @@ public class ProductionDeliveryTests
         });
     }
 
+    [Test]
+    public void RazingDestinationReroutesPaidProductionToSourceAcrossSaveLoad()
+    {
+        World.CreateWorld(CreateGrassMap(8, 8));
+        var player = Game.Current.Players[0];
+        var sourceCity = MapBuilder.FindCity("Marthos");
+        var destinationCity = MapBuilder.FindCity("BanesCitadel");
+        var armyInfo = ModFactory.FindArmyInfo("LightInfantry");
+        World.Current.AddCity(sourceCity, World.Current.Map[1, 1]);
+        World.Current.AddCity(destinationCity, World.Current.Map[4, 4]);
+        player.ClaimCity(sourceCity);
+        player.ClaimCity(destinationCity);
+        player.Gold = 1000000;
+
+        Assert.That(sourceCity.Barracks.StartProduction(armyInfo, destinationCity), Is.True);
+        var queuedArmy = new ArmyInTraining
+        {
+            ArmyInfo = armyInfo,
+            DestinationCity = destinationCity,
+            ProductionCity = sourceCity,
+            TurnsToDeliver = 1,
+            Upkeep = 4,
+            Moves = 10,
+            Strength = 3
+        };
+        sourceCity.Barracks.ArmiesToDeliver = new Queue<ArmyInTraining>(new[] { queuedArmy });
+
+        player.RazeCity(destinationCity);
+
+        var ruins = destinationCity.GetTiles();
+        Assert.Multiple(() =>
+        {
+            Assert.That(ruins, Has.All.Matches<Tile>(tile => tile.Terrain.ShortName == "Ruins"));
+            Assert.That(sourceCity.Barracks.ArmyInTraining.DestinationCity, Is.Null);
+            Assert.That(sourceCity.Barracks.ArmiesToDeliver.Single().DestinationCity, Is.Null);
+            Assert.That(player.GetCities(), Does.Not.Contain(destinationCity));
+        });
+
+        var snapshot = GamePersistance.SnapshotGame(Game.Current);
+        GameFactory.Load(snapshot);
+
+        var loadedPlayer = Game.Current.Players[0];
+        var loadedSourceCity = World.Current.FindCity("Marthos");
+        var produced = loadedSourceCity.Barracks.Produce(out var producedArmy);
+        var delivered = loadedSourceCity.Barracks.Deliver(out var deliveredArmy);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(loadedSourceCity.Barracks.ArmyInTraining, Is.Null);
+            Assert.That(loadedSourceCity.Barracks.HasDeliveries(), Is.False);
+            Assert.That(produced, Is.True);
+            Assert.That(producedArmy.DestinationCity, Is.Null);
+            Assert.That(delivered, Is.True);
+            Assert.That(deliveredArmy.DestinationCity, Is.Null);
+            Assert.That(loadedPlayer.GetArmies(), Has.Count.EqualTo(2));
+            Assert.That(loadedPlayer.GetArmies().All(army => army.Tile != null), Is.True);
+        });
+    }
+
     private static Tile[,] CreateGrassMap(int width, int height)
     {
         var map = new Tile[width, height];

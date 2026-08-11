@@ -458,7 +458,8 @@ public class PlaygroundScenarioRunnerTests
                     ProductionDeliveryBattleConversions = 2,
                     ProductionDeliveryCaptureConversions = 1,
                     ProductionDeliveryPressureConversions = 2,
-                    ProductionDeliveryIdleWindows = 1
+                    ProductionDeliveryIdleWindows = 1,
+                    ProductionDeliveryUnresolvedWindows = 3
                 }),
             EvalCase(
                 scenarioFamily: "classic-ai-conquest",
@@ -468,7 +469,8 @@ public class PlaygroundScenarioRunnerTests
                     ProductionDeliveryBattleConversions = 1,
                     ProductionDeliveryCaptureConversions = 1,
                     ProductionDeliveryPressureConversions = 1,
-                    ProductionDeliveryIdleWindows = 1
+                    ProductionDeliveryIdleWindows = 1,
+                    ProductionDeliveryUnresolvedWindows = 2
                 })
         });
 
@@ -477,6 +479,30 @@ public class PlaygroundScenarioRunnerTests
         Assert.That(scorecard.Counters.ProductionDeliveryCaptureConversions, Is.EqualTo(2));
         Assert.That(scorecard.Counters.ProductionDeliveryPressureConversions, Is.EqualTo(3));
         Assert.That(scorecard.Counters.ProductionDeliveryIdleWindows, Is.EqualTo(2));
+        Assert.That(scorecard.Counters.ProductionDeliveryUnresolvedWindows, Is.EqualTo(5));
+    }
+
+    [Test]
+    public void ProductionDeliveryConversions_SeparateIdleFromRightCensoredWindows()
+    {
+        var moments = new[]
+        {
+            new CampaignMoment("production", "Sirians", 10, 1, string.Empty, "2 delivered"),
+            new CampaignMoment("battle", "Sirians", 15, 2, string.Empty, string.Empty),
+            new CampaignMoment("production", "Sirians", 20, 3, string.Empty, "1 delivered"),
+            new CampaignMoment("production", "Sirians", 35, 4, string.Empty, "3 delivered")
+        };
+
+        var counters = EvalBatchRunner.CountProductionDeliveryConversions(moments, observedThroughTurn: 40);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(counters.BattleConversions, Is.EqualTo(2));
+            Assert.That(counters.CaptureConversions, Is.Zero);
+            Assert.That(counters.PressureConversions, Is.EqualTo(2));
+            Assert.That(counters.IdleWindows, Is.EqualTo(1));
+            Assert.That(counters.UnresolvedWindows, Is.EqualTo(3));
+        });
     }
 
     [Test]
