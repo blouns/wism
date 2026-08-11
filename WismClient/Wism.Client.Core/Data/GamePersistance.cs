@@ -482,10 +482,17 @@ namespace Wism.Client.Data
 
         private static RandomEntity SnapshotRandom(Random random, Game game)
         {
-            var snapshot = new RandomEntity();
-
-            snapshot.Seed = game.RandomSeed;
-            snapshot.Random = Cloner.Clone(random);
+            var snapshot = new RandomEntity { Seed = game.RandomSeed };
+            if (random is DeterministicRandom deterministicRandom)
+            {
+                snapshot.SeedArray = deterministicRandom.ExportSeedArray();
+                snapshot.Inext = deterministicRandom.Inext;
+                snapshot.Inextp = deterministicRandom.Inextp;
+            }
+            else
+            {
+                snapshot.Random = Cloner.Clone(random);
+            }
 
             return snapshot;
         }

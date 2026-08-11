@@ -550,7 +550,7 @@ namespace Wism.Client.Core
             current = new Game
             {
                 RandomSeed = DefaultRandomSeed,
-                Random = new Random(DefaultRandomSeed),
+                Random = new DeterministicRandom(DefaultRandomSeed),
                 WarStrategy = new DefaultWarStrategy(),
                 TraversalStrategy = CompositeTraversalStrategy.CreateDefault(),
                 MovementCoordinator = MovementStrategyCoordinator.CreateDefault(),
