@@ -25,7 +25,7 @@ namespace Wism.Client.Factories
             Game.CreateEmpty();
 
             // Game settings
-            Game.Current.Random = new Random(settings.Random.Seed);
+            Game.Current.Random = new DeterministicRandom(settings.Random.Seed);
             Game.Current.RandomSeed = settings.Random.Seed;
             Game.Current.ModKitSelection = settings.ModKitSelection;
             Game.Current.StrategicPlans = settings.StrategicPlans;
@@ -292,12 +292,17 @@ namespace Wism.Client.Factories
         /// <returns>New Random based on the snapshot</returns>
         private static Random LoadRandom(RandomEntity snapshot)
         {
+            if (snapshot.SeedArray != null)
+            {
+                return new DeterministicRandom(snapshot.SeedArray, snapshot.Inext, snapshot.Inextp);
+            }
+
             if (snapshot.Random != null)
             {
                 return Cloner.Clone(snapshot.Random);
             }
 
-            return new Random(snapshot.Seed);
+            return new DeterministicRandom(snapshot.Seed);
         }
 
         private static void LoadPlayers(GameEntity snapshot, Game current,

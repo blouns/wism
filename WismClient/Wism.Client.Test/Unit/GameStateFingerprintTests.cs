@@ -104,8 +104,7 @@ public sealed class GameStateFingerprintTests
             }
 
             var snapshot = Game.Current.Snapshot();
-            var expectedRandom = Cloner.Clone(snapshot.Random.Random);
-            var expected = ReadRandomSequence(expectedRandom, 10);
+            var expected = ReadRandomSequence(Game.Current.Random, 10);
 
             GameFactory.Load(snapshot);
             var first = ReadRandomSequence(Game.Current.Random, 10);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Wism.Client.Core;
 using Wism.Client.Core.Boons;
+using Wism.Client.Data;
 using Wism.Client.Data.Entities;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
@@ -45,7 +46,7 @@ public class PersistanceTests
         // Random
         Assert.That(gameSnapshot.Random, Is.Not.Null);
         Assert.That(gameSnapshot.Random.Seed, Is.EqualTo(Game.DefaultRandomSeed));
-        Assert.That(gameSnapshot.Random.SeedArray, Is.Null);
+        Assert.That(gameSnapshot.Random.SeedArray, Has.Length.EqualTo(56));
 
         // War Strategy
         Assert.That(gameSnapshot.WarStrategy, Is.Not.Null);
@@ -303,6 +304,28 @@ public class PersistanceTests
         for (var i = 0; i < 100; i++)
         {
             Assert.That(history2[i], Is.EqualTo(history1[i]));
+        }
+    }
+
+    [Test]
+    public void DeterministicRandom_MatchesSeededSystemRandomSequence()
+    {
+        foreach (var seed in new[] { int.MinValue, -1, 0, 1, 1990, int.MaxValue })
+        {
+            var expected = new Random(seed);
+            var actual = new DeterministicRandom(seed);
+
+            for (var i = 0; i < 100; i++)
+            {
+                Assert.Multiple(() =>
+                {
+                    Assert.That(actual.Next(), Is.EqualTo(expected.Next()), $"Next diverged for seed {seed}.");
+                    Assert.That(actual.Next(3, 97), Is.EqualTo(expected.Next(3, 97)),
+                        $"Next(min,max) diverged for seed {seed}.");
+                    Assert.That(actual.NextDouble(), Is.EqualTo(expected.NextDouble()),
+                        $"NextDouble diverged for seed {seed}.");
+                });
+            }
         }
     }
 }

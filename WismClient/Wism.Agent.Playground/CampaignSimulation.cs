@@ -239,7 +239,7 @@ internal sealed class CampaignScenarioBuilder
         var clanCount = Math.Clamp(options.ClanCount, 2, ClanOrder.Length);
         Game.CreateEmpty();
         Game.Current.RandomSeed = options.Seed;
-        Game.Current.Random = new Random(options.Seed);
+        Game.Current.Random = new DeterministicRandom(options.Seed);
         Game.Current.WarStrategy = new DefaultWarStrategy();
         Game.Current.TraversalStrategy = CompositeTraversalStrategy.CreateDefault();
         Game.Current.MovementCoordinator = MovementStrategyCoordinator.CreateDefault();

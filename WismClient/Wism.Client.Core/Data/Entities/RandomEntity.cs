@@ -8,6 +8,10 @@ namespace Wism.Client.Data.Entities
     {
         [DataMember] public int[] SeedArray { get; set; }
 
+        [DataMember] public int Inext { get; set; }
+
+        [DataMember] public int Inextp { get; set; }
+
         [DataMember] public int Seed { get; set; }
 
         [DataMember] public Random Random { get; set; }
