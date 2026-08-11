@@ -102,8 +102,10 @@ namespace Wism.Client.Test.AI
             var logger = TestUtilities.CreateLogFactory().CreateLogger();
             var module = new ExterminationModule(new PathfindingService(new AStarPathingStrategy()), new AStarPathingStrategy(), controllerProvider.ArmyController, logger);
 
+            var bids = module.GenerateBids(World.Current).ToList();
             var commands = GetTestCommands(module, World.Current, logger);
 
+            Assert.That(bids, Is.Empty);
             Assert.That(commands.Any(c => c is AttackOnceCommand), Is.False);
         }
 

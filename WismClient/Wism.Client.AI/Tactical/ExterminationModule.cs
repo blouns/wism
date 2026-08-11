@@ -82,6 +82,15 @@ namespace Wism.Client.AI.Tactical
                 {
                     var distance = AiUtilities.GetManhattanDistance(leader.Tile, target);
                     var estimate = this.combatEstimator.EstimateAttack(stackList, target);
+                    var canAttackNow = target.CanAttackHere(stackList)
+                        && AiUtilities.IsInAttackRange(stackList, target);
+                    if (canAttackNow && estimate.WinProbability < MinimumAttackWinProbability)
+                    {
+                        logger.LogInformation(
+                            $"[Extermination] Suppressing low-odds immediate bid at ({target.X},{target.Y}); win probability {estimate.WinProbability:0.000}.");
+                        continue;
+                    }
+
                     var combatPressure = 0.10 + estimate.WinProbability;
                     var influence = ApplyWeakPointInfluence(target, combatPressure / (distance + 1));
                     bids.Add(new StrategicBid(
