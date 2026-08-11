@@ -63,7 +63,18 @@ namespace Wism.Client.AI.Framework
 
         public IEnumerable<IBid> GetBids(World world)
         {
-            return tacticalModules.SelectMany(module => module.GenerateBids(world));
+            foreach (var module in tacticalModules)
+            {
+                List<IBid> generated = null;
+                Measure(
+                    "tactical-bid-generation:" + module.GetType().Name,
+                    () => generated = module.GenerateBids(world)?.ToList() ?? new List<IBid>());
+
+                foreach (var bid in generated)
+                {
+                    yield return bid;
+                }
+            }
         }
 
         public IReadOnlyList<AiDecisionTrace> LastDecisionTraces => lastDecisionTraces;

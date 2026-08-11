@@ -442,22 +442,34 @@ public class CaptureModule : ITacticalModule, IBlockedReasonProvider
             return null;
         }
 
-        var viableCities = cities
-            .Where(city => CanPursueCity(armies, city) && CanQueueCityPressureCommand(armies, city))
-            .ToList();
-
-        if (shouldLog)
-        {
-            foreach (var city in viableCities
-                .OrderByDescending(c => this.cityTargetEvaluator.Score(armies, c))
-                .ThenBy(c => this.cityTargetEvaluator.GetDistanceToCity(armies[0].Tile, c))
-                .ThenBy(c => c.ShortName))
+        var rankedCities = cities
+            .Where(city => CanPursueCity(armies, city))
+            .Select(city => new
             {
-                logger.LogInformation($"[Capture] Considering city at ({city.Tile.X},{city.Tile.Y}) owned by {city.Clan?.ShortName ?? "Neutral"} with pressure {this.cityTargetEvaluator.Score(armies, city):0.000}.");
+                City = city,
+                Score = this.cityTargetEvaluator.Score(armies, city),
+                Distance = this.cityTargetEvaluator.GetDistanceToCity(armies[0].Tile, city)
+            })
+            .OrderByDescending(candidate => candidate.Score)
+            .ThenBy(candidate => candidate.Distance)
+            .ThenBy(candidate => candidate.City.ShortName);
+
+        foreach (var candidate in rankedCities)
+        {
+            if (!CanQueueCityPressureCommand(armies, candidate.City))
+            {
+                continue;
             }
+
+            if (shouldLog)
+            {
+                logger.LogInformation($"[Capture] Considering city at ({candidate.City.Tile.X},{candidate.City.Tile.Y}) owned by {candidate.City.Clan?.ShortName ?? "Neutral"} with pressure {candidate.Score:0.000}.");
+            }
+
+            return candidate.City;
         }
 
-        return this.cityTargetEvaluator.SelectTarget(armies, viableCities);
+        return null;
     }
 
     private bool CanQueueCityPressureCommand(List<Army> armies, City city)
