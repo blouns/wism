@@ -8,6 +8,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using Wism.Client.Commands.Players;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -69,7 +70,7 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
             new UnityPlayerEntity()
             {
                 ClanName = "LordBane",
-                IsHuman = false
+                IsHuman = true
             }
         };
     }
@@ -102,9 +103,7 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
         var marthos = siriansPlayer.Capitol;
 
         // Dismiss production panel
-        yield return new WaitForInteractivePanel(
-            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
-        yield return WismTestAction.DismissProductionPanel();
+        yield return WismTestAction.DismissProductionPanelIfVisible();
 
         var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
             .GetComponent<GameManager>();
@@ -114,30 +113,33 @@ public class CityActionTests : IPrebuildSetup, IPostBuildCleanup
         gameManager.StartProduction(marthos, ModFactory.FindArmyInfo("LightInfantry"));
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
+        var lastId = gameManager.ControllerProvider.CommandController.GetLastCommand().Id + 1;
         gameManager.EndTurn();
+        yield return new WaitForCommandOfType<StartTurnCommand>(gameManager.ControllerProvider, true, lastId);
 
         // Act 2: Bane do nothing
-        yield return WismTestAction.WaitForNewHeroOffer();
-        yield return WismTestAction.AcceptNewHeroOffer("Lord Bane");
+        yield return WismTestAction.WaitForNewHeroOffer(lastId);
+        yield return WismTestAction.AcceptNewHeroOffer("Lord Bane", lastId);
 
         // Dismiss production panel
-        yield return new WaitForInteractivePanel(
-            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
-        yield return WismTestAction.DismissProductionPanel();
+        yield return WismTestAction.DismissProductionPanelIfVisible();
 
+        lastId = gameManager.ControllerProvider.CommandController.GetLastCommand().Id + 1;
         gameManager.EndTurn();
-        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+        yield return new WaitForCommandOfType<StartTurnCommand>(gameManager.ControllerProvider, true, lastId);
 
         // Act 3: Sirians produce an army
         gameManager.StartProduction(marthos, ModFactory.FindArmyInfo("LightInfantry"));
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
+        lastId = gameManager.ControllerProvider.CommandController.GetLastCommand().Id + 1;
         gameManager.EndTurn();
-        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+        yield return new WaitForCommandOfType<StartTurnCommand>(gameManager.ControllerProvider, true, lastId);
 
         // Act 4: Bane do nothing
+        lastId = gameManager.ControllerProvider.CommandController.GetLastCommand().Id + 1;
         gameManager.EndTurn();
-        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+        yield return new WaitForCommandOfType<StartTurnCommand>(gameManager.ControllerProvider, true, lastId);
 
         // Assert
         Assert.AreEqual(siriansPlayer.Clan.ShortName, Game.Current.GetCurrentPlayer().Clan.ShortName, "Not the Sirian's turn");

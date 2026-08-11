@@ -47,5 +47,17 @@ namespace Assets.Scripts.Tests.PlayMode.Common
 
             yield return new WaitForInteractivePanel(productionPanelGO, false);
         }
+
+        internal static IEnumerator DismissProductionPanelIfVisible()
+        {
+            var productionPanelGO = GameObject.FindGameObjectWithTag("CityProductionPanel");
+            if (productionPanelGO == null)
+            {
+                yield break;
+            }
+
+            yield return new WaitForInteractivePanel(productionPanelGO);
+            yield return DismissProductionPanel();
+        }
     }
 }
