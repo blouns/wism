@@ -6,6 +6,7 @@ using Wism.Client.Core.Armies;
 using Wism.Client.Core.Armies.MovementStrategies;
 using Wism.Client.Core.Armies.TerrainTraversalStrategies;
 using Wism.Client.Core.Armies.WarStrategies;
+using Wism.Client.Data;
 using Wism.Client.Data.Entities;
 using Wism.Client.MapObjects;
 using Wism.Client.Pathing;
@@ -25,6 +26,7 @@ namespace Wism.Client.Factories
 
             // Game settings
             Game.Current.Random = new Random(settings.Random.Seed);
+            Game.Current.RandomSeed = settings.Random.Seed;
             Game.Current.ModKitSelection = settings.ModKitSelection;
             Game.Current.StrategicPlans = settings.StrategicPlans;
             Game.Current.WarStrategy = GetWarStrategy(settings.WarStrategy);
@@ -51,6 +53,7 @@ namespace Wism.Client.Factories
 
             // Game settings
             Game.Current.Random = LoadRandom(snapshot.Random);
+            Game.Current.RandomSeed = snapshot.Random.Seed;
             Game.Current.ModKitSelection = snapshot.ModKitSelection;
             Game.Current.StrategicPlans = snapshot.StrategicPlans;
             Game.Current.WarStrategy = GetWarStrategy(snapshot.WarStrategy);
@@ -227,6 +230,7 @@ namespace Wism.Client.Factories
                 foreach (var citySnapshot in snapshot.World.Cities)
                 {
                     var city = CityFactory.LoadCity(citySnapshot, world);
+                    RestoreGeneratedGarrisonIdentity(snapshot, citySnapshot, city);
 
                     // Add late-bound properties
                     if (cityToPlayer.ContainsKey(city.ShortName))
@@ -247,26 +251,53 @@ namespace Wism.Client.Factories
             }
         }
 
+        private static void RestoreGeneratedGarrisonIdentity(
+            GameEntity snapshot,
+            CityEntity citySnapshot,
+            City city)
+        {
+            if (Game.Current.Players.Exists(p => p.Clan.ShortName == citySnapshot.ClanShortName))
+            {
+                return;
+            }
+
+            var tileSnapshot = snapshot.World.Tiles[
+                citySnapshot.X + citySnapshot.Y * snapshot.World.MapXUpperBound];
+            var persistedIds = tileSnapshot.ArmyIds;
+            var generatedArmies = city.Tile.Armies;
+
+            if (persistedIds == null || persistedIds.Length == 0)
+            {
+                if (generatedArmies != null && generatedArmies.Count > 0)
+                {
+                    city.Tile.RemoveArmies(new List<Army>(generatedArmies));
+                }
+
+                return;
+            }
+
+            if (persistedIds.Length != 1 || generatedArmies == null || generatedArmies.Count != 1)
+            {
+                throw new InvalidOperationException(
+                    $"Neutral city '{citySnapshot.CityShortName}' has an unsupported persisted garrison shape.");
+            }
+
+            generatedArmies[0].Id = persistedIds[0];
+        }
+
         /// <summary>
-        ///     Loads the random seed array into a new Random instance
+        ///     Loads the persisted random state without sharing it with the snapshot.
         /// </summary>
         /// <param name="snapshot">RandomEntity to load</param>
         /// <returns>New Random based on the snapshot</returns>
-        /// <remarks>
-        ///     This method overwrites the private seed array from Random. The seed in this
-        ///     case is actually unused, but it is set for consistency.
-        /// </remarks>
         private static Random LoadRandom(RandomEntity snapshot)
         {
-            var random = new Random(snapshot.Seed);
-            //if (snapshot.SeedArray != null)
-            //{
-            //    var seedArrayCopy = (int[])snapshot.SeedArray.Clone();
-            //    var seedArrayInfo = typeof(Random).GetField("SeedArray", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            //    seedArrayInfo.SetValue(random, seedArrayCopy);
-            //}
+            if (snapshot.Random != null)
+            {
+                return Cloner.Clone(snapshot.Random);
+            }
 
-            return random;
+            return new Random(snapshot.Seed);
         }
 
         private static void LoadPlayers(GameEntity snapshot, Game current,
@@ -280,9 +311,20 @@ namespace Wism.Client.Factories
             current.Players = new List<Player>();
             for (var i = 0; i < players.Length; i++)
             {
-                current.Players.Add(PlayerFactory.Load(players[i],
-                    out cityToPlayer,
-                    out capitolToPlayer));
+                var player = PlayerFactory.Load(players[i],
+                    out var playerCities,
+                    out var playerCapitols);
+                current.Players.Add(player);
+
+                foreach (var pair in playerCities)
+                {
+                    cityToPlayer.Add(pair.Key, pair.Value);
+                }
+
+                foreach (var pair in playerCapitols)
+                {
+                    capitolToPlayer.Add(pair.Key, pair.Value);
+                }
             }
         }
     }
