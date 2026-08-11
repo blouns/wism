@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
+using Wism.Client.Core;
 using Wism.Client.Terminal.Cli;
 using Wism.Client.Terminal.Game;
 using Wism.Client.Terminal.Input;
@@ -151,6 +154,87 @@ public sealed class TerminalClientTests
             Assert.That(text, Does.Contain("WISM Terminal"));
             Assert.That(text, Does.Contain("INSPECTOR"));
             Assert.That(text, Does.Contain("MINIMAP"));
+        }
+        finally
+        {
+            session.CompleteRecording();
+        }
+    }
+
+    [Test]
+    public void TerminalSession_IlluriaHasEightyNonOverlappingFourTileCityFootprints()
+    {
+        var session = TerminalGameSession.Create(new TerminalLaunchOptions
+        {
+            World = "Illuria",
+            RecordRoot = recordingRoot,
+            NoColor = true
+        });
+
+        try
+        {
+            var cities = World.Current.GetCities();
+            var occupiedCoordinates = new HashSet<(int X, int Y)>();
+
+            Assert.That(cities, Has.Count.EqualTo(80));
+            foreach (var city in cities)
+            {
+                var footprint = city.GetTiles();
+                Assert.That(footprint, Has.Length.EqualTo(4), $"{city.ShortName} must occupy four tiles.");
+                Assert.That(footprint, Has.All.Matches<Tile>(tile => tile.City == city));
+
+                foreach (var tile in footprint)
+                {
+                    Assert.That(occupiedCoordinates.Add((tile.X, tile.Y)), Is.True,
+                        $"City footprint overlap at {tile.X},{tile.Y}.");
+                }
+            }
+
+            Assert.That(occupiedCoordinates, Has.Count.EqualTo(320));
+        }
+        finally
+        {
+            session.CompleteRecording();
+        }
+    }
+
+    [TestCase(2)]
+    [TestCase(3)]
+    [TestCase(4)]
+    [TestCase(5)]
+    [TestCase(6)]
+    [TestCase(7)]
+    public void TerminalSession_OmittedIlluriaCapitalsBecomeNeutral(int clanCount)
+    {
+        var session = TerminalGameSession.Create(new TerminalLaunchOptions
+        {
+            World = "Illuria",
+            ClanCount = clanCount,
+            RecordRoot = recordingRoot,
+            NoColor = true
+        });
+
+        try
+        {
+            var activeClans = WismGame.Current.Players
+                .Select(player => player.Clan.ShortName)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var originalCapitals = World.Current.GetCities()
+                .Where(city => !string.Equals(city.Info.ClanName, "Neutral", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            Assert.That(originalCapitals, Has.Length.EqualTo(8));
+            Assert.That(originalCapitals.Count(city => city.Clan.ShortName == "Neutral"),
+                Is.EqualTo(8 - clanCount));
+
+            foreach (var city in originalCapitals)
+            {
+                var expectedOwner = activeClans.Contains(city.Info.ClanName)
+                    ? city.Info.ClanName
+                    : "Neutral";
+                Assert.That(city.Clan.ShortName, Is.EqualTo(expectedOwner),
+                    $"Unexpected owner for {city.ShortName} with {clanCount} active clans.");
+            }
         }
         finally
         {
