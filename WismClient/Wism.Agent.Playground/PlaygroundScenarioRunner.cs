@@ -560,8 +560,7 @@ public sealed class PlaygroundScenarioRunner
         return string.Join(
             ";",
             trace.ObjectiveKind ?? "none",
-            trace.Target ?? "none",
-            trace.BlockingReason ?? "none");
+            trace.Target ?? "none");
     }
 
     private static string FormatStrategicTraceEvent(AiDecisionTrace trace, string eventType)
@@ -573,6 +572,7 @@ public sealed class PlaygroundScenarioRunner
             $"eventType={eventType}",
             $"state={(eventType == "blocked" ? "Blocked" : "Retargeted")}",
             $"target={trace.Target}",
+            $"module={trace.ModuleName}",
             $"score={trace.Score:0.###}",
             $"assignedAssetCount={trace.ArmyIds?.Count ?? 0}",
             $"reason={trace.Reason ?? "none"}",

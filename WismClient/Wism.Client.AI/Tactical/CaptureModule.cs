@@ -12,7 +12,7 @@ using Wism.Client.AI.Framework;
 using Wism.Client.AI.Services;
 using Wism.Client.Common;
 
-public class CaptureModule : ITacticalModule
+public class CaptureModule : ITacticalModule, IBlockedReasonProvider
 {
     private const double ImmediateCaptureUtility = 10.0;
     private const double MinimumBlockerAttackWinProbability = 0.40;
@@ -30,6 +30,8 @@ public class CaptureModule : ITacticalModule
     private readonly Dictionary<string, string> bidTargetByArmyKey = new Dictionary<string, string>();
     private readonly Dictionary<string, City> bidTargetCityByArmyKey = new Dictionary<string, City>();
     private readonly Dictionary<int, City> bidTargetCityByLeadArmyId = new Dictionary<int, City>();
+
+    public string LastBlockingReason { get; private set; }
 
     public CaptureModule(ArmyController armyController, IWismLogger logger)
         : this(armyController, null, GarrisonPolicy.None, logger)
@@ -145,15 +147,18 @@ public class CaptureModule : ITacticalModule
 
     public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
     {
+        LastBlockingReason = null;
         var commands = new List<ICommandAction>();
         if (armies == null || armies.Count == 0)
         {
+            LastBlockingReason = BlockedReasonCategories.NoSelectedAssets;
             return commands;
         }
 
         armies = GetUsableSameTileArmies(this.garrisonPolicy.GetMobileArmies(armies));
         if (armies.Count == 0)
         {
+            LastBlockingReason = BlockedReasonCategories.NoSelectedAssets;
             return commands;
         }
 
@@ -177,7 +182,10 @@ public class CaptureModule : ITacticalModule
             target = FindBestCapturableCity(armies, capturableCities);
         }
         if (target == null)
+        {
+            LastBlockingReason = BlockedReasonCategories.TargetInvalidated;
             return commands;
+        }
 
         var captureArmies = SelectDirectCaptureArmies(armies, target);
         if (captureArmies.Count > 0)
@@ -200,6 +208,7 @@ public class CaptureModule : ITacticalModule
             var minimumWinProbability = GetMinimumCityAttackWinProbability(armies, target);
             if (estimate.DefenderCount > 0 && estimate.WinProbability < minimumWinProbability)
             {
+                LastBlockingReason = BlockedReasonCategories.LowOddsCityAttack;
                 if (shouldLog)
                 {
                     logger.LogInformation(
@@ -244,6 +253,7 @@ public class CaptureModule : ITacticalModule
         {
             if (attackPosition == army.Tile)
             {
+                LastBlockingReason = BlockedReasonCategories.AlreadyAtAttackPosition;
                 if (shouldLog)
                 {
                     logger.LogInformation($"[Capture] Stack is already at the best attack position for city at ({target.Tile.X},{target.Tile.Y}).");
@@ -272,6 +282,7 @@ public class CaptureModule : ITacticalModule
                     return commands;
                 }
 
+                LastBlockingReason = BlockedReasonCategories.LowOddsBlocker;
                 if (shouldLog)
                 {
                     logger.LogInformation(
@@ -287,9 +298,14 @@ public class CaptureModule : ITacticalModule
             }
 
             AiUtilities.GenerateMoveCommands(armyController, armies, commands, attackPosition, routeToAttackPosition, logger);
+            if (commands.Count == 0)
+            {
+                LastBlockingReason = ClassifyRouteFailure(armies, routeToAttackPosition);
+            }
         }
         else
         {
+            LastBlockingReason = BlockedReasonCategories.NoRoute;
             if (shouldLog)
             {
                 logger.LogWarning($"[Capture] Could not find valid attack position for city at ({target.Tile.X},{target.Tile.Y})");
@@ -297,6 +313,38 @@ public class CaptureModule : ITacticalModule
         }
 
         return commands;
+    }
+
+    private static string ClassifyRouteFailure(List<Army> armies, IList<Tile> path)
+    {
+        if (path == null)
+        {
+            return BlockedReasonCategories.NoRoute;
+        }
+
+        if (path.Count <= 1)
+        {
+            return BlockedReasonCategories.EmptyRoute;
+        }
+
+        var next = path[1];
+        if (next != null && next.GetAllArmies().Any(army => army.Clan != armies[0].Clan))
+        {
+            return BlockedReasonCategories.EnemyBlocker;
+        }
+
+        if (next == null || !next.CanTraverseHere(armies))
+        {
+            return BlockedReasonCategories.BlockedNextStep;
+        }
+
+        var movableArmies = Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armies, next);
+        if (!Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(movableArmies, next))
+        {
+            return BlockedReasonCategories.InsufficientMoves;
+        }
+
+        return BlockedReasonCategories.Unknown;
     }
 
     private void RememberBidTarget(List<Army> armies, City city)

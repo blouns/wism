@@ -756,8 +756,7 @@ public class PlaygroundScenarioRunnerTests
 
         fields.TryGetValue("goalType", out var goalType);
         fields.TryGetValue("target", out var target);
-        fields.TryGetValue("blockingReason", out var blockingReason);
-        return string.Join(";", moment.Turn, moment.Clan, goalType ?? "none", target ?? "none", blockingReason ?? "none");
+        return string.Join(";", moment.Turn, moment.Clan, goalType ?? "none", target ?? "none");
     }
 
     [Test]

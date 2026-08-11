@@ -14,7 +14,7 @@ using Wism.Client.Pathing;
 
 namespace Wism.Client.AI.Tactical
 {
-    public class SearchModule : ITacticalModule
+    public class SearchModule : ITacticalModule, IBlockedReasonProvider
     {
         private const double CurrentLocationSearchUtility = 6.0;
         private const double ImmediateLocationSearchUtility = 80.0;
@@ -30,6 +30,8 @@ namespace Wism.Client.AI.Tactical
         private readonly GarrisonPolicy garrisonPolicy;
         private readonly bool allowTempleSearch;
         private readonly IWismLogger logger;
+
+        public string LastBlockingReason { get; private set; }
 
         public SearchModule(
             ArmyController armyController,
@@ -185,15 +187,18 @@ namespace Wism.Client.AI.Tactical
 
         public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
         {
+            LastBlockingReason = null;
             var commands = new List<ICommandAction>();
             if (armies == null || armies.Count == 0)
             {
+                LastBlockingReason = BlockedReasonCategories.NoSelectedAssets;
                 return commands;
             }
 
             armies = this.garrisonPolicy.GetMobileArmies(armies);
             if (armies.Count == 0)
             {
+                LastBlockingReason = BlockedReasonCategories.NoSelectedAssets;
                 return commands;
             }
 
@@ -225,6 +230,7 @@ namespace Wism.Client.AI.Tactical
             var target = FindBestSearchTarget(armies, CandidateLocationsForStack(armies, locations));
             if (target == null)
             {
+                LastBlockingReason = BlockedReasonCategories.TargetInvalidated;
                 return commands;
             }
 
@@ -237,12 +243,14 @@ namespace Wism.Client.AI.Tactical
                 }
 
                 logger.LogInformation($"[Search] Target {target.ShortName} is occupied by an enemy; no search move queued.");
+                LastBlockingReason = BlockedReasonCategories.EnemyBlocker;
                 return commands;
             }
 
             if (HasAdjacentAttackableEnemy(armies))
             {
                 logger.LogInformation("[Search] Adjacent enemy is attackable; no search move queued.");
+                LastBlockingReason = BlockedReasonCategories.EnemyBlocker;
                 return commands;
             }
 
@@ -260,7 +268,44 @@ namespace Wism.Client.AI.Tactical
                 AiUtilities.GenerateMoveCommands(armyController, armies, commands, target.Tile, path, logger);
             }
 
+            if (commands.Count == 0)
+            {
+                LastBlockingReason = ClassifyRouteFailure(armies, path);
+            }
+
             return commands;
+        }
+
+        private static string ClassifyRouteFailure(List<Army> armies, IList<Tile> path)
+        {
+            if (path == null)
+            {
+                return BlockedReasonCategories.NoRoute;
+            }
+
+            if (path.Count <= 1)
+            {
+                return BlockedReasonCategories.EmptyRoute;
+            }
+
+            var next = path[1];
+            if (next != null && next.GetAllArmies().Any(army => army.Clan != armies[0].Clan))
+            {
+                return BlockedReasonCategories.EnemyBlocker;
+            }
+
+            if (next == null || !next.CanTraverseHere(armies))
+            {
+                return BlockedReasonCategories.BlockedNextStep;
+            }
+
+            var movableArmies = Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armies, next);
+            if (!Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(movableArmies, next))
+            {
+                return BlockedReasonCategories.InsufficientMoves;
+            }
+
+            return BlockedReasonCategories.Unknown;
         }
 
         private static List<Location> CandidateLocationsForStack(List<Army> armies, List<Location> locations)
