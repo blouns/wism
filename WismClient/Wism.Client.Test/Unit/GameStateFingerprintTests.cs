@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Wism.Client.Commands.Cities;
 using Wism.Client.Controllers;
@@ -121,6 +122,41 @@ public sealed class GameStateFingerprintTests
                 Assert.That(ArmyFactory.LastId, Is.EqualTo(snapshot.LastArmyId));
             });
         }
+    }
+
+    [Test]
+    public void Capture_TransferredCapitalLeavesOneOwnerAndSnapshotLoads()
+    {
+        Game.CreateDefaultGame();
+        var attacker = Game.Current.Players[0];
+        var defender = Game.Current.Players[1];
+        var capital = MapBuilder.FindCity("Marthos");
+        var secondCity = MapBuilder.FindCity("BanesCitadel");
+        World.Current.AddCity(capital, World.Current.Map[1, 1]);
+        World.Current.AddCity(secondCity, World.Current.Map[4, 4]);
+        defender.ClaimCity(capital);
+        defender.ClaimCity(secondCity);
+
+        attacker.ClaimCity(secondCity);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(defender.Capitol, Is.SameAs(capital));
+            Assert.That(defender.GetCities(), Is.EquivalentTo(new[] { capital }));
+        });
+
+        attacker.ClaimCity(capital);
+        var snapshot = Game.Current.Snapshot();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(defender.GetCities(), Is.Empty);
+            Assert.That(defender.Capitol, Is.Null);
+            Assert.DoesNotThrow(() => GameFactory.Load(snapshot));
+            Assert.That(Game.Current.Players[1].Capitol, Is.Null);
+            Assert.That(Game.Current.Players[0].GetCities().Select(city => city.ShortName),
+                Is.EquivalentTo(new[] { "Marthos", "BanesCitadel" }));
+        });
     }
 
     private static int[] ReadRandomSequence(Random random, int count)

@@ -544,12 +544,12 @@ namespace Wism.Client.Core
 
         private void RemoveCity(City city)
         {
+            var lostCapitol = this.Capitol == city;
             this.myCities.Remove(city);
 
-            // Move capitol if lost
-            if (this.myCities.Count > 0)
+            if (lostCapitol)
             {
-                this.Capitol = this.myCities[0];
+                this.Capitol = this.myCities.Count > 0 ? this.myCities[0] : null;
             }
         }
 
