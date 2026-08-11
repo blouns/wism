@@ -15,7 +15,7 @@ using Wism.Client.AI.InfluenceMaps;
 
 namespace Wism.Client.AI.Tactical
 {
-    public class ExterminationModule : ITacticalModule
+    public class ExterminationModule : ITacticalModule, IBlockedReasonProvider
     {
         private const double MinimumAttackWinProbability = 0.40;
         private const int MaxCandidateEnemyTilesPerStack = 24;
@@ -28,6 +28,8 @@ namespace Wism.Client.AI.Tactical
         private readonly GarrisonPolicy garrisonPolicy;
         private readonly IWismLogger logger;
         private readonly ISpatialAdvisor spatialAdvisor;
+
+        public string LastBlockingReason { get; private set; }
 
         public ExterminationModule(PathfindingService pathfindingService, IPathingStrategy pathingStrategy, ArmyController armyController, IWismLogger logger)
             : this(pathfindingService, pathingStrategy, armyController, new CombatEstimator(), GarrisonPolicy.None, logger)
@@ -99,14 +101,21 @@ namespace Wism.Client.AI.Tactical
 
         public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
         {
+            LastBlockingReason = null;
             var commands = new List<ICommandAction>();
 
             if (armies == null || armies.Count == 0)
+            {
+                LastBlockingReason = BlockedReasonCategories.NoSelectedAssets;
                 return commands;
+            }
 
             armies = this.garrisonPolicy.GetMobileArmies(armies);
             if (armies.Count == 0)
+            {
+                LastBlockingReason = BlockedReasonCategories.NoSelectedAssets;
                 return commands;
+            }
 
             // 1) Snapshot current selection
             var current = Game.Current.ArmiesSelected()
@@ -119,6 +128,7 @@ namespace Wism.Client.AI.Tactical
 
             if (target == null)
             {
+                LastBlockingReason = BlockedReasonCategories.TargetInvalidated;
                 logger.LogInformation(
                     $"[Extermination] Army at ({army.Tile.X},{army.Tile.Y}) found no valid enemy targets this turn.");
                 return commands;
@@ -130,6 +140,9 @@ namespace Wism.Client.AI.Tactical
                 var estimate = this.combatEstimator.EstimateAttack(armies, target);
                 if (estimate.WinProbability < MinimumAttackWinProbability)
                 {
+                    LastBlockingReason = target.City == null
+                        ? BlockedReasonCategories.LowOddsBlocker
+                        : BlockedReasonCategories.LowOddsCityAttack;
                     logger.LogInformation(
                         $"[Extermination] Skipping low-odds attack at ({target.X},{target.Y}); win probability {estimate.WinProbability:0.000}.");
                     return commands;
@@ -177,17 +190,58 @@ namespace Wism.Client.AI.Tactical
                         $"[Extermination] Army moving toward ({path[1].X},{path[1].Y}) to approach target.");
                     AiUtilities.GenerateMoveCommands(
                         armyController, armies, commands, attackPosition, path, logger);
+                    if (commands.Count == 0)
+                    {
+                        LastBlockingReason = ClassifyRouteFailure(armies, path);
+                    }
                     return commands;
                 }
+
+                LastBlockingReason = path == null
+                    ? BlockedReasonCategories.NoRoute
+                    : BlockedReasonCategories.EmptyRoute;
             }
             else
             {
+                LastBlockingReason = BlockedReasonCategories.NoRoute;
                 logger.LogInformation("[Extermination] No attack position found for enemy.");
             }
 
             logger.LogInformation(
                 $"[Extermination] Army at ({army.Tile.X},{army.Tile.Y}) found no valid moves this turn.");
             return commands;
+        }
+
+        private static string ClassifyRouteFailure(List<Army> armies, IList<Tile> path)
+        {
+            if (path == null)
+            {
+                return BlockedReasonCategories.NoRoute;
+            }
+
+            if (path.Count <= 1)
+            {
+                return BlockedReasonCategories.EmptyRoute;
+            }
+
+            var next = path[1];
+            if (next != null && next.GetAllArmies().Any(army => army.Clan != armies[0].Clan))
+            {
+                return BlockedReasonCategories.EnemyBlocker;
+            }
+
+            if (next == null || !next.CanTraverseHere(armies))
+            {
+                return BlockedReasonCategories.BlockedNextStep;
+            }
+
+            var movableArmies = Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armies, next);
+            if (!Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(movableArmies, next))
+            {
+                return BlockedReasonCategories.InsufficientMoves;
+            }
+
+            return BlockedReasonCategories.Unknown;
         }
 
         private Tile FindBestEnemyTarget(List<Army> armies, List<Army> enemies)

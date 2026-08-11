@@ -254,6 +254,49 @@ namespace Wism.Client.Test.AI
             Assert.That(trace.Reason, Does.Contain("TestCity"));
             Assert.That(trace.ArmyIds, Does.Contain(army.Id));
             Assert.That(trace.CommandNames, Is.Empty);
+            Assert.That(trace.BlockingReason, Is.EqualTo(BlockedReasonCategories.TargetInvalidated));
+        }
+
+        [TestCase(BlockedReasonCategories.TargetInvalidated)]
+        [TestCase(BlockedReasonCategories.AlreadyAtAttackPosition)]
+        [TestCase(BlockedReasonCategories.EnemyBlocker)]
+        [TestCase(BlockedReasonCategories.LowOddsCityAttack)]
+        [TestCase(BlockedReasonCategories.LowOddsBlocker)]
+        [TestCase(BlockedReasonCategories.NoRoute)]
+        [TestCase(BlockedReasonCategories.EmptyRoute)]
+        [TestCase(BlockedReasonCategories.BlockedNextStep)]
+        [TestCase(BlockedReasonCategories.InsufficientMoves)]
+        public void AiController_RecordsProviderBlockingReasonWithoutChangingCommandOutput(string blockingReason)
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var player = Game.Current.GetCurrentPlayer();
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), player.Capitol.Tile);
+            var controller = new AiController(
+                new SimpleStrategicModule(),
+                new List<ITacticalModule> { new ReasonedNoCommandTacticalModule(army, blockingReason) });
+
+            var commands = controller.ExecuteTurnAndReturnCommands(World.Current);
+
+            Assert.That(commands, Is.Empty);
+            Assert.That(controller.LastDecisionTraces.Single().BlockingReason, Is.EqualTo(blockingReason));
+        }
+
+        [Test]
+        public void AiController_ClassifiesBidWithoutUsableArmies()
+        {
+            var controllerProvider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(controllerProvider, TestUtilities.DefaultTestWorld);
+            var controller = new AiController(
+                new SimpleStrategicModule(),
+                new List<ITacticalModule> { new NoAssetBidTacticalModule() });
+
+            var commands = controller.ExecuteTurnAndReturnCommands(World.Current);
+
+            Assert.That(commands, Is.Empty);
+            Assert.That(
+                controller.LastDecisionTraces.Single().BlockingReason,
+                Is.EqualTo(BlockedReasonCategories.NoSelectedAssets));
         }
 
         [Test]
@@ -302,7 +345,9 @@ namespace Wism.Client.Test.AI
             Assert.That(controller.LastDecisionTraces.Select(trace => trace.ModuleName), Does.Contain(nameof(NoCommandBidTacticalModule)));
             Assert.That(controller.LastDecisionTraces.Select(trace => trace.ModuleName), Does.Contain(nameof(FallbackMoveTacticalModule)));
             Assert.That(controller.LastDecisionTraces.First(trace => trace.ModuleName == nameof(NoCommandBidTacticalModule)).Outcome, Is.EqualTo("blocked"));
-            Assert.That(controller.LastDecisionTraces.First(trace => trace.ModuleName == nameof(NoCommandBidTacticalModule)).BlockingReason, Is.EqualTo("no-executable-command"));
+            Assert.That(
+                controller.LastDecisionTraces.First(trace => trace.ModuleName == nameof(NoCommandBidTacticalModule)).BlockingReason,
+                Is.EqualTo(BlockedReasonCategories.Unknown));
             Assert.That(controller.LastDecisionTraces.First(trace => trace.ModuleName == nameof(FallbackMoveTacticalModule)).Outcome, Is.EqualTo("executed"));
         }
 
@@ -419,6 +464,62 @@ namespace Wism.Client.Test.AI
                         targetX: targetX ?? army.Tile.X,
                         targetY: targetY ?? army.Tile.Y,
                         reason: "Impossible high-priority objective.")
+                };
+            }
+
+            public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
+            {
+                return Enumerable.Empty<ICommandAction>();
+            }
+        }
+
+        private sealed class ReasonedNoCommandTacticalModule : ITacticalModule, IBlockedReasonProvider
+        {
+            private readonly Army army;
+
+            public ReasonedNoCommandTacticalModule(Army army, string blockingReason)
+            {
+                this.army = army;
+                LastBlockingReason = blockingReason;
+            }
+
+            public string LastBlockingReason { get; }
+
+            public IEnumerable<IBid> GenerateBids(World world)
+            {
+                return new IBid[]
+                {
+                    new StrategicBid(
+                        new List<Army> { army },
+                        this,
+                        100.0,
+                        "Siege",
+                        targetX: army.Tile.X,
+                        targetY: army.Tile.Y,
+                        reason: "Reason taxonomy probe.")
+                };
+            }
+
+            public IEnumerable<ICommandAction> GenerateCommands(List<Army> armies, World world)
+            {
+                return Enumerable.Empty<ICommandAction>();
+            }
+        }
+
+        private sealed class NoAssetBidTacticalModule : ITacticalModule
+        {
+            public IEnumerable<IBid> GenerateBids(World world)
+            {
+                return new IBid[]
+                {
+                    new StrategicBid(
+                        new List<Army>(),
+                        this,
+                        100.0,
+                        "Siege",
+                        targetX: 0,
+                        targetY: 0,
+                        reason: "No selected assets taxonomy probe.")
                 };
             }
 

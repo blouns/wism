@@ -140,7 +140,7 @@ namespace Wism.Client.AI.Framework
                 var generatedBeforeSuppression = generated.Count;
                 generated = SuppressRepeatedCommandBatch(bid, generated);
                 LogBidCommands(bid, generated);
-                var trace = CreateTrace(bid, generated, generatedBeforeSuppression);
+                var trace = CreateTrace(bid, generated, generatedBeforeSuppression, world);
                 traces.Add(trace);
                 UpdateBlockedBidMemory(bid, trace);
                 if (generated.Count > 0)
@@ -204,12 +204,16 @@ namespace Wism.Client.AI.Framework
             }
         }
 
-        private static AiDecisionTrace CreateTrace(IBid bid, List<ICommandAction> commands, int generatedBeforeSuppression)
+        private static AiDecisionTrace CreateTrace(
+            IBid bid,
+            List<ICommandAction> commands,
+            int generatedBeforeSuppression,
+            World world)
         {
             var metadata = bid as IStrategicBidMetadata;
             var outcome = commands != null && commands.Count > 0 ? "executed" : "blocked";
             var blockingReason = outcome == "blocked"
-                ? generatedBeforeSuppression > 0 ? "repeated-command-batch" : "no-executable-command"
+                ? ClassifyBlockingReason(bid, generatedBeforeSuppression, world)
                 : null;
             return new AiDecisionTrace(
                 objectiveKind: metadata?.ObjectiveKind ?? "Unknown",
@@ -221,6 +225,66 @@ namespace Wism.Client.AI.Framework
                 commandNames: commands?.Select(command => command.GetType().Name).ToArray(),
                 outcome: outcome,
                 blockingReason: blockingReason);
+        }
+
+        private static string ClassifyBlockingReason(IBid bid, int generatedBeforeSuppression, World world)
+        {
+            if (generatedBeforeSuppression > 0)
+            {
+                return BlockedReasonCategories.RepeatedCommandBatch;
+            }
+
+            if (bid?.Armies == null ||
+                !bid.Armies.Any(army => army != null && !army.IsDead && army.Tile != null && army.MovesRemaining > 0))
+            {
+                return BlockedReasonCategories.NoSelectedAssets;
+            }
+
+            if (bid.Module is IBlockedReasonProvider provider &&
+                !string.IsNullOrWhiteSpace(provider.LastBlockingReason))
+            {
+                return provider.LastBlockingReason;
+            }
+
+            var metadata = bid as IStrategicBidMetadata;
+            if (IsTargetInvalidated(metadata, bid.Armies, world))
+            {
+                return BlockedReasonCategories.TargetInvalidated;
+            }
+
+            return BlockedReasonCategories.Unknown;
+        }
+
+        private static bool IsTargetInvalidated(
+            IStrategicBidMetadata metadata,
+            IReadOnlyCollection<Army> armies,
+            World world)
+        {
+            if (metadata == null || world == null)
+            {
+                return false;
+            }
+
+            var actingClan = armies?
+                .Where(army => army?.Clan != null)
+                .Select(army => army.Clan)
+                .FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(metadata.TargetCityShortName))
+            {
+                var city = world.GetCities().FirstOrDefault(candidate =>
+                    string.Equals(candidate.ShortName, metadata.TargetCityShortName, StringComparison.OrdinalIgnoreCase));
+                return city == null || city.Tile == null || city.Clan == actingClan;
+            }
+
+            if (!string.IsNullOrWhiteSpace(metadata.TargetLocationShortName))
+            {
+                var location = world.GetLocations().FirstOrDefault(candidate =>
+                    string.Equals(candidate.ShortName, metadata.TargetLocationShortName, StringComparison.OrdinalIgnoreCase));
+                return location == null || location.Tile == null || location.Searched;
+            }
+
+            return false;
         }
 
         private static string DescribeTarget(IStrategicBidMetadata metadata)
