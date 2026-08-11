@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Wism.Client.AI.Framework;
@@ -18,6 +19,13 @@ namespace Wism.Client.Test.AI
     [TestFixture]
     public class AiControllerSpatialAdvisorTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+            Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+        }
+
         [Test]
         public void ExecuteTurn_FloodsTheSpatialAdvisor_ExactlyOnce_WhenNoBids()
         {
@@ -77,6 +85,25 @@ namespace Wism.Client.Test.AI
 
             Assert.That(controller.SpatialAdvisor, Is.Not.Null);
             Assert.That(controller.SpatialAdvisor, Is.TypeOf<ForwardFeedInfluenceMap>());
+        }
+
+        [Test]
+        public void ExecuteTurn_AttributesBidGenerationToEachTacticalModule()
+        {
+            var timingNames = new List<string>();
+            var controller = new AiController(
+                new NoOpStrategicModule(),
+                new List<ITacticalModule> { new StubTacticalModule(), new StubTacticalModule() },
+                new List<ITurnModule>(),
+                logger: null,
+                timingSink: (name, elapsed) => timingNames.Add(name));
+
+            controller.ExecuteTurnAndReturnCommands(null);
+
+            Assert.That(
+                timingNames.FindAll(name => name == "tactical-bid-generation:StubTacticalModule").Count,
+                Is.EqualTo(2));
+            Assert.That(timingNames, Does.Contain("tactical-bid-generation"));
         }
 
         [Test]
