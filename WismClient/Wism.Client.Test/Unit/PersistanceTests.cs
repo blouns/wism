@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Wism.Client.Core;
 using Wism.Client.Core.Boons;
+using Wism.Client.Data.Entities;
 using Wism.Client.Factories;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -67,6 +68,32 @@ public class PersistanceTests
         Assert.That(gameSnapshot.World.Tiles, Is.Not.Null);
         EntityValidator.ValidateTiles(World.Current, gameSnapshot.World.Tiles,
             gameSnapshot.World.MapXUpperBound, gameSnapshot.World.MapYUpperBound);
+    }
+
+    [Test]
+    public void SnapshotAndLoad_PreservesAiDifficulty()
+    {
+        var player = Game.Current.Players[0];
+        player.IsHuman = false;
+        player.AiDifficulty = AiDifficultyTier.Warlord;
+
+        var snapshot = Game.Current.Snapshot();
+
+        Assert.That(snapshot.Players[0].AiDifficulty, Is.EqualTo(AiDifficultyTier.Warlord));
+        GameFactory.Load(snapshot);
+        Assert.That(Game.Current.Players[0].AiDifficulty, Is.EqualTo(AiDifficultyTier.Warlord));
+    }
+
+    [Test]
+    public void CreatePlayer_LegacyAiWithoutDifficultyDefaultsToLord()
+    {
+        var player = PlayerFactory.Create(new PlayerEntity
+        {
+            ClanShortName = "Sirians",
+            IsHuman = false
+        });
+
+        Assert.That(player.AiDifficulty, Is.EqualTo(AiDifficultyTier.Lord));
     }
 
     [Test]

@@ -65,6 +65,7 @@ namespace Wism.Client.Factories
             player.Gold = playerEntity.Gold;
             player.IsDead = playerEntity.IsDead;
             player.IsHuman = playerEntity.IsHuman;
+            player.AiDifficulty = playerEntity.AiDifficulty ?? AiDifficultyTier.Lord;
             player.Turn = playerEntity.Turn;
             player.LastHeroTurn = playerEntity.LastHeroTurn;
 
@@ -77,6 +78,7 @@ namespace Wism.Client.Factories
             var player = Player.Create(clan);
             player.Gold = playerEntity.Gold;
             player.IsHuman = playerEntity.IsHuman;
+            player.AiDifficulty = playerEntity.AiDifficulty ?? AiDifficultyTier.Lord;
 
             return player;
         }

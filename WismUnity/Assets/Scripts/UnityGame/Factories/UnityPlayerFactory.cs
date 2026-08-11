@@ -29,6 +29,7 @@ namespace Assets.Scripts.UnityGame.Factories
                 }
                 playerEntities[i].ClanShortName = unityPlayers[i].ClanName;
                 playerEntities[i].IsHuman = unityPlayers[i].IsHuman;
+                playerEntities[i].AiDifficulty = unityPlayers[i].AiDifficulty;
             }
 
             return playerEntities;

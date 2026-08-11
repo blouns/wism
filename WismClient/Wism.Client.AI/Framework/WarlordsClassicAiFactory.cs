@@ -20,6 +20,7 @@ namespace Wism.Client.AI.Framework
             string aiProfile = "tactical",
             Action<string, TimeSpan> timingSink = null)
         {
+            aiProfile = AiDifficultyPolicy.GetBaseProfile(aiProfile);
             pathingStrategy = pathingStrategy ?? new AStarPathingStrategy();
             var pathfinder = new PathfindingService(pathingStrategy);
             var garrisonPolicy = new GarrisonPolicy();

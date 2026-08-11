@@ -484,6 +484,10 @@ public sealed class PlaygroundScenarioRunner
     private bool DriveClassicAiTurn(Player player, int turn, CampaignRecorder recorder, string aiProfile)
     {
         player.IsHuman = false;
+        if (AiDifficultyPolicy.TryParseProfileSuffix(aiProfile, out var difficulty))
+        {
+            player.AiDifficulty = difficulty;
+        }
         var logger = loggerFactory.CreateLogger();
         var provider = WarlordsClassicAiFactory.CreateCommandProvider(
             controllers,
@@ -1527,23 +1531,28 @@ public sealed class PlaygroundScenarioRunner
 
     private static string NormalizeAiProfile(string aiProfile)
     {
-        if (string.Equals(aiProfile, "tactical", StringComparison.OrdinalIgnoreCase))
+        var suffix = AiDifficultyPolicy.TryParseProfileSuffix(aiProfile, out var difficulty)
+            ? "-" + difficulty.ToString().ToLowerInvariant()
+            : string.Empty;
+        var baseProfile = AiDifficultyPolicy.GetBaseProfile(aiProfile);
+
+        if (string.Equals(baseProfile, "tactical", StringComparison.OrdinalIgnoreCase))
         {
-            return "tactical";
+            return "tactical" + suffix;
         }
 
-        if (string.Equals(aiProfile, "strategic-baseline", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(aiProfile, "strategic-no-im", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(baseProfile, "strategic-baseline", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(baseProfile, "strategic-no-im", StringComparison.OrdinalIgnoreCase))
         {
-            return "strategic-baseline";
+            return "strategic-baseline" + suffix;
         }
 
-        if (string.Equals(aiProfile, "strategic-candidate-production", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(baseProfile, "strategic-candidate-production", StringComparison.OrdinalIgnoreCase))
         {
-            return "strategic-candidate-production";
+            return "strategic-candidate-production" + suffix;
         }
 
-        return "strategic";
+        return "strategic" + suffix;
     }
 
     private static bool UsesSearchMission(string scenarioFamily)

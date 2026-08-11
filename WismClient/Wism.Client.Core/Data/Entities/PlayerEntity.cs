@@ -1,5 +1,7 @@
 ﻿using System.Runtime.Serialization;
 
+using Wism.Client.Core;
+
 namespace Wism.Client.Data.Entities
 {
     [DataContract]
@@ -14,6 +16,8 @@ namespace Wism.Client.Data.Entities
         [DataMember] public bool IsDead { get; set; }
 
         [DataMember] public bool IsHuman { get; set; }
+
+        [DataMember(EmitDefaultValue = false)] public AiDifficultyTier? AiDifficulty { get; set; }
 
         [DataMember] public string CapitolShortName { get; set; }
 

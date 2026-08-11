@@ -10,6 +10,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.TestTools;
+using Wism.Client.Core;
 
 [TestFixture]
 public sealed class GameSetupModSettingsFlowTests
@@ -105,12 +106,24 @@ public sealed class GameSetupModSettingsFlowTests
         yield return WaitForGameSetup();
 
         var expectedRoles = new[] { "Knight", "Baron", "Lord", "Warlord", "Human" };
+        var expectedDifficulties = new AiDifficultyTier?[]
+        {
+            AiDifficultyTier.Knight,
+            AiDifficultyTier.Baron,
+            AiDifficultyTier.Lord,
+            AiDifficultyTier.Warlord,
+            null
+        };
+        var roleIndex = 0;
         foreach (var expectedRole in expectedRoles)
         {
             Click(FindRoleText("Player1"));
             yield return null;
 
             Assert.That(FindRoleText("Player1").text.Trim(), Is.EqualTo(expectedRole));
+            var selectedPlayer = ReadGameSettings().Players.First(player => player.ClanName == "Sirians");
+            Assert.That(selectedPlayer.IsHuman, Is.EqualTo(expectedRole == "Human"));
+            Assert.That(selectedPlayer.AiDifficulty, Is.EqualTo(expectedDifficulties[roleIndex++]));
         }
 
         Click(FindRoleText("Player1"));
