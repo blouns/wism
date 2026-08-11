@@ -17,7 +17,6 @@ namespace Wism.Client.AI.Tactical
         private const int HighPressureThreatenedCityDefenders = 4;
         private const int HighPressureNearbyEnemyCount = 4;
         private const double ThreatenedCityDefenseUtility = 9.5;
-        private const double MinimumCounterAttackWinProbability = 0.75;
 
         private readonly ArmyController armyController;
         private readonly CombatEstimator combatEstimator;
@@ -220,7 +219,7 @@ namespace Wism.Client.AI.Tactical
                 .Where(tile => tile.CanAttackHere(stack) && AiUtilities.IsInAttackRange(stack, tile))
                 .Any(tile =>
                     this.combatEstimator.EstimateAttack(stack, tile).WinProbability >=
-                    MinimumCounterAttackWinProbability);
+                    AiDifficultyPolicy.ForCurrentPlayer().CounterAttackWinProbability);
         }
 
         private static bool IsThreatened(City city, Player player)

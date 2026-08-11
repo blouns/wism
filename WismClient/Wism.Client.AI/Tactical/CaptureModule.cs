@@ -15,9 +15,6 @@ using Wism.Client.Common;
 public class CaptureModule : ITacticalModule, IBlockedReasonProvider
 {
     private const double ImmediateCaptureUtility = 10.0;
-    private const double MinimumBlockerAttackWinProbability = 0.40;
-    private const double MinimumCityAttackWinProbability = 0.40;
-    private const double MinimumEndgameCityAttackWinProbability = 0.20;
     private const int MaxCandidateCitiesPerStack = 24;
 
     private readonly ArmyController armyController;
@@ -266,7 +263,7 @@ public class CaptureModule : ITacticalModule, IBlockedReasonProvider
             if (blocker != null)
             {
                 var estimate = this.combatEstimator.EstimateAttack(armies, blocker);
-                if (estimate.WinProbability >= MinimumBlockerAttackWinProbability)
+                if (estimate.WinProbability >= AiDifficultyPolicy.ForCurrentPlayer().BlockerAttackWinProbability)
                 {
                     if (shouldLog)
                     {
@@ -497,7 +494,8 @@ public class CaptureModule : ITacticalModule, IBlockedReasonProvider
         var blocker = FindEnemyBlockerOnRoute(armies, attackPosition, out var routeToAttackPosition);
         if (blocker != null)
         {
-            return this.combatEstimator.EstimateAttack(armies, blocker).WinProbability >= MinimumBlockerAttackWinProbability;
+            return this.combatEstimator.EstimateAttack(armies, blocker).WinProbability >=
+                   AiDifficultyPolicy.ForCurrentPlayer().BlockerAttackWinProbability;
         }
 
         return routeToAttackPosition != null && routeToAttackPosition.Count > 1;
@@ -546,9 +544,10 @@ public class CaptureModule : ITacticalModule, IBlockedReasonProvider
 
     private static double GetMinimumCityAttackWinProbability(List<Army> armies, City city)
     {
+        var policy = AiDifficultyPolicy.ForCurrentPlayer();
         return IsEndgameAssault(armies, city)
-            ? MinimumEndgameCityAttackWinProbability
-            : MinimumCityAttackWinProbability;
+            ? policy.EndgameCityAttackWinProbability
+            : policy.CityAttackWinProbability;
     }
 
     private static bool IsEndgameAssault(List<Army> armies, City city)

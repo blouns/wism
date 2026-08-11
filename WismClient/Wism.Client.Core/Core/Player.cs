@@ -42,6 +42,8 @@ namespace Wism.Client.Core
 
         public bool IsHuman { get; set; }
 
+        public AiDifficultyTier AiDifficulty { get; set; } = AiDifficultyTier.Lord;
+
         public City Capitol { get; set; }
 
         public int LastHeroTurn { get; internal set; }

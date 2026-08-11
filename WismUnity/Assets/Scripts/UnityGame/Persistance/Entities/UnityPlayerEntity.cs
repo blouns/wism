@@ -5,5 +5,7 @@
         public string ClanName { get; set; }
 
         public bool IsHuman { get; set; }
+
+        public Wism.Client.Core.AiDifficultyTier? AiDifficulty { get; set; }
     }
 }

@@ -401,6 +401,7 @@ namespace Wism.Client.Data
                     Gold = players[i].Gold,
                     IsDead = players[i].IsDead,
                     IsHuman = players[i].IsHuman,
+                    AiDifficulty = players[i].AiDifficulty,
                     MyCitiesShortNames = ConvertToCityShortNames(players[i].GetCities()),
                     Turn = players[i].Turn,
                     LastHeroTurn = players[i].LastHeroTurn,

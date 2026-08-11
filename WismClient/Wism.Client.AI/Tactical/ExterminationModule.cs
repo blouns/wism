@@ -17,7 +17,6 @@ namespace Wism.Client.AI.Tactical
 {
     public class ExterminationModule : ITacticalModule, IBlockedReasonProvider
     {
-        private const double MinimumAttackWinProbability = 0.40;
         private const int MaxCandidateEnemyTilesPerStack = 24;
         private const double WeakPointInfluenceWeight = 0.35;
 
@@ -84,7 +83,7 @@ namespace Wism.Client.AI.Tactical
                     var estimate = this.combatEstimator.EstimateAttack(stackList, target);
                     var canAttackNow = target.CanAttackHere(stackList)
                         && AiUtilities.IsInAttackRange(stackList, target);
-                    if (canAttackNow && estimate.WinProbability < MinimumAttackWinProbability)
+                    if (canAttackNow && estimate.WinProbability < AiDifficultyPolicy.ForCurrentPlayer().ExterminationAttackWinProbability)
                     {
                         logger.LogInformation(
                             $"[Extermination] Suppressing low-odds immediate bid at ({target.X},{target.Y}); win probability {estimate.WinProbability:0.000}.");
@@ -147,7 +146,7 @@ namespace Wism.Client.AI.Tactical
             if (target.CanAttackHere(armies) && AiUtilities.IsInAttackRange(armies, target))
             {
                 var estimate = this.combatEstimator.EstimateAttack(armies, target);
-                if (estimate.WinProbability < MinimumAttackWinProbability)
+                if (estimate.WinProbability < AiDifficultyPolicy.ForCurrentPlayer().ExterminationAttackWinProbability)
                 {
                     LastBlockingReason = target.City == null
                         ? BlockedReasonCategories.LowOddsBlocker

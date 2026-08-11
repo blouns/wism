@@ -8,6 +8,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Wism.Client.Core;
 using Wism.Client.Modules;
 using Wism.Client.Modules.Infos;
 using Wism.Client.Modules.Profiles;
@@ -288,7 +289,11 @@ public class GameSetup : MonoBehaviour
             if (this.playerToggles[i].isOn)
             {
                 var playerEntity = new UnityPlayerEntity();
-                playerEntity.IsHuman = GetPlayerRoleIndex(i) == 0;
+                var roleIndex = GetPlayerRoleIndex(i);
+                playerEntity.IsHuman = roleIndex == 0;
+                playerEntity.AiDifficulty = roleIndex == 0
+                    ? (AiDifficultyTier?)null
+                    : (AiDifficultyTier)(roleIndex - 1);
                 playerEntity.ClanName = GetClanName(i);
                 playerEntities.Add(playerEntity);
             }
