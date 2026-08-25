@@ -16,6 +16,9 @@ namespace Assets.Scripts.UI
             var layout = control.GetComponent<LayoutElement>() ?? control.AddComponent<LayoutElement>();
             layout.minWidth = Mathf.Max(layout.minWidth, theme.MinimumHitTarget.x);
             layout.minHeight = Mathf.Max(layout.minHeight, theme.MinimumHitTarget.y);
+
+            var hitArea = control.GetComponent<WismHitArea>() ?? control.AddComponent<WismHitArea>();
+            hitArea.Configure(theme.DesktopHitTarget, theme.TouchHitTarget);
         }
     }
 }

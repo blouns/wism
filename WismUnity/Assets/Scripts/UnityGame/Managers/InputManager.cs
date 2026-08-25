@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
@@ -352,6 +353,13 @@ namespace Assets.Scripts.Managers
 
         private void HandleLeftClick(bool isDoubleClick = false)
         {
+            if (!WismPointerRoutingPolicy.CanRouteToMap(
+                EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(),
+                this.InputMode == InputMode.Game))
+            {
+                return;
+            }
+
             var camera = this.unityManager.GetMainCamera();
             Tile clickedTile = this.unityManager.WorldTilemap
                 .GetClickedTile(camera);

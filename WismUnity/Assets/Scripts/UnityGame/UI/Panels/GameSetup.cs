@@ -1,6 +1,7 @@
 using Assets.Scripts.Managers;
 using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
+using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,6 +65,7 @@ public class GameSetup : MonoBehaviour
         NormalizeShortcutLabels();
         EnsureValidationText();
         EnsureOptionToggles();
+        EnsureInteractionContracts();
         RefreshAvailableClans();
         EnsurePlayerRoleState();
         ConfigurePlayerRows(resetSelection: true);
@@ -533,6 +535,13 @@ public class GameSetup : MonoBehaviour
             (loadRect.anchoredPosition.x + startRect.anchoredPosition.x) / 2f,
             loadRect.anchoredPosition.y);
         rect.sizeDelta = new Vector2(180f, loadRect.sizeDelta.y);
+        WismHitTargetPolicy.Apply(buttonObject);
+        WismUiControl.Ensure(
+            buttonObject,
+            "game-setup.mods",
+            WismUiControlRole.Navigation,
+            "game-setup.open-mods",
+            20);
     }
 
     private static void EnsureDefaultModKitSelection()
@@ -721,8 +730,60 @@ public class GameSetup : MonoBehaviour
                 button.targetGraphic = text;
                 button.onClick.RemoveAllListeners();
                 button.onClick.AddListener(() => CyclePlayerRole(rowIndex));
+                WismHitTargetPolicy.Apply(button.gameObject);
+                WismUiControl.Ensure(
+                    button.gameObject,
+                    $"game-setup.player-{rowIndex + 1}.role",
+                    WismUiControlRole.Selection,
+                    "game-setup.cycle-player-role",
+                    30);
             }
         }
+    }
+
+    private void EnsureInteractionContracts()
+    {
+        WismUiSurface.Ensure(
+            this.gameObject,
+            "game-setup",
+            WismUiControlState.Normal,
+            WismUiControlState.Selected,
+            WismUiControlState.Disabled);
+
+        EnsureNamedControl("StartButton", "game-setup.start", "game-setup.start", WismUiControlRole.Command, 40);
+        EnsureNamedControl("LoadButton", "game-setup.load", "game-setup.load", WismUiControlRole.Navigation, 20);
+        EnsureNamedControl(ModSettingsButtonName, "game-setup.mods", "game-setup.open-mods", WismUiControlRole.Navigation, 20);
+        EnsureNamedControl("RandomStartToggle", "game-setup.random-start", "game-setup.toggle-random-start", WismUiControlRole.Toggle, 20);
+        EnsureNamedControl("InteractiveToggle", "game-setup.interactive", "game-setup.toggle-interactive", WismUiControlRole.Toggle, 20);
+
+        for (var i = 0; i < this.playerToggles.Length; i++)
+        {
+            var toggle = this.playerToggles[i];
+            WismHitTargetPolicy.Apply(toggle.gameObject);
+            WismUiControl.Ensure(
+                toggle.gameObject,
+                $"game-setup.player-{i + 1}.enabled",
+                WismUiControlRole.Toggle,
+                "game-setup.toggle-player",
+                20);
+        }
+    }
+
+    private static void EnsureNamedControl(
+        string objectName,
+        string semanticId,
+        string actionId,
+        WismUiControlRole role,
+        int priority)
+    {
+        var target = GameObject.Find(objectName);
+        if (target == null)
+        {
+            return;
+        }
+
+        WismHitTargetPolicy.Apply(target);
+        WismUiControl.Ensure(target, semanticId, role, actionId, priority);
     }
 
     private void OnPlayerSelectionChange()

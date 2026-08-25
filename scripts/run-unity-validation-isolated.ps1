@@ -3,7 +3,7 @@ param(
     [string]$UnityCli = "unity",
     [string]$WorktreePath = "",
     [string]$RunId = "",
-    [string]$TestFilter = "ModSettings",
+    [string]$TestFilter = "",
     [string]$Profile = "classic-warlords",
     [string]$Packs = "pack-illurian-legends-flavor",
     [string]$World = "TestWorld",
@@ -26,6 +26,8 @@ param(
     [switch]$SkipClientBuild,
     [switch]$SkipClientTests,
     [switch]$SkipProof,
+    [switch]$EnableCoverage,
+    [string]$CoverageOptions = "generateHtmlReport;generateAdditionalMetrics;assemblyFilters:+UnityGame",
     [int]$TimeoutMinutes = 10,
     [ValidateRange(0, 2)]
     [int]$TestRetries = 1
@@ -448,7 +450,6 @@ Write-Host "Starting Unity CLI PlayMode tests in isolated worktree..."
 $unityArguments = @(
     "test", $unityProjectRoot,
     "--mode", "PlayMode",
-    "--filter", $TestFilter,
     "--output", $unityResults,
     "--report-format", "nunit,junit",
     "--junit-output", $unityJunitResults,
@@ -457,6 +458,17 @@ $unityArguments = @(
     "--format", "ndjson",
     "--non-interactive"
 )
+if (-not [string]::IsNullOrWhiteSpace($TestFilter)) {
+    $unityArguments += @("--filter", $TestFilter)
+}
+if ($EnableCoverage) {
+    $coverageRoot = Join-Path $artifactRoot "coverage"
+    $unityArguments += @(
+        "--coverage",
+        "--coverage-output", $coverageRoot,
+        "--coverage-options", $CoverageOptions
+    )
+}
 $steps.Add((Invoke-Native -Name "unity-cli-playmode-tests" -FilePath $unityCliPath -Arguments $unityArguments -WorkingDirectory $unityProjectRoot -LogPath $unityLog)) | Out-Null
 $unityLauncherExitCode = $steps[-1].exitCode
 if ($unityLauncherExitCode -eq 8) {

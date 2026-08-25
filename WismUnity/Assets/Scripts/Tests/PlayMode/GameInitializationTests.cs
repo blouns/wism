@@ -1,4 +1,5 @@
 using Assets.Scripts.Managers;
+using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using Assets.Tests.PlayMode;
 using NUnit.Framework;
@@ -14,7 +15,6 @@ public class GameInitializationTests : IPrebuildSetup, IPostBuildCleanup
     public static string TestWorld = "TestWorld";
     public static string TestSceneFolder = @"Assets/Scenes/Test";
     private string scenePath = @"Scenes/Test/TestWorld";
-    private bool sceneLoaded;
 
     public void Setup()
     {
@@ -24,6 +24,13 @@ public class GameInitializationTests : IPrebuildSetup, IPostBuildCleanup
     [UnitySetUp]
     public IEnumerator UnitySetup()
     {
+        Wism.Client.Core.Game.Unload();
+        UnityManager.SetNewGameSettings(null);
+        UnityModKitRuntimeSelection.Clear();
+        Wism.Client.Modules.ModFactory.ModPath = GameManager.DefaultModPath;
+        Wism.Client.Modules.ModFactory.WorldPath = TestWorld;
+        Wism.Client.Modules.ModFactory.ActiveFeaturePackIds = new System.Collections.Generic.List<string>();
+        Wism.Client.Modules.ModFactory.ResetCache();
         UnityNewGameEntity settings = new UnityNewGameEntity()
         {
             InteractiveUI = false,
@@ -34,10 +41,11 @@ public class GameInitializationTests : IPrebuildSetup, IPostBuildCleanup
             WorldName = TestWorld
         };
         UnityManager.SetNewGameSettings(settings);
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.LoadScene(this.scenePath, LoadSceneMode.Additive);
+        SceneManager.LoadScene(this.scenePath, LoadSceneMode.Single);
 
-        yield return new WaitWhile(() => this.sceneLoaded == false);
+        yield return new WaitUntil(() =>
+            SceneManager.GetActiveScene().name == TestWorld &&
+            Wism.Client.Core.Game.IsInitialized());
     }
 
     private UnityPlayerEntity[] GetTestPlayers()
@@ -57,15 +65,18 @@ public class GameInitializationTests : IPrebuildSetup, IPostBuildCleanup
         };
     }
 
-    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
-    {
-        this.sceneLoaded = true;
-    }
-
     [UnityTearDown]
     public IEnumerator UnityTearDown()
     {
-        yield return SceneManager.UnloadSceneAsync(this.scenePath);
+        var cleanup = SceneManager.CreateScene("GameInitializationCleanup");
+        SceneManager.SetActiveScene(cleanup);
+        var testScene = SceneManager.GetSceneByName(TestWorld);
+        if (testScene.IsValid() && testScene.isLoaded)
+        {
+            yield return SceneManager.UnloadSceneAsync(testScene);
+        }
+        Wism.Client.Core.Game.Unload();
+        UnityManager.SetNewGameSettings(null);
     }
 
     public void Cleanup()

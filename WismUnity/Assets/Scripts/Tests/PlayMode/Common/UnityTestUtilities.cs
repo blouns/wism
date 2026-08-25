@@ -22,8 +22,17 @@ namespace Assets.Scripts.Tests.PlayMode.Common
 
         public static IEnumerator AcceptNewHeroOffer(string heroName = "Lowenbrau", int lastId = 0)
         {
+            var unityManager = GameObject.FindGameObjectWithTag("UnityManager")
+                .GetComponent<UnityManager>();
             var gameManager = GameObject.FindGameObjectWithTag("UnityManager")
                 .GetComponent<GameManager>();
+
+            if (!unityManager.InteractiveUI)
+            {
+                yield return new WaitForCommandOfType<HireHeroCommand>(gameManager.ControllerProvider, true, lastId);
+                yield break;
+            }
+
             var inputPanel = GameObject.FindGameObjectWithTag("SolicitInputPanel")
                 .GetComponent<SolicitInput>();
 
@@ -39,12 +48,13 @@ namespace Assets.Scripts.Tests.PlayMode.Common
                 .GetComponent<InputManager>();
             var productionPanelGO = GameObject.FindGameObjectWithTag("CityProductionPanel");
 
-            if (productionPanelGO != null)
+            if (!inputManager.UnityManager.InteractiveUI || productionPanelGO == null)
             {
-                productionPanelGO.GetComponent<CityProduction>()
-                    .OnExitClick();
+                yield break;
             }
 
+            productionPanelGO.GetComponent<CityProduction>()
+                .OnExitClick();
             yield return new WaitForInteractivePanel(productionPanelGO, false);
         }
 

@@ -1,5 +1,6 @@
 using Assets.Scripts.Common;
 using Assets.Scripts.Managers;
+using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -154,7 +155,7 @@ namespace Assets.Scripts.Tilemaps
 
         public Tile GetClickedTile(Camera followCamera)
         {
-            return GetTileAtScreenPosition(followCamera, Input.mousePosition);
+            return GetTileAtScreenPosition(followCamera, WismUiInputAdapter.PointerPosition);
         }
 
         public Tile GetTileAtScreenPosition(Camera followCamera, Vector3 screenPosition)

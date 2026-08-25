@@ -32,6 +32,12 @@ Project-owned commands live in `Assets/Scripts/UnityGame/EditorBridge/WismUnityP
 - `wism_evaluate_board`
 - `wism_ai_turn_preview`
 - `wism_modkit_status`
+- `wism_ui_inventory`
+- `wism_ui_exercise`
+- `wism_ui_capture`
+- `wism_ui_compare`
+
+The UI command contract and public evidence boundary are documented in `docs/ui-refinement-pilot.md`.
 
 Discover the current command surface from a connected editor with `unity list`. Invoke a warm command with `unity command <name>`, or a one-shot command with:
 

@@ -2,6 +2,7 @@ using Assets.Scripts.Managers;
 using Assets.Scripts.Tilemaps;
 using Assets.Scripts.Tiles;
 using Assets.Scripts.UnityGame.Persistance.Entities;
+using Assets.Scripts.UnityGame.ModKit;
 using NUnit.Framework;
 using System.Collections;
 using System.Linq;
@@ -11,6 +12,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.Tilemaps;
 using Wism.Client.Core;
+using Wism.Client.Modules;
 
 [TestFixture]
 public sealed class IlluriaCityOwnershipVisualTests
@@ -25,11 +27,18 @@ public sealed class IlluriaCityOwnershipVisualTests
         }
 
         UnityManager.SetNewGameSettings(null);
+        Game.Unload();
     }
 
     [UnityTest]
     public IEnumerator NewIlluriaGame_WithOmittedClan_RepaintsOmittedCapitalNeutral()
     {
+        Game.Unload();
+        UnityModKitRuntimeSelection.Clear();
+        ModFactory.ModPath = GameManager.DefaultModPath;
+        ModFactory.WorldPath = "Illuria";
+        ModFactory.ActiveFeaturePackIds = new System.Collections.Generic.List<string>();
+        ModFactory.ResetCache();
         UnityManager.SetNewGameSettings(new UnityNewGameEntity
         {
             InteractiveUI = false,

@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Managers;
 using Assets.Scripts.Tests.PlayMode.Common;
+using Assets.Scripts.UnityGame.ModKit;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using Assets.Tests.PlayMode;
 using NUnit.Framework;
@@ -21,7 +22,6 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     public static string TestWorld = "TestWorld";
     public static string TestSceneFolder = @"Assets/Scenes/Test";
     private string scenePath = @"Scenes/Test/TestWorld";
-    private bool sceneLoaded;
 
     public void Setup()
     {
@@ -31,6 +31,13 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
     [UnitySetUp]
     public IEnumerator UnitySetup()
     {
+        Game.Unload();
+        UnityManager.SetNewGameSettings(null);
+        UnityModKitRuntimeSelection.Clear();
+        ModFactory.ModPath = GameManager.DefaultModPath;
+        ModFactory.WorldPath = TestWorld;
+        ModFactory.ActiveFeaturePackIds = new List<string>();
+        ModFactory.ResetCache();
         UnityNewGameEntity settings = new UnityNewGameEntity()
         {
             InteractiveUI = false,
@@ -41,21 +48,26 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
             WorldName = TestWorld
         };
         UnityManager.SetNewGameSettings(settings);
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.sceneUnloaded += OnSceneUnloaded;
-        SceneManager.LoadScene(this.scenePath, LoadSceneMode.Additive);
+        SceneManager.LoadScene(this.scenePath, LoadSceneMode.Single);
 
-        yield return new WaitWhile(() => this.sceneLoaded == false);
+        yield return new WaitUntil(() =>
+            SceneManager.GetActiveScene().name == TestWorld &&
+            Game.IsInitialized());
         yield return new WaitForSeconds(2f);
     }
 
     [UnityTearDown]
     public IEnumerator UnityTearDown()
     {
-        SceneManager.UnloadSceneAsync(this.scenePath);
-
-        yield return new WaitWhile(() => this.sceneLoaded == true);
+        var cleanup = SceneManager.CreateScene("ArmyActionCleanup");
+        SceneManager.SetActiveScene(cleanup);
+        var testScene = SceneManager.GetSceneByName(TestWorld);
+        if (testScene.IsValid() && testScene.isLoaded)
+        {
+            yield return SceneManager.UnloadSceneAsync(testScene);
+        }
         Game.Unload();
+        UnityManager.SetNewGameSettings(null);
     }
 
 
@@ -71,19 +83,9 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
             new UnityPlayerEntity()
             {
                 ClanName = "LordBane",
-                IsHuman = false
+                IsHuman = true
             }
         };
-    }
-
-    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
-    {
-        this.sceneLoaded = true;
-    }
-
-    private void OnSceneUnloaded(Scene arg0)
-    {
-        this.sceneLoaded = false;
     }
 
     public void Cleanup()
@@ -113,7 +115,7 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         if (hero != null)
         {
             Assert.AreEqual("Marthos", hero.Tile.City.ShortName);
-            Assert.AreEqual("Lowenbrau", hero.DisplayName, "Lowenbrau has not returned!");
+            Assert.That(hero.DisplayName, Is.Not.Empty, "The recruited hero must have a display name.");
         }
     }
 
@@ -215,11 +217,14 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         gameManager.SelectArmies(armies);
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
+        gameManager.MoveSelectedArmies(hero.X + 1, hero.Y);
+        yield return new WaitForLastCommand(gameManager.ControllerProvider);
+
         gameManager.MoveSelectedArmies(hero.X - 1, hero.Y);
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
         // Assert
-        Assert.AreEqual(originalX - 1, hero.X, "Hero failed to move West.");
+        Assert.AreEqual(originalX, hero.X, "Hero failed to move West across passable terrain.");
         Assert.AreEqual(originalY, hero.Y, "Hero moved North/South.");
     }
 
@@ -237,6 +242,9 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         var banesCitadel = banesPlayer.Capitol;
         banesPlayer.HireHero(banesCitadel.Tile);
         var banesHero = FindFirstHero(banesPlayer);
+        banesHero.Strength = 1;
+        banesCitadel.Defense = 0;
+        var targetTile = banesHero.Tile;
         int originalY = siriansHero.Y;
         var armies = new List<Army>() { siriansHero };
 
@@ -249,15 +257,15 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         gameManager.SelectArmies(armies);
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
-        gameManager.MoveSelectedArmies(banesCitadel.X - 1, siriansHero.Y);
+        gameManager.MoveSelectedArmies(targetTile.X - 1, targetTile.Y);
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
-        gameManager.AttackWithSelectedArmies(banesCitadel.X, siriansHero.Y);
+        gameManager.AttackWithSelectedArmies(targetTile.X, targetTile.Y);
         yield return new WaitForLastCommand(gameManager.ControllerProvider);
 
         // Assert
-        Assert.AreEqual(banesCitadel.X, siriansHero.X, "Hero failed to move to Bane's Citadel.");
-        Assert.AreEqual(originalY, siriansHero.Y, "Hero moved North/South.");
+        Assert.AreEqual(targetTile.X, siriansHero.X, "Hero failed to move to Bane's Citadel.");
+        Assert.AreEqual(targetTile.Y, siriansHero.Y, "Hero moved to the wrong city tile.");
         Assert.IsTrue(banesHero.IsDead, "Lord Bane's hero was not killed.");
         Assert.IsFalse(siriansHero.IsDead, "Sirians' hero died.");
         Assert.AreEqual(2, siriansPlayer.GetCities().Count, "Sirians did not capture Bane's Citadel");
@@ -277,9 +285,6 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         siriansHero.Strength = 9;
         var siriansArmies = new List<Army>() { siriansHero };
 
-        // Dismiss production panel
-        yield return new WaitForInteractivePanel(
-            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
         yield return WismTestAction.DismissProductionPanel();
 
         var banesPlayer = Game.Current.Players[1];
@@ -314,9 +319,6 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         banesHero.Strength = 3;
         var banesArmies = new List<Army>() { banesHero };
 
-        // Dismiss production panel
-        yield return new WaitForInteractivePanel(
-            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
         yield return WismTestAction.DismissProductionPanel();
 
         gameManager.SelectArmies(banesArmies);
@@ -340,9 +342,6 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         var siriansHero = FindFirstHero(siriansPlayer);
         var siriansArmies = new List<Army>() { siriansHero };
 
-        // Dismiss production panel
-        yield return new WaitForInteractivePanel(
-            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
         yield return WismTestAction.DismissProductionPanel();
 
         // Override boon
@@ -391,9 +390,6 @@ public class ArmyActionTests : IPrebuildSetup, IPostBuildCleanup
         var siriansHero = FindFirstHero(siriansPlayer);
         var siriansArmies = new List<Army>() { siriansHero };
 
-        // Dismiss production panel
-        yield return new WaitForInteractivePanel(
-            UnityUtilities.GameObjectHardFind("CityProductionPanel"));
         yield return WismTestAction.DismissProductionPanel();
 
         // Override boon

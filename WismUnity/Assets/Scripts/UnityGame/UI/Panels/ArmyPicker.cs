@@ -96,10 +96,53 @@ namespace Assets.Scripts.UI
             this.armies.AddRange(armies);
             this.armies.Sort(new ByArmyViewingOrder());
 
+            WismUiSurface.Ensure(
+                this.gameObject,
+                "army-selection",
+                WismUiControlState.Normal,
+                WismUiControlState.Selected,
+                WismUiControlState.Disabled);
             RenderArmyRows(this.armies);
+            EnsureInteractionContracts();
 
             this.unityGame.InputManager.SetInputMode(InputMode.UI);
             this.gameObject.SetActive(true);
+        }
+
+        private void EnsureInteractionContracts()
+        {
+            for (var i = 0; i < this.ArmyRows.Length; i++)
+            {
+                var button = GetChildGameObject(this.ArmyRows[i], "SelectButton")?.GetComponent<Button>();
+                if (button == null)
+                {
+                    continue;
+                }
+
+                WismHitTargetPolicy.Apply(button.gameObject);
+                WismUiControl.Ensure(
+                    button.gameObject,
+                    $"army-selection.row-{i + 1}",
+                    WismUiControlRole.Toggle,
+                    "army.selection.toggle",
+                    overlapPriority: 20);
+            }
+
+            foreach (var button in GetComponentsInChildren<Button>(true))
+            {
+                if (button.name == "SelectButton")
+                {
+                    continue;
+                }
+
+                WismHitTargetPolicy.Apply(button.gameObject);
+                WismUiControl.Ensure(
+                    button.gameObject,
+                    $"army-selection.{WismUiIds.FromName(button.name)}",
+                    WismUiControlRole.Command,
+                    WismUiIds.FromName(button.name),
+                    overlapPriority: 10);
+            }
         }
 
         private void RenderArmyRows(List<Army> armies)

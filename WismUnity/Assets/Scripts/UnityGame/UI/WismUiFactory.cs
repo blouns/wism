@@ -19,7 +19,14 @@ namespace Assets.Scripts.UI
             return text;
         }
 
-        public static Button CreateButton(Transform parent, string name, string label)
+        public static Button CreateButton(
+            Transform parent,
+            string name,
+            string label,
+            string semanticId = null,
+            string actionId = null,
+            WismUiControlRole role = WismUiControlRole.Command,
+            int overlapPriority = 0)
         {
             var gameObject = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             gameObject.transform.SetParent(parent, false);
@@ -35,6 +42,12 @@ namespace Assets.Scripts.UI
             button.colors = colors;
 
             WismHitTargetPolicy.Apply(gameObject);
+            WismUiControl.Ensure(
+                gameObject,
+                semanticId ?? WismUiIds.FromName(name),
+                role,
+                actionId ?? WismUiIds.FromName(name),
+                overlapPriority);
 
             var text = CreateText(gameObject.transform, "Label", label, 16, TextAnchor.MiddleCenter);
             var textRect = text.GetComponent<RectTransform>();

@@ -16,6 +16,11 @@ namespace Assets.Scripts.UI
         public readonly Color ButtonSelected = new Color32(198, 184, 68, 255);
         public readonly Color Danger = new Color32(176, 64, 48, 255);
         public readonly Vector2 ReferenceResolution = new Vector2(1280f, 720f);
-        public readonly Vector2 MinimumHitTarget = new Vector2(44f, 34f);
+        public readonly Vector2 LegacyVisualMinimum = new Vector2(44f, 34f);
+        public readonly Vector2 DesktopHitTarget = new Vector2(32f, 32f);
+        public readonly Vector2 TouchHitTarget = new Vector2(44f, 44f);
+
+        // Layout keeps the established visual dimensions; WismHitArea expands only interaction bounds.
+        public Vector2 MinimumHitTarget => this.LegacyVisualMinimum;
     }
 }

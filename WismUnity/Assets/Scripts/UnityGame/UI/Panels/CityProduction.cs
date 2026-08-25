@@ -101,6 +101,7 @@ namespace Assets.Scripts.UI
 
         private void InitializeProduction()
         {
+            EnsureInteractionContracts();
             SetInitialButtonState();
 
             this.viewModel = this.panelMode == ProductionPanelMode.Management
@@ -414,23 +415,101 @@ namespace Assets.Scripts.UI
             this.statusText = WismUiFactory.CreateText(panel, "ProductionStatusText", string.Empty, 14, TextAnchor.MiddleLeft);
 
             var row = WismUiFactory.CreateRow(panel, "ProductionNavigationRow");
-            var previous = WismUiFactory.CreateButton(row, "PreviousProductionCityButton", "Prev");
+            var previous = WismUiFactory.CreateButton(
+                row,
+                "PreviousProductionCityButton",
+                "Prev",
+                "owned-production.previous-city",
+                "production.management.previous",
+                WismUiControlRole.Navigation,
+                10);
             previous.onClick.AddListener(OnPreviousCityClick);
-            var next = WismUiFactory.CreateButton(row, "NextProductionCityButton", "Next");
+            var next = WismUiFactory.CreateButton(
+                row,
+                "NextProductionCityButton",
+                "Next",
+                "owned-production.next-city",
+                "production.management.next",
+                WismUiControlRole.Navigation,
+                10);
             next.onClick.AddListener(OnNextCityClick);
 
             var jumpRow = WismUiFactory.CreateRow(panel, "ProductionJumpRow");
-            this.destinationJumpButton = WismUiFactory.CreateButton(jumpRow, "DestinationProductionCityButton", "->");
+            this.destinationJumpButton = WismUiFactory.CreateButton(
+                jumpRow,
+                "DestinationProductionCityButton",
+                "->",
+                "owned-production.destination",
+                "production.management.destination",
+                WismUiControlRole.Navigation,
+                20);
             this.destinationJumpButton.onClick.AddListener(OnDestinationJumpClick);
             this.sourceJumpButtons = new Button[4];
             for (var i = 0; i < this.sourceJumpButtons.Length; i++)
             {
                 var sourceIndex = i;
-                this.sourceJumpButtons[i] = WismUiFactory.CreateButton(jumpRow, $"SourceProductionCityButton{i + 1}", $"^{i + 1}");
+                this.sourceJumpButtons[i] = WismUiFactory.CreateButton(
+                    jumpRow,
+                    $"SourceProductionCityButton{i + 1}",
+                    $"^{i + 1}",
+                    $"owned-production.source-{i + 1}",
+                    "production.management.source",
+                    WismUiControlRole.Navigation,
+                    20);
                 this.sourceJumpButtons[i].onClick.AddListener(() => OnSourceJumpClick(sourceIndex));
             }
 
             this.minimapPanel = ProductionManagementUi.CreateMinimapPanel(panel, "ProductionMinimapOverlay");
+        }
+
+        private void EnsureInteractionContracts()
+        {
+            var surfaceId = this.panelMode == ProductionPanelMode.Management
+                ? "owned-cities-production"
+                : "single-city-production";
+            WismUiSurface.Ensure(
+                this.gameObject,
+                surfaceId,
+                WismUiControlState.Normal,
+                WismUiControlState.Selected,
+                WismUiControlState.Disabled,
+                WismUiControlState.Busy);
+
+            EnsureButtonContract(this.prodButton, surfaceId + ".produce", "production.start", WismUiControlRole.Command, 30);
+            EnsureButtonContract(this.locButton, surfaceId + ".destination", "production.choose-destination", WismUiControlRole.Command, 30);
+            EnsureButtonContract(this.stopButton, surfaceId + ".stop", "production.stop", WismUiControlRole.Command, 30);
+            EnsureButtonContract(this.exitButton, surfaceId + ".exit", "production.close", WismUiControlRole.Navigation, 40);
+
+            if (this.armyButtons == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < this.armyButtons.Length; i++)
+            {
+                EnsureButtonContract(
+                    this.armyButtons[i],
+                    $"{surfaceId}.army-{i + 1}",
+                    "production.select-army",
+                    WismUiControlRole.Selection,
+                    20);
+            }
+        }
+
+        private static void EnsureButtonContract(
+            Button button,
+            string semanticId,
+            string actionId,
+            WismUiControlRole role,
+            int priority)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            WismHitTargetPolicy.Apply(button.gameObject);
+            WismUiControl.Ensure(button.gameObject, semanticId, role, actionId, priority);
         }
 
         private void RefreshDynamicControls()

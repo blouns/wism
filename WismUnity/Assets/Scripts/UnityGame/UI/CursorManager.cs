@@ -79,7 +79,7 @@ public class CursorManager : MonoBehaviour
             ApplyOverlayCursor(this.activeCursor, this.activeHotspotAnchor, nextScale);
         }
 
-        this.cursorTransform.anchoredPosition = Input.mousePosition;
+        this.cursorTransform.anchoredPosition = Assets.Scripts.UI.WismUiInputAdapter.PointerPosition;
     }
 
     void OnDisable()
@@ -246,7 +246,7 @@ public class CursorManager : MonoBehaviour
         this.cursorImage.enabled = true;
         this.cursorTransform.pivot = CalculatePivot(cursor, hotspotAnchor);
         this.cursorTransform.sizeDelta = CalculateOverlaySize(cursor, hotspotAnchor, scale);
-        this.cursorTransform.anchoredPosition = Input.mousePosition;
+        this.cursorTransform.anchoredPosition = Assets.Scripts.UI.WismUiInputAdapter.PointerPosition;
         Cursor.SetCursor(null, Vector2.zero, this.cursorMode);
         Cursor.visible = false;
     }

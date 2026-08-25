@@ -66,9 +66,12 @@ namespace WismUnity.EditorBridge
             var packages = new[]
             {
                 "com.unity.pipeline",
+                "com.unity.inputsystem",
                 "com.unity.nuget.newtonsoft-json",
                 "com.unity.ugui",
-                "com.unity.test-framework"
+                "com.unity.test-framework",
+                "com.unity.test-framework.performance",
+                "com.unity.testtools.codecoverage"
             };
 
             return PipelineResponse.Success("WismUnity package status loaded.", new
