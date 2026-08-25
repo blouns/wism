@@ -66,7 +66,7 @@ E2E proof:
 
 ## WISM-MODKIT-UNITY-001: Unity Read-Only Mod Kit Report
 
-Status: implemented as `WismUnity.GetModKitStatus`, the shared Unity Mod Kit
+Status: implemented as `wism_modkit_status`, the shared Unity Mod Kit
 selection inspection helper, and the Unity Mod Kit Control Room editor window.
 
 Objective:

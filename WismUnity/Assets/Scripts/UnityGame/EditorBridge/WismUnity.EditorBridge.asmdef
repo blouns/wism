@@ -2,7 +2,7 @@
     "name": "WismUnity.EditorBridge",
     "rootNamespace": "WismUnity.EditorBridge",
     "references": [
-        "Unity.AI.MCP.Editor",
+        "Unity.Pipeline",
         "UnityGame"
     ],
     "includePlatforms": [

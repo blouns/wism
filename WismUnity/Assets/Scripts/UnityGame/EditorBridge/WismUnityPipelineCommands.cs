@@ -5,8 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Unity.AI.MCP.Editor.Helpers;
-using Unity.AI.MCP.Editor.ToolRegistry;
+using Unity.Pipeline.Commands;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEditor.PackageManager;
@@ -25,17 +24,28 @@ using Wism.Client.Pathing;
 
 namespace WismUnity.EditorBridge
 {
-    public static class WismUnityMcpTools
+    public static class WismUnityPipelineCommands
     {
-        const string Group = "wismunity";
+        static class PipelineResponse
+        {
+            public static object Success(string message, object data)
+            {
+                return new { success = true, message, data };
+            }
 
-        [McpTool("WismUnity.GetProjectStatus", "Returns public-safe WismUnity project, editor, build target, and active scene status.", Groups = new[] { Group, "editor" }, EnabledByDefault = true)]
+            public static object Error(string code, object details)
+            {
+                return new { success = false, error = new { code, details } };
+            }
+        }
+
+        [CliCommand("wism_project_status", "Return public-safe WismUnity project, Editor, build target, and active scene status.", Tags = new[] { "wism/editor" })]
         public static object GetProjectStatus()
         {
             var scene = EditorSceneManager.GetActiveScene();
             var projectRoot = Directory.GetCurrentDirectory();
 
-            return Response.Success("WismUnity project status loaded.", new
+            return PipelineResponse.Success("WismUnity project status loaded.", new
             {
                 projectName = new DirectoryInfo(projectRoot).Name,
                 unityVersion = Application.unityVersion,
@@ -50,31 +60,31 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [McpTool("WismUnity.GetPackageStatus", "Returns installed package versions relevant to WismUnity and Unity AI Assistant integration.", Groups = new[] { Group, "packages" }, EnabledByDefault = true)]
+        [CliCommand("wism_package_status", "Return installed packages relevant to WismUnity and Unity Pipeline integration.", Tags = new[] { "wism/packages" })]
         public static object GetPackageStatus()
         {
             var packages = new[]
             {
-                "com.unity.ai.assistant",
+                "com.unity.pipeline",
                 "com.unity.nuget.newtonsoft-json",
                 "com.unity.ugui",
                 "com.unity.test-framework"
             };
 
-            return Response.Success("WismUnity package status loaded.", new
+            return PipelineResponse.Success("WismUnity package status loaded.", new
             {
                 packages = packages.Select(PackageStatus).ToArray(),
                 timestampUtc = DateTime.UtcNow.ToString("O")
             });
         }
 
-        [McpTool("WismUnity.GetSceneSummary", "Returns a read-only summary of the active scene hierarchy and WISM manager components.", Groups = new[] { Group, "scene" }, EnabledByDefault = true)]
+        [CliCommand("wism_scene_summary", "Return a read-only summary of the active scene hierarchy and WISM manager components.", Tags = new[] { "wism/scene" })]
         public static object GetSceneSummary()
         {
             var scene = EditorSceneManager.GetActiveScene();
             if (!scene.IsValid() || !scene.isLoaded)
             {
-                return Response.Success("WismUnity scene is not loaded.", new
+                return PipelineResponse.Success("WismUnity scene is not loaded.", new
                 {
                     activeScene = SceneInfo(scene),
                     rootGameObjectCount = 0,
@@ -99,7 +109,7 @@ namespace WismUnity.EditorBridge
                 .ThenBy(manager => manager.gameObject)
                 .ToArray();
 
-            return Response.Success("WismUnity scene summary loaded.", new
+            return PipelineResponse.Success("WismUnity scene summary loaded.", new
             {
                 activeScene = SceneInfo(scene),
                 rootGameObjectCount = roots.Length,
@@ -109,21 +119,21 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [McpTool("WismUnity.GetConsoleSummary", "Returns Unity console counts without clearing or modifying console messages.", Groups = new[] { Group, "debug" }, EnabledByDefault = true)]
+        [CliCommand("wism_console_summary", "Return Unity console counts without clearing or modifying messages.", Tags = new[] { "wism/debug" })]
         public static object GetConsoleSummary()
         {
             try
             {
                 var logEntriesType = Type.GetType("UnityEditor.LogEntries,UnityEditor");
                 if (logEntriesType == null)
-                    return Response.Error("CONSOLE_SUMMARY_UNAVAILABLE", new { reason = "UnityEditor.LogEntries type was not found." });
+                    return PipelineResponse.Error("CONSOLE_SUMMARY_UNAVAILABLE", new { reason = "UnityEditor.LogEntries type was not found." });
 
                 var getCountsMethod = logEntriesType.GetMethod("GetCountsByType", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 if (getCountsMethod != null)
                 {
                     var parameters = new object[] { 0, 0, 0 };
                     getCountsMethod.Invoke(null, parameters);
-                    return Response.Success("Unity console summary loaded.", new
+                    return PipelineResponse.Success("Unity console summary loaded.", new
                     {
                         available = true,
                         errors = (int)parameters[0],
@@ -135,7 +145,7 @@ namespace WismUnity.EditorBridge
 
                 var getCountMethod = logEntriesType.GetMethod("GetCount", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 var total = getCountMethod != null ? (int)getCountMethod.Invoke(null, null) : -1;
-                return Response.Success("Unity console total count loaded.", new
+                return PipelineResponse.Success("Unity console total count loaded.", new
                 {
                     available = true,
                     errors = -1,
@@ -148,11 +158,11 @@ namespace WismUnity.EditorBridge
             }
             catch (Exception ex)
             {
-                return Response.Error("CONSOLE_SUMMARY_FAILED", new { reason = ex.Message });
+                return PipelineResponse.Error("CONSOLE_SUMMARY_FAILED", new { reason = ex.Message });
             }
         }
 
-        [McpTool("WismUnity.GetGameViewMetadata", "Returns read-only game view and camera metadata useful for visual smoke tests.", Groups = new[] { Group, "visual" }, EnabledByDefault = true)]
+        [CliCommand("wism_game_view_metadata", "Return read-only Game view and camera metadata for visual smoke tests.", Tags = new[] { "wism/visual" })]
         public static object GetGameViewMetadata()
         {
             var mainCamera = Camera.main;
@@ -172,7 +182,7 @@ namespace WismUnity.EditorBridge
                 .ThenBy(camera => camera.name)
                 .ToArray();
 
-            return Response.Success("WismUnity game view metadata loaded.", new
+            return PipelineResponse.Success("WismUnity game view metadata loaded.", new
             {
                 screenWidth = Screen.width,
                 screenHeight = Screen.height,
@@ -184,14 +194,14 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [McpTool("WismUnity.GetWorldBuilderSummary", "Returns a read-only summary of the active WISM world-builder scene, scene containers, tilemap bounds, editor toggles, and MOD JSON availability.", Groups = new[] { Group, "world-builder", "scene" }, EnabledByDefault = true)]
+        [CliCommand("wism_world_builder_summary", "Return a read-only summary of the active WISM world-builder scene and MOD data.", Tags = new[] { "wism/world-builder" })]
         public static object GetWorldBuilderSummary()
         {
             var data = BuildWorldBuilderData();
-            return Response.Success("WismUnity world-builder summary loaded.", data.ToSummaryObject());
+            return PipelineResponse.Success("WismUnity world-builder summary loaded.", data.ToSummaryObject());
         }
 
-        [McpTool("WismUnity.ValidateWorldContract", "Validates the active WISM world-builder scene against read-only scene and MOD JSON contracts without mutating scenes or assets.", Groups = new[] { Group, "world-builder", "validation" }, EnabledByDefault = true)]
+        [CliCommand("wism_validate_world_contract", "Validate the active WISM world-builder scene against read-only scene and MOD contracts.", Tags = new[] { "wism/world-builder/validation" })]
         public static object ValidateWorldContract()
         {
             var data = BuildWorldBuilderData();
@@ -199,7 +209,7 @@ namespace WismUnity.EditorBridge
             var errorCount = issues.Count(issue => issue.Severity == "Error");
             var warningCount = issues.Count(issue => issue.Severity == "Warning");
 
-            return Response.Success("WismUnity world-builder contract validation loaded.", new
+            return PipelineResponse.Success("WismUnity world-builder contract validation loaded.", new
             {
                 status = errorCount > 0 ? "Failed" : warningCount > 0 ? "NeedsAttention" : "Passed",
                 readOnly = true,
@@ -217,7 +227,7 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [McpTool("WismUnity.GetWorldBuilderRiskReport", "Returns read-only world-builder risks around scene/MOD drift, duplicate short names, and active editor import/reset toggles.", Groups = new[] { Group, "world-builder", "risk" }, EnabledByDefault = true)]
+        [CliCommand("wism_world_builder_risk_report", "Return read-only world-builder risks around scene and MOD drift.", Tags = new[] { "wism/world-builder/risk" })]
         public static object GetWorldBuilderRiskReport()
         {
             var data = BuildWorldBuilderData();
@@ -227,7 +237,7 @@ namespace WismUnity.EditorBridge
                 .Select(toggle => toggle.ToObject())
                 .ToArray();
 
-            return Response.Success("WismUnity world-builder risk report loaded.", new
+            return PipelineResponse.Success("WismUnity world-builder risk report loaded.", new
             {
                 readOnly = true,
                 activeScene = data.ActiveScene,
@@ -307,7 +317,7 @@ namespace WismUnity.EditorBridge
             Debug.Log($"WismUnity world-builder validation report written to {reportPath}");
         }
 
-        [McpTool("WismUnity.GetWorldState", "Returns a read-only WISM game and world snapshot from the current Unity runtime state.", Groups = new[] { Group, "game" }, EnabledByDefault = true)]
+        [CliCommand("wism_world_state", "Return a read-only WISM game and world snapshot from current Unity runtime state.", Tags = new[] { "wism/game/state" })]
         public static object GetWorldState()
         {
             if (!TryGetRuntime(out var game, out var world, out var unavailable))
@@ -319,7 +329,7 @@ namespace WismUnity.EditorBridge
                 ? game.GetSelectedArmies()
                 : new List<Army>();
 
-            return Response.Success("WISM world state loaded.", new
+            return PipelineResponse.Success("WISM world state loaded.", new
             {
                 initialized = true,
                 world = new
@@ -353,7 +363,7 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [McpTool("WismUnity.GetLegalActions", "Returns read-only legal action hints for the current WISM selection without enqueueing commands.", Groups = new[] { Group, "game", "actions" }, EnabledByDefault = true)]
+        [CliCommand("wism_legal_actions", "Return read-only legal action hints without enqueueing commands.", Tags = new[] { "wism/game/actions" })]
         public static object GetLegalActions()
         {
             if (!TryGetRuntime(out var game, out var world, out var unavailable))
@@ -361,7 +371,7 @@ namespace WismUnity.EditorBridge
 
             if (!game.ArmiesSelected())
             {
-                return Response.Success("No WISM armies are selected.", new
+                return PipelineResponse.Success("No WISM armies are selected.", new
                 {
                     initialized = true,
                     gameState = game.GameState.ToString(),
@@ -417,7 +427,7 @@ namespace WismUnity.EditorBridge
                 });
             }
 
-            return Response.Success("WISM legal action hints loaded.", new
+            return PipelineResponse.Success("WISM legal action hints loaded.", new
             {
                 initialized = true,
                 gameState = game.GameState.ToString(),
@@ -431,7 +441,7 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [McpTool("WismUnity.EvaluateBoard", "Returns read-only board evaluation metrics for the current WISM game state.", Groups = new[] { Group, "game", "ai" }, EnabledByDefault = true)]
+        [CliCommand("wism_evaluate_board", "Return read-only board evaluation metrics for the current WISM game state.", Tags = new[] { "wism/game/evaluation" })]
         public static object EvaluateBoard()
         {
             if (!TryGetRuntime(out var game, out var world, out var unavailable))
@@ -467,7 +477,7 @@ namespace WismUnity.EditorBridge
                 .ThenByDescending(row => row.military.totalStrength)
                 .ToArray();
 
-            return Response.Success("WISM board evaluation loaded.", new
+            return PipelineResponse.Success("WISM board evaluation loaded.", new
             {
                 initialized = true,
                 world = new
@@ -490,7 +500,7 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [McpTool("WismUnity.RunAITurnPreview", "Returns read-only tactical AI bid previews for the current WISM turn without adding commands.", Groups = new[] { Group, "game", "ai" }, EnabledByDefault = true)]
+        [CliCommand("wism_ai_turn_preview", "Return read-only tactical AI bid previews without adding commands.", Tags = new[] { "wism/game/ai" })]
         public static object RunAITurnPreview()
         {
             if (!TryGetRuntime(out var game, out var world, out var unavailable))
@@ -514,7 +524,7 @@ namespace WismUnity.EditorBridge
                 .Select(BidSummary)
                 .ToArray();
 
-            return Response.Success("WISM AI tactical preview loaded.", new
+            return PipelineResponse.Success("WISM AI tactical preview loaded.", new
             {
                 initialized = true,
                 previewAvailable = true,
@@ -527,7 +537,7 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [McpTool("WismUnity.GetModKitStatus", "Returns a read-only Mod Kit profile, pack, validation, scene, and MOD data status report.", Groups = new[] { Group, "modkit" }, EnabledByDefault = true)]
+        [CliCommand("wism_modkit_status", "Return a read-only Mod Kit profile, pack, validation, scene, and MOD data status report.", Tags = new[] { "wism/modkit" })]
         public static object GetModKitStatus(WismUnityModKitStatusRequest request)
         {
             try
@@ -542,7 +552,7 @@ namespace WismUnity.EditorBridge
                 var selection = UnityModKitSelection.Inspect(request.profile, packIds, request.world, request.modRoot);
                 var scene = EditorSceneManager.GetActiveScene();
 
-                return Response.Success("WismUnity Mod Kit status loaded.", new
+                return PipelineResponse.Success("WismUnity Mod Kit status loaded.", new
                 {
                     selection,
                     activeScene = SceneInfo(scene),
@@ -552,7 +562,7 @@ namespace WismUnity.EditorBridge
             }
             catch (Exception ex)
             {
-                return Response.Error("MODKIT_STATUS_FAILED", new { reason = ex.Message });
+                return PipelineResponse.Error("MODKIT_STATUS_FAILED", new { reason = ex.Message });
             }
         }
 
@@ -1247,7 +1257,7 @@ namespace WismUnity.EditorBridge
 
             if (!Game.IsInitialized())
             {
-                unavailable = Response.Success("WISM game is not initialized.", new
+                unavailable = PipelineResponse.Success("WISM game is not initialized.", new
                 {
                     initialized = false,
                     reason = "Game.Current is not available. Enter Play Mode or initialize the Unity playground first.",
@@ -1266,7 +1276,7 @@ namespace WismUnity.EditorBridge
             }
             catch (Exception ex)
             {
-                unavailable = Response.Error("WISM_RUNTIME_UNAVAILABLE", new { reason = ex.Message });
+                unavailable = PipelineResponse.Error("WISM_RUNTIME_UNAVAILABLE", new { reason = ex.Message });
                 return false;
             }
         }

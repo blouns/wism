@@ -23,11 +23,11 @@ dotnet run --project Wism.Agent.Playground -- world world=TestWorld --quiet
 Unity smoke surface:
 
 ```powershell
-WismUnity.GetProjectStatus
-WismUnity.GetPackageStatus
-WismUnity.GetSceneSummary
-WismUnity.GetConsoleSummary
-WismUnity.GetGameViewMetadata
+unity command wism_project_status
+unity command wism_package_status
+unity command wism_scene_summary
+unity command wism_console_summary
+unity command wism_game_view_metadata
 ```
 
 ## Phase Rule

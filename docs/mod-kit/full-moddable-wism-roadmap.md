@@ -289,7 +289,7 @@ Acceptance:
 - Reports current mod root, profiles, packs, selected profile/packs, validator
   status, active scene, and dirty-scene state.
 - Does not save, reset, import, export, or mutate scene objects.
-- Uses standard Unity MCP response wrappers where exposed through MCP.
+- Returns structured data through the WismUnity Production Pipeline command.
 - Captures report JSON, Unity console evidence, and dirty-scene state.
 
 ### WISM-MODKIT-UNITY-002

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$UnityExe = $env:UNITY_EXE,
+    [string]$UnityCli = "unity",
     [string]$WorktreePath = "",
     [string]$RunId = "",
     [string]$TestFilter = "ModSettings",
@@ -26,7 +26,9 @@ param(
     [switch]$SkipClientBuild,
     [switch]$SkipClientTests,
     [switch]$SkipProof,
-    [int]$TimeoutMinutes = 10
+    [int]$TimeoutMinutes = 10,
+    [ValidateRange(0, 2)]
+    [int]$TestRetries = 1
 )
 
 Set-StrictMode -Version Latest
@@ -42,19 +44,22 @@ function Resolve-RepositoryRoot {
     return [System.IO.Path]::GetFullPath($root.Trim())
 }
 
-function Resolve-UnityExe {
+function Resolve-UnityCli {
     param([string]$Requested)
 
-    if (-not [string]::IsNullOrWhiteSpace($Requested) -and (Test-Path -LiteralPath $Requested)) {
-        return (Resolve-Path -LiteralPath $Requested).Path
+    $command = Get-Command $Requested -ErrorAction SilentlyContinue
+    if ($null -ne $command) {
+        return $command.Source
     }
 
-    $default = "C:\Program Files\Unity\Hub\Editor\6000.4.9f1\Editor\Unity.exe"
-    if (Test-Path -LiteralPath $default) {
-        return $default
+    if ($Requested -eq "unity") {
+        $windowsAppsCli = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\unity.exe"
+        if (Test-Path -LiteralPath $windowsAppsCli) {
+            return $windowsAppsCli
+        }
     }
 
-    throw "Unity executable was not found. Pass -UnityExe or set UNITY_EXE."
+    throw "Unity CLI was not found. Install it with: winget install Unity.CLI"
 }
 
 function Invoke-Native {
@@ -63,7 +68,8 @@ function Invoke-Native {
         [string]$FilePath,
         [string[]]$Arguments,
         [string]$WorkingDirectory,
-        [string]$LogPath
+        [string]$LogPath,
+        [switch]$CaptureOutput
     )
 
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $LogPath) | Out-Null
@@ -72,12 +78,25 @@ function Invoke-Native {
     "Command: $FilePath $($Arguments -join ' ')" | Add-Content -LiteralPath $LogPath
     "" | Add-Content -LiteralPath $LogPath
 
+    $code = 1
+    $captured = @()
+    $previousErrorActionPreference = $ErrorActionPreference
     Push-Location $WorkingDirectory
     try {
-        & $FilePath @Arguments *>> $LogPath
+        # Windows PowerShell 5 wraps native stderr as ErrorRecord objects. Keep
+        # those records in the log and let the process exit code classify them.
+        $ErrorActionPreference = "Continue"
+        if ($CaptureOutput) {
+            $captured = @(& $FilePath @Arguments 2>&1 | ForEach-Object { $_.ToString() })
+            $captured | Add-Content -LiteralPath $LogPath
+        }
+        else {
+            & $FilePath @Arguments *>> $LogPath
+        }
         $code = if ($null -eq $global:LASTEXITCODE) { 0 } else { $global:LASTEXITCODE }
     }
     finally {
+        $ErrorActionPreference = $previousErrorActionPreference
         Pop-Location
     }
 
@@ -85,6 +104,7 @@ function Invoke-Native {
         name = $Name
         exitCode = $code
         logPath = $LogPath
+        standardOutput = $captured
     }
 }
 
@@ -177,6 +197,21 @@ function Convert-StatusPath {
     return $path.Trim('"')
 }
 
+function Convert-RenameSourcePath {
+    param([string]$StatusLine)
+
+    if ($StatusLine.Length -lt 4) {
+        return ""
+    }
+
+    $path = $StatusLine.Substring(3)
+    if (-not $path.Contains(" -> ")) {
+        return ""
+    }
+
+    return ($path -split " -> ")[0].Trim('"')
+}
+
 function Test-AllowedDirtyPath {
     param([string]$RelativePath, [string[]]$AllowedRoots)
 
@@ -235,9 +270,22 @@ function Copy-DirtyOverlay {
             continue
         }
 
+        $statusCode = $line.Substring(0, 2)
+        if ($statusCode.Contains("R")) {
+            $renameSource = Convert-RenameSourcePath -StatusLine $line
+            if (-not [string]::IsNullOrWhiteSpace($renameSource) -and
+                (Test-AllowedDirtyPath -RelativePath $renameSource -AllowedRoots $AllowedRoots) -and
+                -not (Test-ExcludedDirtyPath -RelativePath $renameSource -ExcludedPatterns $ExcludedPatterns)) {
+                $renameSourceTarget = Join-Path $ValidationRoot $renameSource
+                if (Test-Path -LiteralPath $renameSourceTarget) {
+                    Remove-Item -LiteralPath $renameSourceTarget -Force
+                    $removed.Add($renameSource) | Out-Null
+                }
+            }
+        }
+
         $source = Join-Path $RepositoryRoot $relative
         $target = Join-Path $ValidationRoot $relative
-        $statusCode = $line.Substring(0, 2)
         if ($statusCode.Contains("D")) {
             if (Test-Path -LiteralPath $target) {
                 Remove-Item -LiteralPath $target -Force
@@ -272,41 +320,6 @@ function Get-UnityProcessesForProject {
             $commandLine = $rawCommandLine.Replace('\', '/').ToLowerInvariant()
             $commandLine.Contains($normalized)
         }
-}
-
-function Wait-UnityBatch {
-    param(
-        [string]$ProjectPath,
-        [string]$ResultsPath,
-        [string]$LogPath,
-        [int]$TimeoutMinutes
-    )
-
-    $deadline = (Get-Date).AddMinutes($TimeoutMinutes)
-    do {
-        Start-Sleep -Seconds 5
-        $exists = Test-Path -LiteralPath $ResultsPath
-        $processes = @(Get-UnityProcessesForProject -ProjectPath $ProjectPath)
-        Write-Host ("{0} Unity results={1} validationUnityProcesses={2}" -f (Get-Date -Format HH:mm:ss), $exists, $processes.Count)
-        if ($exists -and $processes.Count -eq 0) {
-            return
-        }
-
-        if (-not $exists -and $processes.Count -eq 0) {
-            $hint = ""
-            if (Test-Path -LiteralPath $LogPath) {
-                $errors = @(Select-String -Path $LogPath -Pattern "error CS|Scripts have compiler errors|Aborting batchmode" -SimpleMatch:$false | Select-Object -First 6)
-                if ($errors.Count -gt 0) {
-                    $hint = " First errors: " + (($errors | ForEach-Object { $_.Line.Trim() }) -join " | ")
-                }
-            }
-
-            throw "Unity exited without writing test results. See $LogPath.$hint"
-        }
-    } while ((Get-Date) -lt $deadline)
-
-    $remaining = @(Get-UnityProcessesForProject -ProjectPath $ProjectPath | Select-Object ProcessId, CommandLine)
-    throw "Timed out waiting for Unity batch. Remaining processes: $($remaining | ConvertTo-Json -Compress)"
 }
 
 function Read-UnityResults {
@@ -345,7 +358,7 @@ function Get-UnityVersion {
 }
 
 $repositoryRoot = Resolve-RepositoryRoot
-$unityExePath = Resolve-UnityExe -Requested $UnityExe
+$unityCliPath = Resolve-UnityCli -Requested $UnityCli
 $head = Get-CurrentHead -RepositoryRoot $repositoryRoot
 if ([string]::IsNullOrWhiteSpace($RunId)) {
     $RunId = "isolated-unity-" + (Get-Date -Format "yyyyMMdd-HHmmss")
@@ -365,7 +378,7 @@ Write-Host "  Repository: $repositoryRoot"
 Write-Host "  Head:       $head"
 Write-Host "  Worktree:   $WorktreePath"
 Write-Host "  Artifacts:  $artifactRoot"
-Write-Host "  Unity:      $unityExePath"
+Write-Host "  Unity CLI:  $unityCliPath"
 
 Initialize-ValidationWorktree -RepositoryRoot $repositoryRoot -Path $WorktreePath -Head $head
 
@@ -397,9 +410,13 @@ if (-not $SkipClientBuild) {
     $runBuildArgs += "--no-build"
 }
 
-$steps.Add((Invoke-Native -Name "mod-kit-validate" -FilePath "dotnet" -Arguments (@("run", "--project", "Wism.ModKit.Cli") + $runBuildArgs + @("--", "validate", "repo=$WorktreePath", "profile=$Profile", "packs=$Packs", "--json")) -WorkingDirectory $wismClientRoot -LogPath (Join-Path $logsRoot "modkit-validate.log"))) | Out-Null
+$steps.Add((Invoke-Native -Name "mod-kit-validate" -FilePath "dotnet" -Arguments (@("run", "--project", "Wism.ModKit.Cli") + $runBuildArgs + @("--", "validate", "repo=$WorktreePath", "profile=$Profile", "packs=$Packs", "--json")) -WorkingDirectory $wismClientRoot -LogPath (Join-Path $logsRoot "modkit-validate.log") -CaptureOutput)) | Out-Null
 if ($steps[-1].exitCode -ne 0) {
     throw "Mod Kit validation failed. See $($steps[-1].logPath)"
+}
+$modKitValidation = ($steps[-1].standardOutput -join [Environment]::NewLine) | ConvertFrom-Json
+if ($null -eq $modKitValidation -or -not $modKitValidation.IsValid) {
+    throw "Mod Kit validation did not return a valid structured result. See $($steps[-1].logPath)"
 }
 
 $steps.Add((Invoke-Native -Name "agent-playground" -FilePath "dotnet" -Arguments (@("run", "--project", "Wism.Agent.Playground") + $runBuildArgs + @("--", "world", "profile=$Profile", "packs=$Packs", "--quiet")) -WorkingDirectory $wismClientRoot -LogPath (Join-Path $logsRoot "agentplayground.log"))) | Out-Null
@@ -408,8 +425,10 @@ if ($steps[-1].exitCode -ne 0) {
 }
 
 $unityResults = Join-Path $artifactRoot "unity-playmode-results.xml"
-$unityLog = Join-Path $artifactRoot "unity-playmode.log"
+$unityJunitResults = Join-Path $artifactRoot "unity-playmode-results.junit.xml"
+$unityLog = Join-Path $logsRoot "unity-test-cli.log"
 Remove-Item -LiteralPath $unityResults -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $unityJunitResults -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $unityLog -Force -ErrorAction SilentlyContinue
 
 $existingValidationUnity = @(Get-UnityProcessesForProject -ProjectPath $unityProjectRoot)
@@ -419,16 +438,41 @@ if ($existingValidationUnity.Count -gt 0) {
 
 Clear-UnityPackageCacheTemps -UnityProjectRoot $unityProjectRoot
 
+$steps.Add((Invoke-Native -Name "unity-cli-doctor" -FilePath $unityCliPath -Arguments @("doctor", "--ci", "--format", "json", "--non-interactive") -WorkingDirectory $unityProjectRoot -LogPath (Join-Path $logsRoot "unity-cli-doctor.log"))) | Out-Null
+if ($steps[-1].exitCode -ne 0) {
+    throw "Unity CLI preflight failed. See $($steps[-1].logPath)"
+}
+
 $unityStartedAt = (Get-Date).ToUniversalTime().ToString("O")
-Write-Host "Starting Unity PlayMode tests in isolated worktree..."
-& $unityExePath -batchmode -projectPath $unityProjectRoot -runTests -testPlatform PlayMode -testFilter $TestFilter -testResults $unityResults -logFile $unityLog
-$unityLauncherExitCode = if ($null -eq $global:LASTEXITCODE) { 0 } else { $global:LASTEXITCODE }
-Wait-UnityBatch -ProjectPath $unityProjectRoot -ResultsPath $unityResults -LogPath $unityLog -TimeoutMinutes $TimeoutMinutes
+Write-Host "Starting Unity CLI PlayMode tests in isolated worktree..."
+$unityArguments = @(
+    "test", $unityProjectRoot,
+    "--mode", "PlayMode",
+    "--filter", $TestFilter,
+    "--output", $unityResults,
+    "--report-format", "nunit,junit",
+    "--junit-output", $unityJunitResults,
+    "--retries", $TestRetries,
+    "--timeout", ($TimeoutMinutes * 60),
+    "--format", "ndjson",
+    "--non-interactive"
+)
+$steps.Add((Invoke-Native -Name "unity-cli-playmode-tests" -FilePath $unityCliPath -Arguments $unityArguments -WorkingDirectory $unityProjectRoot -LogPath $unityLog)) | Out-Null
+$unityLauncherExitCode = $steps[-1].exitCode
+if ($unityLauncherExitCode -eq 8) {
+    throw "Unity PlayMode tests completed with failures. See $unityResults and $unityLog"
+}
+if ($unityLauncherExitCode -ne 0) {
+    throw "Unity PlayMode tests did not produce a valid verdict (exit $unityLauncherExitCode). See $unityLog"
+}
 $unityEndedAt = (Get-Date).ToUniversalTime().ToString("O")
 $unityTest = Read-UnityResults -ResultsPath $unityResults
 if ($unityTest.failed -ne 0 -or -not [string]::Equals($unityTest.result, "Passed", [System.StringComparison]::OrdinalIgnoreCase)) {
     throw "Unity PlayMode tests failed: $($unityTest | ConvertTo-Json -Compress). See $unityResults and $unityLog"
 }
+
+$retrySummaryCandidate = Join-Path (Split-Path -Parent $unityResults) (([System.IO.Path]::GetFileNameWithoutExtension($unityResults)) + ".retries.json")
+$retrySummary = if (Test-Path -LiteralPath $retrySummaryCandidate) { $retrySummaryCandidate } else { $null }
 
 $unityManifestPath = Join-Path $artifactRoot "unity-validation-manifest.json"
 $unityManifest = [ordered]@{
@@ -439,17 +483,28 @@ $unityManifest = [ordered]@{
     unityVersion = Get-UnityVersion -UnityProjectRoot $unityProjectRoot
     projectPath = $unityProjectRoot
     profile = $Profile
-    world = $World
+    world = $modKitValidation.LaunchWorld
+    requestedWorld = $World
     packs = @($Packs.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    selection = [ordered]@{
+        profileId = $modKitValidation.ProfileId
+        worldName = $modKitValidation.LaunchWorld
+        compatibilityStatus = $modKitValidation.CompatibilityStatus
+        isGreen = [bool]$modKitValidation.IsGreen
+        isLoadable = [bool]$modKitValidation.IsLoadable
+        contentFingerprint = $modKitValidation.ContentFingerprint
+    }
     testFilter = $TestFilter
     testResults = $unityResults
+    junitTestResults = $unityJunitResults
+    retrySummary = $retrySummary
     launcherExitCode = $unityLauncherExitCode
     dirtyScenes = @()
     console = [ordered]@{
         errors = 0
         warnings = 0
     }
-    proofNotes = "Isolated Unity batchmode PlayMode validation completed against a separate git worktree."
+    proofNotes = "Isolated Unity CLI PlayMode validation completed against a separate git worktree. Exit 8 is a terminal test failure; infrastructure failures are reported separately."
 }
 $unityManifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $unityManifestPath
 
@@ -476,6 +531,7 @@ $summary = [ordered]@{
     unity = [ordered]@{
         projectPath = $unityProjectRoot
         resultsPath = $unityResults
+        junitResultsPath = $unityJunitResults
         logPath = $unityLog
         manifestPath = $unityManifestPath
         result = $unityTest

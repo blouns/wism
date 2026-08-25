@@ -4,15 +4,15 @@
 
 ## Smoke Command
 
-Run with the Unity editor closed:
+Run through Unity CLI with the Editor closed:
 
 ```powershell
-& '<Unity.exe>' `
-  -batchmode -quit `
-  -projectPath '<path-to-WismUnity>' `
-  -executeMethod WismUnity.Playground.UnityPlaygroundCli.Run `
-  -logFile '<path-to-WismUnity>\Logs\unity-playground-smoke.log' `
-  -- world=TestWorld runId=smoke-001 out=artifacts\unity-playground\smoke
+unity run '<path-to-WismUnity>' `
+  --timeout 900 `
+  --format ndjson `
+  -- -executeMethod WismUnity.Playground.UnityPlaygroundCli.Run `
+     -logFile '<path-to-WismUnity>\Logs\unity-playground-smoke.log' `
+     -- world=TestWorld runId=smoke-001 out=artifacts\unity-playground\smoke
 ```
 
 The runner writes `manifest.json` under the requested artifact root and restores the original editor scene setup without saving.
