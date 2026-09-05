@@ -52,7 +52,7 @@ validation before marking the change ready.
 Example shape:
 
 ```powershell
-& 'C:\Program Files\Unity\Hub\Editor\6000.4.9f1\Editor\Unity.exe' `
+& 'C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Unity.exe' `
   -batchmode `
   -quit `
   -projectPath .\WismUnity `

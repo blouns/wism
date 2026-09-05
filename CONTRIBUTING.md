@@ -11,7 +11,7 @@ dotnet build WismClient\WismClient.sln --configuration Release
 dotnet test WismClient\WismClient.sln --configuration Release
 ```
 
-Unity work should use Unity `6000.4.9f1` and open `WismUnity/` as the project.
+Unity work should use Unity `6000.6.0f1` and open `WismUnity/` as the project.
 
 ## Project Boundaries
 

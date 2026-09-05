@@ -11,7 +11,7 @@ WISM is playable and under active development. Expect a working but evolving cod
 Primary current target:
 
 - Windows desktop
-- Unity `6000.4.9f1`
+- Unity `6000.6.0f1`
 - .NET 8 for WismClient tools and tests
 
 ## Technical Highlights
@@ -82,7 +82,7 @@ dotnet test WismClient\WismClient.sln --configuration Release
 
 Open Unity:
 
-1. Install Unity `6000.4.9f1`.
+1. Install Unity `6000.6.0f1`.
 2. Open `WismUnity/` as the Unity project.
 3. Let packages restore.
 4. Open a scene such as `Assets/Scenes/Mini-Illuria.unity`.

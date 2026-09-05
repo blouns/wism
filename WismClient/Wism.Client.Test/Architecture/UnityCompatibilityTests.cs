@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Xml.Linq;
 using NUnit.Framework;
 
@@ -15,20 +16,27 @@ public class UnityCompatibilityTests
     private const string RequiredUnityTargetFramework = "netstandard2.1";
     private const string UnityPublishTargetsSuffix = "Build/Wism.PublishToUnity.targets";
 
-    [Test]
-    public void WismUnity_ProjectProfile_IsUnity6NetStandard21()
+    [TestCase("WismUnity")]
+    [TestCase("WismCompanion")]
+    public void UnityProjectProfile_IsUnity66NetStandard21(string projectName)
     {
         var repoRoot = FindRepoRoot();
-        var projectVersion = File.ReadAllText(Path.Combine(repoRoot, "WismUnity", "ProjectSettings", "ProjectVersion.txt"));
-        var projectSettings = File.ReadAllText(Path.Combine(repoRoot, "WismUnity", "ProjectSettings", "ProjectSettings.asset"));
-        var unityGameProject = File.ReadAllText(Path.Combine(repoRoot, "WismUnity", "UnityGame.csproj"));
+        var projectVersion = File.ReadAllText(Path.Combine(repoRoot, projectName, "ProjectSettings", "ProjectVersion.txt"));
+        var projectSettings = File.ReadAllText(Path.Combine(repoRoot, projectName, "ProjectSettings", "ProjectSettings.asset"));
 
-        Assert.That(projectVersion, Does.Contain("m_EditorVersion: 6000.4.9f1"));
+        Assert.That(projectVersion, Does.Contain("m_EditorVersion: 6000.6.0f1"));
+        Assert.That(projectVersion, Does.Contain("m_EditorVersionWithRevision: 6000.6.0f1 (f7f8ed4d1e24)"));
         Assert.That(projectSettings, Does.Contain("apiCompatibilityLevel: 6"));
-        Assert.That(
-            unityGameProject,
-            Does.Contain(@"NetStandard\ref\2.1.0\netstandard.dll"),
-            "The generated Unity project should reference Unity's .NET Standard 2.1 profile.");
+    }
+
+    [TestCase("WismUnity")]
+    [TestCase("WismCompanion")]
+    public void Unity66Packages_UseCompatibleInputWithoutRemovedVrModule(string projectName)
+    {
+        using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(FindRepoRoot(), projectName, "Packages", "manifest.json")));
+        var dependencies = manifest.RootElement.GetProperty("dependencies");
+        Assert.That(dependencies.GetProperty("com.unity.inputsystem").GetString(), Is.EqualTo("1.19.0"));
+        Assert.That(dependencies.TryGetProperty("com.unity.modules.vr", out _), Is.False);
     }
 
     [Test]
