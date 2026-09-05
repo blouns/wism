@@ -2,6 +2,7 @@
     "name": "WismCompanion.Tests",
     "rootNamespace": "WismCompanion.Tests",
     "references": [
+        "WismCompanion.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "WismCompanion"
