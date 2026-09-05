@@ -2,6 +2,7 @@
     "name": "EditModeTests",
     "rootNamespace": "",
     "references": [
+        "WismUnity.EditorBridge",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

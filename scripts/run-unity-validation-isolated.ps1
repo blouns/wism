@@ -469,6 +469,8 @@ if ($EnableCoverage) {
         "--coverage-options", $CoverageOptions
     )
 }
+# Forward the session-only mute after CLI options, including coverage and filters.
+$unityArguments += @("--", "-wism-mute-audio")
 $steps.Add((Invoke-Native -Name "unity-cli-playmode-tests" -FilePath $unityCliPath -Arguments $unityArguments -WorkingDirectory $unityProjectRoot -LogPath $unityLog)) | Out-Null
 $unityLauncherExitCode = $steps[-1].exitCode
 if ($unityLauncherExitCode -eq 8) {
@@ -507,6 +509,7 @@ $unityManifest = [ordered]@{
         contentFingerprint = $modKitValidation.ContentFingerprint
     }
     testFilter = $TestFilter
+    audioPolicy = "muted-background-session"
     testResults = $unityResults
     junitTestResults = $unityJunitResults
     retrySummary = $retrySummary
