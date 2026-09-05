@@ -33,21 +33,19 @@ namespace Assets.Scripts.UI
             this.selectedArmyIndex = -1;
         }
 
-        internal void HandleArmyClick(bool isDoubleClick, Tile clickedTile)
+        internal string HandleArmyClick(bool isDoubleClick, Tile clickedTile)
         {
             switch (Game.Current.GameState)
             {
                 case GameState.Ready:
-                    SelectObject(clickedTile, isDoubleClick);
-                    break;
+                    return SelectObject(clickedTile, isDoubleClick);
 
                 case GameState.SelectedArmy:
                     if (Game.Current.ArmiesSelected() &&
                         clickedTile == Game.Current.GetSelectedArmies()[0].Tile)
                     {
                         // Clicking on already selected tile
-                        SelectObject(clickedTile, isDoubleClick);
-                        break;
+                        return SelectObject(clickedTile, isDoubleClick);
                     }
 
                     // Move or attack; can only attack from adjacent tiles
@@ -58,6 +56,7 @@ namespace Assets.Scripts.UI
                     {
                         // War!
                         this.gameManager.AttackWithSelectedArmies(clickedTile.X, clickedTile.Y);
+                        return "army.attack";
                     }
                     // Cannot attack from non-adjacent tile
                     else if (isAttacking & !isAdjacent)
@@ -69,9 +68,11 @@ namespace Assets.Scripts.UI
                     {
                         // Move
                         this.gameManager.MoveSelectedArmies(clickedTile.X, clickedTile.Y);
+                        return "army.move";
                     }
                     break;
             }
+            return "rejected";
         }
 
         internal static bool IsAdjacentForAttack(Tile clickedTile, List<Army> armies)
@@ -112,7 +113,7 @@ namespace Assets.Scripts.UI
             }
         }
 
-        internal void SelectObject(Tile tile, bool selectAll)
+        internal string SelectObject(Tile tile, bool selectAll)
         {
             // If no owned armies on selected tile then center screen
             if ((Game.Current.GameState == GameState.Ready) &&
@@ -122,7 +123,7 @@ namespace Assets.Scripts.UI
                     tile.Armies[0].Player != Game.Current.GetCurrentPlayer())))
             {
                 DisplayTileInfo(tile);
-                return;
+                return "map.inspect";
             }
 
             var armiesToSelect = new List<Army>();
@@ -145,7 +146,9 @@ namespace Assets.Scripts.UI
                 armiesToSelect.Sort(new ByArmyViewingOrder());
                 this.gameManager.SelectArmies(armiesToSelect);
                 CenterOnTile(tile);
+                return selectAll ? "army.select-all" : "army.select";
             }
+            return "rejected";
         }
 
         private int GetNextSingleSelectionIndex(Tile tile, List<Army> allArmies)

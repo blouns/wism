@@ -48,8 +48,17 @@ namespace WismUnity.EditorBridge
             });
         }
 
-        [CliCommand("wism_ui_exercise", "Build semantic mouse, keyboard, and simulated-touch traces for declared WISM UI workflows.", Tags = new[] { "wism/ui" })]
-        public static object Exercise()
+        [CliCommand("wism_ui_exercise", "Queue one explicit army input event through Unity devices; poll wism_ui_exercise_status for observed dispatch.", Tags = new[] { "wism/ui" })]
+        public static object Exercise(WismArmyInputExercise.Request request)
+        {
+            return WismArmyInputExercise.Begin(request);
+        }
+
+        [CliCommand("wism_ui_exercise_status", "Read the last queued army input exercise and its observed dispatch, not declared control coverage.", Tags = new[] { "wism/ui" })]
+        public static object ExerciseStatus() => WismArmyInputExercise.Status();
+
+        [CliCommand("wism_ui_workflows", "List declared UI workflows only; does not execute input or prove coverage.", Tags = new[] { "wism/ui" })]
+        public static object Workflows()
         {
             var modalities = Enum.GetNames(typeof(WismUiInputModality));
             var traces = FindSceneObjects<WismUiSurface>()
@@ -68,14 +77,15 @@ namespace WismUnity.EditorBridge
                             actionId = control.ActionId,
                             role = control.Role.ToString(),
                             state = control.State.ToString(),
-                            accepted = control.IsEnabled
+                            enabled = control.IsEnabled
                         })
                         .ToArray()
                 }))
                 .ToArray();
 
-            return Success("WISM UI semantic exercise traces completed.", new
+            return Success("WISM UI workflow declarations only; no input executed.", new
             {
+                executed = false,
                 traces,
                 traceCount = traces.Length,
                 timestampUtc = DateTime.UtcNow.ToString("O")

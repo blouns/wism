@@ -45,8 +45,16 @@ namespace Assets.Scripts.Managers
         private GameManager gameManager;
         private InputHandler inputHandler;
 
-        private readonly Timer mouseSingleLeftClickTimer = new Timer();
-        private bool singleLeftClickProcessed;
+        private Tile lastPressTile;
+        private Vector2 lastPressPosition;
+        private float lastPressTime = float.NegativeInfinity;
+        private bool lastPressWasSelection;
+        private Tile pendingSelectAllTile;
+        private readonly List<RaycastResult> pointerHits = new List<RaycastResult>();
+
+        public string LastPrimaryAction { get; private set; }
+        public int LastPrimaryActionFrame { get; private set; } = -1;
+        public int LastPrimaryDeviceId { get; private set; } = -1;
         private readonly Timer mouseRightClickHoldTimer = new Timer();
         private bool holdingRightButton;
         private InputMode inputMode = InputMode.Game;
@@ -69,8 +77,6 @@ namespace Assets.Scripts.Managers
             this.InputHandler = new InputHandler(this.UnityManager);
 
             // Mouse click timing
-            this.mouseSingleLeftClickTimer.Interval = 400;
-            this.mouseSingleLeftClickTimer.Elapsed += SingleLeftClick;
             this.mouseRightClickHoldTimer.Interval = 200;
             this.mouseRightClickHoldTimer.Elapsed += SingleRightClick;
         }
@@ -85,13 +91,6 @@ namespace Assets.Scripts.Managers
             HandleInput();
         }
 
-        private void SingleLeftClick(object o, System.EventArgs e)
-        {
-            this.mouseSingleLeftClickTimer.Stop();
-
-            this.singleLeftClickProcessed = true;
-        }
-
         private void SingleRightClick(object o, EventArgs e)
         {
             this.holdingRightButton = true;
@@ -99,8 +98,21 @@ namespace Assets.Scripts.Managers
 
         public void SetInputMode(InputMode mode)
         {
+            if (this.InputMode != mode) ResetPrimaryGesture();
             this.InputMode = mode;
         }
+
+        private void ResetPrimaryGesture()
+        {
+            this.lastPressTime = float.NegativeInfinity;
+            this.lastPressTile = null;
+            this.lastPressWasSelection = false;
+            this.pendingSelectAllTile = null;
+        }
+
+        private void OnDisable() => ResetPrimaryGesture();
+
+        private void OnDestroy() => this.mouseRightClickHoldTimer.Dispose();
 
         public void SkipInput()
         {
@@ -157,31 +169,25 @@ namespace Assets.Scripts.Managers
                 this.unityManager.ExecutionMode != ExecutionMode.Running)
             {
                 this.skipInput = false;
+                ResetPrimaryGesture();
                 return;
             }
 
-            if (this.singleLeftClickProcessed)
+            if (this.pendingSelectAllTile != null && Game.Current.ArmiesSelected())
             {
-                // Single left click performed
-                HandleLeftClick();
-                this.singleLeftClickProcessed = false;
+                var tile = this.pendingSelectAllTile;
+                this.pendingSelectAllTile = null;
+                if (Game.Current.GetSelectedArmies()[0].Tile == tile)
+                {
+                    this.LastPrimaryAction = this.InputHandler.HandleArmyClick(true, tile);
+                    this.LastPrimaryActionFrame = Time.frameCount;
+                }
             }
-            else if (Input.GetMouseButtonDown(0))
-            {
-                // Detect single vs. double-click
-                if (this.mouseSingleLeftClickTimer.Enabled == false)
-                {
-                    this.mouseSingleLeftClickTimer.Start();
-                    // Wait for double click
-                    return;
-                }
-                else
-                {
-                    // Double click performed, so cancel single click
-                    this.mouseSingleLeftClickTimer.Stop();
 
-                    HandleLeftClick(true);
-                }
+            if (WismUiInputAdapter.TryGetPrimaryPress(out var pressPosition, out var deviceId))
+            {
+                this.LastPrimaryDeviceId = deviceId;
+                HandlePrimaryPress(pressPosition);
             }
             else
             {
@@ -225,9 +231,12 @@ namespace Assets.Scripts.Managers
             {
                 this.UnityManager.ToggleMinimap();
             }
-            else if (Input.GetKeyDown(KeyCode.N))
+            else if (WismUiInputAdapter.NextArmyPressedThisFrame(out var deviceId))
             {
                 this.GameManager.SelectNextArmy();
+                this.LastPrimaryAction = "army.next";
+                this.LastPrimaryActionFrame = Time.frameCount;
+                this.LastPrimaryDeviceId = deviceId;
             }
             else if (Input.GetKeyDown(KeyCode.D))
             {
@@ -351,24 +360,59 @@ namespace Assets.Scripts.Managers
             }
         }
 
-        private void HandleLeftClick(bool isDoubleClick = false)
+        private void HandlePrimaryPress(Vector2 position)
         {
+            this.LastPrimaryActionFrame = Time.frameCount;
+            this.LastPrimaryAction = "rejected";
+            this.pendingSelectAllTile = null;
+            // Raycast this press, not the EventSystem's previous-frame mouse cache.
+            this.pointerHits.Clear();
+            if (EventSystem.current != null)
+                EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = position }, this.pointerHits);
+            bool overUi = this.pointerHits.Exists(hit => hit.module is UnityEngine.UI.GraphicRaycaster);
             if (!WismPointerRoutingPolicy.CanRouteToMap(
-                EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(),
-                this.InputMode == InputMode.Game))
+                overUi, this.InputMode == InputMode.Game))
             {
+                ResetPrimaryGesture();
                 return;
             }
 
             var camera = this.unityManager.GetMainCamera();
             Tile clickedTile = this.unityManager.WorldTilemap
-                .GetClickedTile(camera);
+                .GetTileAtScreenPosition(camera, position);
             if (clickedTile == null)
             {
+                ResetPrimaryGesture();
                 return;
             }
 
-            this.InputHandler.HandleArmyClick(isDoubleClick, clickedTile);
+            bool repeatedPress = Time.unscaledTime - this.lastPressTime <= 0.4f &&
+                (position - this.lastPressPosition).sqrMagnitude <= 25f;
+            // A command-queue tick can outlast the double-click window. Preserve
+            // the upgrade intent until the first selection has actually applied.
+            if (repeatedPress && this.lastPressWasSelection && !Game.Current.ArmiesSelected())
+            {
+                var tile = this.lastPressTile;
+                ResetPrimaryGesture();
+                this.pendingSelectAllTile = tile;
+                this.LastPrimaryAction = "army.select-all-pending";
+                return;
+            }
+            bool selectAll = repeatedPress && this.lastPressWasSelection &&
+                Game.Current.ArmiesSelected() && Game.Current.GetSelectedArmies()[0].Tile == this.lastPressTile;
+            if (repeatedPress && !selectAll)
+            {
+                ResetPrimaryGesture();
+                return;
+            }
+            // Selection may recenter the camera after the first press. Double-click
+            // still upgrades that stack, never the newly exposed tile beneath it.
+            if (selectAll) clickedTile = this.lastPressTile;
+            this.lastPressPosition = position;
+            this.lastPressTime = selectAll ? float.NegativeInfinity : Time.unscaledTime;
+            this.lastPressTile = clickedTile;
+            this.LastPrimaryAction = this.InputHandler.HandleArmyClick(selectAll, clickedTile);
+            this.lastPressWasSelection = this.LastPrimaryAction == "army.select";
             this.InputHandler.HandleCityClick(clickedTile);
         }
 

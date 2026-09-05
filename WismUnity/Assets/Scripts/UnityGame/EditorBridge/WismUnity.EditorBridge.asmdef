@@ -2,6 +2,7 @@
     "name": "WismUnity.EditorBridge",
     "rootNamespace": "WismUnity.EditorBridge",
     "references": [
+        "Unity.InputSystem",
         "Unity.Pipeline",
         "UnityGame"
     ],
