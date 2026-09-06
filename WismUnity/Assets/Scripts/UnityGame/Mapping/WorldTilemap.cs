@@ -160,7 +160,8 @@ namespace Assets.Scripts.Tilemaps
 
         public Tile GetTileAtScreenPosition(Camera followCamera, Vector3 screenPosition)
         {
-            if (followCamera == null || World.Current?.Map == null)
+            if (followCamera == null || World.Current?.Map == null ||
+                !followCamera.pixelRect.Contains(new Vector2(screenPosition.x, screenPosition.y)))
             {
                 return null;
             }

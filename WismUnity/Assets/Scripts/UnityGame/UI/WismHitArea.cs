@@ -35,11 +35,8 @@ namespace Assets.Scripts.UI
 
         public Rect GetEffectiveScreenBounds(WismUiInputModality modality)
         {
-            var visual = GetVisualScreenBounds();
             var minimum = modality == WismUiInputModality.SimulatedTouch ? this.touchMinimum : this.desktopMinimum;
-            var width = Mathf.Max(visual.width, minimum.x);
-            var height = Mathf.Max(visual.height, minimum.y);
-            return new Rect(visual.center - new Vector2(width, height) * 0.5f, new Vector2(width, height));
+            return ScreenBounds(GetComponent<RectTransform>(), minimum);
         }
 
         public void RefreshGeometry()
@@ -149,15 +146,22 @@ namespace Assets.Scripts.UI
             return order;
         }
 
-        private static Rect ScreenBounds(RectTransform rect)
+        private static Rect ScreenBounds(RectTransform rect, Vector2 minimumSize = default)
         {
             if (rect == null)
             {
                 return default;
             }
 
-            var corners = new Vector3[4];
-            rect.GetWorldCorners(corners);
+            // Expand in local logical units before applying canvas scale and transforms.
+            var half = Vector2.Max(rect.rect.size, minimumSize) * 0.5f;
+            var center = rect.rect.center;
+            var corners = new[] {
+                rect.TransformPoint(center + new Vector2(-half.x, -half.y)),
+                rect.TransformPoint(center + new Vector2(-half.x, half.y)),
+                rect.TransformPoint(center + new Vector2(half.x, half.y)),
+                rect.TransformPoint(center + new Vector2(half.x, -half.y))
+            };
             var canvas = rect.GetComponentInParent<Canvas>();
             var camera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
             var minimum = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);

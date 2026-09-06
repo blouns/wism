@@ -24,7 +24,7 @@ using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
 [UnityPlatform(RuntimePlatform.WindowsEditor, RuntimePlatform.LinuxEditor, RuntimePlatform.OSXEditor)]
-public sealed class ArmyUiInputTests : IPrebuildSetup, IPostBuildCleanup
+public sealed partial class ArmyUiInputTests : IPrebuildSetup, IPostBuildCleanup
 {
     private Mouse mouse;
     private Keyboard keyboard;
