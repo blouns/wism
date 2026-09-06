@@ -15,6 +15,7 @@ using Wism.Client.AI.Tactical;
 using Wism.Client.Api.Telemetry;
 using Wism.Client.CommandProcessors; // Updated
 using Wism.Client.Commands;
+using Wism.Client.Commands.Armies;
 using Wism.Client.Commands.Players;
 using Wism.Client.Controllers; // Updated
 using Wism.Client.Core;
@@ -360,6 +361,32 @@ namespace Assets.Scripts.Managers
         public void GoToLocation()
         {
             this.inputManager.SetInputMode(InputMode.LocationPicker);
+        }
+
+        private void LateUpdate()
+        {
+            if (this.ExecutionMode != ExecutionMode.Running ||
+                this.inputManager == null || this.inputManager.InputMode != InputMode.Game ||
+                !Game.IsInitialized() || Game.Current.GetCurrentPlayer()?.IsHuman != true)
+                return;
+
+            // Complete only front-of-queue selection work before rendering.
+            // Two commands allow a deselect/select pair, never skipping a game action.
+            bool changed = false;
+            for (int i = 0; i < 2; i++)
+            {
+                if (Game.Current.GameState != GameState.Ready && Game.Current.GameState != GameState.SelectedArmy)
+                    break;
+                int next = this.LastCommandId + 1;
+                if (!this.provider.CommandController.CommandExists(next)) break;
+                var command = this.provider.CommandController.GetCommand(next);
+                if (!(command is SelectArmyCommand || command is DeselectArmyCommand || command is SelectNextArmyCommand))
+                    break;
+                DoTasks();
+                if (this.LastCommandId < next) break;
+                changed = true;
+            }
+            if (changed) Draw();
         }
 
         public void FixedUpdate()
