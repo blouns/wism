@@ -1,6 +1,8 @@
 using UnityEngine;
 using Wism.Client.Core;
 
+// Frame the selection after UnityManager has drawn its new highlight in LateUpdate.
+[DefaultExecutionOrder(100)]
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
@@ -22,6 +24,7 @@ public class CameraFollow : MonoBehaviour
     private int lastScreenWidth;
     private int lastScreenHeight;
     private float lastCameraAspect;
+    private float lastOrthographicSize;
 
     // Start is called before the first frame update
     void Start()
@@ -37,6 +40,7 @@ public class CameraFollow : MonoBehaviour
             return;
         }
 
+        ConfigureBoundsFromCurrentWorld();
         HandleCameraMove();
     }
 
@@ -73,7 +77,8 @@ public class CameraFollow : MonoBehaviour
             mapHeight == this.lastMapHeight &&
             Screen.width == this.lastScreenWidth &&
             Screen.height == this.lastScreenHeight &&
-            Mathf.Approximately(this.followCamera.aspect, this.lastCameraAspect))
+            Mathf.Approximately(this.followCamera.aspect, this.lastCameraAspect) &&
+            Mathf.Approximately(this.followCamera.orthographicSize, this.lastOrthographicSize))
         {
             return;
         }
@@ -83,6 +88,7 @@ public class CameraFollow : MonoBehaviour
         this.lastScreenWidth = Screen.width;
         this.lastScreenHeight = Screen.height;
         this.lastCameraAspect = this.followCamera.aspect;
+        this.lastOrthographicSize = this.followCamera.orthographicSize;
 
         var halfHeight = this.followCamera.orthographicSize;
         var halfWidth = halfHeight * this.followCamera.aspect;
@@ -102,6 +108,11 @@ public class CameraFollow : MonoBehaviour
             this.yMinClamp = mapHeight / 2f;
             this.yMaxClamp = mapHeight / 2f;
         }
+
+        var position = this.transform.position;
+        this.transform.position = new Vector3(
+            Mathf.Clamp(position.x, this.xMinClamp, this.xMaxClamp),
+            Mathf.Clamp(position.y, this.yMinClamp, this.yMaxClamp), position.z);
     }
 
     public void ResetCamera()

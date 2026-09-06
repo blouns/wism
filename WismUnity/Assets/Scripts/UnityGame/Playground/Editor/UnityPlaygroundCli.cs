@@ -21,6 +21,8 @@ namespace WismUnity.Playground
     {
         const string DefaultWorld = "TestWorld";
         const string DefaultScene = "Assets/Scenes/Test/TestWorld.unity";
+        static EditorWindow batchGameView;
+        static ScriptableObject batchHostView;
 
         public static void Run()
         {
@@ -885,6 +887,13 @@ namespace WismUnity.Playground
 
         static bool TryReadSelectedEditorGameViewSize(out int width, out int height, out string evidence)
         {
+            if (Application.isBatchMode)
+            {
+                width = Screen.width;
+                height = Screen.height;
+                evidence = $"Batch render viewport is {width}x{height}; no desktop window requested.";
+                return width > 0 && height > 0;
+            }
             width = 0;
             height = 0;
             evidence = "Selected Editor GameView size reflection was not attempted.";
@@ -937,6 +946,12 @@ namespace WismUnity.Playground
 
         static void SelectEditorGameViewSize(Type gameViewType, int index, int width, int height)
         {
+            if (Application.isBatchMode)
+            {
+                if (!TryApplyBatchViewport(index, width, height, out var evidence))
+                    throw new InvalidOperationException(evidence);
+                return;
+            }
             var gameView = EditorWindow.GetWindow(gameViewType);
             var selectedSizeIndex = gameViewType.GetProperty("selectedSizeIndex", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             selectedSizeIndex?.SetValue(gameView, index);
@@ -944,6 +959,51 @@ namespace WismUnity.Playground
             gameView.position = new Rect(0f, 0f, width, height);
             gameView.Repaint();
             EditorApplication.QueuePlayerLoopUpdate();
+        }
+
+        static bool TryApplyBatchViewport(int index, int width, int height, out string evidence)
+        {
+            try
+            {
+                var assembly = typeof(EditorWindow).Assembly;
+                var gameType = assembly.GetType("UnityEditor.GameView");
+                var hostType = assembly.GetType("UnityEditor.HostView");
+                var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                if (batchGameView == null)
+                {
+                    // A render host without a ContainerWindow cannot show or focus a desktop window.
+                    batchGameView = (EditorWindow)ScriptableObject.CreateInstance(gameType);
+                    batchHostView = ScriptableObject.CreateInstance(hostType);
+                    batchGameView.hideFlags = batchHostView.hideFlags = HideFlags.HideAndDontSave;
+                    hostType.GetMethod("SetWindow", flags).Invoke(batchHostView, new object[] { null });
+                    hostType.GetProperty("actualView", flags).SetValue(batchHostView, batchGameView);
+                    EditorApplication.quitting += ReleaseBatchViewport;
+                    AssemblyReloadEvents.beforeAssemblyReload += ReleaseBatchViewport;
+                }
+                gameType.GetProperty("selectedSizeIndex", flags).SetValue(batchGameView, index);
+                gameType.BaseType.GetProperty("targetSize", flags).SetValue(batchGameView, new Vector2(width, height));
+                hostType.GetMethod("SetMainPlayModeViewSize", flags).Invoke(batchHostView, new object[] { new Vector2(width, height) });
+                hostType.GetMethod("SetDisplayViewSize", flags).Invoke(batchHostView, new object[] { 0, new Vector2(width, height) });
+                EditorApplication.QueuePlayerLoopUpdate();
+                evidence = $"Requested windowless batch viewport {width}x{height}.";
+                return true;
+            }
+            catch (Exception exception)
+            {
+                ReleaseBatchViewport();
+                evidence = $"Windowless viewport unavailable: {exception.GetBaseException().Message}";
+                return false;
+            }
+        }
+
+        static void ReleaseBatchViewport()
+        {
+            EditorApplication.quitting -= ReleaseBatchViewport;
+            AssemblyReloadEvents.beforeAssemblyReload -= ReleaseBatchViewport;
+            if (batchGameView != null) UnityEngine.Object.DestroyImmediate(batchGameView);
+            if (batchHostView != null) UnityEngine.Object.DestroyImmediate(batchHostView);
+            batchGameView = null;
+            batchHostView = null;
         }
 
         static UnityPlaygroundUiPanelProof CollectUiPanelProof(Scene scene)
