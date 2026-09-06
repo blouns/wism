@@ -18,6 +18,22 @@ using Wism.Client.Core;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest]
+    public IEnumerator HitArea_MissingVisualRectHasNoEffectiveTarget()
+    {
+        var host = new GameObject("MalformedUiControl");
+        try
+        {
+            var hit = host.AddComponent<WismHitArea>();
+            hit.RefreshGeometry();
+            Assert.That(hit.GetVisualScreenBounds(), Is.EqualTo(default(Rect)));
+            Assert.That(hit.GetEffectiveScreenBounds(WismUiInputModality.Mouse), Is.EqualTo(default(Rect)));
+            Assert.That(hit.GetEffectiveScreenBounds(WismUiInputModality.SimulatedTouch), Is.EqualTo(default(Rect)));
+            yield return null;
+        }
+        finally { UnityEngine.Object.Destroy(host); }
+    }
+
+    [UnityTest]
     public IEnumerator Viewport_MatrixExercisesScaledOverlayAndArmyTileBoundaries()
     {
         var originalWidth = Screen.width;
