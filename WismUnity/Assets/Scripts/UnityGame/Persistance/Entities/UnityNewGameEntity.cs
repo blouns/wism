@@ -10,6 +10,8 @@ namespace Assets.Scripts.UnityGame.Persistance.Entities
 
         public bool InteractiveUI { get; set; }
 
+        public bool ShowAiCombat { get; set; } = true;
+
         public int RandomSeed { get; set; }
 
         public UnityPlayerEntity[] Players { get; set; }

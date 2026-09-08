@@ -166,7 +166,7 @@ namespace Assets.Scripts.CommandProcessors
             if (!this.yesNoCancelBox.Cancelled &&
                 !this.yesNoCancelBox.Answer.HasValue)
             {
-                this.yesNoCancelBox.Ask($"{ait.DisplayName} - Produced!");
+                this.yesNoCancelBox.AskFullWidth($"{ait.DisplayName} - Produced!");
             }
             // If User skipped the reports
             else if (this.yesNoCancelBox.Cancelled)

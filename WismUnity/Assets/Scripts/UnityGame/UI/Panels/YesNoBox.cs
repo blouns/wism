@@ -49,6 +49,17 @@ public class YesNoBox : MonoBehaviour
         return this.canvasGroup.alpha == 1f;
     }
 
+    public void AskFullWidth(string message)
+    {
+        var rect = (RectTransform)this.transform;
+        rect.anchorMin = new Vector2(0f, rect.anchorMin.y);
+        rect.anchorMax = new Vector2(1f, rect.anchorMax.y);
+        rect.sizeDelta = new Vector2(0f, rect.sizeDelta.y);
+        rect.anchoredPosition = new Vector2(0f, rect.anchoredPosition.y);
+        rect.localScale = new Vector3(1f, rect.localScale.y, rect.localScale.z);
+        Ask(message);
+    }
+
     private void Show()
     {
         this.canvasGroup.alpha = 1f;

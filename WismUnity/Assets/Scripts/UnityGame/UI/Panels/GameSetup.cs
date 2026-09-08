@@ -276,6 +276,7 @@ public class GameSetup : MonoBehaviour
         settings.WorldName = this.worldName;
         settings.RandomStartLocations = GetToggleValue("RandomStartToggle", defaultValue: false);
         settings.InteractiveUI = GetToggleValue("InteractiveToggle", defaultValue: true);
+        settings.ShowAiCombat = GetToggleValue("ShowAiCombatToggle", defaultValue: true);
         settings.IsNewGame = true;
         settings.RandomSeed = 0;
         UnityModKitRuntimeSelection.ApplyTo(settings);
@@ -697,6 +698,27 @@ public class GameSetup : MonoBehaviour
             {
                 interactiveToggle.isOn = true;
             }
+
+            if (GameObject.Find("ShowAiCombatToggle") == null)
+            {
+                var combatToggle = Instantiate(interactiveToggle, interactiveToggle.transform.parent, false);
+                combatToggle.name = "ShowAiCombatToggle";
+                combatToggle.onValueChanged = new Toggle.ToggleEvent();
+                combatToggle.group = null;
+                combatToggle.SetIsOnWithoutNotify(true);
+                var rect = combatToggle.GetComponent<RectTransform>();
+                var reference = interactiveToggle.GetComponent<RectTransform>();
+                rect.anchoredPosition = reference.anchoredPosition - new Vector2(0f, reference.rect.height + 8f);
+                foreach (var label in combatToggle.GetComponentsInChildren<Text>(true))
+                {
+                    label.text = "Show AI combat";
+                    label.color = Color.black;
+                    label.horizontalOverflow = HorizontalWrapMode.Overflow;
+                    label.resizeTextForBestFit = true;
+                    label.resizeTextMinSize = 20;
+                    label.resizeTextMaxSize = label.fontSize;
+                }
+            }
         }
     }
 
@@ -755,6 +777,7 @@ public class GameSetup : MonoBehaviour
         EnsureNamedControl(ModSettingsButtonName, "game-setup.mods", "game-setup.open-mods", WismUiControlRole.Navigation, 20);
         EnsureNamedControl("RandomStartToggle", "game-setup.random-start", "game-setup.toggle-random-start", WismUiControlRole.Toggle, 20);
         EnsureNamedControl("InteractiveToggle", "game-setup.interactive", "game-setup.toggle-interactive", WismUiControlRole.Toggle, 20);
+        EnsureNamedControl("ShowAiCombatToggle", "game-setup.show-ai-combat", "game-setup.toggle-ai-combat", WismUiControlRole.Toggle, 20);
 
         for (var i = 0; i < this.playerToggles.Length; i++)
         {

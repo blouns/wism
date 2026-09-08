@@ -17,6 +17,7 @@ namespace Assets.Scripts.UI
 
         private Dictionary<Army, GameObject> attackerPanelObjects = new Dictionary<Army, GameObject>();
         private Dictionary<Army, GameObject> defenderPanelObjects = new Dictionary<Army, GameObject>();
+        private readonly List<GameObject> battleObjects = new List<GameObject>();
         private ArmyManager armyManager;
 
         private int currentAttackerIndex;
@@ -38,6 +39,8 @@ namespace Assets.Scripts.UI
             {
                 throw new ArgumentNullException(nameof(targetTile));
             }
+
+            Teardown();
 
             if (defenders.Count == 0 &&
                 targetTile.HasCity())
@@ -76,6 +79,7 @@ namespace Assets.Scripts.UI
             {
                 // Create the GO for the panel            
                 GameObject armyGo = Instantiate<GameObject>(prefab, position, Quaternion.identity, this.gameObject.transform);
+                this.battleObjects.Add(armyGo);
 
                 // Replace image with army kind
                 ReplaceImage(armies[i], armyGo);
@@ -113,15 +117,15 @@ namespace Assets.Scripts.UI
         {
             this.gameObject.SetActive(false);
 
-            foreach (GameObject go in this.attackerPanelObjects.Values)
+            // Defeated armies leave the dictionaries before their delayed destruction.
+            // Own every clone so closing the panel also clears pending casualties.
+            foreach (GameObject go in this.battleObjects)
             {
-                Destroy(go);
+                if (go != null) Destroy(go);
             }
-
-            foreach (GameObject go in this.defenderPanelObjects.Values)
-            {
-                Destroy(go);
-            }
+            this.battleObjects.Clear();
+            this.attackerPanelObjects.Clear();
+            this.defenderPanelObjects.Clear();
         }
 
         public void UpdateBattle(List<Army> attackers, List<Army> defenders)
@@ -166,6 +170,7 @@ namespace Assets.Scripts.UI
             // Draw killed sprite over defeated army
             this.KilledPrefab.transform.SetPositionAndRotation(position, Quaternion.identity);
             GameObject killedPanelObject = Instantiate(this.KilledPrefab, position, Quaternion.identity, this.gameObject.transform);
+            this.battleObjects.Add(killedPanelObject);
             killedPanelObject.SetActive(true);
 
             // Remove killed sprite and army from panel after an interval

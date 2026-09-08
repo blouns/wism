@@ -34,19 +34,20 @@ namespace Assets.Scripts.UI
         private ProductionPanelMode panelMode;
         private ProductionManagementViewModel viewModel;
         private bool selectingDestination;
-        private Text modeText;
         private Text cityText;
         private Text statusText;
-        private Text routeText;
-        private Text deliveryText;
-        private RectTransform minimapPanel;
+        private RectTransform managementSummary;
+        private RectTransform pickerContent;
+        private float pickerHeight;
+        private RectTransform jumpRow;
         private Button destinationJumpButton;
         private Button[] sourceJumpButtons;
 
         public void LateUpdate()
         {
+            FitPickerToPanel();
             if (this.armyButtons != null &&
-                this.armySelectedIndex > 0 &&
+                this.armySelectedIndex >= 0 &&
                 this.armySelectedIndex < this.armyButtons.Length)
             {
                 this.armyButtons[this.armySelectedIndex].Select();
@@ -101,6 +102,8 @@ namespace Assets.Scripts.UI
 
         private void InitializeProduction()
         {
+            EnsurePickerLayout();
+            this.transform.SetAsLastSibling();
             EnsureInteractionContracts();
             SetInitialButtonState();
 
@@ -136,7 +139,7 @@ namespace Assets.Scripts.UI
                     Game.Current.GetCurrentPlayer().Clan,
                     barracks.ArmyInTraining.ArmyInfo,
                     "CurrentArmyKind");
-                var currentArmyKind = this.transform.Find("CurrentArmyKind");
+                var currentArmyKind = this.pickerContent.Find("CurrentArmyKind");
                 if (currentArmyKind != null)
                 {
                     currentArmyKind.gameObject.SetActive(true);
@@ -146,7 +149,7 @@ namespace Assets.Scripts.UI
             }
             else
             {
-                var currentArmyKind = this.transform.Find("CurrentArmyKind");
+                var currentArmyKind = this.pickerContent.Find("CurrentArmyKind");
                 if (currentArmyKind != null)
                 {
                     currentArmyKind.gameObject.SetActive(false);
@@ -154,7 +157,7 @@ namespace Assets.Scripts.UI
             }
 
             // Set turns remaining text
-            var turnsRemaining = this.gameObject.transform.Find("TurnsRemainingText");
+            var turnsRemaining = this.pickerContent.Find("TurnsRemainingText");
             if (turnsRemaining != null)
             {
                 var turnsText = turnsRemaining.GetComponent<Text>();
@@ -164,7 +167,7 @@ namespace Assets.Scripts.UI
 
         private void SetArmyImageOnGameObject(Clan clan, ArmyInfo info, string gameObjectName)
         {
-            var imageTransform = this.gameObject.transform.Find(gameObjectName);
+            var imageTransform = this.pickerContent.Find(gameObjectName);
             if (imageTransform == null)
             {
                 return;
@@ -249,15 +252,13 @@ namespace Assets.Scripts.UI
 
         public void OnProdClick()
         {
-            StartProduction();
-
-            if (this.panelMode == ProductionPanelMode.SingleCity)
+            if (this.armySelectedIndex < 0 || this.productionInfos == null ||
+                this.armySelectedIndex >= this.productionInfos.Length || !this.prodButton.interactable)
             {
-                OnExitClick();
                 return;
             }
-
-            RefreshAfterMutation();
+            StartProduction();
+            OnExitClick();
         }
 
         private void StartProduction(City destinationCity = null)
@@ -395,27 +396,42 @@ namespace Assets.Scripts.UI
 
         private void EnsureDynamicControls()
         {
-            if (this.modeText != null)
+            // Both entry points reuse this component, but management chrome must never cover the picker.
+            bool management = this.panelMode == ProductionPanelMode.Management;
+            if (this.managementSummary != null)
+            {
+                this.managementSummary.gameObject.SetActive(management);
+            }
+
+            if (!management)
+            {
+                return;
+            }
+
+            if (this.managementSummary != null)
             {
                 return;
             }
 
             var panel = WismUiFactory.CreateVerticalPanel(this.transform, "WismProductionPanelSummary");
+            this.managementSummary = panel;
             var panelRect = panel.GetComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0f, 0f);
-            panelRect.anchorMax = new Vector2(1f, 0f);
+            panelRect.anchorMin = new Vector2(0f, 1f);
+            panelRect.anchorMax = new Vector2(1f, 1f);
             panelRect.pivot = new Vector2(0.5f, 0f);
-            panelRect.anchoredPosition = new Vector2(0f, 6f);
-            panelRect.sizeDelta = new Vector2(0f, 264f);
-
-            this.modeText = WismUiFactory.CreateText(panel, "ProductionModeText", string.Empty, 18, TextAnchor.MiddleCenter);
-            this.cityText = WismUiFactory.CreateText(panel, "ProductionCityText", string.Empty, 16, TextAnchor.MiddleLeft);
-            this.routeText = WismUiFactory.CreateText(panel, "ProductionRouteText", string.Empty, 14, TextAnchor.MiddleLeft);
-            this.deliveryText = WismUiFactory.CreateText(panel, "ProductionDeliveryText", string.Empty, 14, TextAnchor.MiddleLeft);
-            this.statusText = WismUiFactory.CreateText(panel, "ProductionStatusText", string.Empty, 14, TextAnchor.MiddleLeft);
+            panelRect.anchoredPosition = Vector2.zero;
+            panelRect.sizeDelta = new Vector2(0f, 44f);
+            var background = panel.GetComponent<Image>();
+            background.sprite = GetComponent<Image>().sprite;
+            background.color = Color.white;
+            var layout = panel.GetComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(8, 8, 4, 4);
+            layout.spacing = 4f;
+            layout.childControlHeight = true;
 
             var row = WismUiFactory.CreateRow(panel, "ProductionNavigationRow");
-            var previous = WismUiFactory.CreateButton(
+            ConfigureManagementRow(row);
+            var previous = CreateManagementButton(
                 row,
                 "PreviousProductionCityButton",
                 "Prev",
@@ -424,7 +440,9 @@ namespace Assets.Scripts.UI
                 WismUiControlRole.Navigation,
                 10);
             previous.onClick.AddListener(OnPreviousCityClick);
-            var next = WismUiFactory.CreateButton(
+            this.cityText = CreateManagementText(row, "ProductionCityText", flexible: true);
+            this.statusText = CreateManagementText(row, "ProductionStatusText", flexible: false);
+            var next = CreateManagementButton(
                 row,
                 "NextProductionCityButton",
                 "Next",
@@ -434,11 +452,12 @@ namespace Assets.Scripts.UI
                 10);
             next.onClick.AddListener(OnNextCityClick);
 
-            var jumpRow = WismUiFactory.CreateRow(panel, "ProductionJumpRow");
-            this.destinationJumpButton = WismUiFactory.CreateButton(
-                jumpRow,
+            this.jumpRow = WismUiFactory.CreateRow(panel, "ProductionJumpRow");
+            ConfigureManagementRow(this.jumpRow);
+            this.destinationJumpButton = CreateManagementButton(
+                this.jumpRow,
                 "DestinationProductionCityButton",
-                "->",
+                "To",
                 "owned-production.destination",
                 "production.management.destination",
                 WismUiControlRole.Navigation,
@@ -448,10 +467,10 @@ namespace Assets.Scripts.UI
             for (var i = 0; i < this.sourceJumpButtons.Length; i++)
             {
                 var sourceIndex = i;
-                this.sourceJumpButtons[i] = WismUiFactory.CreateButton(
-                    jumpRow,
+                this.sourceJumpButtons[i] = CreateManagementButton(
+                    this.jumpRow,
                     $"SourceProductionCityButton{i + 1}",
-                    $"^{i + 1}",
+                    "From",
                     $"owned-production.source-{i + 1}",
                     "production.management.source",
                     WismUiControlRole.Navigation,
@@ -459,7 +478,83 @@ namespace Assets.Scripts.UI
                 this.sourceJumpButtons[i].onClick.AddListener(() => OnSourceJumpClick(sourceIndex));
             }
 
-            this.minimapPanel = ProductionManagementUi.CreateMinimapPanel(panel, "ProductionMinimapOverlay");
+        }
+
+        private static void ConfigureManagementRow(RectTransform row)
+        {
+            var layout = row.GetComponent<HorizontalLayoutGroup>();
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandHeight = true;
+            var size = row.gameObject.AddComponent<LayoutElement>();
+            size.minHeight = size.preferredHeight = 36f;
+        }
+
+        private Text CreateManagementText(Transform parent, string name, bool flexible)
+        {
+            var text = WismUiFactory.CreateText(parent, name, string.Empty, 22);
+            var original = this.exitButton.GetComponentInChildren<Text>(true);
+            text.font = original.font;
+            text.color = original.color;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 14;
+            text.resizeTextMaxSize = 22;
+            var layout = text.gameObject.AddComponent<LayoutElement>();
+            layout.minWidth = 120f;
+            layout.preferredWidth = flexible ? 320f : 180f;
+            layout.flexibleWidth = flexible ? 1f : 0f;
+            return text;
+        }
+
+        private Button CreateManagementButton(Transform parent, string name, string label,
+            string semanticId, string actionId, WismUiControlRole role, int priority)
+        {
+            var button = Instantiate(this.exitButton, parent, false);
+            button.name = name;
+            // Cloning the classic control preserves its sprites/font, but never its Exit callback.
+            button.onClick = new Button.ButtonClickedEvent();
+            var text = button.GetComponentInChildren<Text>(true);
+            text.text = label;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 14;
+            text.resizeTextMaxSize = 22;
+            EnsureButtonContract(button, semanticId, actionId, role, priority);
+            var layout = button.GetComponent<LayoutElement>();
+            layout.minWidth = 80f;
+            layout.preferredWidth = parent == this.jumpRow ? 180f : 96f;
+            layout.flexibleWidth = parent == this.jumpRow ? 1f : 0f;
+            return button;
+        }
+
+        private void EnsurePickerLayout()
+        {
+            if (this.pickerContent != null)
+            {
+                return;
+            }
+
+            var panel = (RectTransform)this.transform;
+            this.pickerHeight = panel.rect.height;
+            var children = new List<Transform>();
+            foreach (Transform child in panel) children.Add(child);
+            this.pickerContent = new GameObject("ClassicProductionPicker", typeof(RectTransform)).GetComponent<RectTransform>();
+            this.pickerContent.SetParent(panel, false);
+            this.pickerContent.anchorMin = this.pickerContent.anchorMax = new Vector2(0.5f, 0.5f);
+            this.pickerContent.sizeDelta = new Vector2(1360f, this.pickerHeight);
+            foreach (var child in children) child.SetParent(this.pickerContent, false);
+            FitPickerToPanel();
+        }
+
+        private void FitPickerToPanel()
+        {
+            if (this.pickerContent == null) return;
+            var panel = (RectTransform)this.transform;
+            // Preserve the authored composition on wide windows; fit the complete strip on narrow ones.
+            float scale = Mathf.Clamp(panel.rect.width / this.pickerContent.sizeDelta.x, 0.01f, 1f);
+            this.pickerContent.localScale = Vector3.one * scale;
+            float height = this.pickerHeight * scale;
+            panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+            panel.anchoredPosition = new Vector2(panel.anchoredPosition.x, height * panel.pivot.y);
         }
 
         private void EnsureInteractionContracts()
@@ -514,24 +609,15 @@ namespace Assets.Scripts.UI
 
         private void RefreshDynamicControls()
         {
-            if (this.viewModel == null || this.modeText == null)
+            if (this.viewModel == null || this.cityText == null)
             {
                 return;
             }
 
             var selected = this.viewModel.SelectedCity;
-            this.modeText.text = this.panelMode == ProductionPanelMode.Management
-                ? "Production Management"
-                : "City Production";
             this.cityText.text = $"{selected.CityName}: {(selected.IsIdle ? "Idle" : selected.CurrentArmyName)}";
-            this.routeText.text = BuildRouteText(selected);
-            if (this.deliveryText != null)
-            {
-                this.deliveryText.text = BuildDeliveryText(selected);
-            }
 
             RefreshJumpControls(selected);
-            RefreshMinimapControls();
             SetStatus(this.selectingDestination ? "Choose a destination city." : BuildStatusText(selected));
         }
 
@@ -570,51 +656,6 @@ namespace Assets.Scripts.UI
             InitializeProduction();
         }
 
-        private string BuildRouteText(ProductionCityViewModel selected)
-        {
-            var route = selected.IsIdle
-                ? "No production routed."
-                : $"Destination: {selected.DestinationCityName} ({selected.TurnsRemaining}t)";
-            var incoming = selected.IncomingSources.Count == 0
-                ? "Incoming: none"
-                : $"Incoming: {string.Join(", ", ToIncomingLabels(selected.IncomingSources))}";
-            var deliveries = selected.OutgoingDeliveries.Count == 0
-                ? "Deliveries: none"
-                : $"Deliveries: {string.Join(", ", ToIncomingLabels(selected.OutgoingDeliveries))}";
-            return $"{route} | {incoming} | {deliveries}";
-        }
-
-        private string BuildDeliveryText(ProductionCityViewModel selected)
-        {
-            if (selected.IncomingSources.Count == 0 && selected.OutgoingDeliveries.Count == 0)
-            {
-                return "No routed production or delivery in transit.";
-            }
-
-            var incoming = selected.IncomingSources.Count == 0
-                ? "Sources: none"
-                : $"Sources: {string.Join(", ", ToIncomingLabels(selected.IncomingSources))}";
-            var deliveries = selected.OutgoingDeliveries.Count == 0
-                ? "Transit: none"
-                : $"Transit: {string.Join(", ", ToIncomingLabels(selected.OutgoingDeliveries))}";
-            return $"{incoming} | {deliveries}";
-        }
-
-        private void RefreshMinimapControls()
-        {
-            if (this.minimapPanel == null)
-            {
-                return;
-            }
-
-            var showMinimap = this.panelMode == ProductionPanelMode.Management;
-            this.minimapPanel.gameObject.SetActive(showMinimap);
-            if (showMinimap)
-            {
-                ProductionManagementUi.RebuildMinimapMarkers(this.minimapPanel, this.viewModel.MinimapMarkers);
-            }
-        }
-
         private void RefreshJumpControls(ProductionCityViewModel selected)
         {
             if (this.destinationJumpButton != null)
@@ -623,7 +664,8 @@ namespace Assets.Scripts.UI
                     this.panelMode == ProductionPanelMode.Management &&
                     selected.CurrentDestinationCity != null &&
                     selected.CurrentDestinationCity != selected.City;
-                SetButtonText(this.destinationJumpButton, "-> " + selected.DestinationCityName);
+                this.destinationJumpButton.gameObject.SetActive(this.destinationJumpButton.interactable);
+                SetButtonText(this.destinationJumpButton, "To " + selected.DestinationCityName);
             }
 
             if (this.sourceJumpButtons == null)
@@ -635,8 +677,13 @@ namespace Assets.Scripts.UI
             {
                 var hasSource = i < selected.IncomingSources.Count;
                 this.sourceJumpButtons[i].interactable = this.panelMode == ProductionPanelMode.Management && hasSource;
-                SetButtonText(this.sourceJumpButtons[i], hasSource ? "^ " + selected.IncomingSources[i].SourceCityName : "^");
+                this.sourceJumpButtons[i].gameObject.SetActive(this.sourceJumpButtons[i].interactable);
+                SetButtonText(this.sourceJumpButtons[i], hasSource ? "From " + selected.IncomingSources[i].SourceCityName : string.Empty);
             }
+            bool hasRoutes = this.destinationJumpButton.gameObject.activeSelf ||
+                Array.Exists(this.sourceJumpButtons, button => button.gameObject.activeSelf);
+            this.jumpRow.gameObject.SetActive(hasRoutes);
+            this.managementSummary.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, hasRoutes ? 84f : 44f);
         }
 
         private static void SetButtonText(Button button, string value)
@@ -645,14 +692,6 @@ namespace Assets.Scripts.UI
             if (label != null)
             {
                 label.text = value;
-            }
-        }
-
-        private static IEnumerable<string> ToIncomingLabels(IReadOnlyList<ProductionDeliveryViewModel> deliveries)
-        {
-            foreach (var delivery in deliveries)
-            {
-                yield return $"{delivery.SourceCityName}->{delivery.DestinationCityName} {delivery.ArmyDisplayName} {delivery.TurnsRemaining}t";
             }
         }
 
