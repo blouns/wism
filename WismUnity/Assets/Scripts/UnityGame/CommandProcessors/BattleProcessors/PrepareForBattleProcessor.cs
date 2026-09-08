@@ -67,9 +67,9 @@ namespace Assets.Scripts.CommandProcessors
             unityGame.CurrentDefenders = defenders;
 
             var defendingPlayer = BattlePresentation.ResolveDefendingPlayer(tile, defenders);
-            if (!BattlePresentation.ShouldPresent(prep.Player, defendingPlayer))
+            if (!BattlePresentation.ShouldPresent(unityGame, prep.Player, defendingPlayer))
             {
-                unityGame.InputManager.SetInputMode(InputMode.AITurn);
+                unityGame.InputManager.SetInputMode(isHuman ? InputMode.Game : InputMode.AITurn);
                 return command.Execute();
             }
 
@@ -171,10 +171,11 @@ namespace Assets.Scripts.CommandProcessors
             return targetTile?.City?.Player;
         }
 
-        public static bool ShouldPresent(Player attackingPlayer, Player defendingPlayer)
+        public static bool ShouldPresent(UnityManager unityGame, Player attackingPlayer, Player defendingPlayer)
         {
-            return (attackingPlayer?.IsHuman ?? false) ||
-                   (defendingPlayer?.IsHuman ?? false);
+            return unityGame.InteractiveUI && attackingPlayer != null && defendingPlayer != null &&
+                   attackingPlayer != defendingPlayer &&
+                   (unityGame.ShowAiCombat || attackingPlayer.IsHuman || defendingPlayer.IsHuman);
         }
     }
 }

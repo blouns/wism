@@ -61,6 +61,83 @@ public sealed class GameSetupModSettingsFlowTests
 
 
     [UnityTest]
+    public IEnumerator BattlePresentation_GameSetupCheckboxFeedsSettingsWithoutChangingClans()
+    {
+        UnityModKitRuntimeSelection.Clear();
+        SceneManager.LoadScene("GameSetup", LoadSceneMode.Single);
+        yield return WaitForGameSetup();
+        var toggle = FindToggle("ShowAiCombatToggle");
+        Assert.That(toggle.interactable, Is.True);
+        Assert.That(toggle.isOn, Is.True);
+        Assert.That(toggle.GetComponentInChildren<Text>().text, Is.EqualTo("Show AI combat"));
+        var clans = ReadGameSettings().Players.Select(player => player.ClanName).ToArray();
+        var interactive = FindToggle("InteractiveToggle");
+        var combatBounds = new Vector3[4];
+        var interactiveBounds = new Vector3[4];
+        ((RectTransform)toggle.transform).GetWorldCorners(combatBounds);
+        ((RectTransform)interactive.transform).GetWorldCorners(interactiveBounds);
+        Assert.That(combatBounds[1].y, Is.LessThan(interactiveBounds[0].y), "Option rows must not overlap.");
+        ExecuteEvents.Execute(toggle.gameObject, new PointerEventData(EventSystem.current), ExecuteEvents.pointerClickHandler);
+        yield return null;
+        Assert.That(ReadGameSettings().ShowAiCombat, Is.False);
+        Assert.That(ReadGameSettings().InteractiveUI, Is.True);
+        Assert.That(ReadGameSettings().Players.Select(player => player.ClanName), Is.EqualTo(clans));
+        ExecuteEvents.Execute(toggle.gameObject, new BaseEventData(EventSystem.current), ExecuteEvents.submitHandler);
+        yield return null;
+        Assert.That(ReadGameSettings().ShowAiCombat, Is.True);
+        Canvas.ForceUpdateCanvases();
+        var label = toggle.GetComponentInChildren<Text>();
+        Assert.That(label.cachedTextGenerator.characterCountVisible, Is.EqualTo(label.text.Length), "The entire option label must render.");
+        yield return CaptureCombatOption(toggle);
+    }
+
+    private static IEnumerator CaptureCombatOption(Toggle toggle)
+    {
+        var canvas = toggle.GetComponentInParent<Canvas>().rootCanvas;
+        var mode = canvas.renderMode;
+        var camera = canvas.worldCamera;
+        var distance = canvas.planeDistance;
+        var captureCamera = Camera.main;
+        var target = captureCamera.targetTexture;
+        var active = RenderTexture.active;
+        var render = RenderTexture.GetTemporary(Screen.width, Screen.height, 24);
+        var texture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+        var positions = canvas.GetComponentsInChildren<RectTransform>(true)
+            .Where(rect => rect != canvas.transform).Select(rect => (rect, position: rect.localPosition)).ToArray();
+        try
+        {
+            // Batch mode has no Game View texture; capture the shipped canvas through its camera.
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = captureCamera;
+            canvas.planeDistance = captureCamera.nearClipPlane + 1;
+            foreach (var item in positions)
+                item.rect.localPosition = new Vector3(item.position.x, item.position.y, 0);
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+            captureCamera.targetTexture = render;
+            captureCamera.Render();
+            RenderTexture.active = render;
+            texture.ReadPixels(new Rect(0, 0, render.width, render.height), 0, 0);
+            texture.Apply();
+            var root = System.IO.Path.Combine(Application.dataPath, "../Library/WismUiCaptures");
+            System.IO.Directory.CreateDirectory(root);
+            System.IO.File.WriteAllBytes(System.IO.Path.Combine(root, "show-ai-combat-setup-camera-projection.png"), texture.EncodeToPNG());
+        }
+        finally
+        {
+            captureCamera.targetTexture = target;
+            RenderTexture.active = active;
+            foreach (var item in positions) item.rect.localPosition = item.position;
+            canvas.renderMode = mode;
+            canvas.worldCamera = camera;
+            canvas.planeDistance = distance;
+            RenderTexture.ReleaseTemporary(render);
+            Object.Destroy(texture);
+            Canvas.ForceUpdateCanvases();
+        }
+    }
+
+    [UnityTest]
     public IEnumerator GameSetup_OptionTogglesAreInteractiveAndFeedSettings()
     {
         UnityModKitRuntimeSelection.Clear();

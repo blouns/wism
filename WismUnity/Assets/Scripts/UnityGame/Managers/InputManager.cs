@@ -238,7 +238,7 @@ namespace Assets.Scripts.Managers
                 this.LastPrimaryActionFrame = Time.frameCount;
                 this.LastPrimaryDeviceId = deviceId;
             }
-            else if (Input.GetKeyDown(KeyCode.D))
+            else if (WismUiInputAdapter.DefendPressedThisFrame())
             {
                 this.GameManager.DefendSelectedArmies();
             }
@@ -254,11 +254,11 @@ namespace Assets.Scripts.Managers
             // TODO: Add Find armies action
 
             // Hero actions
-            else if (Input.GetKeyDown(KeyCode.T))
+            else if (WismUiInputAdapter.ItemActionPressed(true))
             {
                 this.UnityManager.HandleItemPicker(true);
             }
-            else if (Input.GetKeyDown(KeyCode.O))
+            else if (WismUiInputAdapter.ItemActionPressed(false))
             {
                 this.UnityManager.HandleItemPicker(false);
             }
@@ -284,7 +284,7 @@ namespace Assets.Scripts.Managers
             }
 
             // Game actions
-            else if (Input.GetKeyDown(KeyCode.E))
+            else if (WismUiInputAdapter.EndTurnPressedThisFrame())
             {
                 this.GameManager.EndTurn();
             }
@@ -494,62 +494,41 @@ namespace Assets.Scripts.Managers
             }
 
             Hero hero = (Hero)army;
-            var itemPicker = this.unityManager.ItemPicker;
-            List<MapObject> itemsToPick;
-            if (takingItems)
+            var picker = this.unityManager.ItemPicker;
+            var available = takingItems ? hero.Tile.Items : hero.Items;
+            if (picker.OkCancelResult == OkCancel.None)
             {
-                // Launch the item picker
-                if (itemPicker.OkCancelResult == OkCancel.None)
+                if (available == null || available.Count == 0)
                 {
-                    this.unityManager.NotifyUser("Taking an item...");
-                    itemsToPick = new List<MapObject>(hero.Tile.Items);
-                    itemPicker.Initialize(this.unityManager, itemsToPick);
-                }
-                // Cancelled
-                else if (itemPicker.OkCancelResult == OkCancel.Cancel)
-                {
-                    itemPicker.Clear();
+                    this.unityManager.NotifyUser(takingItems ? "No items here!" : "No items to drop!");
                     SetInputMode(InputMode.Game);
+                    return;
                 }
-                // Take the items
-                else if (itemPicker.OkCancelResult == OkCancel.Ok)
+                if (takingItems && available.Count == 1)
                 {
-                    var item = itemPicker.GetSelectedItem();
-                    var items = new List<Artifact> { (Artifact)item };
-                    this.GameManager.TakeItems(hero, items);
-                    itemPicker.Clear();
+                    this.GameManager.TakeItems(hero, new List<Artifact> { available[0] });
                     SetInputMode(InputMode.Game);
+                    return;
                 }
+                picker.Initialize(this.unityManager, new List<MapObject>(available),
+                    takingItems ? "Take an item" : "Drop an item", takingItems ? "Take" : "Drop", hero.DisplayName);
             }
-            else
+            else if (picker.OkCancelResult == OkCancel.Cancel)
             {
-                // Launch the item picker
-                if (itemPicker.OkCancelResult == OkCancel.None)
+                picker.Clear();
+                SetInputMode(InputMode.Game);
+            }
+            else if (picker.OkCancelResult == OkCancel.Ok)
+            {
+                var item = picker.GetSelectedItem() as Artifact;
+                if (item != null && available != null && available.Contains(item))
                 {
-                    if (hero.Items == null || hero.Items.Count == 0)
-                    {
-                        this.unityManager.NotifyUser("No items to drop!");
-                        return;
-                    }
-                    this.unityManager.NotifyUser("Dropping an item...");
-                    itemsToPick = new List<MapObject>(hero.Items);
-                    itemPicker.Initialize(this.unityManager, itemsToPick);
+                    var chosen = new List<Artifact> { item };
+                    if (takingItems) this.GameManager.TakeItems(hero, chosen);
+                    else this.GameManager.DropItems(hero, chosen);
                 }
-                // Cancelled
-                else if (itemPicker.OkCancelResult == OkCancel.Cancel)
-                {
-                    itemPicker.Clear();
-                    SetInputMode(InputMode.Game);
-                }
-                // Drop the items
-                else if (itemPicker.OkCancelResult == OkCancel.Ok)
-                {
-                    var item = itemPicker.GetSelectedItem();
-                    var items = new List<Artifact> { (Artifact)item };
-                    this.GameManager.DropItems(hero, items);
-                    itemPicker.Clear();
-                    SetInputMode(InputMode.Game);
-                }
+                picker.Clear();
+                SetInputMode(InputMode.Game);
             }
         }
 

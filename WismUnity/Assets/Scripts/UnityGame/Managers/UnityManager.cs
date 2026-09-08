@@ -106,6 +106,7 @@ namespace Assets.Scripts.Managers
         public int LastCommandId { get => this.lastCommandId; set => this.lastCommandId = value; }
         public DebugManager DebugManager { get => this.debugManager; set => this.debugManager = value; }
         public bool InteractiveUI { get => this.interactiveUI; set => this.interactiveUI = value; }
+        public bool ShowAiCombat { get; set; } = true;
 
         public void Start()
         {
@@ -269,6 +270,7 @@ namespace Assets.Scripts.Managers
             {
                 // General processors
                 new SelectArmyProcessor(this.GameManager.LoggerFactory, this),
+                new ItemTransferProcessor(this),
                 
                 // Battle processors
                 new PrepareForBattleProcessor(this.GameManager.LoggerFactory, this),

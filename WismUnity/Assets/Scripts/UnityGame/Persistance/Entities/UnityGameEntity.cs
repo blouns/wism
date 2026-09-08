@@ -33,6 +33,7 @@ namespace Assets.Scripts.Persistance.Entities
             WorldName = unityGame.GetComponent<UnityGameFactory>().WorldName;
             ModKitSelection = Game.IsInitialized() ? Game.Current.ModKitSelection : null;
             LastCommandId = unityGame.LastCommandId;
+            ShowAiCombat = unityGame.ShowAiCombat;
             var cameraPosition = unityGame.GetMainCamera().transform.position;
             CameraPosition = new[]
             {
@@ -46,6 +47,7 @@ namespace Assets.Scripts.Persistance.Entities
         public string WorldName { get; set; }
         public ModKitSelectionEntity ModKitSelection { get; set; }
         public int LastCommandId { get; set; }
+        public bool ShowAiCombat { get; set; } = true;
         public float[] CameraPosition { get; set; }
         public GameEntity WismGameEntity { get; set; }
     }

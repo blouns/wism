@@ -68,6 +68,7 @@ namespace Assets.Scripts
             this.debugManager = this.debugManager = UnityUtilities.GameObjectHardFind("UnityManager")
                     .GetComponent<DebugManager>();
             this.unityManager.InteractiveUI = newGameEntity.InteractiveUI;
+            this.unityManager.ShowAiCombat = newGameEntity.ShowAiCombat;
 
             if (newGameEntity.ModKitSelection != null)
             {

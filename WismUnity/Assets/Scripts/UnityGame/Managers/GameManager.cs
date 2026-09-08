@@ -151,8 +151,10 @@ namespace Assets.Scripts.Managers
 
         public void DefendSelectedArmies()
         {
+            if (!Game.Current.ArmiesSelected()) return;
             this.commandController.AddCommand(
                 new DefendCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies()));
+            this.SelectNextArmy();
         }
 
         public void QuitSelectedArmies()
