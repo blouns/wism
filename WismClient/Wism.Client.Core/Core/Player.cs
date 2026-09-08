@@ -473,7 +473,15 @@ namespace Wism.Client.Core
 
             foreach (var army in this.GetArmies())
             {
-                army.Kill();
+                // Defeated factions withdraw living heroes; only an actual death creates loot.
+                if (army is Hero)
+                {
+                    this.KillArmy(army);
+                }
+                else
+                {
+                    army.Kill();
+                }
             }
 
             this.IsDead = true;
