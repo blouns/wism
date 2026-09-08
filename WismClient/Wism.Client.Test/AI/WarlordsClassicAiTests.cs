@@ -88,6 +88,7 @@ namespace Wism.Client.Test.AI
                 "Mobile Rear Forge"));
             World.Current.AddCity(rearCity, World.Current.Map[2, 12]);
             player.ClaimCity(rearCity);
+            player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), forwardCity.Tile);
 
             var commander = WarlordsClassicAiFactory.CreateCommandProvider(controllerProvider, logger);
             commander.GenerateCommands();
@@ -119,6 +120,7 @@ namespace Wism.Client.Test.AI
                 "Candidate Rear Forge"));
             World.Current.AddCity(rearCity, World.Current.Map[2, 12]);
             player.ClaimCity(rearCity);
+            player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), forwardCity.Tile);
 
             var commander = WarlordsClassicAiFactory.CreateCommandProvider(
                 controllerProvider,
@@ -1697,7 +1699,7 @@ namespace Wism.Client.Test.AI
                 for (var y = 0; y < map.GetLength(1); y++)
                 {
                     var origin = map[x, y];
-                    if (!IsClearTile(origin) ||
+                    if (!IsClearTile(origin) || origin.Terrain.ShortName != "Grass" ||
                         capturableCities.Any(city => evaluator.GetDistanceToCity(origin, city) < 4))
                     {
                         continue;
@@ -1712,7 +1714,7 @@ namespace Wism.Client.Test.AI
                             if (locationTile == null ||
                                 locationTile == origin ||
                                 !origin.IsNeighbor(locationTile) ||
-                                !IsClearTile(locationTile))
+                                !IsClearTile(locationTile) || locationTile.Terrain.ShortName != "Grass")
                             {
                                 continue;
                             }
@@ -1736,7 +1738,7 @@ namespace Wism.Client.Test.AI
                 {
                     var tile = map[x, y];
                     if (System.Math.Abs(origin.X - x) + System.Math.Abs(origin.Y - y) < minimumDistance ||
-                        !CanPlaceCityAt(tile))
+                        !CanPlaceCityAt(tile) || tile.Terrain.ShortName != "Grass")
                     {
                         continue;
                     }

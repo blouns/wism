@@ -101,7 +101,16 @@ namespace Wism.Client.Controllers
             {
                 this.logger.LogInformation(
                     $"{ArmiesToString(armiesToMove)} has insuffient moves to reach {targetTile}");
-                Game.Current.DeselectArmies();
+                var selected = Game.Current.GetSelectedArmies();
+                if (selected != null && selected.Count == armiesToMove.Count &&
+                    selected.All(armiesToMove.Contains))
+                {
+                    Game.Current.QuitSelectedArmies();
+                }
+                else
+                {
+                    Game.Current.DeselectArmies();
+                }
                 return MoveResult.InsuffientMoves;
             }
 
