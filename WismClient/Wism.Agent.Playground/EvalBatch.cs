@@ -331,7 +331,10 @@ public sealed record EvalCounters(
     int StrategicGoalsAbandoned,
     int StrategicGoalsFailed,
     int StrategicGoalsStale,
-    int EndgameCleanupCompletions)
+    int EndgameCleanupCompletions,
+    int ProductionRiskDecisions = 0,
+    int UnsupportedProductionDelayTurns = 0,
+    int ProductionUnitsProduced = 0)
 {
     public static EvalCounters Empty { get; } = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -374,7 +377,10 @@ public sealed record EvalCounters(
             left.StrategicGoalsAbandoned + right.StrategicGoalsAbandoned,
             left.StrategicGoalsFailed + right.StrategicGoalsFailed,
             left.StrategicGoalsStale + right.StrategicGoalsStale,
-            left.EndgameCleanupCompletions + right.EndgameCleanupCompletions);
+            left.EndgameCleanupCompletions + right.EndgameCleanupCompletions,
+            left.ProductionRiskDecisions + right.ProductionRiskDecisions,
+            left.UnsupportedProductionDelayTurns + right.UnsupportedProductionDelayTurns,
+            left.ProductionUnitsProduced + right.ProductionUnitsProduced);
 }
 
 internal sealed record ProductionDeliveryConversionCounters(
@@ -522,7 +528,7 @@ public sealed class EvalBatchRunner
         var hasRequestedCoverage = requestedScenarioFamilies != null && requestedFamilies.Length > 0;
         var hasCaptureCases = cases.Any(result => IsCaptureFocused(result.ScenarioFamily));
         var hasSearchCases = cases.Any(result => IsSearchFocused(result.ScenarioFamily));
-        var hasProductionCases = cases.Any(result => IsProductionFocused(result.ScenarioFamily));
+        var hasProductionCases = cases.Any(result => IsProductionFocused(result.ScenarioFamily) && !result.ScenarioFamily.Contains("opening-force"));
         var hasProductionVectoringCases = cases.Any(result => IsProductionVectoringFocused(result.ScenarioFamily));
         var classicAiCases = cases.Where(result => IsClassicAiFocused(result.ScenarioFamily)).ToArray();
         var classicAiConquestCases = cases.Where(IsClassicAiConquestPressureCase).ToArray();
@@ -552,6 +558,14 @@ public sealed class EvalBatchRunner
             new EvalGateResult("capture-signal", !hasCaptureCases || counters.CityCaptures > 0, $"{counters.CityCaptures} city captures"),
             new EvalGateResult("search-signal", !hasSearchCases || counters.Searches > 0, $"{counters.Searches} searches"),
             new EvalGateResult("production-delivery-signal", !hasProductionCases || counters.ProductionDeliveries > 0, $"{counters.ProductionDeliveries} production deliveries"),
+            new EvalGateResult("unsupported-opening-production-risk",
+                cases.Where(result => result.ScenarioFamily.Contains("unsupported-opening-force", StringComparison.OrdinalIgnoreCase))
+                    .All(result => result.Counters.ProductionRiskDecisions > 0 && result.Counters.UnsupportedProductionDelayTurns == 0),
+                $"{counters.ProductionRiskDecisions} evaluated builds; {counters.UnsupportedProductionDelayTurns} avoidable build-delay turns without a standing army"),
+            new EvalGateResult("opening-force-production-output",
+                cases.Where(result => result.ScenarioFamily.Contains("opening-force"))
+                    .All(result => result.Counters.ProductionUnitsProduced + result.Counters.ProductionDeliveries > 0),
+                $"{counters.ProductionUnitsProduced} units actually produced; local units are distinct from routed deliveries"),
             new EvalGateResult("production-vectoring-signal", !hasProductionVectoringCases || counters.ProductionVectors > 0, $"{counters.ProductionVectors} production vectors"),
             new EvalGateResult(
                 "board-state-invariants",
@@ -1177,7 +1191,18 @@ public sealed class EvalBatchRunner
             StrategicGoalsAbandoned: strategicGoalLifecycle.Abandoned,
             StrategicGoalsFailed: strategicGoalLifecycle.Failed,
             StrategicGoalsStale: strategicGoalLifecycle.Stale,
-            EndgameCleanupCompletions: outcomeKind == VictoryOutcomeKind.Conquest ? 1 : 0);
+            EndgameCleanupCompletions: outcomeKind == VictoryOutcomeKind.Conquest ? 1 : 0,
+            ProductionRiskDecisions: momentDetails.Count(moment => moment.Kind == "production-risk"),
+            UnsupportedProductionDelayTurns: momentDetails.Where(moment => moment.Kind == "production-risk")
+                .Sum(moment => ReadProductionMetric(moment, "UnsupportedDelayTurns")),
+            ProductionUnitsProduced: momentDetails.Where(moment => moment.Kind == "production-output")
+                .Sum(moment => ReadProductionMetric(moment, "Produced")));
+    }
+
+    private static int ReadProductionMetric(CampaignMoment moment, string property)
+    {
+        using var document = System.Text.Json.JsonDocument.Parse(moment.Context);
+        return document.RootElement.GetProperty(property).GetInt32();
     }
 
     private static EvalDominanceMetrics BuildDominanceMetrics(VictoryOutcomeSnapshot? outcome)

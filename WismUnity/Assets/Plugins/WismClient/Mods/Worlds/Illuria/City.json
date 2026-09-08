@@ -13,18 +13,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Tasme",
@@ -44,13 +37,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -58,10 +44,17 @@
         "Upkeep": 4
       },
       {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 4,
         "Upkeep": 8
       }
     ],
@@ -89,18 +82,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "Strength": 5,
+        "TurnsToProduce": 5,
         "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Varde",
@@ -120,25 +113,18 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
         "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "Griffins",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Strength": 5,
+        "TurnsToProduce": 8,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Khorfe",
@@ -165,18 +151,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Zaigonne",
@@ -196,25 +175,18 @@
     "Income": 20,
     "ProductionInfos": [
       {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 7,
+        "Strength": 6,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Argrond",
@@ -236,23 +208,16 @@
       {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
+        "Strength": 2,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 12,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Jessarton",
@@ -272,13 +237,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -286,11 +244,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Wellmore",
@@ -310,13 +268,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -324,11 +275,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
       }
     ],
     "ShortName": "AkEnlie",
@@ -355,17 +306,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 5,
         "Upkeep": 8
       }
     ],
@@ -386,13 +330,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -400,11 +337,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
       }
     ],
     "ShortName": "Greenweigh",
@@ -424,13 +368,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -438,11 +375,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Kazrak",
@@ -462,11 +406,11 @@
     "Income": 33,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
+        "ArmyInfoName": "GiantWarriors",
         "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
+        "Strength": 6,
+        "TurnsToProduce": 5,
+        "Upkeep": 6
       },
       {
         "ArmyInfoName": "HeavyInfantry",
@@ -476,10 +420,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
@@ -505,20 +449,6 @@
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Vival",
@@ -545,18 +475,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
+        "TurnsToProduce": 3,
+        "Upkeep": 8
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "Navy",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 13,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Herzag",
@@ -577,24 +507,10 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "Moves": 12,
         "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Carmel",
@@ -614,13 +530,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -628,11 +537,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
       }
     ],
     "ShortName": "Ungor",
@@ -657,20 +566,6 @@
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Lador",
@@ -690,13 +585,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -704,11 +592,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Waybourne",
@@ -728,25 +616,18 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
         "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "Griffins",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Cragmorton",
@@ -771,20 +652,6 @@
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Deephallow",
@@ -804,13 +671,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -818,11 +678,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
       }
     ],
     "ShortName": "AkFarzon",
@@ -849,18 +709,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Ubar",
@@ -880,6 +733,13 @@
     "Income": 20,
     "ProductionInfos": [
       {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 8,
+        "Strength": 4,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
@@ -887,18 +747,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Marton",
@@ -918,6 +771,13 @@
     "Income": 20,
     "ProductionInfos": [
       {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 8,
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
@@ -925,17 +785,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
@@ -963,17 +816,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
@@ -994,25 +840,25 @@
     "Income": 33,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "Moves": 10,
         "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
         "Moves": 16,
-        "Strength": 6,
+        "Strength": 4,
         "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Upkeep": 16
       }
     ],
     "ShortName": "Elvallie",
@@ -1039,18 +885,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "Moves": 19,
         "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 3,
+        "Upkeep": 6
       }
     ],
     "ShortName": "Dunethel",
@@ -1070,17 +909,17 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
         "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
@@ -1089,6 +928,13 @@
         "Strength": 6,
         "TurnsToProduce": 6,
         "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Beleri",
@@ -1115,17 +961,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
@@ -1153,16 +992,9 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
-        "Strength": 6,
+        "Strength": 5,
         "TurnsToProduce": 6,
         "Upkeep": 8
       }
@@ -1184,25 +1016,18 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
         "TurnsToProduce": 1,
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "Griffins",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Strength": 5,
+        "TurnsToProduce": 5,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Zhoran",
@@ -1222,13 +1047,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1236,11 +1054,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "CitadelofIce",
@@ -1267,18 +1092,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 4,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Minbourne",
@@ -1298,13 +1116,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1312,11 +1123,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
       }
     ],
     "ShortName": "Barthel",
@@ -1336,13 +1147,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1350,11 +1154,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Strength": 4,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Gildenhome",
@@ -1381,17 +1192,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "Strength": 5,
+        "TurnsToProduce": 4,
         "Upkeep": 8
       }
     ],
@@ -1412,25 +1216,18 @@
     "Income": 33,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
         "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "ArmyInfoName": "Griffins",
+        "Moves": 18,
         "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 5,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Khamar",
@@ -1450,25 +1247,11 @@
     "Income": 33,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 12,
+        "Strength": 6,
         "TurnsToProduce": 2,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Stormheim",
@@ -1488,13 +1271,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1502,10 +1278,17 @@
         "Upkeep": 4
       },
       {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 4,
         "Upkeep": 8
       }
     ],
@@ -1526,13 +1309,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1540,11 +1316,25 @@
         "Upkeep": 4
       },
       {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 5,
         "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 20,
+        "Strength": 5,
+        "TurnsToProduce": 10,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Hithos",
@@ -1564,13 +1354,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1578,11 +1361,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Ilnyr",
@@ -1605,22 +1395,8 @@
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Upway",
@@ -1647,17 +1423,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 5,
         "Upkeep": 8
       }
     ],
@@ -1678,13 +1447,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1692,10 +1454,17 @@
         "Upkeep": 4
       },
       {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 5,
         "Upkeep": 8
       }
     ],
@@ -1716,13 +1485,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1730,11 +1492,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Strength": 4,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Argenthorn",
@@ -1759,20 +1528,6 @@
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Charling",
@@ -1799,17 +1554,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "Moves": 15,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 4,
         "Upkeep": 8
       }
     ],
@@ -1830,6 +1578,13 @@
     "Income": 20,
     "ProductionInfos": [
       {
+        "ArmyInfoName": "HeavyInfantry",
+        "Moves": 7,
+        "Strength": 5,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
@@ -1837,18 +1592,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Vernon",
@@ -1873,20 +1621,6 @@
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Needleton",
@@ -1902,9 +1636,16 @@
   {
     "ClanName": "LordBane",
     "Defense": 6,
-    "DisplayName": "Bane\u0027s Citadel",
+    "DisplayName": "Bane's Citadel",
     "Income": 33,
     "ProductionInfos": [
+      {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 10,
+        "Strength": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 4
+      },
       {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
@@ -1913,17 +1654,17 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 4,
+        "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
+        "Strength": 5,
+        "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
@@ -1944,13 +1685,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -1958,11 +1692,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Upbourne",
@@ -1987,20 +1721,6 @@
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Gimlad",
@@ -2023,22 +1743,8 @@
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Paynor",
@@ -2058,13 +1764,6 @@
     "Income": 33,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2072,11 +1771,25 @@
         "Upkeep": 4
       },
       {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "Moves": 20,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 4,
         "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 6,
+        "TurnsToProduce": 8,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Enmouth",
@@ -2096,13 +1809,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2110,11 +1816,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Strength": 4,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
       }
     ],
     "ShortName": "AkGiriel",
@@ -2134,13 +1847,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2148,11 +1854,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
       }
     ],
     "ShortName": "Gorag",
@@ -2179,17 +1885,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
@@ -2210,13 +1909,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2224,11 +1916,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 10,
+        "Upkeep": 18
       }
     ],
     "ShortName": "Ohmsmouth",
@@ -2248,13 +1940,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2262,10 +1947,17 @@
         "Upkeep": 4
       },
       {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 5,
         "Upkeep": 8
       }
     ],
@@ -2293,17 +1985,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "Strength": 5,
+        "TurnsToProduce": 4,
         "Upkeep": 8
       }
     ],
@@ -2324,13 +2009,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2338,8 +2016,15 @@
         "Upkeep": 4
       },
       {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "Moves": 13,
         "Strength": 6,
         "TurnsToProduce": 6,
         "Upkeep": 8
@@ -2369,18 +2054,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "Moves": 18,
         "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 3,
+        "Upkeep": 6
       }
     ],
     "ShortName": "Fleymark",
@@ -2400,13 +2078,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2414,11 +2085,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "CitadelofFire",
@@ -2434,7 +2112,7 @@
   {
     "ClanName": "Neutral",
     "Defense": 4,
-    "DisplayName": "Alfar\u0027s Gap",
+    "DisplayName": "Alfar's Gap",
     "Income": 20,
     "ProductionInfos": [
       {
@@ -2445,17 +2123,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "Strength": 5,
+        "TurnsToProduce": 5,
         "Upkeep": 8
       }
     ],
@@ -2483,18 +2154,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Deserton",
@@ -2514,13 +2178,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2528,10 +2185,24 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
+      },
+      {
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 15,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 2,
         "Upkeep": 8
       }
     ],
@@ -2552,6 +2223,13 @@
     "Income": 20,
     "ProductionInfos": [
       {
+        "ArmyInfoName": "GiantWarriors",
+        "Moves": 10,
+        "Strength": 6,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
@@ -2559,17 +2237,10 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "WolfRiders",
+        "Moves": 14,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
@@ -2595,20 +2266,6 @@
         "Strength": 3,
         "TurnsToProduce": 1,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Amenal",
@@ -2635,18 +2292,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 8,
+        "Upkeep": 10
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Galin",
@@ -2666,13 +2323,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2680,11 +2330,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
+        "Strength": 5,
+        "TurnsToProduce": 13,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Herueth",
@@ -2705,23 +2362,16 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
+        "Moves": 9,
         "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "Moves": 18,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 4,
         "Upkeep": 8
       }
     ],
@@ -2742,13 +2392,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2756,11 +2399,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "DwarvenLegion",
+        "Moves": 9,
+        "Strength": 5,
+        "TurnsToProduce": 2,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Griffins",
         "Moves": 16,
-        "Strength": 6,
+        "Strength": 5,
         "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Upkeep": 16
       }
     ],
     "ShortName": "DharKhosis",
@@ -2783,21 +2433,14 @@
         "ArmyInfoName": "LightInfantry",
         "Moves": 10,
         "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
         "TurnsToProduce": 2,
         "Upkeep": 4
       },
       {
         "ArmyInfoName": "Cavalry",
-        "Moves": 16,
+        "Moves": 18,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 3,
         "Upkeep": 8
       }
     ],
@@ -2818,13 +2461,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2832,11 +2468,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 3,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Strength": 4,
+        "TurnsToProduce": 5,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Gunthang",
@@ -2863,18 +2506,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Quiesce",
@@ -2895,24 +2531,10 @@
     "ProductionInfos": [
       {
         "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
-        "Strength": 5,
+        "Moves": 9,
+        "Strength": 4,
         "TurnsToProduce": 2,
         "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
       }
     ],
     "ShortName": "Tirfing",
@@ -2932,13 +2554,6 @@
     "Income": 33,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -2946,11 +2561,25 @@
         "Upkeep": 4
       },
       {
+        "ArmyInfoName": "LightInfantry",
+        "Moves": 10,
+        "Strength": 3,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
         "ArmyInfoName": "Cavalry",
         "Moves": 16,
         "Strength": 6,
-        "TurnsToProduce": 6,
+        "TurnsToProduce": 4,
         "Upkeep": 8
+      },
+      {
+        "ArmyInfoName": "Pegasus",
+        "Moves": 15,
+        "Strength": 5,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Marthos",
@@ -2977,18 +2606,11 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "HeavyInfantry",
-        "Moves": 8,
+        "ArmyInfoName": "Navy",
+        "Moves": 18,
         "Strength": 5,
-        "TurnsToProduce": 2,
-        "Upkeep": 4
-      },
-      {
-        "ArmyInfoName": "Cavalry",
-        "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "TurnsToProduce": 11,
+        "Upkeep": 20
       }
     ],
     "ShortName": "Tal",
@@ -3008,13 +2630,6 @@
     "Income": 20,
     "ProductionInfos": [
       {
-        "ArmyInfoName": "LightInfantry",
-        "Moves": 10,
-        "Strength": 3,
-        "TurnsToProduce": 1,
-        "Upkeep": 4
-      },
-      {
         "ArmyInfoName": "HeavyInfantry",
         "Moves": 8,
         "Strength": 5,
@@ -3022,11 +2637,18 @@
         "Upkeep": 4
       },
       {
-        "ArmyInfoName": "Cavalry",
+        "ArmyInfoName": "ElvenArchers",
+        "Moves": 12,
+        "Strength": 4,
+        "TurnsToProduce": 1,
+        "Upkeep": 4
+      },
+      {
+        "ArmyInfoName": "Pegasus",
         "Moves": 16,
-        "Strength": 6,
-        "TurnsToProduce": 6,
-        "Upkeep": 8
+        "Strength": 4,
+        "TurnsToProduce": 7,
+        "Upkeep": 16
       }
     ],
     "ShortName": "Loremark",

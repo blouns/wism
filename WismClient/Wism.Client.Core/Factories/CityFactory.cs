@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
 using Wism.Client.Data.Entities;
@@ -29,7 +30,26 @@ namespace Wism.Client.Factories
                 throw new ArgumentNullException(nameof(world));
             }
 
-            MapBuilder.AddCity(world, snapshot.X, snapshot.Y, snapshot.CityShortName, snapshot.ClanShortName);
+            if (snapshot.Definition != null)
+            {
+                if (snapshot.Definition.ShortName != snapshot.CityShortName || snapshot.Definition.ProductionInfos == null)
+                    throw new InvalidOperationException("Snapshot city definition does not match its identity.");
+                MapBuilder.AddCitiesFromInfos(world, new List<Wism.Client.Modules.Infos.CityInfo> { new Wism.Client.Modules.Infos.CityInfo
+                {
+                    ShortName = snapshot.CityShortName, DisplayName = snapshot.Definition.DisplayName,
+                    Income = snapshot.Definition.Income, Defense = snapshot.Defense,
+                    X = snapshot.X, Y = snapshot.Y, ClanName = snapshot.ClanShortName,
+                    ProductionInfos = snapshot.Definition.ProductionInfos.Select(info => new Wism.Client.Modules.Infos.ProductionInfo
+                    {
+                        ArmyInfoName = info.ArmyInfoName, Moves = info.Moves, Strength = info.Strength,
+                        TurnsToProduce = info.TurnsToProduce, Upkeep = info.Upkeep
+                    }).ToArray()
+                } });
+            }
+            else
+            {
+                MapBuilder.AddCity(world, snapshot.X, snapshot.Y, snapshot.CityShortName, snapshot.ClanShortName);
+            }
 
             var city = world.Map[snapshot.X, snapshot.Y].City;
             city.Defense = snapshot.Defense;

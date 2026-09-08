@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Wism.Client.Core;
 using Wism.Client.Core.Armies;
@@ -279,6 +280,17 @@ namespace Wism.Client.Data
                     ArmyInTraining = SnapshotArmyInTraining(cities[i].Barracks.ArmyInTraining),
                     ClanShortName = cities[i].Clan == null ? null : cities[i].Clan.ShortName,
                     CityShortName = cities[i].ShortName,
+                    Definition = new Wism.Client.Modules.Infos.CityInfo
+                    {
+                        ShortName = cities[i].ShortName, DisplayName = cities[i].DisplayName,
+                        Income = cities[i].Income, Defense = cities[i].Defense,
+                        X = cities[i].X, Y = cities[i].Y, ClanName = cities[i].Clan?.ShortName,
+                        ProductionInfos = cities[i].Barracks.GetProductionKinds().Select(info => new Wism.Client.Modules.Infos.ProductionInfo
+                        {
+                            ArmyInfoName = info.ArmyInfoName, Moves = info.Moves, Strength = info.Strength,
+                            TurnsToProduce = info.TurnsToProduce, Upkeep = info.Upkeep
+                        }).ToArray()
+                    },
                     ProductionInfo = SnapshotProductionSlots(cities[i].Barracks),
                     Defense = cities[i].Defense,
                     Id = cities[i].Id,

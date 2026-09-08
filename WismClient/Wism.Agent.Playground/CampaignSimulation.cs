@@ -270,7 +270,7 @@ internal sealed class CampaignScenarioBuilder
         MapBuilder.AddCitiesFromInfos(World.Current, CreateCities(cityCoordinates, clanCount, outpostCoordinates, scenarioFamily));
         MapBuilder.AddLocationsFromInfos(World.Current, CreateLocations(locationCoordinates, clanCount, scenarioFamily));
         MapBuilder.AllocateBoons(World.Current.GetLocations());
-        AddStartingArmies();
+        AddStartingArmies(scenarioFamily);
         AddScenarioProbeArmies(scenarioFamily, clanCount);
 
         return new WorldValidator().Validate(World.Current, Game.Current.Players);
@@ -458,7 +458,7 @@ internal sealed class CampaignScenarioBuilder
                 Income = 30,
                 X = coordinates[i].X,
                 Y = coordinates[i].Y,
-                ProductionInfos = DefaultProduction()
+                ProductionInfos = DefaultProduction(scenarioFamily)
             });
         }
 
@@ -475,7 +475,7 @@ internal sealed class CampaignScenarioBuilder
                 Income = 20,
                 X = outpostCoordinates[i].X,
                 Y = outpostCoordinates[i].Y,
-                ProductionInfos = DefaultProduction()
+                ProductionInfos = DefaultProduction(scenarioFamily)
             });
         }
 
@@ -640,23 +640,24 @@ internal sealed class CampaignScenarioBuilder
         map[x, y].Terrain = MapBuilder.TerrainKinds[terrain];
     }
 
-    private static ProductionInfo[] DefaultProduction()
+    private static ProductionInfo[] DefaultProduction(string scenarioFamily)
     {
         return new[]
         {
             new ProductionInfo { ArmyInfoName = "LightInfantry", Moves = 10, Strength = 3, TurnsToProduce = 1, Upkeep = 4 },
             new ProductionInfo { ArmyInfoName = "HeavyInfantry", Moves = 8, Strength = 5, TurnsToProduce = 2, Upkeep = 4 },
-            new ProductionInfo { ArmyInfoName = "Cavalry", Moves = 16, Strength = 6, TurnsToProduce = 4, Upkeep = 8 }
+            new ProductionInfo { ArmyInfoName = "Cavalry", Moves = 16, Strength = 6, TurnsToProduce = scenarioFamily.Contains("opening-force") ? 6 : 4, Upkeep = 8 }
         };
     }
 
-    private static void AddStartingArmies()
+    private static void AddStartingArmies(string scenarioFamily)
     {
         foreach (var player in Game.Current.Players)
         {
             player.Gold = 400;
             var city = player.Capitol;
             player.HireHero(city.Tile);
+            if (scenarioFamily.Contains("unsupported-opening-force")) continue;
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), city.Tile);
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("HeavyInfantry"), city.Tile);
             player.ConscriptArmy(ArmyInfo.GetArmyInfo("Cavalry"), city.Tile);

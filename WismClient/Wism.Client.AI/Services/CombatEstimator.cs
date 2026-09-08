@@ -96,8 +96,10 @@ namespace Wism.Client.AI.Services
             return estimate;
         }
 
-        private static double EstimateDuelWinProbability(int attackStrength, int defenseStrength)
+        public static double EstimateDuelWinProbability(int attackStrength, int defenseStrength)
         {
+            attackStrength = ClampCombatStrength(attackStrength);
+            defenseStrength = ClampCombatStrength(defenseStrength);
             var attackerHitProbability = (1.0 - (defenseStrength / 10.0)) * (attackStrength / 10.0);
             var defenderHitProbability = (defenseStrength / 10.0) * (1.0 - (attackStrength / 10.0));
             var hitProbability = attackerHitProbability + defenderHitProbability;

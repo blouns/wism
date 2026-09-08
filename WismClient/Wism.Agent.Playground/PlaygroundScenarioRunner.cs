@@ -1067,6 +1067,13 @@ public sealed class PlaygroundScenarioRunner
         {
             case StartProductionCommand start:
             {
+                var production = start.ProductionCity.Barracks.GetProductionKinds().Single(info => info.ArmyInfoName == start.ArmyInfo.ShortName);
+                var delay = Wism.Client.AI.Strategic.ProductionModule.UnsupportedBuildDelay(start.ProductionCity, production);
+                recorder.Checkpoint("production-risk", turn, player.Clan.ShortName,
+                    System.Text.Json.JsonSerializer.Serialize(new { City = start.ProductionCity.ShortName,
+                        Army = start.ArmyInfo.ShortName, BuildTurns = production.TurnsToProduce,
+                        StandingArmies = player.GetArmies().Count(army => !army.IsDead && army is not Hero),
+                        UnsupportedDelayTurns = delay }));
                 var destination = start.DestinationCity ?? start.ProductionCity;
                 events.Add($"{player.Clan.ShortName} started {start.ArmyInfo.ShortName} production in {start.ProductionCity.ShortName} for {destination.ShortName}.");
                 var kind = start.DestinationCity != null && start.DestinationCity != start.ProductionCity
@@ -1077,6 +1084,9 @@ public sealed class PlaygroundScenarioRunner
             }
 
             case ReviewProductionCommand review:
+                recorder.Checkpoint("production-output", turn, player.Clan.ShortName,
+                    System.Text.Json.JsonSerializer.Serialize(new { Produced = review.ArmiesProducedResult?.Count ?? 0,
+                        Delivered = review.ArmiesDeliveredResult?.Count ?? 0 }));
                 recorder.Checkpoint("production", turn, player.Clan.ShortName, $"Reviewed production: {review.ArmiesProducedResult?.Count ?? 0} produced, {review.ArmiesDeliveredResult?.Count ?? 0} delivered.");
                 break;
 
@@ -1536,6 +1546,9 @@ public sealed class PlaygroundScenarioRunner
             : string.Empty;
         var baseProfile = AiDifficultyPolicy.GetBaseProfile(aiProfile);
 
+        if (string.Equals(baseProfile, "strategic-production-risk-control", StringComparison.OrdinalIgnoreCase))
+            return "strategic-production-risk-control" + suffix;
+
         if (string.Equals(baseProfile, "tactical", StringComparison.OrdinalIgnoreCase))
         {
             return "tactical" + suffix;
@@ -1626,6 +1639,7 @@ public sealed class PlaygroundScenarioRunner
             return true;
         }
 
+        if (options.ScenarioFamily.Contains("opening-force", StringComparison.OrdinalIgnoreCase)) return false;
         if (!UsesProductionEconomy(options.ScenarioFamily))
         {
             return false;

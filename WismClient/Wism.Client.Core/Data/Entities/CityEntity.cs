@@ -22,5 +22,7 @@ namespace Wism.Client.Data.Entities
         [DataMember] public ArmyInTrainingEntity[] ArmiesToDeliver { get; set; }
 
         [DataMember] public ProductionEntity ProductionInfo { get; set; }
+
+        [DataMember(EmitDefaultValue = false)] public Wism.Client.Modules.Infos.CityInfo Definition { get; set; }
     }
 }

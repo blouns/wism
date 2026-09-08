@@ -26,6 +26,7 @@ namespace Wism.Client.AI.Strategic
         private readonly CityTargetEvaluator cityTargetEvaluator;
         private readonly IWismLogger logger;
         private readonly bool useExpandedProductionRouting;
+        public double UnsupportedBuildRiskWeight { get; set; } = 8.0;
         private readonly HashSet<string> handledTurns = new HashSet<string>();
 
         public ProductionModule(CityController cityController, IWismLogger logger)
@@ -256,12 +257,40 @@ namespace Wism.Client.AI.Strategic
         private ProductionInfo ChooseProduction(City city, City pressureTarget, City destination)
         {
             var useMobilityDoctrine = ShouldUseMobilityDoctrine(city, pressureTarget, destination);
+            var defenders = pressureTarget?.MusterArmies()
+                .Where(army => army.Clan != city.Clan).ToList();
+            var defendedStrength = defenders != null && defenders.Count > 0
+                ? defenders.Average(army => army.Strength) + defenders.Sum(army => army.GetDefenseModifier()) +
+                    (pressureTarget.Clan?.ShortName == "Neutral" ? 0 : pressureTarget.Defense)
+                : 0;
             return city.Barracks.GetProductionKinds()
-                .OrderByDescending(info => ProductionScore(info, useMobilityDoctrine))
+                .OrderByDescending(info => (defendedStrength > 0 && !useMobilityDoctrine
+                    ? AssaultProductionScore(info, (int)System.Math.Ceiling(defendedStrength))
+                    : ProductionScore(info, useMobilityDoctrine)) -
+                    UnsupportedBuildRiskWeight * UnsupportedBuildDelay(city, info))
                 .ThenBy(info => info.TurnsToProduce)
                 .ThenBy(info => info.Upkeep)
                 .ThenBy(info => info.ArmyInfoName)
                 .FirstOrDefault();
+        }
+
+        private static double AssaultProductionScore(ProductionInfo info, int defenseStrength)
+        {
+            var win = CombatEstimator.EstimateDuelWinProbability(info.Strength, defenseStrength);
+            var turns = System.Math.Max(1, info.TurnsToProduce);
+            // Expected defender losses per replacement turn rewards useful siege reinforcements.
+            return 100.0 * win / System.Math.Max(0.01, 1.0 - win) / turns;
+        }
+
+        public static int UnsupportedBuildDelay(City city, ProductionInfo production)
+        {
+            var player = city?.Clan?.Player;
+            if (player == null || player.GetArmies().Any(army => !army.IsDead && !(army is Hero))) return 0;
+            var quickest = city.Barracks.GetProductionKinds()
+                .Where(info => { var kind = ModFactory.FindArmyInfo(info.ArmyInfoName); return kind != null && (kind.CanWalk || kind.CanFly); })
+                .Select(info => System.Math.Max(1, info.TurnsToProduce)).DefaultIfEmpty(1).Min();
+            // Exposure is avoidable delay without a standing field army, not city occupancy.
+            return System.Math.Max(0, production.TurnsToProduce - quickest);
         }
 
         private bool ShouldUseMobilityDoctrine(City city, City pressureTarget, City destination)
@@ -298,8 +327,8 @@ namespace Wism.Client.AI.Strategic
             var turns = info.TurnsToProduce <= 0 ? 1 : info.TurnsToProduce;
             var upkeep = info.Upkeep <= 0 ? 1 : info.Upkeep;
             var armyInfo = ModFactory.FindArmyInfo(info.ArmyInfoName);
-            var mobility = armyInfo?.Moves ?? info.Moves;
-            var strength = armyInfo?.Strength ?? info.Strength;
+            var mobility = info.Moves;
+            var strength = info.Strength;
             var score = (strength * 2.0) + (mobility * 3.0) - (turns * 2.0) - (upkeep / 4.0);
 
             if (armyInfo != null && !armyInfo.CanWalk && !armyInfo.CanFly)
