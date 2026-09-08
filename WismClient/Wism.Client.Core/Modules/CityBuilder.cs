@@ -44,7 +44,8 @@ namespace Wism.Client.Modules
                 throw new ArgumentNullException(nameof(info));
             }
 
-            this.AddCity(world, info.X, info.Y, info.ShortName, info.ClanName);
+            // Supplied definitions are instance data, not replacements for cached mod templates.
+            AddCity(world, info.X, info.Y, City.Create(info), info.ClanName);
         }
 
         /// <summary>
@@ -74,7 +75,16 @@ namespace Wism.Client.Modules
                 throw new ArgumentException($"{shortName} not found in city modules.");
             }
 
-            city = city.Clone();
+            AddCity(world, x, y, city.Clone(), clanName);
+        }
+
+        private static void AddCity(World world, int x, int y, City city, string clanName)
+        {
+            if (world is null)
+            {
+                throw new ArgumentNullException(nameof(world));
+            }
+
             world.AddCity(city, world.Map[x, y]);
 
             // Claim the city if matching player exists; otherwise Neutral

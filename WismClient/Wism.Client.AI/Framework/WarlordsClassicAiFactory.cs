@@ -21,6 +21,8 @@ namespace Wism.Client.AI.Framework
             Action<string, TimeSpan> timingSink = null)
         {
             aiProfile = AiDifficultyPolicy.GetBaseProfile(aiProfile);
+            var productionRiskControl = string.Equals(aiProfile, "strategic-production-risk-control", StringComparison.OrdinalIgnoreCase);
+            if (productionRiskControl) aiProfile = "strategic";
             pathingStrategy = pathingStrategy ?? new AStarPathingStrategy();
             var pathfinder = new PathfindingService(pathingStrategy);
             var garrisonPolicy = new GarrisonPolicy();
@@ -45,6 +47,7 @@ namespace Wism.Client.AI.Framework
                 new List<ITurnModule>
                 {
                     new ProductionModule(controllerProvider.CityController, logger, UsesCandidateProductionProfile(aiProfile))
+                    { UnsupportedBuildRiskWeight = productionRiskControl ? 0.0 : 8.0 }
                 },
                 logger,
                 spatialAdvisor,

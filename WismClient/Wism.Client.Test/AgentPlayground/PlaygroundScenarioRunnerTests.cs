@@ -15,6 +15,51 @@ namespace Wism.Client.Test.AgentPlayground;
 public class PlaygroundScenarioRunnerTests
 {
     [Test]
+    public void ProductionRiskEval_DoesNotLetOtherCasesMaskUnsupportedBuildOrMissingEvidence()
+    {
+        foreach (var risky in new[] { EvalCounters.Empty,
+            EvalCounters.Empty with { ProductionRiskDecisions = 2, UnsupportedProductionDelayTurns = 10 } })
+        {
+            var scorecard = EvalBatchRunner.BuildScorecard(new[] {
+                EvalCase(scenarioFamily: "classic-ai-production-unsupported-opening-force", counters: risky),
+                EvalCase(scenarioFamily: "classic-ai-production-economy", counters: EvalCounters.Empty with { ProductionDeliveries = 99, ProductionRiskDecisions = 99 }) });
+            Assert.That(scorecard.Gates.Single(gate => gate.Name == "unsupported-opening-production-risk").Passed, Is.False);
+        }
+    }
+
+    [Test]
+    public void ProductionRiskEval_PairedOpeningAndStandingArmyControls()
+    {
+        var output = Path.Combine(TestContext.CurrentContext.WorkDirectory, "production-risk-eval");
+        var families = new[] { "classic-ai-production-unsupported-opening-force", "classic-ai-production-supported-opening-force" };
+        var control = new EvalBatchRunner().Run(new EvalBatchOptions(1990, 6, 16, Path.Combine(output, "control"),
+            families, new[] { 2 }, new[] { "small" }, null, "strategic-production-risk-control", "summary", ProcessIsolated: false));
+        var candidate = new EvalBatchRunner().Run(new EvalBatchOptions(1990, 6, 16, Path.Combine(output, "candidate"),
+            families, new[] { 2 }, new[] { "small" }, null, "strategic", "summary", ProcessIsolated: false));
+        TestContext.Out.WriteLine("Control: " + control.ScorecardPath);
+        TestContext.Out.WriteLine("Candidate: " + candidate.ScorecardPath);
+        Assert.That(candidate.Scorecard.Status, Is.EqualTo("Passed"), "A successful process is not a passing eval.");
+        Assert.That(control.Cases.All(c => c.AiProfile == "strategic-production-risk-control"), Is.True,
+            "A normalized-away control is not an A/B comparison.");
+        Assert.That(control.Scorecard.Counters.UnsupportedProductionDelayTurns, Is.GreaterThan(0), "The control must reproduce the live failure.");
+        foreach (var result in control.Cases.Where(c => c.ScenarioFamily.Contains("unsupported-opening")))
+        {
+            var riskRows = File.ReadLines(Path.Combine(result.CampaignDirectory, "checkpoint-index.jsonl"))
+                .Select(line => JsonConvert.DeserializeObject<CampaignMoment>(line)).Where(moment => moment.Kind == "production-risk")
+                .Select(moment => Newtonsoft.Json.Linq.JObject.Parse(moment.Context)).ToList();
+            Assert.That(riskRows.Any(row => (string)row["Army"] == "Cavalry" && (int)row["BuildTurns"] == 6 && (int)row["StandingArmies"] == 0), Is.True,
+                "The control must execute the reported six-turn/no-standing-army decision, not a similarly named fixture.");
+        }
+        Assert.That(candidate.Scorecard.Counters.UnsupportedProductionDelayTurns, Is.Zero);
+        Assert.That(candidate.Scorecard.Counters.Crashes + candidate.Scorecard.Counters.Timeouts + candidate.Scorecard.Counters.InvalidCommands, Is.Zero);
+        foreach (var baselineCase in control.Cases.Where(c => c.ScenarioFamily.Contains("supported-opening") && !c.ScenarioFamily.Contains("unsupported")))
+        {
+            var compared = candidate.Cases.Single(c => c.Seed == baselineCase.Seed && c.ScenarioFamily == baselineCase.ScenarioFamily);
+            Assert.That(compared.Counters.CityCaptures, Is.GreaterThanOrEqualTo(baselineCase.Counters.CityCaptures), "Standing-army expansion must not regress.");
+        }
+    }
+
+    [Test]
     public void Sample_InitializesAsciiWorldHeadlessly()
     {
         var report = new PlaygroundScenarioRunner().Sample();
