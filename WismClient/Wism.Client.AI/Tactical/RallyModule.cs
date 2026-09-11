@@ -42,9 +42,10 @@ namespace Wism.Client.AI.Tactical
                 return bids;
             }
 
-            var stacks = GetMobileStacks(player);
-            foreach (var stack in stacks)
+            var stacks = GetFriendlyStacks(player);
+            foreach (var residentStack in stacks)
             {
+                var stack = this.garrisonPolicy.GetMobileArmies(residentStack.Where(army => army.MovesRemaining > 0).ToList());
                 var target = FindRallyTarget(stack, stacks);
                 if (target == null)
                 {
@@ -78,31 +79,21 @@ namespace Wism.Client.AI.Tactical
                 return commands;
             }
 
-            armies = this.garrisonPolicy.GetMobileArmies(armies);
+            armies = this.garrisonPolicy.GetMobileArmies(armies
+                .Where(army => army != null && !army.IsDead && army.Tile != null && army.MovesRemaining > 0).ToList());
             if (armies.Count == 0)
             {
                 return commands;
             }
 
-            var stacks = GetMobileStacks(armies[0].Player);
+            var stacks = GetFriendlyStacks(armies[0].Player);
             var target = FindRallyTarget(armies, stacks);
             if (target == null)
             {
                 return commands;
             }
 
-            this.pathingStrategy.FindShortestRoute(
-                World.Current.Map,
-                armies,
-                target.Tile,
-                out var path,
-                out _,
-                ignoreClan: false);
-
-            if (path == null || path.Count <= 1)
-            {
-                return commands;
-            }
+            var path = target.Path;
 
             logger.LogInformation(
                 $"[Rally] Moving stack at ({armies[0].Tile.X},{armies[0].Tile.Y}) toward friendly stack at ({target.Tile.X},{target.Tile.Y}) via ({path[1].X},{path[1].Y}).");
@@ -110,13 +101,12 @@ namespace Wism.Client.AI.Tactical
             return commands;
         }
 
-        private List<List<Army>> GetMobileStacks(Player player)
+        private static List<List<Army>> GetFriendlyStacks(Player player)
         {
             return player.GetArmies()
-                .Where(army => army != null && army.Tile != null && army.MovesRemaining > 0)
+                .Where(army => army != null && !army.IsDead && army.Tile != null)
                 .GroupBy(army => army.Tile)
-                .Select(group => this.garrisonPolicy.GetMobileArmies(group.ToList()))
-                .Where(stack => stack.Count > 0)
+                .Select(group => group.ToList())
                 .ToList();
         }
 
@@ -128,8 +118,12 @@ namespace Wism.Client.AI.Tactical
             }
 
             var origin = armies[0].Tile;
-            return stacks
-                .Where(stack => stack.Count > armies.Count)
+            var residentCount = stacks.FirstOrDefault(stack => stack[0].Tile == origin)?.Count ?? armies.Count;
+            // Strictly increasing size, then stable tile order, prevents reciprocal rendezvous.
+            var candidates = stacks
+                .Where(stack => stack.Count > residentCount ||
+                    (stack.Count == residentCount &&
+                     (stack[0].Tile.X < origin.X || (stack[0].Tile.X == origin.X && stack[0].Tile.Y < origin.Y))))
                 .Where(stack => stack[0].Tile != origin)
                 .Where(stack => stack[0].Tile.HasRoom(armies.Count))
                 .Where(stack => stack[0].Tile.CanTraverseHere(armies))
@@ -140,8 +134,26 @@ namespace Wism.Client.AI.Tactical
                 .OrderByDescending(target => target.StackSize)
                 .ThenBy(target => target.Distance)
                 .ThenBy(target => target.Tile.X)
-                .ThenBy(target => target.Tile.Y)
-                .FirstOrDefault();
+                .ThenBy(target => target.Tile.Y);
+
+            foreach (var target in candidates)
+            {
+                this.pathingStrategy.FindShortestRoute(World.Current.Map, armies, target.Tile,
+                    out var path, out _, ignoreClan: false);
+                if (path == null || path.Count <= 1 || path[1] == null || !path[1].CanTraverseHere(armies) ||
+                    !path[1].HasRoom(armies.Count) ||
+                    path[1].GetAllArmies().Any(army => army.Clan != armies[0].Clan))
+                    continue;
+
+                var movable = Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armies, path[1]);
+                if (!Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(movable, path[1]))
+                    continue;
+
+                target.Path = path;
+                return target;
+            }
+
+            return null;
         }
 
         private class RallyTarget
@@ -158,6 +170,8 @@ namespace Wism.Client.AI.Tactical
             public int StackSize { get; }
 
             public int Distance { get; }
+
+            public IList<Tile> Path { get; set; }
         }
     }
 }

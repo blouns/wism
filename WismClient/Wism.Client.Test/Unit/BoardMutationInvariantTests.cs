@@ -85,6 +85,35 @@ public class BoardMutationInvariantTests
     }
 
     [Test]
+    public void Invariant_AttackOutcomeDistinguishesRejectionFromResolvedDefeat()
+    {
+        Game.Current.Random = new System.Random(20260910);
+        var controllers = TestUtilities.CreateControllerProvider();
+        var origin = World.Current.Map[2, 2];
+        var target = World.Current.Map[2, 3];
+        var attacker = Game.Current.Players[0].ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+        var attackers = new List<Army> { attacker };
+        var defenders = Enumerable.Range(0, Army.MaxArmies)
+            .Select(_ => Game.Current.Players[1].ConscriptArmy(ArmyInfo.GetArmyInfo("Dragons"), target)).ToList();
+        var attack = new AttackOnceCommand(controllers.ArmyController, attackers, target.X, target.Y);
+
+        Assert.That(attack.Execute(), Is.EqualTo(ActionState.Failed));
+        Assert.That(attack.LastAttackResult, Is.Null, "Rejected input is not a resolved battle.");
+        Assert.That(attacker.IsDead, Is.False);
+        Assert.That(defenders.All(army => !army.IsDead), Is.True);
+
+        new SelectArmyCommand(controllers.ArmyController, attackers).Execute();
+        Assert.That(new PrepareForBattleCommand(controllers.ArmyController, attackers, target.X, target.Y).Execute(),
+            Is.EqualTo(ActionState.Succeeded));
+        attack = new AttackOnceCommand(controllers.ArmyController, attackers, target.X, target.Y);
+        Assert.That(TestUtilities.ExecuteCommandUntilDone(controllers.CommandController, attack), Is.EqualTo(ActionState.Failed));
+        Assert.That(attack.LastAttackResult, Is.EqualTo(AttackResult.DefenderWinBattle));
+        Assert.That(attacker.IsDead, Is.True);
+        Assert.That(Game.Current.GameState, Is.EqualTo(GameState.Ready));
+        Assert.That(target.GetAllArmies().All(army => army.Player == Game.Current.Players[1]), Is.True);
+    }
+
+    [Test]
     public void Invariant_CaptureCityCommandRejectsHostileCityFootprintVisitors()
     {
         var controllers = TestUtilities.CreateControllerProvider();

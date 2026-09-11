@@ -37,8 +37,11 @@ namespace Wism.Client.Commands.Armies
         public List<MapObjects.Army> OriginalAttackingArmies { get; set; }
         public List<MapObjects.Army> OriginalDefendingArmies { get; set; }
 
+        public AttackResult? LastAttackResult { get; private set; }
+
         protected override ActionState ExecuteInternal()
         {
+            LastAttackResult = null;
             var targetTile = World.Current.Map[this.X, this.Y];
             if (!IsPreparedAttackStillCurrent(this.Armies, targetTile))
             {
@@ -46,6 +49,7 @@ namespace Wism.Client.Commands.Armies
             }
 
             var result = this.ArmyController.AttackOnce(this.Armies, targetTile);
+            LastAttackResult = result;
 
             if (result == AttackResult.DefenderWinBattle)
             {
