@@ -1058,6 +1058,15 @@ public sealed class PlaygroundScenarioRunner
 
     private void RecordClassicAiCommandMoment(Command command, ActionState result, Player player, int turn, CampaignRecorder recorder)
     {
+        // A defeated attacker completes cleanup inside AttackOnce, not CompleteBattle.
+        // Failed validation is not a battle; require the resolver's explicit outcome.
+        if (result == ActionState.Failed && command is AttackOnceCommand defeatedAttack &&
+            defeatedAttack.LastAttackResult == AttackResult.DefenderWinBattle)
+        {
+            recorder.Checkpoint("battle", turn, player.Clan.ShortName, "Resolved Classic AI battle: defender won.");
+            return;
+        }
+
         if (result != ActionState.Succeeded)
         {
             return;
