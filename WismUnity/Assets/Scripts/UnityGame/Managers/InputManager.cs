@@ -59,6 +59,24 @@ namespace Assets.Scripts.Managers
         private bool holdingRightButton;
         private InputMode inputMode = InputMode.Game;
         private bool skipInput;
+        public bool EndTurnPending { get; private set; }
+
+        public bool CanAcceptGameplayInput => !EndTurnPending && Game.IsInitialized() &&
+            Game.Current.GetCurrentPlayer().IsHuman &&
+            Game.Current.GameState != GameState.EndingTurn &&
+            Game.Current.GameState != GameState.StartingTurn &&
+            Game.Current.GameState != GameState.GameOver;
+
+        public bool TryBeginEndTurn()
+        {
+            if (EndTurnPending) return false;
+            EndTurnPending = true;
+            ResetPrimaryGesture();
+            SetInputMode(InputMode.AITurn);
+            return true;
+        }
+
+        public void CompleteEndTurn() => EndTurnPending = false;
 
         public GameManager GameManager { get => this.gameManager; set => this.gameManager = value; }
         public UnityManager UnityManager { get => this.unityManager; set => this.unityManager = value; }
@@ -165,7 +183,7 @@ namespace Assets.Scripts.Managers
 
         private void HandleGameInput()
         {
-            if (this.skipInput ||
+            if (!CanAcceptGameplayInput || this.skipInput ||
                 this.unityManager.ExecutionMode != ExecutionMode.Running)
             {
                 this.skipInput = false;
@@ -365,6 +383,7 @@ namespace Assets.Scripts.Managers
             this.LastPrimaryActionFrame = Time.frameCount;
             this.LastPrimaryAction = "rejected";
             this.pendingSelectAllTile = null;
+            if (!CanAcceptGameplayInput) return;
             // Raycast this press, not the EventSystem's previous-frame mouse cache.
             this.pointerHits.Clear();
             if (EventSystem.current != null)

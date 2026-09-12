@@ -219,6 +219,7 @@ namespace Assets.Scripts.Managers
 
         public void EndTurn()
         {
+            if (!GetUnityManager().InputManager.TryBeginEndTurn()) return;
             this.commandController.AddCommand(
                 new EndTurnCommand(this.provider.GameController, Game.Current.GetCurrentPlayer()));
         }
