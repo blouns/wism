@@ -78,12 +78,10 @@ namespace Assets.Scripts.UI
 
         public static bool EndTurnPressedThisFrame()
         {
-            if (Input.GetKeyDown(KeyCode.E) &&
-                (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))) return true;
+            if (Input.GetKeyDown(KeyCode.E)) return true;
 #if ENABLE_INPUT_SYSTEM
             var keyboard = Keyboard.current;
-            return keyboard != null && keyboard.eKey.wasPressedThisFrame &&
-                (keyboard.leftAltKey.isPressed || keyboard.rightAltKey.isPressed);
+            return keyboard != null && keyboard.eKey.wasPressedThisFrame;
 #else
             return false;
 #endif

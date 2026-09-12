@@ -17,11 +17,18 @@ public class BackgroundTestAudioTests
     }
 
     [Test]
-    public void BackgroundEditorHasMasterMuteEnabled()
+    public void ImportWorkersDoNotChangeAudioPolicy()
+    {
+        Assert.That(BackgroundTestAudio.ShouldMute(true, new[] { "-runTests" }, true), Is.False);
+        Assert.That(BackgroundTestAudio.ShouldMute(true, new string[0], true), Is.False);
+    }
+
+    [Test]
+    public void BackgroundEditorHasProcessLocalMuteEnabled()
     {
         if (!BackgroundTestAudio.ShouldMute(UnityEngine.Application.isBatchMode, System.Environment.GetCommandLineArgs()))
             Assert.Ignore("This assertion requires an automated editor session.");
 
-        Assert.That(EditorUtility.audioMasterMute, Is.True);
+        Assert.That(UnityEngine.AudioListener.volume, Is.Zero);
     }
 }

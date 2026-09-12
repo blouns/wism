@@ -11,25 +11,25 @@ namespace Wism.EditorTesting
 
         static BackgroundTestAudio()
         {
-            if (!ShouldMute(Application.isBatchMode, Environment.GetCommandLineArgs()))
+            if (!ShouldMute(Application.isBatchMode, Environment.GetCommandLineArgs(), AssetDatabase.IsAssetImportWorkerProcess()))
                 return;
 
-            // Process-local master mute preserves audio timing and normal player settings.
+            // Listener volume is process-local. Never change the Editor's persisted mute preference.
             EnforceMute();
             EditorApplication.update += EnforceMute;
             EditorApplication.playModeStateChanged += _ => EnforceMute();
         }
 
-        public static bool ShouldMute(bool batchMode, string[] arguments)
+        public static bool ShouldMute(bool batchMode, string[] arguments, bool assetImportWorker = false)
         {
-            return batchMode || Array.Exists(arguments, argument =>
+            return !assetImportWorker && (batchMode || Array.Exists(arguments, argument =>
                 string.Equals(argument, MuteArgument, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(argument, "-runTests", StringComparison.OrdinalIgnoreCase));
+                string.Equals(argument, "-runTests", StringComparison.OrdinalIgnoreCase)));
         }
 
         private static void EnforceMute()
         {
-            EditorUtility.audioMasterMute = true;
+            AudioListener.volume = 0f;
         }
     }
 }

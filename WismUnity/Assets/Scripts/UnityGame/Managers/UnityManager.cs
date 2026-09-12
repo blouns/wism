@@ -631,6 +631,7 @@ namespace Assets.Scripts.Managers
 
             if (command is EndTurnCommand)
             {
+                this.InputManager.CompleteEndTurn();
                 QueueStartTurnAfterEndTurnIfNeeded();
 
                 var nextPlayer = Game.Current.GetCurrentPlayer();

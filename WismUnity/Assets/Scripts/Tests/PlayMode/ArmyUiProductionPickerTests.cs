@@ -34,21 +34,66 @@ public sealed partial class ArmyUiInputTests
     }
 
     [UnityTest]
-    public IEnumerator LiveRegression_EndTurnRequiresAltE()
+    public IEnumerator LiveRegression_EndTurnAcceptsPlainE()
+    {
+        yield return EndTurnWithKeys(UnityEngine.InputSystem.Key.E);
+    }
+
+    [UnityTest]
+    public IEnumerator LiveRegression_EndTurnAcceptsAltE()
+    {
+        yield return EndTurnWithKeys(UnityEngine.InputSystem.Key.LeftAlt, UnityEngine.InputSystem.Key.E);
+    }
+
+    private IEnumerator EndTurnWithKeys(params UnityEngine.InputSystem.Key[] keys)
     {
         var player = Game.Current.GetCurrentPlayer();
-        var before = State();
         UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,
-            new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.E));
-        yield return null;
-        UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard, new UnityEngine.InputSystem.LowLevel.KeyboardState());
-        yield return new WaitForSecondsRealtime(0.2f);
-        Assert.That(State(), Is.EqualTo(before), "Plain E must not end the turn.");
-        UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,
-            new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.LeftAlt, UnityEngine.InputSystem.Key.E));
+            new UnityEngine.InputSystem.LowLevel.KeyboardState(keys));
         yield return null;
         UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard, new UnityEngine.InputSystem.LowLevel.KeyboardState());
         yield return WaitFor(() => Game.Current.GetCurrentPlayer() != player);
+    }
+
+    [UnityTest]
+    public IEnumerator LiveRegression_EndTurnImmediatelyLocksMapAndRejectsDuplicateRequests()
+    {
+        yield return Tap(ScreenPoint(hero.Tile));
+        yield return WaitFor(() => Game.Current.ArmiesSelected());
+        var commands = manager.ControllerProvider.CommandController;
+        var count = commands.GetCommands().Count();
+        var player = Game.Current.GetCurrentPlayer();
+        unity.enabled = false;
+        try
+        {
+            manager.EndTurn();
+            manager.EndTurn();
+            Assert.That(input.EndTurnPending, Is.True);
+            Assert.That(input.CanAcceptGameplayInput, Is.False);
+            Assert.That(input.InputMode, Is.EqualTo(InputMode.AITurn));
+            Assert.That(commands.GetCommands().Count(), Is.EqualTo(count + 1));
+            var before = State();
+            yield return Click(ScreenPoint(World.Current.Map[hero.X + 1, hero.Y]));
+            yield return Tap(ScreenPoint(hero.Tile));
+            Assert.That(commands.GetCommands().Count(), Is.EqualTo(count + 1), "No mouse or touch action may queue after End Turn.");
+            Assert.That(State(), Is.EqualTo(before), "Pending handoff cannot mutate gameplay through pointer input.");
+        }
+        finally { unity.enabled = true; }
+        yield return WaitFor(() => Game.Current.GetCurrentPlayer() != player,
+            () => $"handoff: mode={input.InputMode}, pending={input.EndTurnPending}, state={Game.Current.GameState}");
+        Assert.That(input.EndTurnPending, Is.False);
+        yield return Assets.Scripts.Tests.PlayMode.Common.WismTestAction.WaitForNewHeroOffer();
+        yield return Assets.Scripts.Tests.PlayMode.Common.WismTestAction.AcceptNewHeroOffer();
+        yield return WaitFor(() => input.CanAcceptGameplayInput && input.InputMode == InputMode.Game,
+            () => $"restore: mode={input.InputMode}, pending={input.EndTurnPending}, state={Game.Current.GameState}");
+        var nextPlayer = Game.Current.GetCurrentPlayer();
+        yield return WaitFor(() => nextPlayer.GetArmies().Count > 0,
+            () => "The accepted next-player hero offer must execute before pointer selection.");
+        var nextArmy = nextPlayer.GetArmies().First();
+        yield return Click(ScreenPoint(nextArmy.Tile));
+        yield return WaitFor(() => Game.Current.ArmiesSelected(),
+            () => $"next selection: action={input.LastPrimaryAction}, mode={input.InputMode}, armies={nextPlayer.GetArmies().Count}, point={ScreenPoint(nextArmy.Tile)}");
+        Assert.That(Game.Current.GetSelectedArmies().All(army => army.Player == nextPlayer), Is.True);
     }
 
     [UnityTest]
