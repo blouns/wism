@@ -148,8 +148,8 @@ public class ManualParityTests
         player1.ConscriptArmy(ModFactory.FindArmyInfo("Griffins"), World.Current.Map[2, 2]);
         var griffin = player1.GetArmies()[0];
 
-        var forestTile = FindTileWithTerrain("Forest");
-        Assume.That(forestTile, Is.Not.Null, "Test world has no Forest tile; test skipped.");
+        var forestTile = World.Current.Map[2, 3];
+        forestTile.Terrain = MapBuilder.TerrainKinds["Forest"];
 
         Assert.That(griffin.GetEffectiveMovementCost(forestTile!), Is.EqualTo(1),
             "Griffin (flyer) should pay 1 for Forest, not the terrain cost of 4");
@@ -177,8 +177,8 @@ public class ManualParityTests
         var dragon = player1.GetArmies()[0];
 
         // Dragon can fly: should pay 1 per tile on any terrain
-        var forestTile = FindTileWithTerrain("Forest");
-        Assume.That(forestTile, Is.Not.Null, "Test world has no Forest tile; test skipped.");
+        var forestTile = World.Current.Map[2, 3];
+        forestTile.Terrain = MapBuilder.TerrainKinds["Forest"];
 
         Assert.That(dragon.GetEffectiveMovementCost(forestTile!), Is.EqualTo(1),
             "Dragon (flyer) should pay 1 per tile");

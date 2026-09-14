@@ -97,6 +97,16 @@ namespace Wism.Client.Pathing
             {
                 for (var x = 0; x < mapSizeX; x++)
                 {
+                    // Terrain traversal alone does not check stacks occupying the route.
+                    // Combat planning opts out explicitly through ignoreClan.
+                    var tile = map[x, y];
+                    if (!ignoreClan &&
+                        ((tile.HasArmies() && tile.Armies.Exists(army => army.Clan != armies[0].Clan)) ||
+                         (tile.HasVisitingArmies() && tile.VisitingArmies.Exists(army => army.Clan != armies[0].Clan))))
+                    {
+                        continue;
+                    }
+
                     // Only add a node if the army can actually traverse there
                     // Note: this will leave some "null" spots as a sparse-array
                     if (map[x, y].CanTraverseHere(armies, ignoreClan) ||
