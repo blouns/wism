@@ -1,6 +1,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+    <!-- Release debug metadata must be independent of the developer checkout path. -->
+    <PathMap Condition="'$(Configuration)' == 'Release' and '$(PathMap)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..'))=/_/wism</PathMap>
     <UnityPluginDir Condition="'$(UnityPluginDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\WismUnity\Assets\Plugins\WismClient\'))</UnityPluginDir>
     <CompanionPluginDir Condition="'$(CompanionPluginDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\WismCompanion\Assets\Plugins\WismShared\'))</CompanionPluginDir>
     <!-- The Unity companion only needs the shared contract DTOs and their core dependency. -->
