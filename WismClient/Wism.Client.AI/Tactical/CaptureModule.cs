@@ -679,28 +679,23 @@ public class CaptureModule : ITacticalModule, IBlockedReasonProvider
             return null;
         }
 
+        // Inspect a combat route for an adjacent blocker, but never issue movement
+        // along that hypothetical route. Ordinary movement must avoid hostile stacks.
         Game.Current.PathingStrategy.FindShortestRoute(
-            World.Current.Map,
-            armies,
-            destination,
-            out path,
-            out _,
-            ignoreClan: false);
-
-        if (path == null || path.Count <= 1)
+            World.Current.Map, armies, destination, out var combatPath, out _, ignoreClan: true);
+        if (combatPath != null && combatPath.Count > 1)
         {
-            return null;
+            var next = combatPath[1];
+            if (next.GetAllArmies().Any(defender => defender.Clan != armies[0].Clan) &&
+                AiUtilities.IsInAttackRange(armies, next))
+            {
+                return next;
+            }
         }
 
-        var next = path[1];
-        if (!next.HasArmies() || next.Armies[0].Clan == armies[0].Clan)
-        {
-            return null;
-        }
-
-        return AiUtilities.IsInAttackRange(armies, next)
-            ? next
-            : null;
+        Game.Current.PathingStrategy.FindShortestRoute(
+            World.Current.Map, armies, destination, out path, out _, ignoreClan: false);
+        return null;
     }
 
     private static List<Army> GetUsableSameTileArmies(IEnumerable<Army> armies)

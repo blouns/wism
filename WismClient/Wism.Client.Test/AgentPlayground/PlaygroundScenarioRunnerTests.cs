@@ -340,6 +340,25 @@ public class PlaygroundScenarioRunnerTests
     }
 
     [Test]
+    public void Campaign_ClassicAiBlockedSearchDetoursBeforeVictory()
+    {
+        var result = new PlaygroundScenarioRunner().Campaign(
+            seed: 20260626,
+            clans: 2,
+            maxTurns: 40,
+            outputRoot: Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns"),
+            name: "ClassicAiBlockedSearchDetour",
+            size: "medium",
+            scenarioFamily: "classic-ai-blocked-search-tension",
+            checkpointMode: "summary",
+            aiProfile: "strategic");
+
+        Assert.That(result.Status, Is.EqualTo("Passed"), result.Outcome);
+        Assert.That(result.Moments, Has.Some.StartsWith("search:"),
+            "A reachable search objective must not be abandoned because its route crosses a known enemy.");
+    }
+
+    [Test]
     public void Campaign_ClassicAiContestedSiegeTensionResolvesBattle()
     {
         var outputRoot = Path.Combine(TestContext.CurrentContext.WorkDirectory, "campaigns");

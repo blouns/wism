@@ -43,6 +43,41 @@ public class PathingStrategyTests
         this.AssertPathStartsWithHeroEndsWithTower(shortestRoute);
     }
 
+    [TestCase(false, false, false)]
+    [TestCase(true, false, false)]
+    [TestCase(false, true, true)]
+    [TestCase(true, true, true)]
+    public void Dijkstra_HostileOccupancy_RespectsIgnoreClan(bool visiting, bool ignoreClan, bool usesOccupiedTile)
+    {
+        string[,] matrix = { { "S", "2", "2" }, { "2", "1", "2" }, { "2", "2", "T" } };
+        var map = ConvertMatrixToMap(matrix, out var armies, out var target);
+        var occupied = map[1, 1];
+        var enemy = Game.Current.Players[1].ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), occupied);
+        if (visiting)
+        {
+            occupied.Armies.Remove(enemy);
+            occupied.VisitingArmies = new List<Army> { enemy };
+        }
+
+        new DijkstraPathingStrategy().FindShortestRoute(map, armies, target, out var route, out _, ignoreClan);
+
+        Assert.That(route, Is.Not.Empty);
+        Assert.That(route.Contains(occupied), Is.EqualTo(usesOccupiedTile),
+            "Movement routes must avoid hostile stacks; explicit combat lookahead may cross them.");
+    }
+
+    [Test]
+    public void Dijkstra_FriendlyOccupancy_DoesNotBlockRoute()
+    {
+        string[,] matrix = { { "S", "2", "2" }, { "2", "1", "2" }, { "2", "2", "T" } };
+        var map = ConvertMatrixToMap(matrix, out var armies, out var target);
+        Game.Current.GetCurrentPlayer().ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), map[1, 1]);
+
+        new DijkstraPathingStrategy().FindShortestRoute(map, armies, target, out var route, out _);
+
+        Assert.That(route, Does.Contain(map[1, 1]));
+    }
+
     [Test]
     public void DijkstraSimple2_3x3Test()
     {
