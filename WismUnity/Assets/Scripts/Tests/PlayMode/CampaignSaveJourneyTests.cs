@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Assets.Scripts.Managers;
 using Assets.Scripts.UI;
+using Assets.Tests.PlayMode;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -121,8 +122,11 @@ public sealed partial class ArmyUiInputTests
         var adjacent = World.Current.Map[city.X - 1, city.Y];
         yield return Click(ScreenPoint(adjacent));
         yield return WaitFor(() => hero.Tile == adjacent);
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        yield return null;
         yield return Click(ScreenPoint(city.Tile));
-        Assert.That(input.LastPrimaryAction, Is.EqualTo("army.attack"));
+        Assert.That(input.LastPrimaryAction, Is.EqualTo("army.attack"),
+            $"mode={input.InputMode}; moves={hero.MovesRemaining}; hero={hero.X},{hero.Y}; city={city.X},{city.Y}; selected={Game.Current.ArmiesSelected()}");
         yield return WaitFor(() => city.Player == hero.Player);
         Assert.That(hero.IsDead, Is.False);
     }
