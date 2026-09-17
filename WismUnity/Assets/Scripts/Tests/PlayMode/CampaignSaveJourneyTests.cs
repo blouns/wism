@@ -44,7 +44,8 @@ public sealed partial class ArmyUiInputTests
             var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
             yield return PressProductionControl(picker, "ArmyButton1");
             yield return PressProductionControl(picker, "ProdButton");
-            yield return WaitFor(() => input.CanAcceptGameplayInput && input.InputMode == InputMode.Game);
+            yield return WaitFor(() => input.CanAcceptGameplayInput && input.InputMode == InputMode.Game &&
+                Game.Current.GetCurrentPlayer().Capitol.Barracks.ProducingArmy());
             var training = Game.Current.GetCurrentPlayer().Capitol.Barracks.ArmyInTraining.ArmyInfo.ShortName;
 
             yield return PressJourneyKey(Key.S);
