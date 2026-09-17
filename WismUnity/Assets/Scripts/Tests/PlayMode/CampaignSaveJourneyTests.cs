@@ -113,11 +113,14 @@ public sealed partial class ArmyUiInputTests
 
     private IEnumerator AttackCapitalWithDevice()
     {
+        // Let LateUpdate apply the resized viewport before computing device coordinates.
+        yield return null;
         var city = Game.Current.Players[1].Capitol;
         if (!Game.Current.ArmiesSelected())
         {
             yield return Click(ScreenPoint(hero.Tile));
-            yield return WaitFor(() => Game.Current.ArmiesSelected());
+            yield return WaitFor(() => Game.Current.ArmiesSelected(),
+                () => $"Select hero after viewport layout: {input.LastPrimaryAction}; mode={input.InputMode}");
         }
         var adjacent = World.Current.Map[city.X - 1, city.Y];
         yield return Click(ScreenPoint(adjacent));
