@@ -132,5 +132,12 @@ public sealed partial class ArmyUiInputTests
             $"mode={input.InputMode}; moves={hero.MovesRemaining}; hero={hero.X},{hero.Y}; city={city.X},{city.Y}; selected={Game.Current.ArmiesSelected()}");
         yield return WaitFor(() => city.Player == hero.Player);
         Assert.That(hero.IsDead, Is.False);
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        yield return WaitFor(() => input.InputMode == InputMode.UI &&
+            GameObject.FindGameObjectWithTag("CityProductionPanel") != null,
+            () => "Captured city must offer its production picker.");
+        var capturedPicker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+        yield return PressProductionControl(capturedPicker, "ExitButton");
+        yield return WaitFor(() => input.InputMode == InputMode.Game, () => "Captured-city picker Exit must return map control.");
     }
 }
