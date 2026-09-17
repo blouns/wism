@@ -67,8 +67,8 @@ public sealed partial class ArmyUiInputTests
             yield return PressJourneyButton(yesButton);
             Assert.That(clickedYes, Is.True, "The real Yes button must receive the click.");
             unity.InteractiveUI = false;
-            yield return WaitFor(() => !World.Current.GetCities().Contains(city), () =>
-                $"Confirmed city must be removed. input={input.InputMode}; yes={confirmation.Answer}; active={confirmation.IsActive()}; interactive={unity.InteractiveUI}; stage={RazeJourneyStage()}");
+            yield return WaitFor(() => !player.GetCities().Contains(city) && footprint.All(tile => tile.City == null), () =>
+                $"Confirmed city must leave holdings and all four tiles. input={input.InputMode}; yes={confirmation.Answer}; active={confirmation.IsActive()}; interactive={unity.InteractiveUI}; stage={RazeJourneyStage()}");
             yield return new WaitForLastCommand(manager.ControllerProvider);
             yield return null;
             var map = unity.WorldTilemap.GetComponent<Tilemap>();
