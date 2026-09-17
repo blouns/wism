@@ -32,7 +32,9 @@ public sealed partial class ArmyUiInputTests
             yield return WaitFor(() => Screen.width == width && Screen.height == height);
             AssertBatchWindowless();
             // Seed a two-city realm and a bounded battle; all journey actions use devices.
-            World.Current.GetCities().Single(city => city.ShortName == "Deserton").Claim(hero.Player);
+            var seededCity = World.Current.GetCities().Single(city => city.ShortName == "Deserton");
+            foreach (var defender in seededCity.MusterArmies().ToArray()) defender.Kill();
+            seededCity.Claim(hero.Player);
             var enemy = Game.Current.Players[1];
             enemy.HireHero(enemy.Capitol.Tile);
             enemy.GetArmies().OfType<Hero>().Single().Strength = 1;
