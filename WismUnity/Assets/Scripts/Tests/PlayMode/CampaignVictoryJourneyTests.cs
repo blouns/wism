@@ -60,10 +60,15 @@ public sealed partial class ArmyUiInputTests
             yield return WaitFor(() => confirmation.IsActive() && input.InputMode == InputMode.UI,
                 () => $"Raze confirmation: mode={input.InputMode}; selected={Game.Current.ArmiesSelected()}; city={hero.Tile.City?.ShortName}");
             Assert.That(World.Current.GetCities(), Does.Contain(city), "Opening confirmation cannot raze the city.");
-            yield return PressJourneyButton(confirmation.GetComponentsInChildren<Button>()
-                .Single(button => button.GetComponentInChildren<Text>()?.text == "Yes"));
+            var yesButton = confirmation.GetComponentsInChildren<Button>()
+                .Single(button => button.GetComponentInChildren<Text>()?.text == "Yes");
+            bool clickedYes = false;
+            yesButton.onClick.AddListener(() => clickedYes = true);
+            yield return PressJourneyButton(yesButton);
+            Assert.That(clickedYes, Is.True, "The real Yes button must receive the click.");
             unity.InteractiveUI = false;
-            yield return WaitFor(() => !World.Current.GetCities().Contains(city), () => "Confirmed city must be removed.");
+            yield return WaitFor(() => !World.Current.GetCities().Contains(city), () =>
+                $"Confirmed city must be removed. input={input.InputMode}; yes={confirmation.Answer}; active={confirmation.IsActive()}; interactive={unity.InteractiveUI}; stage={RazeJourneyStage()}");
             yield return new WaitForLastCommand(manager.ControllerProvider);
             yield return null;
             var map = unity.WorldTilemap.GetComponent<Tilemap>();
@@ -94,5 +99,15 @@ public sealed partial class ArmyUiInputTests
             unity.InteractiveUI = interactive;
             ApplyViewport(originalWidth, originalHeight);
         }
+    }
+
+    private int RazeJourneyStage()
+    {
+        var processors = (System.Collections.IEnumerable)typeof(Assets.Scripts.Managers.UnityManager)
+            .GetField("commandProcessors", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(unity);
+        var processor = processors.Cast<object>().Single(item => item is Assets.Scripts.CommandProcessors.RazeCityDefensesProcessor);
+        var stager = (Assets.Scripts.CommandProcessors.CutsceneStager)processor.GetType()
+            .GetField("stager", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(processor);
+        return stager?.SceneIndex ?? -1;
     }
 }
