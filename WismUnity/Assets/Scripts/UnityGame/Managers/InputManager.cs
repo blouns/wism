@@ -404,6 +404,19 @@ namespace Assets.Scripts.Managers
                 return;
             }
 
+            // Production picking owns this click, including rejected destinations.
+            // Never queue an army action beneath a city/destination picker.
+            var productionMode = this.unityManager.ProductionMode;
+            if (productionMode == ProductionMode.SelectCity || productionMode == ProductionMode.SelectDestination)
+            {
+                ResetPrimaryGesture();
+                this.InputHandler.HandleCityClick(clickedTile);
+                if (this.InputMode == InputMode.UI)
+                    this.LastPrimaryAction = productionMode == ProductionMode.SelectCity
+                        ? "production.select-city" : "production.select-destination";
+                return;
+            }
+
             bool repeatedPress = Time.unscaledTime - this.lastPressTime <= 0.4f &&
                 (position - this.lastPressPosition).sqrMagnitude <= 25f;
             // A command-queue tick can outlast the double-click window. Preserve
