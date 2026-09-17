@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Tilemaps;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 namespace Assets.Scripts.Editors
 {
@@ -23,11 +24,16 @@ namespace Assets.Scripts.Editors
             var worldTilemap = GameObject.FindGameObjectWithTag("WorldTilemap")
                 .GetComponent<WorldTilemap>();
 
-            var coords = worldTilemap.ConvertUnityToGameVector(this.gameObject.transform.position);
+            var map = worldTilemap.GetComponent<Tilemap>();
+            var local = map.transform.InverseTransformPoint(transform.position);
+            var intersection = map.LocalToCellInterpolated(local);
 
-            // City markers are centered horizontally across the 2x2 footprint.
-            // Move back to the top-left tile used by WismClient cities.
-            return new Vector2Int(coords.x - 1, coords.y);
+            // Authoring markers sit at the center intersection of a 2x2 city,
+            // sometimes with tiny placement offsets. Unlike pointer input, they
+            // snap to an intersection rather than floor to the containing cell.
+            return new Vector2Int(
+                Mathf.RoundToInt(intersection.x) - 1 - map.cellBounds.xMin,
+                Mathf.RoundToInt(intersection.y) - map.cellBounds.yMin);
         }
 
         private void HideRuntimeMarkerSprite()

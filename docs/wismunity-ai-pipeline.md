@@ -56,6 +56,14 @@ unity run .\WismUnity --command wism_project_status --format ndjson --non-intera
 
 The isolated runner at `scripts/run-unity-validation-isolated.ps1` uses this contract and never treats launcher text as stronger evidence than the final reports.
 
+To retain an existing validation checkout and its Library, pass
+`-ReuseExistingWorktree -NoDirtyOverlay -WorktreePath <checkout>` explicitly.
+Reuse requires a registered, clean worktree at the exact requested HEAD, with
+no Unity lock or live Editor. A missing reuse path is refused. Existing paths
+are never reset or cleaned automatically; use a new path when changing source
+without preparing the existing checkout first. Run
+`scripts/test-unity-worktree-reuse.ps1` to check these safeguards without Unity.
+
 ## Mutation Policy
 
 Keep project commands read-only by default. A future command that changes scenes, prefabs, tilemaps, world data, or MOD JSON must provide preview, backup, explicit apply intent, and post-change validation. Runtime game commands must route through WismClient rules rather than directly mutating Unity objects.

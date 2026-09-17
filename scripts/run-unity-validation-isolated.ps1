@@ -2,6 +2,7 @@
 param(
     [string]$UnityCli = "unity",
     [string]$WorktreePath = "",
+    [switch]$ReuseExistingWorktree,
     [string]$RunId = "",
     [string]$TestFilter = "",
     [string]$Profile = "classic-warlords",
@@ -164,18 +165,21 @@ function Initialize-ValidationWorktree {
             throw "Refusing to reuse $Path because it is not a registered git worktree."
         }
 
-        & git -C $Path reset --hard $Head | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            throw "git reset failed in validation worktree."
+        if (-not $ReuseExistingWorktree -or -not $NoDirtyOverlay) {
+            throw "Existing worktrees require -ReuseExistingWorktree -NoDirtyOverlay. Source and Library are never reset or cleaned automatically."
         }
-
-        & git -C $Path clean -fdx | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            throw "git clean failed in validation worktree."
-        }
+        $current = Get-CurrentHead -RepositoryRoot $Path
+        if ($current -ne $Head) { throw "Existing worktree HEAD must match the requested source." }
+        $dirty = @(& git -C $Path status --porcelain=v1 --untracked-files=all)
+        if ($LASTEXITCODE -ne 0 -or $dirty.Count -ne 0) { throw "Existing validation worktree must be clean." }
+        $project = Join-Path $Path "WismUnity"
+        if (Test-Path -LiteralPath (Join-Path $project "Temp/UnityLockfile")) { throw "Existing validation project is locked." }
+        if (@(Get-UnityProcessesForProject -ProjectPath $project).Count -gt 0) { throw "Existing validation project has a live Editor." }
 
         return
     }
+
+    if ($ReuseExistingWorktree) { throw "Requested reuse path does not exist; no checkout will be created." }
 
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Path) | Out-Null
     & git -C $RepositoryRoot worktree add --detach $Path $Head | Out-Null
@@ -438,7 +442,9 @@ if ($existingValidationUnity.Count -gt 0) {
     throw "Validation worktree is already open in Unity. Close that Unity instance or use a different -WorktreePath."
 }
 
-Clear-UnityPackageCacheTemps -UnityProjectRoot $unityProjectRoot
+if (-not $ReuseExistingWorktree) {
+    Clear-UnityPackageCacheTemps -UnityProjectRoot $unityProjectRoot
+}
 
 $steps.Add((Invoke-Native -Name "unity-cli-doctor" -FilePath $unityCliPath -Arguments @("doctor", "--ci", "--format", "json", "--non-interactive") -WorkingDirectory $unityProjectRoot -LogPath (Join-Path $logsRoot "unity-cli-doctor.log"))) | Out-Null
 if ($steps[-1].exitCode -ne 0) {

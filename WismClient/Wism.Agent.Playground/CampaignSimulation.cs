@@ -71,7 +71,10 @@ public sealed record CampaignTimingSummary(
     int Count,
     double TotalSeconds,
     double AverageSeconds,
-    double MaxSeconds);
+    double MaxSeconds,
+    double? P50Seconds = null,
+    double? P95Seconds = null,
+    int QuantileSampleCount = 0);
 
 internal sealed class CampaignTimingAccumulator
 {
@@ -111,6 +114,8 @@ internal sealed class CampaignTimingAccumulator
 
 internal sealed class CampaignTimingStats
 {
+    private const int MaximumQuantileSamples = 65536;
+    private readonly List<double> samples = new();
     private TimeSpan total = TimeSpan.Zero;
     private TimeSpan max = TimeSpan.Zero;
 
@@ -122,6 +127,8 @@ internal sealed class CampaignTimingStats
 
     public void Add(TimeSpan elapsed)
     {
+        if (elapsed < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(elapsed));
+        if (this.samples.Count < MaximumQuantileSamples) this.samples.Add(elapsed.TotalSeconds);
         this.Count++;
         this.total += elapsed;
         if (elapsed > this.max)
@@ -130,12 +137,19 @@ internal sealed class CampaignTimingStats
         }
     }
 
-    public CampaignTimingSummary ToSummary() => new(
+    public CampaignTimingSummary ToSummary()
+    {
+        var ordered = this.samples.OrderBy(value => value).ToArray();
+        double? Quantile(double fraction) => this.Count == 0 || this.Count != ordered.Length
+            ? null : ordered[(int)Math.Ceiling(fraction * ordered.Length) - 1];
+        return new(
         this.Name,
         this.Count,
         Math.Round(this.total.TotalSeconds, 3),
         this.Count <= 0 ? 0 : Math.Round(this.total.TotalSeconds / this.Count, 3),
-        Math.Round(this.max.TotalSeconds, 3));
+        Math.Round(this.max.TotalSeconds, 3),
+        Quantile(0.50), Quantile(0.95), ordered.Length);
+    }
 }
 
 internal sealed record CampaignOptions(
@@ -962,14 +976,14 @@ internal sealed class CampaignRecorder
         this.commandIndex++;
     }
 
-    public string Checkpoint(string kind, int turn, string clan, string context)
+    public string Checkpoint(string kind, int turn, string clan, string context, bool includeSnapshot = true)
     {
         var stopwatch = Stopwatch.StartNew();
         try
         {
             this.PrepareOutputDirectory();
             var fileName = string.Empty;
-            if (this.ShouldWriteSnapshot(kind))
+            if (includeSnapshot && this.ShouldWriteSnapshot(kind))
             {
                 fileName = $"{this.checkpoints.Count:0000}-{kind}-turn{turn:000}-{Sanitize(clan)}.json";
                 var path = Path.Combine(this.outputDirectory, fileName);

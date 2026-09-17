@@ -12,6 +12,13 @@ namespace Assets.Scripts.Managers
     public static class PersistanceManager
     {
         private static UnityGameEntity snapshot;
+        private static string saveDirectory;
+
+        public static string SaveDirectory
+        {
+            get => saveDirectory ?? Application.persistentDataPath;
+            set => saveDirectory = string.IsNullOrWhiteSpace(value) ? null : Path.GetFullPath(value);
+        }
 
         public static void Save(string filename, string saveGameName, UnityManager unityGame)
         {
@@ -34,7 +41,8 @@ namespace Assets.Scripts.Managers
             snapshot.WismGameEntity.World.Name = snapshot.WorldName;
 
             // Write to disk
-            string path = Application.persistentDataPath + "/" + filename;
+            Directory.CreateDirectory(SaveDirectory);
+            string path = Path.Combine(SaveDirectory, filename);
             var settings = new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() };
             var json = JsonConvert.SerializeObject(snapshot, settings);
             using (StreamWriter writer = new StreamWriter(path, false))

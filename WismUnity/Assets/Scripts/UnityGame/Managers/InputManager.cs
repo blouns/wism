@@ -93,6 +93,7 @@ namespace Assets.Scripts.Managers
                 .GetComponent<UnityManager>();
             this.GameManager = this.UnityManager.GetComponent<GameManager>();
             this.InputHandler = new InputHandler(this.UnityManager);
+            WismUiInputAdapter.ConfigureGameEventSystem();
 
             // Mouse click timing
             this.mouseRightClickHoldTimer.Interval = 200;
@@ -288,11 +289,11 @@ namespace Assets.Scripts.Managers
             // TODO: Add Find heros (k) action
 
             // City actions
-            else if (Input.GetKeyDown(KeyCode.P))
+            else if (WismUiInputAdapter.ProductionPressedThisFrame())
             {
                 this.UnityManager.SetProductionMode(ProductionMode.SelectCity);
             }
-            else if (Input.GetKeyDown(KeyCode.R))
+            else if (WismUiInputAdapter.RazePressedThisFrame())
             {
                 this.GameManager.RazeCity();
             }
@@ -306,13 +307,12 @@ namespace Assets.Scripts.Managers
             {
                 this.GameManager.EndTurn();
             }
-            else if (Input.GetKeyDown(KeyCode.S))
+            else if (WismUiInputAdapter.SavePressedThisFrame())
             {
                 this.UnityManager.HandleSaveLoadPicker(true);
             }
-            else if (Input.GetKeyDown(KeyCode.L))
+            else if (WismUiInputAdapter.ManagementOrLoadPressedThisFrame(out var shiftHeld))
             {
-                var shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                 switch (GameKeyboardShortcuts.ResolveLKey(shiftHeld))
                 {
                     case GameKeyboardAction.OpenProductionManagement:
@@ -402,6 +402,19 @@ namespace Assets.Scripts.Managers
             if (clickedTile == null)
             {
                 ResetPrimaryGesture();
+                return;
+            }
+
+            // Production picking owns this click, including rejected destinations.
+            // Never queue an army action beneath a city/destination picker.
+            var productionMode = this.unityManager.ProductionMode;
+            if (productionMode == ProductionMode.SelectCity || productionMode == ProductionMode.SelectDestination)
+            {
+                ResetPrimaryGesture();
+                this.InputHandler.HandleCityClick(clickedTile);
+                if (this.InputMode == InputMode.UI)
+                    this.LastPrimaryAction = productionMode == ProductionMode.SelectCity
+                        ? "production.select-city" : "production.select-destination";
                 return;
             }
 

@@ -513,7 +513,26 @@ public sealed class PlaygroundScenarioRunner
             var commandContext = $"Executing {command.GetType().Name}: {command}.";
             logger.LogInformation($"[Campaign] {player.Clan.ShortName} turn {turn} command {recorder.CommandIndex}: {commandContext}");
             recorder.Checkpoint("pre-command", turn, player.Clan.ShortName, commandContext);
+            var movement = command is MoveOnceCommand move
+                ? move.Armies.Select(army => new { Army = army, X = army.Tile?.X,
+                    Y = army.Tile?.Y, Moves = army.MovesRemaining }).ToArray() : null;
+            var executedCommandIndex = recorder.CommandIndex;
             var result = ExecuteBufferedCampaignCommand(command, recorder, logFailure: false);
+            if (movement is not null && command is MoveOnceCommand movementCommand)
+            {
+                // Destination intent is not displacement. Keep every member's identity
+                // and actual before/after state without multiplying full snapshots.
+                recorder.Checkpoint("movement-outcome", turn, player.Clan.ShortName,
+                    System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        ExecutedCommandIndex = executedCommandIndex,
+                        Result = result.ToString(), TargetX = movementCommand.X, TargetY = movementCommand.Y,
+                        Armies = movement.Select(before => new { before.Army.Id,
+                            FromX = before.X, FromY = before.Y, ToX = before.Army.Tile?.X,
+                            ToY = before.Army.Tile?.Y, MovesBefore = before.Moves,
+                            MovesAfter = before.Army.MovesRemaining, before.Army.IsDead })
+                    }), includeSnapshot: false);
+            }
             logger.LogInformation($"[Campaign] {player.Clan.ShortName} turn {turn} command {recorder.CommandIndex} result: {result}");
             RecordClassicAiCommandMoment(command, result, player, turn, recorder);
             endedTurn |= command is EndTurnCommand;
