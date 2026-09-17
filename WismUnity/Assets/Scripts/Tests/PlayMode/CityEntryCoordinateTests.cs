@@ -10,6 +10,45 @@ using UnityEngine.Tilemaps;
 public class CityEntryCoordinateTests
 {
     [UnityTest]
+    public IEnumerator CityEntry_SnapsAuthoringOffsetsWithoutChangingPointerCells()
+    {
+        var grid = new GameObject("OffsetCityGrid", typeof(Grid));
+        var mapObject = new GameObject("OffsetCityMap", typeof(Tilemap), typeof(TilemapRenderer));
+        var marker = new GameObject("OffsetCityMarker");
+        var boundsTile = ScriptableObject.CreateInstance<Tile>();
+        try
+        {
+            grid.transform.position = new Vector3(12, -9, 0);
+            grid.transform.localScale = new Vector3(2, 2, 1);
+            mapObject.transform.SetParent(grid.transform, false);
+            mapObject.tag = "WorldTilemap";
+            var map = mapObject.GetComponent<Tilemap>();
+            var world = mapObject.AddComponent<WorldTilemap>();
+            map.SetTile(new Vector3Int(-3, 4, 0), boundsTile);
+            map.SetTile(new Vector3Int(9, 12, 0), boundsTile);
+            map.CompressBounds();
+            var entry = marker.AddComponent<CityEntry>();
+            yield return null;
+            foreach (var offset in new[] { -0.04f, 0f, 0.04f })
+            {
+                marker.transform.position = map.transform.TransformPoint(
+                    map.CellToLocalInterpolated(new Vector3(3 + offset, 8 + offset, 0)));
+                Assert.That(entry.GetGameCoordinates(), Is.EqualTo(new Vector2Int(5, 4)));
+            }
+            var insideCell = map.transform.TransformPoint(map.CellToLocalInterpolated(new Vector3(2.99f, 7.99f, 0)));
+            Assert.That(world.ConvertUnityToGameVector(insideCell), Is.EqualTo(new Vector2Int(5, 3)),
+                "Pointer conversion must still use the containing cell, not marker snapping.");
+        }
+        finally
+        {
+            Object.Destroy(marker);
+            Object.Destroy(mapObject);
+            Object.Destroy(grid);
+            Object.Destroy(boundsTile);
+        }
+    }
+
+    [UnityTest]
     public IEnumerator CityEntry_ReturnsTopLeftCoordinateForCenteredCityMarker()
     {
         var grid = new GameObject("SyntheticGrid");
