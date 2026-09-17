@@ -293,7 +293,7 @@ namespace Assets.Scripts.Managers
             {
                 this.UnityManager.SetProductionMode(ProductionMode.SelectCity);
             }
-            else if (Input.GetKeyDown(KeyCode.R))
+            else if (WismUiInputAdapter.RazePressedThisFrame())
             {
                 this.GameManager.RazeCity();
             }
@@ -307,7 +307,7 @@ namespace Assets.Scripts.Managers
             {
                 this.GameManager.EndTurn();
             }
-            else if (Input.GetKeyDown(KeyCode.S))
+            else if (WismUiInputAdapter.SavePressedThisFrame())
             {
                 this.UnityManager.HandleSaveLoadPicker(true);
             }

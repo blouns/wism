@@ -97,6 +97,26 @@ namespace Assets.Scripts.UI
 #endif
         }
 
+        public static bool SavePressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.S)) return true;
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.sKey.wasPressedThisFrame;
+#else
+            return false;
+#endif
+        }
+
+        public static bool RazePressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.R)) return true;
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame;
+#else
+            return false;
+#endif
+        }
+
         public static bool ManagementOrLoadPressedThisFrame(out bool shiftHeld)
         {
             shiftHeld = false;

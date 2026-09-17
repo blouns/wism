@@ -1,7 +1,8 @@
 ﻿using Assets.Scripts.Managers;
 using System;
 using System.IO;
-using System.Text;
+using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -33,7 +34,8 @@ namespace Assets.Scripts.UI
 
             this.gameObject.SetActive(true);
             this.okButton.interactable = false;
-            this.cancelButton.interactable = false;
+            this.cancelButton.interactable = true;
+            this.SelectedIndex = -1;
             this.OkCancelResult = OkCancel.Picking;
             this.isSaving = isSaving;
 
@@ -59,8 +61,10 @@ namespace Assets.Scripts.UI
 
         public void SetCurrentItem(int index)
         {
-            if (index < 0)
+            if (index < 0 || this.filenames == null || index >= this.filenames.Length ||
+                (!this.isSaving && !File.Exists(this.filenames[index])))
             {
+                this.SelectedIndex = -1;
                 this.okButton.interactable = false;
                 return;
             }
@@ -146,7 +150,7 @@ namespace Assets.Scripts.UI
                 inputField.enabled = this.isSaving;
                 rowButton.interactable = this.isSaving;
 
-                if (i < this.filenames.Length)
+                if (File.Exists(this.filenames[i]))
                 {
                     // Existing file for this slot
                     SetSaveName(i, inputField);
@@ -157,8 +161,8 @@ namespace Assets.Scripts.UI
                 else
                 {
                     // Clear slot as there is no existing file save
-                    inputField.SendMessage("Reset");
-                    rowButton.interactable = false;
+                    inputField.text = this.isSaving ? "WISM " + (i + 1) : string.Empty;
+                    rowButton.interactable = this.isSaving;
                 }
             }
         }
@@ -199,29 +203,17 @@ namespace Assets.Scripts.UI
                 throw new FileNotFoundException(path);
             }
 
-            // Save is a JSON which starts with the Display name;
-            // so for perf, grab the first row and parse it out.
-            // e.g. '{"DisplayName":"WISM1","WorldName":"Illuria",...'
-            foreach (var line in File.ReadLines(path))
+            // Stream only the top-level display name, preserving JSON escapes
+            // without deserializing the complete world for every slot.
+            using (var stream = File.OpenText(path))
+            using (var reader = new JsonTextReader(stream))
             {
-                string displayToken = "\"DisplayName\":";
-                int tokenIndex = line.IndexOf(displayToken);
-                if (tokenIndex >= 0)
+                while (reader.Read())
                 {
-                    int index = tokenIndex + displayToken.Length;
-                    var displayName = new StringBuilder();
-                    if (line[index] != '"')
-                    {
-                        throw new FileLoadException("File could not be loaded", path);
-                    }
-
-                    // Parse DisplayName value
-                    while (line[++index] != '"')
-                    {
-                        displayName.Append(line[index]);
-                    }
-
-                    return displayName.ToString();
+                    if (reader.TokenType == JsonToken.PropertyName && reader.Depth == 1 &&
+                        string.Equals(reader.Value as string, "DisplayName", StringComparison.Ordinal) &&
+                        reader.Read() && reader.TokenType == JsonToken.String)
+                        return (string)reader.Value;
                 }
             }
 
@@ -230,9 +222,9 @@ namespace Assets.Scripts.UI
 
         private string[] GetSavedFileNames()
         {
-            var path = Application.persistentDataPath;
-            var pattern = String.Format(this.DefaultFilenameFormat, "?");
-            return Directory.GetFiles(path, pattern, SearchOption.TopDirectoryOnly);
+            return Enumerable.Range(1, 8)
+                .Select(slot => Path.Combine(PersistanceManager.SaveDirectory, String.Format(this.DefaultFilenameFormat, slot)))
+                .ToArray();
         }
 
         public void Clear()
