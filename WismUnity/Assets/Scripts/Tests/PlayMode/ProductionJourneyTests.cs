@@ -19,6 +19,53 @@ public sealed partial class ArmyUiInputTests
     [UnityTest] public IEnumerator ProductionJourney_Owned1280() => ProductionJourney(true, 1280, 720);
     [UnityTest] public IEnumerator ProductionJourney_Owned1920() => ProductionJourney(true, 1920, 1080);
     [UnityTest] public IEnumerator ProductionJourney_TouchControls() => ProductionJourney(true, 1024, 768, true);
+    [UnityTest] public IEnumerator CampaignProduction_FirstUnit1024() => ProduceFirstUnit(1024, 768);
+    [UnityTest] public IEnumerator CampaignProduction_FirstUnit1280() => ProduceFirstUnit(1280, 720);
+    [UnityTest] public IEnumerator CampaignProduction_FirstUnit1920() => ProduceFirstUnit(1920, 1080);
+
+    private IEnumerator ProduceFirstUnit(int width, int height)
+    {
+        int originalWidth = Screen.width, originalHeight = Screen.height;
+        try
+        {
+            ApplyViewport(width, height);
+            yield return WaitFor(() => Screen.width == width && Screen.height == height);
+            AssertBatchWindowless();
+            var player = Game.Current.GetCurrentPlayer();
+            var city = player.Capitol;
+            var before = player.GetArmies().Select(army => army.Id).ToArray();
+            yield return OpenProductionWithDevice(false);
+            var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+            var kinds = city.Barracks.GetProductionKinds().ToList();
+            int choice = kinds.FindIndex(kind => kind.ArmyInfoName == "LightInfantry");
+            Assert.That(choice, Is.GreaterThanOrEqualTo(0));
+            yield return PressProductionControl(picker, "ArmyButton" + (choice + 1));
+            yield return PressProductionControl(picker, "ProdButton");
+            yield return WaitFor(() => input.InputMode == InputMode.Game && city.Barracks.ProducingArmy());
+            for (int round = 0; round < 3 && !player.GetArmies().Any(army => !before.Contains(army.Id) && army.ShortName == "LightInfantry"); round++)
+            {
+                yield return PressJourneyKey(Key.E);
+                yield return WaitFor(() => Game.Current.GetCurrentPlayer() != player && input.InputMode == InputMode.Game && !input.EndTurnPending);
+                yield return PressJourneyKey(Key.E);
+                yield return WaitFor(() => Game.Current.GetCurrentPlayer() == player && input.InputMode == InputMode.Game && !input.EndTurnPending);
+            }
+            var produced = player.GetArmies().Where(army => !before.Contains(army.Id) && army.ShortName == "LightInfantry").ToArray();
+            Assert.That(produced.Length, Is.EqualTo(1), "The selected unit must actually appear, exactly once.");
+            Assert.That(produced[0].Tile.City, Is.SameAs(city));
+            Assert.That(produced[0].Player, Is.SameAs(player));
+            Trace("campaign.production.first-unit", ScreenPoint(produced[0].Tile));
+            Capture("campaign-production-first-unit");
+        }
+        finally { ApplyViewport(originalWidth, originalHeight); }
+    }
+
+    private IEnumerator PressJourneyKey(Key key)
+    {
+        InputSystem.QueueStateEvent(keyboard, new KeyboardState(key));
+        yield return null;
+        InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+        yield return null;
+    }
 
     [UnityTest]
     public IEnumerator ProductionJourney_ShiftLStillLoadsRatherThanManagingCities()
