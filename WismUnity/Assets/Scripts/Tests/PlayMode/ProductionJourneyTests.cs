@@ -34,6 +34,8 @@ public sealed partial class ArmyUiInputTests
             Assert.That(picker.GetPanelMode(), Is.EqualTo(management ? ProductionPanelMode.Management : ProductionPanelMode.SingleCity));
             Assert.That(State(), Is.EqualTo(before), "Opening production must not move an army or queue gameplay.");
             yield return PressProductionControl(picker, "ArmyButton1");
+            Assert.That(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name,
+                Is.EqualTo("ArmyButton1"), "Pointer input must reach the actual UI module.");
             Assert.That(city.Barracks.ProducingArmy(), Is.False, "Selection alone cannot start production.");
             yield return CaptureProductionPicker(picker, _ => { }, "-device-journey");
             yield return PressProductionControl(picker, "ProdButton");

@@ -93,6 +93,7 @@ namespace Assets.Scripts.Managers
                 .GetComponent<UnityManager>();
             this.GameManager = this.UnityManager.GetComponent<GameManager>();
             this.InputHandler = new InputHandler(this.UnityManager);
+            WismUiInputAdapter.ConfigureGameEventSystem();
 
             // Mouse click timing
             this.mouseRightClickHoldTimer.Interval = 200;

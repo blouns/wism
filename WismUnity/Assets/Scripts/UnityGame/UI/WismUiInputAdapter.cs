@@ -1,12 +1,33 @@
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
+using UnityEngine.EventSystems;
 #endif
 
 namespace Assets.Scripts.UI
 {
     public static class WismUiInputAdapter
     {
+        public static void ConfigureGameEventSystem()
+        {
+#if ENABLE_INPUT_SYSTEM
+            var events = EventSystem.current;
+            if (events == null) return;
+            var legacy = events.GetComponent<StandaloneInputModule>();
+            if (legacy == null || !legacy.enabled) return;
+
+            // Use Unity's UI action processing for the same devices as map input.
+            // Keep authored EventSystem selection and navigation settings intact.
+            var module = events.GetComponent<InputSystemUIInputModule>();
+            if (module == null) module = events.gameObject.AddComponent<InputSystemUIInputModule>();
+            module.moveRepeatDelay = legacy.repeatDelay;
+            if (legacy.inputActionsPerSecond > 0) module.moveRepeatRate = 1f / legacy.inputActionsPerSecond;
+            legacy.enabled = false;
+            module.enabled = true;
+#endif
+        }
+
         public static Vector2 PointerPosition
         {
             get
