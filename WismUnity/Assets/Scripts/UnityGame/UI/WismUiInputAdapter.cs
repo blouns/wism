@@ -66,6 +66,35 @@ namespace Assets.Scripts.UI
             return false;
         }
 
+        public static bool ProductionPressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.P)) return true;
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame;
+#else
+            return false;
+#endif
+        }
+
+        public static bool ManagementOrLoadPressedThisFrame(out bool shiftHeld)
+        {
+            shiftHeld = false;
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                return true;
+            }
+#if ENABLE_INPUT_SYSTEM
+            var keyboard = Keyboard.current;
+            if (keyboard != null && keyboard.lKey.wasPressedThisFrame)
+            {
+                shiftHeld = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
+                return true;
+            }
+#endif
+            return false;
+        }
+
         public static bool DefendPressedThisFrame()
         {
             if (Input.GetKeyDown(KeyCode.D)) return true;

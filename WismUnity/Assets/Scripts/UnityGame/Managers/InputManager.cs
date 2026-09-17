@@ -288,7 +288,7 @@ namespace Assets.Scripts.Managers
             // TODO: Add Find heros (k) action
 
             // City actions
-            else if (Input.GetKeyDown(KeyCode.P))
+            else if (WismUiInputAdapter.ProductionPressedThisFrame())
             {
                 this.UnityManager.SetProductionMode(ProductionMode.SelectCity);
             }
@@ -310,9 +310,8 @@ namespace Assets.Scripts.Managers
             {
                 this.UnityManager.HandleSaveLoadPicker(true);
             }
-            else if (Input.GetKeyDown(KeyCode.L))
+            else if (WismUiInputAdapter.ManagementOrLoadPressedThisFrame(out var shiftHeld))
             {
-                var shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                 switch (GameKeyboardShortcuts.ResolveLKey(shiftHeld))
                 {
                     case GameKeyboardAction.OpenProductionManagement:
