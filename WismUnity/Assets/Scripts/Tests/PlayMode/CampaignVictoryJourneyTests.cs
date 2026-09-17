@@ -42,15 +42,28 @@ public sealed partial class ArmyUiInputTests
             Assert.That(city.Player, Is.SameAs(player));
             Assert.That(enemy.GetCities(), Is.Empty);
 
+            if (!Game.Current.ArmiesSelected())
+            {
+                yield return Click(ScreenPoint(hero.Tile));
+                yield return WaitFor(() => Game.Current.ArmiesSelected(), () => "Reselect victorious army.");
+            }
+            if (hero.Tile.City != city)
+            {
+                yield return Click(ScreenPoint(city.Tile));
+                yield return WaitFor(() => hero.Tile.City == city, () => "Enter captured city before razing.");
+                yield return new WaitForLastCommand(manager.ControllerProvider);
+            }
+
             unity.InteractiveUI = true;
             yield return PressJourneyKey(Key.R);
             var confirmation = GameObject.FindGameObjectWithTag("YesNoBox").GetComponent<YesNoBox>();
-            yield return WaitFor(() => confirmation.IsActive() && input.InputMode == InputMode.UI);
+            yield return WaitFor(() => confirmation.IsActive() && input.InputMode == InputMode.UI,
+                () => $"Raze confirmation: mode={input.InputMode}; selected={Game.Current.ArmiesSelected()}; city={hero.Tile.City?.ShortName}");
             Assert.That(World.Current.GetCities(), Does.Contain(city), "Opening confirmation cannot raze the city.");
             yield return PressJourneyButton(confirmation.GetComponentsInChildren<Button>()
                 .Single(button => button.GetComponentInChildren<Text>()?.text == "Yes"));
             unity.InteractiveUI = false;
-            yield return WaitFor(() => !World.Current.GetCities().Contains(city));
+            yield return WaitFor(() => !World.Current.GetCities().Contains(city), () => "Confirmed city must be removed.");
             yield return new WaitForLastCommand(manager.ControllerProvider);
             yield return null;
             var map = unity.WorldTilemap.GetComponent<Tilemap>();
