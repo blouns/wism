@@ -45,9 +45,11 @@ public sealed partial class ArmyUiInputTests
             for (int round = 0; round < 3 && !player.GetArmies().Any(army => !before.Contains(army.Id) && army.ShortName == "LightInfantry"); round++)
             {
                 yield return PressJourneyKey(Key.E);
-                yield return WaitFor(() => Game.Current.GetCurrentPlayer() != player && input.InputMode == InputMode.Game && !input.EndTurnPending);
+                yield return WaitFor(() => Game.Current.GetCurrentPlayer() != player && input.InputMode == InputMode.Game && input.CanAcceptGameplayInput,
+                    () => "Waiting for opponent input readiness: " + Game.Current.GameState);
                 yield return PressJourneyKey(Key.E);
-                yield return WaitFor(() => Game.Current.GetCurrentPlayer() == player && input.InputMode == InputMode.Game && !input.EndTurnPending);
+                yield return WaitFor(() => Game.Current.GetCurrentPlayer() == player && input.InputMode == InputMode.Game && input.CanAcceptGameplayInput,
+                    () => "Waiting for returning player input readiness: " + Game.Current.GameState);
             }
             var produced = player.GetArmies().Where(army => !before.Contains(army.Id) && army.ShortName == "LightInfantry").ToArray();
             Assert.That(produced.Length, Is.EqualTo(1), "The selected unit must actually appear, exactly once.");
