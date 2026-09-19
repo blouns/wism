@@ -35,7 +35,7 @@ namespace Assets.Scripts.Managers
 
         public GameObject FindGameObjectKind(Clan clan, int flagSize)
         {
-            return this.flagsByClanMap[$"{clan.ShortName.ToLowerInvariant()}_Flag{flagSize}"];
+            return this.flagsByClanMap[$"{clan.Info.ArtworkClanName.ToLowerInvariant()}_Flag{flagSize}"];
         }
 
         public GameObject Instantiate(Clan clan, int flagSize, Transform parent)

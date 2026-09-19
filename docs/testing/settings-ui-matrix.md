@@ -37,6 +37,15 @@ mode is suitable only for the settings controls subset, not world startup.
   viewports. Text fitting does not change stable clan identity or selected tiers.
 - Mods navigates once and returns. Load disables empty slots, cancels back to
   setup, and restores the saved roster and world rather than the setup selection.
+- Mod rosters are not limited to eight clans. The classic roster retains eight
+  rows; larger rosters use seven rows and a pager without shrinking targets.
+  Every selected clan, including off-page clans, participates in Start validation.
+- Twelve-clan tests click page navigation and role controls, preserve selections
+  through Mods, and start all twelve actual players with their own capitals.
+  Explicit artwork aliases resolve army and flag prefabs without changing clan IDs.
+- Reduced and reordered rosters preserve choices by stable ID, not row position.
+  Hidden rows have no active raycasts. Mod names are literal text, even when they
+  contain markup or match a role name. Primary/secondary colors come from mod data.
 - Shipped menu cursor settings use the system pointer and its native hotspot;
   testing the gameplay overlay's calculation helpers alone is insufficient.
 - Mini-Illuria uses the same packaged mod root validated by setup, never the
@@ -58,3 +67,11 @@ Run the neighboring `GameSetupModSettingsFlowTests`, `JoyfulFidelityUiTests`,
 Synthetic input and geometry checks are not screenshot fidelity approval or a
 native player test. Final Windows player qualification belongs on an isolated
 interactive test desktop; human gameplay acceptance remains a separate gate.
+
+## Evidence Boundaries
+
+A passing test count does not qualify every aspect of the first impression.
+Keep separate results for native keyboard submission, human visual acceptance,
+125%/150% UI scaling, touch input, and interaction latency. These are not implied
+by the pointer/world matrix. Add cases when a defect is found, and rerun the full
+matrix at the end of settings-changing tranches rather than on every check-in.

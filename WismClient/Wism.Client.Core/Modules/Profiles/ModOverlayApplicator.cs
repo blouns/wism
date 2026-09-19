@@ -69,6 +69,9 @@ namespace Wism.Client.Modules.Profiles
                 {
                     info.DisplayName = item.DisplayName;
                 }
+                if (info != null && item.PrimaryColor != null) info.PrimaryColor = item.PrimaryColor;
+                if (info != null && item.SecondaryColor != null) info.SecondaryColor = item.SecondaryColor;
+                if (info != null && item.Playable.HasValue) info.Playable = item.Playable.Value;
             }
         }
 

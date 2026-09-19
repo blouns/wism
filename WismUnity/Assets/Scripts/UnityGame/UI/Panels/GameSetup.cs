@@ -42,6 +42,27 @@ public class GameSetup : MonoBehaviour
     private readonly Sprite[] playerRoleSprites = new Sprite[PlayerRoles.Length];
     private int[] playerRoleIndexes = Array.Empty<int>();
     private bool isInitializing;
+    private readonly Dictionary<string, ClanChoice> clanChoices = new Dictionary<string, ClanChoice>(StringComparer.OrdinalIgnoreCase);
+    private Text[][] clanLabels;
+    private Text[][] roleLabels;
+    private int clanPage;
+    private GameObject clanPager;
+    private Text pageLabel;
+    private Button previousPage;
+    private Button nextPage;
+    private string rosterError;
+    private static Dictionary<string, ClanChoice> pendingChoices;
+    private static bool pendingCombat;
+
+    private sealed class ClanChoice
+    {
+        public bool Selected;
+        public int Role;
+        public ClanChoice Copy() => new ClanChoice { Selected = Selected, Role = Role };
+    }
+
+    private int PageSize => availableClans.Length > playerToggles.Length ? playerToggles.Length - 1 : playerToggles.Length;
+    private int ClanIndex(int row) => clanPage * PageSize + row;
 
     private readonly struct PlayerRole
     {
@@ -88,6 +109,13 @@ public class GameSetup : MonoBehaviour
         EnsureValidationText();
         EnsureOptionToggles();
         EnsureInteractionContracts();
+        CachePlayerLabels();
+        if (pendingChoices != null)
+        {
+            foreach (var pair in pendingChoices) clanChoices[pair.Key] = pair.Value.Copy();
+            GameObject.Find("ShowAiCombatToggle").GetComponent<Toggle>().SetIsOnWithoutNotify(pendingCombat);
+            pendingChoices = null;
+        }
         RefreshAvailableClans();
         EnsurePlayerRoleState();
         ConfigurePlayerRows(resetSelection: true);
@@ -134,12 +162,24 @@ public class GameSetup : MonoBehaviour
         }
 
         RefreshAvailableClans();
+        var startClans = LoadStartClanNames(this.worldName);
+        foreach (var clan in availableClans)
+            if (clanChoices.TryGetValue(clan.ShortName, out var choice))
+                choice.Selected = startClans.Contains(clan.ShortName);
         ConfigurePlayerRows(resetSelection: true);
         UpdateStartValidation();
     }
 
     public void ModSettingsButton()
     {
+        if (!UnityModKitRuntimeSelection.HasSelection)
+        {
+            var report = UnityModKitSelection.Inspect(ModularGameProfileCatalog.DefaultProfileId,
+                Array.Empty<string>(), worldName, UnityModKitSelection.PluginModRoot);
+            if (report.isLoadable) UnityModKitRuntimeSelection.Set(report);
+        }
+        pendingChoices = clanChoices.ToDictionary(pair => pair.Key, pair => pair.Value.Copy(), StringComparer.OrdinalIgnoreCase);
+        pendingCombat = GetToggleValue("ShowAiCombatToggle", true);
         SceneManager.LoadScene(ModSettingsScene);
     }
 
@@ -213,6 +253,7 @@ public class GameSetup : MonoBehaviour
 
     private GameSetupValidation ValidateGameSettings(UnityNewGameEntity settings)
     {
+        if (!string.IsNullOrEmpty(rosterError)) return GameSetupValidation.Invalid(rosterError);
         if (settings is null)
         {
             throw new ArgumentNullException(nameof(settings));
@@ -310,12 +351,12 @@ public class GameSetup : MonoBehaviour
     private UnityPlayerEntity[] GetSelectedPlayersFromPanel()
     {
         var playerEntities = new List<UnityPlayerEntity>();
-        for (int i = 0; i < this.playerToggles.Length; i++)
+        for (int i = 0; i < availableClans.Length; i++)
         {
-            if (this.playerToggles[i].isOn)
+            if (clanChoices.TryGetValue(availableClans[i].ShortName, out var choice) && choice.Selected)
             {
                 var playerEntity = new UnityPlayerEntity();
-                var role = PlayerRoles[GetPlayerRoleIndex(i)];
+                var role = PlayerRoles[choice.Role];
                 playerEntity.IsHuman = !role.Difficulty.HasValue;
                 playerEntity.AiDifficulty = role.Difficulty;
                 playerEntity.ClanName = GetClanName(i);
@@ -360,12 +401,25 @@ public class GameSetup : MonoBehaviour
         try
         {
             availableClans = ModFactory.LoadClanInfos(ModFactory.ModPath)
-                .Where(clan => !string.Equals(clan.ShortName, "Neutral", StringComparison.OrdinalIgnoreCase))
+                .Where(clan => clan.Playable && !string.Equals(clan.ShortName, "Neutral", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
+            rosterError = null;
+            var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var clan in availableClans)
+            {
+                if (string.IsNullOrWhiteSpace(clan.ShortName) || !ids.Add(clan.ShortName))
+                    throw new InvalidOperationException("Each clan needs a unique, nonempty ShortName.");
+                if (string.IsNullOrWhiteSpace(clan.DisplayName))
+                    throw new InvalidOperationException("Clan " + clan.ShortName + " needs a display name.");
+                if (!TryClanColor(clan.PrimaryColor ?? clan.Color, out _) ||
+                    !TryClanColor(clan.SecondaryColor ?? "(0, 0, 0)", out _))
+                    throw new InvalidOperationException("Clan " + clan.ShortName + " needs RGB colors between 0 and 255.");
+            }
+            clanPage = Mathf.Clamp(clanPage, 0, Math.Max(0, (availableClans.Length - 1) / PageSize));
         }
         catch (Exception ex)
         {
-            Debug.LogError("Could not load clans: " + ex.Message);
+            rosterError = "Could not load clans: " + ex.Message;
             availableClans = new ClanInfo[0];
         }
     }
@@ -398,35 +452,125 @@ public class GameSetup : MonoBehaviour
     private void ConfigurePlayerRows(bool resetSelection)
     {
         var startClans = LoadStartClanNames(this.worldName);
+        foreach (var clan in availableClans)
+            if (!clanChoices.ContainsKey(clan.ShortName))
+                clanChoices[clan.ShortName] = new ClanChoice { Selected = startClans.Contains(clan.ShortName) };
+        // World changes exclude clans without a capital, but do not erase their role.
+        if (resetSelection)
+            foreach (var clan in availableClans)
+                if (!startClans.Contains(clan.ShortName)) clanChoices[clan.ShortName].Selected = false;
         for (int i = 0; i < this.playerToggles.Length; i++)
         {
             var toggle = this.playerToggles[i];
-            var hasClan = i < availableClans.Length;
+            var index = ClanIndex(i);
+            var hasClan = i < PageSize && index < availableClans.Length;
+            toggle.gameObject.SetActive(hasClan);
             toggle.interactable = hasClan;
-            if (resetSelection)
+            toggle.SetIsOnWithoutNotify(hasClan && clanChoices[availableClans[index].ShortName].Selected);
+            var labels = clanLabels[i];
+            foreach (var label in labels)
             {
-                toggle.isOn = hasClan && startClans.Contains(availableClans[i].ShortName);
+                label.supportRichText = false;
+                label.text = hasClan ? availableClans[index].DisplayName : string.Empty;
+                if (hasClan)
+                {
+                    var clan = availableClans[index];
+                    // The authored shadow precedes the foreground in canvas draw order.
+                    TryClanColor(labels.Length > 1 && label == labels[0]
+                        ? clan.SecondaryColor ?? "(0, 0, 0)" : clan.PrimaryColor ?? clan.Color, out var color);
+                    label.color = color;
+                }
             }
-            else if (!hasClan)
-            {
-                toggle.isOn = false;
-            }
-
-            var clanLabels = toggle.GetComponentsInChildren<Text>(true)
-                .Where(text => !PlayerRoleLabels.Contains(NormalizeRoleLabelText(text.text), StringComparer.OrdinalIgnoreCase)).ToArray();
-            foreach (var label in clanLabels)
-            {
-                label.text = hasClan ? availableClans[i].DisplayName : "Unavailable";
-            }
-            FitClanLabels(clanLabels, GetPlayerRoleIcon(i));
-
-            if (!hasClan && i < this.playerRoleIndexes.Length)
-            {
-                this.playerRoleIndexes[i] = 0;
-            }
-
+            FitClanLabels(labels, GetPlayerRoleIcon(i));
+            playerRoleIndexes[i] = hasClan ? clanChoices[availableClans[index].ShortName].Role : 0;
             SetPlayerRoleLabel(i);
         }
+        UpdateClanPager();
+    }
+
+    private void CachePlayerLabels()
+    {
+        roleLabels = playerToggles.Select(toggle => toggle.GetComponentsInChildren<Text>(true)
+            .Where(text => PlayerRoleLabels.Contains(NormalizeRoleLabelText(text.text), StringComparer.OrdinalIgnoreCase)).ToArray()).ToArray();
+        clanLabels = playerToggles.Select((toggle, row) => toggle.GetComponentsInChildren<Text>(true)
+            .Except(roleLabels[row]).ToArray()).ToArray();
+    }
+
+    private static bool TryClanColor(string value, out Color color)
+    {
+        color = Color.black;
+        if (!ClanInfo.TryParseRgb(value, out var r, out var g, out var b)) return false;
+        color = new Color32(r, g, b, 255);
+        return true;
+    }
+
+    private void UpdateClanPager()
+    {
+        bool paged = availableClans.Length > playerToggles.Length;
+        if (paged && clanPager == null)
+        {
+            var last = playerToggles[playerToggles.Length - 1].GetComponent<RectTransform>();
+            clanPager = new GameObject("ClanPager", typeof(RectTransform));
+            var rect = clanPager.GetComponent<RectTransform>();
+            rect.SetParent(last.parent, false);
+            rect.anchorMin = last.anchorMin;
+            rect.anchorMax = last.anchorMax;
+            rect.pivot = last.pivot;
+            rect.anchoredPosition = last.anchoredPosition;
+            rect.sizeDelta = new Vector2(440f, last.rect.height);
+            previousPage = CreatePageButton("PreviousClans", "<", -130f, -1);
+            nextPage = CreatePageButton("NextClans", ">", 130f, 1);
+            var label = new GameObject("ClanPageLabel", typeof(RectTransform), typeof(Text));
+            label.transform.SetParent(rect, false);
+            pageLabel = label.GetComponent<Text>();
+            pageLabel.font = clanLabels[0][0].font;
+            pageLabel.fontSize = 24;
+            pageLabel.color = Color.black;
+            pageLabel.alignment = TextAnchor.MiddleCenter;
+            pageLabel.raycastTarget = false;
+            pageLabel.rectTransform.sizeDelta = new Vector2(180f, 44f);
+        }
+        if (clanPager == null) return;
+        clanPager.SetActive(paged);
+        if (!paged) return;
+        previousPage.interactable = clanPage > 0;
+        nextPage.interactable = (clanPage + 1) * PageSize < availableClans.Length;
+        previousPage.GetComponentInChildren<Text>().color = previousPage.interactable ? Color.black : Color.gray;
+        nextPage.GetComponentInChildren<Text>().color = nextPage.interactable ? Color.black : Color.gray;
+        pageLabel.text = $"{clanPage * PageSize + 1}-{Math.Min((clanPage + 1) * PageSize, availableClans.Length)} / {availableClans.Length}";
+    }
+
+    private Button CreatePageButton(string name, string text, float x, int direction)
+    {
+        var obj = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+        var rect = obj.GetComponent<RectTransform>();
+        rect.SetParent(clanPager.transform, false);
+        rect.sizeDelta = new Vector2(60f, 44f);
+        rect.anchoredPosition = new Vector2(x, 0f);
+        var image = obj.GetComponent<Image>();
+        var style = GameObject.Find("LoadButton").GetComponent<Image>();
+        image.sprite = style.sprite;
+        image.type = style.type;
+        image.color = style.color;
+        var button = obj.GetComponent<Button>();
+        button.targetGraphic = image;
+        button.onClick.AddListener(() =>
+        {
+            clanPage = Mathf.Clamp(clanPage + direction, 0, (availableClans.Length - 1) / PageSize);
+            ConfigurePlayerRows(false);
+        });
+        var label = new GameObject("Label", typeof(RectTransform), typeof(Text)).GetComponent<Text>();
+        label.transform.SetParent(rect, false);
+        label.rectTransform.sizeDelta = rect.sizeDelta;
+        label.font = clanLabels[0][0].font;
+        label.fontSize = 28;
+        label.color = Color.black;
+        label.alignment = TextAnchor.MiddleCenter;
+        label.text = text;
+        label.raycastTarget = false;
+        WismHitTargetPolicy.Apply(obj);
+        WismUiControl.Ensure(obj, "game-setup." + name, WismUiControlRole.Navigation, "game-setup.page-clans", 30);
+        return button;
     }
 
     private HashSet<string> LoadStartClanNames(string world)
@@ -524,7 +668,7 @@ public class GameSetup : MonoBehaviour
         }
     }
 
-    private static void EnsureModSettingsButton()
+    private void EnsureModSettingsButton()
     {
         if (GameObject.Find(ModSettingsButtonName) != null)
         {
@@ -543,7 +687,7 @@ public class GameSetup : MonoBehaviour
 
         var button = buttonObject.GetComponent<Button>();
         button.onClick = new Button.ButtonClickedEvent();
-        button.onClick.AddListener(() => SceneManager.LoadScene(ModSettingsScene));
+        button.onClick.AddListener(ModSettingsButton);
 
         foreach (var label in buttonObject.GetComponentsInChildren<Text>(true))
         {
@@ -771,7 +915,13 @@ public class GameSetup : MonoBehaviour
         for (int i = 0; i < this.playerToggles.Length; i++)
         {
             var rowIndex = i;
-            this.playerToggles[i].onValueChanged.AddListener(_ => OnPlayerSelectionChange());
+            this.playerToggles[i].onValueChanged.AddListener(value =>
+            {
+                var index = ClanIndex(rowIndex);
+                if (!isInitializing && rowIndex < PageSize && index < availableClans.Length)
+                    clanChoices[availableClans[index].ShortName].Selected = value;
+                OnPlayerSelectionChange();
+            });
             foreach (var text in GetRoleTexts(rowIndex))
             {
                 // Preserve the label's left edge while removing its invisible
@@ -877,6 +1027,9 @@ public class GameSetup : MonoBehaviour
         }
 
         this.playerRoleIndexes[playerIndex] = (this.playerRoleIndexes[playerIndex] + 1) % PlayerRoleLabels.Length;
+        var index = ClanIndex(playerIndex);
+        if (playerIndex >= PageSize || index >= availableClans.Length) return;
+        clanChoices[availableClans[index].ShortName].Role = playerRoleIndexes[playerIndex];
         SetPlayerRoleLabel(playerIndex);
         UpdateStartValidation();
     }
@@ -953,10 +1106,7 @@ public class GameSetup : MonoBehaviour
             return Enumerable.Empty<Text>();
         }
 
-        return this.playerToggles[playerIndex]
-            .GetComponentsInChildren<Text>(true)
-            .Where(text => PlayerRoleLabels.Contains(NormalizeRoleLabelText(text.text), StringComparer.OrdinalIgnoreCase))
-            .ToArray();
+        return roleLabels[playerIndex];
     }
 
     private static string NormalizeRoleLabelText(string text)

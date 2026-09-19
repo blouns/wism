@@ -20,6 +20,7 @@ using UnityEngine.UI;
 using Wism.Client.Core;
 using Wism.Client.Modules;
 using Assets.Scripts.Tests.PlayMode.Common;
+using Newtonsoft.Json.Linq;
 
 [Category("SettingsE2E")]
 public sealed class GameSetupPointerMatrixTests
@@ -98,6 +99,280 @@ public sealed class GameSetupPointerMatrixTests
     }
 
     private static string Identity(UnityPlayerEntity player) => player.ClanName + ":" + player.IsHuman + ":" + player.AiDifficulty;
+
+    [UnityTest]
+    public IEnumerator Mods_TwelveClans_PageTargetsPreserveIdentityAndChoices()
+    {
+        using (var fixture = new ClanRosterFixture(12))
+        {
+            yield return ModsRoundTrip();
+            Assert.That(Settings().Players.Length, Is.EqualTo(12));
+            Assert.That(GameObject.Find("Player8"), Is.Null, "Last authored row is reserved for paging.");
+            Assert.That(Find<Button>("PreviousClans").interactable, Is.False);
+            Assert.That(Find<Button>("PreviousClans").GetComponentInChildren<Text>().color, Is.EqualTo(Color.gray));
+            foreach (var size in new[] { new Vector2Int(1024, 768), new Vector2Int(1280, 800), new Vector2Int(1920, 1080) })
+            {
+                yield return SetViewport(size.x, size.y);
+                var before = Settings().Players.Select(Identity).ToArray();
+                var next = Find<Button>("NextClans").GetComponent<RectTransform>();
+                AssertHandler(next, next.gameObject);
+                yield return Click(next);
+                var previous = Find<Button>("PreviousClans").GetComponent<RectTransform>();
+                AssertHandler(previous, previous.gameObject);
+                yield return Click(previous);
+                Assert.That(Settings().Players.Select(Identity), Is.EqualTo(before));
+            }
+            var first = Settings().Players[0].ClanName;
+            yield return Click(Checkbox("Player1"));
+            yield return Click(Find<Button>("NextClans").GetComponent<RectTransform>());
+            Assert.That(Find<Text>("ClanPageLabel").text, Is.EqualTo("8-12 / 12"));
+            Assert.That(Find<Button>("NextClans").interactable, Is.False);
+            yield return GameSetupModSettingsFlowTests.CaptureSetupCanvas(Find<Button>("NextClans").gameObject, "mod-roster-twelve-page-two.png");
+            Assert.That(GameObject.Find("Player6"), Is.Null, "Unused rows must not retain invisible targets.");
+            yield return Click(RoleIcon(2));
+            Assert.That(Settings().Players.Single(p => p.ClanName == "ExtraClan1").AiDifficulty, Is.EqualTo(AiDifficultyTier.Knight));
+            Assert.That(Settings().Players.Any(p => p.ClanName == first), Is.False);
+            yield return Click(Find<Button>("PreviousClans").GetComponent<RectTransform>());
+            Assert.That(Find<Toggle>("Player1").isOn, Is.False);
+            yield return ModsRoundTrip();
+            Assert.That(Settings().Players.Length, Is.EqualTo(11));
+            Assert.That(Settings().Players.Single(p => p.ClanName == "ExtraClan1").AiDifficulty, Is.EqualTo(AiDifficultyTier.Knight));
+            Assert.That(Settings().Players.Any(p => p.ClanName == first), Is.False);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator Mods_TwelveClans_StartsAllPlayersWithCapitalsAndArtwork()
+    {
+        using (var fixture = new ClanRosterFixture(12))
+        {
+            yield return ModsRoundTrip();
+            var expected = Settings().Players.Select(p => p.ClanName).ToArray();
+            Assert.That(expected.Length, Is.EqualTo(12));
+            Assert.That(Find<Button>("StartButton").interactable, Is.True);
+            yield return Click(Find<Button>("StartButton").GetComponent<RectTransform>());
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "Illuria" && Game.IsInitialized(), "Twelve-clan start");
+            Assert.That(Game.Current.Players.Select(p => p.Clan.ShortName), Is.EqualTo(expected));
+            var armies = UnityEngine.Object.FindAnyObjectByType<ArmyManager>();
+            var flags = UnityEngine.Object.FindAnyObjectByType<FlagManager>();
+            foreach (var player in Game.Current.Players)
+            {
+                Assert.That(player.Capitol, Is.Not.Null, player.Clan.ShortName);
+                Assert.That(player.Capitol.Clan.ShortName, Is.EqualTo(player.Clan.ShortName));
+                Assert.That(armies.FindGameObjectKind(player.Clan, ModFactory.FindArmyInfo("LightInfantry")), Is.Not.Null);
+                Assert.That(flags.FindGameObjectKind(player.Clan, 1), Is.Not.Null);
+            }
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator Mods_ReorderedRosterKeepsRolesAndUsesLiteralNamesAndDataColors()
+    {
+        var originalName = ClanTexts(1).First().text;
+        yield return Click(RoleIcon(1));
+        yield return Click(Checkbox("Player2"));
+        using (var fixture = new ClanRosterFixture(8))
+        {
+            fixture.ReverseAndRename();
+            yield return ModsRoundTrip();
+            Assert.That(Settings().Players.Single(p => p.ClanName == "Sirians").AiDifficulty, Is.EqualTo(AiDifficultyTier.Knight));
+            Assert.That(Settings().Players.Length, Is.EqualTo(7));
+            var labels = Find<Toggle>("Player1").GetComponentsInChildren<Text>().Where(t => t.text == "<b>Human</b>").ToArray();
+            Assert.That(labels, Is.Not.Empty);
+            Assert.That(labels.All(t => !t.supportRichText), Is.True, "Mod names must be literal, not UI markup.");
+            Assert.That(labels.Any(t => ((Color32)t.color).Equals(new Color32(30, 180, 90, 255))), Is.True);
+            yield return Click(RoleIcon(1));
+            Assert.That(labels.All(t => t.text == "<b>Human</b>"), Is.True, "Role changes cannot overwrite a clan label.");
+        }
+        yield return ModsRoundTrip();
+        Assert.That(Settings().Players.Single(p => p.ClanName == "Sirians").AiDifficulty, Is.EqualTo(AiDifficultyTier.Knight));
+        Assert.That(ClanTexts(1).First().text, Is.EqualTo(originalName));
+    }
+
+    [UnityTest]
+    public IEnumerator Mods_ReducedRosterHidesRowsAndRevertsWithoutLosingChoices()
+    {
+        yield return Click(RoleIcon(1));
+        using (var fixture = new ClanRosterFixture(3))
+        {
+            yield return ModsRoundTrip();
+            Assert.That(Settings().Players.Length, Is.EqualTo(3));
+            Assert.That(GameObject.Find("Player4"), Is.Null);
+            Assert.That(Find<Button>("StartButton").interactable, Is.True);
+        }
+        yield return ModsRoundTrip();
+        Assert.That(Settings().Players.Length, Is.EqualTo(8));
+        Assert.That(Settings().Players[0].AiDifficulty, Is.EqualTo(AiDifficultyTier.Knight));
+    }
+
+    private IEnumerator ModsRoundTrip()
+    {
+        yield return Click(Find<Button>("AdvancedModsButton").GetComponent<RectTransform>());
+        yield return WaitFor(() => GameObject.Find("ContinueButton") != null, "Mods screen");
+        Assert.That(Find<Button>("ContinueButton").interactable, Is.True);
+        yield return Click(Find<Button>("ContinueButton").GetComponent<RectTransform>());
+        yield return WaitFor(() => GameObject.Find("ShowAiCombatToggle") != null, "Mod roster return");
+        Canvas.ForceUpdateCanvases();
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator Mods_PageBoundaries_NineFourteenFifteenThirtyTwo()
+    {
+        foreach (int count in new[] { 9, 14, 15, 32 })
+        {
+            using (var fixture = new ClanRosterFixture(count))
+            {
+                yield return ModsRoundTrip();
+                var expected = Settings().Players.Select(Identity).ToArray();
+                Assert.That(expected.Length, Is.EqualTo(count));
+                for (int page = 0; page <= (count - 1) / 7; page++)
+                {
+                    Assert.That(Find<Text>("ClanPageLabel").text, Is.EqualTo($"{page * 7 + 1}-{Math.Min(page * 7 + 7, count)} / {count}"));
+                    Assert.That(Settings().Players.Select(Identity), Is.EqualTo(expected), "Paging cannot change player state.");
+                    if (page < (count - 1) / 7)
+                        yield return Click(Find<Button>("NextClans").GetComponent<RectTransform>());
+                }
+                Assert.That(Find<Button>("NextClans").interactable, Is.False);
+            }
+            yield return ModsRoundTrip();
+            Assert.That(Settings().Players.Length, Is.EqualTo(8));
+            Assert.That(GameObject.Find("ClanPager"), Is.Null);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator Mods_ZeroOrOnePlayableClan_CannotStartOrLeakClicks()
+    {
+        foreach (int count in new[] { 0, 1 })
+        {
+            using (var fixture = new ClanRosterFixture(count))
+            {
+                yield return ModsRoundTrip();
+                Assert.That(Settings().Players.Length, Is.EqualTo(count));
+                Assert.That(Find<Button>("StartButton").interactable, Is.False);
+                yield return Click(Find<Button>("StartButton").GetComponent<RectTransform>());
+                Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("GameSetup"));
+                Assert.That(Game.IsInitialized(), Is.False);
+            }
+            yield return ModsRoundTrip();
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator Mods_FlavorOverlay_ChangesMembershipNameAndBothColors_ThenRestores()
+    {
+        yield return Click(Find<Button>("AdvancedModsButton").GetComponent<RectTransform>());
+        yield return WaitFor(() => GameObject.Find("ContinueButton") != null, "Mods screen");
+        var pack = Find<Toggle>("PackToggle:pack-illurian-legends-flavor");
+        if (!pack.isOn) yield return Click(pack.GetComponent<RectTransform>());
+        yield return Click(Find<Button>("ContinueButton").GetComponent<RectTransform>());
+        yield return WaitFor(() => GameObject.Find("ShowAiCombatToggle") != null, "Flavor selected");
+        var path = Path.Combine(UnityModKitSelection.PluginModRoot, "FeaturePacks", "pack-illurian-legends-flavor", "overlays", "mod-overlay.json");
+        var bytes = File.ReadAllBytes(path);
+        var oldName = ClanTexts(1).First().text;
+        var oldColors = ClanTexts(1).Select(t => t.color).ToArray();
+        try
+        {
+            var overlay = JObject.Parse(File.ReadAllText(path));
+            overlay["clans"] = new JArray(
+                new JObject { ["shortName"] = "Sirians", ["displayName"] = "Human", ["primaryColor"] = "(20, 150, 210)", ["secondaryColor"] = "(70, 20, 90)" },
+                new JObject { ["shortName"] = "StormGiants", ["displayName"] = "Storm Giants", ["playable"] = false });
+            File.WriteAllText(path, overlay.ToString());
+            ModFactory.ResetCache();
+            yield return ModsRoundTrip();
+            Assert.That(Settings().Players.Length, Is.EqualTo(7));
+            Assert.That(Settings().Players.Any(p => p.ClanName == "StormGiants"), Is.False);
+            var labels = Find<Toggle>("Player1").GetComponentsInChildren<Text>().Where(t => t.text == "Human" && !t.supportRichText).ToArray();
+            Assert.That(labels.Length, Is.EqualTo(2));
+            Assert.That((Color32)labels[0].color, Is.EqualTo(new Color32(70, 20, 90, 255)));
+            Assert.That((Color32)labels[1].color, Is.EqualTo(new Color32(20, 150, 210, 255)));
+            yield return Click(RoleIcon(1));
+            Assert.That(labels.All(t => t.text == "Human"), Is.True);
+            Assert.That(Settings().Players[0].AiDifficulty, Is.EqualTo(AiDifficultyTier.Knight));
+        }
+        finally { File.WriteAllBytes(path, bytes); ModFactory.ResetCache(); }
+        yield return ModsRoundTrip();
+        Assert.That(Settings().Players.Length, Is.EqualTo(8));
+        Assert.That(ClanTexts(1).First().text, Is.EqualTo(oldName));
+        Assert.That(ClanTexts(1).Select(t => t.color), Is.EqualTo(oldColors));
+    }
+
+    [UnityTest]
+    public IEnumerator Mods_CancelPreservesWorldEmptyPackSelectionAndPlayerChoices()
+    {
+        yield return SelectWorld("Mini-Illuria");
+        yield return Click(RoleIcon(1));
+        yield return Click(Checkbox("ShowAiCombatToggle"));
+        var expected = Settings();
+        yield return ModsRoundTrip();
+        Assert.That(Settings().WorldName, Is.EqualTo("Mini-Illuria"));
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Is.Empty);
+        yield return Click(Find<Button>("AdvancedModsButton").GetComponent<RectTransform>());
+        yield return WaitFor(() => GameObject.Find("BackButton") != null, "Mods screen");
+        yield return Click(Find<Toggle>("PackToggle:pack-illurian-legends-flavor").GetComponent<RectTransform>());
+        yield return Click(Find<Button>("BackButton").GetComponent<RectTransform>());
+        yield return WaitFor(() => GameObject.Find("ShowAiCombatToggle") != null, "Cancelled Mods");
+        Assert.That(Settings().WorldName, Is.EqualTo(expected.WorldName));
+        Assert.That(Settings().Players.Select(Identity), Is.EqualTo(expected.Players.Select(Identity)));
+        Assert.That(Settings().ShowAiCombat, Is.EqualTo(expected.ShowAiCombat));
+        Assert.That(UnityModKitRuntimeSelection.CurrentSelection.PackIds, Is.Empty);
+    }
+
+    private sealed class ClanRosterFixture : IDisposable
+    {
+        private readonly string clanPath = Path.Combine(UnityModKitSelection.PluginModRoot, "Clan.json");
+        private readonly string cityPath = Path.Combine(UnityModKitSelection.PluginModRoot, "Worlds", "Illuria", "City.json");
+        private readonly byte[] clanBytes;
+        private readonly byte[] cityBytes;
+        public ClanRosterFixture(int count)
+        {
+            clanBytes = File.ReadAllBytes(clanPath);
+            cityBytes = File.ReadAllBytes(cityPath);
+            try
+            {
+                var clans = JArray.Parse(File.ReadAllText(clanPath));
+                var playable = clans.OfType<JObject>().Where(c => (string)c["ShortName"] != "Neutral").ToArray();
+                for (int i = 0; i < playable.Length; i++) playable[i]["Playable"] = i < count;
+                var cities = JArray.Parse(File.ReadAllText(cityPath));
+                var neutral = cities.OfType<JObject>().Where(c => string.IsNullOrEmpty((string)c["ClanName"]) || (string)c["ClanName"] == "Neutral").ToArray();
+                for (int i = playable.Length; i < count; i++)
+                {
+                    var clan = (JObject)playable[0].DeepClone();
+                    var name = "ExtraClan" + (i - playable.Length + 1);
+                    clan["ShortName"] = name;
+                    clan["DisplayName"] = "Extra Clan " + (i - playable.Length + 1);
+                    clan["VisualClanName"] = "Sirians";
+                    clan["Playable"] = true;
+                    clans.Add(clan);
+                    neutral[i - playable.Length]["ClanName"] = name;
+                }
+                File.WriteAllText(clanPath, clans.ToString());
+                File.WriteAllText(cityPath, cities.ToString());
+                ModFactory.ResetCache();
+            }
+            catch { Dispose(); throw; }
+        }
+        public void ReverseAndRename()
+        {
+            var clans = JArray.Parse(File.ReadAllText(clanPath));
+            var reordered = new JArray(clans.Reverse().ToArray());
+            // Use an ID not renamed again by the selected default flavor pack.
+            var first = reordered.OfType<JObject>().First(c => (string)c["ShortName"] == "HorseLords");
+            first.Remove();
+            reordered.Insert(0, first);
+            first["DisplayName"] = "<b>Human</b>";
+            first["PrimaryColor"] = "(30, 180, 90)";
+            File.WriteAllText(clanPath, reordered.ToString());
+            ModFactory.ResetCache();
+        }
+        public void Dispose()
+        {
+            File.WriteAllBytes(clanPath, clanBytes);
+            File.WriteAllBytes(cityPath, cityBytes);
+            ModFactory.ResetCache();
+        }
+    }
 
     [UnityTest]
     public IEnumerator ClanCheckboxes_All256Subsets_ChangeOnlyTheIntendedClan()

@@ -89,7 +89,7 @@ namespace Assets.Scripts.Managers
                 Initialize();
             }
 
-            return this.armiesByClanMap[$"{army.Clan.ShortName}_{army.ShortName}"];
+            return this.armiesByClanMap[$"{army.Clan.Info.ArtworkClanName}_{army.ShortName}"];
         }
 
         public GameObject FindGameObjectKind(Clan clan, ArmyInfo armyInfo)
@@ -99,7 +99,7 @@ namespace Assets.Scripts.Managers
                 Initialize();
             }
 
-            return this.armiesByClanMap[$"{clan.ShortName}_{armyInfo.ShortName}"];
+            return this.armiesByClanMap[$"{clan.Info.ArtworkClanName}_{armyInfo.ShortName}"];
         }
 
         public GameObject Instantiate(Army army, Vector3 worldVector, Transform parent)
