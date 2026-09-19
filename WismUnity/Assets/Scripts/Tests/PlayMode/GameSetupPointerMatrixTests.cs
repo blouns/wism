@@ -29,6 +29,7 @@ public sealed class GameSetupPointerMatrixTests
     private InputSettings originalSettings;
     private InputSettings testSettings;
     private readonly string[] roles = { "Human", "Knight", "Baron", "Lord", "Warlord" };
+    private readonly AiDifficultyTier?[] difficulties = { null, AiDifficultyTier.Knight, AiDifficultyTier.Baron, AiDifficultyTier.Lord, AiDifficultyTier.Warlord };
 
     [UnitySetUp]
     public IEnumerator OpenSettings()
@@ -126,7 +127,9 @@ public sealed class GameSetupPointerMatrixTests
         for (int row = 1; row <= 8; row++)
         {
             var icon = RoleIcon(row);
+            var bounds = icon.rect;
             AssertHandler(icon, icon.gameObject);
+            AssertRolePortrait(row, 0);
             for (int press = 1; press <= 5; press++)
             {
                 yield return Click(icon);
@@ -135,13 +138,96 @@ public sealed class GameSetupPointerMatrixTests
                 Assert.That(players.Select(item => item.ClanName), Is.EqualTo(clans));
                 Assert.That(RoleText(row).text, Is.EqualTo(roles[press % 5]));
                 Assert.That(player.IsHuman, Is.EqualTo(press == 5));
-                Assert.That(player.AiDifficulty, Is.EqualTo(press == 5 ? (AiDifficultyTier?)null : (AiDifficultyTier)(press - 1)));
+                Assert.That(player.AiDifficulty, Is.EqualTo(difficulties[press % 5]));
+                AssertRolePortrait(row, press % 5);
+                Assert.That(icon.rect, Is.EqualTo(bounds), "Changing portrait must not resize the click target.");
                 Assert.That(players.Where((_, i) => i != row - 1).All(item => item.IsHuman), Is.True);
             }
             yield return Click(RoleText(row).rectTransform);
             Assert.That(RoleText(row).text, Is.EqualTo("Knight"), "Role text remains an alternative target.");
+            AssertRolePortrait(row, 1);
             for (int i = 0; i < 4; i++) yield return Click(icon);
         }
+    }
+
+    private void AssertRolePortrait(int row, int role)
+    {
+        var image = RoleIcon(row).GetComponent<Image>();
+        var expected = Resources.Load<Sprite>("UI/PlayerRoles/" + roles[role]);
+        Assert.That(expected, Is.Not.Null, "Every role portrait must be packaged as a runtime resource.");
+        Assert.That(image.sprite, Is.SameAs(expected), "Portrait must agree with the role label and difficulty.");
+        Assert.That(image.overrideSprite, Is.SameAs(expected), "A legacy override must not hide the selected portrait.");
+        Assert.That(image.preserveAspect, Is.True);
+        Assert.That(expected.rect.size, Is.EqualTo(new Vector2(32, 30)));
+        Assert.That(expected.texture.filterMode, Is.EqualTo(FilterMode.Point));
+        Assert.That(expected.texture.mipmapCount, Is.EqualTo(1));
+    }
+
+    [UnityTest]
+    public IEnumerator RolePortraits_KeyboardAndReselectionKeepDifficultyInSync()
+    {
+        var icon = RoleIcon(2);
+        yield return Click(icon);
+        for (int role = 1; role < 5; role++)
+        {
+            AssertRolePortrait(2, role);
+            Assert.That(Settings().Players[1].AiDifficulty, Is.EqualTo(difficulties[role]));
+            if (role < 4) yield return KeyPress(Key.Enter);
+        }
+        var clan = Settings().Players[1].ClanName;
+        yield return Click(Checkbox("Player2"));
+        Assert.That(Settings().Players.Any(player => player.ClanName == clan), Is.False);
+        AssertRolePortrait(2, 4);
+        yield return Click(Checkbox("Player2"));
+        Assert.That(Settings().Players.Single(player => player.ClanName == clan).AiDifficulty, Is.EqualTo(AiDifficultyTier.Warlord));
+        AssertRolePortrait(2, 4);
+        yield return Click(icon);
+        AssertRolePortrait(2, 0);
+        Assert.That(Settings().Players[1].IsHuman, Is.True);
+        Assert.That(Settings().Players[1].AiDifficulty, Is.Null);
+    }
+
+    [UnityTest]
+    public IEnumerator RolePortraits_AreDistinctPixelArtWithTransparentBorders()
+    {
+        var fingerprints = new HashSet<string>();
+        foreach (var role in roles)
+        {
+            var sprite = Resources.Load<Sprite>("UI/PlayerRoles/" + role);
+            Assert.That(sprite, Is.Not.Null, role);
+#if UNITY_EDITOR
+            var path = UnityEditor.AssetDatabase.GetAssetPath(sprite);
+            var importer = (UnityEditor.TextureImporter)UnityEditor.AssetImporter.GetAtPath(path);
+            Assert.That(importer.textureCompression, Is.EqualTo(UnityEditor.TextureImporterCompression.Uncompressed), role);
+            var texture = new Texture2D(2, 2);
+            try
+            {
+                var bytes = File.ReadAllBytes(path);
+                Assert.That(texture.LoadImage(bytes), Is.True);
+                Assert.That(texture.width, Is.EqualTo(32));
+                Assert.That(texture.height, Is.EqualTo(30));
+                var pixels = texture.GetPixels32();
+                Assert.That(pixels.Count(pixel => pixel.a == 255), Is.GreaterThan(100), role);
+                Assert.That(pixels[0].a, Is.Zero, role);
+                Assert.That(pixels[31].a, Is.Zero, role);
+                Assert.That(fingerprints.Add(Convert.ToBase64String(bytes)), Is.True, "Roles need distinct artwork.");
+            }
+            finally { UnityEngine.Object.Destroy(texture); }
+#endif
+        }
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator RolePortraits_AllStatesRenderInSettings()
+    {
+        for (int row = 1; row <= roles.Length; row++)
+        {
+            for (int press = 1; press < row; press++) yield return Click(RoleIcon(row));
+            AssertRolePortrait(row, row - 1);
+        }
+        yield return GameSetupModSettingsFlowTests.CaptureSetupCanvas(RoleIcon(1).gameObject,
+            "player-role-portraits-camera-projection.png");
     }
 
     [UnityTest]
@@ -269,6 +355,7 @@ public sealed class GameSetupPointerMatrixTests
             for (int press = 0; press < (i - 1) % 4 + 1; press++) yield return Click(RoleIcon(rows[i]));
         yield return Click(Checkbox("ShowAiCombatToggle"));
         var expected = Settings();
+        for (int i = 0; i < rows.Length; i++) AssertRolePortrait(rows[i], i == 0 ? 0 : (i - 1) % 4 + 1);
         var cityInfos = ModFactory.LoadCityInfos(System.IO.Path.Combine(ModFactory.ModPath, ModFactory.WorldsPath, world)).ToArray();
         Assert.That(Find<Button>("StartButton").IsInteractable(), Is.True, world);
         yield return Click(Find<Button>("StartButton").GetComponent<RectTransform>());

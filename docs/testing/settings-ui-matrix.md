@@ -20,6 +20,11 @@ mode is suitable only for the settings controls subset, not world startup.
   fewer than two players cannot start.
 - All eight warrior icons cycle Human, Knight, Baron, Lord, Warlord, Human.
   Role labels remain alternative targets. Adjacent settings never change a role.
+- Each role has a distinct transparent 32x30 portrait, point-filtered without
+  compression or mipmaps. Portrait, label and explicit difficulty mapping agree
+  for pointer and keyboard input, wrapping and clan deselection/reselection.
+  Changing portraits preserves the existing button geometry. World starts check
+  the selected portraits against actual player tiers, not just setup labels.
 - Random start is off and disabled; Interactive UI is on and disabled. Show AI
   combat is independently selectable and feeds the created/loaded game.
 - Every world option is checked. Worlds absent from build settings cannot start.

@@ -88,12 +88,12 @@ public sealed class GameSetupModSettingsFlowTests
         Canvas.ForceUpdateCanvases();
         var label = toggle.GetComponentInChildren<Text>();
         Assert.That(label.cachedTextGenerator.characterCountVisible, Is.EqualTo(label.text.Length), "The entire option label must render.");
-        yield return CaptureCombatOption(toggle);
+        yield return CaptureSetupCanvas(toggle.gameObject, "show-ai-combat-setup-camera-projection.png");
     }
 
-    private static IEnumerator CaptureCombatOption(Toggle toggle)
+    internal static IEnumerator CaptureSetupCanvas(GameObject control, string filename)
     {
-        var canvas = toggle.GetComponentInParent<Canvas>().rootCanvas;
+        var canvas = control.GetComponentInParent<Canvas>().rootCanvas;
         var mode = canvas.renderMode;
         var camera = canvas.worldCamera;
         var distance = canvas.planeDistance;
@@ -121,7 +121,7 @@ public sealed class GameSetupModSettingsFlowTests
             texture.Apply();
             var root = System.IO.Path.Combine(Application.dataPath, "../Library/WismUiCaptures");
             System.IO.Directory.CreateDirectory(root);
-            System.IO.File.WriteAllBytes(System.IO.Path.Combine(root, "show-ai-combat-setup-camera-projection.png"), texture.EncodeToPNG());
+            System.IO.File.WriteAllBytes(System.IO.Path.Combine(root, filename), texture.EncodeToPNG());
         }
         finally
         {
