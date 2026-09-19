@@ -40,6 +40,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
     string[] worldIds = new string[0];
     FeaturePackManifest[] packs = new FeaturePackManifest[0];
     UnityModKitSelectionReport currentReport;
+    UnityModKitSelectionReport entryReport;
     bool isRefreshing;
     bool initializedSelection;
 
@@ -59,6 +60,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
     void Start()
     {
+        entryReport = UnityModKitRuntimeSelection.LastReport;
         BuildUi();
         Refresh();
     }
@@ -121,6 +123,11 @@ public sealed class ModSettingsPanel : MonoBehaviour
         var previousProfile = Current(profileDropdown, profileIds);
         var previousWorld = Current(worldDropdown, worldIds);
         var previousPacks = new HashSet<string>(selectedPacks, StringComparer.OrdinalIgnoreCase);
+        if (!initializedSelection && entryReport?.selectionEntity != null)
+        {
+            previousProfile = entryReport.profileId;
+            previousWorld = entryReport.worldName;
+        }
 
         profileIds = DiscoverIds(Path.Combine(UnityModKitSelection.PluginModRoot, "Profiles"), "classic-warlords");
         worldIds = DiscoverIds(Path.Combine(UnityModKitSelection.PluginModRoot, "Worlds"), "Mini-Illuria");
@@ -133,8 +140,17 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
         if (!initializedSelection)
         {
-            ApplyProfileDefaults(profile);
-            previousWorld = DefaultWorldForProfile(profile);
+            if (entryReport?.selectionEntity != null)
+            {
+                selectedPacks.Clear();
+                foreach (var packId in entryReport.selectionEntity.PackIds ?? Array.Empty<string>())
+                    if (PackExists(packId)) selectedPacks.Add(packId);
+            }
+            else
+            {
+                ApplyProfileDefaults(profile);
+                previousWorld = DefaultWorldForProfile(profile);
+            }
             initializedSelection = true;
         }
         else
@@ -305,7 +321,8 @@ public sealed class ModSettingsPanel : MonoBehaviour
 
     void Back()
     {
-        UnityModKitRuntimeSelection.Clear();
+        if (entryReport == null) UnityModKitRuntimeSelection.Clear();
+        else UnityModKitRuntimeSelection.Set(entryReport);
         SceneManager.LoadScene(GameSetupScene);
     }
 

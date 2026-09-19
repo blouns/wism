@@ -10,6 +10,60 @@ namespace Wism.Client.Test.Unit;
 [TestFixture]
 public sealed class ModKitValidatorTests
 {
+    [TestCase("(0, 127, 255)", true)]
+    [TestCase(" ( 30, 180, 90 ) ", true)]
+    [TestCase("(256, 0, 0)", false)]
+    [TestCase("(-1, 0, 0)", false)]
+    [TestCase("(0, 0)", false)]
+    [TestCase("red", false)]
+    [TestCase(null, false)]
+    public void ClanColors_AreStrictRgb(string value, bool valid)
+    {
+        Assert.That(Wism.Client.Modules.Infos.ClanInfo.TryParseRgb(value, out _, out _, out _), Is.EqualTo(valid));
+    }
+
+    [Test]
+    public void ClanPresentation_DefaultsPreserveLegacyIdentity()
+    {
+        var clan = Newtonsoft.Json.JsonConvert.DeserializeObject<Wism.Client.Modules.Infos.ClanInfo>("{\"ShortName\":\"NewClan\"}");
+        Assert.That(clan!.Playable, Is.True);
+        Assert.That(clan.ArtworkClanName, Is.EqualTo("NewClan"));
+        clan.VisualClanName = "Sirians";
+        Assert.That(clan.ArtworkClanName, Is.EqualTo("Sirians"));
+        Assert.That(clan.ShortName, Is.EqualTo("NewClan"));
+    }
+
+    [Test]
+    public void ClanPresentation_RuntimeSerializerKeepsLegacyClansPlayable()
+    {
+        var serializer = new System.Runtime.Serialization.Json.DataContractJsonSerializer(typeof(Wism.Client.Modules.Infos.ClanInfo));
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("{\"ShortName\":\"Sirians\"}"));
+        var clan = (Wism.Client.Modules.Infos.ClanInfo)serializer.ReadObject(stream)!;
+        Assert.That(clan.Playable, Is.True);
+        Assert.That(clan.Color, Is.EqualTo("(255, 0, 0)"));
+    }
+
+    [TestCase("{\"clans\":[{\"shortName\":\"Sirians\",\"displayName\":\"New name\",\"primaryColor\":\"(999,0,0)\"}]}", "clan-color-invalid")]
+    [TestCase("{\"clans\":[null]}", "flavor-entry-invalid")]
+    public void InvalidClanPresentation_IsRejected(string overlay, string code)
+    {
+        var root = CreateFixture("pack-colors", "{\"id\":\"pack-colors\",\"displayName\":\"Colors\",\"kind\":\"Flavor\",\"overlay\":\"overlays/mod-overlay.json\"}",
+            ("FeaturePacks/pack-colors/overlays/mod-overlay.json", overlay));
+        Assert.That(ModKitValidator.Validate(root).Issues.Any(issue => issue.Code == code), Is.True);
+    }
+
+    [TestCase("[null]", "clan-id-invalid")]
+    [TestCase("[{\"ShortName\":\"Sirians\"},{\"ShortName\":\"sirians\"}]", "clan-id-invalid")]
+    [TestCase("[{\"ShortName\":\"Sirians\",\"PrimaryColor\":\"(256,0,0)\"}]", "clan-color-invalid")]
+    [TestCase("[{\"ShortName\":\"Sirians\",\"VisualClanName\":\"Missing\"}]", "clan-artwork-invalid")]
+    [TestCase("[{\"ShortName\":\"Sirians\",\"VisualClanName\":\"Sirians\"}]", "clan-artwork-invalid")]
+    public void InvalidBaseClanData_IsRejected(string clans, string code)
+    {
+        var root = CreateFixture("pack-labels", "{\"id\":\"pack-labels\",\"displayName\":\"Labels\",\"kind\":\"Flavor\",\"overlay\":\"labels.json\"}",
+            ("Clan.json", clans), ("FeaturePacks/pack-labels/labels.json", "{}"));
+        Assert.That(ModKitValidator.Validate(root).Issues.Any(issue => issue.Code == code), Is.True);
+    }
+
     [Test]
     public void DefaultModKit_ValidatesCleanly()
     {

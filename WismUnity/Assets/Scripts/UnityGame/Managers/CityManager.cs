@@ -122,6 +122,7 @@ namespace Assets.Scripts.Managers
         /// <returns>City matching the clan if found; otherwise Neutral city</returns>
         private CityTile FindCityTile(string clanName)
         {
+            clanName = Wism.Client.Modules.ModFactory.FindClanInfo(clanName)?.ArtworkClanName ?? clanName;
             var returnTile = this.neutralCityTile;
 
             for (int i = 0; i < this.cityTiles.Length; i++)

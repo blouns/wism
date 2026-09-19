@@ -11,5 +11,8 @@ namespace Wism.Client.Modules.Profiles
     {
         public string ShortName { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
+        public string PrimaryColor { get; set; }
+        public string SecondaryColor { get; set; }
+        public bool? Playable { get; set; }
     }
 }

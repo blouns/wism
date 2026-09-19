@@ -27,7 +27,9 @@ For the full sidecar map and world-builder direction, see the
 ## What You Can Build
 
 - Visual packs: presentation catalog data for Unity, Companion, or other views.
-- Flavor packs: display-name overlays for existing stable ids.
+- Flavor packs: display-name overlays for existing stable ids, plus clan label
+  colors and new-game playable membership. See [Clan Rosters](clan-rosters.md)
+  for variable-size rosters, including more than eight clans.
 - Mode packs: launch presets that select existing worlds, seed, clan count,
   turn bounds, and scenario labels.
 

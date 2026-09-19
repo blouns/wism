@@ -28,11 +28,41 @@ namespace Wism.Client.Modules.Profiles
             var clans = LoadStableIds<ClanInfo>(report, modRoot, "Clan.json", info => info.ShortName);
             var armies = LoadStableIds<ArmyInfo>(report, modRoot, "Army.json", info => info.ShortName);
             var artifacts = LoadStableIds<ArtifactInfo>(report, modRoot, "Artifact.json", info => info.ShortName);
+            ValidateClanPresentation(report, modRoot);
 
             ValidateProfiles(report, modRoot);
             ValidateFeaturePacks(report, modRoot, clans, armies, artifacts);
 
             return report;
+        }
+
+        private static void ValidateClanPresentation(ModKitValidationReport report, string modRoot)
+        {
+            var path = Path.Combine(modRoot, "Clan.json");
+            var clans = LoadManifest<List<ClanInfo>>(report, path, "base-json-invalid") ?? new List<ClanInfo>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var clan in clans)
+            {
+                if (clan == null || string.IsNullOrWhiteSpace(clan.ShortName) || !seen.Add(clan.ShortName))
+                {
+                    report.Add(ModKitValidationSeverity.Error, "clan-id-invalid", "Clans require unique, nonempty short names.", path);
+                    continue;
+                }
+                if (string.IsNullOrWhiteSpace(clan.DisplayName))
+                    report.Add(ModKitValidationSeverity.Error, "clan-display-name-invalid", "Clan display name must not be empty.", path);
+                ValidateClanColor(report, clan.PrimaryColor ?? clan.Color, path);
+                ValidateClanColor(report, clan.SecondaryColor ?? "(0, 0, 0)", path);
+                if (!string.IsNullOrWhiteSpace(clan.VisualClanName) &&
+                    !clans.Any(other => other != null && other.ShortName == clan.VisualClanName
+                        && string.IsNullOrWhiteSpace(other.VisualClanName)))
+                    report.Add(ModKitValidationSeverity.Error, "clan-artwork-invalid", "VisualClanName must reference an installed clan with its own artwork, not another alias.", path);
+            }
+        }
+
+        private static void ValidateClanColor(ModKitValidationReport report, string value, string path)
+        {
+            if (!ClanInfo.TryParseRgb(value, out _, out _, out _))
+                report.Add(ModKitValidationSeverity.Error, "clan-color-invalid", "Clan colors must use (R, G, B), with each channel between 0 and 255.", path);
         }
 
         private static void ValidateProfiles(ModKitValidationReport report, string modRoot)
@@ -191,6 +221,12 @@ namespace Wism.Client.Modules.Profiles
             }
 
             ValidateDisplayOverrides(report, overlay.Clans, clans, overlayPath, "flavor-clan-unknown");
+            foreach (var item in overlay.Clans ?? Array.Empty<NamedDisplayOverride>())
+            {
+                if (item == null) continue;
+                if (item.PrimaryColor != null) ValidateClanColor(report, item.PrimaryColor, overlayPath);
+                if (item.SecondaryColor != null) ValidateClanColor(report, item.SecondaryColor, overlayPath);
+            }
             ValidateDisplayOverrides(report, overlay.Armies, armies, overlayPath, "flavor-army-unknown");
             ValidateDisplayOverrides(report, overlay.Artifacts, artifacts, overlayPath, "flavor-artifact-unknown");
         }
@@ -204,6 +240,11 @@ namespace Wism.Client.Modules.Profiles
         {
             foreach (var item in overrides ?? Array.Empty<NamedDisplayOverride>())
             {
+                if (item == null)
+                {
+                    report.Add(ModKitValidationSeverity.Error, "flavor-entry-invalid", "Flavor overrides cannot contain null entries.", path);
+                    continue;
+                }
                 if (string.IsNullOrWhiteSpace(item.ShortName))
                 {
                     report.Add(ModKitValidationSeverity.Error, "flavor-short-name-missing", "Flavor overrides must include a stable shortName.", path);
@@ -305,7 +346,7 @@ namespace Wism.Client.Modules.Profiles
             var path = Path.Combine(modRoot, fileName);
             var items = LoadManifest<List<T>>(report, path, "base-json-invalid") ?? new List<T>();
             return new HashSet<string>(
-                items.Select(idSelector)
+                items.Where(item => !(item is null)).Select(idSelector)
                     .Where(id => !string.IsNullOrWhiteSpace(id)),
                 StringComparer.OrdinalIgnoreCase);
         }
