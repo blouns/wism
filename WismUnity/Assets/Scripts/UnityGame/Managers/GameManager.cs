@@ -337,6 +337,23 @@ namespace Assets.Scripts.Managers
                 .GetComponent<UnityManager>();
             var snapshot = PersistanceManager.LoadEntities(filename, unityGame);
             var savedSelection = snapshot.ModKitSelection ?? snapshot.WismGameEntity?.ModKitSelection;
+            var savedWorld = snapshot.WismGameEntity?.World?.Name ?? snapshot.WorldName;
+            var explicitScene = savedSelection == null ? null : UnityModKitSelection.Inspect(
+                savedSelection.ProfileId, savedSelection.PackIds, savedSelection.World, UnityModKitSelection.PluginModRoot).unityScene;
+            var savedScene = UnityWorldSceneCatalog.Resolve(savedWorld, explicitScene);
+            if (savedScene == null) throw new InvalidOperationException("The saved world's scene is not included in this build.");
+            var sceneName = System.IO.Path.GetFileNameWithoutExtension(savedScene);
+            if (!string.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, sceneName, StringComparison.OrdinalIgnoreCase))
+            {
+                // Recreate terrain from the saved world's scene, not the setup
+                // selection. The new manager will restore this same snapshot.
+                UnityManager.SetNewGameSettings(new Assets.Scripts.UnityGame.Persistance.Entities.UnityNewGameEntity
+                {
+                    IsNewGame = false, InteractiveUI = true, WorldName = savedWorld, LoadFilename = filename
+                });
+                UnityEngine.SceneManagement.SceneManager.LoadScene(savedScene);
+                return;
+            }
             if (savedSelection == null)
             {
                 ApplyLegacySaveModContext(unityGame, snapshot);

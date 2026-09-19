@@ -5,6 +5,7 @@ using Assets.Scripts.UI;
 using Assets.Scripts.UnityGame.Persistance.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using Wism.Client.AI.CommandProviders;
@@ -39,6 +40,7 @@ namespace Assets.Scripts.Managers
 
         // Bootstrapping
         private static UnityNewGameEntity gameSettings;
+        public bool AwaitingInitialLoad { get; private set; }
 
         // Telemetry
         private IMapSnapshotBroadcaster snapshotBroadcaster;
@@ -160,6 +162,7 @@ namespace Assets.Scripts.Managers
 
             this.runAiBeforeInitialHumanTurn = gameSettings.IsNewGame && gameSettings.InteractiveUI;
             this.repaintCityTilesAfterNewGame = gameSettings.IsNewGame;
+            this.AwaitingInitialLoad = !gameSettings.IsNewGame;
 
             IntializeWismApi();            
             InitializeCommandProcessors();
@@ -172,6 +175,23 @@ namespace Assets.Scripts.Managers
 
             this.isInitialized = true;
             this.ExecutionMode = ExecutionMode.Bootstrap;
+            if (this.AwaitingInitialLoad) StartCoroutine(OpenInitialLoadPicker(gameSettings.LoadFilename));
+        }
+
+        private System.Collections.IEnumerator OpenInitialLoadPicker(string filename)
+        {
+            yield return null;
+            if (string.IsNullOrWhiteSpace(filename)) this.InputManager.HandleSaveLoadPicker(false);
+            else this.GameManager.LoadGame(filename);
+        }
+
+        public void CancelInitialLoad()
+        {
+            if (!this.AwaitingInitialLoad) return;
+            this.ExecutionMode = ExecutionMode.NotStarted;
+            SetNewGameSettings(null);
+            Game.Unload();
+            UnityEngine.SceneManagement.SceneManager.LoadScene("GameSetup");
         }
 
         private void InitializeAI()
@@ -325,6 +345,12 @@ namespace Assets.Scripts.Managers
             this.armyManager.Reset();
             GetComponent<CityManager>().Reset();
             GetComponent<ItemManager>().Reset();
+            if (this.AwaitingInitialLoad)
+            {
+                this.AwaitingInitialLoad = false;
+                InitializeSelectedArmyBox();
+                this.ExecutionMode = ExecutionMode.Running;
+            }
             NotifyUser("Game loaded successfully!");
         }
 
@@ -393,6 +419,13 @@ namespace Assets.Scripts.Managers
 
         public void FixedUpdate()
         {
+            // The loader's placeholder world must never start a turn or run AI.
+            // Only the queued load command may replace it with playable state.
+            if (this.AwaitingInitialLoad)
+            {
+                if (this.isInitialized) DoTasks();
+                return;
+            }
             try
             {
                 switch (this.ExecutionMode)
@@ -478,7 +511,9 @@ namespace Assets.Scripts.Managers
 
         private void InitializeSelectedArmyBox()
         {
-            var startingTile = Game.Current.GetCurrentPlayer().Capitol.Tile;
+            var player = Game.Current.GetCurrentPlayer();
+            // A valid saved realm can have armies but no remaining capital.
+            var startingTile = player.Capitol?.Tile ?? player.GetArmies().FirstOrDefault()?.Tile ?? World.Current.Map[0, 0];
             var worldVector = this.WorldTilemap.ConvertGameToUnityVector(startingTile.X, startingTile.Y);
             this.selectedArmyBox = Instantiate<GameObject>(this.SelectedBoxPrefab, worldVector, Quaternion.identity, this.WorldTilemap.transform).GetComponent<SelectedArmyBox>();
         }

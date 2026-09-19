@@ -165,15 +165,18 @@ public sealed class JoyfulFidelityUiTests
             var router = low.transform.Find("WismExpandedHitArea").GetComponent<WismHitAreaRaycastTarget>();
             var overlapPoint = (low.GetComponent<WismHitArea>().GetVisualScreenBounds().center +
                 high.GetComponent<WismHitArea>().GetVisualScreenBounds().center) * 0.5f;
-            router.OnPointerClick(new PointerEventData(eventSystemObject.GetComponent<EventSystem>()) { position = overlapPoint });
-
+            var highRouter = high.transform.Find("WismExpandedHitArea").GetComponent<WismHitAreaRaycastTarget>();
+            Assert.That(router.IsRaycastLocationValid(overlapPoint, null), Is.False);
+            Assert.That(highRouter.IsRaycastLocationValid(overlapPoint, null), Is.True);
+            Assert.That(ExecuteEvents.GetEventHandler<IPointerClickHandler>(highRouter.gameObject), Is.EqualTo(high.gameObject));
             Assert.That(lowCount, Is.Zero);
-            Assert.That(highCount, Is.EqualTo(1));
+            Assert.That(highCount, Is.Zero, "Raycast filtering must not execute actions.");
 
             high.GetComponent<Button>().interactable = false;
-            router.OnPointerClick(new PointerEventData(eventSystemObject.GetComponent<EventSystem>()) { position = overlapPoint });
-            Assert.That(lowCount, Is.EqualTo(1));
-            Assert.That(highCount, Is.EqualTo(1));
+            Assert.That(router.IsRaycastLocationValid(overlapPoint, null), Is.True);
+            Assert.That(highRouter.IsRaycastLocationValid(overlapPoint, null), Is.False);
+            Assert.That(lowCount, Is.Zero);
+            Assert.That(highCount, Is.Zero);
         }
         finally
         {

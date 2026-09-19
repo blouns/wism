@@ -67,6 +67,7 @@ public sealed class ModSettingsPanel : MonoBehaviour
     {
         EnsureCamera();
         EnsureEventSystem();
+        Assets.Scripts.UI.WismUiInputAdapter.ConfigureGameEventSystem();
         ScreenOverlayCanvasHost.Ensure(gameObject, sortingOrder: 10);
 
         var root = CreatePanel(transform, "Mod Settings", new Vector2(32f, 32f), new Vector2(-32f, -32f));

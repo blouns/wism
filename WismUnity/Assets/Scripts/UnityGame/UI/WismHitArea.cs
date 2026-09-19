@@ -58,23 +58,15 @@ namespace Assets.Scripts.UI
             this.raycastRect.SetAsLastSibling();
         }
 
-        internal static WismHitArea ResolveAt(Vector2 point)
+        internal static WismHitArea ResolveAt(Vector2 point, Canvas canvas)
         {
             var candidates = ActiveAreas
-                .Where(area => area != null && area.isActiveAndEnabled)
+                .Where(area => area != null && area.isActiveAndEnabled &&
+                    area.GetComponentInParent<Canvas>()?.rootCanvas == canvas)
                 .Select(area => area.ToCandidate())
                 .ToArray();
             var winner = WismUiHitResolver.Resolve(candidates, point);
             return winner.HasValue ? winner.Value.Control.GetComponent<WismHitArea>() : null;
-        }
-
-        internal void Activate()
-        {
-            var button = GetComponent<Button>();
-            if (button != null && button.IsInteractable())
-            {
-                button.onClick.Invoke();
-            }
         }
 
         private void OnEnable()
@@ -162,7 +154,7 @@ namespace Assets.Scripts.UI
                 rect.TransformPoint(center + new Vector2(half.x, half.y)),
                 rect.TransformPoint(center + new Vector2(half.x, -half.y))
             };
-            var canvas = rect.GetComponentInParent<Canvas>();
+            var canvas = rect.GetComponentInParent<Canvas>()?.rootCanvas;
             var camera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
             var minimum = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
             var maximum = minimum;
@@ -177,17 +169,16 @@ namespace Assets.Scripts.UI
         }
     }
 
-    public sealed class WismHitAreaRaycastTarget : MonoBehaviour, IPointerClickHandler
+    public sealed class WismHitAreaRaycastTarget : MonoBehaviour, ICanvasRaycastFilter
     {
         public WismHitArea Owner { get; set; }
 
-        public void OnPointerClick(PointerEventData eventData)
+        public bool IsRaycastLocationValid(Vector2 point, Camera eventCamera)
         {
-            var winner = WismHitArea.ResolveAt(eventData.position);
-            if (winner != null)
-            {
-                winner.Activate();
-            }
+            // Filter overlap without becoming the press/click receiver. Unity must
+            // route down, up, click, selection and disabled state to the Selectable.
+            return Owner != null && WismHitArea.ResolveAt(point,
+                Owner.GetComponentInParent<Canvas>()?.rootCanvas) == Owner;
         }
     }
 }

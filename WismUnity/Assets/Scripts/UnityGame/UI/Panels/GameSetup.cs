@@ -36,6 +36,7 @@ public class GameSetup : MonoBehaviour
 
     public void Start()
     {
+        WismUiInputAdapter.ConfigureGameEventSystem();
         if (this.playerToggles == null || this.playerToggles.Length == 0)
         {
             throw new InvalidOperationException("Must have at least one player.");
@@ -123,11 +124,17 @@ public class GameSetup : MonoBehaviour
 
     private void LoadGame()
     {
+        var scene = ResolvePlayableScene(this.worldName, false) ?? ResolvePlayableScene("Illuria", false);
+        if (scene == null)
+        {
+            UpdateValidationText(GameSetupValidation.Invalid("No game scene is available for loading."));
+            return;
+        }
         UnityNewGameEntity settings = new UnityNewGameEntity();
         settings.IsNewGame = false;
+        settings.InteractiveUI = true;
         UnityManager.SetNewGameSettings(settings);
-
-        LoadScene(this.worldName);
+        SceneManager.LoadScene(scene);
     }
 
     private void StartNewGame(UnityNewGameEntity settings)
@@ -139,23 +146,15 @@ public class GameSetup : MonoBehaviour
 
     private void LoadScene(string worldName)
     {
-        var selectedScene = ResolveSelectedUnityScene();
-        if (!string.IsNullOrWhiteSpace(selectedScene))
-        {
-            SceneManager.LoadScene(selectedScene);
-            return;
-        }
+        var scene = ResolvePlayableScene(worldName);
+        if (scene == null) return;
+        SceneManager.LoadScene(scene);
+    }
 
-        string scenePath = "Scenes/";
-
-#if DEBUG
-        if (worldName.Contains("Test"))
-        {
-            scenePath += "Test/";
-        }
-#endif
-
-        SceneManager.LoadScene(scenePath + worldName);
+    private static string ResolvePlayableScene(string world, bool useSelection = true)
+    {
+        var selected = useSelection ? ResolveSelectedUnityScene() : null;
+        return UnityWorldSceneCatalog.Resolve(world, selected);
     }
 
     private static string ResolveSelectedUnityScene()
@@ -207,6 +206,9 @@ public class GameSetup : MonoBehaviour
         {
             return GameSetupValidation.Invalid("Choose a world.");
         }
+
+        if (ResolvePlayableScene(settings.WorldName) == null)
+            return GameSetupValidation.Invalid("This world is not included in this build.");
 
         if (settings.ModKitSelection != null)
         {
@@ -274,8 +276,8 @@ public class GameSetup : MonoBehaviour
         UnityNewGameEntity settings = new UnityNewGameEntity();
         settings.Players = GetSelectedPlayersFromPanel();
         settings.WorldName = this.worldName;
-        settings.RandomStartLocations = GetToggleValue("RandomStartToggle", defaultValue: false);
-        settings.InteractiveUI = GetToggleValue("InteractiveToggle", defaultValue: true);
+        settings.RandomStartLocations = false;
+        settings.InteractiveUI = true;
         settings.ShowAiCombat = GetToggleValue("ShowAiCombatToggle", defaultValue: true);
         settings.IsNewGame = true;
         settings.RandomSeed = 0;
@@ -391,8 +393,7 @@ public class GameSetup : MonoBehaviour
                 toggle.isOn = false;
             }
 
-            var label = toggle.GetComponentInChildren<Text>(true);
-            if (label != null)
+            foreach (var label in toggle.GetComponentsInChildren<Text>(true).Where(text => !PlayerRoleLabels.Contains(NormalizeRoleLabelText(text.text), StringComparer.OrdinalIgnoreCase)))
             {
                 label.text = hasClan ? availableClans[i].DisplayName : "Unavailable";
             }
@@ -519,7 +520,7 @@ public class GameSetup : MonoBehaviour
         buttonObject.name = ModSettingsButtonName;
 
         var button = buttonObject.GetComponent<Button>();
-        button.onClick.RemoveAllListeners();
+        button.onClick = new Button.ButtonClickedEvent();
         button.onClick.AddListener(() => SceneManager.LoadScene(ModSettingsScene));
 
         foreach (var label in buttonObject.GetComponentsInChildren<Text>(true))
@@ -687,17 +688,15 @@ public class GameSetup : MonoBehaviour
         var randomStartToggle = GameObject.Find("RandomStartToggle")?.GetComponent<Toggle>();
         if (randomStartToggle != null)
         {
-            randomStartToggle.interactable = true;
+            randomStartToggle.SetIsOnWithoutNotify(false);
+            randomStartToggle.interactable = false;
         }
 
         var interactiveToggle = GameObject.Find("InteractiveToggle")?.GetComponent<Toggle>();
         if (interactiveToggle != null)
         {
-            interactiveToggle.interactable = true;
-            if (!interactiveToggle.isOn)
-            {
-                interactiveToggle.isOn = true;
-            }
+            interactiveToggle.SetIsOnWithoutNotify(true);
+            interactiveToggle.interactable = false;
 
             if (GameObject.Find("ShowAiCombatToggle") == null)
             {
@@ -705,6 +704,7 @@ public class GameSetup : MonoBehaviour
                 combatToggle.name = "ShowAiCombatToggle";
                 combatToggle.onValueChanged = new Toggle.ToggleEvent();
                 combatToggle.group = null;
+                combatToggle.interactable = true;
                 combatToggle.SetIsOnWithoutNotify(true);
                 var rect = combatToggle.GetComponent<RectTransform>();
                 var reference = interactiveToggle.GetComponent<RectTransform>();
@@ -746,6 +746,15 @@ public class GameSetup : MonoBehaviour
             this.playerToggles[i].onValueChanged.AddListener(_ => OnPlayerSelectionChange());
             foreach (var text in GetRoleTexts(rowIndex))
             {
+                // Preserve the label's left edge while removing its invisible
+                // overlap with the settings column.
+                var rect = text.rectTransform;
+                var left = rect.anchoredPosition.x - rect.rect.width * rect.pivot.x;
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 160f);
+                rect.anchoredPosition = new Vector2(left + 160f * rect.pivot.x, rect.anchoredPosition.y);
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 24;
+                text.resizeTextMaxSize = text.fontSize;
                 text.raycastTarget = true;
                 var button = text.GetComponent<Button>() ?? text.gameObject.AddComponent<Button>();
                 button.transition = Selectable.Transition.ColorTint;
@@ -760,6 +769,19 @@ public class GameSetup : MonoBehaviour
                     "game-setup.cycle-player-role",
                     30);
             }
+            var icon = this.playerToggles[i].GetComponentsInChildren<Image>(true)
+                .FirstOrDefault(image => image.transform.parent == this.playerToggles[rowIndex].transform && image.name.StartsWith("Image", StringComparison.Ordinal));
+            if (icon != null)
+            {
+                icon.raycastTarget = true;
+                var button = icon.GetComponent<Button>() ?? icon.gameObject.AddComponent<Button>();
+                button.targetGraphic = icon;
+                button.onClick = new Button.ButtonClickedEvent();
+                button.onClick.AddListener(() => CyclePlayerRole(rowIndex));
+                WismHitTargetPolicy.Apply(button.gameObject);
+                WismUiControl.Ensure(button.gameObject, $"game-setup.player-{i + 1}.role-icon",
+                    WismUiControlRole.Selection, "game-setup.cycle-player-role", 30);
+            }
         }
     }
 
@@ -773,6 +795,7 @@ public class GameSetup : MonoBehaviour
             WismUiControlState.Disabled);
 
         EnsureNamedControl("StartButton", "game-setup.start", "game-setup.start", WismUiControlRole.Command, 40);
+        EnsureNamedControl("WorldDropdown", "game-setup.world", "game-setup.select-world", WismUiControlRole.Selection, 20);
         EnsureNamedControl("LoadButton", "game-setup.load", "game-setup.load", WismUiControlRole.Navigation, 20);
         EnsureNamedControl(ModSettingsButtonName, "game-setup.mods", "game-setup.open-mods", WismUiControlRole.Navigation, 20);
         EnsureNamedControl("RandomStartToggle", "game-setup.random-start", "game-setup.toggle-random-start", WismUiControlRole.Toggle, 20);

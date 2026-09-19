@@ -138,7 +138,7 @@ public sealed class GameSetupModSettingsFlowTests
     }
 
     [UnityTest]
-    public IEnumerator GameSetup_OptionTogglesAreInteractiveAndFeedSettings()
+    public IEnumerator GameSetup_UnimplementedOptionsAreDisabledAndCannotChangeSettings()
     {
         UnityModKitRuntimeSelection.Clear();
         SceneManager.LoadScene("GameSetup", LoadSceneMode.Single);
@@ -146,16 +146,16 @@ public sealed class GameSetupModSettingsFlowTests
 
         var randomStart = FindToggle("RandomStartToggle");
         var interactive = FindToggle("InteractiveToggle");
-        Assert.That(randomStart.interactable, Is.True);
-        Assert.That(interactive.interactable, Is.True);
+        Assert.That(randomStart.interactable, Is.False);
+        Assert.That(interactive.interactable, Is.False);
 
         randomStart.isOn = true;
         interactive.isOn = false;
         yield return null;
 
         var settings = ReadGameSettings();
-        Assert.That(settings.RandomStartLocations, Is.True);
-        Assert.That(settings.InteractiveUI, Is.False);
+        Assert.That(settings.RandomStartLocations, Is.False);
+        Assert.That(settings.InteractiveUI, Is.True);
     }
 
     [UnityTest]

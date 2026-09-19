@@ -147,8 +147,7 @@ namespace Assets.Scripts
             Game.CreateDefaultGame();
             World.CreateDefaultWorld();
 
-            // Load game picker
-            this.unityManager.InputManager.HandleSaveLoadPicker(false);
+            // UnityManager opens the picker after every component has run Start.
         }
 
         private static void ValidateNewGameSettings(UnityNewGameEntity newGameEntity)

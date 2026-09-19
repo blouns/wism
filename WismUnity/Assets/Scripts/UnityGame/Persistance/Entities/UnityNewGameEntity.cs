@@ -17,6 +17,7 @@ namespace Assets.Scripts.UnityGame.Persistance.Entities
         public UnityPlayerEntity[] Players { get; set; }
 
         public bool IsNewGame { get; set; }
+        public string LoadFilename { get; set; }
 
         public ModKitSelectionEntity ModKitSelection { get; set; }
     }
