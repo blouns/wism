@@ -78,6 +78,7 @@ namespace Assets.Scripts.Managers
         private SelectedArmyBox selectedArmyBox;
         private Camera mainCamera;
         private Camera minimapCamera;
+        private RenderTexture ownedMinimapTexture;
         private CameraFollow cameraFollow;
 
         private bool isInitialized;
@@ -226,6 +227,11 @@ namespace Assets.Scripts.Managers
         private void OnDestroy()
         {
             this.socketTelemetryPublisher?.Dispose();
+            if (this.ownedMinimapTexture != null)
+            {
+                this.ownedMinimapTexture.Release();
+                Destroy(this.ownedMinimapTexture);
+            }
         }
 
         private static TelemetryContext CreateTelemetryContext()
@@ -265,7 +271,6 @@ namespace Assets.Scripts.Managers
                 GetComponent<UnityGameFactory>().LoadNewGame();
             }
 
-            ConfigureWorldCameras();
         }
 
         private void InitializeUI()
@@ -345,6 +350,7 @@ namespace Assets.Scripts.Managers
             this.armyManager.Reset();
             GetComponent<CityManager>().Reset();
             GetComponent<ItemManager>().Reset();
+            ConfigureWorldCameras();
             if (this.AwaitingInitialLoad)
             {
                 this.AwaitingInitialLoad = false;
@@ -433,6 +439,7 @@ namespace Assets.Scripts.Managers
                     // Bootstrap game
                     case ExecutionMode.Bootstrap:
                         DoTasks();
+                        ConfigureWorldCameras();
                         RepaintCityTilesAfterNewGameIfReady();
                         MoveInitialTurnToAiBeforeHumanHandoff();
                         this.ExecutionMode = ExecutionMode.Starting;
@@ -957,6 +964,7 @@ namespace Assets.Scripts.Managers
             }
 
             this.minimapCamera.orthographic = true;
+            ConfigureMinimapGeometry(mapWidth, mapHeight);
             var aspect = this.minimapCamera.targetTexture != null && this.minimapCamera.targetTexture.height > 0
                 ? this.minimapCamera.targetTexture.width / (float)this.minimapCamera.targetTexture.height
                 : this.minimapCamera.aspect;
@@ -967,6 +975,79 @@ namespace Assets.Scripts.Managers
                 mapWidth / 2f,
                 mapHeight / 2f,
                 this.minimapCamera.transform.position.z == 0f ? -10f : this.minimapCamera.transform.position.z);
+        }
+
+        private void ConfigureMinimapGeometry(int mapWidth, int mapHeight)
+        {
+            var map = GameObject.Find("Minimap")?.GetComponent<RectTransform>();
+            var panel = GameObject.Find("MinimapPanel")?.GetComponent<RectTransform>();
+            if (map == null || panel == null) return;
+
+            const float frameBorder = 0.58f;
+            float height = map.rect.height > 0f ? map.rect.height : 10.44f;
+            float width = height * mapWidth / mapHeight;
+            map.anchorMin = map.anchorMax = map.pivot = new Vector2(.5f, .5f);
+            map.sizeDelta = new Vector2(width, height);
+            map.anchoredPosition = Vector2.zero;
+            var previousSize = panel.rect.size;
+            panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width + 2f * frameBorder);
+            panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height + 2f * frameBorder);
+            // Keep the authored top-right edge fixed as wider worlds grow inward.
+            panel.anchoredPosition += Vector2.Scale(previousSize - panel.rect.size, Vector2.one - panel.pivot);
+            var collider = panel.GetComponent<BoxCollider2D>();
+            if (collider != null)
+            {
+                collider.size = map.rect.size;
+                collider.offset = Vector2.zero;
+            }
+
+            // Fit both the UI and camera target. Resizing only the frame would
+            // stretch the map; mutating the shared asset would affect other worlds.
+            int pixelsPerTile = Mathf.Clamp(1024 / Mathf.Max(mapWidth, mapHeight), 1, 4);
+            int textureWidth = mapWidth * pixelsPerTile;
+            int textureHeight = mapHeight * pixelsPerTile;
+            if (this.ownedMinimapTexture == null || this.ownedMinimapTexture.width != textureWidth ||
+                this.ownedMinimapTexture.height != textureHeight)
+            {
+                if (this.ownedMinimapTexture != null)
+                {
+                    this.ownedMinimapTexture.Release();
+                    Destroy(this.ownedMinimapTexture);
+                }
+                this.ownedMinimapTexture = new RenderTexture(textureWidth, textureHeight, 24)
+                {
+                    name = "WorldMinimap", filterMode = FilterMode.Point
+                };
+                this.ownedMinimapTexture.Create();
+            }
+            this.minimapCamera.targetTexture = this.ownedMinimapTexture;
+            var image = map.GetComponent<UnityEngine.UI.RawImage>();
+            if (image != null) image.texture = this.ownedMinimapTexture;
+            KeepMinimapInsideViewport(panel);
+        }
+
+        private static void KeepMinimapInsideViewport(RectTransform panel)
+        {
+            Canvas.ForceUpdateCanvases();
+            var canvas = panel.GetComponentInParent<Canvas>()?.rootCanvas;
+            if (canvas == null) return;
+            var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            var corners = new Vector3[4];
+            panel.GetWorldCorners(corners);
+            var minimum = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
+            var maximum = minimum;
+            foreach (var corner in corners)
+            {
+                var point = RectTransformUtility.WorldToScreenPoint(camera, corner);
+                minimum = Vector2.Min(minimum, point);
+                maximum = Vector2.Max(maximum, point);
+            }
+            var offset = new Vector2(
+                maximum.x > Screen.width - 4f ? Screen.width - 4f - maximum.x : Mathf.Max(0f, 4f - minimum.x),
+                maximum.y > Screen.height - 4f ? Screen.height - 4f - maximum.y : Mathf.Max(0f, 4f - minimum.y));
+            var origin = RectTransformUtility.WorldToScreenPoint(camera, panel.position);
+            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(panel, origin + offset, camera, out var position))
+                panel.position = position;
         }
 
         internal void SetCameraTarget(Transform transform)
