@@ -494,6 +494,11 @@ namespace Assets.Scripts.Managers
                 else if (saveLoadPicker.OkCancelResult == OkCancel.Cancel)
                 {
                     saveLoadPicker.Clear();
+                    if (this.unityManager.AwaitingInitialLoad)
+                    {
+                        this.unityManager.CancelInitialLoad();
+                        return;
+                    }
                     SetInputMode(InputMode.Game);
                 }
                 // Load the game
