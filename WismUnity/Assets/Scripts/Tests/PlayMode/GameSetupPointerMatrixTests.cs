@@ -341,6 +341,74 @@ public sealed class GameSetupPointerMatrixTests
             Assert.That(screen.x, Is.InRange(-1f, Screen.width + 1f), "Minimap frame must fit horizontally.");
             Assert.That(screen.y, Is.InRange(-1f, Screen.height + 1f), "Minimap frame must fit vertically.");
         }
+        var frame = ScreenBounds(panel);
+        Assert.That(Screen.width - frame.xMax, Is.EqualTo(4f).Within(1f), "Minimap must dock right, not merely remain visible.");
+        Assert.That(Screen.height - frame.yMax, Is.EqualTo(4f).Within(1f), "Minimap must dock to the top edge.");
+    }
+
+    [UnityTest]
+    public IEnumerator Minimap_DocksTopRight_AfterWorldStartAndViewportResize()
+    {
+        yield return StartRoster("Mini-Illuria", null);
+        foreach (var size in new[] { new Vector2Int(1024, 768), new Vector2Int(1280, 800),
+            new Vector2Int(1920, 1080), new Vector2Int(2560, 1080), new Vector2Int(1024, 768) })
+        {
+            yield return SetViewport(size.x, size.y);
+            yield return null;
+            yield return null;
+            AssertMinimapFitsWorld();
+            var bounds = ScreenBounds(Find<RectTransform>("MinimapPanel"));
+            Assert.That(Screen.width - bounds.xMax, Is.EqualTo(4f).Within(1f), "Right docking: " + size);
+            Assert.That(Screen.height - bounds.yMax, Is.EqualTo(4f).Within(1f), "Top docking: " + size);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator Splash_CompleteCompositionFits_AcrossViewportResize()
+    {
+        SceneManager.LoadScene("SplashScreen");
+        yield return null;
+        var splash = UnityEngine.Object.FindAnyObjectByType<Assets.Scripts.UI.Panels.SplashScreen>();
+        Assert.That(splash, Is.Not.Null);
+        // Hold only the scene timer, leaving the production layout lifecycle active.
+        splash.StopAllCoroutines();
+        var panel = Find<RectTransform>("SplashScreenPanel");
+        foreach (var size in new[] { new Vector2Int(1024, 768), new Vector2Int(1280, 800),
+            new Vector2Int(1920, 1080), new Vector2Int(2560, 1080), new Vector2Int(1024, 768) })
+        {
+            yield return SetViewport(size.x, size.y);
+            yield return null;
+            yield return null;
+            var union = ScreenBounds(panel);
+            foreach (var image in panel.GetComponentsInChildren<Image>())
+            {
+                var bounds = ScreenBounds(image.rectTransform);
+                Assert.That(bounds.xMin, Is.GreaterThanOrEqualTo(-1f), image.name + " left: " + size);
+                Assert.That(bounds.yMin, Is.GreaterThanOrEqualTo(-1f), image.name + " bottom: " + size);
+                Assert.That(bounds.xMax, Is.LessThanOrEqualTo(Screen.width + 1f), image.name + " right: " + size);
+                Assert.That(bounds.yMax, Is.LessThanOrEqualTo(Screen.height + 1f), image.name + " top: " + size);
+                union = Rect.MinMaxRect(Mathf.Min(union.xMin, bounds.xMin), Mathf.Min(union.yMin, bounds.yMin),
+                    Mathf.Max(union.xMax, bounds.xMax), Mathf.Max(union.yMax, bounds.yMax));
+            }
+            Assert.That(union.center.x, Is.EqualTo(Screen.width / 2f).Within(1f));
+            Assert.That(union.center.y, Is.EqualTo(Screen.height / 2f).Within(1f));
+            Assert.That(Mathf.Max(union.width / Screen.width, union.height / Screen.height), Is.EqualTo(1f).Within(.01f),
+                "Fit the composition without shrinking it unnecessarily.");
+            Assert.That(panel.localScale.x, Is.EqualTo(panel.localScale.y).Within(.0001f));
+            Assert.That(Game.IsInitialized(), Is.False, "Splash layout must not start gameplay.");
+        }
+        yield return GameSetupModSettingsFlowTests.CaptureSetupCanvas(panel.gameObject, "splash-fit-camera-projection.png");
+    }
+
+    private static Rect ScreenBounds(RectTransform rect)
+    {
+        var canvas = rect.GetComponentInParent<Canvas>().rootCanvas;
+        var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        var corners = new Vector3[4];
+        rect.GetWorldCorners(corners);
+        var points = corners.Select(corner => RectTransformUtility.WorldToScreenPoint(camera, corner)).ToArray();
+        return Rect.MinMaxRect(points.Min(point => point.x), points.Min(point => point.y),
+            points.Max(point => point.x), points.Max(point => point.y));
     }
 
     private IEnumerator StartRoster(string world, int[] selected)
