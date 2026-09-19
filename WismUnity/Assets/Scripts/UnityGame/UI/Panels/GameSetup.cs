@@ -412,10 +412,13 @@ public class GameSetup : MonoBehaviour
                 toggle.isOn = false;
             }
 
-            foreach (var label in toggle.GetComponentsInChildren<Text>(true).Where(text => !PlayerRoleLabels.Contains(NormalizeRoleLabelText(text.text), StringComparer.OrdinalIgnoreCase)))
+            var clanLabels = toggle.GetComponentsInChildren<Text>(true)
+                .Where(text => !PlayerRoleLabels.Contains(NormalizeRoleLabelText(text.text), StringComparer.OrdinalIgnoreCase)).ToArray();
+            foreach (var label in clanLabels)
             {
                 label.text = hasClan ? availableClans[i].DisplayName : "Unavailable";
             }
+            FitClanLabels(clanLabels, GetPlayerRoleIcon(i));
 
             if (!hasClan && i < this.playerRoleIndexes.Length)
             {
@@ -905,6 +908,34 @@ public class GameSetup : MonoBehaviour
             icon.sprite = this.playerRoleSprites[roleIndex];
             icon.type = Image.Type.Simple;
             icon.preserveAspect = true;
+        }
+    }
+
+    private static void FitClanLabels(Text[] labels, Image icon)
+    {
+        if (labels.Length == 0 || icon == null) return;
+        var iconLeft = icon.rectTransform.TransformPoint(new Vector3(icon.rectTransform.rect.xMin, 0, 0));
+        var width = labels.Min(label =>
+        {
+            var rect = label.rectTransform;
+            var left = rect.localPosition.x + rect.rect.xMin;
+            return rect.parent.InverseTransformPoint(iconLeft).x - 8f - left;
+        });
+        width = Mathf.Max(1f, width);
+        var maxFontSize = labels.Min(label => label.fontSize);
+        // Keep foreground and shadow on identical text geometry and font sizing.
+        foreach (var label in labels)
+        {
+            var rect = label.rectTransform;
+            var position = rect.localPosition;
+            var left = position.x + rect.rect.xMin;
+            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            rect.localPosition = new Vector3(left - rect.rect.xMin, position.y, position.z);
+            label.horizontalOverflow = HorizontalWrapMode.Wrap;
+            label.verticalOverflow = VerticalWrapMode.Truncate;
+            label.resizeTextForBestFit = true;
+            label.resizeTextMaxSize = maxFontSize;
+            label.resizeTextMinSize = Mathf.Min(20, maxFontSize);
         }
     }
 

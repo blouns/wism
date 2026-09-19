@@ -407,11 +407,58 @@ public sealed class GameSetupPointerMatrixTests
         Assert.That(dropdown.value, Is.EqualTo(target));
     }
 
+    [UnityTest] public IEnumerator Mods_LongClanNames_1024x768() => ModsLongClanNamesFitBeforeRoleTargets(1024, 768);
+    [UnityTest] public IEnumerator Mods_LongClanNames_1280x800() => ModsLongClanNamesFitBeforeRoleTargets(1280, 800);
+    [UnityTest] public IEnumerator Mods_LongClanNames_1920x1080() => ModsLongClanNamesFitBeforeRoleTargets(1920, 1080);
+
+    private IEnumerator ModsLongClanNamesFitBeforeRoleTargets(int width, int height)
+    {
+        yield return SetViewport(width, height);
+        var report = UnityModKitSelection.Inspect("classic-warlords",
+            new[] { "pack-illurian-legends-flavor" }, "Illuria", UnityModKitSelection.PluginModRoot);
+        Assert.That(report.isGreen, Is.True);
+        UnityModKitRuntimeSelection.Set(report);
+        yield return Click(Find<Button>("AdvancedModsButton").GetComponent<RectTransform>());
+        yield return WaitFor(() => GameObject.Find("ContinueButton") != null, "Mods screen");
+        yield return Click(Find<Button>("ContinueButton").GetComponent<RectTransform>());
+        yield return WaitFor(() => GameObject.Find("ShowAiCombatToggle") != null, "Modded settings");
+        Canvas.ForceUpdateCanvases();
+        Assert.That(ClanTexts(1).First().text, Is.EqualTo("Sirians of the Dawn"));
+        Assert.That(ClanTexts(8).First().text, Is.EqualTo("Bane's Black Host"));
+        for (int row = 1; row <= 8; row++)
+        {
+            AssertClanLabelFits(row);
+            AssertHandler(RoleIcon(row), RoleIcon(row).gameObject);
+            yield return Click(RoleIcon(row));
+            AssertRolePortrait(row, 1);
+        }
+        yield return GameSetupModSettingsFlowTests.CaptureSetupCanvas(RoleIcon(1).gameObject,
+            $"long-clan-labels-{width}x{height}-camera-projection.png");
+    }
+
+    private IEnumerable<Text> ClanTexts(int row) => GameObject.Find("Player" + row).GetComponentsInChildren<Text>()
+        .Where(text => !roles.Contains(text.text.Trim()));
+
+    private void AssertClanLabelFits(int row)
+    {
+        var icon = RoleIcon(row);
+        foreach (var text in ClanTexts(row))
+        {
+            var right = text.rectTransform.TransformPoint(new Vector3(text.rectTransform.rect.xMax, 0, 0));
+            var left = icon.TransformPoint(new Vector3(icon.rect.xMin, 0, 0));
+            Assert.That(icon.parent.InverseTransformPoint(right).x, Is.LessThan(icon.parent.InverseTransformPoint(left).x),
+                "Clan label must end before the role target: " + text.text);
+            Assert.That(text.cachedTextGenerator.characterCountVisible, Is.EqualTo(text.text.Length),
+                "Complete clan name must render: " + text.text);
+            Assert.That(text.cachedTextGenerator.lineCount, Is.EqualTo(1), "Clan name must stay on one row.");
+        }
+    }
+
     [UnityTest] public IEnumerator PointerSweep_1024x768() => SweepViewport(1024, 768);
     [UnityTest] public IEnumerator PointerSweep_1280x800() => SweepViewport(1280, 800);
     [UnityTest] public IEnumerator PointerSweep_1920x1080() => SweepViewport(1920, 1080);
 
-    private IEnumerator SweepViewport(int width, int height)
+    private static IEnumerator SetViewport(int width, int height)
     {
         var editorType = AppDomain.CurrentDomain.GetAssemblies()
             .Select(assembly => assembly.GetType("WismUnity.Playground.UnityPlaygroundCli")).First(type => type != null);
@@ -420,8 +467,14 @@ public sealed class GameSetupPointerMatrixTests
         Assert.That(method.Invoke(null, arguments), Is.True, arguments[3]?.ToString());
         yield return WaitFor(() => Screen.width == width && Screen.height == height, "Windowless viewport");
         Canvas.ForceUpdateCanvases();
+    }
+
+    private IEnumerator SweepViewport(int width, int height)
+    {
+        yield return SetViewport(width, height);
         for (int row = 1; row <= 8; row++)
         {
+            AssertClanLabelFits(row);
             var before = Settings().Players.Select(Identity).ToArray();
             var checkbox = Checkbox("Player" + row);
             foreach (var location in new[] { new Vector2(.1f, .1f), new Vector2(.9f, .1f), new Vector2(.9f, .9f), new Vector2(.1f, .9f) })
