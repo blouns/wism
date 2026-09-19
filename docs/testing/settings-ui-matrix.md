@@ -29,6 +29,12 @@ mode is suitable only for the settings controls subset, not world startup.
   or flattening authored geometry.
 - Mods navigates once and returns. Load disables empty slots, cancels back to
   setup, and restores the saved roster and world rather than the setup selection.
+- Shipped menu cursor settings use the system pointer and its native hotspot;
+  testing the gameplay overlay's calculation helpers alone is insufficient.
+- Mini-Illuria uses the same packaged mod root validated by setup, never the
+  legacy editor-only scene path. All included worlds fit minimap geometry after
+  the queued game creation completes; UI, camera texture, collider and map agree.
+- A rendered Mini-Illuria minimap capture checks that the target is not blank.
 
 Run the neighboring `GameSetupModSettingsFlowTests`, `JoyfulFidelityUiTests`,
 `ModSettingsUiTests` and army UI journeys when shared hit-area code changes.

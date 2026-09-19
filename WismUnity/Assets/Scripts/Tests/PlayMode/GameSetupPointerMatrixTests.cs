@@ -186,6 +186,77 @@ public sealed class GameSetupPointerMatrixTests
     [UnityTest] public IEnumerator Start_MiniIlluria() => StartRoster("Mini-Illuria", null);
     [UnityTest] public IEnumerator Start_TestWorld() => StartRoster("TestWorld", null);
 
+    [UnityTest]
+    public IEnumerator NativeContract_MenuUsesSystemPointerWithoutCustomHotspot()
+    {
+#if UNITY_EDITOR
+        Assert.That(UnityEditor.PlayerSettings.defaultCursor, Is.Null,
+            "Menus must not bypass the bounded game cursor with a raw hardware texture.");
+        Assert.That(UnityEditor.PlayerSettings.cursorHotspot, Is.EqualTo(Vector2.zero));
+#endif
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator NativeContract_MiniIlluriaUsesValidatedModRoot()
+    {
+        yield return StartRoster("Mini-Illuria", null);
+        var manager = UnityEngine.Object.FindAnyObjectByType<GameManager>();
+        Assert.That(Path.GetFullPath(manager.ModPath), Is.EqualTo(Path.GetFullPath(UnityModKitSelection.PluginModRoot)),
+            "An authored scene must not silently use the editor-only Assets/Mod copy.");
+        Assert.That(manager.WorldName, Is.EqualTo("Mini-Illuria"));
+        Assert.That(Game.Current.Players.Count, Is.EqualTo(8));
+    }
+
+    [UnityTest]
+    public IEnumerator NativeContract_MiniIlluriaMinimapFitsWorld()
+    {
+        yield return StartRoster("Mini-Illuria", null);
+        AssertMinimapFitsWorld();
+        var camera = GameObject.FindGameObjectWithTag("MinimapCamera").GetComponent<Camera>();
+        camera.Render();
+        var previous = RenderTexture.active;
+        var capture = new Texture2D(camera.targetTexture.width, camera.targetTexture.height, TextureFormat.RGB24, false);
+        try
+        {
+            RenderTexture.active = camera.targetTexture;
+            capture.ReadPixels(new Rect(0, 0, capture.width, capture.height), 0, 0);
+            capture.Apply();
+            Assert.That(capture.GetPixels32().Distinct().Take(9).Count(), Is.GreaterThan(8), "Minimap must render actual terrain, not an empty target.");
+            var folder = Path.Combine(Application.dataPath, "../Library/WismUiCaptures");
+            Directory.CreateDirectory(folder);
+            File.WriteAllBytes(Path.Combine(folder, "mini-illuria-minimap.png"), capture.EncodeToPNG());
+        }
+        finally
+        {
+            RenderTexture.active = previous;
+            UnityEngine.Object.Destroy(capture);
+        }
+    }
+
+    private static void AssertMinimapFitsWorld()
+    {
+        var map = GameObject.Find("Minimap").GetComponent<RectTransform>();
+        var panel = GameObject.Find("MinimapPanel").GetComponent<RectTransform>();
+        var camera = GameObject.FindGameObjectWithTag("MinimapCamera").GetComponent<Camera>();
+        var aspect = World.Current.Map.GetLength(0) / (float)World.Current.Map.GetLength(1);
+        Assert.That(map.rect.width / map.rect.height, Is.EqualTo(aspect).Within(.005f));
+        Assert.That(camera.targetTexture.width / (float)camera.targetTexture.height, Is.EqualTo(aspect).Within(.005f));
+        Assert.That(GameObject.Find("Minimap").GetComponent<RawImage>().texture, Is.SameAs(camera.targetTexture));
+        Assert.That(panel.rect.width - map.rect.width, Is.GreaterThan(0f).And.LessThan(2f));
+        Assert.That(camera.orthographicSize, Is.EqualTo(World.Current.Map.GetLength(1) / 2f).Within(.01f));
+        Assert.That(panel.GetComponent<BoxCollider2D>().size, Is.EqualTo(map.rect.size));
+        var canvas = panel.GetComponentInParent<Canvas>().rootCanvas;
+        var corners = new Vector3[4];
+        panel.GetWorldCorners(corners);
+        foreach (var corner in corners)
+        {
+            var screen = RectTransformUtility.WorldToScreenPoint(canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera, corner);
+            Assert.That(screen.x, Is.InRange(-1f, Screen.width + 1f), "Minimap frame must fit horizontally.");
+            Assert.That(screen.y, Is.InRange(-1f, Screen.height + 1f), "Minimap frame must fit vertically.");
+        }
+    }
+
     private IEnumerator StartRoster(string world, int[] selected)
     {
         yield return SelectWorld(world);
@@ -217,6 +288,7 @@ public sealed class GameSetupPointerMatrixTests
             Assert.That(city.Clan.ShortName, Is.EqualTo(expectedClan), "Capital ownership: " + info.ShortName);
         }
         Assert.That(UnityEngine.Object.FindAnyObjectByType<UnityManager>().ShowAiCombat, Is.False);
+        AssertMinimapFitsWorld();
     }
 
     [UnityTest]

@@ -83,6 +83,13 @@ namespace Assets.Scripts
                     throw new InvalidOperationException(report.outcome);
                 }
             }
+            else
+            {
+                // Scene-authored legacy paths are editor conveniences, not the
+                // packaged mod root validated by GameSetup.
+                UnityModKitSelection.Apply(this.unityManager, null, Array.Empty<string>(),
+                    newGameEntity.WorldName, UnityModKitSelection.PluginModRoot);
+            }
 
             // Set up the Game
             this.WorldName = newGameEntity.WorldName;
