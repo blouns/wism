@@ -30,9 +30,30 @@ public class GameSetup : MonoBehaviour
     private Button startButton;
     private Text validationText;
     private ClanInfo[] availableClans = new ClanInfo[0];
-    private static readonly string[] PlayerRoleLabels = new[] { "Human", "Knight", "Baron", "Lord", "Warlord" };
+    private static readonly PlayerRole[] PlayerRoles =
+    {
+        new PlayerRole("Human", null),
+        new PlayerRole("Knight", AiDifficultyTier.Knight),
+        new PlayerRole("Baron", AiDifficultyTier.Baron),
+        new PlayerRole("Lord", AiDifficultyTier.Lord),
+        new PlayerRole("Warlord", AiDifficultyTier.Warlord)
+    };
+    private static readonly string[] PlayerRoleLabels = PlayerRoles.Select(role => role.Label).ToArray();
+    private readonly Sprite[] playerRoleSprites = new Sprite[PlayerRoles.Length];
     private int[] playerRoleIndexes = Array.Empty<int>();
     private bool isInitializing;
+
+    private readonly struct PlayerRole
+    {
+        public PlayerRole(string label, AiDifficultyTier? difficulty)
+        {
+            Label = label;
+            Difficulty = difficulty;
+        }
+
+        public string Label { get; }
+        public AiDifficultyTier? Difficulty { get; }
+    }
 
     public void Start()
     {
@@ -294,11 +315,9 @@ public class GameSetup : MonoBehaviour
             if (this.playerToggles[i].isOn)
             {
                 var playerEntity = new UnityPlayerEntity();
-                var roleIndex = GetPlayerRoleIndex(i);
-                playerEntity.IsHuman = roleIndex == 0;
-                playerEntity.AiDifficulty = roleIndex == 0
-                    ? (AiDifficultyTier?)null
-                    : (AiDifficultyTier)(roleIndex - 1);
+                var role = PlayerRoles[GetPlayerRoleIndex(i)];
+                playerEntity.IsHuman = !role.Difficulty.HasValue;
+                playerEntity.AiDifficulty = role.Difficulty;
                 playerEntity.ClanName = GetClanName(i);
                 playerEntities.Add(playerEntity);
             }
@@ -736,6 +755,12 @@ public class GameSetup : MonoBehaviour
         }
 
         this.playerRoleIndexes = new int[this.playerToggles.Length];
+        for (int i = 0; i < PlayerRoles.Length; i++)
+        {
+            this.playerRoleSprites[i] = Resources.Load<Sprite>("UI/PlayerRoles/" + PlayerRoles[i].Label);
+            if (this.playerRoleSprites[i] == null)
+                throw new InvalidOperationException("Missing player role portrait: " + PlayerRoles[i].Label);
+        }
     }
 
     private void WirePlayerRowEvents()
@@ -769,8 +794,7 @@ public class GameSetup : MonoBehaviour
                     "game-setup.cycle-player-role",
                     30);
             }
-            var icon = this.playerToggles[i].GetComponentsInChildren<Image>(true)
-                .FirstOrDefault(image => image.transform.parent == this.playerToggles[rowIndex].transform && image.name.StartsWith("Image", StringComparison.Ordinal));
+            var icon = GetPlayerRoleIcon(i);
             if (icon != null)
             {
                 icon.raycastTarget = true;
@@ -868,11 +892,27 @@ public class GameSetup : MonoBehaviour
             return;
         }
 
-        var role = PlayerRoleLabels[GetPlayerRoleIndex(playerIndex)];
+        var roleIndex = GetPlayerRoleIndex(playerIndex);
+        var role = PlayerRoles[roleIndex];
         foreach (var text in GetRoleTexts(playerIndex))
         {
-            text.text = role;
+            text.text = role.Label;
         }
+        var icon = GetPlayerRoleIcon(playerIndex);
+        if (icon != null)
+        {
+            icon.overrideSprite = null;
+            icon.sprite = this.playerRoleSprites[roleIndex];
+            icon.type = Image.Type.Simple;
+            icon.preserveAspect = true;
+        }
+    }
+
+    private Image GetPlayerRoleIcon(int playerIndex)
+    {
+        var row = this.playerToggles[playerIndex].transform;
+        return row.GetComponentsInChildren<Image>(true)
+            .FirstOrDefault(image => image.transform.parent == row && image.name.StartsWith("Image", StringComparison.Ordinal));
     }
 
     private IEnumerable<Text> GetRoleTexts(int playerIndex)
