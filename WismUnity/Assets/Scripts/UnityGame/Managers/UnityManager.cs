@@ -81,6 +81,7 @@ namespace Assets.Scripts.Managers
         private RenderTexture ownedMinimapTexture;
         private RectTransform minimapPanel;
         private Vector2Int minimapViewport;
+        private Vector2 minimapParentSize;
         private CameraFollow cameraFollow;
 
         private bool isInitialized;
@@ -402,10 +403,12 @@ namespace Assets.Scripts.Managers
         private void LateUpdate()
         {
             var viewport = new Vector2Int(Screen.width, Screen.height);
-            if (this.minimapPanel != null && viewport != this.minimapViewport)
+            if (this.minimapPanel != null && this.minimapPanel.parent is RectTransform parent &&
+                (viewport != this.minimapViewport || parent.rect.size != this.minimapParentSize))
             {
                 DockMinimapToViewport(this.minimapPanel);
                 this.minimapViewport = viewport;
+                this.minimapParentSize = parent.rect.size;
             }
 
             if (this.ExecutionMode != ExecutionMode.Running ||
@@ -998,11 +1001,8 @@ namespace Assets.Scripts.Managers
             map.anchorMin = map.anchorMax = map.pivot = new Vector2(.5f, .5f);
             map.sizeDelta = new Vector2(width, height);
             map.anchoredPosition = Vector2.zero;
-            var previousSize = panel.rect.size;
             panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width + 2f * frameBorder);
             panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height + 2f * frameBorder);
-            // Keep the authored top-right edge fixed as wider worlds grow inward.
-            panel.anchoredPosition += Vector2.Scale(previousSize - panel.rect.size, Vector2.one - panel.pivot);
             var collider = panel.GetComponent<BoxCollider2D>();
             if (collider != null)
             {
@@ -1040,23 +1040,12 @@ namespace Assets.Scripts.Managers
         private static void DockMinimapToViewport(RectTransform panel)
         {
             Canvas.ForceUpdateCanvases();
-            var canvas = panel.GetComponentInParent<Canvas>()?.rootCanvas;
-            if (canvas == null) return;
-            var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-            var corners = new Vector3[4];
-            panel.GetWorldCorners(corners);
-            var maximum = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
-            foreach (var corner in corners)
-            {
-                var point = RectTransformUtility.WorldToScreenPoint(camera, corner);
-                maximum = Vector2.Max(maximum, point);
-            }
-            var offset = new Vector2(
-                Screen.width - 4f - maximum.x,
-                Screen.height - 4f - maximum.y);
-            var origin = RectTransformUtility.WorldToScreenPoint(camera, panel.position);
-            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(panel, origin + offset, camera, out var position))
-                panel.position = position;
+            if (!(panel.parent is RectTransform parent) || Screen.width <= 0 || Screen.height <= 0) return;
+            // Anchors follow the camera-backed canvas even when its dimensions
+            // settle after world startup. Keep the existing pivot/collider origin.
+            panel.anchorMin = panel.anchorMax = Vector2.one;
+            var margin = new Vector2(4f * parent.rect.width / Screen.width, 4f * parent.rect.height / Screen.height);
+            panel.anchoredPosition = -Vector2.Scale(panel.rect.size, Vector2.one - panel.pivot) - margin;
         }
 
         internal void SetCameraTarget(Transform transform)
