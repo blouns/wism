@@ -32,6 +32,9 @@ mode is suitable only for the settings controls subset, not world startup.
   actual player identities, AI tiers and neutral capitals for unselected clans.
 - Pointer sweeps use 1024x768, 1280x800 and 1920x1080 without changing canvas modes
   or flattening authored geometry.
+- Returning from Mods with longer flavor-pack clan names preserves single-row
+  text, complete foreground/shadow rendering and clear role targets at all three
+  viewports. Text fitting does not change stable clan identity or selected tiers.
 - Mods navigates once and returns. Load disables empty slots, cancels back to
   setup, and restores the saved roster and world rather than the setup selection.
 - Shipped menu cursor settings use the system pointer and its native hotspot;
