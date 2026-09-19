@@ -43,6 +43,14 @@ mode is suitable only for the settings controls subset, not world startup.
   legacy editor-only scene path. All included worlds fit minimap geometry after
   the queued game creation completes; UI, camera texture, collider and map agree.
 - A rendered Mini-Illuria minimap capture checks that the target is not blank.
+- Every included-world startup checks top-right docking with a four-pixel inset,
+  not only viewport containment. A Mini-Illuria resize journey covers 1024x768,
+  1280x800, 1920x1080, 2560x1080 and returning to the initial size, preserving
+  map aspect, frame, texture and collider agreement.
+- The complete authored startup splash composition remains centered and fits
+  these same viewport sizes without nonuniform scaling or cropped image bounds.
+  The test holds the splash timer while exercising its real layout lifecycle;
+  a camera-projection capture supplements geometry, not native visual acceptance.
 
 Run the neighboring `GameSetupModSettingsFlowTests`, `JoyfulFidelityUiTests`,
 `ModSettingsUiTests` and army UI journeys when shared hit-area code changes.

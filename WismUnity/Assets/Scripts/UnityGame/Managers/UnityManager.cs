@@ -79,6 +79,8 @@ namespace Assets.Scripts.Managers
         private Camera mainCamera;
         private Camera minimapCamera;
         private RenderTexture ownedMinimapTexture;
+        private RectTransform minimapPanel;
+        private Vector2Int minimapViewport;
         private CameraFollow cameraFollow;
 
         private bool isInitialized;
@@ -399,6 +401,13 @@ namespace Assets.Scripts.Managers
 
         private void LateUpdate()
         {
+            var viewport = new Vector2Int(Screen.width, Screen.height);
+            if (this.minimapPanel != null && viewport != this.minimapViewport)
+            {
+                DockMinimapToViewport(this.minimapPanel);
+                this.minimapViewport = viewport;
+            }
+
             if (this.ExecutionMode != ExecutionMode.Running ||
                 this.inputManager == null || this.inputManager.InputMode != InputMode.Game ||
                 !Game.IsInitialized() || Game.Current.GetCurrentPlayer()?.IsHuman != true)
@@ -1023,10 +1032,12 @@ namespace Assets.Scripts.Managers
             this.minimapCamera.targetTexture = this.ownedMinimapTexture;
             var image = map.GetComponent<UnityEngine.UI.RawImage>();
             if (image != null) image.texture = this.ownedMinimapTexture;
-            KeepMinimapInsideViewport(panel);
+            this.minimapPanel = panel;
+            DockMinimapToViewport(panel);
+            this.minimapViewport = new Vector2Int(Screen.width, Screen.height);
         }
 
-        private static void KeepMinimapInsideViewport(RectTransform panel)
+        private static void DockMinimapToViewport(RectTransform panel)
         {
             Canvas.ForceUpdateCanvases();
             var canvas = panel.GetComponentInParent<Canvas>()?.rootCanvas;
@@ -1034,17 +1045,15 @@ namespace Assets.Scripts.Managers
             var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
             var corners = new Vector3[4];
             panel.GetWorldCorners(corners);
-            var minimum = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
-            var maximum = minimum;
+            var maximum = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
             foreach (var corner in corners)
             {
                 var point = RectTransformUtility.WorldToScreenPoint(camera, corner);
-                minimum = Vector2.Min(minimum, point);
                 maximum = Vector2.Max(maximum, point);
             }
             var offset = new Vector2(
-                maximum.x > Screen.width - 4f ? Screen.width - 4f - maximum.x : Mathf.Max(0f, 4f - minimum.x),
-                maximum.y > Screen.height - 4f ? Screen.height - 4f - maximum.y : Mathf.Max(0f, 4f - minimum.y));
+                Screen.width - 4f - maximum.x,
+                Screen.height - 4f - maximum.y);
             var origin = RectTransformUtility.WorldToScreenPoint(camera, panel.position);
             if (RectTransformUtility.ScreenPointToWorldPointInRectangle(panel, origin + offset, camera, out var position))
                 panel.position = position;
