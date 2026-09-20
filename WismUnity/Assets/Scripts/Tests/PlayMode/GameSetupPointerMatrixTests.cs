@@ -27,6 +27,7 @@ public sealed class GameSetupPointerMatrixTests
 {
     private Mouse mouse;
     private Keyboard keyboard;
+    private Touchscreen touch;
     private InputSettings originalSettings;
     private InputSettings testSettings;
     private readonly string[] roles = { "Human", "Knight", "Baron", "Lord", "Warlord" };
@@ -49,6 +50,7 @@ public sealed class GameSetupPointerMatrixTests
         InputSystem.settings = testSettings;
         mouse = InputSystem.AddDevice<Mouse>("SettingsProofMouse");
         keyboard = InputSystem.AddDevice<Keyboard>("SettingsProofKeyboard");
+        touch = InputSystem.AddDevice<Touchscreen>("SettingsProofTouch");
         SceneManager.LoadScene("GameSetup");
         yield return WaitFor(() => GameObject.Find("ShowAiCombatToggle") != null, "Settings startup");
         Canvas.ForceUpdateCanvases();
@@ -61,6 +63,7 @@ public sealed class GameSetupPointerMatrixTests
         AssertWindowless();
         if (mouse != null && mouse.added) InputSystem.RemoveDevice(mouse);
         if (keyboard != null && keyboard.added) InputSystem.RemoveDevice(keyboard);
+        if (touch != null && touch.added) InputSystem.RemoveDevice(touch);
         if (originalSettings != null) InputSystem.settings = originalSettings;
         if (testSettings != null) UnityEngine.Object.Destroy(testSettings);
         UnityManager.SetNewGameSettings(null);
@@ -99,6 +102,149 @@ public sealed class GameSetupPointerMatrixTests
     }
 
     private static string Identity(UnityPlayerEntity player) => player.ClanName + ":" + player.IsHuman + ":" + player.AiDifficulty;
+
+    [UnityTest] public IEnumerator Qualification_ScaleAndTouch_1024x768() => QualifyScaledControls(new Vector2Int(1024, 768));
+    [UnityTest] public IEnumerator Qualification_ScaleAndTouch_1280x720() => QualifyScaledControls(new Vector2Int(1280, 720));
+    [UnityTest] public IEnumerator Qualification_ScaleAndTouch_1920x1080() => QualifyScaledControls(new Vector2Int(1920, 1080));
+    [UnityTest] public IEnumerator Qualification_ScaleAndTouch_2560x1080() => QualifyScaledControls(new Vector2Int(2560, 1080));
+
+    private IEnumerator QualifyScaledControls(Vector2Int viewport)
+    {
+        var scaler = RoleIcon(1).GetComponentInParent<Canvas>().rootCanvas.GetComponent<CanvasScaler>();
+        var reference = scaler.referenceResolution;
+        try
+        {
+            yield return SetViewport(viewport.x, viewport.y);
+            foreach (float scale in new[] { 1f, 1.25f, 1.5f })
+            {
+                // Exercise the real layout with an increased logical UI scale, not a synthetic canvas.
+                scaler.referenceResolution = reference / scale;
+                yield return null;
+                Canvas.ForceUpdateCanvases();
+                var before = Settings().Players.Select(Identity).ToArray();
+                for (int row = 1; row <= 8; row++)
+                {
+                    AssertClanLabelFits(row);
+                    var checkbox = Checkbox("Player" + row);
+                    AssertOnScreen(checkbox, viewport, scale);
+                    AssertOnScreen(RoleIcon(row), viewport, scale);
+                    yield return TouchPoint(Point(checkbox));
+                    Assert.That(Find<Toggle>("Player" + row).isOn, Is.False, $"Touch checkbox {row}, {viewport}, {scale}");
+                    yield return Click(checkbox);
+                    yield return TouchPoint(Point(RoleIcon(row)));
+                    Assert.That(RoleText(row).text, Is.EqualTo("Knight"));
+                    for (int role = 0; role < 4; role++) yield return Click(RoleIcon(row));
+                }
+                foreach (var name in new[] { "StartButton", "LoadButton", "AdvancedModsButton", "WorldDropdown", "ShowAiCombatToggle" })
+                {
+                    var rect = Find<RectTransform>(name);
+                    AssertOnScreen(rect, viewport, scale);
+                    AssertHandler(rect, rect.gameObject);
+                }
+                Assert.That(Settings().Players.Select(Identity), Is.EqualTo(before));
+                Assert.That(Game.IsInitialized(), Is.False, "Settings gestures must not initialize gameplay.");
+                if (scale == 1.5f)
+                    yield return GameSetupModSettingsFlowTests.CaptureSetupCanvas(RoleIcon(1).gameObject,
+                        $"settings-{viewport.x}x{viewport.y}-scale150-camera-projection.png");
+            }
+        }
+        finally { scaler.referenceResolution = reference; }
+    }
+
+    [UnityTest]
+    public IEnumerator Qualification_TouchPagedRosterAndDisabledActions()
+    {
+        using (var fixture = new ClanRosterFixture(12))
+        {
+            yield return ModsRoundTrip();
+            var before = Settings().Players.Select(Identity).ToArray();
+            yield return TouchPoint(Point(Find<RectTransform>("PreviousClans")));
+            Assert.That(Find<Text>("ClanPageLabel").text, Is.EqualTo("1-7 / 12"));
+            yield return TouchPoint(Point(Find<RectTransform>("NextClans")));
+            Assert.That(Find<Text>("ClanPageLabel").text, Is.EqualTo("8-12 / 12"));
+            yield return TouchPoint(Point(Find<RectTransform>("NextClans")));
+            Assert.That(Settings().Players.Select(Identity), Is.EqualTo(before), "Paging and rejected gestures cannot alter choices.");
+            yield return TouchPoint(Point(RoleIcon(5)));
+            Assert.That(Settings().Players[11].AiDifficulty, Is.EqualTo(AiDifficultyTier.Knight));
+            Assert.That(Settings().Players.Take(11).Select(Identity), Is.EqualTo(before.Take(11)));
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator Qualification_KeyboardSubmit_ReturnAndNumpadEnter()
+    {
+        foreach (var key in new[] { Key.Enter, Key.NumpadEnter })
+        {
+            yield return Click(RoleIcon(1));
+            var selected = EventSystem.current.currentSelectedGameObject;
+            Assert.That(selected, Is.EqualTo(RoleIcon(1).gameObject));
+            var before = Settings().Players.Select(Identity).ToArray();
+            var label = RoleText(1).text;
+            yield return KeyPress(key);
+            Assert.That(RoleText(1).text, Is.EqualTo(roles[(Array.IndexOf(roles, label) + 1) % roles.Length]), key.ToString());
+            Assert.That(Settings().Players.Skip(1).Select(Identity), Is.EqualTo(before.Skip(1)));
+            Assert.That(Game.IsInitialized(), Is.False);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator Qualification_OneHundredInteractions_ImmediateFeedbackAndLatency()
+    {
+        var samples = new List<double>();
+        var toggle = Find<Toggle>("ShowAiCombatToggle");
+        var before = Settings().Players.Select(Identity).ToArray();
+        var point = Point(Checkbox("ShowAiCombatToggle"));
+        for (int i = -10; i < 100; i++)
+        {
+            bool expected = !toggle.isOn;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point }.WithButton(MouseButton.Left));
+            yield return null;
+            Assert.That(toggle.isOn, Is.Not.EqualTo(expected), "Press alone must not commit a click.");
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            int frame = Time.frameCount;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = point });
+            yield return null;
+            watch.Stop();
+            Assert.That(toggle.isOn, Is.EqualTo(expected), "Feedback must be visible in the next frame.");
+            Assert.That(Time.frameCount - frame, Is.LessThanOrEqualTo(1));
+            if (i >= 0) samples.Add(watch.Elapsed.TotalMilliseconds);
+        }
+        Assert.That(Settings().Players.Select(Identity), Is.EqualTo(before));
+        Assert.That(Game.IsInitialized(), Is.False);
+        var ordered = samples.OrderBy(value => value).ToArray();
+        var p95 = ordered[(int)Math.Ceiling(ordered.Length * .95) - 1];
+        var folder = Path.Combine(Application.dataPath, "../Library/WismUiCaptures");
+        Directory.CreateDirectory(folder);
+        File.WriteAllText(Path.Combine(folder, "settings-interaction-latency.json"), new JObject
+        {
+            ["kind"] = "synthetic-input-to-next-frame", ["samples"] = samples.Count,
+            ["warmup"] = 10, ["p95Milliseconds"] = p95,
+            ["viewport"] = $"{Screen.width}x{Screen.height}", ["milliseconds"] = new JArray(samples)
+        }.ToString());
+        Assert.That(p95, Is.LessThanOrEqualTo(180), "Post-warmup input feedback p95 budget.");
+    }
+
+    private static void AssertOnScreen(RectTransform rect, Vector2Int viewport, float scale)
+    {
+        var corners = new Vector3[4];
+        rect.GetWorldCorners(corners);
+        var canvas = rect.GetComponentInParent<Canvas>().rootCanvas;
+        foreach (var corner in corners)
+        {
+            var point = RectTransformUtility.WorldToScreenPoint(canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera, corner);
+            Assert.That(point.x, Is.InRange(-1f, viewport.x + 1f), $"{rect.name} horizontal clipping at {viewport}, scale {scale}");
+            Assert.That(point.y, Is.InRange(-1f, viewport.y + 1f), $"{rect.name} vertical clipping at {viewport}, scale {scale}");
+        }
+    }
+
+    private IEnumerator TouchPoint(Vector2 point)
+    {
+        InputSystem.QueueStateEvent(touch, new TouchState { touchId = 1, phase = UnityEngine.InputSystem.TouchPhase.Began, position = point });
+        yield return null;
+        InputSystem.QueueStateEvent(touch, new TouchState { touchId = 1, phase = UnityEngine.InputSystem.TouchPhase.Ended, position = point });
+        yield return null;
+        yield return null;
+    }
 
     [UnityTest]
     public IEnumerator Mods_TwelveClans_PageTargetsPreserveIdentityAndChoices()
