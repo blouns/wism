@@ -25,6 +25,20 @@ namespace Assets.Scripts.UI
             if (legacy.inputActionsPerSecond > 0) module.moveRepeatRate = 1f / legacy.inputActionsPerSecond;
             legacy.enabled = false;
             module.enabled = true;
+            var submit = module.submit?.action;
+            if (submit != null)
+            {
+                bool hasNumpadEnter = false;
+                foreach (var binding in submit.bindings)
+                    hasNumpadEnter |= string.Equals(binding.effectivePath, "<Keyboard>/numpadEnter", System.StringComparison.OrdinalIgnoreCase);
+                if (!hasNumpadEnter)
+                {
+                    bool wasEnabled = submit.enabled;
+                    submit.Disable();
+                    submit.AddBinding("<Keyboard>/numpadEnter");
+                    if (wasEnabled) submit.Enable();
+                }
+            }
 #endif
         }
 
