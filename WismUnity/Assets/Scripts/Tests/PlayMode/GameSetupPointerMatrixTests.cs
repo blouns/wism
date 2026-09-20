@@ -23,13 +23,14 @@ using Assets.Scripts.Tests.PlayMode.Common;
 using Newtonsoft.Json.Linq;
 
 [Category("SettingsE2E")]
-public sealed class GameSetupPointerMatrixTests
+public sealed partial class GameSetupPointerMatrixTests
 {
     private Mouse mouse;
     private Keyboard keyboard;
     private Touchscreen touch;
     private InputSettings originalSettings;
     private InputSettings testSettings;
+    private Vector2Int originalViewport;
     private readonly string[] roles = { "Human", "Knight", "Baron", "Lord", "Warlord" };
     private readonly AiDifficultyTier?[] difficulties = { null, AiDifficultyTier.Knight, AiDifficultyTier.Baron, AiDifficultyTier.Lord, AiDifficultyTier.Warlord };
 
@@ -37,6 +38,7 @@ public sealed class GameSetupPointerMatrixTests
     public IEnumerator OpenSettings()
     {
         AssertWindowless();
+        originalViewport = new Vector2Int(Screen.width, Screen.height);
         Game.Unload();
         UnityManager.SetNewGameSettings(null);
         UnityModKitRuntimeSelection.Clear();
@@ -72,6 +74,7 @@ public sealed class GameSetupPointerMatrixTests
         SceneManager.SetActiveScene(SceneManager.CreateScene("SettingsProofCleanup"));
         if (previous.IsValid() && previous.isLoaded) yield return SceneManager.UnloadSceneAsync(previous);
         Game.Unload();
+        yield return SetViewport(originalViewport.x, originalViewport.y);
         yield return null;
     }
 

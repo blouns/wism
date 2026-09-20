@@ -987,6 +987,26 @@ namespace Assets.Scripts.Managers
                 mapWidth / 2f,
                 mapHeight / 2f,
                 this.minimapCamera.transform.position.z == 0f ? -10f : this.minimapCamera.transform.position.z);
+            ConfigureMinimapCityOverlay();
+        }
+
+        private void ConfigureMinimapCityOverlay()
+        {
+            var map = GameObject.Find("Minimap")?.GetComponent<RectTransform>();
+            if (map == null) return;
+            var overlay = map.GetComponentInChildren<MinimapCityOverlay>(true);
+            if (overlay == null)
+            {
+                var layer = new GameObject("CityMarkers", typeof(RectTransform), typeof(MinimapCityOverlay));
+                layer.transform.SetParent(map, false);
+                overlay = layer.GetComponent<MinimapCityOverlay>();
+                var rect = overlay.rectTransform;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = rect.offsetMax = Vector2.zero;
+            }
+            overlay.transform.SetAsFirstSibling();
+            overlay.Bind(World.Current, this.minimapCamera, this.WorldTilemap);
         }
 
         private void ConfigureMinimapGeometry(int mapWidth, int mapHeight)
