@@ -103,48 +103,49 @@ public sealed class GameSetupPointerMatrixTests
 
     private static string Identity(UnityPlayerEntity player) => player.ClanName + ":" + player.IsHuman + ":" + player.AiDifficulty;
 
-    [UnityTest]
-    public IEnumerator Qualification_ScaledAuthoredControls_PointerAndTouch()
+    [UnityTest] public IEnumerator Qualification_ScaleAndTouch_1024x768() => QualifyScaledControls(new Vector2Int(1024, 768));
+    [UnityTest] public IEnumerator Qualification_ScaleAndTouch_1280x720() => QualifyScaledControls(new Vector2Int(1280, 720));
+    [UnityTest] public IEnumerator Qualification_ScaleAndTouch_1920x1080() => QualifyScaledControls(new Vector2Int(1920, 1080));
+    [UnityTest] public IEnumerator Qualification_ScaleAndTouch_2560x1080() => QualifyScaledControls(new Vector2Int(2560, 1080));
+
+    private IEnumerator QualifyScaledControls(Vector2Int viewport)
     {
         var scaler = RoleIcon(1).GetComponentInParent<Canvas>().rootCanvas.GetComponent<CanvasScaler>();
         var reference = scaler.referenceResolution;
         try
         {
-            foreach (var viewport in new[] { new Vector2Int(1024, 768), new Vector2Int(1280, 720), new Vector2Int(1920, 1080), new Vector2Int(2560, 1080) })
+            yield return SetViewport(viewport.x, viewport.y);
+            foreach (float scale in new[] { 1f, 1.25f, 1.5f })
             {
-                yield return SetViewport(viewport.x, viewport.y);
-                foreach (float scale in new[] { 1f, 1.25f, 1.5f })
+                // Exercise the real layout with an increased logical UI scale, not a synthetic canvas.
+                scaler.referenceResolution = reference / scale;
+                yield return null;
+                Canvas.ForceUpdateCanvases();
+                var before = Settings().Players.Select(Identity).ToArray();
+                for (int row = 1; row <= 8; row++)
                 {
-                    // Exercise the real layout with an increased logical UI scale, not a synthetic canvas.
-                    scaler.referenceResolution = reference / scale;
-                    yield return null;
-                    Canvas.ForceUpdateCanvases();
-                    var before = Settings().Players.Select(Identity).ToArray();
-                    for (int row = 1; row <= 8; row++)
-                    {
-                        AssertClanLabelFits(row);
-                        var checkbox = Checkbox("Player" + row);
-                        AssertOnScreen(checkbox, viewport, scale);
-                        AssertOnScreen(RoleIcon(row), viewport, scale);
-                        yield return TouchPoint(Point(checkbox));
-                        Assert.That(Find<Toggle>("Player" + row).isOn, Is.False, $"Touch checkbox {row}, {viewport}, {scale}");
-                        yield return Click(checkbox);
-                        yield return TouchPoint(Point(RoleIcon(row)));
-                        Assert.That(RoleText(row).text, Is.EqualTo("Knight"));
-                        for (int role = 0; role < 4; role++) yield return Click(RoleIcon(row));
-                    }
-                    foreach (var name in new[] { "StartButton", "LoadButton", "AdvancedModsButton", "WorldDropdown", "ShowAiCombatToggle" })
-                    {
-                        var rect = Find<RectTransform>(name);
-                        AssertOnScreen(rect, viewport, scale);
-                        AssertHandler(rect, rect.gameObject);
-                    }
-                    Assert.That(Settings().Players.Select(Identity), Is.EqualTo(before));
-                    Assert.That(Game.IsInitialized(), Is.False, "Settings gestures must not initialize gameplay.");
-                    if (scale == 1.5f)
-                        yield return GameSetupModSettingsFlowTests.CaptureSetupCanvas(RoleIcon(1).gameObject,
-                            $"settings-{viewport.x}x{viewport.y}-scale150-camera-projection.png");
+                    AssertClanLabelFits(row);
+                    var checkbox = Checkbox("Player" + row);
+                    AssertOnScreen(checkbox, viewport, scale);
+                    AssertOnScreen(RoleIcon(row), viewport, scale);
+                    yield return TouchPoint(Point(checkbox));
+                    Assert.That(Find<Toggle>("Player" + row).isOn, Is.False, $"Touch checkbox {row}, {viewport}, {scale}");
+                    yield return Click(checkbox);
+                    yield return TouchPoint(Point(RoleIcon(row)));
+                    Assert.That(RoleText(row).text, Is.EqualTo("Knight"));
+                    for (int role = 0; role < 4; role++) yield return Click(RoleIcon(row));
                 }
+                foreach (var name in new[] { "StartButton", "LoadButton", "AdvancedModsButton", "WorldDropdown", "ShowAiCombatToggle" })
+                {
+                    var rect = Find<RectTransform>(name);
+                    AssertOnScreen(rect, viewport, scale);
+                    AssertHandler(rect, rect.gameObject);
+                }
+                Assert.That(Settings().Players.Select(Identity), Is.EqualTo(before));
+                Assert.That(Game.IsInitialized(), Is.False, "Settings gestures must not initialize gameplay.");
+                if (scale == 1.5f)
+                    yield return GameSetupModSettingsFlowTests.CaptureSetupCanvas(RoleIcon(1).gameObject,
+                        $"settings-{viewport.x}x{viewport.y}-scale150-camera-projection.png");
             }
         }
         finally { scaler.referenceResolution = reference; }
