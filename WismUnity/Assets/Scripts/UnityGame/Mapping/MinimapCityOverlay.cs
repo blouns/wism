@@ -16,6 +16,7 @@ public sealed class MinimapCityOverlay : MaskableGraphic
     private readonly Vector3[] corners = new Vector3[4];
     private Vector2 pixelsPerUnit;
     public int MarkerCount => markers.Count;
+    public System.Func<City, Color32> ColorOverride { get; set; }
 
     private sealed class Marker
     {
@@ -56,10 +57,10 @@ public sealed class MinimapCityOverlay : MaskableGraphic
             var center = new Vector2(projected.x, projected.y);
             bool razed = !ReferenceEquals(city.Tile.City, city);
             string source = razed ? null : city.Player?.Clan.Info.PrimaryColor ?? city.Player?.Clan.Info.Color;
-            if (marker.Center != center || marker.Razed != razed || marker.ColorSource != source)
+            var color = ColorOverride != null ? ColorOverride(city) : ResolveColor(source);
+            if (marker.Center != center || marker.Razed != razed || !marker.Color.Equals(color))
                 changed = true;
-            if (marker.ColorSource != source || marker.Color.a == 0)
-                marker.Color = ResolveColor(source);
+            marker.Color = color;
             marker.Center = center;
             marker.Razed = razed;
             marker.ColorSource = source;
@@ -67,6 +68,23 @@ public sealed class MinimapCityOverlay : MaskableGraphic
         var scale = ScreenPixelsPerUnit();
         if (scale != pixelsPerUnit) { pixelsPerUnit = scale; changed = true; }
         if (changed) SetVerticesDirty();
+    }
+
+    public City HitTestCity(Vector2 screenPoint, Camera eventCamera)
+    {
+        Refresh();
+        if (!RectTransformUtility.RectangleContainsScreenPoint(rectTransform, screenPoint, eventCamera)) return null;
+        City closest = null;
+        float distance = 8f * 8f;
+        foreach (var marker in markers)
+        {
+            if (marker.Razed) continue;
+            var local = rectTransform.rect.min + Vector2.Scale(rectTransform.rect.size, marker.Center);
+            var point = RectTransformUtility.WorldToScreenPoint(eventCamera, rectTransform.TransformPoint(local));
+            float squared = (point - screenPoint).sqrMagnitude;
+            if (squared < distance) { closest = marker.City; distance = squared; }
+        }
+        return closest;
     }
 
     public static Color32 ResolveColor(string value)

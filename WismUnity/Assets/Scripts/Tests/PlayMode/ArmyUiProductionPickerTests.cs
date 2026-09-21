@@ -12,6 +12,196 @@ using Wism.Client.Core;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest]
+    public IEnumerator ProductionLoc_MinimapMouseAndTouchRouteWithoutMovingArmy()
+    {
+        var player = Game.Current.GetCurrentPlayer();
+        var source = player.Capitol;
+        var destination = Game.Current.Players.First(other => other != player).Capitol;
+        player.ClaimCity(destination);
+        int width = Screen.width, height = Screen.height;
+        var armyTile = hero.Tile;
+        var armyMoves = hero.MovesRemaining;
+        try
+        {
+            foreach (var size in new[] { new Vector2Int(1024, 768), new Vector2Int(1280, 720), new Vector2Int(1920, 1080), new Vector2Int(3440, 1440) })
+            {
+                ApplyViewport(size.x, size.y);
+                yield return WaitFor(() => Screen.width == size.x && Screen.height == size.y);
+                OpenProductionPicker(true);
+                var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+                ClickProductionButton(picker, "ArmyButton1");
+                yield return null;
+                Canvas.ForceUpdateCanvases();
+                var loc = (RectTransform)picker.GetComponentsInChildren<Button>().Single(b => b.name == "LocButton").transform;
+                yield return Click(RectTransformUtility.WorldToScreenPoint(null, loc.TransformPoint(loc.rect.center)));
+                Assert.That(picker.IsSelectingDestination(), Is.True, "Loc must open after layout settles at " + size);
+                var overlay = GameObject.Find("Minimap").GetComponentInChildren<MinimapCityOverlay>();
+                Assert.That(overlay.ColorOverride(source), Is.EqualTo((Color32)Color.yellow));
+                Assert.That(overlay.ColorOverride(destination), Is.EqualTo((Color32)Color.white));
+                var point = ProductionMinimapPoint(destination);
+                Assert.That(overlay.HitTestCity(point, ProductionMinimapEventCamera()), Is.SameAs(destination));
+                yield return CaptureProductionPicker(picker, _ => { }, "-loc");
+                if (size.x <= 1280) yield return Click(point); else yield return Tap(point);
+                yield return WaitFor(() => source.Barracks.ArmyInTraining?.DestinationCity == destination,
+                    () => $"routing: mode={input.InputMode}, picking={picker.IsSelectingDestination()}, point={point}");
+                Assert.That(picker.IsSelectingDestination(), Is.False);
+                Assert.That(input.InputMode, Is.EqualTo(InputMode.UI));
+                Assert.That(overlay.ColorOverride, Is.Null);
+                yield return null;
+                Assert.That(picker.transform.Find("ClassicProductionPicker/CurrentArmyKind").gameObject.activeSelf, Is.True);
+                Assert.That(picker.transform.Find("ClassicProductionPicker/TurnsRemainingText").GetComponent<Text>().text,
+                    Is.EqualTo(source.Barracks.ArmyInTraining.TurnsToProduce + "t"));
+                Assert.That(hero.Tile, Is.SameAs(armyTile));
+                Assert.That(hero.MovesRemaining, Is.EqualTo(armyMoves));
+                picker.OnExitClick();
+                source.Barracks.StopProduction();
+            }
+        }
+        finally { ApplyViewport(width, height); }
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionLoc_CancelAndRejectedTargetDoNotQueueOrders()
+    {
+        var player = Game.Current.GetCurrentPlayer();
+        var source = player.Capitol;
+        var owned = Game.Current.Players.First(other => other != player).Capitol;
+        var enemy = World.Current.GetCities().First(city => city != source && city != owned);
+        player.ClaimCity(owned);
+        OpenProductionPicker(true);
+        var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+        ClickProductionButton(picker, "ArmyButton1");
+        ClickProductionButton(picker, "LocButton");
+        var before = TerminalState();
+        var count = manager.ControllerProvider.CommandController.GetCommands().Count();
+        yield return Click(ProductionMinimapPoint(enemy));
+        yield return PressJourneyKey(UnityEngine.InputSystem.Key.E);
+        yield return PressJourneyKey(UnityEngine.InputSystem.Key.N);
+        yield return PressJourneyKey(UnityEngine.InputSystem.Key.Q);
+        Assert.That(picker.IsSelectingDestination(), Is.True);
+        Assert.That(picker.DestinationColor(enemy), Is.EqualTo(new Color32(128, 128, 128, 255)));
+        yield return PressJourneyKey(UnityEngine.InputSystem.Key.Escape);
+        Assert.That(picker.IsSelectingDestination(), Is.False);
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.UI));
+        Assert.That(GameObject.Find("Minimap").GetComponentInChildren<MinimapCityOverlay>().ColorOverride, Is.Null);
+        Assert.That(TerminalState(), Is.EqualTo(before));
+        Assert.That(manager.ControllerProvider.CommandController.GetCommands().Count(), Is.EqualTo(count));
+        ClickProductionButton(picker, "LocButton");
+        ClickProductionButton(picker, "LocButton");
+        Assert.That(picker.IsSelectingDestination(), Is.False);
+        picker.OnExitClick();
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionLoc_RevalidatesCapturedDestinationAndSourceSelectionMeansLocal()
+    {
+        var player = Game.Current.GetCurrentPlayer();
+        var source = player.Capitol;
+        var enemy = Game.Current.Players.First(other => other != player);
+        var destination = enemy.Capitol;
+        player.ClaimCity(destination);
+        OpenProductionPicker(true);
+        var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+        ClickProductionButton(picker, "ArmyButton1");
+        ClickProductionButton(picker, "LocButton");
+        enemy.ClaimCity(destination);
+        var gold = player.Gold;
+        yield return Click(ProductionMinimapPoint(destination));
+        Assert.That(picker.IsSelectingDestination(), Is.True);
+        Assert.That(source.Barracks.ProducingArmy(), Is.False);
+        Assert.That(player.Gold, Is.EqualTo(gold));
+        yield return Tap(ProductionMinimapPoint(source));
+        yield return WaitFor(() => source.Barracks.ProducingArmy());
+        Assert.That(source.Barracks.ArmyInTraining.DestinationCity, Is.Null);
+        picker.OnExitClick();
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionLoc_CapacityRefreshesAndRejectsFifthSource()
+    {
+        var player = Game.Current.GetCurrentPlayer();
+        var source = player.Capitol;
+        var destination = Game.Current.Players.First(other => other != player).Capitol;
+        player.ClaimCity(destination);
+        var sources = Enumerable.Range(0, 4).Select(index => CreateUiRoutingCity("Route" + index, "LightInfantry")).ToArray();
+        foreach (var city in sources)
+            city.Barracks.ArmyInTraining = new Wism.Client.Core.Armies.ArmyInTraining
+            {
+                ProductionCity = city, DestinationCity = destination,
+                ArmyInfo = Wism.Client.Modules.ModFactory.FindArmyInfo("LightInfantry"), TurnsToProduce = 2
+            };
+        OpenProductionPicker(false);
+        var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+        ClickProductionButton(picker, "ArmyButton1");
+        ClickProductionButton(picker, "LocButton");
+        Assert.That(picker.DestinationColor(destination), Is.EqualTo((Color32)Color.red));
+        var count = manager.ControllerProvider.CommandController.GetCommands().Count();
+        yield return Click(ProductionMinimapPoint(destination));
+        Assert.That(picker.IsSelectingDestination(), Is.True);
+        Assert.That(manager.ControllerProvider.CommandController.GetCommands().Count(), Is.EqualTo(count));
+        sources[0].Barracks.StopProduction();
+        Assert.That(picker.DestinationColor(destination), Is.EqualTo((Color32)Color.white));
+        yield return Tap(ProductionMinimapPoint(destination));
+        yield return WaitFor(() => source.Barracks.ProducingArmy());
+        Assert.That(source.Barracks.ArmyInTraining.DestinationCity, Is.SameAs(destination));
+        picker.OnExitClick();
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionLoc_NavyDestinationControlIsDisabled()
+    {
+        var city = CreateUiRoutingCity("Port", "Navy");
+        typeof(UnityManager).GetMethod("ShowProductionPanel", System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.NonPublic).Invoke(unity, new object[] { city });
+        var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+        ClickProductionButton(picker, "ArmyButton1");
+        Assert.That(picker.GetComponentsInChildren<Button>().Single(button => button.name == "LocButton").interactable, Is.False);
+        var count = manager.ControllerProvider.CommandController.GetCommands().Count();
+        picker.OnLocClick();
+        yield return null;
+        Assert.That(picker.IsSelectingDestination(), Is.False);
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.UI));
+        Assert.That(manager.ControllerProvider.CommandController.GetCommands().Count(), Is.EqualTo(count));
+        picker.OnExitClick();
+    }
+
+    private static Wism.Client.MapObjects.City CreateUiRoutingCity(string name, string army)
+    {
+        var map = World.Current.Map;
+        var tile = map.Cast<Tile>().First(candidate => candidate.X > 0 && candidate.Y > 0 &&
+            candidate.X < map.GetLength(0) - 1 &&
+            new[] { candidate, map[candidate.X + 1, candidate.Y], map[candidate.X, candidate.Y - 1],
+                map[candidate.X + 1, candidate.Y - 1] }.All(cell => !cell.HasCity() && !cell.HasArmies()));
+        var city = Wism.Client.MapObjects.City.Create(new Wism.Client.Modules.Infos.CityInfo
+        {
+            ShortName = name, DisplayName = name, Defense = 4, Income = 20,
+            ProductionInfos = new[] { new Wism.Client.Modules.Infos.ProductionInfo
+                { ArmyInfoName = army, TurnsToProduce = 1, Upkeep = 4, Moves = 10, Strength = 3 } }
+        });
+        World.Current.AddCity(city, tile);
+        Game.Current.GetCurrentPlayer().ClaimCity(city);
+        return city;
+    }
+
+    private static Vector2 ProductionMinimapPoint(Wism.Client.MapObjects.City city)
+    {
+        var rect = GameObject.Find("Minimap").GetComponent<RectTransform>();
+        var tilemap = Object.FindObjectOfType<Assets.Scripts.Tilemaps.WorldTilemap>();
+        var camera = GameObject.FindGameObjectWithTag("MinimapCamera").GetComponent<Camera>();
+        var center = (tilemap.ConvertGameToUnityVector(city.X, city.Y) +
+            tilemap.ConvertGameToUnityVector(city.X + 1, city.Y - 1)) * .5f;
+        var viewport = camera.WorldToViewportPoint(center);
+        return RectTransformUtility.WorldToScreenPoint(ProductionMinimapEventCamera(), rect.TransformPoint(rect.rect.min +
+            Vector2.Scale(rect.rect.size, new Vector2(viewport.x, viewport.y))));
+    }
+
+    private static Camera ProductionMinimapEventCamera()
+    {
+        var canvas = GameObject.Find("Minimap").GetComponentInParent<Canvas>().rootCanvas;
+        return canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+    }
+
+    [UnityTest]
     public IEnumerator LiveRegression_DefendAdvancesOnceAndEmptySelectionDoesNothing()
     {
         var army = Game.Current.GetCurrentPlayer().ConscriptArmy(

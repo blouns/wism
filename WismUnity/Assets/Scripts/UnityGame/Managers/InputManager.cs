@@ -199,6 +199,16 @@ namespace Assets.Scripts.Managers
                 return;
             }
 
+            if (this.unityManager.ProductionMode == ProductionMode.SelectDestination)
+            {
+                ResetPrimaryGesture();
+                if (WismUiInputAdapter.ItemPickerCancelPressed() || Input.GetMouseButtonDown(1))
+                    this.unityManager.CancelProductionDestination();
+                else if (WismUiInputAdapter.TryGetPrimaryPress(out var destinationPosition, out _))
+                    HandlePrimaryPress(destinationPosition);
+                return;
+            }
+
             if (this.pendingSelectAllTile != null && Game.Current.ArmiesSelected())
             {
                 var tile = this.pendingSelectAllTile;

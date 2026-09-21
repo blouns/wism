@@ -160,6 +160,25 @@ public sealed class ProductionUiKitTests
     }
 
     [Test]
+    public void ProductionManagementViewModel_DeduplicatesSourcesWithoutHidingFourthCity()
+    {
+        var cities = Enumerable.Range(1, 5).Select(index => CreateCity(index, "Route" + index)).ToArray();
+        var army = new ArmyInfo { ShortName = "LightInfantry", DisplayName = "Light Infantry" };
+        foreach (var source in cities.Skip(1))
+        {
+            source.Barracks.ArmyInTraining = Training(source, cities[0], army, 7, 3);
+            source.Barracks.ArmiesToDeliver = new Queue<ArmyInTraining>(new[]
+            {
+                Training(source, cities[0], army, 0, 2), Training(source, cities[0], army, 0, 1)
+            });
+        }
+        var model = ProductionPanelViewModelBuilder.BuildManagement(cities, cities[0]);
+        Assert.That(model.SelectedCity.IncomingSources.Select(row => row.SourceCity), Is.EquivalentTo(cities.Skip(1)));
+        Assert.That(model.SelectedCity.IncomingSources.All(row => row.TurnsRemaining == 7), Is.True);
+        Assert.That(model.Cities[1].OutgoingDeliveries.Select(row => row.TurnsRemaining), Is.EqualTo(new[] { 2, 1 }));
+    }
+
+    [Test]
     public void ProductionManagementUi_RendersFiveCityMinimapMarkers()
     {
         var host = new GameObject("production-proof-host", typeof(RectTransform));

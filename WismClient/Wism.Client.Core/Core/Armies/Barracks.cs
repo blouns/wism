@@ -11,6 +11,7 @@ namespace Wism.Client.Core
     public class Barracks
     {
         private const int DefaultTurnsToDeliver = 3;
+        public const int MaxIncomingProductionSources = 4;
 
         private readonly City city;
         private readonly DefaultDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
@@ -105,15 +106,12 @@ namespace Wism.Client.Core
                 throw new ArgumentException($"This barracks cannot create {armyInfo.ShortName}");
             }
 
-            if (!this.PlayerHasSufficientGold(armyInfo))
+            if (!this.CanStartProduction(armyInfo, destinationCity))
             {
                 return false;
             }
 
-            if (!this.CanDeployProducedArmy(armyInfo, destinationCity))
-            {
-                return false;
-            }
+            if (destinationCity == this.city) destinationCity = null;
 
             this.ChargePlayerForProductionCosts(armyInfo);
 
@@ -135,6 +133,33 @@ namespace Wism.Client.Core
 
 
             return true;
+        }
+
+        public static bool CanVectorArmy(ArmyInfo armyInfo)
+        {
+            return armyInfo != null && !(armyInfo.CanFloat && !armyInfo.CanWalk && !armyInfo.CanFly);
+        }
+
+        public bool CanRouteProductionTo(ArmyInfo armyInfo, City destinationCity)
+        {
+            if (armyInfo == null || this.Player == null || this.city.Tile?.City != this.city)
+                return false;
+            if (destinationCity == null || destinationCity == this.city) return true;
+            if (!CanVectorArmy(armyInfo) || destinationCity.Player != this.Player ||
+                destinationCity.Tile?.City != destinationCity) return false;
+
+            // A source reserves one slot while training or while any paid delivery is in transit.
+            // Renewing an existing route must not consume another slot.
+            int otherSources = this.Player.GetCities().Count(source => source != this.city &&
+                (source.Barracks.ArmyInTraining?.DestinationCity == destinationCity ||
+                 source.Barracks.ArmiesToDeliver?.Any(army => army.DestinationCity == destinationCity) == true));
+            return otherSources < MaxIncomingProductionSources;
+        }
+
+        public bool CanStartProduction(ArmyInfo armyInfo, City destinationCity = null)
+        {
+            return this.CanRouteProductionTo(armyInfo, destinationCity) && this.CanProduce(armyInfo) &&
+                this.PlayerHasSufficientGold(armyInfo) && this.CanDeployProducedArmy(armyInfo, destinationCity);
         }
 
         /// <summary>
