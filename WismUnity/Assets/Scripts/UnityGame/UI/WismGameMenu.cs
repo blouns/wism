@@ -21,6 +21,8 @@ namespace Assets.Scripts.UI
         private GameObject menu;
         private GameObject confirmation;
         private Button openButton;
+        private Button reportsButton;
+        public StrategicReportView Reports { get; private set; }
         private Button saveButton;
         private Button loadButton;
         private Button exitButton;
@@ -53,6 +55,8 @@ namespace Assets.Scripts.UI
             scaler.matchWidthOrHeight = 1;
             openButton = Button(canvasRoot.transform, "OpenGameMenu", "Game", "game.menu", Open);
             Place((RectTransform)openButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(100, 44));
+            reportsButton = Button(canvasRoot.transform, "OpenReports", "Reports", "game.reports", () => OpenReports());
+            Place((RectTransform)reportsButton.transform, new Vector2(0, 1), new Vector2(116, -8), new Vector2(128, 44));
             shield = Panel(canvasRoot.transform, "MenuBackdrop", new Color(0, 0, 0, 0.25f));
             Stretch((RectTransform)shield.transform);
             shield.AddComponent<Button>().onClick.AddListener(Cancel);
@@ -84,6 +88,12 @@ namespace Assets.Scripts.UI
             var confirm = Button(rect, "ConfirmExit", "Exit Game", "game.exit.confirm", ConfirmExit);
             Place((RectTransform)cancelButton.transform, new Vector2(0, 1), new Vector2(16, -136), new Vector2(196, 44));
             Place((RectTransform)confirm.transform, new Vector2(0, 1), new Vector2(228, -136), new Vector2(196, 44));
+            var reportRoot = new GameObject("StrategicReports", typeof(RectTransform), typeof(StrategicReportView));
+            reportRoot.transform.SetParent(shield.transform, false);
+            Stretch((RectTransform)reportRoot.transform);
+            Reports = reportRoot.GetComponent<StrategicReportView>();
+            Reports.Initialize(manager, font, Close);
+            reportRoot.SetActive(false);
             WismUiSurface.Ensure(canvasRoot, "game-menu", WismUiControlState.Normal, WismUiControlState.Disabled);
             shield.SetActive(false);
             confirmation.SetActive(false);
@@ -101,6 +111,7 @@ namespace Assets.Scripts.UI
         {
             if (openButton == null) return;
             openButton.interactable = IsOpen || CanOpen;
+            reportsButton.interactable = IsOpen || CanOpen;
             if (!IsOpen && CanOpen && WismUiInputAdapter.ApplicationExitPressedThisFrame()) RequestExit();
             if (!IsOpen) return;
             bool escape = Input.GetKeyDown(KeyCode.Escape);
@@ -118,6 +129,7 @@ namespace Assets.Scripts.UI
             saveButton.interactable = loadButton.interactable = CanPersist;
             exitRequested = false;
             menu.SetActive(true);
+            Reports.gameObject.SetActive(false);
             confirmation.SetActive(false);
             shield.SetActive(true);
             manager.InputManager.SetInputMode(InputMode.UI);
@@ -129,6 +141,7 @@ namespace Assets.Scripts.UI
             if (!IsOpen) Open();
             if (!IsOpen || exitRequested) return;
             menu.SetActive(false);
+            Reports.gameObject.SetActive(false);
             confirmation.SetActive(true);
             Select(cancelButton.gameObject);
         }
@@ -157,6 +170,7 @@ namespace Assets.Scripts.UI
         {
             if (!IsOpen || exitRequested) return;
             shield.SetActive(false);
+            Reports.gameObject.SetActive(false);
             confirmation.SetActive(false);
             manager.InputManager.SetInputMode(previousMode);
             manager.InputManager.SkipInput();
@@ -168,6 +182,16 @@ namespace Assets.Scripts.UI
             exitRequested = false;
             if (shield != null) shield.SetActive(false);
             if (confirmation != null) confirmation.SetActive(false);
+            if (Reports != null) Reports.gameObject.SetActive(false);
+        }
+
+        public void OpenReports(StrategicReportKind kind = StrategicReportKind.Cities)
+        {
+            if (!IsOpen) Open();
+            if (!IsOpen || IsConfirmingExit || exitRequested) return;
+            menu.SetActive(false);
+            Reports.Open(kind);
+            Select(Reports.GetComponentsInChildren<Button>().First(button => button.name == "Report" + kind).gameObject);
         }
 
         private void OpenPersistence(bool saving)
