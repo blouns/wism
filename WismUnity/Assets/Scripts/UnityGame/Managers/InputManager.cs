@@ -258,10 +258,7 @@ namespace Assets.Scripts.Managers
                 this.UnityManager.ToggleHelp();
             else if (Input.GetKeyDown(KeyCode.X))
             {
-#if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-#endif
-                Application.Quit();
+                this.UnityManager.GameMenu.RequestExit();
             }
         }
 
@@ -356,10 +353,7 @@ namespace Assets.Scripts.Managers
             }
             else if (Input.GetKeyDown(KeyCode.X))
             {
-#if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-#endif
-                Application.Quit();
+                this.UnityManager.GameMenu.RequestExit();
             }
             // TODO: Remove temp debug code
             else if (Input.GetKeyDown(KeyCode.RightBracket))
