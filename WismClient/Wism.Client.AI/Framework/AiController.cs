@@ -83,6 +83,11 @@ namespace Wism.Client.AI.Framework
         {
             var commands = new List<ICommandAction>();
             var traces = new List<AiDecisionTrace>();
+            if (Game.Current.GameState == GameState.GameOver)
+            {
+                this.lastDecisionTraces = traces;
+                return commands;
+            }
             LogDecisionStart(world);
 
             // Refresh the shared spatial picture once, before any module reads it (A2). All

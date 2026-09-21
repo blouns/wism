@@ -15,6 +15,8 @@ namespace Wism.Client.Data.Entities
 
         [DataMember] public GameState GameState { get; set; }
 
+        [DataMember] public VictoryOutcomeSnapshot VictoryOutcome { get; set; }
+
         [DataMember] public int[] SelectedArmyIds { get; set; }
 
         [DataMember] public PlayerEntity[] Players { get; set; }

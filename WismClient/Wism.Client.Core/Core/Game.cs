@@ -193,7 +193,9 @@ namespace Wism.Client.Core
         /// <param name="newState">State to transition to</param>
         public void Transition(GameState newState)
         {
-            // For now just set it; later we can validate and manage the state machine
+            // Only loading/creating a different Game may leave a terminal campaign.
+            if (this.GameState == GameState.GameOver)
+                return;
             this.GameState = newState;
         }
 
@@ -211,6 +213,8 @@ namespace Wism.Client.Core
         /// </remarks>
         public void EndTurn()
         {
+            if (this.GameState == GameState.GameOver)
+                return;
             // End current players turn
             this.DeselectArmies();
             this.CommitAllVisitingArmies();
@@ -246,6 +250,11 @@ namespace Wism.Client.Core
             }
 
             // This may roll back to the original player (player wins); so return False in that case
+            if (this.CurrentPlayerIndex < 0)
+            {
+                this.CurrentPlayerIndex = lastPlayerIndex;
+                return false;
+            }
             return lastPlayerIndex != this.CurrentPlayerIndex;
         }
 
@@ -254,6 +263,8 @@ namespace Wism.Client.Core
         /// </summary>
         public void StartTurn()
         {
+            if (this.GameState == GameState.GameOver)
+                return;
             this.CommitAllVisitingArmies();
             var player = this.GetCurrentPlayer();
 
@@ -620,6 +631,8 @@ namespace Wism.Client.Core
 
         private void HandleGameOver()
         {
+            this.SetVictoryOutcome(VictoryEvaluator.EvaluateConquest(
+                World.Current, this.Players, this.GetCurrentPlayer().Turn));
             this.Transition(GameState.GameOver);
         }
 

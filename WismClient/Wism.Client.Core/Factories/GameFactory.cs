@@ -74,6 +74,12 @@ namespace Wism.Client.Factories
             LoadCities(snapshot, world, cityToPlayer, capitolToPlayer);
             LoadArmies(snapshot, armiesToTile, visitingToTile);
 
+            if (snapshot.VictoryOutcome != null)
+                Game.Current.SetVictoryOutcome(snapshot.VictoryOutcome);
+            else if (snapshot.GameState == GameState.GameOver)
+                Game.Current.SetVictoryOutcome(VictoryEvaluator.EvaluateConquest(
+                    world, Game.Current.Players, Game.Current.GetCurrentPlayer().Turn));
+
             // Factory state
             ArmyFactory.LastId = snapshot.LastArmyId;
 

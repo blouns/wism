@@ -56,6 +56,7 @@ namespace Assets.Scripts.UI
             this.infoPanelGroup.alpha = 0f;
             this.notificationText.text = message;
             this.timer = 0f;
+            this.waitTime = (float)interval;
             ShowNotifications();
         }
     }

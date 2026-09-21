@@ -34,8 +34,10 @@ namespace Wism.Client.AI.CommandProviders
 
         public void GenerateCommands()
         {
-            logger.LogInformation("AdaptaCommandProvider: Generating AI commands.");
             bufferedCommands.Clear();
+            if (Game.Current.GameState == GameState.GameOver)
+                return;
+            logger.LogInformation("AdaptaCommandProvider: Generating AI commands.");
 
             // live selection snapshot
             var current = Game.Current.ArmiesSelected()

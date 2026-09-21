@@ -25,6 +25,7 @@ namespace Wism.Client.Data
                 Timestamp = DateTime.UtcNow,
                 CurrentPlayerIndex = game.CurrentPlayerIndex,
                 GameState = game.GameState,
+                VictoryOutcome = game.VictoryOutcome,
                 Players = SnapshotPlayers(game.Players),
                 Random = SnapshotRandom(game.Random, game),
                 SelectedArmyIds = SnapshotSelectedArmies(game.GetSelectedArmies()),
