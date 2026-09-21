@@ -69,6 +69,7 @@ namespace Assets.Scripts
                     .GetComponent<DebugManager>();
             this.unityManager.InteractiveUI = newGameEntity.InteractiveUI;
             this.unityManager.ShowAiCombat = newGameEntity.ShowAiCombat;
+            this.unityManager.ObserveAiMovement = newGameEntity.ObserveAiMovement;
 
             if (newGameEntity.ModKitSelection != null)
             {

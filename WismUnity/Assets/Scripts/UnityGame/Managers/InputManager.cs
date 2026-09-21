@@ -248,7 +248,9 @@ namespace Assets.Scripts.Managers
         private void HandleInspectionInput()
         {
             // A finished campaign permits navigation and persistence, never orders.
-            if (WismUiInputAdapter.SavePressedThisFrame())
+            if (WismUiInputAdapter.CapitalPressedThisFrame() && this.UnityManager.CanNavigateToCapital)
+                this.UnityManager.GoToCapitol(Game.Current.GetCurrentPlayer());
+            else if (WismUiInputAdapter.SavePressedThisFrame())
                 this.UnityManager.HandleSaveLoadPicker(true);
             else if (WismUiInputAdapter.ManagementOrLoadPressedThisFrame(out var shiftHeld) && shiftHeld)
                 this.UnityManager.HandleSaveLoadPicker(false);
@@ -304,10 +306,6 @@ namespace Assets.Scripts.Managers
             else if (WismUiInputAdapter.ItemActionPressed(false))
             {
                 this.UnityManager.HandleItemPicker(false);
-            }
-            else if (Input.GetKey(KeyCode.C))
-            {
-                this.UnityManager.HandlePetCompanion();
             }
             // TODO: Add Inventory action
             // TODO: Add Find heros (k) action
@@ -367,7 +365,7 @@ namespace Assets.Scripts.Managers
             // TODO: Add reports actions (winning, cities, gold, etc.)
 
             // Navigation actions
-            else if (Input.GetKeyDown(KeyCode.C))
+            else if (WismUiInputAdapter.CapitalPressedThisFrame() && this.UnityManager.CanNavigateToCapital)
             {
                 this.UnityManager.GoToCapitol(Game.Current.GetCurrentPlayer());
             }
