@@ -113,6 +113,7 @@ namespace Assets.Scripts.Managers
         public DebugManager DebugManager { get => this.debugManager; set => this.debugManager = value; }
         public bool InteractiveUI { get => this.interactiveUI; set => this.interactiveUI = value; }
         public bool ShowAiCombat { get; set; } = true;
+        public WismGameMenu GameMenu { get; private set; }
 
         public void Start()
         {
@@ -289,6 +290,8 @@ namespace Assets.Scripts.Managers
             this.ItemPicker = this.itemPickerPrefab.GetComponent<ItemPicker>();
             this.SaveLoadPicker = this.saveLoadPickerPrefab.GetComponent<SaveLoadPicker>();
             this.productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
+            this.GameMenu = GetComponent<WismGameMenu>() ?? gameObject.AddComponent<WismGameMenu>();
+            this.GameMenu.Initialize(this);
             this.DebugManager.LogInformation("Initialized UI");
         }
 
@@ -349,6 +352,7 @@ namespace Assets.Scripts.Managers
         /// </summary>
         public void Reset()
         {
+            this.GameMenu?.ResetForGame();
             this.CampaignResultText = null;
             this.presentedCompletedGame = null;
             this.nextAiGenerationTime = 0f;
@@ -462,6 +466,7 @@ namespace Assets.Scripts.Managers
 
         public void FixedUpdate()
         {
+            if (this.GameMenu != null && this.GameMenu.IsOpen) return;
             // The loader's placeholder world must never start a turn or run AI.
             // Only the queued load command may replace it with playable state.
             if (this.AwaitingInitialLoad)

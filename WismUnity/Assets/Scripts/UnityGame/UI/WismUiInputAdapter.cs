@@ -9,6 +9,19 @@ namespace Assets.Scripts.UI
 {
     public static class WismUiInputAdapter
     {
+        public static bool ApplicationExitPressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.X) ||
+                (Input.GetKeyDown(KeyCode.Q) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))))
+                return true;
+#if ENABLE_INPUT_SYSTEM
+            var keyboard = Keyboard.current;
+            if (keyboard != null && (keyboard.xKey.wasPressedThisFrame ||
+                (keyboard.qKey.wasPressedThisFrame && keyboard.ctrlKey.isPressed))) return true;
+#endif
+            return false;
+        }
+
         public static void ConfigureGameEventSystem()
         {
 #if ENABLE_INPUT_SYSTEM
