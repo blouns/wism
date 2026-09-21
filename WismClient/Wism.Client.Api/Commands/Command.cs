@@ -21,9 +21,15 @@ namespace Wism.Client.Commands
 
         public ActionState Result { get; private set; }
 
+        public bool CanExecuteInCurrentState => !Core.Game.IsInitialized() ||
+            Core.Game.Current.GameState != Core.GameState.GameOver ||
+            this is Games.LoadGameCommand || this is Games.NewGameCommand;
+
         public ActionState Execute()
         {
-            this.Result = this.ExecuteInternal();            
+            if (!this.CanExecuteInCurrentState)
+                return this.Result = ActionState.Failed;
+            this.Result = this.ExecuteInternal();
 
             return this.Result;
         }

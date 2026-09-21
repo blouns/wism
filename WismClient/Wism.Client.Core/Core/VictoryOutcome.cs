@@ -246,6 +246,18 @@ namespace Wism.Client.Core
                 false);
         }
 
+        public static VictoryOutcomeSnapshot EvaluateConquest(World world, IReadOnlyList<Player> players, int turn)
+        {
+            var standings = BuildStandings(world, players);
+            var survivors = standings.Where(standing => !standing.IsDead).ToArray();
+            var totalCities = world.GetCities().Count;
+            return CreateSnapshot(
+                survivors.Length == 1 ? VictoryOutcomeKind.Conquest : VictoryOutcomeKind.None,
+                survivors.Length == 1 ? survivors[0] : null, null, totalCities, turn, false,
+                Ratio(Math.Max(0, totalCities - standings.Sum(standing => standing.CityCount)), totalCities),
+                survivors.Length, 0, 0, false, "conquest", false);
+        }
+
         public static VictoryOutcomeSnapshot EvaluateClassicSurrender(World world, IReadOnlyList<Player> players, int turn)
         {
             var standings = BuildStandings(world, players);

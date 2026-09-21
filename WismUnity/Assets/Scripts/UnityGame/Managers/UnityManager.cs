@@ -349,6 +349,10 @@ namespace Assets.Scripts.Managers
         /// </summary>
         public void Reset()
         {
+            this.CampaignResultText = null;
+            this.presentedCompletedGame = null;
+            this.nextAiGenerationTime = 0f;
+            this.InputManager.CompleteEndTurn();
             this.InputManager.SetInputMode(InputMode.Game);
             this.armyManager.Reset();
             GetComponent<CityManager>().Reset();
@@ -435,6 +439,27 @@ namespace Assets.Scripts.Managers
             if (changed) Draw();
         }
 
+        private Game presentedCompletedGame;
+        public string CampaignResultText { get; private set; }
+
+        private void PresentCompletedCampaign()
+        {
+            if (ReferenceEquals(this.presentedCompletedGame, Game.Current))
+                return;
+
+            this.presentedCompletedGame = Game.Current;
+            this.InputManager.CompleteEndTurn();
+            this.InputManager.SetInputMode(InputMode.Game);
+            var winner = Game.Current.VictoryOutcome?.WinnerClanDisplayName;
+            this.CampaignResultText = string.IsNullOrEmpty(winner)
+                ? "The war is over. You may inspect the realm."
+                : $"{winner} have won the war. You may inspect the realm.";
+            LogInformation(this.CampaignResultText);
+            var notification = GameObject.FindGameObjectWithTag("NotificationBox")?.GetComponent<NotificationBox>();
+            if (notification != null)
+                notification.Notify(this.CampaignResultText, double.PositiveInfinity);
+        }
+
         public void FixedUpdate()
         {
             // The loader's placeholder world must never start a turn or run AI.
@@ -468,9 +493,17 @@ namespace Assets.Scripts.Managers
                     // Standard game loop
                     case ExecutionMode.Running:
                         Draw();
+                        if (Game.Current.GameState == GameState.GameOver)
+                        {
+                            PresentCompletedCampaign();
+                            // Discard stale gameplay, but still service a requested load.
+                            DoTasks();
+                            break;
+                        }
                         GenerateAICommands();
                         DoTasks();
-                        this.armyManager.CleanupArmies();
+                        if (Game.Current.GameState != GameState.GameOver)
+                            this.armyManager.CleanupArmies();
                         break;
 
                     case ExecutionMode.NotStarted:
@@ -489,6 +522,8 @@ namespace Assets.Scripts.Managers
 
         private void GenerateAICommands()
         {
+            if (Game.Current.GameState == GameState.GameOver)
+                return;
             var currentPlayer = Game.Current.GetCurrentPlayer();
             if (!currentPlayer.IsHuman)
             {
@@ -633,6 +668,12 @@ namespace Assets.Scripts.Managers
 
             // Retrieve next command
             var command = this.provider.CommandController.GetCommand(nextCommand);
+            if (!command.CanExecuteInCurrentState)
+            {
+                // Do not invoke a processor: it can have side effects before Execute.
+                this.LastCommandId = command.Id;
+                return;
+            }
             this.DebugManager.LogInformation($"{command}");
             //LogPlayerKind(command);
 

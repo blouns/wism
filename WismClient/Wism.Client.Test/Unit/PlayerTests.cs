@@ -142,12 +142,8 @@ public class PlayerTests
         Game.Current.StartTurn();
         Game.Current.EndTurn();
 
-        player1.Turn = 19;
-
-        // Skip a turn (back to Sirians)
-        Game.Current.EndTurn();
-        Game.Current.StartTurn();
-        Game.Current.EndTurn();
+        // Sample recruitment at turn 21 without advancing an already won campaign.
+        player1.Turn = 21;
 
         // Act
         player1.StartTurn();
@@ -158,7 +154,7 @@ public class PlayerTests
         var hired = player1.TryHireHero(tile, price, name, out var hero);
 
         // Assert
-        Assert.That(player1.LastHeroTurn, Is.EqualTo(21), "Last hero should be 10");
+        Assert.That(player1.LastHeroTurn, Is.EqualTo(21), "Last hero should be recruited on turn 21");
         Assert.That(hired, Is.True, "Did not hire the hero");
         Assert.That(hero, Is.Not.Null, "Hero was null");
         Assert.That(success, Is.True, "No hero was available");

@@ -184,6 +184,13 @@ namespace Assets.Scripts.Managers
 
         private void HandleGameInput()
         {
+            if (Game.IsInitialized() && Game.Current.GameState == GameState.GameOver &&
+                this.unityManager.ExecutionMode == ExecutionMode.Running)
+            {
+                ResetPrimaryGesture();
+                HandleInspectionInput();
+                return;
+            }
             if (!CanAcceptGameplayInput || this.skipInput ||
                 this.unityManager.ExecutionMode != ExecutionMode.Running)
             {
@@ -236,6 +243,26 @@ namespace Assets.Scripts.Managers
             }
 
             this.UnityManager.Draw();
+        }
+
+        private void HandleInspectionInput()
+        {
+            // A finished campaign permits navigation and persistence, never orders.
+            if (WismUiInputAdapter.SavePressedThisFrame())
+                this.UnityManager.HandleSaveLoadPicker(true);
+            else if (WismUiInputAdapter.ManagementOrLoadPressedThisFrame(out var shiftHeld) && shiftHeld)
+                this.UnityManager.HandleSaveLoadPicker(false);
+            else if (Input.GetKeyDown(KeyCode.Period) || Input.GetKeyDown(KeyCode.KeypadPeriod))
+                this.UnityManager.ToggleMinimap();
+            else if (Input.GetKeyDown(KeyCode.Slash))
+                this.UnityManager.ToggleHelp();
+            else if (Input.GetKeyDown(KeyCode.X))
+            {
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#endif
+                Application.Quit();
+            }
         }
 
         private void HandleKeyboard()
