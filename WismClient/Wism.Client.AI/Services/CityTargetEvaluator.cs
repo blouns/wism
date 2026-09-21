@@ -114,12 +114,13 @@ namespace Wism.Client.AI.Services
             return city.GetTiles().Any(tile =>
                 tile != null &&
                 origin.IsNeighbor(tile) &&
-                tile.HasRoom(armies.Count) &&
+                tile.HasRoom(1) &&
                 !tile.MusterArmy().Any(army => army.Clan != player.Clan) &&
-                armies.All(army =>
+                armies.Any(army =>
+                    !army.IsDead &&
                     army.Player == player &&
                     army.Tile == origin &&
-                    army.MovesRemaining > tile.Terrain.MovementCost));
+                    army.MovesRemaining >= tile.Terrain.MovementCost));
         }
     }
 }
