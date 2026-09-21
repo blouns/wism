@@ -15,8 +15,6 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
-        private YesNoBox offerOfPeaceBox;
-        private VictoryOutcomeSnapshot pendingOfferOfPeace;
 
         public EndTurnProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -75,61 +73,12 @@ namespace Assets.Scripts.CommandProcessors
                 return ActionState.Succeeded;
             }
 
-            if (this.pendingOfferOfPeace == null)
-            {
-                this.pendingOfferOfPeace = VictoryEvaluator.EvaluateClassicSurrender(
-                    World.Current,
-                    Game.Current.Players,
-                    command.Player.Turn);
-
-                if (!this.pendingOfferOfPeace.SurrenderEligible)
-                {
-                    this.pendingOfferOfPeace = null;
-                    return ActionState.Succeeded;
-                }
-
-                Game.Current.SetVictoryOutcome(this.pendingOfferOfPeace);
-            }
-
-            if (this.offerOfPeaceBox == null)
-            {
-                this.offerOfPeaceBox = UnityUtilities.GameObjectHardFind("AcceptRejectPanel")
-                    .GetComponent<YesNoBox>();
-            }
-
-            if (!this.offerOfPeaceBox.Answer.HasValue)
-            {
-                if (!this.offerOfPeaceBox.IsActive())
-                {
-                    this.offerOfPeaceBox.Ask(
-                        "Mighty Warlord!\n" +
-                        "The remaining computer lords offer peace.\n" +
-                        "Accept their surrender?");
-
-                    this.unityGame.InputManager.SetInputMode(InputMode.UI);
-                }
-
-                return ActionState.InProgress;
-            }
-
-            var accepted = this.offerOfPeaceBox.Answer.Value;
-            this.offerOfPeaceBox.Clear();
-            this.unityGame.InputManager.SetInputMode(InputMode.Game);
-
-            if (accepted)
-            {
-                VictoryEvaluator.AcceptSurrender(Game.Current, World.Current, this.pendingOfferOfPeace);
-                this.unityGame.NotifyUser(
-                    "{0}, you have won. You may now inspect your domain.",
-                    this.pendingOfferOfPeace.WinnerClanDisplayName);
-            }
-            else
-            {
-                VictoryEvaluator.RejectSurrender(Game.Current, this.pendingOfferOfPeace);
-                this.unityGame.NotifyUser("Peace is not an option. The war continues.");
-            }
-
-            this.pendingOfferOfPeace = null;
+            var offer = VictoryEvaluator.EvaluateClassicSurrender(
+                World.Current, Game.Current.Players, command.Player.Turn);
+            if (offer.SurrenderEligible)
+                Game.Current.SetVictoryOutcome(offer);
+            // Presentation observes the durable outcome, including after a load.
+            // Finish this command before pausing the next turn for the decision.
             return ActionState.Succeeded;
         }
 

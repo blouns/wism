@@ -388,6 +388,10 @@ namespace Wism.Client.Core
 
             foreach (var city in world.GetCities().Where(city => city.Clan != winner.Clan).ToArray())
             {
+                // Neutral defenders are not in the participating-player roster.
+                // Transfer them before claiming the realm's remaining cities.
+                foreach (var army in city.MusterArmies().Where(army => army.Player != winner).ToArray())
+                    army.Player.TransferArmyTo(army, winner);
                 winner.ClaimCity(city);
             }
 
