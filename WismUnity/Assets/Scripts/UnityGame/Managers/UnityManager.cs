@@ -114,6 +114,7 @@ namespace Assets.Scripts.Managers
         public bool InteractiveUI { get => this.interactiveUI; set => this.interactiveUI = value; }
         public bool ShowAiCombat { get; set; } = true;
         public WismGameMenu GameMenu { get; private set; }
+        public CampaignPresentation CampaignPresentation { get; private set; }
 
         public void Start()
         {
@@ -292,6 +293,8 @@ namespace Assets.Scripts.Managers
             this.productionPanel = UnityUtilities.GameObjectHardFind("CityProductionPanel");
             this.GameMenu = GetComponent<WismGameMenu>() ?? gameObject.AddComponent<WismGameMenu>();
             this.GameMenu.Initialize(this);
+            this.CampaignPresentation = GetComponent<CampaignPresentation>() ?? gameObject.AddComponent<CampaignPresentation>();
+            this.CampaignPresentation.Initialize(this);
             this.DebugManager.LogInformation("Initialized UI");
         }
 
@@ -353,6 +356,7 @@ namespace Assets.Scripts.Managers
         public void Reset()
         {
             this.GameMenu?.ResetForGame();
+            this.CampaignPresentation?.ResetForGame();
             this.CampaignResultText = null;
             this.presentedCompletedGame = null;
             this.nextAiGenerationTime = 0f;
@@ -462,6 +466,7 @@ namespace Assets.Scripts.Managers
             var notification = GameObject.FindGameObjectWithTag("NotificationBox")?.GetComponent<NotificationBox>();
             if (notification != null)
                 notification.Notify(this.CampaignResultText, double.PositiveInfinity);
+            this.CampaignPresentation?.PresentVictory();
         }
 
         public void FixedUpdate()
@@ -498,15 +503,19 @@ namespace Assets.Scripts.Managers
                     // Standard game loop
                     case ExecutionMode.Running:
                         Draw();
+                        if (this.CampaignPresentation != null && this.CampaignPresentation.PresentPendingOffer())
+                            break;
                         if (Game.Current.GameState == GameState.GameOver)
                         {
                             PresentCompletedCampaign();
+                            if (this.CampaignPresentation != null && this.CampaignPresentation.IsOpen) break;
                             // Discard stale gameplay, but still service a requested load.
                             DoTasks();
                             break;
                         }
                         GenerateAICommands();
                         DoTasks();
+                        this.CampaignPresentation?.PresentPendingOffer();
                         if (Game.Current.GameState != GameState.GameOver)
                             this.armyManager.CleanupArmies();
                         break;

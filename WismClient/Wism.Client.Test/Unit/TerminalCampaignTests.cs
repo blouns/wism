@@ -128,6 +128,36 @@ public sealed class TerminalCampaignTests
         Assert.That(Game.Current.VictoryOutcome.WinnerClanShortName, Is.EqualTo(result.WinnerClanShortName));
     }
 
+    [Test]
+    public void AcceptSurrender_TransfersNeutralDefendersAndPreservesArmiesThroughLoad()
+    {
+        GameFactory.Create(TestGameFactory.CreateDefaultNewGameSettings("TestWorld"));
+        var game = Game.Current;
+        var winner = game.GetCurrentPlayer();
+        var city = World.Current.GetCities().First(item => item.Clan.ShortName == "Neutral" && item.MusterArmies().Count > 0);
+        var defender = city.MusterArmies().First();
+        var neutral = defender.Player;
+        var armies = game.Players.SelectMany(player => player.GetArmies())
+            .Concat(World.Current.GetCities().SelectMany(item => item.MusterArmies())).Distinct().ToArray();
+        var standings = new[] { new VictoryClanStanding(winner.Clan.ShortName, winner.Clan.DisplayName, 50, 20, 500, true, false) }
+            .Concat(Enumerable.Range(0, 7).Select(i => new VictoryClanStanding("rival" + i, "Rival " + i, 4, 3, 40, false, false))).ToArray();
+        var offer = VictoryEvaluator.EvaluateClassicSurrender(standings, 80, 40);
+
+        Assert.DoesNotThrow(() => VictoryEvaluator.AcceptSurrender(game, World.Current, offer));
+        Assert.That(game.GameState, Is.EqualTo(GameState.GameOver));
+        Assert.That(defender.Player, Is.SameAs(winner));
+        Assert.That(neutral.GetArmies(), Does.Not.Contain(defender));
+        Assert.That(winner.GetArmies(), Is.EquivalentTo(armies));
+        Assert.That(World.Current.GetCities().All(item => item.Player == winner), Is.True);
+        var count = winner.GetArmies().Count;
+        GameFactory.Load(JsonConvert.DeserializeObject<GameEntity>(JsonConvert.SerializeObject(game.Snapshot())));
+        Assert.That(Game.Current.Players.Single(player => player.Clan.ShortName == winner.Clan.ShortName).GetArmies().Count, Is.EqualTo(count));
+        var before = StableState();
+        Game.Current.EndTurn();
+        Game.Current.StartTurn();
+        Assert.That(StableState(), Is.EqualTo(before));
+    }
+
     private static string StableState()
     {
         var snapshot = Game.Current.Snapshot();

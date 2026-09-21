@@ -207,11 +207,14 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(newOwner));
             }
 
-            if (!this.myArmies.Remove(army))
+            if (army.Player != this || newOwner == this)
             {
                 return;
             }
 
+            // Loaded neutral garrisons can exist on the board without a roster entry.
+            // Ownership, not roster membership, is the authority for transfer.
+            this.myArmies.Remove(army);
             var hero = army as Hero;
             if (hero != null)
             {

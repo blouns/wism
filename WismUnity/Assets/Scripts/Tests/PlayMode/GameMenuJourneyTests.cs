@@ -174,6 +174,11 @@ public sealed partial class ArmyUiInputTests
     private void CaptureMenuCanvas(int width, int height)
     {
         var canvas = unity.GameMenu.GetComponentInChildren<Canvas>();
+        CaptureUiCanvas(canvas, "game-menu-confirmation", width, height);
+    }
+
+    private void CaptureUiCanvas(Canvas canvas, string name, int width, int height)
+    {
         var objects = canvas.GetComponentsInChildren<Transform>(true).Select(child => child.gameObject).ToArray();
         var layers = objects.Select(child => child.layer).ToArray();
         var cameraObject = new GameObject("OffscreenMenuProof", typeof(Camera));
@@ -201,7 +206,7 @@ public sealed partial class ArmyUiInputTests
             Assert.That(texture.GetPixels32().Select(pixel => (pixel.r, pixel.g, pixel.b)).Distinct().Take(10).Count(), Is.GreaterThan(5));
             var root = Path.Combine(Application.dataPath, "../Library/WismUiCaptures");
             Directory.CreateDirectory(root);
-            File.WriteAllBytes(Path.Combine(root, $"game-menu-confirmation-{width}x{height}.png"), texture.EncodeToPNG());
+            File.WriteAllBytes(Path.Combine(root, $"{name}-{width}x{height}.png"), texture.EncodeToPNG());
         }
         finally
         {
