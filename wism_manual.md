@@ -60,6 +60,20 @@ finishes before the two additional transit turns. Existing routes can be renewed
 without taking another slot. Ownership and capacity are checked again on delivery
 of the production order, not only when Loc opens.
 
+Production management:
+Route rows distinguish current training from paid armies at two-or-more turns,
+one turn, or waiting for a legal arrival tile. From/To city buttons navigate
+without issuing production orders. Long route lists scroll; Stop ends training,
+not paid transit. A changed route can still have deliveries bound for its previous
+destination. Returning armies whose destination was razed retain their transit ETA.
+
+Production report:
+Reports > Production shows the current player's producing-city percentage and
+owned-city list. Transit counts are armies, not source-city counts. White outlines
+mark incoming routes and yellow outlines outgoing routes, including paid transit
+after training stops. A city with both directions has both outlines. City fills
+retain WISM ownership colors; no unverified classic production-fill meaning is implied.
+
 Debug Actions:
 ,		Go to location
 {Tab}	Toggle debug output

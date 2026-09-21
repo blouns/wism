@@ -13,6 +13,15 @@ using Wism.Client.Core;
 public sealed class StrategicReportModelTests
 {
     [Test]
+    public void ProductionPercentCountsActiveCitiesNotPaidTransitOrClanShares()
+    {
+        var cities = new[] { new ProductionCityViewModel { IsIdle = false },
+            new ProductionCityViewModel { IsIdle = true }, new ProductionCityViewModel { IsIdle = false } };
+        Assert.That(StrategicReportData.ProducingPercent(cities), Is.EqualTo(200.0 / 3).Within(.00001));
+        Assert.Throws<System.ArgumentException>(() => StrategicReportData.Values(new ClanReportRow[0], StrategicReportKind.Production));
+    }
+
+    [Test]
     public void WinningUsesDocumentedSharesAndExcludesEliminatedClans()
     {
         var rows = new[] {

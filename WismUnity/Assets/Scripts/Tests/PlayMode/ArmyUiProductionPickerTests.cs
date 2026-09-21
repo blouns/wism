@@ -11,6 +11,241 @@ using Wism.Client.Core;
 
 public sealed partial class ArmyUiInputTests
 {
+    [UnityTest] public IEnumerator ProductionTransit_Viewport1024() => ProductionTransitViewport(1024, 768);
+    [UnityTest] public IEnumerator ProductionTransit_Viewport1280() => ProductionTransitViewport(1280, 720);
+    [UnityTest] public IEnumerator ProductionTransit_Viewport1920() => ProductionTransitViewport(1920, 1080);
+    [UnityTest] public IEnumerator ProductionTransit_ViewportUltrawide() => ProductionTransitViewport(3440, 1440);
+
+    private IEnumerator ProductionTransitViewport(int width, int height)
+    {
+        int oldWidth = Screen.width, oldHeight = Screen.height;
+        var player = Game.Current.GetCurrentPlayer();
+        var destination = player.Capitol;
+        var sources = Enumerable.Range(0, 4).Select(i => CreateUiRoutingCity("Route" + i, "LightInfantry")).ToArray();
+        var info = Wism.Client.Modules.ModFactory.FindArmyInfo("LightInfantry");
+        foreach (var source in sources)
+        {
+            source.Barracks.ArmyInTraining = new Wism.Client.Core.Armies.ArmyInTraining
+                { ProductionCity = source, DestinationCity = destination, ArmyInfo = info, TurnsToProduce = 7 };
+            source.Barracks.ArmiesToDeliver = new System.Collections.Generic.Queue<Wism.Client.Core.Armies.ArmyInTraining>(
+                new[] { 2, 1, 0 }.Select(turns => new Wism.Client.Core.Armies.ArmyInTraining
+                    { ProductionCity = source, DestinationCity = destination, ArmyInfo = info, TurnsToDeliver = turns }));
+        }
+        try
+        {
+            ApplyViewport(width, height);
+            yield return WaitFor(() => Screen.width == width && Screen.height == height);
+            OpenProductionPicker(true);
+            var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            var before = TerminalState();
+            var rows = picker.transform.Find("WismProductionPanelSummary/ProductionRouteViewport/ProductionJumpRow");
+            Assert.That(rows.childCount, Is.EqualTo(4));
+            foreach (Transform row in rows)
+            {
+                Assert.That(row.Find("RouteValue0").GetComponent<Text>().text, Does.Contain("7t"));
+                for (int i = 1; i < 4; i++) Assert.That(row.Find("RouteValue" + i).GetComponent<Text>().text, Is.EqualTo("Light Infantry"));
+                var corners = new Vector3[4];
+                ((RectTransform)row).GetWorldCorners(corners);
+                Assert.That(corners.All(point => point.y >= 0 && point.y <= Screen.height), Is.True);
+            }
+            yield return CaptureProductionPicker(picker, _ => { }, "-transit");
+            yield return PressProductionControl(picker, "SourceProductionCityButton1", width >= 1920);
+            Assert.That(picker.GetViewModel().SelectedCity.City, Is.SameAs(sources[0]));
+            yield return PressProductionControl(picker, "DestinationProductionCityButton", width >= 1920);
+            Assert.That(picker.GetViewModel().SelectedCity.City, Is.SameAs(destination));
+            Assert.That(TerminalState(), Is.EqualTo(before));
+            picker.OnExitClick();
+
+            yield return Tap(MenuPoint("OpenReports"));
+            yield return PressJourneyButton(MenuButton("ReportProduction"));
+            var report = unity.GameMenu.Reports;
+            Assert.That(report.Values.Single(), Is.EqualTo(80));
+            Assert.That(report.Production.Cities.Count, Is.EqualTo(5));
+            var overlay = report.GetComponentInChildren<MinimapCityOverlay>();
+            Assert.That(overlay.VisibleMarkerCount, Is.EqualTo(5));
+            Assert.That(overlay.RouteDirections(destination), Is.EqualTo(1));
+            Assert.That(overlay.RouteDirections(sources[0]), Is.EqualTo(2));
+            Assert.That(overlay.IncludeCity(Game.Current.Players.First(other => other != player).Capitol), Is.False);
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            CaptureUiCanvas(unity.GameMenu.GetComponentInChildren<Canvas>(), "production-report", width, height);
+            yield return PressJourneyKey(UnityEngine.InputSystem.Key.E);
+            Assert.That(TerminalState(), Is.EqualTo(before));
+            yield return PressJourneyButton(MenuButton("ReportCities"));
+            Assert.That(overlay.RouteDirections, Is.Null);
+            Assert.That(overlay.VisibleMarkerCount, Is.EqualTo(World.Current.GetCities().Count));
+            yield return Tap(MenuPoint("CloseReport"));
+            Assert.That(TerminalState(), Is.EqualTo(before));
+        }
+        finally { ApplyViewport(oldWidth, oldHeight); }
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionTransit_ReportHandlesNoOwnedCitiesDuringInspection()
+    {
+        var player = Game.Current.GetCurrentPlayer();
+        player.RazeCity(player.Capitol);
+        Game.Current.Transition(GameState.GameOver);
+        yield return new WaitForFixedUpdate();
+        var before = TerminalState();
+        unity.GameMenu.OpenReports(StrategicReportKind.Production);
+        yield return null;
+        Assert.That(unity.GameMenu.Reports.Values.Single(), Is.Zero);
+        Assert.That(unity.GameMenu.Reports.GetComponentInChildren<MinimapCityOverlay>().VisibleMarkerCount, Is.Zero);
+        Assert.That(unity.GameMenu.Reports.GetComponentsInChildren<Text>().Any(text => text.text == "No owned cities"), Is.True);
+        yield return PressJourneyKey(UnityEngine.InputSystem.Key.Escape);
+        Assert.That(TerminalState(), Is.EqualTo(before));
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionTransit_ReportBothDirectionsAndStoppedPaidTransit()
+    {
+        var player = Game.Current.GetCurrentPlayer();
+        var source = player.Capitol;
+        var destination = Game.Current.Players.First(other => other != player).Capitol;
+        player.ClaimCity(destination);
+        var info = Wism.Client.Modules.ModFactory.FindArmyInfo("LightInfantry");
+        destination.Barracks.ArmyInTraining = new Wism.Client.Core.Armies.ArmyInTraining
+            { ProductionCity = destination, DestinationCity = source, ArmyInfo = info, TurnsToProduce = 2 };
+        source.Barracks.ArmiesToDeliver = new System.Collections.Generic.Queue<Wism.Client.Core.Armies.ArmyInTraining>(
+            new[] { new Wism.Client.Core.Armies.ArmyInTraining
+                { ProductionCity = source, DestinationCity = destination, ArmyInfo = info, TurnsToDeliver = 1 } });
+        var before = TerminalState();
+        unity.GameMenu.OpenReports(StrategicReportKind.Production);
+        var report = unity.GameMenu.Reports;
+        var overlay = report.GetComponentInChildren<MinimapCityOverlay>();
+        Assert.That(report.Values.Single(), Is.EqualTo(50));
+        Assert.That(overlay.RouteDirections(source), Is.EqualTo(3));
+        Assert.That(overlay.RouteDirections(destination), Is.EqualTo(3));
+        unity.GameMenu.Close();
+        Assert.That(TerminalState(), Is.EqualTo(before));
+        destination.Barracks.StopProduction();
+        unity.GameMenu.OpenReports(StrategicReportKind.Production);
+        Assert.That(report.Values.Single(), Is.Zero);
+        Assert.That(overlay.RouteDirections(source), Is.EqualTo(2));
+        Assert.That(overlay.RouteDirections(destination), Is.EqualTo(1));
+        Assert.That(source.Barracks.ArmiesToDeliver.Count, Is.EqualTo(1));
+        unity.GameMenu.Close();
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionTransit_CrowdedPaidQueuesScrollToLastSource()
+    {
+        int oldWidth = Screen.width, oldHeight = Screen.height;
+        var destination = Game.Current.GetCurrentPlayer().Capitol;
+        var sources = Enumerable.Range(0, 4).Select(i => CreateUiRoutingCity("Waiting" + i, "LightInfantry")).ToArray();
+        var types = destination.Barracks.GetProductionKinds().Select(kind => Wism.Client.Modules.ModFactory.FindArmyInfo(kind.ArmyInfoName)).ToArray();
+        Assert.That(types.Length, Is.EqualTo(4));
+        foreach (var source in sources)
+            source.Barracks.ArmiesToDeliver = new System.Collections.Generic.Queue<Wism.Client.Core.Armies.ArmyInTraining>(
+                types.Select(info => new Wism.Client.Core.Armies.ArmyInTraining
+                    { ProductionCity = source, DestinationCity = destination, ArmyInfo = info, TurnsToDeliver = 0 }));
+        try
+        {
+            ApplyViewport(1024, 768);
+            yield return WaitFor(() => Screen.width == 1024 && Screen.height == 768);
+            OpenProductionPicker(true);
+            var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            var scrolling = picker.GetComponentInChildren<ScrollRect>();
+            Assert.That(scrolling.content.rect.height, Is.GreaterThan(scrolling.viewport.rect.height));
+            Assert.That(scrolling.verticalScrollbar.gameObject.activeInHierarchy, Is.True);
+            Assert.That(scrolling.verticalScrollbar.handleRect.rect.width,
+                Is.LessThanOrEqualTo(((RectTransform)scrolling.verticalScrollbar.transform).rect.width + .1f),
+                "The scrollbar handle must not overlap the delivery column.");
+            Assert.That(picker.GetViewModel().SelectedCity.IncomingSources.Sum(route => route.Deliveries.Count), Is.EqualTo(16));
+            var before = TerminalState();
+            scrolling.OnScroll(new PointerEventData(EventSystem.current) { scrollDelta = new Vector2(0, -100) });
+            yield return null;
+            Assert.That(scrolling.verticalNormalizedPosition, Is.LessThan(.01f));
+            yield return CaptureProductionPicker(picker, _ => { }, "-waiting");
+            yield return PressProductionControl(picker, "SourceProductionCityButton4", true);
+            Assert.That(picker.GetViewModel().SelectedCity.City, Is.SameAs(sources[3]));
+            Assert.That(TerminalState(), Is.EqualTo(before));
+            picker.OnExitClick();
+        }
+        finally { ApplyViewport(oldWidth, oldHeight); }
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionTransit_LargeOwnedCityReportScrollsWithoutOrders()
+    {
+        for (int i = 0; i < 12; i++) CreateUiRoutingCity("Northern Province " + i, "LightInfantry");
+        var before = TerminalState();
+        unity.GameMenu.OpenReports(StrategicReportKind.Production);
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+        var report = unity.GameMenu.Reports;
+        Assert.That(report.Production.Cities.Count, Is.EqualTo(13));
+        var scrolling = report.GetComponentInChildren<ScrollRect>();
+        Assert.That(scrolling.content.rect.height, Is.GreaterThan(scrolling.viewport.rect.height));
+        Assert.That(scrolling.verticalScrollbar.gameObject.activeInHierarchy, Is.True);
+        scrolling.OnScroll(new PointerEventData(EventSystem.current) { scrollDelta = new Vector2(0, -100) });
+        yield return null;
+        Assert.That(scrolling.verticalNormalizedPosition, Is.LessThan(.01f));
+        yield return Tap(MenuPoint("CloseReport"));
+        Assert.That(TerminalState(), Is.EqualTo(before));
+    }
+
+    [UnityTest]
+    public IEnumerator ProductionTransit_SaveReloadPreservesEveryDisplayedPhase()
+    {
+        unity.enabled = false;
+        input.enabled = false;
+        try
+        {
+            var player = Game.Current.GetCurrentPlayer();
+            var source = player.Capitol;
+            var destination = Game.Current.Players.First(other => other != player).Capitol;
+            player.ClaimCity(destination);
+            player.Gold = 10000;
+            var sourceName = source.ShortName;
+            var destinationName = destination.ShortName;
+            var info = Wism.Client.Modules.ModFactory.FindArmyInfo("LightInfantry");
+            int before = player.GetArmies().Count;
+            Assert.That(source.Barracks.StartProduction(info, destination), Is.True);
+            int paidGold = player.Gold;
+            for (int phase = 0; phase < 4; phase++)
+            {
+                var snapshot = Wism.Client.Data.GamePersistance.SnapshotGame(Game.Current);
+                Wism.Client.Factories.GameFactory.Load(snapshot);
+                player = Game.Current.GetCurrentPlayer();
+                Assert.That(player.Gold, Is.EqualTo(paidGold), "Reloading or stopping transit cannot charge production again.");
+                source = World.Current.FindCity(sourceName);
+                destination = World.Current.FindCity(destinationName);
+                var model = ProductionPanelViewModelBuilder.BuildManagement(player, destination);
+                var incoming = model.SelectedCity.IncomingSources;
+                if (phase == 0)
+                {
+                    Assert.That(incoming.Single().Training, Is.Not.Null);
+                    Assert.That(incoming.Single().Deliveries, Is.Empty);
+                    while (source.Barracks.ProducingArmy()) source.Barracks.Produce(out _);
+                    source.Barracks.Deliver(out _);
+                }
+                else if (phase < 3)
+                {
+                    Assert.That(incoming.Single().Training, Is.Null);
+                    Assert.That(incoming.Single().Deliveries.Single().TurnsRemaining, Is.EqualTo(3 - phase));
+                    Assert.That(player.GetArmies().Count, Is.EqualTo(before));
+                    source.Barracks.StopProduction();
+                    source.Barracks.Deliver(out _);
+                }
+                else
+                {
+                    Assert.That(incoming, Is.Empty);
+                    Assert.That(player.GetArmies().Count, Is.EqualTo(before + 1));
+                    Assert.That(source.Barracks.HasDeliveries(), Is.False);
+                }
+            }
+        }
+        finally { unity.enabled = true; input.enabled = true; }
+        yield return null;
+    }
+
     [UnityTest]
     public IEnumerator ProductionLoc_MinimapMouseAndTouchRouteWithoutMovingArmy()
     {
@@ -419,7 +654,8 @@ public sealed partial class ArmyUiInputTests
         Assert.That(summary.GetComponent<Image>().sprite, Is.SameAs(picker.GetComponent<Image>().sprite));
         Assert.That(summary.GetComponent<Image>().color, Is.EqualTo(Color.white));
         Assert.That(summary.Find("ProductionMinimapOverlay"), Is.Null, "Do not create a second minimap.");
-        Assert.That(summary.Find("ProductionJumpRow").gameObject.activeSelf, Is.False, "No blank route buttons for an idle city.");
+        Assert.That(summary.Find("ProductionRouteViewport").gameObject.activeSelf, Is.False, "No blank route table for an idle city.");
+        Assert.That(summary.Find("ProductionRouteHeader").gameObject.activeSelf, Is.False, "No route headings for an idle city.");
         var classicFont = picker.GetComponentsInChildren<Button>().Single(button => button.name == "ExitButton")
             .GetComponentInChildren<Text>().font;
         foreach (var text in summary.GetComponentsInChildren<Text>())
@@ -493,7 +729,7 @@ public sealed partial class ArmyUiInputTests
         var training = source.Barracks.ArmyInTraining;
         var before = State();
         var summary = (RectTransform)picker.transform.Find("WismProductionPanelSummary");
-        Assert.That(summary.rect.height, Is.EqualTo(84f).Within(0.1f));
+        Assert.That(summary.rect.height, Is.EqualTo(116f).Within(0.1f));
         var to = summary.GetComponentsInChildren<Button>().Single(button => button.name == "DestinationProductionCityButton");
         Assert.That(to.GetComponentInChildren<Text>().text, Is.EqualTo("To " + destination.DisplayName));
         ClickProductionButton(picker, to.name);
@@ -609,7 +845,8 @@ public sealed partial class ArmyUiInputTests
         }
         finally
         {
-            foreach (var item in depths) item.rect.localPosition = item.position;
+            foreach (var item in depths)
+                if (item.rect != null) item.rect.localPosition = item.position;
             canvas.renderMode = mode;
             canvas.worldCamera = camera;
             canvas.planeDistance = distance;

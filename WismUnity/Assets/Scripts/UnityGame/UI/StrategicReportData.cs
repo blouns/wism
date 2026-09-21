@@ -5,7 +5,7 @@ using Wism.Client.Core;
 
 namespace Assets.Scripts.UI
 {
-    public enum StrategicReportKind { Cities, Armies, Gold, Winning }
+    public enum StrategicReportKind { Cities, Armies, Gold, Winning, Production }
 
     public sealed class ClanReportRow
     {
@@ -30,6 +30,9 @@ namespace Assets.Scripts.UI
 
     public static class StrategicReportData
     {
+        public static double ProducingPercent(IReadOnlyList<ProductionCityViewModel> cities) =>
+            cities.Count == 0 ? 0 : 100.0 * cities.Count(city => !city.IsIdle) / cities.Count;
+
         public static ClanReportRow[] Capture(Game game) => game.Players.Select(player =>
         {
             var armies = player.GetArmies().Where(army => !army.IsDead).ToArray();
@@ -39,6 +42,8 @@ namespace Assets.Scripts.UI
 
         public static double[] Values(IReadOnlyList<ClanReportRow> rows, StrategicReportKind kind)
         {
+            if (kind == StrategicReportKind.Production)
+                throw new ArgumentException("Production uses owned-city data, not clan shares.", nameof(kind));
             double cities = rows.Where(row => !row.Eliminated).Sum(row => row.Cities);
             double strength = rows.Where(row => !row.Eliminated).Sum(row => row.Strength);
             double gold = rows.Where(row => !row.Eliminated).Sum(row => row.Gold);

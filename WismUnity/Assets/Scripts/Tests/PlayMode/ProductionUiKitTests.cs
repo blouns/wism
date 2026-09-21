@@ -14,6 +14,52 @@ using Wism.Client.Modules.Infos;
 public sealed class ProductionUiKitTests
 {
     [Test]
+    public void ProductionTransit_RetainsAllPaidDeliveriesAfterStopAndRouteChange()
+    {
+        var cities = Enumerable.Range(1, 3).Select(index => CreateCity(index, "Route" + index)).ToArray();
+        var army = new ArmyInfo { ShortName = "LightInfantry", DisplayName = "Light Infantry" };
+        cities[0].Barracks.ArmyInTraining = Training(cities[0], cities[2], army, 7, 3);
+        cities[0].Barracks.ArmiesToDeliver = new Queue<ArmyInTraining>(new[]
+        {
+            Training(cities[0], cities[1], army, 0, 2), Training(cities[0], cities[1], army, 0, 1),
+            Training(cities[0], cities[1], army, 0, 0), Training(cities[0], null, army, 0, 1)
+        });
+        var model = ProductionPanelViewModelBuilder.BuildManagement(cities, cities[0]);
+        Assert.That(model.SelectedCity.OutgoingRoutes.Count, Is.EqualTo(3));
+        Assert.That(model.SelectedCity.OutgoingDeliveries.Count, Is.EqualTo(4));
+        Assert.That(model.Cities[1].IncomingSources.Single().Deliveries.Select(item => item.TurnsRemaining), Is.EqualTo(new[] { 2, 1, 0 }));
+        Assert.That(model.Cities[2].IncomingSources.Single().Training.TurnsRemaining, Is.EqualTo(7));
+        Assert.That(model.SelectedCity.OutgoingRoutes.Single(route => route.DestinationCity == cities[0]).Deliveries.Single().TurnsRemaining, Is.EqualTo(1));
+        cities[0].Barracks.StopProduction();
+        model = ProductionPanelViewModelBuilder.BuildManagement(cities, cities[0]);
+        Assert.That(model.SelectedCity.OutgoingDeliveries.Count, Is.EqualTo(4));
+        Assert.That(model.SelectedCity.CurrentDestinationCity, Is.SameAs(cities[1]));
+        Assert.That(model.Cities[1].IncomingSources.Single().Training, Is.Null);
+        Assert.That(model.Cities[2].IncomingSources, Is.Empty);
+    }
+
+    [Test]
+    public void ProductionTransit_EmptyManagementHasNoSelectedCityOrMarkers()
+    {
+        var model = ProductionPanelViewModelBuilder.BuildManagement(new City[0]);
+        Assert.That(model.SelectedCity, Is.Null);
+        Assert.That(model.MinimapMarkers, Is.Empty);
+        Assert.That(StrategicReportData.ProducingPercent(model.Cities), Is.Zero);
+    }
+
+    [Test]
+    public void ProductionTransit_LegacyFifthSourceRemainsVisible()
+    {
+        var cities = Enumerable.Range(1, 6).Select(index => CreateCity(index, "Legacy" + index)).ToArray();
+        var army = new ArmyInfo { ShortName = "LightInfantry", DisplayName = "Light Infantry" };
+        foreach (var source in cities.Skip(1))
+            source.Barracks.ArmiesToDeliver = new Queue<ArmyInTraining>(new[] { Training(source, cities[0], army, 0, 1) });
+        var model = ProductionPanelViewModelBuilder.BuildManagement(cities, cities[0]);
+        Assert.That(model.SelectedCity.IncomingSources.Count, Is.EqualTo(5), "Display legacy paid deliveries; do not admit new fifth-source orders.");
+        Assert.That(model.SelectedCity.IncomingSources.Sum(route => route.Deliveries.Count), Is.EqualTo(5));
+    }
+
+    [Test]
     public void WismUiFactory_CreatesClassicButtonWithMinimumHitTarget()
     {
         var host = new GameObject("host", typeof(RectTransform));

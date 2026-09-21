@@ -17,6 +17,9 @@ public sealed class MinimapCityOverlay : MaskableGraphic
     private Vector2 pixelsPerUnit;
     public int MarkerCount => markers.Count;
     public System.Func<City, Color32> ColorOverride { get; set; }
+    public System.Predicate<City> IncludeCity { get; set; }
+    public System.Func<City, int> RouteDirections { get; set; }
+    public int VisibleMarkerCount => markers.FindAll(marker => marker.Visible).Count;
 
     private sealed class Marker
     {
@@ -25,6 +28,8 @@ public sealed class MinimapCityOverlay : MaskableGraphic
         public Color32 Color;
         public bool Razed;
         public string ColorSource;
+        public bool Visible;
+        public int Directions;
     }
 
     public void Bind(World world, Camera camera, WorldTilemap tilemap)
@@ -58,8 +63,13 @@ public sealed class MinimapCityOverlay : MaskableGraphic
             bool razed = !ReferenceEquals(city.Tile.City, city);
             string source = razed ? null : city.Player?.Clan.Info.PrimaryColor ?? city.Player?.Clan.Info.Color;
             var color = ColorOverride != null ? ColorOverride(city) : ResolveColor(source);
-            if (marker.Center != center || marker.Razed != razed || !marker.Color.Equals(color))
+            bool visible = IncludeCity == null || IncludeCity(city);
+            int directions = RouteDirections?.Invoke(city) ?? 0;
+            if (marker.Center != center || marker.Razed != razed || !marker.Color.Equals(color) ||
+                marker.Visible != visible || marker.Directions != directions)
                 changed = true;
+            marker.Visible = visible;
+            marker.Directions = directions;
             marker.Color = color;
             marker.Center = center;
             marker.Razed = razed;
@@ -78,7 +88,7 @@ public sealed class MinimapCityOverlay : MaskableGraphic
         float distance = 8f * 8f;
         foreach (var marker in markers)
         {
-            if (marker.Razed) continue;
+            if (marker.Razed || !marker.Visible) continue;
             var local = rectTransform.rect.min + Vector2.Scale(rectTransform.rect.size, marker.Center);
             var point = RectTransformUtility.WorldToScreenPoint(eventCamera, rectTransform.TransformPoint(local));
             float squared = (point - screenPoint).sqrMagnitude;
@@ -114,8 +124,11 @@ public sealed class MinimapCityOverlay : MaskableGraphic
             1f / Mathf.Max(.001f, pixelsPerUnit.y));
         foreach (var marker in markers)
         {
+            if (!marker.Visible) continue;
             if (marker.Center.x < 0 || marker.Center.x > 1 || marker.Center.y < 0 || marker.Center.y > 1) continue;
             var center = rect.min + Vector2.Scale(rect.size, marker.Center);
+            if ((marker.Directions & 2) != 0) AddOutline(mesh, center, unit, 15, rect, Color.yellow);
+            if ((marker.Directions & 1) != 0) AddOutline(mesh, center, unit, 11, rect, Color.white);
             var outer = new Rect(center - unit * 3.5f, unit * 7f);
             if (marker.Razed)
             {
@@ -131,6 +144,15 @@ public sealed class MinimapCityOverlay : MaskableGraphic
                 AddQuad(mesh, new Rect(center - unit * 1.5f, unit * 3f), rect, marker.Color);
             }
         }
+    }
+
+    private static void AddOutline(VertexHelper mesh, Vector2 center, Vector2 unit, float size, Rect clip, Color32 color)
+    {
+        var outer = new Rect(center - unit * (size * .5f), unit * size);
+        AddQuad(mesh, new Rect(outer.xMin, outer.yMin, outer.width, unit.y), clip, color);
+        AddQuad(mesh, new Rect(outer.xMin, outer.yMax - unit.y, outer.width, unit.y), clip, color);
+        AddQuad(mesh, new Rect(outer.xMin, outer.yMin, unit.x, outer.height), clip, color);
+        AddQuad(mesh, new Rect(outer.xMax - unit.x, outer.yMin, unit.x, outer.height), clip, color);
     }
 
     private static void AddQuad(VertexHelper mesh, Rect area, Rect clip, Color32 color)

@@ -31,6 +31,16 @@ namespace Assets.Scripts.UI
         public string Kind { get; set; }
     }
 
+    public sealed class ProductionRouteViewModel
+    {
+        public City SourceCity { get; set; }
+        public City DestinationCity { get; set; }
+        public string SourceCityName => SourceCity.DisplayName;
+        public ProductionDeliveryViewModel Training { get; set; }
+        public IReadOnlyList<ProductionDeliveryViewModel> Deliveries { get; set; }
+        public int TurnsRemaining => Training?.TurnsRemaining ?? Deliveries.FirstOrDefault()?.TurnsRemaining ?? 0;
+    }
+
     public sealed class ProductionCityViewModel
     {
         public City City { get; set; }
@@ -42,7 +52,8 @@ namespace Assets.Scripts.UI
         public bool IsIdle { get; set; }
         public IReadOnlyList<ProductionChoiceViewModel> Choices { get; set; }
         public IReadOnlyList<ProductionDeliveryViewModel> OutgoingDeliveries { get; set; }
-        public IReadOnlyList<ProductionDeliveryViewModel> IncomingSources { get; set; }
+        public IReadOnlyList<ProductionRouteViewModel> IncomingSources { get; set; }
+        public IReadOnlyList<ProductionRouteViewModel> OutgoingRoutes { get; set; }
     }
 
     public sealed class ProductionManagementViewModel
@@ -51,7 +62,7 @@ namespace Assets.Scripts.UI
         public int SelectedCityIndex { get; set; }
         public IReadOnlyList<ProductionCityViewModel> Cities { get; set; }
         public IReadOnlyList<ProductionMinimapMarkerViewModel> MinimapMarkers { get; set; }
-        public ProductionCityViewModel SelectedCity => this.Cities[this.SelectedCityIndex];
+        public ProductionCityViewModel SelectedCity => this.Cities.Count == 0 ? null : this.Cities[this.SelectedCityIndex];
     }
 
     public static class ProductionPanelViewModelBuilder
@@ -69,20 +80,7 @@ namespace Assets.Scripts.UI
 
         public static ProductionManagementViewModel BuildManagement(Player player, City selectedCity = null)
         {
-            var cities = player.GetCities();
-            var selectedIndex = selectedCity == null ? 0 : cities.FindIndex(city => city == selectedCity);
-            if (selectedIndex < 0)
-            {
-                selectedIndex = 0;
-            }
-
-            return new ProductionManagementViewModel
-            {
-                Mode = ProductionPanelMode.Management,
-                SelectedCityIndex = selectedIndex,
-                Cities = BuildManagementCities(cities).ToArray(),
-                MinimapMarkers = BuildMinimapMarkers(cities, cities[selectedIndex])
-            };
+            return BuildManagement(player.GetCities(), selectedCity);
         }
 
         public static ProductionManagementViewModel BuildManagement(IReadOnlyList<City> cities, City selectedCity = null)
@@ -98,7 +96,7 @@ namespace Assets.Scripts.UI
                 Mode = ProductionPanelMode.Management,
                 SelectedCityIndex = selectedIndex,
                 Cities = BuildManagementCities(cities).ToArray(),
-                MinimapMarkers = BuildMinimapMarkers(cities, cities[selectedIndex])
+                MinimapMarkers = BuildMinimapMarkers(cities, cities.Count == 0 ? null : cities[selectedIndex])
             };
         }
 
@@ -124,7 +122,8 @@ namespace Assets.Scripts.UI
         {
             var barracks = city.Barracks;
             var armyInTraining = barracks.ArmyInTraining;
-            var destinationCity = armyInTraining?.DestinationCity ?? city;
+            var destinationCity = armyInTraining?.DestinationCity ??
+                barracks.ArmiesToDeliver?.FirstOrDefault()?.DestinationCity ?? city;
             return new ProductionCityViewModel
             {
                 City = city,
@@ -144,35 +143,34 @@ namespace Assets.Scripts.UI
                     })
                     .ToArray(),
                 OutgoingDeliveries = barracks.HasDeliveries()
-                    ? barracks.ArmiesToDeliver.Select(ToDelivery).Take(2).ToArray()
+                    ? barracks.ArmiesToDeliver.Select(ToDelivery).ToArray()
                     : new ProductionDeliveryViewModel[0],
                 IncomingSources = ownedCities
                     .Where(source => source != city)
-                    .Select(source => IncomingFrom(source, city).FirstOrDefault())
+                    .Select(source => BuildRoute(source, city))
                     .Where(source => source != null)
-                    .Take(Barracks.MaxIncomingProductionSources)
-                    .ToArray()
+                    .ToArray(),
+                OutgoingRoutes = (barracks.ArmiesToDeliver ?? new Queue<ArmyInTraining>())
+                    .Select(delivery => delivery.DestinationCity ?? city)
+                    .Concat(armyInTraining?.DestinationCity != null ? new[] { armyInTraining.DestinationCity } : new City[0])
+                    .Distinct().Select(destination => BuildRoute(city, destination)).Where(route => route != null).ToArray()
             };
         }
 
-        private static IEnumerable<ProductionDeliveryViewModel> IncomingFrom(City source, City destination)
+        private static ProductionRouteViewModel BuildRoute(City source, City destination)
         {
-            if (source.Barracks.ArmyInTraining?.DestinationCity == destination)
+            ProductionDeliveryViewModel training = null;
+            if (source.Barracks.ArmyInTraining?.DestinationCity == destination && source != destination)
             {
-                var training = ToDelivery(source.Barracks.ArmyInTraining);
+                training = ToDelivery(source.Barracks.ArmyInTraining);
                 training.TurnsRemaining = source.Barracks.ArmyInTraining.TurnsToProduce;
-                yield return training;
             }
-
-            if (!source.Barracks.HasDeliveries())
+            var deliveries = (source.Barracks.ArmiesToDeliver ?? new Queue<ArmyInTraining>())
+                .Where(delivery => (delivery.DestinationCity ?? source) == destination).Select(ToDelivery).ToArray();
+            return training == null && deliveries.Length == 0 ? null : new ProductionRouteViewModel
             {
-                yield break;
-            }
-
-            foreach (var delivery in source.Barracks.ArmiesToDeliver.Where(delivery => delivery.DestinationCity == destination))
-            {
-                yield return ToDelivery(delivery);
-            }
+                SourceCity = source, DestinationCity = destination, Training = training, Deliveries = deliveries
+            };
         }
 
         private static ProductionDeliveryViewModel ToDelivery(ArmyInTraining delivery)
@@ -185,7 +183,7 @@ namespace Assets.Scripts.UI
                 SourceCityName = delivery.ProductionCity?.DisplayName,
                 DestinationCityName = destination?.DisplayName,
                 ArmyDisplayName = delivery.ArmyInfo?.DisplayName,
-                TurnsRemaining = delivery.DestinationCity == null ? delivery.TurnsToProduce : delivery.TurnsToDeliver
+                TurnsRemaining = delivery.TurnsToDeliver
             };
         }
 

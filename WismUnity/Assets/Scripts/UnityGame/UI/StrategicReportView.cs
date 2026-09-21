@@ -24,6 +24,7 @@ namespace Assets.Scripts.UI
         public ClanReportRow[] Rows { get; private set; }
         public double[] Values { get; private set; }
         public StrategicReportKind Kind { get; private set; }
+        public ProductionManagementViewModel Production { get; private set; }
 
         public void Initialize(UnityManager owner, Font face, Action close)
         {
@@ -37,7 +38,7 @@ namespace Assets.Scripts.UI
             exitRect.anchorMin = exitRect.anchorMax = exitRect.pivot = Vector2.one;
             exitRect.anchoredPosition = new Vector2(-20, -16);
             exitRect.sizeDelta = new Vector2(100, 44);
-            tabs = new Button[4];
+            tabs = new Button[Enum.GetValues(typeof(StrategicReportKind)).Length];
             for (int i = 0; i < tabs.Length; i++)
             {
                 var kind = (StrategicReportKind)i;
@@ -102,6 +103,7 @@ namespace Assets.Scripts.UI
         public void Open(StrategicReportKind kind)
         {
             gameObject.SetActive(true);
+            Production = ProductionPanelViewModelBuilder.BuildManagement(Game.Current.GetCurrentPlayer());
             map.texture = UnityUtilities.GameObjectHardFind("Minimap").GetComponent<RawImage>().texture;
             map.GetComponent<AspectRatioFitter>().aspectRatio = (float)World.Current.Map.GetLength(0) / World.Current.Map.GetLength(1);
             var camera = GameObject.FindGameObjectWithTag("MinimapCamera").GetComponent<Camera>();
@@ -120,6 +122,9 @@ namespace Assets.Scripts.UI
         {
             if (Rows == null) return;
             Kind = kind;
+            cities.IncludeCity = null;
+            cities.RouteDirections = null;
+            if (kind == StrategicReportKind.Production) { ShowProduction(); return; }
             Values = StrategicReportData.Values(Rows, kind);
             heading.text = kind == StrategicReportKind.Winning ? "Winning (estimate)" : kind.ToString();
             metric.text = kind == StrategicReportKind.Winning ? "City share 50%  /  Strength share 35%  /  Gold share 15%" :
@@ -128,6 +133,7 @@ namespace Assets.Scripts.UI
             for (int i = 0; i < tabs.Length; i++) tabs[i].image.color = i == (int)kind ? new Color32(226, 211, 152, 255) : new Color32(185, 185, 185, 255);
             cities.gameObject.SetActive(kind != StrategicReportKind.Armies);
             armies.gameObject.SetActive(kind == StrategicReportKind.Armies);
+            cities.Refresh();
             foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
             content.sizeDelta = new Vector2(0, Rows.Length * 52);
             double max = kind == StrategicReportKind.Winning ? 100 : Values.DefaultIfEmpty(0).Max();
@@ -162,6 +168,51 @@ namespace Assets.Scripts.UI
             scroll.verticalNormalizedPosition = 1;
         }
 
+        private void ShowProduction()
+        {
+            if (Production == null) return;
+            var owned = new System.Collections.Generic.HashSet<Wism.Client.MapObjects.City>(Production.Cities.Select(city => city.City));
+            var routes = Production.Cities.SelectMany(city => city.OutgoingRoutes)
+                .Where(route => route.SourceCity != route.DestinationCity && owned.Contains(route.DestinationCity)).ToArray();
+            var inbound = new System.Collections.Generic.HashSet<Wism.Client.MapObjects.City>(routes.Select(route => route.DestinationCity));
+            var outbound = new System.Collections.Generic.HashSet<Wism.Client.MapObjects.City>(routes.Select(route => route.SourceCity));
+            cities.IncludeCity = city => owned.Contains(city);
+            cities.RouteDirections = city => (inbound.Contains(city) ? 1 : 0) | (outbound.Contains(city) ? 2 : 0);
+            cities.gameObject.SetActive(true);
+            armies.gameObject.SetActive(false);
+            cities.Refresh();
+            Values = new[] { StrategicReportData.ProducingPercent(Production.Cities) };
+            heading.text = "Production";
+            metric.text = $"{Production.Cities.Count(city => !city.IsIdle)}/{Production.Cities.Count} cities producing ({Values[0]:F1}%)" +
+                "\nWhite outline: inbound  /  Yellow outline: outbound";
+            for (int i = 0; i < tabs.Length; i++) tabs[i].image.color = i == (int)Kind ? new Color32(226, 211, 152, 255) : new Color32(185, 185, 185, 255);
+            foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            content.sizeDelta = new Vector2(0, Mathf.Max(1, Production.Cities.Count) * 88);
+            if (Production.Cities.Count == 0)
+            {
+                var empty = Label(content, "NoProductionCities", "No owned cities", 18);
+                Place(empty.rectTransform, 8, 8, 300, 44);
+            }
+            for (int i = 0; i < Production.Cities.Count; i++)
+            {
+                var city = Production.Cities[i];
+                var row = Rect(content, "ProductionCity" + i);
+                row.anchorMin = Vector2.up; row.anchorMax = Vector2.one; row.pivot = Vector2.up;
+                row.sizeDelta = new Vector2(0, 88); row.anchoredPosition = new Vector2(0, -i * 88);
+                var name = Label(row, "City", city.CityName, 18);
+                Place(name.rectTransform, 8, 2, 154, 80);
+                name.resizeTextForBestFit = true; name.resizeTextMinSize = 10; name.resizeTextMaxSize = 18;
+                var destination = owned.Contains(city.CurrentDestinationCity) ? city.DestinationCityName : "Unavailable";
+                var value = (city.IsIdle ? "Idle" : $"{city.CurrentArmyName} - {city.TurnsRemaining}t") +
+                    $"\nTo: {destination}\nTransit: {city.IncomingSources.Sum(route => route.Deliveries.Count)} in / {city.OutgoingDeliveries.Count} out";
+                var detail = Label(row, "ProductionState", value, 16);
+                detail.rectTransform.anchorMin = Vector2.zero; detail.rectTransform.anchorMax = Vector2.one;
+                detail.rectTransform.offsetMin = new Vector2(170, 4); detail.rectTransform.offsetMax = new Vector2(-8, -4);
+                detail.resizeTextForBestFit = true; detail.resizeTextMinSize = 10; detail.resizeTextMaxSize = 16;
+            }
+            scroll.verticalNormalizedPosition = 1;
+        }
+
         public void OnPointerClick(PointerEventData eventData) { }
 
         private Text Label(Transform parent, string name, string value, int size)
@@ -183,6 +234,9 @@ namespace Assets.Scripts.UI
             var text = button.GetComponentInChildren<Text>();
             text.font = font;
             text.fontSize = 20;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 12;
+            text.resizeTextMaxSize = 20;
             text.color = Color.black;
             button.onClick.AddListener(() => action());
             return button;

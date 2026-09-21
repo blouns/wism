@@ -1,6 +1,7 @@
 using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Wism.Client.Core;
@@ -40,8 +41,8 @@ namespace Assets.Scripts.UI
         private RectTransform pickerContent;
         private float pickerHeight;
         private RectTransform jumpRow;
-        private Button destinationJumpButton;
-        private Button[] sourceJumpButtons;
+        private RectTransform routeHeader;
+        private RectTransform routeViewport;
         private MinimapCityOverlay destinationOverlay;
         private Player productionPlayer;
         private Wism.Client.Core.Armies.ArmyInTraining displayedTraining;
@@ -510,31 +511,52 @@ namespace Assets.Scripts.UI
                 10);
             next.onClick.AddListener(OnNextCityClick);
 
-            this.jumpRow = WismUiFactory.CreateRow(panel, "ProductionJumpRow");
-            ConfigureManagementRow(this.jumpRow);
-            this.destinationJumpButton = CreateManagementButton(
-                this.jumpRow,
-                "DestinationProductionCityButton",
-                "To",
-                "owned-production.destination",
-                "production.management.destination",
-                WismUiControlRole.Navigation,
-                20);
-            this.destinationJumpButton.onClick.AddListener(OnDestinationJumpClick);
-            this.sourceJumpButtons = new Button[4];
-            for (var i = 0; i < this.sourceJumpButtons.Length; i++)
-            {
-                var sourceIndex = i;
-                this.sourceJumpButtons[i] = CreateManagementButton(
-                    this.jumpRow,
-                    $"SourceProductionCityButton{i + 1}",
-                    "From",
-                    $"owned-production.source-{i + 1}",
-                    "production.management.source",
-                    WismUiControlRole.Navigation,
-                    20);
-                this.sourceJumpButtons[i].onClick.AddListener(() => OnSourceJumpClick(sourceIndex));
-            }
+            this.routeHeader = WismUiFactory.CreateRow(panel, "ProductionRouteHeader");
+            ConfigureManagementRow(this.routeHeader);
+            this.routeHeader.GetComponent<LayoutElement>().minHeight = 24;
+            this.routeHeader.GetComponent<LayoutElement>().preferredHeight = 24;
+            foreach (var heading in new[] { "City", "Training", "2+ turns", "1 turn", "Waiting" })
+                CreateRouteText(this.routeHeader, heading, heading);
+
+            this.routeViewport = new GameObject("ProductionRouteViewport", typeof(RectTransform), typeof(Image),
+                typeof(RectMask2D), typeof(ScrollRect), typeof(LayoutElement)).GetComponent<RectTransform>();
+            this.routeViewport.SetParent(panel, false);
+            this.routeViewport.GetComponent<Image>().color = new Color32(128, 128, 128, 255);
+            this.jumpRow = new GameObject("ProductionJumpRow", typeof(RectTransform), typeof(VerticalLayoutGroup)).GetComponent<RectTransform>();
+            this.jumpRow.SetParent(this.routeViewport, false);
+            this.jumpRow.anchorMin = Vector2.up;
+            this.jumpRow.anchorMax = Vector2.one;
+            this.jumpRow.pivot = Vector2.up;
+            this.jumpRow.offsetMin = this.jumpRow.offsetMax = Vector2.zero;
+            this.jumpRow.offsetMax = new Vector2(-16, 0);
+            var routesLayout = this.jumpRow.GetComponent<VerticalLayoutGroup>();
+            routesLayout.spacing = 4;
+            routesLayout.childControlHeight = routesLayout.childControlWidth = true;
+            routesLayout.childForceExpandHeight = false;
+            var scrolling = this.routeViewport.GetComponent<ScrollRect>();
+            scrolling.viewport = this.routeViewport;
+            scrolling.content = this.jumpRow;
+            scrolling.horizontal = false;
+            scrolling.movementType = ScrollRect.MovementType.Clamped;
+            scrolling.scrollSensitivity = 32;
+            var barRect = new GameObject("ProductionRouteScrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar))
+                .GetComponent<RectTransform>();
+            barRect.SetParent(this.routeViewport, false);
+            barRect.anchorMin = new Vector2(1, 0); barRect.anchorMax = Vector2.one;
+            barRect.offsetMin = new Vector2(-14, 0); barRect.offsetMax = Vector2.zero;
+            barRect.GetComponent<Image>().color = new Color32(65, 65, 65, 255);
+            var handle = new GameObject("Handle", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            handle.SetParent(barRect, false);
+            handle.anchorMin = Vector2.zero; handle.anchorMax = Vector2.one;
+            handle.offsetMin = handle.offsetMax = Vector2.zero;
+            var handleImage = handle.GetComponent<Image>();
+            handleImage.color = new Color32(200, 200, 200, 255);
+            var scrollbar = barRect.GetComponent<Scrollbar>();
+            scrollbar.handleRect = handle; scrollbar.targetGraphic = handleImage;
+            scrollbar.direction = Scrollbar.Direction.BottomToTop;
+            scrolling.verticalScrollbar = scrollbar;
+            scrolling.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+            this.routeHeader.GetComponent<HorizontalLayoutGroup>().padding.right = 16;
 
         }
 
@@ -679,28 +701,6 @@ namespace Assets.Scripts.UI
             SetStatus(this.selectingDestination ? "Choose a destination city." : BuildStatusText(selected));
         }
 
-        private void OnDestinationJumpClick()
-        {
-            var destination = this.viewModel?.SelectedCity?.CurrentDestinationCity;
-            if (destination == null)
-            {
-                return;
-            }
-
-            SelectManagementCity(destination);
-        }
-
-        private void OnSourceJumpClick(int index)
-        {
-            var incoming = this.viewModel?.SelectedCity?.IncomingSources;
-            if (incoming == null || index < 0 || index >= incoming.Count)
-            {
-                return;
-            }
-
-            SelectManagementCity(incoming[index].SourceCity);
-        }
-
         private void SelectManagementCity(City city)
         {
             if (city == null)
@@ -716,32 +716,63 @@ namespace Assets.Scripts.UI
 
         private void RefreshJumpControls(ProductionCityViewModel selected)
         {
-            if (this.destinationJumpButton != null)
-            {
-                this.destinationJumpButton.interactable =
-                    this.panelMode == ProductionPanelMode.Management &&
-                    selected.CurrentDestinationCity != null &&
-                    selected.CurrentDestinationCity != selected.City;
-                this.destinationJumpButton.gameObject.SetActive(this.destinationJumpButton.interactable);
-                SetButtonText(this.destinationJumpButton, "To " + selected.DestinationCityName);
-            }
+            foreach (Transform child in this.jumpRow) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            float height = 0;
+            for (int i = 0; i < selected.OutgoingRoutes.Count; i++)
+                height += CreateRouteRow(selected.OutgoingRoutes[i], false, i) + 4;
+            for (int i = 0; i < selected.IncomingSources.Count; i++)
+                height += CreateRouteRow(selected.IncomingSources[i], true, i) + 4;
+            bool hasRoutes = height > 0;
+            height = Mathf.Max(0, height - 4);
+            this.routeHeader.gameObject.SetActive(hasRoutes);
+            this.routeViewport.gameObject.SetActive(hasRoutes);
+            this.jumpRow.sizeDelta = new Vector2(0, height);
+            var viewportSize = this.routeViewport.GetComponent<LayoutElement>();
+            viewportSize.minHeight = viewportSize.preferredHeight = Mathf.Min(240, height);
+            this.managementSummary.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, hasRoutes ? 76 + Mathf.Min(240, height) : 44);
+            this.routeViewport.GetComponent<ScrollRect>().verticalNormalizedPosition = 1;
+        }
 
-            if (this.sourceJumpButtons == null)
-            {
-                return;
-            }
+        private float CreateRouteRow(ProductionRouteViewModel route, bool incoming, int index)
+        {
+            var row = WismUiFactory.CreateRow(this.jumpRow, (incoming ? "IncomingRoute" : "OutgoingRoute") + index);
+            ConfigureManagementRow(row);
+            var destination = incoming ? route.SourceCity : route.DestinationCity;
+            var name = incoming ? $"SourceProductionCityButton{index + 1}" :
+                index == 0 ? "DestinationProductionCityButton" : $"DestinationProductionCityButton{index + 1}";
+            var button = CreateManagementButton(row, name, (incoming ? "From " : "To ") + destination.DisplayName,
+                "owned-production.route", "production.management.route", WismUiControlRole.Navigation, 20);
+            button.onClick.AddListener(() => SelectManagementCity(destination));
+            var buttonLayout = button.GetComponent<LayoutElement>();
+            buttonLayout.minWidth = 80; buttonLayout.preferredWidth = 180; buttonLayout.flexibleWidth = 1;
+            var training = route.Training == null ? "Idle" : $"{route.Training.ArmyDisplayName}\n{route.Training.TurnsRemaining}t";
+            var cells = new[] { training, TransitText(route, 2), TransitText(route, 1), TransitText(route, 0) };
+            for (int i = 0; i < cells.Length; i++) CreateRouteText(row, "RouteValue" + i, cells[i]);
+            float height = Mathf.Max(40, cells.Max(value => value.Split('\n').Length) * 20);
+            row.GetComponent<LayoutElement>().minHeight = row.GetComponent<LayoutElement>().preferredHeight = height;
+            return height;
+        }
 
-            for (var i = 0; i < this.sourceJumpButtons.Length; i++)
-            {
-                var hasSource = i < selected.IncomingSources.Count;
-                this.sourceJumpButtons[i].interactable = this.panelMode == ProductionPanelMode.Management && hasSource;
-                this.sourceJumpButtons[i].gameObject.SetActive(this.sourceJumpButtons[i].interactable);
-                SetButtonText(this.sourceJumpButtons[i], hasSource ? "From " + selected.IncomingSources[i].SourceCityName : string.Empty);
-            }
-            bool hasRoutes = this.destinationJumpButton.gameObject.activeSelf ||
-                Array.Exists(this.sourceJumpButtons, button => button.gameObject.activeSelf);
-            this.jumpRow.gameObject.SetActive(hasRoutes);
-            this.managementSummary.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, hasRoutes ? 84f : 44f);
+        private Text CreateRouteText(Transform parent, string name, string value)
+        {
+            var text = CreateManagementText(parent, name, true);
+            text.text = value;
+            text.fontSize = text.resizeTextMaxSize = 18;
+            text.resizeTextMinSize = 10;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            var layout = text.GetComponent<LayoutElement>();
+            layout.minWidth = 80; layout.preferredWidth = 180; layout.flexibleWidth = 1;
+            return text;
+        }
+
+        private static string TransitText(ProductionRouteViewModel route, int bucket)
+        {
+            var groups = route.Deliveries.Where(delivery => bucket == 2 ? delivery.TurnsRemaining >= 2 :
+                bucket == 1 ? delivery.TurnsRemaining == 1 : delivery.TurnsRemaining <= 0)
+                .GroupBy(delivery => new { delivery.ArmyDisplayName, delivery.TurnsRemaining });
+            var lines = groups.Select(group => group.Key.ArmyDisplayName + (group.Count() > 1 ? " x" + group.Count() : "") +
+                (group.Key.TurnsRemaining > 2 ? " (" + group.Key.TurnsRemaining + "t)" : "")).ToArray();
+            return lines.Length == 0 ? "-" : string.Join("\n", lines);
         }
 
         private static void SetButtonText(Button button, string value)
