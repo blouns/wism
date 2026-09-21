@@ -277,6 +277,82 @@ namespace Wism.Client.Test.AI
         }
 
        
+        [TestCase("LightInfantry", false)]
+        [TestCase("LightInfantry", true)]
+        [TestCase("Cavalry", false)]
+        [TestCase("Cavalry", true)]
+        public void CaptureScore_RecognizesOneEligibleArmyAtExactMovementCost(string kind, bool exhaustedCompanion)
+        {
+            var provider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(provider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(provider);
+            var player = Game.Current.GetCurrentPlayer();
+            var target = World.Current.Map[7, 4].City;
+            var origin = World.Current.Map[6, 4];
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo(kind), origin);
+            var armies = new List<Army> { army };
+            var cost = target.GetTiles().Where(tile => origin.IsNeighbor(tile)).Min(tile => tile.Terrain.MovementCost);
+            army.MovesRemaining = cost + 1;
+            var evaluator = new CityTargetEvaluator();
+            double expected = evaluator.Score(armies, target);
+            army.MovesRemaining = cost;
+            if (exhaustedCompanion)
+            {
+                var companion = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+                companion.MovesRemaining = 0;
+                armies.Add(companion);
+            }
+            var capture = new CaptureModule(provider.ArmyController, provider.CityController,
+                TestUtilities.CreateLogFactory().CreateLogger());
+            Assert.That(capture.GenerateCommands(armies, World.Current), Has.One.InstanceOf<CaptureCityCommand>(),
+                "The capture planner can legally dispatch one eligible army.");
+            Assert.That(evaluator.Score(armies, target), Is.EqualTo(expected).Within(0.00001),
+                "A legal exact-cost capture must retain its direct-capture score bonus.");
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void CaptureScore_DefenderOnAnyCityTilePreventsDirectCaptureBonus(int defenderTile)
+        {
+            var provider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(provider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(provider);
+            var player = Game.Current.GetCurrentPlayer();
+            var target = World.Current.Map[7, 4].City;
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("Cavalry"), World.Current.Map[6, 4]);
+            var armies = new List<Army> { army };
+            target.Clan.Player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), target.GetTiles().ElementAt(defenderTile));
+            var evaluator = new CityTargetEvaluator();
+            army.MovesRemaining = 10;
+            double defended = evaluator.Score(armies, target);
+            army.MovesRemaining = 0;
+            Assert.That(evaluator.Score(armies, target), Is.EqualTo(defended),
+                "An occupied footprint is defended even when the city anchor looks empty.");
+        }
+
+        [Test]
+        public void CaptureScore_ExhaustedStackDoesNotReceiveDirectCaptureBonus()
+        {
+            var provider = TestUtilities.CreateControllerProvider();
+            TestUtilities.NewGame(provider, TestUtilities.DefaultTestWorld);
+            TestUtilities.StartTurn(provider);
+            var player = Game.Current.GetCurrentPlayer();
+            var target = World.Current.Map[7, 4].City;
+            var army = player.ConscriptArmy(ArmyInfo.GetArmyInfo("Cavalry"), World.Current.Map[6, 4]);
+            var armies = new List<Army> { army };
+            var evaluator = new CityTargetEvaluator();
+            army.MovesRemaining = 10;
+            double eligible = evaluator.Score(armies, target);
+            var companion = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), army.Tile);
+            companion.MovesRemaining = 0;
+            armies.Add(companion);
+            Assert.That(evaluator.Score(armies, target), Is.EqualTo(eligible), "Only one army must be eligible.");
+            army.MovesRemaining = 0;
+            Assert.That(evaluator.Score(armies, target), Is.LessThan(eligible));
+        }
+
         #region Helper Methods
 
         private AdaptaCommandProvider SetupAIController(ControllerProvider controllerProvider, IWismLogger logger)
