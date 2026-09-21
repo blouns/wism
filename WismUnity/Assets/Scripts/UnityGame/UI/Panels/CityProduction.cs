@@ -42,9 +42,16 @@ namespace Assets.Scripts.UI
         private RectTransform jumpRow;
         private Button destinationJumpButton;
         private Button[] sourceJumpButtons;
+        private MinimapCityOverlay destinationOverlay;
+        private Player productionPlayer;
+        private Wism.Client.Core.Armies.ArmyInTraining displayedTraining;
 
         public void LateUpdate()
         {
+            if (this.productionCity != null && !this.selectingDestination &&
+                this.unityManager.ProductionMode == ProductionMode.CitySelected &&
+                this.productionCity.Barracks.ArmyInTraining != this.displayedTraining)
+                InitializeProduction();
             FitPickerToPanel();
             if (this.armyButtons != null &&
                 this.armySelectedIndex >= 0 &&
@@ -67,6 +74,7 @@ namespace Assets.Scripts.UI
             }
 
             this.productionCity = city;
+            this.productionPlayer = city.Player;
             this.unityManager = unityManager;
             this.armyManager = unityManager.GetComponent<ArmyManager>();
             this.armySelectedIndex = -1;
@@ -93,6 +101,7 @@ namespace Assets.Scripts.UI
             this.armyManager = unityManager.GetComponent<ArmyManager>();
             this.armySelectedIndex = -1;
             this.managementPlayer = player;
+            this.productionPlayer = player;
             this.panelMode = ProductionPanelMode.Management;
             this.selectingDestination = false;
             this.productionCity = selectedCity ?? player.Capitol ?? player.GetCities()[0];
@@ -102,6 +111,7 @@ namespace Assets.Scripts.UI
 
         private void InitializeProduction()
         {
+            CancelDestination();
             EnsurePickerLayout();
             this.transform.SetAsLastSibling();
             EnsureInteractionContracts();
@@ -129,6 +139,7 @@ namespace Assets.Scripts.UI
 
         private void InitializeCurrentProduction()
         {
+            this.displayedTraining = this.productionCity.Barracks.ArmyInTraining;
             string turnsRemainingString = "None";
 
             var barracks = this.productionCity.Barracks;
@@ -257,14 +268,24 @@ namespace Assets.Scripts.UI
             {
                 return;
             }
-            StartProduction();
-            OnExitClick();
+            if (StartProduction()) OnExitClick();
         }
 
-        private void StartProduction(City destinationCity = null)
+        private ArmyInfo SelectedArmy => this.productionInfos != null && this.armySelectedIndex >= 0 &&
+            this.armySelectedIndex < this.productionInfos.Length
+            ? ModFactory.FindArmyInfo(this.productionInfos[this.armySelectedIndex].ArmyInfoName) : null;
+
+        private bool StartProduction(City destinationCity = null)
         {
-            var armyName = this.productionInfos[this.armySelectedIndex].ArmyInfoName;
-            var armyInfo = ModFactory.FindArmyInfo(armyName);
+            var armyInfo = SelectedArmy;
+            if (this.productionCity.Player != this.productionPlayer ||
+                this.productionPlayer != Game.Current.GetCurrentPlayer() ||
+                Game.Current.GameState == GameState.GameOver ||
+                !this.productionCity.Barracks.CanStartProduction(armyInfo, destinationCity))
+            {
+                SetStatus("Production unavailable at this destination.");
+                return false;
+            }
 
             Debug.Log($"Starting production of {armyInfo.DisplayName}" +
                 $" on {this.productionCity}" +
@@ -272,10 +293,13 @@ namespace Assets.Scripts.UI
 
             this.unityManager.GameManager
                 .StartProduction(this.productionCity, armyInfo, destinationCity);
+            return true;
         }
 
         public void OnLocClick()
         {
+            if (this.selectingDestination) { CancelDestination(); return; }
+            if (!Barracks.CanVectorArmy(SelectedArmy)) return;
             if (this.armySelectedIndex < 0)
             {
                 SetStatus("Choose an army first.");
@@ -289,6 +313,13 @@ namespace Assets.Scripts.UI
             }
 
             this.selectingDestination = true;
+            this.destinationOverlay = UnityUtilities.GameObjectHardFind("Minimap")?.GetComponentInChildren<MinimapCityOverlay>();
+            if (this.destinationOverlay != null)
+            {
+                this.destinationOverlay.ColorOverride = DestinationColor;
+                this.destinationOverlay.Refresh();
+            }
+            this.locButton.GetComponentInChildren<Text>().text = "Back";
             this.unityManager.SetProductionMode(ProductionMode.SelectDestination);
             this.unityManager.InputManager.SetInputMode(InputMode.Game);
             SetStatus("Choose a destination city.");
@@ -307,15 +338,44 @@ namespace Assets.Scripts.UI
                 return;
             }
 
-            this.selectingDestination = false;
-            StartProduction(destinationCity == this.productionCity ? null : destinationCity);
-            this.unityManager.SetProductionMode(ProductionMode.CitySelected);
-            this.unityManager.InputManager.SetInputMode(InputMode.UI);
+            if (!StartProduction(destinationCity == this.productionCity ? null : destinationCity)) return;
+            CancelDestination();
             RefreshAfterMutation();
         }
 
+        public Color32 DestinationColor(City city)
+        {
+            if (city == null || city.Player != this.productionPlayer || city.Tile?.City != city)
+                return new Color32(128, 128, 128, 255);
+            if (city == this.productionCity) return Color.yellow;
+            return this.productionCity.Barracks.CanRouteProductionTo(SelectedArmy, city) ? Color.white : Color.red;
+        }
+
+        public void CancelDestination()
+        {
+            ClearDestinationOverlay();
+            if (!this.selectingDestination) return;
+            this.selectingDestination = false;
+            this.locButton.GetComponentInChildren<Text>().text = "Loc";
+            this.unityManager.SetProductionMode(ProductionMode.CitySelected);
+            this.unityManager.InputManager.SetInputMode(InputMode.UI);
+            SetStatus(string.Empty);
+        }
+
+        private void ClearDestinationOverlay()
+        {
+            if (this.destinationOverlay == null) return;
+            if (this.destinationOverlay.ColorOverride == DestinationColor)
+                this.destinationOverlay.ColorOverride = null;
+            this.destinationOverlay.Refresh();
+            this.destinationOverlay = null;
+        }
+
+        private void OnDisable() => CancelDestination();
+
         public void OnStopClick()
         {
+            CancelDestination();
             Debug.Log($"Stopping production on {this.productionCity}");
             this.unityManager.GameManager
                 .StopProduction(this.productionCity);
@@ -326,6 +386,7 @@ namespace Assets.Scripts.UI
 
         public void OnExitClick()
         {
+            CancelDestination();
             this.armySelectedIndex = -1;
             this.selectingDestination = false;
             this.unityManager.InputManager.SetInputMode(InputMode.Game);
@@ -335,13 +396,10 @@ namespace Assets.Scripts.UI
 
         private void EnableProduction()
         {
+            CancelDestination();
             this.prodButton.interactable = true;
-
-            if (Game.Current.GetCurrentPlayer()
-                .GetCities().Count > 1)
-            {
-                this.locButton.interactable = true;
-            }
+            this.locButton.interactable = Barracks.CanVectorArmy(SelectedArmy) &&
+                Game.Current.GetCurrentPlayer().GetCities().Count > 1;
         }
 
         private void DisableProduction()

@@ -35,6 +35,20 @@ public class MinimapInteraction : MonoBehaviour, IPointerDownHandler
             return;
         }
 
+        var manager = GetUnityManager();
+        if (manager.ProductionMode == ProductionMode.SelectDestination)
+        {
+            manager.InputManager.SkipInput();
+            if (eventData.button == PointerEventData.InputButton.Right)
+                manager.CancelProductionDestination();
+            else if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                var overlay = UnityUtilities.GameObjectHardFind("Minimap").GetComponentInChildren<MinimapCityOverlay>();
+                manager.SelectProductionDestination(overlay?.HitTestCity(eventData.position, eventData.pressEventCamera));
+            }
+            return;
+        }
+
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             var unityManager = GetUnityManager();

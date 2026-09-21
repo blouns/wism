@@ -49,6 +49,17 @@ Minimap Actions:
 Left-click		Go-to on map
 .				Toggle mini-map (on/off)
 
+Production destinations:
+Select an army, then Loc, then a city on the minimap or main map.
+Yellow is the source (local production), white an eligible owned destination,
+red an owned destination with no free incoming route, and gray an unowned city.
+Back, Escape or right-click cancels destination selection without issuing orders.
+Navies produce locally and cannot be vectored. A city receives from at most four
+distinct sources; paid armies in transit retain their source slot. Production
+finishes before the two additional transit turns. Existing routes can be renewed
+without taking another slot. Ownership and capacity are checked again on delivery
+of the production order, not only when Loc opens.
+
 Debug Actions:
 ,		Go to location
 {Tab}	Toggle debug output

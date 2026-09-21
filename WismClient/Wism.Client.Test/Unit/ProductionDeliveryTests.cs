@@ -311,6 +311,100 @@ public class ProductionDeliveryTests
         });
     }
 
+    [Test]
+    public void VectorCapacityCountsDistinctSourcesAndReservesInFlightSlots()
+    {
+        var cities = CreateRoutingCities();
+        var info = ModFactory.FindArmyInfo("LightInfantry");
+        var destination = cities[5];
+        foreach (var source in cities.Take(4))
+            Assert.That(source.Barracks.StartProduction(info, destination), Is.True);
+        var gold = destination.Player.Gold;
+        Assert.That(cities[4].Barracks.StartProduction(info, destination), Is.False);
+        Assert.That(destination.Player.Gold, Is.EqualTo(gold));
+        Assert.That(cities[4].Barracks.GetProductionNumber("LightInfantry"), Is.Zero);
+        Assert.That(cities[0].Barracks.StartProduction(info, destination), Is.True, "Renewal reuses a source slot.");
+
+        cities[0].Barracks.Produce(out _);
+        cities[0].Barracks.StartProduction(info, destination);
+        cities[0].Barracks.Produce(out _);
+        Assert.That(cities[0].Barracks.ArmiesToDeliver, Has.Count.EqualTo(2));
+        Assert.That(cities[4].Barracks.StartProduction(info, destination), Is.False, "Paid transit reserves the slot.");
+        cities[1].Barracks.StopProduction();
+        Assert.That(cities[4].Barracks.StartProduction(info, destination), Is.True, "Duplicate deliveries must not consume two slots.");
+    }
+
+    [Test]
+    public void InvalidRoutingPreservesExistingProductionAndGold()
+    {
+        var cities = CreateRoutingCities();
+        var source = cities[0];
+        var destination = cities[1];
+        var info = ModFactory.FindArmyInfo("LightInfantry");
+        Assert.That(source.Barracks.StartProduction(info), Is.True);
+        var training = source.Barracks.ArmyInTraining;
+        var player = source.Player;
+        Game.Current.Players[1].ClaimCity(destination);
+        var gold = player.Gold;
+        Assert.That(source.Barracks.StartProduction(info, destination), Is.False);
+        Assert.That(player.Gold, Is.EqualTo(gold));
+        player.ClaimCity(destination);
+        player.RazeCity(destination);
+        gold = player.Gold;
+        Assert.That(source.Barracks.StartProduction(info, destination), Is.False);
+        Assert.That(source.Barracks.ArmyInTraining, Is.SameAs(training));
+        Assert.That(player.Gold, Is.EqualTo(gold));
+    }
+
+    [Test]
+    public void NavyCanProduceLocallyButCannotBeVectored()
+    {
+        var cities = CreateRoutingCities("Navy");
+        var info = ModFactory.FindArmyInfo("Navy");
+        World.Current.Map[3, 2].Terrain = MapBuilder.TerrainKinds["Water"];
+        World.Current.Map[6, 2].Terrain = MapBuilder.TerrainKinds["Water"];
+        var barracks = cities[0].Barracks;
+        var gold = cities[0].Player.Gold;
+        Assert.That(barracks.StartProduction(info, cities[1]), Is.False);
+        Assert.That(cities[0].Player.Gold, Is.EqualTo(gold));
+        Assert.That(barracks.StartProduction(info, cities[0]), Is.True);
+        Assert.That(barracks.ArmyInTraining.DestinationCity, Is.Null, "Selecting the source means local production.");
+    }
+
+    [Test]
+    public void QueuedProductionRejectsCapturedSource()
+    {
+        var cities = CreateRoutingCities();
+        var command = new Wism.Client.Commands.Cities.StartProductionCommand(
+            Wism.Client.Test.Common.TestUtilities.CreateCityController(), cities[0],
+            ModFactory.FindArmyInfo("LightInfantry"));
+        var captor = Game.Current.Players[1];
+        captor.ClaimCity(cities[0]);
+        var gold = captor.Gold;
+        Assert.That(command.Execute(), Is.EqualTo(Wism.Client.Controllers.ActionState.Failed));
+        Assert.That(cities[0].Barracks.ProducingArmy(), Is.False);
+        Assert.That(captor.Gold, Is.EqualTo(gold));
+    }
+
+    private static City[] CreateRoutingCities(string armyName = "LightInfantry")
+    {
+        World.CreateWorld(CreateGrassMap(22, 8));
+        var player = Game.Current.Players[0];
+        player.Gold = 1000000;
+        return Enumerable.Range(0, 6).Select(index =>
+        {
+            var city = City.Create(new CityInfo
+            {
+                ShortName = "Route" + index, DisplayName = "Route " + index, Defense = 4, Income = 20,
+                ProductionInfos = new[] { new ProductionInfo
+                    { ArmyInfoName = armyName, TurnsToProduce = 1, Upkeep = 4, Moves = 10, Strength = 3 } }
+            });
+            World.Current.AddCity(city, World.Current.Map[1 + index * 3, 2]);
+            player.ClaimCity(city);
+            return city;
+        }).ToArray();
+    }
+
     private static Tile[,] CreateGrassMap(int width, int height)
     {
         var map = new Tile[width, height];

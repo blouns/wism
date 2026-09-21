@@ -853,6 +853,11 @@ namespace Assets.Scripts.Managers
                             .SelectDestination(city);
         }
 
+        internal void CancelProductionDestination()
+        {
+            this.productionPanel.GetComponent<CityProduction>().CancelDestination();
+        }
+
         internal Camera GetMainCamera()
         {
             return this.mainCamera;

@@ -16,6 +16,7 @@ namespace Wism.Client.Commands.Cities
             this.ProductionCity = productionCity ?? throw new ArgumentNullException(nameof(productionCity));
             this.ArmyInfo = armyInfo ?? throw new ArgumentNullException(nameof(armyInfo));
             this.DestinationCity = destinationCity;
+            this.Player = productionCity.Player;
         }
 
         public CityController CityController { get; }
@@ -25,6 +26,8 @@ namespace Wism.Client.Commands.Cities
 
         protected override ActionState ExecuteInternal()
         {
+            if (this.Player == null || this.ProductionCity.Player != this.Player)
+                return ActionState.Failed;
             bool success;
             if (this.DestinationCity == null)
             {

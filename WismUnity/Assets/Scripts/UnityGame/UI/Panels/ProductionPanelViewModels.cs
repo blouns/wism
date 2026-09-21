@@ -148,8 +148,9 @@ namespace Assets.Scripts.UI
                     : new ProductionDeliveryViewModel[0],
                 IncomingSources = ownedCities
                     .Where(source => source != city)
-                    .SelectMany(source => IncomingFrom(source, city))
-                    .Take(4)
+                    .Select(source => IncomingFrom(source, city).FirstOrDefault())
+                    .Where(source => source != null)
+                    .Take(Barracks.MaxIncomingProductionSources)
                     .ToArray()
             };
         }
@@ -158,7 +159,9 @@ namespace Assets.Scripts.UI
         {
             if (source.Barracks.ArmyInTraining?.DestinationCity == destination)
             {
-                yield return ToDelivery(source.Barracks.ArmyInTraining);
+                var training = ToDelivery(source.Barracks.ArmyInTraining);
+                training.TurnsRemaining = source.Barracks.ArmyInTraining.TurnsToProduce;
+                yield return training;
             }
 
             if (!source.Barracks.HasDeliveries())
