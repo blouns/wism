@@ -113,6 +113,17 @@ namespace Assets.Scripts.Managers
         public DebugManager DebugManager { get => this.debugManager; set => this.debugManager = value; }
         public bool InteractiveUI { get => this.interactiveUI; set => this.interactiveUI = value; }
         public bool ShowAiCombat { get; set; } = true;
+        private bool observeAiMovement = true;
+        public bool ObserveAiMovement
+        {
+            get => this.observeAiMovement;
+            set
+            {
+                this.observeAiMovement = value;
+                if (!value && Game.IsInitialized() && !Game.Current.GetCurrentPlayer().IsHuman && this.cameraFollow != null)
+                    this.cameraFollow.target = null;
+            }
+        }
         public WismGameMenu GameMenu { get; private set; }
         public CampaignPresentation CampaignPresentation { get; private set; }
 
@@ -398,14 +409,22 @@ namespace Assets.Scripts.Managers
 
             var inputManager = GetComponent<InputManager>();
             var inputHandler = inputManager != null ? inputManager.InputHandler : null;
-            if (inputHandler == null || player == null || player.Capitol == null || player.Capitol.Tile == null)
+            if (inputHandler == null || player == null || player.Capitol == null || player.Capitol.Tile == null ||
+                player.Capitol.Player != player || player.Capitol.Tile.City != player.Capitol)
             {
                 Debug.LogWarning("Cannot center camera on capitol because the interactive camera target is unavailable.");
                 return;
             }
 
-            inputHandler.CenterOnTile(player.Capitol.Tile);
+            // Navigation must not repurpose the selected-army highlight or enqueue an order.
+            this.cameraFollow.ResetCamera();
+            this.cameraFollow.target = null;
+            this.cameraFollow.SetCameraTarget(this.WorldTilemap.ConvertGameToUnityVector(player.Capitol.X, player.Capitol.Y));
         }
+
+        public bool CanNavigateToCapital => this.InteractiveUI && this.ExecutionMode == ExecutionMode.Running &&
+            Game.IsInitialized() && Game.Current.GetCurrentPlayer()?.Capitol is City capital &&
+            capital.Player == Game.Current.GetCurrentPlayer() && capital.Tile?.City == capital;
 
         public void GoToLocation()
         {
@@ -792,6 +811,11 @@ namespace Assets.Scripts.Managers
 
         internal void SetCameraToSelectedBox()
         {
+            if (!ShouldFollowArmy(Game.Current.GetCurrentPlayer()))
+            {
+                this.cameraFollow.target = null;
+                return;
+            }
             this.cameraFollow.ResetCamera();
             SetCameraTarget(this.selectedArmyBox.transform);
         }
@@ -1126,6 +1150,15 @@ namespace Assets.Scripts.Managers
         internal void SetCameraTarget(Transform transform)
         {
             this.cameraFollow.target = transform;
+        }
+
+        internal bool ShouldFollowArmy(Player player) => player != null &&
+            (player.IsHuman || (this.InteractiveUI && this.ObserveAiMovement));
+
+        internal void SetArmyCameraTarget(Transform target, Player player)
+        {
+            if (this.GameMenu != null && this.GameMenu.IsOpen) return;
+            this.cameraFollow.target = ShouldFollowArmy(player) ? target : null;
         }
     }
 }

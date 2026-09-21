@@ -184,7 +184,8 @@ namespace Assets.Scripts.Managers
                     if (tile.HasVisitingArmies() && this.ArmyDictionary.ContainsKey(tile.VisitingArmies[0].Id))
                     {
                         armyId = tile.VisitingArmies[0].Id;
-                        this.unityManager.SetCameraTarget(this.ArmyDictionary[armyId].GameObject.transform);
+                        this.unityManager.SetArmyCameraTarget(this.ArmyDictionary[armyId].GameObject.transform,
+                            this.ArmyDictionary[armyId].Army.Player);
 
                         // Update the current tile for info panel
                         //var coords = WorldTilemap.ConvertUnityToGameVector(this.selectedArmyBox.transform.position);

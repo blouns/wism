@@ -17,20 +17,33 @@ Z	Search location (some locations require a Hero)
 Hero Actions:
 T	Take item
 O	Drop item
-C	Pet companion
 
 City Actions:
 P	Enter production mode (then select city)
 R	Raze city
 B	Build city defenses
-C	Go to capitol
+C	Go to current player's owned capital (also View > Capital)
 
 Game Actions:
 E	End turn
 S	Save game
-L	Load game
+L	Owned-cities production management
+Shift+L	Load game
 ?	Toggle help
-X	Quit game
+X / Ctrl+Q	Request application exit with confirmation (not Army Quit)
+
+Game menu:
+Observe AI Moves	Follow nonhuman army movement; off leaves the camera where you put it.
+Show AI Combat	Show AI-versus-AI battles independently of movement observation.
+Save Game / Load Game	Open the existing save/load picker when safe.
+Exit Game	Confirm application exit; Cancel preserves the game.
+Observe is saved with the game and defaults on for older saves. It does not skip
+turns, alter AI decisions, hide human battles or enable bulk simulation. Current
+command cadence is unchanged; there is no extra movement-animation wait to bypass.
+
+View menu:
+Capital	Center on the current player's owned, unrazed capital without changing
+selection. Disabled if there is no owned capital. Available during final inspection.
 
 Minimap Actions:
 Left-click		Go-to on map

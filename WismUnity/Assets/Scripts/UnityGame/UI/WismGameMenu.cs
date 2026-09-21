@@ -22,6 +22,11 @@ namespace Assets.Scripts.UI
         private GameObject confirmation;
         private Button openButton;
         private Button reportsButton;
+        private Button viewButton;
+        private Button capitalButton;
+        private GameObject viewMenu;
+        private Toggle observeToggle;
+        private Toggle combatToggle;
         public StrategicReportView Reports { get; private set; }
         private Button saveButton;
         private Button loadButton;
@@ -57,18 +62,29 @@ namespace Assets.Scripts.UI
             Place((RectTransform)openButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(100, 44));
             reportsButton = Button(canvasRoot.transform, "OpenReports", "Reports", "game.reports", () => OpenReports());
             Place((RectTransform)reportsButton.transform, new Vector2(0, 1), new Vector2(116, -8), new Vector2(128, 44));
+            viewButton = Button(canvasRoot.transform, "OpenViewMenu", "View", "game.view", OpenView);
+            Place((RectTransform)viewButton.transform, new Vector2(0, 1), new Vector2(252, -8), new Vector2(100, 44));
             shield = Panel(canvasRoot.transform, "MenuBackdrop", new Color(0, 0, 0, 0.25f));
             Stretch((RectTransform)shield.transform);
             shield.AddComponent<Button>().onClick.AddListener(Cancel);
 
             menu = Panel(shield.transform, "GameMenu", Stone);
-            Place((RectTransform)menu.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(240, 156));
+            Place((RectTransform)menu.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(304, 252));
+            observeToggle = Preference("ObserveMovement", "Observe AI Moves", "game.observe", 8,
+                value => manager.ObserveAiMovement = value);
+            combatToggle = Preference("ShowAiCombat", "Show AI Combat", "game.show-ai-combat", 56,
+                value => manager.ShowAiCombat = value);
             saveButton = Button(menu.transform, "SaveGame", "Save Game", "game.save", () => OpenPersistence(true));
             loadButton = Button(menu.transform, "LoadGame", "Load Game", "game.load", () => OpenPersistence(false));
             exitButton = Button(menu.transform, "ExitGame", "Exit Game...", "game.exit.request", RequestExit);
-            PlaceRow(saveButton, 8);
-            PlaceRow(loadButton, 56);
-            PlaceRow(exitButton, 104);
+            PlaceRow(saveButton, 104);
+            PlaceRow(loadButton, 152);
+            PlaceRow(exitButton, 200);
+            viewMenu = Panel(shield.transform, "ViewMenu", Stone);
+            Place((RectTransform)viewMenu.transform, new Vector2(0, 1), new Vector2(252, -56), new Vector2(240, 60));
+            capitalButton = Button(viewMenu.transform, "Capital", "Capital", "view.capital", NavigateToCapital);
+            Place((RectTransform)capitalButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(224, 44));
+            viewMenu.SetActive(false);
 
             confirmation = Panel(shield.transform, "ExitConfirmation", Stone);
             var rect = (RectTransform)confirmation.transform;
@@ -112,6 +128,7 @@ namespace Assets.Scripts.UI
             if (openButton == null) return;
             openButton.interactable = IsOpen || CanOpen;
             reportsButton.interactable = IsOpen || CanOpen;
+            viewButton.interactable = IsOpen || CanOpen;
             if (!IsOpen && CanOpen && WismUiInputAdapter.ApplicationExitPressedThisFrame()) RequestExit();
             if (!IsOpen) return;
             bool escape = Input.GetKeyDown(KeyCode.Escape);
@@ -127,8 +144,13 @@ namespace Assets.Scripts.UI
             previousMode = manager.InputManager.InputMode;
             previousSelection = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
             saveButton.interactable = loadButton.interactable = CanPersist;
+            observeToggle.SetIsOnWithoutNotify(manager.ObserveAiMovement);
+            combatToggle.SetIsOnWithoutNotify(manager.ShowAiCombat);
+            capitalButton.interactable = manager.CanNavigateToCapital;
+            capitalButton.GetComponentInChildren<Text>().text = capitalButton.interactable ? "Capital" : "No owned capital";
             exitRequested = false;
             menu.SetActive(true);
+            viewMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(false);
             shield.SetActive(true);
@@ -141,6 +163,7 @@ namespace Assets.Scripts.UI
             if (!IsOpen) Open();
             if (!IsOpen || exitRequested) return;
             menu.SetActive(false);
+            viewMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(true);
             Select(cancelButton.gameObject);
@@ -170,6 +193,7 @@ namespace Assets.Scripts.UI
         {
             if (!IsOpen || exitRequested) return;
             shield.SetActive(false);
+            viewMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(false);
             manager.InputManager.SetInputMode(previousMode);
@@ -183,6 +207,7 @@ namespace Assets.Scripts.UI
             if (shield != null) shield.SetActive(false);
             if (confirmation != null) confirmation.SetActive(false);
             if (Reports != null) Reports.gameObject.SetActive(false);
+            if (viewMenu != null) viewMenu.SetActive(false);
         }
 
         public void OpenReports(StrategicReportKind kind = StrategicReportKind.Cities)
@@ -190,6 +215,7 @@ namespace Assets.Scripts.UI
             if (!IsOpen) Open();
             if (!IsOpen || IsConfirmingExit || exitRequested) return;
             menu.SetActive(false);
+            viewMenu.SetActive(false);
             Reports.Open(kind);
             Select(Reports.GetComponentsInChildren<Button>().First(button => button.name == "Report" + kind).gameObject);
         }
@@ -199,6 +225,46 @@ namespace Assets.Scripts.UI
             if (!IsOpen || IsConfirmingExit || !CanPersist) return;
             Close();
             manager.HandleSaveLoadPicker(saving);
+        }
+
+        public void OpenView()
+        {
+            if (!IsOpen) Open();
+            if (!IsOpen || IsConfirmingExit || exitRequested) return;
+            menu.SetActive(false);
+            Reports.gameObject.SetActive(false);
+            viewMenu.SetActive(true);
+            Select(capitalButton.interactable ? capitalButton.gameObject : null);
+        }
+
+        private void NavigateToCapital()
+        {
+            if (!viewMenu.activeSelf || !manager.CanNavigateToCapital) return;
+            Close();
+            manager.GoToCapitol(Wism.Client.Core.Game.Current.GetCurrentPlayer());
+        }
+
+        private Toggle Preference(string name, string label, string id, float y, UnityEngine.Events.UnityAction<bool> change)
+        {
+            var root = Panel(menu.transform, name, new Color32(151, 151, 151, 255));
+            Place((RectTransform)root.transform, new Vector2(0, 1), new Vector2(8, -y), new Vector2(288, 44));
+            var toggle = root.AddComponent<Toggle>();
+            toggle.targetGraphic = root.GetComponent<Image>();
+            var box = Panel(root.transform, "Checkbox", Color.white);
+            Place((RectTransform)box.transform, new Vector2(0, 1), new Vector2(10, -10), new Vector2(24, 24));
+            box.GetComponent<Image>().raycastTarget = false;
+            var check = WismUiFactory.CreateText(box.transform, "Check", "X", 20, TextAnchor.MiddleCenter);
+            check.font = font;
+            check.color = Color.black;
+            Stretch(check.rectTransform);
+            toggle.graphic = check;
+            var text = WismUiFactory.CreateText(root.transform, "Label", label, 22, TextAnchor.MiddleLeft);
+            text.font = font;
+            text.color = Color.black;
+            Place(text.rectTransform, new Vector2(0, 1), new Vector2(44, 0), new Vector2(236, 44));
+            WismUiControl.Ensure(root, id, WismUiControlRole.Toggle, id, 100);
+            toggle.onValueChanged.AddListener(change);
+            return toggle;
         }
 
         private void OnDestroy()
@@ -267,7 +333,7 @@ namespace Assets.Scripts.UI
         }
 
         private static void PlaceRow(Button button, float y) =>
-            Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(8, -y), new Vector2(224, 44));
+            Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(8, -y), new Vector2(288, 44));
 
         private static void Place(RectTransform rect, Vector2 anchor, Vector2 position, Vector2 size)
         {
