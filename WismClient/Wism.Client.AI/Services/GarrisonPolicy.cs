@@ -10,7 +10,6 @@ namespace Wism.Client.AI.Services
         public static readonly GarrisonPolicy None = new GarrisonPolicy(0);
         private const int OwnedCityThreatRadius = 6;
         private const int MaximumProductionReserve = 3;
-        private const double HopelessDefenseLossProbability = 0.95;
 
         private readonly int minimumOwnedCityDefenders;
 
@@ -44,8 +43,8 @@ namespace Wism.Client.AI.Services
                 return stack;
             }
 
-            var nearbyEnemies = GetNearbyEnemies(player, origin);
-            if (nearbyEnemies.Count == 0)
+            var nearbyEnemies = CountNearbyEnemies(player, origin);
+            if (nearbyEnemies == 0)
             {
                 return stack;
             }
@@ -58,9 +57,7 @@ namespace Wism.Client.AI.Services
                 .ToList();
             var productionReserve = GetProductionReserve(city);
             var reserveTarget = System.Math.Max(this.minimumOwnedCityDefenders,
-                System.Math.Min(nearbyEnemies.Count, productionReserve));
-            reserveTarget = AdjustReserveForCombat(city, player, nearbyEnemies,
-                reserveTarget);
+                System.Math.Min(nearbyEnemies, productionReserve));
             var reserveCount = System.Math.Min(reserveTarget, reservableDefenders.Count);
             if (friendlyCityArmies.Count <= reserveCount)
             {
@@ -78,25 +75,6 @@ namespace Wism.Client.AI.Services
                 .OrderByDescending(GetMobilityPriority)
                 .ThenBy(army => army.Id)
                 .ToList();
-        }
-
-        private static int AdjustReserveForCombat(City city, Player player, List<Army> enemies, int fallbackReserve)
-        {
-            // Multiple approaching stacks may attack in sequence. Keep the existing
-            // reserve until that attrition can be evaluated rather than assume independence.
-            if (enemies.Select(army => army.Tile).Distinct().Count() != 1)
-            {
-                return fallbackReserve;
-            }
-
-            var estimator = new CombatEstimator();
-            if (player.GetCities().Count > 1 &&
-                estimator.EstimateAttack(enemies, city.Tile).WinProbability >= HopelessDefenseLossProbability)
-            {
-                return 0;
-            }
-
-            return fallbackReserve;
         }
 
         private static int GetProductionReserve(City city)
@@ -135,22 +113,21 @@ namespace Wism.Client.AI.Services
             return priority;
         }
 
-        private static List<Army> GetNearbyEnemies(Player player, Tile origin)
+        private static int CountNearbyEnemies(Player player, Tile origin)
         {
             if (!Game.IsInitialized() || player == null || origin == null)
             {
-                return new List<Army>();
+                return 0;
             }
 
             return Game.Current.Players
                 .Where(other => other != null && other != player && !other.IsDead)
                 .SelectMany(other => other.GetArmies())
-                .Where(army =>
+                .Count(army =>
                     army != null &&
                     !army.IsDead &&
                     army.Tile != null &&
-                    GetManhattanDistance(origin, army.Tile) <= OwnedCityThreatRadius)
-                .ToList();
+                    GetManhattanDistance(origin, army.Tile) <= OwnedCityThreatRadius);
         }
 
         private static int GetManhattanDistance(Tile a, Tile b)
