@@ -100,7 +100,8 @@ public sealed class EightClanEndgameTests
     private static ControllerProvider PrepareEightClanCampaign()
     {
         var settings = TestGameFactory.CreateDefaultNewGameSettings(TestUtilities.DefaultTestWorld);
-        var worldPath = Path.Combine(ModFactory.ModPath, ModFactory.WorldsPath, ModFactory.WorldPath);
+        // Other fixtures change the active world; this journey always uses Illuria.
+        var worldPath = Path.Combine(ModFactory.ModPath, ModFactory.WorldsPath, "Illuria");
         settings.World = LoadJson<WorldEntity>(Path.Combine(worldPath, "Map.json"));
         settings.World.Cities = LoadJson<CityInfo[]>(Path.Combine(worldPath, "City.json"))
             .Select(info => new CityEntity
