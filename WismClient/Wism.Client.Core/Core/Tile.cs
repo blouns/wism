@@ -50,7 +50,7 @@ namespace Wism.Client.Core
         {
             if (artifact == null)
                 throw new ArgumentNullException(nameof(artifact));
-            if (this.ContainsItem(artifact))
+            if (this.Items != null && this.Items.Any(item => ReferenceEquals(item, artifact)))
                 throw new ArgumentException("Artifact is already on this tile.", nameof(artifact));
 
             if (this.Items == null)

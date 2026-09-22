@@ -259,6 +259,20 @@ public class BetaCityAndCommandIntegrityTests
     }
 
     [Test]
+    public void AddItem_DistinctEquivalentArtifactsCanShareTile()
+    {
+        var first = Artifact.Create(ModFactory.FindArtifactInfo("Firesword"));
+        var second = Artifact.Create(ModFactory.FindArtifactInfo("Firesword"));
+        Assert.That(first, Is.EqualTo(second));
+        Assert.That(first, Is.Not.SameAs(second));
+        At(2, 2).AddItem(first);
+        At(2, 2).AddItem(second);
+        Assert.That(At(2, 2).Items, Has.Count.EqualTo(2));
+        Assert.That(first.Tile, Is.SameAs(At(2, 2)));
+        Assert.That(second.Tile, Is.SameAs(At(2, 2)));
+    }
+
+    [Test]
     public void Temple_RemoteArmyCannotReceiveBlessing()
     {
         var location = Location.Create(new LocationInfo { ShortName = "RemoteTemple", Kind = "Temple", Terrain = "Grass" });
