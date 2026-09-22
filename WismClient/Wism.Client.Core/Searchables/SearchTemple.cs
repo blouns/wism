@@ -22,7 +22,8 @@ namespace Wism.Client.Searchables
 
             foreach (var army in armies)
             {
-                if (!army.BlessedAt.Contains(location) &&
+                if (army != null && !army.IsDead && location.Tile != null && army.Tile == location.Tile &&
+                    !army.BlessedAt.Contains(location) &&
                     army.MovesRemaining > 0)
                 {
                     army.Strength += army.Strength == Army.MaxStrength ? 0 : 1;

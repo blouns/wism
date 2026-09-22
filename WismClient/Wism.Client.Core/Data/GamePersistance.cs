@@ -448,6 +448,7 @@ namespace Wism.Client.Data
                     DisplayName = armies[i].DisplayName,
                     Id = armies[i].Id,
                     IsDead = armies[i].IsDead,
+                    IsDefending = armies[i].IsDefending,
                     IsHero = armies[i] is Hero,
                     Moves = armies[i].Moves,
                     MovesRemaining = armies[i].MovesRemaining,

@@ -80,6 +80,13 @@ namespace Wism.Client.Factories
             var world = World.Current;
             world.Name = snapshot.Name;
 
+            foreach (var tile in map)
+            {
+                if (tile.Items == null) continue;
+                foreach (var item in tile.Items)
+                    world.AddLooseItem(item, tile);
+            }
+
             // Load late-bound Locations (after world creation) 
             if (snapshot.Locations != null)
             {

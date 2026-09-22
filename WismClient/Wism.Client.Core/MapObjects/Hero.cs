@@ -29,7 +29,7 @@ namespace Wism.Client.MapObjects
 
         public void Take(Artifact item)
         {
-            if (item == null)
+            if (item == null || this.Tile == null || !this.Tile.ContainsItem(item))
             {
                 return;
             }
@@ -46,13 +46,18 @@ namespace Wism.Client.MapObjects
                 return;
             }
 
-            foreach (var item in new List<Artifact>(items))
+            // Validate the whole request before transferring any item.
+            var requested = new List<Artifact>(items);
+            var seen = new HashSet<Artifact>();
+            foreach (var item in requested)
             {
-                if (!this.Tile.Items.Contains(item))
+                if (item == null || !this.Tile.Items.Contains(item) || !seen.Add(item))
                 {
                     throw new ArgumentException("Item was not found on current tile: " + item);
                 }
-
+            }
+            foreach (var item in requested)
+            {
                 this.Take(item);
             }
         }

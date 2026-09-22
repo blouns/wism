@@ -48,6 +48,11 @@ namespace Wism.Client.Core
 
         public void AddItem(Artifact artifact)
         {
+            if (artifact == null)
+                throw new ArgumentNullException(nameof(artifact));
+            if (this.Items != null && this.Items.Any(item => ReferenceEquals(item, artifact)))
+                throw new ArgumentException("Artifact is already on this tile.", nameof(artifact));
+
             if (this.Items == null)
             {
                 this.Items = new List<Artifact>();
@@ -59,13 +64,11 @@ namespace Wism.Client.Core
 
         public void RemoveItem(Artifact artifact)
         {
-            if (this.Items == null)
-            {
-                this.Items = new List<Artifact>();
-            }
-
-            this.Items.Remove(artifact);
-            artifact.Tile = null;
+            var index = this.Items?.IndexOf(artifact) ?? -1;
+            if (index < 0) return;
+            var removed = this.Items[index];
+            this.Items.RemoveAt(index);
+            if (removed != null && removed.Tile == this) removed.Tile = null;
         }
 
         public bool ContainsItem(Artifact item)
@@ -256,15 +259,15 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot remove armies from a tile with no armies.");
             }
 
-            foreach (var army in armiesToRemove)
+            var requested = new List<Army>(armiesToRemove);
+            foreach (var army in requested)
             {
                 if (!this.Armies.Contains(army))
                 {
                     throw new InvalidOperationException("Cannot remove army from tile as it does not exist.");
                 }
-
-                this.Armies.Remove(army);
             }
+            foreach (var army in requested) this.Armies.Remove(army);
         }
 
         /// <summary>
@@ -283,15 +286,15 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot remove visiting armies from a tile with no armies.");
             }
 
-            foreach (var army in armiesToRemove)
+            var requested = new List<Army>(armiesToRemove);
+            foreach (var army in requested)
             {
                 if (!this.VisitingArmies.Contains(army))
                 {
                     throw new InvalidOperationException("Cannot remove visiting army from tile as it does not exist.");
                 }
-
-                this.VisitingArmies.Remove(army);
             }
+            foreach (var army in requested) this.VisitingArmies.Remove(army);
         }
 
         /// <summary>

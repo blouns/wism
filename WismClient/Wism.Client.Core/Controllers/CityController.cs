@@ -43,6 +43,9 @@ namespace Wism.Client.Controllers
             var state = ActionState.Failed;
             var success = true;
 
+            if (productionToRenew.Exists(army => army == null || army.ProductionCity?.Player != player))
+                return ActionState.Failed;
+
             foreach (var armyToRenew in productionToRenew)
             {
                 if (armyToRenew.DestinationCity != null)

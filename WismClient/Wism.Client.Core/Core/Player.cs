@@ -16,7 +16,7 @@ namespace Wism.Client.Core
 
         private readonly List<ArmyInTraining> armiesDelivered = new List<ArmyInTraining>();
         private readonly List<ArmyInTraining> armiesProduced = new List<ArmyInTraining>();
-        private readonly IDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
+        private readonly DefaultDeploymentStrategy deploymentStrategy = new DefaultDeploymentStrategy();
 
         private readonly List<Army> myArmies = new List<Army>();
         private readonly List<City> myCities = new List<City>();
@@ -125,6 +125,9 @@ namespace Wism.Client.Core
         {
             hero = null;
 
+            if (price < 0 || tile == null)
+                return false;
+
             if (this.myHeros.Count >= Hero.MaxHeros)
             {
                 return false;
@@ -135,11 +138,11 @@ namespace Wism.Client.Core
                 return false;
             }
 
-            // Pay the hero and reset the price
-            this.Gold -= price;
+            if (!this.deploymentStrategy.TryFindNextOpenTile(this, ArmyInfo.GetHeroInfo(), tile, out var openTile))
+                return false;
 
-            // Get him a uniform!
-            hero = (Hero)this.ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
+            hero = (Hero)this.ConscriptArmy(ArmyInfo.GetHeroInfo(), openTile);
+            this.Gold -= price;
             hero.DisplayName = displayName;
 
             this.myHeros.Add(hero);
@@ -156,6 +159,9 @@ namespace Wism.Client.Core
         /// <returns>New hero deployed to tile</returns>
         public Hero HireHero(Tile tile, int price = 0)
         {
+            if (price < 0)
+                throw new ArgumentOutOfRangeException(nameof(price));
+
             if (this.myHeros.Count >= Hero.MaxHeros)
             {
                 throw new InvalidOperationException("Reached max hero limit.");
@@ -166,11 +172,10 @@ namespace Wism.Client.Core
                 throw new InvalidOperationException("Cannot afford a new hero!");
             }
 
-            // Pay the hero and reset the price
+            // Resolve deployment before allocating an army identity or charging gold.
+            var openTile = this.deploymentStrategy.FindNextOpenTile(this, ArmyInfo.GetHeroInfo(), tile);
+            var hero = (Hero)this.ConscriptArmy(ArmyInfo.GetHeroInfo(), openTile);
             this.Gold -= price;
-
-            // Get him a uniform!
-            var hero = (Hero)this.ConscriptArmy(ArmyInfo.GetHeroInfo(), tile);
 
             // Get a random name
             hero.DisplayName = this.RecruitHeroStrategy.GetHeroName();
@@ -323,7 +328,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(productionCity));
             }
 
-            return productionCity.ProduceArmy(armyInfo, destinationCity);
+            return productionCity.Player == this && productionCity.ProduceArmy(armyInfo, destinationCity);
         }
 
         /// <summary>
@@ -439,7 +444,7 @@ namespace Wism.Client.Core
                 }
 
                 army.Reset();
-                army.MovesRemaining = army.Info.Moves;
+                army.MovesRemaining = army.Moves;
             }
         }
 
@@ -535,15 +540,18 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(tile));
             }
 
-            // Are we claiming from another clan?
-            if (city.Clan != null &&
-                city.Clan.ShortName != GetNeutralPlayer().Clan.ShortName)
-            {
-                this.PillageGoldFromClan(city.Clan);
-                city.Clan.Player.RemoveCity(city);
-            }
+            if (city.Player == this && this.myCities.Contains(city))
+                return;
 
+            var previousClan = city.Clan;
+            // Validate the claim before transferring treasury or removing the old owner's city.
             city.Claim(this, tile);
+            if (previousClan != null && previousClan != this.Clan &&
+                previousClan.ShortName != GetNeutralPlayer().Clan.ShortName)
+            {
+                this.PillageGoldFromClan(previousClan);
+                previousClan.Player.RemoveCity(city);
+            }
 
             // Add city to Player for tracking
             this.myCities.Add(city);
@@ -607,11 +615,7 @@ namespace Wism.Client.Core
             city.Raze();
 
             // Remove city from Player tracking
-            this.myCities.Remove(city);
-            if (this.Capitol == city)
-            {
-                this.Capitol = null;
-            }
+            this.RemoveCity(city);
         }
 
         public override bool Equals(object obj)
