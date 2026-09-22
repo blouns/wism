@@ -198,6 +198,8 @@ namespace Wism.Client.AI.Framework
 
         private void Measure(string name, Action action, string secondaryName = null)
         {
+            using (Wism.Client.Diagnostics.PerformanceProbe.Measure(secondaryName ?? name))
+            {
             if (this.timingSink == null)
             {
                 action();
@@ -217,6 +219,7 @@ namespace Wism.Client.AI.Framework
                 {
                     this.timingSink(secondaryName, stopwatch.Elapsed);
                 }
+            }
             }
         }
 

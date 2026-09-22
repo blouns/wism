@@ -307,6 +307,34 @@ public class PersistanceTests
         }
     }
 
+    [TestCase(false)]
+    [TestCase(true)]
+    public void Load_BlessingsReferenceRestoredWorldAndCanBeSavedAgain(bool replaceWorld)
+    {
+        var temple = MapBuilder.FindLocation("TempleCat");
+        World.Current.AddLocation(temple, World.Current.Map[2, 3]);
+        var player = Game.Current.Players[0];
+        player.ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), World.Current.Map[2, 2]);
+        var army = player.GetArmies()[0];
+        army.BlessedAt.Add(temple);
+        int strength = army.Strength;
+        var snapshot = Game.Current.Snapshot();
+        if (replaceWorld) Game.CreateDefaultGame(TestUtilities.DefaultTestWorld);
+
+        GameFactory.Load(snapshot);
+
+        var loaded = Game.Current.Players[0].GetArmies()[0];
+        var loadedTemple = World.Current.GetLocations().Find(l => l.ShortName == temple.ShortName);
+        Assert.That(loaded.BlessedAt, Has.Count.EqualTo(1));
+        Assert.That(loaded.BlessedAt[0], Is.SameAs(loadedTemple));
+        Assert.That(loaded.BlessedAt[0], Is.Not.SameAs(temple));
+        Assert.That(loaded.Strength, Is.EqualTo(strength));
+        var resaved = Game.Current.Snapshot();
+        Assert.That(resaved.Players[0].Armies[0].BlessedAtShortNames, Is.EqualTo(new[] { temple.ShortName }));
+        GameFactory.Load(resaved);
+        Assert.DoesNotThrow(() => Game.Current.Snapshot());
+    }
+
     [Test]
     public void DeterministicRandom_MatchesSeededSystemRandomSequence()
     {

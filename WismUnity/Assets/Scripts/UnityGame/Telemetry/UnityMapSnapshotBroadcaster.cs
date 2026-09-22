@@ -1,3 +1,4 @@
+using System;
 using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.Api.Telemetry;
 using Wism.Client.Core.Telemetry;
@@ -8,11 +9,14 @@ namespace Assets.Scripts.Telemetry
     {
         private readonly MapSnapshotBuilder builder;
         private readonly MapSnapshotEmitter emitter;
+        private readonly Func<bool> includeInfluence;
 
-        public UnityMapSnapshotBroadcaster(MapSnapshotBuilder builder, MapSnapshotEmitter emitter)
+        public UnityMapSnapshotBroadcaster(MapSnapshotBuilder builder, MapSnapshotEmitter emitter,
+            Func<bool> includeInfluence = null)
         {
             this.builder = builder;
             this.emitter = emitter;
+            this.includeInfluence = includeInfluence;
         }
 
         public void TryEmitSnapshot()
@@ -23,7 +27,9 @@ namespace Assets.Scripts.Telemetry
 
                 // Attach the current player's spatial influence field for the overlay.
                 // Observation-only: a fresh deterministic flood, no effect on AI decisions.
-                snapshot.Influence = InfluenceFieldExporter.BuildForCurrentPlayer();
+                // Retain the basic map for late joiners without flooding an unseen overlay.
+                if (includeInfluence == null || includeInfluence())
+                    snapshot.Influence = InfluenceFieldExporter.BuildForCurrentPlayer();
 
                 emitter.Publish(snapshot);
             }

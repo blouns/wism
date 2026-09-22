@@ -16,6 +16,7 @@
         "nunit.framework.dll",
         "Newtonsoft.Json.dll",
         "Wism.Client.Api.dll",
+        "Wism.Companion.Shared.dll",
         "Wism.Client.Core.dll"
     ],
     "autoReferenced": false,
