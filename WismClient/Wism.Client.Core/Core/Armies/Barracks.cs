@@ -128,7 +128,8 @@ namespace Wism.Client.Core
                 TurnsToDeliver = DefaultTurnsToDeliver,
                 Upkeep = pi.Upkeep,
                 Moves = pi.Moves,
-                Strength = pi.Strength
+                Strength = pi.Strength,
+                DisplayName = this.GetArmyDisplayName(armyInfo)
             };
 
 
@@ -158,6 +159,10 @@ namespace Wism.Client.Core
 
         public bool CanStartProduction(ArmyInfo armyInfo, City destinationCity = null)
         {
+            var production = armyInfo == null ? null : this.FindProductionInfo(armyInfo);
+            if (production == null || production.TurnsToProduce <= 0 || production.Upkeep < 0)
+                return false;
+
             return this.CanRouteProductionTo(armyInfo, destinationCity) && this.CanProduce(armyInfo) &&
                 this.PlayerHasSufficientGold(armyInfo) && this.CanDeployProducedArmy(armyInfo, destinationCity);
         }
@@ -176,11 +181,16 @@ namespace Wism.Client.Core
             }
 
             // Train the army!
-            this.ArmyInTraining.TurnsToProduce--;
+            if (this.ArmyInTraining.TurnsToProduce > 0)
+                this.ArmyInTraining.TurnsToProduce--;
 
             // Is production complete?
-            if (this.ArmyInTraining.TurnsToProduce == 0)
+            if (this.ArmyInTraining.TurnsToProduce <= 0)
             {
+                if (this.ArmyInTraining.DestinationCity == null &&
+                    !this.CanDeployProducedArmy(this.ArmyInTraining.ArmyInfo, null))
+                    return false;
+
                 armyProduced = this.ArmyInTraining;
 
                 // Do we need to deliver this to another city?
@@ -224,7 +234,8 @@ namespace Wism.Client.Core
             // Select the next open tile if army cannot be placed here (full, navy)
             targetTile = this.deploymentStrategy.FindNextOpenTile(this.Player, army.ArmyInfo, targetTile);
 
-            army.DisplayName = this.GetArmyDisplayName(army.ArmyInfo);
+            if (string.IsNullOrEmpty(army.DisplayName))
+                army.DisplayName = this.GetArmyDisplayName(army.ArmyInfo);
 
             this.Player.ConscriptArmy(army, targetTile);
         }
@@ -241,7 +252,7 @@ namespace Wism.Client.Core
             string suffix;
 
             // Add the "st/nd/rd/th" to the number for style
-            switch (numberCreated % 10)
+            switch (numberCreated % 100 >= 11 && numberCreated % 100 <= 13 ? 0 : numberCreated % 10)
             {
                 case 1:
                     suffix = "st";
@@ -345,6 +356,9 @@ namespace Wism.Client.Core
 
         internal void CancelDelivery(City city)
         {
+            if (this.ArmyInTraining?.DestinationCity == city)
+                this.ArmyInTraining.DestinationCity = null;
+
             if (this.HasDeliveries() &&
                 this.ArmiesToDeliver.Any(a => a.DestinationCity == city))
             {

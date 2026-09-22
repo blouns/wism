@@ -38,7 +38,7 @@ namespace Wism.Client.Searchables
                     !this.DefeatedMonster())
                 {
                     // Hero was slain!
-                    hero.Player.KillArmy(hero);
+                    hero.Kill();
                     return false;
                 }
 
@@ -60,7 +60,7 @@ namespace Wism.Client.Searchables
         /// <returns>True if monster is defeated; otherwise False</returns>
         private bool DefeatedMonster()
         {
-            return Game.Current.Random.Next(0, 10) / 10 < OddsToDefeatMonster;
+            return Game.Current.Random.Next(0, 10) / 10f < OddsToDefeatMonster;
         }
     }
 }

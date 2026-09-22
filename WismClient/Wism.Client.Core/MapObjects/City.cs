@@ -283,15 +283,15 @@ namespace Wism.Client.MapObjects
 
         public override bool Equals(object obj)
         {
-            var other = (City)obj;
-            return
+            var other = obj as City;
+            return other != null &&
                 this.ShortName == other.ShortName &&
                 this.Tile == other.Tile;
         }
 
         public override int GetHashCode()
         {
-            return $"{this.ShortName}{this.Tile}".GetHashCode();
+            return this.ShortName.GetHashCode();
         }
     }
 }

@@ -328,7 +328,7 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(productionCity));
             }
 
-            return productionCity.ProduceArmy(armyInfo, destinationCity);
+            return productionCity.Player == this && productionCity.ProduceArmy(armyInfo, destinationCity);
         }
 
         /// <summary>
@@ -540,15 +540,18 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(tile));
             }
 
-            // Are we claiming from another clan?
-            if (city.Clan != null &&
-                city.Clan.ShortName != GetNeutralPlayer().Clan.ShortName)
-            {
-                this.PillageGoldFromClan(city.Clan);
-                city.Clan.Player.RemoveCity(city);
-            }
+            if (city.Player == this && this.myCities.Contains(city))
+                return;
 
+            var previousClan = city.Clan;
+            // Validate the claim before transferring treasury or removing the old owner's city.
             city.Claim(this, tile);
+            if (previousClan != null && previousClan != this.Clan &&
+                previousClan.ShortName != GetNeutralPlayer().Clan.ShortName)
+            {
+                this.PillageGoldFromClan(previousClan);
+                previousClan.Player.RemoveCity(city);
+            }
 
             // Add city to Player for tracking
             this.myCities.Add(city);
@@ -612,11 +615,7 @@ namespace Wism.Client.Core
             city.Raze();
 
             // Remove city from Player tracking
-            this.myCities.Remove(city);
-            if (this.Capitol == city)
-            {
-                this.Capitol = null;
-            }
+            this.RemoveCity(city);
         }
 
         public override bool Equals(object obj)

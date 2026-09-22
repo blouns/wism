@@ -310,11 +310,17 @@ namespace Wism.Client.Core
             }
 
             Current.DeselectArmies();
-            var tileWithArmies = this.nextArmyQueue[0];
-            this.nextArmyQueue.RemoveAt(0);
-            this.SelectArmies(tileWithArmies.Armies);
-
-            return true;
+            while (this.nextArmyQueue.Count > 0)
+            {
+                var tileWithArmies = this.nextArmyQueue[0];
+                this.nextArmyQueue.RemoveAt(0);
+                var eligible = tileWithArmies.GetAllArmies().Where(army =>
+                    army.Player == this.GetCurrentPlayer() && !army.IsDefending && army.MovesRemaining > 0).ToList();
+                if (eligible.Count == 0) continue;
+                this.SelectArmies(eligible);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
