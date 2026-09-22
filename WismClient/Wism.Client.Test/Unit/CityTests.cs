@@ -1,5 +1,11 @@
 ﻿using System;
 using NUnit.Framework;
+using System.Collections.Generic;
+using System.Linq;
+using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Cities;
+using Wism.Client.Controllers;
+using Wism.Client.Test.Common;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
@@ -204,6 +210,65 @@ public class CityTests
             Assert.That(result, Is.True);
             Assert.That(city.Barracks.ProducingArmy(), Is.True);
             Assert.That(city.Barracks.ArmyInTraining.ArmyInfo.ShortName, Is.EqualTo("Navy"));
+        });
+    }
+
+    [Test]
+    public void HumanNavy_ProduceBoardSailAndLandThroughCommands()
+    {
+        var controllers = TestUtilities.CreateControllerProvider();
+        var player = Game.Current.GetCurrentPlayer();
+        player.IsHuman = true;
+        var city = CreateNavyCity("JourneyPort", "Journey Port");
+        World.Current.AddCity(city, World.Current.Map[1, 2]);
+        player.ClaimCity(city);
+        var dock = World.Current.Map[3, 2];
+        var sea = World.Current.Map[4, 2];
+        var shore = World.Current.Map[5, 2];
+        dock.Terrain = MapBuilder.TerrainKinds["Water"];
+        sea.Terrain = MapBuilder.TerrainKinds["Water"];
+        shore.Terrain = MapBuilder.TerrainKinds["Grass"];
+        var navyInfo = ModFactory.FindArmyInfo("Navy");
+        var gold = player.Gold;
+        Assert.That(new StartProductionCommand(controllers.CityController, city, navyInfo).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(player.Gold, Is.LessThan(gold));
+        Assert.That(city.Barracks.Produce(out _), Is.True);
+        var navy = player.GetArmies().Single();
+        Assert.That(navy.Info.ShortName, Is.EqualTo("Navy"));
+        Assert.That(navy.Tile, Is.SameAs(dock));
+        Assert.That(Barracks.CanVectorArmy(navyInfo), Is.False);
+
+        var passenger = player.ConscriptArmy(ModFactory.FindArmyInfo("HeavyInfantry"), World.Current.Map[2, 2]);
+        var passengers = new List<Army> { passenger };
+        Assert.That(new SelectArmyCommand(controllers.ArmyController, passengers).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(TestUtilities.ExecuteCommandUntilDone(controllers.CommandController,
+            new MoveOnceCommand(controllers.ArmyController, passengers, dock.X, dock.Y)), Is.EqualTo(ActionState.Succeeded));
+        Game.Current.DeselectArmies();
+        Assert.That(dock.GetAllArmies(), Is.EquivalentTo(new[] { navy, passenger }));
+
+        var fleet = new List<Army> { navy, passenger };
+        var navyMoves = navy.MovesRemaining;
+        var passengerMoves = passenger.MovesRemaining;
+        Assert.That(new SelectArmyCommand(controllers.ArmyController, fleet).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(TestUtilities.ExecuteCommandUntilDone(controllers.CommandController,
+            new MoveOnceCommand(controllers.ArmyController, fleet, sea.X, sea.Y)), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(navy.MovesRemaining, Is.EqualTo(navyMoves - navy.GetEffectiveMovementCost(sea)));
+        Assert.That(passenger.MovesRemaining, Is.EqualTo(passengerMoves - passenger.GetEffectiveMovementCost(sea)));
+        Assert.That(passenger.Tile, Is.SameAs(sea));
+        var passengerMovesBeforeLanding = passenger.MovesRemaining;
+        Game.Current.DeselectArmies();
+
+        Assert.That(new SelectArmyCommand(controllers.ArmyController, passengers).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(TestUtilities.ExecuteCommandUntilDone(controllers.CommandController,
+            new MoveOnceCommand(controllers.ArmyController, passengers, shore.X, shore.Y)), Is.EqualTo(ActionState.Succeeded));
+        Game.Current.DeselectArmies();
+        Assert.Multiple(() =>
+        {
+            Assert.That(passenger.Tile, Is.SameAs(shore));
+            Assert.That(navy.Tile, Is.SameAs(sea));
+            Assert.That(passenger.MovesRemaining, Is.EqualTo(passengerMovesBeforeLanding - passenger.GetEffectiveMovementCost(shore)));
+            Assert.That(sea.GetAllArmies(), Is.EquivalentTo(new[] { navy }));
+            Assert.That(shore.GetAllArmies(), Is.EquivalentTo(passengers));
         });
     }
 

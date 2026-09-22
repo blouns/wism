@@ -400,6 +400,79 @@ public sealed partial class ArmyUiInputTests
         picker.OnExitClick();
     }
 
+    [UnityTest]
+    public IEnumerator HumanNavy_ProductionControlsAndTransportCommands()
+    {
+        var player = Game.Current.GetCurrentPlayer();
+        var city = CreateUiRoutingCity("JourneyPort", "Navy");
+        var map = World.Current.Map;
+        var dock = map[city.X + 2, city.Y];
+        var sea = map[city.X + 3, city.Y];
+        var shore = map[city.X + 4, city.Y];
+        // Make this fixture's dock the only legal adjacent water spawn.
+        foreach (var adjacent in map.Cast<Tile>().Where(tile => city.GetTiles().Any(tile.IsNeighbor)))
+            if (adjacent.Terrain.ShortName == "Water")
+                adjacent.Terrain = Wism.Client.Modules.MapBuilder.TerrainKinds["Grass"];
+        foreach (var tile in new[] { dock, sea, shore })
+        {
+            Assert.That(tile.HasCity() || tile.HasArmies(), Is.False, "Transport fixture needs empty tiles.");
+            tile.Terrain = Wism.Client.Modules.MapBuilder.TerrainKinds[tile == shore ? "Grass" : "Water"];
+        }
+        typeof(UnityManager).GetMethod("ShowProductionPanel", System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.NonPublic).Invoke(unity, new object[] { city });
+        var picker = GameObject.FindGameObjectWithTag("CityProductionPanel").GetComponent<CityProduction>();
+        ClickProductionButton(picker, "ArmyButton1");
+        Assert.That(picker.GetComponentsInChildren<Button>().Single(button => button.name == "LocButton").interactable, Is.False);
+        ClickProductionButton(picker, "ProdButton");
+        yield return WaitFor(() => city.Barracks.ProducingArmy());
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.Game));
+        Assert.That(city.Barracks.Produce(out _), Is.True);
+        var navy = player.GetArmies().Single(army => army.ShortName == "Navy");
+        Assert.That(navy.Tile, Is.SameAs(dock));
+        var passenger = player.ConscriptArmy(Wism.Client.Modules.ModFactory.FindArmyInfo("HeavyInfantry"), map[city.X + 1, city.Y]);
+        var passengers = new System.Collections.Generic.List<Wism.Client.MapObjects.Army> { passenger };
+
+        manager.SelectArmies(passengers);
+        yield return WaitFor(() => Game.Current.GetSelectedArmies()?.Contains(passenger) == true);
+        manager.MoveSelectedArmies(dock.X, dock.Y);
+        yield return WaitFor(() => passenger.Tile == dock && Game.Current.GameState == GameState.SelectedArmy);
+        manager.DeselectArmies();
+        yield return WaitFor(() => !Game.Current.ArmiesSelected());
+        manager.SelectArmies(new System.Collections.Generic.List<Wism.Client.MapObjects.Army> { navy, passenger });
+        yield return WaitFor(() => Game.Current.GetSelectedArmies()?.Count == 2);
+        manager.MoveSelectedArmies(sea.X, sea.Y);
+        yield return WaitFor(() => navy.Tile == sea && passenger.Tile == sea && Game.Current.GameState == GameState.SelectedArmy);
+        manager.DeselectArmies();
+        yield return WaitFor(() => !Game.Current.ArmiesSelected());
+        manager.SelectArmies(passengers);
+        yield return WaitFor(() => Game.Current.GetSelectedArmies()?.Count == 1);
+        manager.MoveSelectedArmies(shore.X, shore.Y);
+        yield return WaitFor(() => passenger.Tile == shore && Game.Current.GameState == GameState.SelectedArmy);
+        Assert.That(navy.Tile, Is.SameAs(sea));
+        Assert.That(shore.GetAllArmies(), Is.EquivalentTo(passengers));
+    }
+
+    [UnityTest]
+    public IEnumerator CaptureCity_ExactMovementExecutesInUnityRuntime()
+    {
+        var player = Game.Current.GetCurrentPlayer();
+        var enemyCity = Game.Current.Players.First(other => other != player).Capitol;
+        var origin = World.Current.Map[enemyCity.X - 1, enemyCity.Y];
+        Assert.That(origin.HasArmies(), Is.False);
+        var army = player.ConscriptArmy(Wism.Client.Modules.ModFactory.FindArmyInfo("LightInfantry"), origin);
+        var armies = new System.Collections.Generic.List<Wism.Client.MapObjects.Army> { army };
+        army.MovesRemaining = enemyCity.GetTiles().Where(origin.IsNeighbor).Min(tile => tile.Terrain.MovementCost);
+        manager.SelectArmies(armies);
+        yield return WaitFor(() => Game.Current.GetSelectedArmies()?.Contains(army) == true);
+        var command = new Wism.Client.Commands.Cities.CaptureCityCommand(manager.ControllerProvider.CityController, player, armies, enemyCity);
+        manager.ControllerProvider.CommandController.AddCommand(command);
+        yield return WaitFor(() => command.Result == Wism.Client.Controllers.ActionState.Succeeded || command.Result == Wism.Client.Controllers.ActionState.Failed);
+        Assert.That(command.Result, Is.EqualTo(Wism.Client.Controllers.ActionState.Succeeded));
+        Assert.That(enemyCity.Clan, Is.SameAs(player.Clan));
+        Assert.That(army.Tile.City, Is.SameAs(enemyCity));
+        Assert.That(army.MovesRemaining, Is.Zero);
+    }
+
     private static Wism.Client.MapObjects.City CreateUiRoutingCity(string name, string army)
     {
         var map = World.Current.Map;
