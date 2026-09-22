@@ -9,6 +9,8 @@ namespace Wism.Client.AI.Services
     {
         public static readonly GarrisonPolicy None = new GarrisonPolicy(0);
         private const int OwnedCityThreatRadius = 6;
+        private const int MaximumProductionReserve = 3;
+        private const double HopelessDefenseLossProbability = 0.95;
 
         private readonly int minimumOwnedCityDefenders;
 
@@ -42,7 +44,8 @@ namespace Wism.Client.AI.Services
                 return stack;
             }
 
-            if (!IsOwnedCityThreatened(player, origin))
+            var nearbyEnemies = GetNearbyEnemies(player, origin);
+            if (nearbyEnemies.Count == 0)
             {
                 return stack;
             }
@@ -53,23 +56,67 @@ namespace Wism.Client.AI.Services
             var reservableDefenders = friendlyCityArmies
                 .Where(army => !(army is Hero))
                 .ToList();
-            var reserveCount = System.Math.Min(this.minimumOwnedCityDefenders, reservableDefenders.Count);
+            var productionReserve = GetProductionReserve(city);
+            var reserveTarget = System.Math.Max(this.minimumOwnedCityDefenders,
+                System.Math.Min(nearbyEnemies.Count, productionReserve));
+            reserveTarget = AdjustReserveForCombat(city, player, nearbyEnemies,
+                reserveTarget);
+            var reserveCount = System.Math.Min(reserveTarget, reservableDefenders.Count);
             if (friendlyCityArmies.Count <= reserveCount)
             {
                 return new List<Army>();
             }
 
-            var mobileCount = friendlyCityArmies.Count - reserveCount;
-            if (mobileCount >= stack.Count)
-            {
-                return stack;
-            }
-
+            // Reserve specific armies across the whole city. A count alone can
+            // release a reserved soldier when modules ask about a smaller stack.
+            var reserved = new HashSet<Army>(reservableDefenders
+                .OrderBy(GetMobilityPriority)
+                .ThenByDescending(army => army.Id)
+                .Take(reserveCount));
             return stack
+                .Where(army => !reserved.Contains(army))
                 .OrderByDescending(GetMobilityPriority)
                 .ThenBy(army => army.Id)
-                .Take(mobileCount)
                 .ToList();
+        }
+
+        private static int AdjustReserveForCombat(City city, Player player, List<Army> enemies, int fallbackReserve)
+        {
+            // Multiple approaching stacks may attack in sequence. Keep the existing
+            // reserve until that attrition can be evaluated rather than assume independence.
+            if (enemies.Select(army => army.Tile).Distinct().Count() != 1)
+            {
+                return fallbackReserve;
+            }
+
+            var estimator = new CombatEstimator();
+            if (player.GetCities().Count > 1 &&
+                estimator.EstimateAttack(enemies, city.Tile).WinProbability >= HopelessDefenseLossProbability)
+            {
+                return 0;
+            }
+
+            return fallbackReserve;
+        }
+
+        private static int GetProductionReserve(City city)
+        {
+            // Production throughput matters more than fortification. Mobility is
+            // a bounded modifier so fast units do not consume the whole field army.
+            var production = city.Barracks?.GetProductionKinds();
+            if (production == null || production.Count == 0)
+            {
+                return 1;
+            }
+
+            var throughput = production
+                .Where(slot => slot != null && slot.TurnsToProduce > 0 && slot.Strength > 0)
+                .Select(slot => (slot.Strength / (double)slot.TurnsToProduce) *
+                    System.Math.Max(0.5, System.Math.Min(1.5, slot.Moves / 10.0)))
+                .DefaultIfEmpty(0.0)
+                .Max();
+            return (int)System.Math.Max(1, System.Math.Min(MaximumProductionReserve,
+                System.Math.Ceiling(throughput)));
         }
 
         private static int GetMobilityPriority(Army army)
@@ -88,21 +135,22 @@ namespace Wism.Client.AI.Services
             return priority;
         }
 
-        private static bool IsOwnedCityThreatened(Player player, Tile origin)
+        private static List<Army> GetNearbyEnemies(Player player, Tile origin)
         {
             if (!Game.IsInitialized() || player == null || origin == null)
             {
-                return false;
+                return new List<Army>();
             }
 
             return Game.Current.Players
                 .Where(other => other != null && other != player && !other.IsDead)
                 .SelectMany(other => other.GetArmies())
-                .Any(army =>
+                .Where(army =>
                     army != null &&
                     !army.IsDead &&
                     army.Tile != null &&
-                    GetManhattanDistance(origin, army.Tile) <= OwnedCityThreatRadius);
+                    GetManhattanDistance(origin, army.Tile) <= OwnedCityThreatRadius)
+                .ToList();
         }
 
         private static int GetManhattanDistance(Tile a, Tile b)
