@@ -348,6 +348,11 @@ namespace Wism.Client.Core
                 this.GameState != GameState.SelectedArmy)
                 return;
 
+            if (armies.Count == 0 || armies.Any(a => a == null || a.IsDead || a.Tile == null) ||
+                armies.Distinct().Count() != armies.Count ||
+                armies.Any(a => a.Tile != armies[0].Tile || !a.Tile.GetAllArmies().Contains(a)))
+                throw new ArgumentException("Selection must contain distinct living armies on one tile.", nameof(armies));
+
             var player = this.GetCurrentPlayer();
             if (!armies.TrueForAll(a => a.Player.Clan == player.Clan))
                 throw new InvalidOperationException("Only current player's armies can be selected.");

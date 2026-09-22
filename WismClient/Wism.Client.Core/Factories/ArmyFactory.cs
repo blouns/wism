@@ -56,6 +56,9 @@ namespace Wism.Client.Factories
             army.IsDead = armyEntity.IsDead;
             army.DisplayName = armyEntity.DisplayName;
             army.MovesRemaining = armyEntity.MovesRemaining;
+            army.Moves = armyEntity.Moves;
+            army.Upkeep = armyEntity.Upkeep;
+            army.IsDefending = armyEntity.IsDefending;
             army.Strength = armyEntity.Strength;
             if (armyEntity.BlessedAtShortNames != null)
             {

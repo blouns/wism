@@ -25,6 +25,8 @@ namespace Wism.Client.Data.Entities
 
         [DataMember] public bool IsDead { get; set; }
 
+        [DataMember(EmitDefaultValue = false)] public bool IsDefending { get; set; }
+
         [DataMember] public int Moves { get; internal set; }
 
         [DataMember] public string[] BlessedAtShortNames { get; set; }
