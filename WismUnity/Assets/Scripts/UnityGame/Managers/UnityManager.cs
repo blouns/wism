@@ -220,7 +220,8 @@ namespace Assets.Scripts.Managers
             //    return;
             //}
 
-            this.adaptaProvider = WarlordsClassicAiFactory.CreateCommandProvider(this.provider, this.logger);
+            this.adaptaProvider = WarlordsClassicAiFactory.CreateCommandProvider(this.provider, this.logger,
+                timingSink: PlaytestPerformance.Instance == null ? null : PlaytestPerformance.Instance.Timing);
             this.DebugManager.LogInformation($"ADAPTA AI initialized.");
         }
 
@@ -237,7 +238,8 @@ namespace Assets.Scripts.Managers
                 this.GameManager.LoggerFactory,
                 telemetryContext,
                 this.socketTelemetryPublisher);
-            this.snapshotBroadcaster = new UnityMapSnapshotBroadcaster(builder, emitter);
+            this.snapshotBroadcaster = new UnityMapSnapshotBroadcaster(builder, emitter,
+                () => this.socketTelemetryPublisher.NeedsInfluenceSnapshot);
         }
 
         private void OnDestroy()
@@ -572,8 +574,18 @@ namespace Assets.Scripts.Managers
                         return;
                     }
 
+                    var diagnostics = PlaytestPerformance.Instance;
+                    diagnostics?.BeginDecision(this);
                     var start = System.Diagnostics.Stopwatch.StartNew();
-                    this.adaptaProvider.GenerateCommands();
+                    try
+                    {
+                        if (diagnostics == null) this.adaptaProvider.GenerateCommands();
+                        else diagnostics.Measure("ai-decision", this.adaptaProvider.GenerateCommands);
+                    }
+                    finally
+                    {
+                        diagnostics?.EndDecision(this.adaptaProvider.GetBufferedCommands());
+                    }
                     start.Stop();
 
                     if (start.Elapsed.TotalMilliseconds >= SlowAiGenerationWarningMs)
@@ -682,7 +694,8 @@ namespace Assets.Scripts.Managers
 
         internal void Draw()
         {
-            DrawSelectedArmiesBox();            
+            if (PlaytestPerformance.Instance == null) DrawSelectedArmiesBox();
+            else PlaytestPerformance.Instance.Measure("ui-draw", DrawSelectedArmiesBox);
         }
 
         /// <summary>
@@ -703,6 +716,7 @@ namespace Assets.Scripts.Managers
             var command = this.provider.CommandController.GetCommand(nextCommand);
             if (!command.CanExecuteInCurrentState)
             {
+                PlaytestPerformance.Instance?.CommandResult(command, ActionState.Failed, 0, true);
                 // Do not invoke a processor: it can have side effects before Execute.
                 this.LastCommandId = command.Id;
                 return;
@@ -715,10 +729,12 @@ namespace Assets.Scripts.Managers
             {
                 if (processor.CanExecute(command))
                 {
-                    var startTime = DateTime.Now;
-                    result = processor.Execute(command);
-                    var stopTime = DateTime.Now;
-                    this.logger.LogInformation("Command duration: " + (stopTime - startTime).TotalMilliseconds + "ms");
+                    var commandTimer = System.Diagnostics.Stopwatch.StartNew();
+                    if (PlaytestPerformance.Instance == null) result = processor.Execute(command);
+                    else PlaytestPerformance.Instance.Measure(command.GetType().Name, () => result = processor.Execute(command));
+                    commandTimer.Stop();
+                    PlaytestPerformance.Instance?.CommandResult(command, result, commandTimer.Elapsed.TotalMilliseconds);
+                    this.logger.LogInformation("Command duration: " + commandTimer.Elapsed.TotalMilliseconds + "ms");
 
                     // Emit snapshot if the command is a game state change
                     EmitSnapshot();
@@ -792,7 +808,8 @@ namespace Assets.Scripts.Managers
         {
             if (Time.time >= nextSnapshotTime)
             {
-                snapshotBroadcaster.TryEmitSnapshot();
+                if (PlaytestPerformance.Instance == null) snapshotBroadcaster.TryEmitSnapshot();
+                else PlaytestPerformance.Instance.Measure("map-snapshot", () => snapshotBroadcaster.TryEmitSnapshot());
                 nextSnapshotTime = Time.time + snapshotInterval;
             }
         }

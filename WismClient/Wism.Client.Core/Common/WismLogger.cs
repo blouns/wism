@@ -19,8 +19,11 @@ namespace Wism.Client.Common
 
         public void LogInformation(string message)
         {
+            using (Wism.Client.Diagnostics.PerformanceProbe.Measure("logging"))
+            {
             Log.WriteLine(Log.TraceLevel.Information, message);
             Console.WriteLine($"[{Log.TraceLevel.Information}] {message}");
+            }
         }
     }
 }

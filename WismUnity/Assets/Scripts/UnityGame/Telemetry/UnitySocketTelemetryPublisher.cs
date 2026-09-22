@@ -46,6 +46,18 @@ namespace Assets.Scripts.Telemetry
         private bool hasPublished;
         private string latestFrame;
 
+        // Keep fallback transports fully populated; their consumers are not visible here.
+        public bool NeedsInfluenceSnapshot
+        {
+            get
+            {
+                lock (this.clientsLock)
+                {
+                    return !this.disposed && (!this.listening || this.clients.Count > 0);
+                }
+            }
+        }
+
         public UnitySocketTelemetryPublisher(
             IWismLoggerFactory loggerFactory,
             TelemetryContext telemetryContext = null,

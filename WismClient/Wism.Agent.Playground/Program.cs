@@ -14,6 +14,12 @@ try
 {
     switch (command.ToLowerInvariant())
     {
+        case "profile-checkpoint":
+            return runner.ProfileCheckpoint(
+                ReadString(args, "checkpoint", null) ?? throw new ArgumentException("checkpoint is required"),
+                ReadString(args, "out", null) ?? throw new ArgumentException("out is required"),
+                ReadString(args, "aiProfile", "tactical") ?? "tactical",
+                ReadInt(args, "repetitions", 3)) ? 0 : 1;
         case "sample":
             Print(runner.Sample(), quiet);
             return 0;

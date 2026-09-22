@@ -10,6 +10,10 @@ namespace Wism.Client.Pathing
         public void FindShortestRoute(Tile[,] map, List<Army> armiesToMove, Tile target, out IList<Tile> fastestRoute,
             out float distance, bool ignoreClan = false)
         {
+            var diagnostics = Wism.Client.Diagnostics.PerformanceProbe.Current;
+            diagnostics?.PathStarted(map == null ? 0 : map.Length);
+            using (Wism.Client.Diagnostics.PerformanceProbe.Measure("pathfinding"))
+            {
             if (map == null)
             {
                 throw new ArgumentNullException(nameof(map));
@@ -60,6 +64,7 @@ namespace Wism.Client.Pathing
                 }
 
                 visited.Add(currentNode);
+                diagnostics?.PathExpanded();
 
                 if (currentNode.Value == target)
                 {
@@ -85,6 +90,7 @@ namespace Wism.Client.Pathing
                 {
                     UpdateNeighborIfShorter(queue, visited, currentNode, neighbor, armiesToMove);
                 }
+            }
             }
         }
 

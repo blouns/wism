@@ -63,13 +63,14 @@ namespace Wism.Client.Factories
             Game.Current.Transition(snapshot.GameState);
             Game.Current.CurrentPlayerIndex = snapshot.CurrentPlayerIndex;
 
-            LoadPlayers(snapshot, Game.Current,
-                out var cityToPlayer,
-                out var capitolToPlayer);
-
+            // Army blessings must resolve against the restored locations, not the previous world.
             var world = WorldFactory.Load(snapshot.World,
                 out var armiesToTile,
                 out var visitingToTile);
+
+            LoadPlayers(snapshot, Game.Current,
+                out var cityToPlayer,
+                out var capitolToPlayer);
 
             LoadCities(snapshot, world, cityToPlayer, capitolToPlayer);
             LoadArmies(snapshot, armiesToTile, visitingToTile);

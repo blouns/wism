@@ -26,7 +26,7 @@ using Wism.Companion.Shared.Events;
 
 namespace Wism.Agent.Playground;
 
-public sealed class PlaygroundScenarioRunner
+public sealed partial class PlaygroundScenarioRunner
 {
     private const int MaxBufferedCommandIterations = 2048;
     private const int MaxBufferedCommandNoProgressIterations = 64;
@@ -678,7 +678,8 @@ public sealed class PlaygroundScenarioRunner
         }
 
         var settings = new JsonSerializerSettings { ContractResolver = new JsonContractResolver() };
-        var snapshot = JsonConvert.DeserializeObject<GameEntity>(File.ReadAllText(checkpointPath), settings)
+        var document = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(checkpointPath));
+        var snapshot = JsonConvert.DeserializeObject<GameEntity>((document["WismGameEntity"] ?? document).ToString(), settings)
             ?? throw new InvalidDataException($"Could not load checkpoint {checkpointPath}.");
         var world = snapshot.World?.Name ?? "Illuria";
         var catalogWorld = world.StartsWith("GeneratedCampaign_", StringComparison.OrdinalIgnoreCase) ||
