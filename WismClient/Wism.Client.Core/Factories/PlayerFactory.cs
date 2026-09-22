@@ -40,9 +40,9 @@ namespace Wism.Client.Factories
                         // Load items
                         if (armyEntity.Artifacts != null)
                         {
+                            hero.Items = new List<Artifact>();
                             foreach (var artifactEntity in armyEntity.Artifacts)
                             {
-                                hero.Items = new List<Artifact>();
                                 hero.Items.Add(ArtifactFactory.Load(artifactEntity));
                             }
                         }
