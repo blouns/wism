@@ -274,6 +274,15 @@ namespace Wism.Client.Test.AI
             var commands = captureModule.GenerateCommands(new List<Army> { army }, World.Current).ToList();
 
             Assert.That(commands, Has.One.InstanceOf<CaptureCityCommand>());
+            foreach (var command in commands)
+                Assert.That(TestUtilities.ExecuteCommandUntilDone(controllerProvider.CommandController, (Command)command),
+                    Is.EqualTo(ActionState.Succeeded));
+            Assert.Multiple(() =>
+            {
+                Assert.That(targetCity.Clan, Is.EqualTo(sirians.Clan));
+                Assert.That(army.Tile.City, Is.EqualTo(targetCity));
+                Assert.That(army.MovesRemaining, Is.Zero);
+            });
         }
 
        
@@ -304,10 +313,22 @@ namespace Wism.Client.Test.AI
             }
             var capture = new CaptureModule(provider.ArmyController, provider.CityController,
                 TestUtilities.CreateLogFactory().CreateLogger());
-            Assert.That(capture.GenerateCommands(armies, World.Current), Has.One.InstanceOf<CaptureCityCommand>(),
+            var commands = capture.GenerateCommands(armies, World.Current).ToList();
+            Assert.That(commands, Has.One.InstanceOf<CaptureCityCommand>(),
                 "The capture planner can legally dispatch one eligible army.");
             Assert.That(evaluator.Score(armies, target), Is.EqualTo(expected).Within(0.00001),
                 "A legal exact-cost capture must retain its direct-capture score bonus.");
+            foreach (var command in commands)
+                Assert.That(TestUtilities.ExecuteCommandUntilDone(provider.CommandController, (Command)command),
+                    Is.EqualTo(ActionState.Succeeded));
+            Assert.Multiple(() =>
+            {
+                Assert.That(target.Clan, Is.EqualTo(player.Clan));
+                Assert.That(army.Tile.City, Is.EqualTo(target));
+                Assert.That(army.MovesRemaining, Is.Zero);
+                if (exhaustedCompanion)
+                    Assert.That(armies[1].Tile, Is.SameAs(origin));
+            });
         }
 
         [TestCase(0)]

@@ -116,7 +116,7 @@ namespace Wism.Client.Commands.Cities
                         .Any(cityTile => cityTile.GetAllArmies().Any(army => army.Clan != this.Player.Clan)) &&
                     this.Armies.All(army =>
                         army.Player == this.Player &&
-                        army.MovesRemaining > tile.Terrain.MovementCost))
+                        army.MovesRemaining >= tile.Terrain.MovementCost))
                 .OrderBy(tile => Math.Abs(originTile.X - tile.X) + Math.Abs(originTile.Y - tile.Y))
                 .FirstOrDefault();
         }

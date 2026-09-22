@@ -144,6 +144,81 @@ public class BoardMutationInvariantTests
         });
     }
 
+    [TestCase(-1, false)]
+    [TestCase(-1, true)]
+    [TestCase(0, false)]
+    [TestCase(0, true)]
+    [TestCase(1, false)]
+    [TestCase(1, true)]
+    public void Invariant_CaptureMovementBoundaryPreservesBoard(int spareMoves, bool selected)
+    {
+        var controllers = TestUtilities.CreateControllerProvider();
+        TestUtilities.NewGame(controllers, TestUtilities.DefaultTestWorld);
+        TestUtilities.StartTurn(controllers);
+        Game.Current.DeselectArmies();
+        var player = Game.Current.GetCurrentPlayer();
+        var origin = World.Current.Map[6, 4];
+        var city = World.Current.Map[7, 4].City;
+        var previousOwner = city.Clan;
+        var attacker = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+        var armies = new List<Army> { attacker };
+        var cost = city.GetTiles().Where(origin.IsNeighbor).Min(tile => tile.Terrain.MovementCost);
+        attacker.MovesRemaining = cost + spareMoves;
+        if (selected)
+            Assert.That(new SelectArmyCommand(controllers.ArmyController, armies).Execute(), Is.EqualTo(ActionState.Succeeded));
+
+        var result = new CaptureCityCommand(controllers.CityController, player, armies, city).Execute();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(spareMoves < 0 ? ActionState.Failed : ActionState.Succeeded));
+            Assert.That(city.Clan, Is.SameAs(spareMoves < 0 ? previousOwner : player.Clan));
+            Assert.That(attacker.MovesRemaining, Is.EqualTo(spareMoves < 0 ? cost + spareMoves : spareMoves));
+            if (spareMoves < 0)
+            {
+                Assert.That(attacker.Tile, Is.SameAs(origin));
+                Assert.That(origin.GetAllArmies(), Does.Contain(attacker));
+            }
+            else
+            {
+                Assert.That(attacker.Tile.City, Is.SameAs(city));
+                Assert.That(origin.GetAllArmies(), Does.Not.Contain(attacker));
+                Assert.That(Game.Current.ArmiesSelected(), Is.False);
+            }
+        });
+    }
+
+    [TestCase(0)]
+    [TestCase(1)]
+    [TestCase(2)]
+    [TestCase(3)]
+    public void Invariant_ExactCostCaptureCannotBypassAnotherCityCornerDefender(int corner)
+    {
+        var controllers = TestUtilities.CreateControllerProvider();
+        TestUtilities.NewGame(controllers, TestUtilities.DefaultTestWorld);
+        TestUtilities.StartTurn(controllers);
+        Game.Current.DeselectArmies();
+        var player = Game.Current.GetCurrentPlayer();
+        var origin = World.Current.Map[6, 4];
+        var city = World.Current.Map[7, 4].City;
+        var previousOwner = city.Clan;
+        var attacker = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+        var defender = city.Player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), city.GetTiles().ElementAt(corner));
+        var cost = city.GetTiles().Where(origin.IsNeighbor).Min(tile => tile.Terrain.MovementCost);
+        attacker.MovesRemaining = cost;
+
+        var result = new CaptureCityCommand(controllers.CityController, player, new List<Army> { attacker }, city).Execute();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(ActionState.Failed));
+            Assert.That(city.Clan, Is.SameAs(previousOwner));
+            Assert.That(attacker.Tile, Is.SameAs(origin));
+            Assert.That(attacker.MovesRemaining, Is.EqualTo(cost));
+            Assert.That(defender.IsDead, Is.False);
+        });
+    }
+
     [Test]
     public void Invariant_PlayerEliminationRemovesArmiesFromStationaryAndVisitingTiles()
     {
