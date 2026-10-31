@@ -34,7 +34,7 @@ namespace Assets.Scripts.CommandProcessors
             var towerCommand = (RazeTowerCommand)command;
             if (towerCommand.Player.IsHuman)
             {
-                if (this.pending == null)
+                if (this.pending != towerCommand)
                 {
                     if (!towerCommand.CanRaze())
                     {
@@ -47,12 +47,6 @@ namespace Assets.Scripts.CommandProcessors
                     this.prompt.Ask("Raze this tower?\nIt can never be rebuilt.");
                     return ActionState.InProgress;
                 }
-                bool cancel = UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Escape);
-#if ENABLE_INPUT_SYSTEM
-                cancel |= UnityEngine.InputSystem.Keyboard.current != null &&
-                    UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame;
-#endif
-                if (cancel) this.prompt.No();
                 if (!this.prompt.Answer.HasValue && !this.prompt.Cancelled) return ActionState.InProgress;
                 this.pending = null;
                 this.unityGame.InputManager.SetInputMode(InputMode.Game);

@@ -150,6 +150,37 @@ public sealed partial class ArmyUiInputTests
         Assert.That(MenuButton("Raze").interactable, Is.False);
     }
 
+    [UnityTest]
+    public IEnumerator TowerJourney_ExtraClanUsesDeclaredColorAndNeutralShape()
+    {
+        yield return PrepareTowerBuilder();
+        var site = hero.Tile;
+        Assert.That(new BuildTowerCommand(Game.Current.GetSelectedArmies(), site).Execute(),
+            Is.EqualTo(Wism.Client.Controllers.ActionState.Succeeded));
+        unity.GetComponent<ArmyManager>().RefreshTowerOwnershipVisuals(true);
+        var extras = new List<Player>();
+        try
+        {
+            for (int i = 2; i < 10; i++)
+            {
+                var clan = Clan.Create(new Wism.Client.Modules.Infos.ClanInfo {
+                    ShortName = "TowerModClan" + i, DisplayName = "Tower Mod Clan " + i,
+                    PrimaryColor = "(37, 149, 211)", SecondaryColor = "(0, 0, 0)"
+                });
+                var player = Player.Create(clan);
+                extras.Add(player);
+                Game.Current.Players.Add(player);
+            }
+            site.Claim(extras.Last());
+            unity.GetComponent<ArmyManager>().RefreshTowerOwnershipVisuals();
+            var visual = TowerAt(site);
+            Assert.That(visual.OwnerClanShortName, Is.EqualTo("TowerModClan9"));
+            Assert.That(visual.GetComponent<SpriteRenderer>().sprite, Is.Not.Null);
+            Assert.That(visual.GetComponent<SpriteRenderer>().color, Is.EqualTo((Color)new Color32(37, 149, 211, 255)));
+        }
+        finally { foreach (var player in extras) Game.Current.Players.Remove(player); }
+    }
+
     private TowerOwnershipVisual TowerAt(Tile site) => UnityEngine.Object.FindObjectsOfType<TowerOwnershipVisual>()
         .Single(visual => {
             var point = unity.WorldTilemap.ConvertUnityToGameVector(visual.transform.position);

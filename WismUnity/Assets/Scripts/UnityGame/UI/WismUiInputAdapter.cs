@@ -224,7 +224,9 @@ namespace Assets.Scripts.UI
 #endif
         }
 
-        public static bool ItemPickerCancelPressed()
+        public static bool ItemPickerCancelPressed() => CancelPressedThisFrame();
+
+        public static bool CancelPressedThisFrame()
         {
             if (Input.GetKeyDown(KeyCode.Escape)) return true;
 #if ENABLE_INPUT_SYSTEM

@@ -20,8 +20,8 @@ O	Drop item
 
 City Actions:
 P	Enter production mode (then select city)
-R	Raze city
-B	Build city defenses
+R	Raze city or tower, with confirmation
+B	Build city defenses or a new tower
 C	Go to current player's owned capital (also View > Capital)
 
 Game Actions:
@@ -44,6 +44,13 @@ command cadence is unchanged; there is no extra movement-animation wait to bypas
 View menu:
 Capital	Center on the current player's owned, unrazed capital without changing
 selection. Disabled if there is no owned capital. Available during final inspection.
+
+Orders menu:
+Build / Raze	Use the selected army to build or destroy a structure.
+A new tower costs 100 gp and can only be built on clear plains. Confirm the
+quoted price to build; Cancel or Escape leaves your gold and the site unchanged.
+Razing a tower turns it into permanent ruins and removes its defense bonus.
+Neither a razed tower nor a razed city can be rebuilt on the same site.
 
 Minimap Actions:
 Left-click		Go-to on map

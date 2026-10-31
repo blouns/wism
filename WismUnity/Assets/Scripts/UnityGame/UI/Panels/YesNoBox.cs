@@ -1,4 +1,5 @@
 using Assets.Scripts.Managers;
+using Assets.Scripts.UI;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +27,7 @@ public class YesNoBox : MonoBehaviour
 
     public void Update()
     {
+            if (this.canvasGroup != null && IsActive() && WismUiInputAdapter.CancelPressedThisFrame()) No();
         if (this.Answer.HasValue || this.Cancelled)
         {
             Hide();

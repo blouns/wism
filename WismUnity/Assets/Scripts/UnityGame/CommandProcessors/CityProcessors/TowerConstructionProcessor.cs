@@ -4,9 +4,6 @@ using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Locations;
 using Wism.Client.Controllers;
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
 
 namespace Assets.Scripts.CommandProcessors
 {
@@ -23,14 +20,20 @@ namespace Assets.Scripts.CommandProcessors
         public ActionState Execute(ICommandAction command)
         {
             var build = (BuildTowerCommand)command;
-            if (pending == null)
+            if (pending != build)
             {
                 if (!build.CanBuild())
                 {
                     if (manager.ShouldPresentFor(build.Player)) manager.NotifyUser(build.FailureReason);
                     return ActionState.Failed;
                 }
-                if (!build.Player.IsHuman) return build.Execute();
+                if (!build.Player.IsHuman)
+                {
+                    var aiState = build.Execute();
+                    if (aiState == ActionState.Succeeded)
+                        manager.GetComponent<ArmyManager>().RefreshTowerOwnershipVisuals(true);
+                    return aiState;
+                }
                 pending = build;
                 prompt = GameObject.FindGameObjectWithTag("YesNoBox").GetComponent<YesNoBox>();
                 manager.InputManager.SetInputMode(InputMode.UI);
@@ -38,11 +41,6 @@ namespace Assets.Scripts.CommandProcessors
                 return ActionState.InProgress;
             }
 
-            bool cancel = Input.GetKeyDown(KeyCode.Escape);
-#if ENABLE_INPUT_SYSTEM
-            cancel |= Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
-#endif
-            if (cancel) prompt.No();
             if (!prompt.Answer.HasValue && !prompt.Cancelled) return ActionState.InProgress;
             bool accepted = prompt.Answer == true && !prompt.Cancelled;
             var result = accepted ? build.Execute() : ActionState.Failed;
