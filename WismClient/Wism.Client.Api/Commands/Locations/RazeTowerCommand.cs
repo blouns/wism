@@ -39,6 +39,7 @@ namespace Wism.Client.Commands.Locations
             this.FailureReason = null;
             var map = World.Current.Map;
             if (!this.CanExecuteInCurrentState || this.Player.IsDead || Game.Current.GetCurrentPlayer() != this.Player ||
+                (Game.Current.GameState != GameState.Ready && Game.Current.GameState != GameState.SelectedArmy) ||
                 this.TowerTile.X < 0 || this.TowerTile.Y < 0 || this.TowerTile.X >= map.GetLength(0) ||
                 this.TowerTile.Y >= map.GetLength(1) || map[this.TowerTile.X, this.TowerTile.Y] != this.TowerTile)
             {
@@ -47,7 +48,9 @@ namespace Wism.Client.Commands.Locations
             }
             if (this.Armies.Count == 0 || this.Armies.Any(army => army == null || army.IsDead ||
                 army.Player != this.Player || army.Tile == null || !this.Player.GetArmies().Contains(army) ||
-                !army.Tile.ContainsArmies(new List<Army> { army })))
+                !army.Tile.GetAllArmies().Contains(army) ||
+                (army.Tile.VisitingArmies?.Contains(army) == true &&
+                    Game.Current.GetSelectedArmies()?.Contains(army) != true)))
             {
                 this.FailureReason = "Your razing armies must still be stationed nearby.";
                 return false;

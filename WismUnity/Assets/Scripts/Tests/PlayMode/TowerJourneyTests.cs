@@ -32,8 +32,28 @@ public sealed partial class ArmyUiInputTests
         manager.SelectArmies(new List<Wism.Client.MapObjects.Army> { hero });
         yield return new WaitForLastCommand(manager.ControllerProvider);
         unity.GetComponent<ArmyManager>().DrawArmyGameObjects();
+        var quote = new BuildTowerCommand(Game.Current.GetSelectedArmies(), site);
+        Assert.That(quote.CanBuild(), Is.True, () => quote.FailureReason +
+            $" site={site.X},{site.Y}/{site.Terrain.ShortName}; player={hero.Player.Clan.ShortName}; current={Game.Current.GetCurrentPlayer().Clan.ShortName}; stationed={site.Armies?.Contains(hero)}; visiting={site.VisitingArmies?.Count}; city={site.City?.ShortName}; location={site.Location?.ShortName}");
         unity.InteractiveUI = true;
         yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator TowerJourney_BuildInsideCityStillImprovesCityDefense()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var city = hero.Tile.City;
+        Assert.That(city, Is.Not.Null);
+        int defense = city.Defense, cost = city.GetCostToBuild();
+        hero.Player.Gold = 2000;
+        yield return Click(ScreenPoint(hero.Tile));
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        yield return PressJourneyKey(Key.B);
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(city.Defense, Is.EqualTo(defense + 1));
+        Assert.That(hero.Player.Gold, Is.EqualTo(2000 - cost));
+        Assert.That(hero.Tile.IsTower(), Is.False);
     }
 
     private IEnumerator TowerBuildAndRaze(int width, int height)
@@ -56,14 +76,14 @@ public sealed partial class ArmyUiInputTests
             Assert.That(player.Gold, Is.EqualTo(500));
             Assert.That(site.IsTower(), Is.False);
             yield return PressJourneyKey(Key.Escape);
-            yield return new WaitForLastCommand(manager.ControllerProvider);
+            yield return WaitForTowerCommand();
             Assert.That(site.IsTower(), Is.False);
             Assert.That(player.Gold, Is.EqualTo(500));
 
             yield return PressJourneyKey(Key.B);
             yield return WaitFor(() => prompt.IsActive());
             yield return TowerAnswer(prompt, true);
-            yield return new WaitForLastCommand(manager.ControllerProvider);
+            yield return WaitForTowerCommand();
             Assert.That(site.IsTower(), Is.True);
             Assert.That(player.Gold, Is.EqualTo(400));
             var visual = TowerAt(site);
@@ -76,13 +96,13 @@ public sealed partial class ArmyUiInputTests
             yield return WaitFor(() => prompt.IsActive());
             Assert.That(site.IsTower(), Is.True, "Raze must wait for confirmation.");
             yield return TowerAnswer(prompt, false);
-            yield return new WaitForLastCommand(manager.ControllerProvider);
+            yield return WaitForTowerCommand();
             Assert.That(site.IsTower(), Is.True);
             yield return Click(MenuPoint("OpenOrdersMenu"));
             yield return Click(MenuPoint("Raze"));
             yield return WaitFor(() => prompt.IsActive());
             yield return TowerAnswer(prompt, true);
-            yield return new WaitForLastCommand(manager.ControllerProvider);
+            yield return WaitForTowerCommand();
             Assert.That(site.IsTowerRazed, Is.True);
             Assert.That(site.Terrain.ShortName, Is.EqualTo("Ruins"));
             Assert.That(site.TowerOwnerClanShortName, Is.Null);
@@ -90,7 +110,7 @@ public sealed partial class ArmyUiInputTests
             Capture("tower-razed");
 
             yield return PressJourneyKey(Key.B);
-            yield return new WaitForLastCommand(manager.ControllerProvider);
+            yield return WaitForTowerCommand();
             Assert.That(site.IsTowerRazed, Is.True);
             Assert.That(site.IsTower(), Is.False);
             Assert.That(player.Gold, Is.EqualTo(400));
@@ -113,6 +133,8 @@ public sealed partial class ArmyUiInputTests
         site.Claim(enemy);
         unity.GetComponent<ArmyManager>().RefreshTowerOwnershipVisuals(true);
         Assert.That(TowerAt(site).OwnerClanShortName, Is.EqualTo(enemy.Clan.ShortName));
+        UnityEngine.Object.Destroy(TowerAt(site).gameObject);
+        yield return null;
         var load = new LoadGameCommand(manager.ControllerProvider.GameController, saved);
         Assert.That(load.Execute(), Is.EqualTo(Wism.Client.Controllers.ActionState.Succeeded));
         unity.Reset();
@@ -123,7 +145,7 @@ public sealed partial class ArmyUiInputTests
         Assert.That(TowerAt(site).IsRazed, Is.False);
         Assert.That(UnityEngine.Object.FindObjectsOfType<TowerOwnershipVisual>().Count(visual =>
             unity.WorldTilemap.ConvertUnityToGameVector(visual.transform.position) == new Vector2Int(x, y)), Is.EqualTo(1));
-        Assert.That(new RazeTowerCommand(site.Armies, site).Execute(), Is.EqualTo(Wism.Client.Controllers.ActionState.Succeeded));
+        Assert.That(new RazeTowerCommand(site.GetAllArmies(), site).Execute(), Is.EqualTo(Wism.Client.Controllers.ActionState.Succeeded));
         saved = Game.Current.Snapshot();
         Assert.That(new LoadGameCommand(manager.ControllerProvider.GameController, saved).Execute(),
             Is.EqualTo(Wism.Client.Controllers.ActionState.Succeeded));
@@ -132,7 +154,7 @@ public sealed partial class ArmyUiInputTests
         site = World.Current.Map[x, y];
         Assert.That(site.IsTowerRazed, Is.True);
         Assert.That(TowerAt(site).IsRazed, Is.True);
-        Assert.That(new BuildTowerCommand(site.Armies, site).Execute(), Is.EqualTo(Wism.Client.Controllers.ActionState.Failed));
+        Assert.That(new BuildTowerCommand(site.GetAllArmies(), site).Execute(), Is.EqualTo(Wism.Client.Controllers.ActionState.Failed));
     }
 
     [UnityTest]
@@ -192,5 +214,13 @@ public sealed partial class ArmyUiInputTests
         var button = prompt.GetComponentsInChildren<Button>().Single(candidate =>
             candidate.GetComponentInChildren<Text>()?.text == (yes ? "Yes" : "No"));
         yield return PressJourneyButton(button);
+    }
+
+    private IEnumerator WaitForTowerCommand()
+    {
+        int id = manager.ControllerProvider.CommandController.GetLastCommand().Id;
+        yield return WaitFor(() => unity.LastCommandId >= id && input.InputMode == InputMode.Game,
+            () => $"Tower command {id}; processed={unity.LastCommandId}; mode={input.InputMode}");
+        yield return null;
     }
 }

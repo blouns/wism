@@ -27,7 +27,8 @@ namespace Wism.Client.Commands.Locations
         {
             this.FailureReason = null;
             if (!this.CanExecuteInCurrentState || this.Player.IsDead ||
-                Game.Current.GetCurrentPlayer() != this.Player)
+                Game.Current.GetCurrentPlayer() != this.Player ||
+                (Game.Current.GameState != GameState.Ready && Game.Current.GameState != GameState.SelectedArmy))
                 return Reject("You can only build during your own turn.");
 
             var map = World.Current.Map;
@@ -37,11 +38,15 @@ namespace Wism.Client.Commands.Locations
 
             if (this.builders.Count == 0 || this.builders.Any(army => army == null || army.IsDead ||
                 army.Player != this.Player || army.Tile != this.Tile ||
-                !this.Player.GetArmies().Contains(army) || !this.Tile.ContainsArmies(new List<Army> { army })))
-                return Reject("Your builder army must still be stationed on this tile.");
+                !this.Player.GetArmies().Contains(army) || !this.Tile.GetAllArmies().Contains(army)))
+                return Reject("Your builder army must still be on this tile.");
+
+            var selected = Game.Current.GetSelectedArmies();
+            if (this.Tile.HasVisitingArmies() && (selected == null || this.Tile.VisitingArmies.Except(selected).Any()))
+                return Reject("A tower cannot be built while armies are moving through this tile.");
 
             if (this.Tile.IsTowerRazed || this.Tile.City != null || this.Tile.Location != null ||
-                this.Tile.Terrain?.ShortName != "Grass" || this.Tile.HasVisitingArmies() ||
+                this.Tile.Terrain?.ShortName != "Grass" ||
                 this.Tile.GetAllArmies().Any(army => army.Player != this.Player))
                 return Reject("Towers can only be built on clear plains, never on ruins or existing structures.");
 

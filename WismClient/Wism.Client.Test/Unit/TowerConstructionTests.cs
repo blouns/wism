@@ -54,6 +54,39 @@ public class TowerConstructionTests
         Assert.That(player.Gold, Is.EqualTo(300));
     }
 
+    [Test]
+    public void BuildAndRaze_SelectedVisitingArmy_PreservesSelectionAndPosition()
+    {
+        Game.Current.SelectArmies(new List<Army> { builder });
+        Assert.That(site.ContainsVisitingArmies(new List<Army> { builder }), Is.True);
+        Assert.That(Build().Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(new RazeTowerCommand(new List<Army> { builder }, site).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(Game.Current.GetSelectedArmies(), Is.EqualTo(new[] { builder }));
+        Assert.That(site.ContainsVisitingArmies(new List<Army> { builder }), Is.True);
+        Assert.That(site.GetAllArmies(), Is.EqualTo(new[] { builder }));
+        Assert.That(player.Gold, Is.Zero);
+    }
+
+    [Test]
+    public void Build_UnselectedVisitingArmy_IsRejected()
+    {
+        site.RemoveArmies(new List<Army> { builder });
+        site.AddVisitingArmies(new List<Army> { builder });
+        Assert.That(Build().Execute(), Is.EqualTo(ActionState.Failed));
+        Assert.That(player.Gold, Is.EqualTo(BuildTowerCommand.BuildCost));
+    }
+
+    [TestCase(GameState.MovingArmy)]
+    [TestCase(GameState.AttackingArmy)]
+    [TestCase(GameState.EndingTurn)]
+    [TestCase(GameState.StartingTurn)]
+    public void Build_UnsafeGameState_IsRejected(GameState state)
+    {
+        Game.Current.Transition(state);
+        Assert.That(Build().Execute(), Is.EqualTo(ActionState.Failed));
+        Assert.That(player.Gold, Is.EqualTo(BuildTowerCommand.BuildCost));
+    }
+
     [TestCase("Forest")]
     [TestCase("Hill")]
     [TestCase("Mountain")]
