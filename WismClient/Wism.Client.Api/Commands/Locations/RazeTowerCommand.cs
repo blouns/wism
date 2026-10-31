@@ -14,7 +14,7 @@ namespace Wism.Client.Commands.Locations
         public RazeTowerCommand(List<Army> armies, Tile towerTile)
             : base(ResolvePlayer(armies))
         {
-            this.Armies = armies ?? throw new ArgumentNullException(nameof(armies));
+            this.Armies = new List<Army>(armies);
             this.TowerTile = towerTile ?? throw new ArgumentNullException(nameof(towerTile));
         }
 
@@ -34,26 +34,41 @@ namespace Wism.Client.Commands.Locations
 
         public string FailureReason { get; private set; }
 
-        protected override ActionState ExecuteInternal()
+        public bool CanRaze()
         {
-            if (this.Armies.Count == 0)
+            this.FailureReason = null;
+            var map = World.Current.Map;
+            if (!this.CanExecuteInCurrentState || this.Player.IsDead || Game.Current.GetCurrentPlayer() != this.Player ||
+                this.TowerTile.X < 0 || this.TowerTile.Y < 0 || this.TowerTile.X >= map.GetLength(0) ||
+                this.TowerTile.Y >= map.GetLength(1) || map[this.TowerTile.X, this.TowerTile.Y] != this.TowerTile)
             {
-                this.FailureReason = "No armies selected.";
-                return ActionState.Failed;
+                this.FailureReason = "The tower cannot be razed in the current turn or world.";
+                return false;
             }
-
-            if (!this.TowerTile.IsTower())
+            if (this.Armies.Count == 0 || this.Armies.Any(army => army == null || army.IsDead ||
+                army.Player != this.Player || army.Tile == null || !this.Player.GetArmies().Contains(army) ||
+                !army.Tile.ContainsArmies(new List<Army> { army })))
             {
-                this.FailureReason = "Target tile is not an active tower.";
-                return ActionState.Failed;
+                this.FailureReason = "Your razing armies must still be stationed nearby.";
+                return false;
+            }
+            if (!this.TowerTile.IsTower() || this.TowerTile.TowerOwnerClanShortName != this.Player.Clan.ShortName)
+            {
+                this.FailureReason = "Target tile is not one of your active towers.";
+                return false;
             }
 
             if (!this.Armies.Any(army => army.Tile != null && (army.Tile == this.TowerTile || army.Tile.IsNeighbor(this.TowerTile))))
             {
                 this.FailureReason = "Selected armies are not adjacent to the tower.";
-                return ActionState.Failed;
+                return false;
             }
+            return true;
+        }
 
+        protected override ActionState ExecuteInternal()
+        {
+            if (!CanRaze()) return ActionState.Failed;
             this.TowerTile.RazeTower();
             return ActionState.Succeeded;
         }

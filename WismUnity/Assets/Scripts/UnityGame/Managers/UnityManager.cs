@@ -340,6 +340,7 @@ namespace Assets.Scripts.Managers
                 // City processors
                 new BuildCityDefensesProcessor(this.GameManager.LoggerFactory, this),
                 new RazeCityDefensesProcessor(this.GameManager.LoggerFactory, this),
+                new TowerConstructionProcessor(this),
                 new RazeTowerProcessor(this.GameManager.LoggerFactory, this),
 
                 // Game processors

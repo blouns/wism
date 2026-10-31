@@ -329,7 +329,7 @@ namespace Assets.Scripts.Managers
             {
                 this.GameManager.RazeCity();
             }
-            else if (Input.GetKeyDown(KeyCode.B))
+            else if (WismUiInputAdapter.BuildPressedThisFrame())
             {
                 this.GameManager.Build();
             }

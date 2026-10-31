@@ -25,6 +25,10 @@ namespace Assets.Scripts.UI
         private Button viewButton;
         private Button capitalButton;
         private GameObject viewMenu;
+        private GameObject ordersMenu;
+        private Button ordersButton;
+        private Button buildButton;
+        private Button razeButton;
         private Toggle observeToggle;
         private Toggle combatToggle;
         public StrategicReportView Reports { get; private set; }
@@ -36,6 +40,7 @@ namespace Assets.Scripts.UI
         private GameObject previousSelection;
         private bool exitRequested;
         private Font font;
+        private bool canIssueOrders;
 
         public bool IsOpen => shield != null && shield.activeSelf;
         public bool IsConfirmingExit => confirmation != null && confirmation.activeSelf;
@@ -64,6 +69,8 @@ namespace Assets.Scripts.UI
             Place((RectTransform)reportsButton.transform, new Vector2(0, 1), new Vector2(116, -8), new Vector2(128, 44));
             viewButton = Button(canvasRoot.transform, "OpenViewMenu", "View", "game.view", OpenView);
             Place((RectTransform)viewButton.transform, new Vector2(0, 1), new Vector2(252, -8), new Vector2(100, 44));
+            ordersButton = Button(canvasRoot.transform, "OpenOrdersMenu", "Orders", "game.orders", OpenOrders);
+            Place((RectTransform)ordersButton.transform, new Vector2(0, 1), new Vector2(360, -8), new Vector2(112, 44));
             shield = Panel(canvasRoot.transform, "MenuBackdrop", new Color(0, 0, 0, 0.25f));
             Stretch((RectTransform)shield.transform);
             shield.AddComponent<Button>().onClick.AddListener(Cancel);
@@ -85,6 +92,13 @@ namespace Assets.Scripts.UI
             capitalButton = Button(viewMenu.transform, "Capital", "Capital", "view.capital", NavigateToCapital);
             Place((RectTransform)capitalButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(224, 44));
             viewMenu.SetActive(false);
+            ordersMenu = Panel(shield.transform, "OrdersMenu", Stone);
+            Place((RectTransform)ordersMenu.transform, new Vector2(0, 1), new Vector2(360, -56), new Vector2(240, 108));
+            buildButton = Button(ordersMenu.transform, "Build", "Build", "orders.build", () => Order(true));
+            razeButton = Button(ordersMenu.transform, "Raze", "Raze", "orders.raze", () => Order(false));
+            Place((RectTransform)buildButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(224, 44));
+            Place((RectTransform)razeButton.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(224, 44));
+            ordersMenu.SetActive(false);
 
             confirmation = Panel(shield.transform, "ExitConfirmation", Stone);
             var rect = (RectTransform)confirmation.transform;
@@ -129,6 +143,7 @@ namespace Assets.Scripts.UI
             openButton.interactable = IsOpen || CanOpen;
             reportsButton.interactable = IsOpen || CanOpen;
             viewButton.interactable = IsOpen || CanOpen;
+            ordersButton.interactable = IsOpen || CanOpen;
             if (!IsOpen && CanOpen && WismUiInputAdapter.ApplicationExitPressedThisFrame()) RequestExit();
             if (!IsOpen) return;
             bool escape = Input.GetKeyDown(KeyCode.Escape);
@@ -144,6 +159,8 @@ namespace Assets.Scripts.UI
             previousMode = manager.InputManager.InputMode;
             previousSelection = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
             saveButton.interactable = loadButton.interactable = CanPersist;
+            canIssueOrders = CanPersist && manager.InputManager.CanAcceptGameplayInput &&
+                Wism.Client.Core.Game.Current.ArmiesSelected();
             observeToggle.SetIsOnWithoutNotify(manager.ObserveAiMovement);
             combatToggle.SetIsOnWithoutNotify(manager.ShowAiCombat);
             capitalButton.interactable = manager.CanNavigateToCapital;
@@ -151,6 +168,7 @@ namespace Assets.Scripts.UI
             exitRequested = false;
             menu.SetActive(true);
             viewMenu.SetActive(false);
+            ordersMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(false);
             shield.SetActive(true);
@@ -164,6 +182,7 @@ namespace Assets.Scripts.UI
             if (!IsOpen || exitRequested) return;
             menu.SetActive(false);
             viewMenu.SetActive(false);
+            ordersMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(true);
             Select(cancelButton.gameObject);
@@ -194,6 +213,7 @@ namespace Assets.Scripts.UI
             if (!IsOpen || exitRequested) return;
             shield.SetActive(false);
             viewMenu.SetActive(false);
+            ordersMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(false);
             manager.InputManager.SetInputMode(previousMode);
@@ -208,6 +228,7 @@ namespace Assets.Scripts.UI
             if (confirmation != null) confirmation.SetActive(false);
             if (Reports != null) Reports.gameObject.SetActive(false);
             if (viewMenu != null) viewMenu.SetActive(false);
+            if (ordersMenu != null) ordersMenu.SetActive(false);
         }
 
         public void OpenReports(StrategicReportKind kind = StrategicReportKind.Cities)
@@ -216,6 +237,7 @@ namespace Assets.Scripts.UI
             if (!IsOpen || IsConfirmingExit || exitRequested) return;
             menu.SetActive(false);
             viewMenu.SetActive(false);
+            ordersMenu.SetActive(false);
             Reports.Open(kind);
             Select(Reports.GetComponentsInChildren<Button>().First(button => button.name == "Report" + kind).gameObject);
         }
@@ -234,7 +256,32 @@ namespace Assets.Scripts.UI
             menu.SetActive(false);
             Reports.gameObject.SetActive(false);
             viewMenu.SetActive(true);
+            ordersMenu.SetActive(false);
             Select(capitalButton.interactable ? capitalButton.gameObject : null);
+        }
+
+        public void OpenOrders()
+        {
+            if (!IsOpen) Open();
+            if (!IsOpen || IsConfirmingExit || exitRequested) return;
+            menu.SetActive(false);
+            viewMenu.SetActive(false);
+            Reports.gameObject.SetActive(false);
+            ordersMenu.SetActive(true);
+            bool canOrder = canIssueOrders && Wism.Client.Core.Game.Current.GameState != Wism.Client.Core.GameState.GameOver &&
+                previousMode == InputMode.Game && Wism.Client.Core.Game.Current.ArmiesSelected();
+            buildButton.interactable = razeButton.interactable = canOrder;
+            buildButton.GetComponentInChildren<Text>().text = canOrder ? "Build" : "Build (unavailable)";
+            razeButton.GetComponentInChildren<Text>().text = canOrder ? "Raze" : "Raze (unavailable)";
+            Select(canOrder ? buildButton.gameObject : null);
+        }
+
+        private void Order(bool build)
+        {
+            if (!ordersMenu.activeSelf || !buildButton.interactable) return;
+            Close();
+            if (build) manager.GameManager.Build();
+            else manager.GameManager.RazeCity();
         }
 
         private void NavigateToCapital()
