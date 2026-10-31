@@ -24,6 +24,9 @@ namespace Assets.Scripts.UI
         private Button reportsButton;
         private Button viewButton;
         private Button capitalButton;
+        private Button inventoryButton;
+        private Button heroesButton;
+        public HeroControlsView HeroControls { get; private set; }
         private GameObject viewMenu;
         private GameObject ordersMenu;
         private Button ordersButton;
@@ -41,6 +44,7 @@ namespace Assets.Scripts.UI
         private bool exitRequested;
         private Font font;
         private bool canIssueOrders;
+        private bool canInspectHeroes;
 
         public bool IsOpen => shield != null && shield.activeSelf;
         public bool IsConfirmingExit => confirmation != null && confirmation.activeSelf;
@@ -88,9 +92,13 @@ namespace Assets.Scripts.UI
             PlaceRow(loadButton, 152);
             PlaceRow(exitButton, 200);
             viewMenu = Panel(shield.transform, "ViewMenu", Stone);
-            Place((RectTransform)viewMenu.transform, new Vector2(0, 1), new Vector2(252, -56), new Vector2(240, 60));
+            Place((RectTransform)viewMenu.transform, new Vector2(0, 1), new Vector2(252, -56), new Vector2(240, 156));
             capitalButton = Button(viewMenu.transform, "Capital", "Capital", "view.capital", NavigateToCapital);
             Place((RectTransform)capitalButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(224, 44));
+            inventoryButton = Button(viewMenu.transform, "Inventory", "Inventory", "heroes.inventory", () => OpenHeroes(false));
+            heroesButton = Button(viewMenu.transform, "FindHeroes", "Find Heroes", "heroes.find", () => OpenHeroes(true));
+            Place((RectTransform)inventoryButton.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(224, 44));
+            Place((RectTransform)heroesButton.transform, new Vector2(0, 1), new Vector2(8, -104), new Vector2(224, 44));
             viewMenu.SetActive(false);
             ordersMenu = Panel(shield.transform, "OrdersMenu", Stone);
             Place((RectTransform)ordersMenu.transform, new Vector2(0, 1), new Vector2(360, -56), new Vector2(240, 108));
@@ -124,6 +132,10 @@ namespace Assets.Scripts.UI
             Reports = reportRoot.GetComponent<StrategicReportView>();
             Reports.Initialize(manager, font, Close);
             reportRoot.SetActive(false);
+            var heroRoot = new GameObject("HeroControls", typeof(RectTransform), typeof(HeroControlsView));
+            heroRoot.transform.SetParent(shield.transform, false);
+            HeroControls = heroRoot.GetComponent<HeroControlsView>();
+            HeroControls.Initialize(manager, font, Close);
             WismUiSurface.Ensure(canvasRoot, "game-menu", WismUiControlState.Normal, WismUiControlState.Disabled);
             shield.SetActive(false);
             confirmation.SetActive(false);
@@ -137,6 +149,10 @@ namespace Assets.Scripts.UI
              manager.InputManager.CanAcceptGameplayInput) &&
             manager.LastCommandId == (manager.GameManager.ControllerProvider.CommandController.GetLastCommand()?.Id ?? 0);
 
+        private bool CanInspectState => Wism.Client.Core.Game.Current.GameState == Wism.Client.Core.GameState.Ready ||
+            Wism.Client.Core.Game.Current.GameState == Wism.Client.Core.GameState.SelectedArmy ||
+            Wism.Client.Core.Game.Current.GameState == Wism.Client.Core.GameState.GameOver;
+
         private void Update()
         {
             if (openButton == null) return;
@@ -145,6 +161,11 @@ namespace Assets.Scripts.UI
             viewButton.interactable = IsOpen || CanOpen;
             ordersButton.interactable = IsOpen || CanOpen;
             if (!IsOpen && CanOpen && WismUiInputAdapter.ApplicationExitPressedThisFrame()) RequestExit();
+            if (!IsOpen && CanOpen && manager.InteractiveUI)
+            {
+                if (WismUiInputAdapter.InventoryPressedThisFrame()) OpenHeroes(false);
+                else if (WismUiInputAdapter.FindHeroesPressedThisFrame()) OpenHeroes(true);
+            }
             if (!IsOpen) return;
             bool escape = Input.GetKeyDown(KeyCode.Escape);
 #if ENABLE_INPUT_SYSTEM
@@ -161,15 +182,19 @@ namespace Assets.Scripts.UI
             saveButton.interactable = loadButton.interactable = CanPersist;
             canIssueOrders = CanPersist && manager.InputManager.CanAcceptGameplayInput &&
                 Wism.Client.Core.Game.Current.ArmiesSelected();
+            canInspectHeroes = CanPersist && CanInspectState && manager.InteractiveUI &&
+                Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman == true;
             observeToggle.SetIsOnWithoutNotify(manager.ObserveAiMovement);
             combatToggle.SetIsOnWithoutNotify(manager.ShowAiCombat);
             capitalButton.interactable = manager.CanNavigateToCapital;
             capitalButton.GetComponentInChildren<Text>().text = capitalButton.interactable ? "Capital" : "No owned capital";
+            inventoryButton.interactable = heroesButton.interactable = canInspectHeroes;
             exitRequested = false;
             menu.SetActive(true);
             viewMenu.SetActive(false);
             ordersMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
+            HeroControls.gameObject.SetActive(false);
             confirmation.SetActive(false);
             shield.SetActive(true);
             manager.InputManager.SetInputMode(InputMode.UI);
@@ -185,6 +210,7 @@ namespace Assets.Scripts.UI
             ordersMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(true);
+            HeroControls.gameObject.SetActive(false);
             Select(cancelButton.gameObject);
         }
 
@@ -217,6 +243,7 @@ namespace Assets.Scripts.UI
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(false);
             manager.InputManager.SetInputMode(previousMode);
+            HeroControls.gameObject.SetActive(false);
             manager.InputManager.SkipInput();
             Select(previousSelection != null && previousSelection.activeInHierarchy ? previousSelection : null);
         }
@@ -229,6 +256,7 @@ namespace Assets.Scripts.UI
             if (Reports != null) Reports.gameObject.SetActive(false);
             if (viewMenu != null) viewMenu.SetActive(false);
             if (ordersMenu != null) ordersMenu.SetActive(false);
+            if (HeroControls != null) HeroControls.gameObject.SetActive(false);
         }
 
         public void OpenReports(StrategicReportKind kind = StrategicReportKind.Cities)
@@ -238,6 +266,7 @@ namespace Assets.Scripts.UI
             menu.SetActive(false);
             viewMenu.SetActive(false);
             ordersMenu.SetActive(false);
+            HeroControls.gameObject.SetActive(false);
             Reports.Open(kind);
             Select(Reports.GetComponentsInChildren<Button>().First(button => button.name == "Report" + kind).gameObject);
         }
@@ -257,6 +286,7 @@ namespace Assets.Scripts.UI
             Reports.gameObject.SetActive(false);
             viewMenu.SetActive(true);
             ordersMenu.SetActive(false);
+            HeroControls.gameObject.SetActive(false);
             Select(capitalButton.interactable ? capitalButton.gameObject : null);
         }
 
@@ -268,6 +298,7 @@ namespace Assets.Scripts.UI
             viewMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             ordersMenu.SetActive(true);
+            HeroControls.gameObject.SetActive(false);
             bool canOrder = canIssueOrders && Wism.Client.Core.Game.Current.GameState != Wism.Client.Core.GameState.GameOver &&
                 previousMode == InputMode.Game && Wism.Client.Core.Game.Current.ArmiesSelected();
             buildButton.interactable = razeButton.interactable = canOrder;
@@ -282,6 +313,21 @@ namespace Assets.Scripts.UI
             Close();
             if (build) manager.GameManager.Build();
             else manager.GameManager.RazeCity();
+        }
+
+        public void OpenHeroes(bool find)
+        {
+            // Check before Open changes the input mode; a rejected shortcut opens no modal.
+            if (!IsOpen && (!CanOpen || !CanPersist || !CanInspectState || !manager.InteractiveUI ||
+                Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman != true)) return;
+            if (!IsOpen) Open();
+            if (!IsOpen || !canInspectHeroes || !CanInspectState || IsConfirmingExit || exitRequested ||
+                manager.InputManager.EndTurnPending || Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman != true) return;
+            menu.SetActive(false);
+            viewMenu.SetActive(false);
+            ordersMenu.SetActive(false);
+            Reports.gameObject.SetActive(false);
+            HeroControls.Open(find);
         }
 
         private void NavigateToCapital()

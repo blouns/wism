@@ -317,8 +317,7 @@ namespace Assets.Scripts.Managers
             {
                 this.UnityManager.HandleItemPicker(false);
             }
-            // TODO: Add Inventory action
-            // TODO: Add Find heros (k) action
+            // Read-only Inventory/Find shortcuts are handled by the modal game menu in Update.
 
             // City actions
             else if (WismUiInputAdapter.ProductionPressedThisFrame())

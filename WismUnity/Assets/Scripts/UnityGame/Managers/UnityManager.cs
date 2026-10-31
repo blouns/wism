@@ -429,6 +429,19 @@ namespace Assets.Scripts.Managers
             Game.IsInitialized() && Game.Current.GetCurrentPlayer()?.Capitol is City capital &&
             capital.Player == Game.Current.GetCurrentPlayer() && capital.Tile?.City == capital;
 
+        public void NavigateToHero(Hero hero)
+        {
+            if (!this.InteractiveUI || this.ExecutionMode != ExecutionMode.Running || !Game.IsInitialized() ||
+                hero == null || hero.IsDead || hero.Tile == null || hero.Player != Game.Current.GetCurrentPlayer() ||
+                !hero.Player.GetArmies().Contains(hero) || this.InputManager.EndTurnPending) return;
+            var map = World.Current.Map;
+            if (hero.Tile.X < 0 || hero.Tile.Y < 0 || hero.Tile.X >= map.GetLength(0) ||
+                hero.Tile.Y >= map.GetLength(1) || map[hero.Tile.X, hero.Tile.Y] != hero.Tile) return;
+            this.cameraFollow.ResetCamera();
+            this.cameraFollow.target = null;
+            this.cameraFollow.SetCameraTarget(this.WorldTilemap.ConvertGameToUnityVector(hero.Tile.X, hero.Tile.Y));
+        }
+
         public void GoToLocation()
         {
             this.inputManager.SetInputMode(InputMode.LocationPicker);

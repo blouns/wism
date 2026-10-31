@@ -81,6 +81,15 @@ mark incoming routes and yellow outlines outgoing routes, including paid transit
 after training stops. A city with both directions has both outlines. City fills
 retain WISM ownership colors; no unverified classic production-fill meaning is implied.
 
+Hero views:
+View > Inventory, or I, shows the selected owned heroes' artifacts and their
+combat and command bonuses. Choose a hero row when a stack has multiple heroes.
+View > Find Heroes, or K, lists your living heroes. Go to Hero moves only the
+camera; selection, movement and ownership are unchanged. Long lists scroll.
+Close or Escape returns to the map. These views are read-only and unavailable
+during computer turns, pending orders or other dialogs. Inventory is empty when
+no hero is selected. Read-only inspection remains available after a human game ends.
+
 Debug Actions:
 ,		Go to location
 {Tab}	Toggle debug output
