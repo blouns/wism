@@ -22,6 +22,7 @@ namespace Assets.Scripts.Managers
         private UnityManager unityManager;
         private WorldTilemap worldTilemap;
         private InputManager inputManager;
+        private Tile[,] lastTowerMap;
 
         public Dictionary<int, ArmyGameObject> ArmyDictionary => this.armyDictionary;
 
@@ -222,7 +223,7 @@ namespace Assets.Scripts.Managers
             ArmyGameObject ago = new ArmyGameObject(army, armyGO);
             this.ArmyDictionary.Add(army.Id, ago);
         }
-        private void RefreshTowerOwnershipVisuals()
+        public void RefreshTowerOwnershipVisuals(bool discover = false)
         {
             if (this.worldTilemap == null)
             {
@@ -245,6 +246,27 @@ namespace Assets.Scripts.Managers
             }
 
             var towerVisuals = FindObjectsOfType<TowerOwnershipVisual>(true);
+            if (discover || this.lastTowerMap != map)
+            {
+                // Constructed towers have no authored scene object. Recreate them from saved tiles.
+                var occupied = new HashSet<Vector2Int>();
+                foreach (var visual in towerVisuals)
+                {
+                    var position = this.worldTilemap.ConvertUnityToGameVector(visual.transform.position);
+                    occupied.Add(new Vector2Int(position.x, position.y));
+                }
+                foreach (var tile in map)
+                {
+                    if ((!tile.IsTower() && !tile.IsTowerRazed) || occupied.Contains(new Vector2Int(tile.X, tile.Y))) continue;
+                    var prefab = Resources.Load<GameObject>("RuntimeTower");
+                    if (prefab == null) throw new InvalidOperationException("Runtime tower prefab is missing.");
+                    var instance = Instantiate(prefab, this.worldTilemap.ConvertGameToUnityVector(tile.X, tile.Y),
+                        Quaternion.identity, this.worldTilemap.transform);
+                    instance.GetComponent<TowerOwnershipVisual>().RuntimeCreated = true;
+                }
+                towerVisuals = FindObjectsOfType<TowerOwnershipVisual>(true);
+                this.lastTowerMap = map;
+            }
             foreach (var towerVisual in towerVisuals)
             {
                 var coords = this.worldTilemap.ConvertUnityToGameVector(towerVisual.transform.position);
@@ -257,6 +279,12 @@ namespace Assets.Scripts.Managers
                 }
 
                 var towerTile = map[coords.x, coords.y];
+                if (towerVisual.RuntimeCreated && !towerTile.IsTower() && !towerTile.IsTowerRazed)
+                {
+                    towerVisual.gameObject.SetActive(false);
+                    Destroy(towerVisual.gameObject);
+                    continue;
+                }
                 if (!towerTile.IsTower())
                 {
                     towerVisual.SetRazed();

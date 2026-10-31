@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Linq;
+using Wism.Client.Core;
 
 namespace Assets.Scripts.UnityGame.Mapping
 {
@@ -21,6 +23,7 @@ namespace Assets.Scripts.UnityGame.Mapping
         public string OwnerClanShortName { get; private set; } = "Neutral";
 
         public bool IsRazed { get; private set; }
+        public bool RuntimeCreated { get; set; }
 
         public void Awake()
         {
@@ -41,12 +44,20 @@ namespace Assets.Scripts.UnityGame.Mapping
             {
                 GetRenderer().sprite = sprite;
             }
+            GetRenderer().color = Color.white;
+            if (sprite == this.neutralTower && this.OwnerClanShortName != "Neutral" && Game.IsInitialized())
+            {
+                var clan = Game.Current.Players.FirstOrDefault(player => player.Clan.ShortName == this.OwnerClanShortName)?.Clan;
+                if (clan != null)
+                    GetRenderer().color = MinimapCityOverlay.ResolveColor(clan.Info.PrimaryColor ?? clan.Info.Color);
+            }
         }
 
         public void SetRazed()
         {
             this.IsRazed = true;
             this.OwnerClanShortName = "Neutral";
+            GetRenderer().color = Color.white;
 
             if (this.razedTower != null)
             {

@@ -237,6 +237,7 @@ namespace Assets.Scripts.Managers
             {
                 // TODO: Perhaps say "you found nothing"?
                 Debug.Log("No location on this tile.");
+                return;
             }
 
             Command command;
@@ -263,6 +264,7 @@ namespace Assets.Scripts.Managers
 
         internal void Build()
         {
+            if (!GetUnityManager().InputManager.CanAcceptGameplayInput) return;
             if (!Game.Current.ArmiesSelected())
             {
                 NotifyUser("You must have an army selected to build.");
@@ -273,7 +275,7 @@ namespace Assets.Scripts.Managers
             var city = armies[0].Tile.City;
             if (city == null)
             {
-                NotifyUser("Tower building is not yet supported.");
+                this.commandController.AddCommand(new BuildTowerCommand(armies, armies[0].Tile));
                 return;
             }
 
@@ -283,6 +285,7 @@ namespace Assets.Scripts.Managers
 
         internal void RazeCity()
         {
+            if (!GetUnityManager().InputManager.CanAcceptGameplayInput) return;
             if (!Game.Current.ArmiesSelected())
             {
                 return;

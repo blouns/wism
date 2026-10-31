@@ -154,6 +154,16 @@ namespace Assets.Scripts.UI
 #endif
         }
 
+        public static bool BuildPressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.B)) return true;
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.bKey.wasPressedThisFrame;
+#else
+            return false;
+#endif
+        }
+
         public static bool ManagementOrLoadPressedThisFrame(out bool shiftHeld)
         {
             shiftHeld = false;
@@ -214,7 +224,9 @@ namespace Assets.Scripts.UI
 #endif
         }
 
-        public static bool ItemPickerCancelPressed()
+        public static bool ItemPickerCancelPressed() => CancelPressedThisFrame();
+
+        public static bool CancelPressedThisFrame()
         {
             if (Input.GetKeyDown(KeyCode.Escape)) return true;
 #if ENABLE_INPUT_SYSTEM
