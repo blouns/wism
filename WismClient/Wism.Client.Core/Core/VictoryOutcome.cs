@@ -372,12 +372,18 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(world));
             }
 
-            if (offer == null || !offer.SurrenderEligible || string.IsNullOrWhiteSpace(offer.WinnerClanShortName))
+            RequireCurrentPendingOffer(game, offer, "accepted");
+            var winners = game.Players?
+                .Where(player => player.Clan.ShortName == offer.WinnerClanShortName)
+                .ToArray() ?? Array.Empty<Player>();
+            if (winners.Length != 1 || winners[0].IsDead)
             {
-                throw new InvalidOperationException("A surrender offer is required before surrender can be accepted.");
+                throw new InvalidOperationException(
+                    "A surrender can only be accepted for a single surviving clan on this game's roster.");
             }
 
-            var winner = game.Players.Single(player => player.Clan.ShortName == offer.WinnerClanShortName);
+            // Every check above precedes the first ownership or state change below.
+            var winner = winners[0];
             foreach (var player in game.Players.Where(player => player != winner).ToArray())
             {
                 foreach (var army in player.GetArmies().ToArray())
@@ -406,12 +412,27 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(game));
             }
 
-            if (offer == null || !offer.SurrenderEligible)
-            {
-                throw new InvalidOperationException("A surrender offer is required before surrender can be rejected.");
-            }
-
+            RequireCurrentPendingOffer(game, offer, "rejected");
             game.SetVictoryOutcome(offer.WithOutcome(VictoryOutcomeKind.RejectedSurrender, false));
+        }
+
+        /// <summary>
+        ///     A surrender decision applies only to the offer this game currently holds as its
+        ///     pending outcome. A retained, replaced, rejected, accepted or foreign snapshot is
+        ///     refused, as is any decision once the game is over.
+        /// </summary>
+        private static void RequireCurrentPendingOffer(Game game, VictoryOutcomeSnapshot offer, string decision)
+        {
+            if (offer == null ||
+                !ReferenceEquals(offer, game.VictoryOutcome) ||
+                offer.OutcomeKind != VictoryOutcomeKind.SurrenderOffered ||
+                !offer.SurrenderEligible ||
+                string.IsNullOrWhiteSpace(offer.WinnerClanShortName) ||
+                game.GameState == GameState.GameOver)
+            {
+                throw new InvalidOperationException(
+                    $"Only this game's current pending surrender offer can be {decision}.");
+            }
         }
 
         private static IReadOnlyList<VictoryClanStanding> BuildStandings(World world, IReadOnlyList<Player> players)

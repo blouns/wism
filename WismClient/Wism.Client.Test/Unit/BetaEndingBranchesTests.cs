@@ -30,7 +30,7 @@ namespace Wism.Client.Test.Unit;
 ///     World/Player state. See docs/acceptance/beta-ending-branches.md.
 /// </summary>
 [TestFixture, NonParallelizable]
-public sealed class BetaEndingBranchesTests
+public sealed partial class BetaEndingBranchesTests
 {
     private const string Human = "Sirians";
     private const string Rival = "LordBane";
@@ -247,11 +247,14 @@ public sealed class BetaEndingBranchesTests
         Assert.That(CountNeutralCities(), Is.EqualTo(neutralBefore), "Conquest does not claim neutral cities.");
         Assert.That(outcome.UnclaimedCityShare, Is.EqualTo(Math.Round(neutralBefore / (double)IlluriaCities, 4)));
         Assert.That(neutralBefore, Is.GreaterThan(0));
+        this.AssertNoFurtherTurnsOrAi();
 
         SaveAndReload(terminalSerializer: true);
         Assert.That(Game.Current.GameState, Is.EqualTo(GameState.GameOver));
         Assert.That(Game.Current.VictoryOutcome.OutcomeKind, Is.EqualTo(VictoryOutcomeKind.Conquest));
         Assert.That(Game.Current.VictoryOutcome.WinnerClanShortName, Is.EqualTo(Human));
+        this.UseFreshControllers();
+        this.AssertNoFurtherTurnsOrAi();
     }
 
     // ------------------------------------------------------------------
