@@ -47,8 +47,8 @@ namespace Wism.Client.Commands.Armies
     /// Uses Command rather than ArmyCommand so empty and null batches can be rejected safely.
     /// </summary>
     /// <remarks>
-    /// Game snapshots support the resulting state. Legacy CommandPersistence requires
-    /// a disband entity registration before serializing this command in command history.
+    /// Game snapshots support the resulting state. Command history retains the original
+    /// requested IDs, including rejected entries; this is not an executable replay format.
     /// </remarks>
     public sealed class DisbandArmiesCommand : Command
     {
