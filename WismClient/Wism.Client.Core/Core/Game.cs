@@ -159,32 +159,34 @@ namespace Wism.Client.Core
         }
 
         /// <summary>
-        ///     Gets the next alive player
+        ///     Gets the next alive player in seat order without changing the turn.
         /// </summary>
-        /// <returns>Player whose turn is next, or null if no players are alive</returns>
+        /// <returns>
+        ///     The first alive seat after the current one, wrapping around the roster. When every
+        ///     other seat is dead this is the current player if alive, otherwise null.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">The roster has not been initialized.</exception>
+        /// <remarks>
+        ///     Visits each seat at most once, so dead seats can never make the lookup spin.
+        /// </remarks>
         public Player GetNextPlayer()
         {
-            if (this.Players == null || this.Players.Count == 0)
-            {
-                throw new InvalidOperationException("Players have not been initialized.");
-            }
+            // Throws when the roster has not been initialized.
+            this.GetCurrentPlayer();
+            var count = this.Players.Count;
 
-            var currentPlayer = this.GetCurrentPlayer();
-
-            // Find the next alive player
-            var nextPlayer = this.Players[(this.CurrentPlayerIndex + 1) % this.Players.Count];
-            while (nextPlayer.IsDead)
+            // Seats after the current one, wrapping around and ending on the current seat.
+            for (var offset = 1; offset <= count; offset++)
             {
-                nextPlayer = this.Players[(this.CurrentPlayerIndex + 1) % this.Players.Count];
-                if (nextPlayer == currentPlayer)
+                var candidate = this.Players[(this.CurrentPlayerIndex + offset) % count];
+                if (!candidate.IsDead)
                 {
-                    // No players are alive
-                    nextPlayer = null;
-                    break;
+                    return candidate;
                 }
             }
 
-            return nextPlayer;
+            // Every seat, including the current one, is dead.
+            return null;
         }
 
         /// <summary>

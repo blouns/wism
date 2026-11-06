@@ -1189,6 +1189,7 @@ public class PlaygroundScenarioRunnerTests
                 false))
             .ToArray();
         var offer = VictoryEvaluator.EvaluateClassicSurrender(standings, totalCities: 80, turn: 40);
+        Game.Current.SetVictoryOutcome(offer);
 
         VictoryEvaluator.RejectSurrender(Game.Current, offer);
 
