@@ -142,6 +142,7 @@ public sealed class TerminalCampaignTests
         var standings = new[] { new VictoryClanStanding(winner.Clan.ShortName, winner.Clan.DisplayName, 50, 20, 500, true, false) }
             .Concat(Enumerable.Range(0, 7).Select(i => new VictoryClanStanding("rival" + i, "Rival " + i, 4, 3, 40, false, false))).ToArray();
         var offer = VictoryEvaluator.EvaluateClassicSurrender(standings, 80, 40);
+        game.SetVictoryOutcome(offer);
 
         Assert.DoesNotThrow(() => VictoryEvaluator.AcceptSurrender(game, World.Current, offer));
         Assert.That(game.GameState, Is.EqualTo(GameState.GameOver));
