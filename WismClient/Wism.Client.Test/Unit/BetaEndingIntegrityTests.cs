@@ -243,6 +243,37 @@ public sealed partial class BetaEndingBranchesTests
     }
 
     // ------------------------------------------------------------------
+    // Thresholds scale with the map's city count (manual: >40 of 80 cities, lead >15)
+    // ------------------------------------------------------------------
+
+    [TestCase(40, 21, 13, true, TestName = "ClassicSurrender_40CityMap_Over50PercentWithLeadOver18Point75Percent_IsOffered")]
+    [TestCase(40, 20, 1, false, TestName = "ClassicSurrender_40CityMap_Exactly50Percent_IsNotOffered")]
+    [TestCase(40, 21, 14, false, TestName = "ClassicSurrender_40CityMap_LeadOf17Point5Percent_IsNotOffered")]
+    [TestCase(160, 81, 65, false, TestName = "ClassicSurrender_160CityMap_IllurianLeadOf16_IsNotEnough")]
+    [TestCase(160, 81, 51, false, TestName = "ClassicSurrender_160CityMap_LeadOfExactly30_IsNotOffered")]
+    [TestCase(160, 81, 50, true, TestName = "ClassicSurrender_160CityMap_LeadOf31_IsOffered")]
+    [TestCase(10, 6, 0, true, TestName = "ClassicSurrender_10CityMap_AtTheMinimumSize_IsOffered")]
+    [TestCase(9, 9, 0, false, TestName = "ClassicSurrender_9CityMap_BelowTheMinimumSize_IsNeverOffered")]
+    public void ClassicSurrender_ThresholdsAreAShareOfTheMapsCities(
+        int totalCities,
+        int humanCities,
+        int strongestComputerCities,
+        bool expectedOffer)
+    {
+        var standings = new[]
+        {
+            new VictoryClanStanding("Human", "Human", humanCities, 5, 50, true, false),
+            new VictoryClanStanding("Strongest", "Strongest", strongestComputerCities, 3, 10, false, false),
+            new VictoryClanStanding("Weakest", "Weakest", 0, 1, 0, false, false)
+        };
+
+        var offer = VictoryEvaluator.EvaluateClassicSurrender(standings, totalCities, turn: 40);
+
+        Assert.That(offer.SurrenderEligible, Is.EqualTo(expectedOffer));
+        Assert.That(offer.OutcomeKind, Is.EqualTo(expectedOffer ? VictoryOutcomeKind.SurrenderOffered : VictoryOutcomeKind.None));
+    }
+
+    // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
 

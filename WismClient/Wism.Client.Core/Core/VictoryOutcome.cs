@@ -221,6 +221,23 @@ namespace Wism.Client.Core
 
     public static class VictoryEvaluator
     {
+        /// <summary>
+        ///     The Warlords manual's classic rule on the 80-city Illuria map: surviving computer
+        ///     clans offer surrender when the human holds more than 40 cities and the strongest
+        ///     computer is not within 15 cities. Other maps scale both by their own city count
+        ///     (more than 50% of all cities, and a lead of more than 18.75% of all cities).
+        /// </summary>
+        public const int ClassicSurrenderReferenceCities = 80;
+
+        /// <summary>Cities the human must exceed on the 80-city reference map.</summary>
+        public const int ClassicSurrenderCities = 40;
+
+        /// <summary>Lead over the strongest computer the human must exceed on the reference map.</summary>
+        public const int ClassicSurrenderLead = 15;
+
+        /// <summary>Maps with fewer cities than this never offer the classic surrender.</summary>
+        public const int ClassicSurrenderMinimumCities = 10;
+
         public static VictoryOutcomeSnapshot None(int turn = 0)
         {
             return new VictoryOutcomeSnapshot(
@@ -284,8 +301,9 @@ namespace Wism.Client.Core
             var surrenderEligible = human != null &&
                                     rosterHumans == 1 &&
                                     computers.Length > 0 &&
-                                    human.CityCount > 40 &&
-                                    strongestComputerCities < human.CityCount - 15;
+                                    totalCities >= ClassicSurrenderMinimumCities &&
+                                    ExceedsClassicShare(human.CityCount, ClassicSurrenderCities, totalCities) &&
+                                    ExceedsClassicShare(human.CityCount - strongestComputerCities, ClassicSurrenderLead, totalCities);
 
             return CreateSnapshot(
                 surrenderEligible ? VictoryOutcomeKind.SurrenderOffered : VictoryOutcomeKind.None,
@@ -501,6 +519,16 @@ namespace Wism.Client.Core
                 dominanceEligible,
                 dominancePolicyId,
                 surrenderEligible);
+        }
+
+        /// <summary>
+        ///     True when <paramref name="count" /> of <paramref name="totalCities" /> is a larger share
+        ///     than <paramref name="referenceCount" /> of the reference map's cities. Integer
+        ///     cross-multiplication keeps the Illuria boundaries exact.
+        /// </summary>
+        private static bool ExceedsClassicShare(int count, int referenceCount, int totalCities)
+        {
+            return (long)count * ClassicSurrenderReferenceCities > (long)referenceCount * totalCities;
         }
 
         private static double Ratio(int numerator, int denominator)

@@ -41,8 +41,11 @@ The offer applies to a campaign with exactly one human seat against any number o
 | --- | --- |
 | Human seats on the roster | exactly 1, still in the war |
 | Computer clans still in the war (not yet eliminated) | at least 1 |
-| Cities owned by the human | more than 40 (41 or more) |
-| Cities owned by the strongest computer clan | fewer than the human's count minus 15 (a lead of 16 or more; a lead of exactly 15 is not enough) |
+| Cities on the map, including neutral cities | at least 10 (smaller maps never receive the offer) |
+| Cities owned by the human | more than 50% of the map's cities (on Illuria's 80: more than 40, so 41 or more) |
+| Human's lead over the strongest computer clan | more than 18.75% of the map's cities (on Illuria: more than 15, so 16 or more; exactly 15 is not enough) |
+
+The Warlords manual states the rule for Illuria: the surviving computer players offer surrender when the human has more than 40 cities and the most powerful computer player is not within 15 cities. WISM keeps those exact boundaries on the 80-city map and scales both by each map's own city count. For example, a 40-city map needs 21 cities and a lead of 8, and a 160-city map needs 81 cities and a lead of 31.
 
 - Neutral cities count toward the realm total and the unclaimed share. They never count toward the human or any computer clan.
 - Eliminated computer clans do not close the offer. The lead is measured against the strongest computer clan still in the war.
@@ -71,7 +74,7 @@ After any ending, turn commands fail and the classic computer AI produces no ord
 | Topic | Intended rule | Current behavior | Status |
 | --- | --- | --- | --- |
 | Who offers surrender | In a one-human campaign, the *surviving* computer clans offer surrender, whatever the map's clan count. | Any one-human campaign with at least one computer clan still in the war. Eliminated computer clans do not close the offer. | Fixed. |
-| Configurable thresholds | Scenario and mod worlds can tune the surrender thresholds. | The 40-city and 15-city-lead values are fixed in code and sized for the 80-city Illuria map. | Not yet implemented. |
+| Map-relative thresholds | Thresholds follow each map's size. | Both thresholds are shares of the map's cities (the Illuria values scaled by city count). Maps under 10 cities never offer. | Fixed. Per-mod tuning is not implemented. |
 | Rejected surrender | The remaining computer clans fight on as a desperate opposing bloc. | The rejection is recorded and the war continues. Computer strategy does not change. | Not yet implemented. |
 | Pending offer pause | The human decides before play continues. | WismUnity pauses play. The rules engine itself does not block turns while an offer is pending, and the terminal and agent runtimes do not present the offer. | By design. Front ends own the pause. |
 | Offer validation | Only the campaign's current pending offer can be accepted or rejected. | Accept and reject refuse any offer that is not the campaign's current pending result, and any decision after the campaign has ended, before changing anything. | Fixed. |
@@ -89,6 +92,7 @@ After any ending, turn commands fail and the classic computer AI produces no ord
 | No offer at 40 cities | BEB `..._40Cities_HugeLead_IsNotOffered`; `PlaygroundScenarioRunnerTests.ClassicSurrender_DoesNotTriggerAtFortyCitiesOrCloseComputer` | — |
 | Neutral cities count toward the total only | BEB boundary cases (unclaimed share and neutral count) | — |
 | Computer that just lost its last city still counts | BEB `ClassicSurrender_AtHumanEndTurn_StillCountsAComputerThatJustLostItsLastCity` | — |
+| Thresholds scale with the map's city count; no offer under 10 cities | BEB `ClassicSurrender_*CityMap_*` | — |
 | Offer after computer eliminations and on maps with any number of computer clans | BEB `ClassicSurrender_IsStillOfferedAfterAComputerClanIsEliminated`, `ClassicSurrender_*ClanMap_*` | — |
 | No offer in AI-only or hotseat campaigns | BEB `ClassicSurrender_IsNeverOfferedInAiOnlyCampaign_EvenToADominantComputer`, `Hotseat_...`; `PlaygroundScenarioRunnerTests.ClassicSurrender_DoesNotTriggerForMultiHumanOrAiOnlyGames` | — |
 | Pending offer survives save and load, then is accepted | BEB `PendingOffer_SurvivesUnitySaveLoad_...`, `PendingOffer_SurvivesTerminalSaveLoad_...` | `CampaignPresentation_LoadedOfferResumesWithoutQueuedEndTurn` (reject path) |
