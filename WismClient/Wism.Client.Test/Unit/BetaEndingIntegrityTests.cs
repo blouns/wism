@@ -198,6 +198,51 @@ public sealed partial class BetaEndingBranchesTests
     }
 
     // ------------------------------------------------------------------
+    // The offer does not depend on how many computer clans the map has or has lost
+    // ------------------------------------------------------------------
+
+    [Test]
+    public void ClassicSurrender_IsStillOfferedAfterAComputerClanIsEliminated()
+    {
+        this.CreateIlluriaCampaign(Human);
+        var human = Seat(Human);
+        GrowTo(human, 40);
+        this.CaptureLastCityAndEliminate(human, Seat("StormGiants"));
+        GrowTo(Seat(Rival), 25);
+
+        var offer = VictoryEvaluator.EvaluateClassicSurrender(World.Current, Game.Current.Players, human.Turn);
+
+        Assert.That(Seat("StormGiants").IsDead, Is.True);
+        Assert.That(human.GetCities().Count, Is.EqualTo(41));
+        Assert.That(offer.ActiveClanCount, Is.EqualTo(Seats.Length - 1));
+        Assert.That(offer.SurrenderEligible, Is.True,
+            "41 cities with a 16-city lead over the strongest computer, six computers still fighting.");
+    }
+
+    [TestCase(1, 0, true, TestName = "ClassicSurrender_TwoClanMap_OneComputer_IsOffered")]
+    [TestCase(3, 0, true, TestName = "ClassicSurrender_FourClanMap_ThreeComputers_IsOffered")]
+    [TestCase(5, 4, true, TestName = "ClassicSurrender_SixClanMap_OneOfFiveComputersLeft_IsOffered")]
+    [TestCase(3, 3, false, TestName = "ClassicSurrender_FourClanMap_EveryComputerEliminated_IsNotOffered")]
+    public void ClassicSurrender_AppliesToAnyComputerClanCount(int computers, int eliminated, bool expectedOffer)
+    {
+        var standings = new[] { new VictoryClanStanding("Human", "Human", 41, 10, 100, true, false) }
+            .Concat(Enumerable.Range(0, computers).Select(index => new VictoryClanStanding(
+                "Computer" + index,
+                "Computer " + index,
+                index < eliminated ? 0 : index == eliminated ? 25 : 1,
+                index < eliminated ? 0 : 3,
+                10,
+                false,
+                index < eliminated)))
+            .ToArray();
+
+        var offer = VictoryEvaluator.EvaluateClassicSurrender(standings, totalCities: 80, turn: 40);
+
+        Assert.That(offer.SurrenderEligible, Is.EqualTo(expectedOffer));
+        Assert.That(offer.ActiveClanCount, Is.EqualTo(1 + computers - eliminated));
+    }
+
+    // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
 

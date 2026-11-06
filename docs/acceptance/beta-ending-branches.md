@@ -35,17 +35,18 @@ The executable regression suite for these branches is `WismClient/Wism.Client.Te
 
 ### Classic Surrender Offer
 
-The offer applies only to a campaign with one human seat against seven computer clans. As implemented today, every one of the following must hold:
+The offer applies to a campaign with exactly one human seat against any number of computer clans. The number of clans varies per map, so it is not part of the rule. Every one of the following must hold:
 
 | Condition | Threshold |
 | --- | --- |
-| Human seats still in the war | exactly 1 |
-| Computer clans still in the war (not yet eliminated) | exactly 7 |
+| Human seats on the roster | exactly 1, still in the war |
+| Computer clans still in the war (not yet eliminated) | at least 1 |
 | Cities owned by the human | more than 40 (41 or more) |
 | Cities owned by the strongest computer clan | fewer than the human's count minus 15 (a lead of 16 or more; a lead of exactly 15 is not enough) |
 
 - Neutral cities count toward the realm total and the unclaimed share. They never count toward the human or any computer clan.
-- A computer clan that has just lost its last city still counts as one of the seven until its own next turn start eliminates it.
+- Eliminated computer clans do not close the offer. The lead is measured against the strongest computer clan still in the war.
+- A computer clan that has just lost its last city is still in the war until its own next turn start eliminates it.
 - AI-only campaigns never receive an offer, however dominant one computer clan becomes.
 - Evaluating the offer has no side effects. WismUnity evaluates it after a human ends a turn, and only while no result has been recorded yet. If the offer is eligible, WismUnity records it as the campaign's pending result. It then pauses the game until the human decides, before any computer turn runs.
 
@@ -69,8 +70,8 @@ After any ending, turn commands fail and the classic computer AI produces no ord
 
 | Topic | Intended rule | Current behavior | Status |
 | --- | --- | --- | --- |
-| Who offers surrender | In a one-human versus seven-computer campaign, the *surviving* computer clans offer surrender. | All seven computer clans must still be in the war. Once any computer clan is eliminated, the offer can no longer appear in that campaign. | Open rule decision. A minimal evaluator change has been proposed for review. |
-| Configurable thresholds | Scenario and mod worlds can tune the surrender thresholds. | The 40-city, 15-city-lead and seven-computer values are fixed in code. | Not yet implemented. |
+| Who offers surrender | In a one-human campaign, the *surviving* computer clans offer surrender, whatever the map's clan count. | Any one-human campaign with at least one computer clan still in the war. Eliminated computer clans do not close the offer. | Fixed. |
+| Configurable thresholds | Scenario and mod worlds can tune the surrender thresholds. | The 40-city and 15-city-lead values are fixed in code and sized for the 80-city Illuria map. | Not yet implemented. |
 | Rejected surrender | The remaining computer clans fight on as a desperate opposing bloc. | The rejection is recorded and the war continues. Computer strategy does not change. | Not yet implemented. |
 | Pending offer pause | The human decides before play continues. | WismUnity pauses play. The rules engine itself does not block turns while an offer is pending, and the terminal and agent runtimes do not present the offer. | By design. Front ends own the pause. |
 | Offer validation | Only the campaign's current pending offer can be accepted or rejected. | Accept and reject refuse any offer that is not the campaign's current pending result, and any decision after the campaign has ended, before changing anything. | Fixed. |
@@ -88,6 +89,7 @@ After any ending, turn commands fail and the classic computer AI produces no ord
 | No offer at 40 cities | BEB `..._40Cities_HugeLead_IsNotOffered`; `PlaygroundScenarioRunnerTests.ClassicSurrender_DoesNotTriggerAtFortyCitiesOrCloseComputer` | — |
 | Neutral cities count toward the total only | BEB boundary cases (unclaimed share and neutral count) | — |
 | Computer that just lost its last city still counts | BEB `ClassicSurrender_AtHumanEndTurn_StillCountsAComputerThatJustLostItsLastCity` | — |
+| Offer after computer eliminations and on maps with any number of computer clans | BEB `ClassicSurrender_IsStillOfferedAfterAComputerClanIsEliminated`, `ClassicSurrender_*ClanMap_*` | — |
 | No offer in AI-only or hotseat campaigns | BEB `ClassicSurrender_IsNeverOfferedInAiOnlyCampaign_EvenToADominantComputer`, `Hotseat_...`; `PlaygroundScenarioRunnerTests.ClassicSurrender_DoesNotTriggerForMultiHumanOrAiOnlyGames` | — |
 | Pending offer survives save and load, then is accepted | BEB `PendingOffer_SurvivesUnitySaveLoad_...`, `PendingOffer_SurvivesTerminalSaveLoad_...` | `CampaignPresentation_LoadedOfferResumesWithoutQueuedEndTurn` (reject path) |
 | Accept: whole realm, inspection mode, play stops | BEB `PendingOffer_*`; `TerminalCampaignTests.AcceptSurrender_TransfersNeutralDefendersAndPreservesArmiesThroughLoad`, `AcceptedSurrenderIdentity_SurvivesSerialization` | `CampaignPresentation_AcceptTransfersRealmThenFreezesForInspection` |
@@ -110,7 +112,7 @@ After any ending, turn commands fail and the classic computer AI produces no ord
 The PlayMode tests above inject the offer or drive elimination through the rules engine directly. Check these by hand in WismUnity before Beta sign-off:
 
 1. **Offer raised by real play.** In a one-human Illuria campaign, end a turn holding 41 or more cities with a lead of 16 or more. The peace offer (arrival, scroll, choice) must appear before any computer turn runs. It must not appear at a lead of exactly 15.
-2. **Offer withdrawn by an elimination.** Eliminate one computer clan, then reach the thresholds. Confirm the product decision on whether the offer should still appear (see the table above).
+2. **Offer after an elimination.** Eliminate one computer clan, then reach the thresholds. The offer must still appear.
 3. **Rejection holds across sessions.** Reject, save, quit, load, and grow the lead further. The offer must never return. Computer turns resume immediately after "Continue War".
 4. **Accept after load.** Save while the offer is on screen, load, and accept. All 80 cities show the winner's colors, the victory, dominion and inspection pages appear, and map and city inspection still work while end turn, movement and production are unavailable.
 5. **Human defeat in play.** Lose the last city. The "For you, the war is over" notice appears. The defeated seat can no longer act, and the game does not wait for input from it. Computer turns run to the end, and the final message names the winning clan.

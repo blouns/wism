@@ -277,9 +277,13 @@ namespace Wism.Client.Core
             var runnerUp = ordered.Skip(1).FirstOrDefault();
             var human = humans.Length == 1 ? humans[0] : null;
             var strongestComputerCities = computers.Length == 0 ? 0 : computers.Max(standing => standing.CityCount);
+            // One human seat on the roster (a hotseat campaign stays hotseat after its other
+            // humans fall) against any number of computer clans, at least one still fighting.
+            // The clan count varies per map, so it is not part of the rule.
+            var rosterHumans = standings.Count(standing => standing.IsHuman);
             var surrenderEligible = human != null &&
-                                    humans.Length == 1 &&
-                                    computers.Length == 7 &&
+                                    rosterHumans == 1 &&
+                                    computers.Length > 0 &&
                                     human.CityCount > 40 &&
                                     strongestComputerCities < human.CityCount - 15;
 
