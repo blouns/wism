@@ -9,6 +9,26 @@ namespace Assets.Scripts.UI
 {
     public static class WismUiInputAdapter
     {
+        public static bool MenuPressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.F10)) return true;
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.f10Key.wasPressedThisFrame;
+#else
+            return false;
+#endif
+        }
+
+        public static bool DisbandPressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.Delete)) return true;
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.deleteKey.wasPressedThisFrame;
+#else
+            return false;
+#endif
+        }
+
         public static bool InventoryPressedThisFrame()
         {
             if (Input.GetKeyDown(KeyCode.I)) return true;

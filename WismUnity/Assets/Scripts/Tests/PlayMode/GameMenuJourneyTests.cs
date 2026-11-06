@@ -166,6 +166,9 @@ public sealed partial class ArmyUiInputTests
     private Button MenuButton(string name) => unity.GameMenu.GetComponentsInChildren<Button>(true).Single(button => button.name == name);
     private Vector2 MenuPoint(string name)
     {
+        // Legacy journeys target a menu tab directly; reveal the collapsed navigation first.
+        if (name == "OpenReports" || name == "OpenViewMenu" || name == "OpenOrdersMenu")
+            unity.GameMenu.Open();
         Canvas.ForceUpdateCanvases();
         var rect = (RectTransform)MenuButton(name).transform;
         return RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));

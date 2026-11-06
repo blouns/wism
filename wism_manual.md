@@ -10,7 +10,8 @@ Right-click + Drag		Move map
 Army Actions:
 M	Open Army Picker (select armies)
 N	Select next army with moves
-D	Defect army (skipped by 'N')
+D	Defend selected armies and select the next army
+Delete	Disband selected ordinary armies, with confirmation; heroes are preserved
 Q	Quit army (skipped by 'N' until next turn)
 Z	Search location (some locations require a Hero)
 
@@ -33,6 +34,8 @@ Shift+L	Load game
 X / Ctrl+Q	Request application exit with confirmation (not Army Quit)
 
 Game menu:
+Menu / F10	Open the menu; the other menu tabs stay hidden during ordinary play.
+Escape	Close the menu or cancel a pending Disband confirmation without an order.
 Observe AI Moves	Follow nonhuman army movement; off leaves the camera where you put it.
 Show AI Combat	Show AI-versus-AI battles independently of movement observation.
 Save Game / Load Game	Open the existing save/load picker when safe.
@@ -47,6 +50,11 @@ selection. Disabled if there is no owned capital. Available during final inspect
 
 Orders menu:
 Build / Raze	Use the selected army to build or destroy a structure.
+Disband	Preview the ordinary armies to remove and the heroes to preserve.
+Cancel or Escape leaves the stack unchanged. Confirm permanently removes only
+the previewed ordinary armies and immediately reduces upkeep. Heroes and their
+artifacts remain. A changed selection or unavailable turn cannot reuse an old
+confirmation. Army Quit is still a temporary selection skip, not Disband.
 A new tower costs 100 gp and can only be built on clear plains. Confirm the
 quoted price to build; Cancel or Escape leaves your gold and the site unchanged.
 Razing a tower turns it into permanent ruins and removes its defense bonus.

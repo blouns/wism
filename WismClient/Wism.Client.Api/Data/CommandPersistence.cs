@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Armies;
 using Wism.Client.Commands.Games;
@@ -40,7 +41,12 @@ namespace Wism.Client.Data
             CommandEntity snapshot;
 
             // Army command
-            snapshot = SnapshotArmyCommand(command);
+            snapshot = command is DisbandArmiesCommand disband
+                ? new DisbandArmiesCommandEntity
+                {
+                    RequestedArmyIds = disband.Armies?.Select(army => army == null ? (int?)null : army.Id).ToArray()
+                }
+                : SnapshotArmyCommand(command);
 
             // City command
             if (snapshot == null)

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Assets.Scripts.Managers;
+using Wism.Client.Commands.Armies;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -32,6 +33,13 @@ namespace Assets.Scripts.UI
         private Button ordersButton;
         private Button buildButton;
         private Button razeButton;
+        private Button disbandButton;
+        private GameObject disbandConfirmation;
+        private Text disbandTitle;
+        private Text disbandDetails;
+        private ScrollRect disbandScroll;
+        private Button disbandCancel;
+        private DisbandArmiesCommand pendingDisband;
         private Toggle observeToggle;
         private Toggle combatToggle;
         public StrategicReportView Reports { get; private set; }
@@ -48,6 +56,7 @@ namespace Assets.Scripts.UI
 
         public bool IsOpen => shield != null && shield.activeSelf;
         public bool IsConfirmingExit => confirmation != null && confirmation.activeSelf;
+        public bool IsConfirmingDisband => disbandConfirmation != null && disbandConfirmation.activeSelf;
         public Action ApplicationExit { get; set; } = ExitApplication;
 
         public void Initialize(UnityManager owner)
@@ -67,7 +76,7 @@ namespace Assets.Scripts.UI
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1024, 768);
             scaler.matchWidthOrHeight = 1;
-            openButton = Button(canvasRoot.transform, "OpenGameMenu", "Game", "game.menu", Open);
+            openButton = Button(canvasRoot.transform, "OpenGameMenu", "Menu", "game.menu", () => { if (IsOpen) Cancel(); else Open(); });
             Place((RectTransform)openButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(100, 44));
             reportsButton = Button(canvasRoot.transform, "OpenReports", "Reports", "game.reports", () => OpenReports());
             Place((RectTransform)reportsButton.transform, new Vector2(0, 1), new Vector2(116, -8), new Vector2(128, 44));
@@ -101,11 +110,13 @@ namespace Assets.Scripts.UI
             Place((RectTransform)heroesButton.transform, new Vector2(0, 1), new Vector2(8, -104), new Vector2(224, 44));
             viewMenu.SetActive(false);
             ordersMenu = Panel(shield.transform, "OrdersMenu", Stone);
-            Place((RectTransform)ordersMenu.transform, new Vector2(0, 1), new Vector2(360, -56), new Vector2(240, 108));
+            Place((RectTransform)ordersMenu.transform, new Vector2(0, 1), new Vector2(360, -56), new Vector2(240, 156));
             buildButton = Button(ordersMenu.transform, "Build", "Build", "orders.build", () => Order(true));
             razeButton = Button(ordersMenu.transform, "Raze", "Raze", "orders.raze", () => Order(false));
+            disbandButton = Button(ordersMenu.transform, "Disband", "Disband...", "orders.disband", RequestDisband);
             Place((RectTransform)buildButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(224, 44));
             Place((RectTransform)razeButton.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(224, 44));
+            Place((RectTransform)disbandButton.transform, new Vector2(0, 1), new Vector2(8, -104), new Vector2(224, 44));
             ordersMenu.SetActive(false);
 
             confirmation = Panel(shield.transform, "ExitConfirmation", Stone);
@@ -136,9 +147,11 @@ namespace Assets.Scripts.UI
             heroRoot.transform.SetParent(shield.transform, false);
             HeroControls = heroRoot.GetComponent<HeroControlsView>();
             HeroControls.Initialize(manager, font, Close);
+            InitializeDisband();
             WismUiSurface.Ensure(canvasRoot, "game-menu", WismUiControlState.Normal, WismUiControlState.Disabled);
             shield.SetActive(false);
             confirmation.SetActive(false);
+            SetNavigation(false);
         }
 
         private bool CanOpen => manager != null && manager.ExecutionMode == ExecutionMode.Running &&
@@ -160,6 +173,7 @@ namespace Assets.Scripts.UI
             reportsButton.interactable = IsOpen || CanOpen;
             viewButton.interactable = IsOpen || CanOpen;
             ordersButton.interactable = IsOpen || CanOpen;
+            if (!IsOpen && CanOpen && WismUiInputAdapter.MenuPressedThisFrame()) Open();
             if (!IsOpen && CanOpen && WismUiInputAdapter.ApplicationExitPressedThisFrame()) RequestExit();
             if (!IsOpen && CanOpen && manager.InteractiveUI)
             {
@@ -197,12 +211,14 @@ namespace Assets.Scripts.UI
             HeroControls.gameObject.SetActive(false);
             confirmation.SetActive(false);
             shield.SetActive(true);
+            SetNavigation(true);
             manager.InputManager.SetInputMode(InputMode.UI);
             Select(exitButton.gameObject);
         }
 
         public void RequestExit()
         {
+            if (IsConfirmingDisband) return;
             if (!IsOpen) Open();
             if (!IsOpen || exitRequested) return;
             menu.SetActive(false);
@@ -224,6 +240,7 @@ namespace Assets.Scripts.UI
         public void Cancel()
         {
             if (!IsOpen || exitRequested) return;
+            if (IsConfirmingDisband) { Close(); return; }
             if (IsConfirmingExit)
             {
                 confirmation.SetActive(false);
@@ -242,6 +259,9 @@ namespace Assets.Scripts.UI
             ordersMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
             confirmation.SetActive(false);
+            disbandConfirmation.SetActive(false);
+            pendingDisband = null;
+            SetNavigation(false);
             manager.InputManager.SetInputMode(previousMode);
             HeroControls.gameObject.SetActive(false);
             manager.InputManager.SkipInput();
@@ -257,12 +277,15 @@ namespace Assets.Scripts.UI
             if (viewMenu != null) viewMenu.SetActive(false);
             if (ordersMenu != null) ordersMenu.SetActive(false);
             if (HeroControls != null) HeroControls.gameObject.SetActive(false);
+            if (disbandConfirmation != null) disbandConfirmation.SetActive(false);
+            pendingDisband = null;
+            SetNavigation(false);
         }
 
         public void OpenReports(StrategicReportKind kind = StrategicReportKind.Cities)
         {
             if (!IsOpen) Open();
-            if (!IsOpen || IsConfirmingExit || exitRequested) return;
+            if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || exitRequested) return;
             menu.SetActive(false);
             viewMenu.SetActive(false);
             ordersMenu.SetActive(false);
@@ -273,7 +296,7 @@ namespace Assets.Scripts.UI
 
         private void OpenPersistence(bool saving)
         {
-            if (!IsOpen || IsConfirmingExit || !CanPersist) return;
+            if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || !CanPersist) return;
             Close();
             manager.HandleSaveLoadPicker(saving);
         }
@@ -281,7 +304,7 @@ namespace Assets.Scripts.UI
         public void OpenView()
         {
             if (!IsOpen) Open();
-            if (!IsOpen || IsConfirmingExit || exitRequested) return;
+            if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || exitRequested) return;
             menu.SetActive(false);
             Reports.gameObject.SetActive(false);
             viewMenu.SetActive(true);
@@ -293,7 +316,7 @@ namespace Assets.Scripts.UI
         public void OpenOrders()
         {
             if (!IsOpen) Open();
-            if (!IsOpen || IsConfirmingExit || exitRequested) return;
+            if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || exitRequested) return;
             menu.SetActive(false);
             viewMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
@@ -304,6 +327,10 @@ namespace Assets.Scripts.UI
             buildButton.interactable = razeButton.interactable = canOrder;
             buildButton.GetComponentInChildren<Text>().text = canOrder ? "Build" : "Build (unavailable)";
             razeButton.GetComponentInChildren<Text>().text = canOrder ? "Raze" : "Raze (unavailable)";
+            var preview = canOrder ? SelectedDisband()?.Preview() : null;
+            disbandButton.interactable = manager.InteractiveUI && preview?.CanExecute == true;
+            disbandButton.GetComponentInChildren<Text>().text = preview?.RejectionReason == DisbandRejectionReason.HeroesOnly
+                ? "Heroes protected" : "Disband...";
             Select(canOrder ? buildButton.gameObject : null);
         }
 
@@ -321,7 +348,7 @@ namespace Assets.Scripts.UI
             if (!IsOpen && (!CanOpen || !CanPersist || !CanInspectState || !manager.InteractiveUI ||
                 Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman != true)) return;
             if (!IsOpen) Open();
-            if (!IsOpen || !canInspectHeroes || !CanInspectState || IsConfirmingExit || exitRequested ||
+            if (!IsOpen || !canInspectHeroes || !CanInspectState || IsConfirmingExit || IsConfirmingDisband || exitRequested ||
                 manager.InputManager.EndTurnPending || Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman != true) return;
             menu.SetActive(false);
             viewMenu.SetActive(false);
@@ -335,6 +362,106 @@ namespace Assets.Scripts.UI
             if (!viewMenu.activeSelf || !manager.CanNavigateToCapital) return;
             Close();
             manager.GoToCapitol(Wism.Client.Core.Game.Current.GetCurrentPlayer());
+        }
+
+        private void SetNavigation(bool visible)
+        {
+            foreach (var button in new[] { reportsButton, viewButton, ordersButton })
+            {
+                if (button == null) continue;
+                button.gameObject.SetActive(visible);
+                if (visible) button.transform.SetAsLastSibling();
+            }
+            if (openButton != null) openButton.transform.SetAsLastSibling();
+        }
+
+        private DisbandArmiesCommand SelectedDisband()
+        {
+            var armies = Wism.Client.Core.Game.Current.GetSelectedArmies();
+            return armies == null ? null : new DisbandArmiesCommand(manager.GameManager.ControllerProvider.ArmyController, armies);
+        }
+
+        public void RequestDisband()
+        {
+            if (IsConfirmingExit || IsConfirmingDisband || !manager.InteractiveUI) return;
+            if (!IsOpen && (!CanOpen || !CanPersist || !manager.InputManager.CanAcceptGameplayInput)) return;
+            var candidate = SelectedDisband();
+            var preview = candidate?.Preview();
+            if (preview?.CanExecute != true) return;
+            if (!IsOpen) Open();
+            if (!IsOpen || !canIssueOrders || previousMode != InputMode.Game) return;
+            pendingDisband = candidate;
+            menu.SetActive(false);
+            ordersMenu.SetActive(false);
+            viewMenu.SetActive(false);
+            Reports.gameObject.SetActive(false);
+            HeroControls.gameObject.SetActive(false);
+            int count = preview.ArmiesToDisband.Count;
+            disbandTitle.text = $"Disband {count} {(count == 1 ? "army" : "armies")}?";
+            disbandDetails.text = "Remove permanently:\n" + string.Join("\n", preview.ArmiesToDisband.Select((army, index) => $"{index + 1}. {army.DisplayName}")) +
+                "\n\nKeep heroes and artifacts:\n" + (preview.HeroesToPreserve.Count == 0 ? "None selected" :
+                    string.Join("\n", preview.HeroesToPreserve.Select(hero => hero.DisplayName)));
+            disbandConfirmation.SetActive(true);
+            Canvas.ForceUpdateCanvases();
+            disbandDetails.rectTransform.sizeDelta = new Vector2(-24, Mathf.Max(disbandScroll.viewport.rect.height, disbandDetails.preferredHeight + 20));
+            disbandScroll.verticalNormalizedPosition = 1;
+            Select(disbandCancel.gameObject);
+        }
+
+        public void ConfirmDisband()
+        {
+            if (!IsConfirmingDisband || pendingDisband == null) return;
+            var command = pendingDisband;
+            var selected = Wism.Client.Core.Game.Current.GetSelectedArmies();
+            var valid = !manager.InputManager.EndTurnPending && previousMode == InputMode.Game &&
+                Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman == true &&
+                manager.LastCommandId == (manager.GameManager.ControllerProvider.CommandController.GetLastCommand()?.Id ?? 0) &&
+                selected != null && selected.SequenceEqual(command.Armies) && command.Preview().CanExecute;
+            Close();
+            if (valid) manager.GameManager.ControllerProvider.CommandController.AddCommand(command);
+        }
+
+        private void InitializeDisband()
+        {
+            disbandConfirmation = Panel(shield.transform, "DisbandConfirmation", Stone);
+            var rect = (RectTransform)disbandConfirmation.transform;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, .5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = new Vector2(700, 420);
+            disbandTitle = WismUiFactory.CreateText(rect, "DisbandTitle", "Disband armies?", 26, TextAnchor.MiddleLeft);
+            disbandTitle.font = font;
+            disbandTitle.color = Color.black;
+            disbandTitle.rectTransform.anchorMin = new Vector2(0, 1);
+            disbandTitle.rectTransform.anchorMax = Vector2.one;
+            disbandTitle.rectTransform.offsetMin = new Vector2(20, -64);
+            disbandTitle.rectTransform.offsetMax = new Vector2(-20, -12);
+            var scrollRoot = Panel(rect, "DisbandList", Color.white);
+            var scrollRect = (RectTransform)scrollRoot.transform;
+            Stretch(scrollRect);
+            scrollRect.offsetMin = new Vector2(20, 84);
+            scrollRect.offsetMax = new Vector2(-20, -76);
+            scrollRoot.AddComponent<RectMask2D>();
+            disbandScroll = scrollRoot.AddComponent<ScrollRect>();
+            disbandScroll.viewport = scrollRect;
+            disbandScroll.horizontal = false;
+            disbandScroll.movementType = ScrollRect.MovementType.Clamped;
+            disbandDetails = WismUiFactory.CreateText(scrollRect, "DisbandDetails", "", 22, TextAnchor.UpperLeft);
+            disbandDetails.font = font;
+            disbandDetails.color = Color.black;
+            disbandDetails.supportRichText = false;
+            disbandDetails.horizontalOverflow = HorizontalWrapMode.Wrap;
+            disbandDetails.verticalOverflow = VerticalWrapMode.Overflow;
+            disbandDetails.rectTransform.anchorMin = new Vector2(0, 1);
+            disbandDetails.rectTransform.anchorMax = Vector2.one;
+            disbandDetails.rectTransform.pivot = new Vector2(.5f, 1);
+            disbandDetails.rectTransform.anchoredPosition = new Vector2(0, -10);
+            disbandDetails.rectTransform.sizeDelta = new Vector2(-24, 0);
+            disbandScroll.content = disbandDetails.rectTransform;
+            disbandCancel = Button(rect, "CancelDisband", "Cancel", "orders.disband.cancel", Close);
+            var confirm = Button(rect, "ConfirmDisband", "Disband", "orders.disband.confirm", ConfirmDisband);
+            Place((RectTransform)disbandCancel.transform, Vector2.zero, new Vector2(20, 20), new Vector2(196, 44));
+            Place((RectTransform)confirm.transform, Vector2.right, new Vector2(-20, 20), new Vector2(196, 44));
+            disbandConfirmation.SetActive(false);
         }
 
         private Toggle Preference(string name, string label, string id, float y, UnityEngine.Events.UnityAction<bool> change)

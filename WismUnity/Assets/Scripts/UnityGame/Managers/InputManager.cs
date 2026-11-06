@@ -305,7 +305,10 @@ namespace Assets.Scripts.Managers
             {
                 this.GameManager.SearchLocation();
             }
-            // TODO: Add Disband action for armies
+            else if (WismUiInputAdapter.DisbandPressedThisFrame())
+            {
+                this.UnityManager.GameMenu.RequestDisband();
+            }
             // TODO: Add Find armies action
 
             // Hero actions
