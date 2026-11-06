@@ -41,15 +41,15 @@
   },
   {
     "ShortName": "Selentines",
-    "PrimaryColor": "(255, 0, 0)",
-    "SecondaryColor": "(0, 85, 119)",
+    "PrimaryColor": "(199, 199, 0)",
+    "SecondaryColor": "(0, 85, 199)",
     "DisplayName": "The Selentines",
     "Capitol": "Enmouth",
     "StartingGold": 1000
   },
   {
     "ShortName": "HorseLords",
-    "PrimaryColor": "(134, 199, 0)",
+    "PrimaryColor": "(0, 134, 199)",
     "SecondaryColor": "(0, 0, 0)",
     "DisplayName": "Horse Lords",
     "Capitol": "Dunethel",

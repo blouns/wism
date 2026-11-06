@@ -330,7 +330,7 @@ public class GameSetup : MonoBehaviour
             return GameSetupValidation.Invalid("World has no starting city for: " + string.Join(", ", missingStartClans));
         }
 
-        return GameSetupValidation.Valid("Ready.");
+        return GameSetupValidation.Valid(string.Empty);
     }
 
     private UnityNewGameEntity GetGameSettings()
@@ -1137,6 +1137,5 @@ public class GameSetup : MonoBehaviour
         }
     }
 }
-
 
 
