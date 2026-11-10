@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Core;
+using Wism.Client.MapObjects;
 
 namespace Assets.Scripts.UI
 {
-    public enum StrategicReportKind { Cities, Armies, Gold, Winning, Production }
+    public enum StrategicReportKind { Cities, Armies, Gold, Winning, Production, Heroes, Ruins }
 
     public sealed class ClanReportRow
     {
@@ -30,6 +31,16 @@ namespace Assets.Scripts.UI
 
     public static class StrategicReportData
     {
+        public static Hero[] Heroes(Player player) => player.GetHeros()
+            .Where(hero => !hero.IsDead && hero.Tile != null).OrderBy(hero => hero.DisplayName)
+            .ThenBy(hero => hero.Id).ToArray();
+
+        public static Location[] Ruins(World world) => world.GetLocations()
+            .Where(location => location.Tile != null && !location.IsTowerSite &&
+                (location.Kind == "Ruins" || location.Kind == "Tomb"))
+            .OrderBy(location => location.DisplayName).ThenBy(location => location.X)
+            .ThenBy(location => location.Y).ToArray();
+
         public static double ProducingPercent(IReadOnlyList<ProductionCityViewModel> cities) =>
             cities.Count == 0 ? 0 : 100.0 * cities.Count(city => !city.IsIdle) / cities.Count;
 
@@ -42,8 +53,8 @@ namespace Assets.Scripts.UI
 
         public static double[] Values(IReadOnlyList<ClanReportRow> rows, StrategicReportKind kind)
         {
-            if (kind == StrategicReportKind.Production)
-                throw new ArgumentException("Production uses owned-city data, not clan shares.", nameof(kind));
+            if (kind == StrategicReportKind.Production || kind == StrategicReportKind.Heroes || kind == StrategicReportKind.Ruins)
+                throw new ArgumentException("This report uses map entities, not clan shares.", nameof(kind));
             double cities = rows.Where(row => !row.Eliminated).Sum(row => row.Cities);
             double strength = rows.Where(row => !row.Eliminated).Sum(row => row.Strength);
             double gold = rows.Where(row => !row.Eliminated).Sum(row => row.Gold);

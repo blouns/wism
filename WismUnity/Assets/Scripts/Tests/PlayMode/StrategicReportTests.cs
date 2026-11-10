@@ -41,6 +41,13 @@ public sealed class StrategicReportModelTests
         Assert.That(StrategicReportData.Values(rows, StrategicReportKind.Winning), Is.EqualTo(new double[] { 0 }));
     }
 
+    [TestCase(StrategicReportKind.Heroes)]
+    [TestCase(StrategicReportKind.Ruins)]
+    public void EntityReportsCannotBeMistakenForWinningShares(StrategicReportKind kind)
+    {
+        Assert.Throws<System.ArgumentException>(() => StrategicReportData.Values(new ClanReportRow[0], kind));
+    }
+
     [TestCase(4, 3, 100)]
     [TestCase(3, 4, 100)]
     [TestCase(3, 3, 101)]
@@ -54,6 +61,44 @@ public sealed class StrategicReportModelTests
 
 public sealed partial class ArmyUiInputTests
 {
+    [UnityTest]
+    public IEnumerator StrategicReports_HeroesAndRuinsReflectStateWithoutOrders()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var player = Game.Current.GetCurrentPlayer();
+        var ruins = StrategicReportData.Ruins(World.Current);
+        Assert.That(ruins.Length, Is.GreaterThan(1), "Use both searched and unsearched real map sites.");
+        ruins[0].Searched = true;
+        ruins[1].Searched = false;
+        var before = TerminalState();
+        var searchedBefore = World.Current.GetLocations().Select(location => location.Searched).ToArray();
+        int command = unity.LastCommandId;
+        yield return Click(MenuPoint("OpenReports"));
+        var report = unity.GameMenu.Reports;
+        yield return PressJourneyButton(MenuButton("ReportHeroes"));
+        var heroes = StrategicReportData.Heroes(player);
+        Assert.That(heroes, Does.Contain(hero));
+        Assert.That(heroes.All(item => item.Player == player && !item.IsDead), Is.True);
+        Assert.That(report.Values, Is.EqualTo(new[] { (double)heroes.Length }));
+        Assert.That(report.GetComponentInChildren<MinimapArmyOverlay>().MarkerCount,
+            Is.EqualTo(heroes.Select(item => item.Tile).Distinct().Count()));
+        yield return PressJourneyButton(MenuButton("ReportRuins"));
+        Assert.That(report.Values, Is.EqualTo(new[] { (double)ruins.Count(site => !site.Searched), ruins.Count(site => site.Searched) }));
+        Assert.That(report.GetComponentInChildren<MinimapLocationOverlay>().MarkerCount, Is.EqualTo(ruins.Length));
+        Assert.That(ruins.All(site => site.Kind == "Ruins" || site.Kind == "Tomb"), Is.True);
+        Assert.That(report.GetComponentsInChildren<Text>().Any(text => text.name == "LocationState" && text.text.EndsWith("\nSearched")), Is.True);
+        Assert.That(report.GetComponentsInChildren<Text>().Any(text => text.name == "LocationState" && text.text.EndsWith("\nUnsearched")), Is.True);
+        yield return PressJourneyButton(MenuButton("ReportArmies"));
+        int occupied = Game.Current.Players.Sum(owner => owner.GetArmies().Where(army => !army.IsDead && army.Tile != null)
+            .Select(army => army.Tile).Distinct().Count());
+        Assert.That(report.GetComponentInChildren<MinimapArmyOverlay>().MarkerCount, Is.EqualTo(occupied),
+            "Switching back must remove the own-hero filter.");
+        yield return PressJourneyButton(MenuButton("CloseReport"));
+        Assert.That(TerminalState(), Is.EqualTo(before));
+        Assert.That(World.Current.GetLocations().Select(location => location.Searched), Is.EqualTo(searchedBefore));
+        Assert.That(unity.LastCommandId, Is.EqualTo(command));
+    }
+
     [UnityTest]
     public IEnumerator StrategicReports_ShowExactTotalsWithoutOrdersOrClickThrough()
     {
@@ -151,6 +196,21 @@ public sealed partial class ArmyUiInputTests
             scrolling.OnScroll(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { scrollDelta = new Vector2(0, -100) });
             yield return null;
             Assert.That(scrolling.verticalNormalizedPosition, Is.LessThan(.01f));
+            foreach (var kind in new[] { StrategicReportKind.Heroes, StrategicReportKind.Ruins })
+            {
+                yield return PressJourneyButton(MenuButton("Report" + kind));
+                Canvas.ForceUpdateCanvases();
+                foreach (var tab in report.GetComponentsInChildren<Button>().Where(button => button.name.StartsWith("Report")))
+                {
+                    var bounds = new Vector3[4];
+                    tab.GetComponent<RectTransform>().GetWorldCorners(bounds);
+                    Assert.That(bounds.All(point => point.x >= 0 && point.y >= 0 && point.x <= width && point.y <= height), Is.True);
+                    var text = tab.GetComponentInChildren<Text>();
+                    Assert.That(text.cachedTextGenerator.characterCountVisible, Is.EqualTo(text.text.Length));
+                }
+                CaptureUiCanvas(unity.GameMenu.GetComponentInChildren<Canvas>(), "strategic-" + kind.ToString().ToLowerInvariant(), width, height);
+                yield return null;
+            }
             yield return Tap(MenuPoint("CloseReport"));
             Assert.That(unity.GameMenu.IsOpen, Is.False);
         }
