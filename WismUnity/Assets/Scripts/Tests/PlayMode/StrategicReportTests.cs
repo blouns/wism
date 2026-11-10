@@ -120,9 +120,11 @@ public sealed partial class ArmyUiInputTests
         int oldWidth = Screen.width, oldHeight = Screen.height;
         try
         {
-            Screen.SetResolution(width, height, false);
+            ApplyViewport(width, height);
             yield return null;
             yield return null;
+            Assert.That(Screen.width, Is.EqualTo(width));
+            Assert.That(Screen.height, Is.EqualTo(height));
             yield return Tap(MenuPoint("OpenReports"));
             var report = unity.GameMenu.Reports;
             Assert.That(report.gameObject.activeInHierarchy, Is.True);
@@ -152,6 +154,6 @@ public sealed partial class ArmyUiInputTests
             yield return Tap(MenuPoint("CloseReport"));
             Assert.That(unity.GameMenu.IsOpen, Is.False);
         }
-        finally { Screen.SetResolution(oldWidth, oldHeight, false); }
+        finally { ApplyViewport(oldWidth, oldHeight); }
     }
 }

@@ -241,9 +241,11 @@ public sealed partial class ArmyUiInputTests
         int oldWidth = Screen.width, oldHeight = Screen.height;
         try
         {
-            Screen.SetResolution(width, height, false);
+            ApplyViewport(width, height);
             yield return null;
             yield return null;
+            Assert.That(Screen.width, Is.EqualTo(width));
+            Assert.That(Screen.height, Is.EqualTo(height));
             yield return Tap(MenuPoint("OpenGameMenu"));
             Canvas.ForceUpdateCanvases();
             foreach (var item in unity.GameMenu.GetComponentsInChildren<Selectable>())
@@ -263,7 +265,7 @@ public sealed partial class ArmyUiInputTests
             Assert.That(unity.GameMenu.IsOpen, Is.True);
             unity.GameMenu.Close();
         }
-        finally { Screen.SetResolution(oldWidth, oldHeight, false); }
+        finally { ApplyViewport(oldWidth, oldHeight); }
     }
 
     private Toggle PreferenceToggle(string name) => unity.GameMenu.GetComponentsInChildren<Toggle>(true).Single(toggle => toggle.name == name);

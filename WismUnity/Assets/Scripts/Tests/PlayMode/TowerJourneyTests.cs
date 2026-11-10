@@ -117,7 +117,7 @@ public sealed partial class ArmyUiInputTests
             Assert.That(prompt.IsActive(), Is.False, "A ruined site is rejected before confirmation.");
             Trace("tower.build-cancel-confirm-raze-cancel-confirm-no-rebuild", ScreenPoint(site));
         }
-        finally { Screen.SetResolution(oldWidth, oldHeight, false); }
+        finally { ApplyViewport(oldWidth, oldHeight); }
     }
 
     [UnityTest]
