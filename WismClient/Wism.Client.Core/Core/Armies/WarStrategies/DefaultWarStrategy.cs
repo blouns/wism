@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Common;
 using Wism.Client.Comparers;
+using Wism.Client.Core.Armies.WarStrategies.CombatModifiers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.Core.Armies.WarStrategies
@@ -127,8 +128,8 @@ namespace Wism.Client.Core.Armies.WarStrategies
             defenders = GetDefenders(attackers, target);
 
             // Calculate composite modifiers
-            compositeAFCM = attackers.Sum(a => a.GetAttackModifier(target));
-            compositeDFCM = defenders.Sum(a => a.GetDefenseModifier());
+            compositeAFCM = ForceCombatModifier.Attack(attackers, target);
+            compositeDFCM = ForceCombatModifier.Defense(defenders, target);
 
             // City defense bonus added once for the whole defending force (Warlords DFCM rule).
             // Neutral cities already defend with a generated neutral garrison whose strength is
@@ -198,14 +199,14 @@ namespace Wism.Client.Core.Armies.WarStrategies
         }
 
         /// <summary>
-        ///     Apply each army's clan terrain affinity to its combat strength.
+        ///     Apply unit-type terrain affinity; clan affinity is already in the force modifier.
         ///     Armies fighting in their preferred terrain get a bonus; in disfavored terrain, a penalty.
         /// </summary>
         private static void ApplyArmyTerrainModifiers(IList<Army> armies, Tile target)
         {
             foreach (var army in armies)
             {
-                var terrainBonus = army.Clan.GetTerrainModifier(target);
+                var terrainBonus = army.GetTerrainCombatModifier(target);
                 army.ModifiedStrength = Math.Max(1, army.Strength + terrainBonus);
             }
         }

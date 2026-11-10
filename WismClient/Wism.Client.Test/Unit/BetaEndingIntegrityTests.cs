@@ -332,6 +332,11 @@ public sealed partial class BetaEndingBranchesTests
             }
 
             var released = probe.Join(TimeSpan.FromSeconds(10));
+            // This fixture runs only in the standalone .NET testhost. If the recovery
+            // cannot join the probe, abort that host rather than leak a spinning thread
+            // into later tests. The runner must report an aborted run, never a pass.
+            if (!released)
+                Environment.FailFast("GetNextPlayer probe did not stop after recovery; aborting its testhost to prevent an orphan thread.");
             Assert.Fail($"GetNextPlayer did not return within {NextPlayerLimit.TotalSeconds:0} s " +
                         $"(probe released after reviving seats: {released}).");
         }

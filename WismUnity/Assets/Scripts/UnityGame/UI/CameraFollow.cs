@@ -19,6 +19,7 @@ public class CameraFollow : MonoBehaviour
     private bool isDragging;
     private bool centered;
     private Camera followCamera;
+    private Assets.Scripts.Tilemaps.WorldTilemap worldTilemap;
     private int lastMapWidth;
     private int lastMapHeight;
     private int lastScreenWidth;
@@ -90,24 +91,21 @@ public class CameraFollow : MonoBehaviour
         this.lastCameraAspect = this.followCamera.aspect;
         this.lastOrthographicSize = this.followCamera.orthographicSize;
 
-        var halfHeight = this.followCamera.orthographicSize;
-        var halfWidth = halfHeight * this.followCamera.aspect;
-
-        this.xMinClamp = halfWidth;
-        this.xMaxClamp = Mathf.Max(halfWidth, mapWidth - halfWidth);
-        if (this.xMaxClamp <= this.xMinClamp)
-        {
-            this.xMinClamp = mapWidth / 2f;
-            this.xMaxClamp = mapWidth / 2f;
-        }
-
-        this.yMinClamp = halfHeight;
-        this.yMaxClamp = Mathf.Max(halfHeight, mapHeight - halfHeight);
-        if (this.yMaxClamp <= this.yMinClamp)
-        {
-            this.yMinClamp = mapHeight / 2f;
-            this.yMaxClamp = mapHeight / 2f;
-        }
+        // Keep the camera center on playable terrain, not its entire viewport.
+        // Edge cities can then be centered without adding traversable map cells.
+        if (this.worldTilemap == null)
+            this.worldTilemap = FindFirstObjectByType<Assets.Scripts.Tilemaps.WorldTilemap>();
+        var first = this.worldTilemap != null
+            ? this.worldTilemap.ConvertGameToUnityVector(0, 0) : new Vector3(0.5f, 0.5f);
+        var last = this.worldTilemap != null
+            ? this.worldTilemap.ConvertGameToUnityVector(mapWidth - 1, mapHeight - 1)
+            : new Vector3(mapWidth - 0.5f, mapHeight - 0.5f);
+        this.xMinClamp = Mathf.Min(first.x, last.x);
+        this.xMaxClamp = Mathf.Max(first.x, last.x);
+        this.yMinClamp = Mathf.Min(first.y, last.y);
+        this.yMaxClamp = Mathf.Max(first.y, last.y);
+        this.followCamera.clearFlags = CameraClearFlags.SolidColor;
+        this.followCamera.backgroundColor = new Color32(28, 30, 32, 255);
 
         var position = this.transform.position;
         this.transform.position = new Vector3(

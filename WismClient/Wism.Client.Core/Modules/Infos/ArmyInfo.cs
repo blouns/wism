@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Wism.Client.Modules.Infos
@@ -18,6 +19,10 @@ namespace Wism.Client.Modules.Infos
         [DataMember] public int Moves;
 
         [DataMember] public int Strength;
+
+        [DataMember] public Dictionary<string, int> TerrainMovementCosts { get; set; }
+
+        [DataMember] public Dictionary<string, int> TerrainCombatModifiers { get; set; }
 
         [DataMember] public string DisplayName { get; set; } = "Army Name";
 

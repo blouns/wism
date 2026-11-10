@@ -49,8 +49,8 @@ namespace Wism.Client.Comparers
             if (compare == 0)
             {
                 // Differentiate on modified battlefield strength
-                var modifiedStrengthX = x.GetAttackModifier(this.battlefieldTile) + x.Strength;
-                var modifiedStrengthY = y.GetAttackModifier(this.battlefieldTile) + y.Strength;
+                var modifiedStrengthX = x.GetAttackModifier(this.battlefieldTile) + x.Strength + x.GetTerrainCombatModifier(this.battlefieldTile);
+                var modifiedStrengthY = y.GetAttackModifier(this.battlefieldTile) + y.Strength + y.GetTerrainCombatModifier(this.battlefieldTile);
 
                 // Stack in reverse order of strength
                 compare = modifiedStrengthX.CompareTo(modifiedStrengthY);

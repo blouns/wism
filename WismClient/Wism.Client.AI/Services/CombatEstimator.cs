@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Comparers;
 using Wism.Client.Core;
+using Wism.Client.Core.Armies.WarStrategies.CombatModifiers;
 using Wism.Client.MapObjects;
 
 namespace Wism.Client.AI.Services
@@ -32,12 +33,13 @@ namespace Wism.Client.AI.Services
             orderedAttackers.Sort(new ByArmyBattleOrder(targetTile));
             orderedDefenders.Sort(new ByArmyBattleOrder(targetTile));
 
-            var attackerModifier = orderedAttackers.Sum(army => army.GetAttackModifier(targetTile));
-            var defenderModifier = orderedDefenders.Sum(army => army.GetDefenseModifier());
+            var attackerModifier = ForceCombatModifier.Attack(orderedAttackers, targetTile);
+            var defenderModifier = ForceCombatModifier.Defense(orderedDefenders, targetTile);
             var probabilityCache = new double?[orderedAttackers.Count + 1, orderedDefenders.Count + 1];
             var winProbability = EstimateStackWinProbability(
                 orderedAttackers,
                 orderedDefenders,
+                targetTile,
                 attackerModifier,
                 defenderModifier,
                 0,
@@ -50,6 +52,7 @@ namespace Wism.Client.AI.Services
         private static double EstimateStackWinProbability(
             IReadOnlyList<Army> attackers,
             IReadOnlyList<Army> defenders,
+            Tile targetTile,
             int attackerModifier,
             int defenderModifier,
             int attackerIndex,
@@ -72,13 +75,16 @@ namespace Wism.Client.AI.Services
                 return cached.Value;
             }
 
-            var attackStrength = ClampCombatStrength(attackers[attackerIndex].Strength + attackerModifier);
-            var defenseStrength = ClampCombatStrength(defenders[defenderIndex].Strength + defenderModifier);
+            var attackStrength = ClampCombatStrength(Math.Max(1, attackers[attackerIndex].Strength +
+                attackers[attackerIndex].GetTerrainCombatModifier(targetTile)) + attackerModifier);
+            var defenseStrength = ClampCombatStrength(Math.Max(1, defenders[defenderIndex].Strength +
+                defenders[defenderIndex].GetTerrainCombatModifier(targetTile)) + defenderModifier);
             var duelWin = EstimateDuelWinProbability(attackStrength, defenseStrength);
 
             var estimate = (duelWin * EstimateStackWinProbability(
                     attackers,
                     defenders,
+                    targetTile,
                     attackerModifier,
                     defenderModifier,
                     attackerIndex,
@@ -87,6 +93,7 @@ namespace Wism.Client.AI.Services
                 ((1.0 - duelWin) * EstimateStackWinProbability(
                     attackers,
                     defenders,
+                    targetTile,
                     attackerModifier,
                     defenderModifier,
                     attackerIndex + 1,

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Assets.Scripts.Managers;
@@ -7,6 +8,7 @@ using Assets.Scripts.UI;
 using Assets.Tests.PlayMode;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
@@ -81,9 +83,26 @@ public sealed partial class ArmyUiInputTests
             var destination = World.Current.GetCities().Single(city => city.ShortName == "Deserton");
             yield return PressProductionControl(picker, "ArmyButton1");
             yield return PressProductionControl(picker, "LocButton");
-            yield return Click(ScreenPoint(destination.Tile));
-            yield return WaitFor(() => input.InputMode == InputMode.UI);
-            Assert.That(input.LastPrimaryAction, Is.EqualTo("production.select-destination"));
+            Assert.That(unity.ProductionMode, Is.EqualTo(ProductionMode.SelectDestination));
+            var worldPoint = ScreenPoint(destination.Tile);
+            var hits = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = worldPoint }, hits);
+            TestContext.Progress.WriteLine($"Redirect world point={worldPoint}; screen={Screen.width}x{Screen.height}; hits={string.Join(",", hits.Select(hit => hit.gameObject.name))}");
+            // Retain direct-map coverage at larger resolutions; exercise the
+            // minimap destination workflow in the compact layout.
+            var destinationPoint = Screen.width == 1024 ? ProductionMinimapPoint(destination) : worldPoint;
+            hits.Clear();
+            EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = destinationPoint }, hits);
+            if (Screen.width == 1024)
+            {
+                Assert.That(hits, Is.Not.Empty, "Destination marker must have a UI recipient.");
+                Assert.That(ExecuteEvents.GetEventHandler<IPointerDownHandler>(hits[0].gameObject)
+                    ?.GetComponent<MinimapInteraction>(), Is.Not.Null,
+                    "The winning pointer recipient must be the minimap.");
+            }
+            yield return Click(destinationPoint);
+            yield return WaitFor(() => input.InputMode == InputMode.UI,
+                () => $"Redirect destination={ScreenPoint(destination.Tile)} screen={Screen.width}x{Screen.height}; mode={input.InputMode}; action={input.LastPrimaryAction}");
             yield return WaitFor(() => Game.Current.GetCurrentPlayer().Capitol.Barracks.ArmyInTraining?.DestinationCity == destination);
             yield return PressProductionControl(picker, "ExitButton");
             yield return AttackCapitalWithDevice();

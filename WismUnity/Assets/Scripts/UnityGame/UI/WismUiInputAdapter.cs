@@ -132,6 +132,19 @@ namespace Assets.Scripts.UI
         public static bool TryGetPrimaryPress(out Vector2 position, out int deviceId)
         {
             deviceId = -1;
+#if ENABLE_INPUT_SYSTEM
+            // Touchscreen's primary touch is the press authority. Pointer.current
+            // may instead be a mouse that moved in the same input update.
+            foreach (var device in InputSystem.devices)
+            {
+                if (device is Touchscreen screen && screen.primaryTouch.press.wasPressedThisFrame)
+                {
+                    position = screen.primaryTouch.position.ReadValue();
+                    deviceId = screen.deviceId;
+                    return true;
+                }
+            }
+#endif
             // Never pair a legacy press with a different device's coordinates.
             if (Input.GetMouseButtonDown(0))
             {

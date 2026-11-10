@@ -12,6 +12,7 @@ using UnityEngine.UI;
 using Newtonsoft.Json.Linq;
 
 [TestFixture]
+[UnityPlatform(RuntimePlatform.WindowsEditor, RuntimePlatform.LinuxEditor, RuntimePlatform.OSXEditor)]
 public sealed class BetaSetupIdentityJourneyTests
 {
     private Vector2Int originalViewport;
@@ -112,12 +113,69 @@ public sealed class BetaSetupIdentityJourneyTests
             Assert.That(validationRect.anchorMin, Is.EqualTo(startRect.anchorMin));
             Assert.That(validationRect.anchorMax, Is.EqualTo(startRect.anchorMax));
             AssertRectOnScreen(validationRect, viewport);
+            var validationBounds = TextInkBounds(validation);
+            var mods = GameObject.Find("AdvancedModsButton");
+            Assert.That(mods, Is.Not.Null);
+            foreach (var button in new[] { start, mods.GetComponent<Button>() })
+                Assert.That(validationBounds.Overlaps(ScreenBounds((RectTransform)button.transform)), Is.False,
+                    "Validation feedback must not cover " + button.name);
 
             playerTwo.isOn = true;
             yield return null;
             Canvas.ForceUpdateCanvases();
             Assert.That(start.interactable, Is.True, "A valid roster must re-enable Start at " + viewport);
             Assert.That(validation.text, Is.Empty, "Returning to a valid setup clears the error.");
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator SetupJourney_LongErrorsScrollWithoutCoveringControlsAndRecover()
+    {
+        SceneManager.LoadScene("GameSetup", LoadSceneMode.Single);
+        yield return new WaitUntil(() => GameObject.Find("GameSetupValidationText") != null);
+        var setup = UnityEngine.Object.FindFirstObjectByType<GameSetup>();
+        var errorField = typeof(GameSetup).GetField("rosterError", BindingFlags.Instance | BindingFlags.NonPublic);
+        var refresh = typeof(GameSetup).GetMethod("UpdateStartValidation", BindingFlags.Instance | BindingFlags.NonPublic);
+        var start = GameObject.Find("StartButton").GetComponent<Button>();
+        var validation = GameObject.Find("GameSetupValidationText").GetComponent<Text>();
+        var error = "Could not load clans: " + string.Join("\n", Enumerable.Range(1, 24)
+            .Select(i => "Missing starting city for clan " + i + " <unknown> with a long display name."));
+
+        foreach (var viewport in Viewports)
+        {
+            yield return SetViewport(viewport.x, viewport.y);
+            errorField.SetValue(setup, error);
+            refresh.Invoke(setup, null);
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            Assert.That(start.interactable, Is.False);
+            Assert.That(validation.text, Is.EqualTo(error), "Do not truncate diagnostic details.");
+            Assert.That(validation.supportRichText, Is.False, "Mod text is literal, not markup.");
+            var scroll = validation.GetComponentInParent<ScrollRect>();
+            Assert.That(scroll, Is.Not.Null, "Long diagnostics need a bounded scrollable region.");
+            Assert.That(scroll.vertical, Is.True);
+            Assert.That(scroll.horizontal, Is.False);
+            Assert.That(scroll.verticalScrollbar, Is.Not.Null, "Overflow must have a discoverable control.");
+            Assert.That(scroll.content.rect.height, Is.GreaterThan(scroll.viewport.rect.height));
+            AssertRectOnScreen(scroll.viewport, viewport);
+            var region = ScreenBounds((RectTransform)scroll.transform);
+            foreach (var control in new[] { "StartButton", "LoadButton", "AdvancedModsButton", "ShowAiCombatToggle" })
+                Assert.That(region.Overlaps(ScreenBounds(GameObject.Find(control).GetComponent<RectTransform>())),
+                    Is.False, "Long feedback must not cover " + control);
+            scroll.verticalNormalizedPosition = 0f;
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            Assert.That(ScreenBounds(scroll.content).yMin,
+                Is.EqualTo(ScreenBounds(scroll.viewport).yMin).Within(2f), "The last error line must be reachable.");
+            yield return GameSetupModSettingsFlowTests.CaptureSetupCanvas(start.gameObject,
+                $"setup-long-error-{viewport.x}x{viewport.y}-camera-projection.png");
+
+            errorField.SetValue(setup, null);
+            refresh.Invoke(setup, null);
+            yield return null;
+            Assert.That(start.interactable, Is.True);
+            Assert.That(validation.text, Is.Empty);
+            Assert.That(scroll.gameObject.activeSelf, Is.False, "Recovered feedback must not intercept input.");
         }
     }
 
@@ -147,6 +205,24 @@ public sealed class BetaSetupIdentityJourneyTests
             Assert.That(corner.x, Is.InRange(0f, viewport.x), "Validation text must stay horizontally on screen.");
             Assert.That(corner.y, Is.InRange(0f, viewport.y), "Validation text must stay vertically on screen.");
         }
+    }
+
+    private static Rect ScreenBounds(RectTransform rect)
+    {
+        var corners = new Vector3[4];
+        rect.GetWorldCorners(corners);
+        return Rect.MinMaxRect(corners.Min(p => p.x), corners.Min(p => p.y), corners.Max(p => p.x), corners.Max(p => p.y));
+    }
+
+    private static Rect TextInkBounds(Text text)
+    {
+        // The feedback's non-raycast rectangle is wider than its glyphs. Compare
+        // visible text, not transparent layout space, against neighboring controls.
+        var vertices = text.cachedTextGenerator.verts;
+        var points = vertices.Take(Math.Max(0, vertices.Count - 4))
+            .Select(vertex => text.rectTransform.TransformPoint(vertex.position / text.pixelsPerUnit)).ToArray();
+        Assert.That(points, Is.Not.Empty);
+        return Rect.MinMaxRect(points.Min(p => p.x), points.Min(p => p.y), points.Max(p => p.x), points.Max(p => p.y));
     }
 
     private static IEnumerator SetViewport(int width, int height)
