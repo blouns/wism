@@ -176,7 +176,7 @@ namespace Assets.Scripts.Managers
         private void HandleWaitForKey()
         {
             if (this.KeyPressed != null &&
-                Input.anyKeyDown)
+                WismUiInputAdapter.AnyKeyPressedThisFrame())
             {
                 this.KeyPressed();
             }
@@ -301,7 +301,7 @@ namespace Assets.Scripts.Managers
             {
                 this.GameManager.QuitSelectedArmies();
             }
-            else if (Input.GetKeyDown(KeyCode.Z))
+            else if (WismUiInputAdapter.SearchPressedThisFrame())
             {
                 this.GameManager.SearchLocation();
             }
