@@ -33,7 +33,14 @@ namespace Assets.Scripts.UI
             font = face;
             gameObject.AddComponent<Image>().color = new Color32(128, 128, 128, 255);
             heading = Label(transform, "ReportHeading", "Reports", 28);
-            Place(heading.rectTransform, 20, 16, 420, 42);
+            // Expanded navigation occupies the left header; keep the title clear of it and Close.
+            heading.rectTransform.anchorMin = Vector2.up;
+            heading.rectTransform.anchorMax = Vector2.one;
+            heading.rectTransform.offsetMin = new Vector2(500, -58);
+            heading.rectTransform.offsetMax = new Vector2(-140, -16);
+            heading.resizeTextForBestFit = true;
+            heading.resizeTextMinSize = 16;
+            heading.resizeTextMaxSize = 28;
             var exit = MakeButton(transform, "CloseReport", "Close", close);
             var exitRect = (RectTransform)exit.transform;
             exitRect.anchorMin = exitRect.anchorMax = exitRect.pivot = Vector2.one;

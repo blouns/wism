@@ -207,6 +207,7 @@ public sealed partial class ArmyUiInputTests
             {
                 yield return PressJourneyButton(MenuButton("Report" + kind));
                 Canvas.ForceUpdateCanvases();
+                AssertReportHeadingClear(report);
                 foreach (var tab in report.GetComponentsInChildren<Button>().Where(button => button.name.StartsWith("Report")))
                 {
                     var bounds = new Vector3[4];
@@ -222,5 +223,21 @@ public sealed partial class ArmyUiInputTests
             Assert.That(unity.GameMenu.IsOpen, Is.False);
         }
         finally { ApplyViewport(oldWidth, oldHeight); }
+    }
+
+    private void AssertReportHeadingClear(StrategicReportView report)
+    {
+        System.Func<RectTransform, Rect> bounds = rect =>
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            return Rect.MinMaxRect(corners.Min(p => p.x), corners.Min(p => p.y),
+                corners.Max(p => p.x), corners.Max(p => p.y));
+        };
+        var title = report.GetComponentsInChildren<Text>().Single(text => text.name == "ReportHeading");
+        foreach (var name in new[] { "OpenGameMenu", "OpenReports", "OpenViewMenu", "OpenOrdersMenu", "CloseReport" })
+            Assert.That(bounds(title.rectTransform).Overlaps(bounds(MenuButton(name).GetComponent<RectTransform>())),
+                Is.False, "Report title must not sit under " + name);
+        Assert.That(title.cachedTextGenerator.characterCountVisible, Is.EqualTo(title.text.Length));
     }
 }
