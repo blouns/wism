@@ -548,9 +548,25 @@ namespace Assets.Scripts.Managers
                 else if (saveLoadPicker.OkCancelResult == OkCancel.Ok)
                 {
                     var filename = saveLoadPicker.GetCurrentFilename();
-                    this.GameManager.LoadGame(filename);
-                    saveLoadPicker.Clear();
-                    SetInputMode(InputMode.Game);
+                    var failed = false;
+                    try
+                    {
+                        this.GameManager.LoadGame(filename);
+                    }
+                    catch (Exception error) when (error is IOException || error is InvalidDataException || error is UnauthorizedAccessException ||
+                        error is Newtonsoft.Json.JsonException)
+                    {
+                        failed = true;
+                        Debug.LogWarning("Load failed: " + error.Message);
+                        this.unityManager.NotifyUser("Could not load the game. Check the save file and required world, then try again.");
+                    }
+                    finally
+                    {
+                        saveLoadPicker.Clear();
+                        if (failed && this.unityManager.AwaitingInitialLoad)
+                            this.unityManager.CancelInitialLoad();
+                        else SetInputMode(InputMode.Game);
+                    }
                 }
             }
         }

@@ -18,6 +18,78 @@ using Wism.Client.MapObjects;
 
 public sealed partial class ArmyUiInputTests
 {
+    [UnityTest]
+    public IEnumerator CampaignSave_RejectedLoadPreservesActiveGameAndReturnsControl()
+    {
+        var directory = Path.Combine(Application.temporaryCachePath, "LoadRecovery-" + Guid.NewGuid().ToString("N"));
+        var previousDirectory = PersistanceManager.SaveDirectory;
+        var previousSnapshot = PersistanceManager.GetLastSnapshot();
+        try
+        {
+            PersistanceManager.SaveDirectory = directory;
+            PersistanceManager.Save("WISM1.SAV", "Load recovery", unity);
+            var path = Path.Combine(directory, "WISM1.SAV");
+            var valid = File.ReadAllText(path);
+            var game = Game.Current;
+            var modPath = Wism.Client.Modules.ModFactory.ModPath;
+            var worldPath = Wism.Client.Modules.ModFactory.WorldPath;
+            var packs = Wism.Client.Modules.ModFactory.ActiveFeaturePackIds.ToArray();
+            yield return new WaitForLastCommand(manager.ControllerProvider);
+            unity.InteractiveUI = true;
+            yield return null;
+            var camera = Camera.main.transform.position;
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+            foreach (var failure in new[] { "malformed", "missing-core", "camera", "world", "deleted" })
+            {
+                var json = Newtonsoft.Json.Linq.JObject.Parse(valid);
+                if (failure == "missing-core") json["WismGameEntity"] = null;
+                if (failure == "camera") json["CameraPosition"] = new Newtonsoft.Json.Linq.JArray(1);
+                if (failure == "world")
+                {
+                    json["ModKitSelection"] = null;
+                    json["WismGameEntity"]["ModKitSelection"] = null;
+                    json["WorldName"] = "UnavailableSaveWorld";
+                    json["WismGameEntity"]["World"]["Name"] = "UnavailableSaveWorld";
+                }
+                File.WriteAllText(path, failure == "malformed"
+                    ? "{\"DisplayName\":\"Broken save\",\"WismGameEntity\":" : json.ToString());
+                yield return Click(MenuPoint("OpenGameMenu"));
+                yield return Click(MenuPoint("LoadGame"));
+                yield return WaitFor(() => input.InputMode == InputMode.LoadGamePicker && unity.SaveLoadPicker.IsInitialized());
+                var picker = unity.SaveLoadPicker;
+                yield return PressJourneyButton(picker.GetComponentsInChildren<Button>().Single(button => button.name == "Button1"));
+                if (failure == "deleted") File.Delete(path);
+                yield return PressJourneyButton(picker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load"));
+                yield return WaitFor(() => input.InputMode == InputMode.Game && input.CanAcceptGameplayInput,
+                    () => $"Load rejection={failure}; mode={input.InputMode}; picker={picker.OkCancelResult}");
+                Assert.That(Game.Current, Is.SameAs(game), failure);
+                Assert.That(PersistanceManager.GetLastSnapshot(), Is.SameAs(previousSnapshot), failure);
+                Assert.That(Camera.main.transform.position, Is.EqualTo(camera), failure);
+                Assert.That(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path, Is.EqualTo(scene), failure);
+                Assert.That(Wism.Client.Modules.ModFactory.ModPath, Is.EqualTo(modPath), failure);
+                Assert.That(Wism.Client.Modules.ModFactory.WorldPath, Is.EqualTo(worldPath), failure);
+                Assert.That(Wism.Client.Modules.ModFactory.ActiveFeaturePackIds, Is.EqualTo(packs), failure);
+                Assert.That(GameObject.FindGameObjectWithTag("NotificationBox").GetComponent<Text>().text,
+                    Does.StartWith("Could not load the game."), failure);
+            }
+            File.WriteAllText(path, valid);
+            yield return Click(MenuPoint("OpenGameMenu"));
+            yield return Click(MenuPoint("LoadGame"));
+            yield return WaitFor(() => input.InputMode == InputMode.LoadGamePicker && unity.SaveLoadPicker.IsInitialized());
+            yield return PressJourneyButton(unity.SaveLoadPicker.GetComponentsInChildren<Button>().Single(button => button.name == "Button1"));
+            yield return PressJourneyButton(unity.SaveLoadPicker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load"));
+            yield return WaitFor(() => !ReferenceEquals(Game.Current, game) && input.InputMode == InputMode.Game && input.CanAcceptGameplayInput);
+            Assert.That(PersistanceManager.GetLastSnapshot().DisplayName, Is.EqualTo("Load recovery"));
+        }
+        finally
+        {
+            PersistanceManager.SaveDirectory = previousDirectory;
+            typeof(PersistanceManager).GetMethod("SetLastSnapshot", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(null, new object[] { previousSnapshot });
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+        }
+    }
+
     [UnityTest, UnityPlatform(RuntimePlatform.WindowsEditor)]
     public IEnumerator CampaignSave_StorageFailureReturnsControlAndCanRetryFromPicker()
     {
