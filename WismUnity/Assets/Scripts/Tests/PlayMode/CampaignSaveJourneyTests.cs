@@ -24,8 +24,15 @@ public sealed partial class ArmyUiInputTests
         var directory = Path.Combine(Application.temporaryCachePath, "LoadRecovery-" + Guid.NewGuid().ToString("N"));
         var previousDirectory = PersistanceManager.SaveDirectory;
         var previousSnapshot = PersistanceManager.GetLastSnapshot();
+        var previousModPath = Wism.Client.Modules.ModFactory.ModPath;
+        var previousManagerModPath = manager.ModPath;
+        var previousReport = Assets.Scripts.UnityGame.ModKit.UnityModKitRuntimeSelection.LastReport;
         try
         {
+            Wism.Client.Modules.ModFactory.ModPath = Path.GetFullPath(previousModPath);
+            manager.ModPath = Wism.Client.Modules.ModFactory.ModPath;
+            var runningReport = new Assets.Scripts.UnityGame.ModKit.UnityModKitSelectionReport();
+            Assets.Scripts.UnityGame.ModKit.UnityModKitRuntimeSelection.Set(runningReport);
             PersistanceManager.SaveDirectory = directory;
             PersistanceManager.Save("WISM1.SAV", "Load recovery", unity);
             var path = Path.Combine(directory, "WISM1.SAV");
@@ -39,11 +46,13 @@ public sealed partial class ArmyUiInputTests
             yield return null;
             var camera = Camera.main.transform.position;
             var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
-            foreach (var failure in new[] { "malformed", "missing-core", "camera", "world", "deleted" })
+            foreach (var failure in new[] { "malformed", "missing-core", "camera", "world", "deleted", "deep-random", "deep-city" })
             {
                 var json = Newtonsoft.Json.Linq.JObject.Parse(valid);
                 if (failure == "missing-core") json["WismGameEntity"] = null;
                 if (failure == "camera") json["CameraPosition"] = new Newtonsoft.Json.Linq.JArray(1);
+                if (failure == "deep-random") json["WismGameEntity"]["Random"] = null;
+                if (failure == "deep-city") json["WismGameEntity"]["World"]["Cities"][0]["X"] = -1;
                 if (failure == "world")
                 {
                     json["ModKitSelection"] = null;
@@ -60,17 +69,28 @@ public sealed partial class ArmyUiInputTests
                 yield return PressJourneyButton(picker.GetComponentsInChildren<Button>().Single(button => button.name == "Button1"));
                 if (failure == "deleted") File.Delete(path);
                 yield return PressJourneyButton(picker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load"));
-                yield return WaitFor(() => input.InputMode == InputMode.Game && input.CanAcceptGameplayInput,
+                yield return WaitFor(() => input.InputMode == InputMode.Game && input.CanAcceptGameplayInput &&
+                    (!failure.StartsWith("deep-", StringComparison.Ordinal) ||
+                     unity.LastCommandId >= manager.ControllerProvider.CommandController.GetLastCommand().Id),
                     () => $"Load rejection={failure}; mode={input.InputMode}; picker={picker.OkCancelResult}");
                 Assert.That(Game.Current, Is.SameAs(game), failure);
                 Assert.That(PersistanceManager.GetLastSnapshot(), Is.SameAs(previousSnapshot), failure);
                 Assert.That(Camera.main.transform.position, Is.EqualTo(camera), failure);
                 Assert.That(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path, Is.EqualTo(scene), failure);
                 Assert.That(Wism.Client.Modules.ModFactory.ModPath, Is.EqualTo(modPath), failure);
+                Assert.That(manager.ModPath, Is.EqualTo(modPath), failure);
+                Assert.That(Assets.Scripts.UnityGame.ModKit.UnityModKitRuntimeSelection.LastReport, Is.SameAs(runningReport), failure);
                 Assert.That(Wism.Client.Modules.ModFactory.WorldPath, Is.EqualTo(worldPath), failure);
                 Assert.That(Wism.Client.Modules.ModFactory.ActiveFeaturePackIds, Is.EqualTo(packs), failure);
                 Assert.That(GameObject.FindGameObjectWithTag("NotificationBox").GetComponent<Text>().text,
                     Does.StartWith("Could not load the game."), failure);
+                if (failure.StartsWith("deep-", StringComparison.Ordinal))
+                {
+                    var command = manager.ControllerProvider.CommandController.GetLastCommand();
+                    Assert.That(command.Result, Is.EqualTo(Wism.Client.Controllers.ActionState.Failed));
+                    for (int frame = 0; frame < 10; frame++) yield return null;
+                    Assert.That(unity.LastCommandId, Is.EqualTo(command.Id), "A failed load must not be resubmitted each frame.");
+                }
             }
             File.WriteAllText(path, valid);
             yield return Click(MenuPoint("OpenGameMenu"));
@@ -84,6 +104,10 @@ public sealed partial class ArmyUiInputTests
         finally
         {
             PersistanceManager.SaveDirectory = previousDirectory;
+            Wism.Client.Modules.ModFactory.ModPath = previousModPath;
+            Wism.Client.Modules.ModFactory.ResetCache();
+            manager.ModPath = previousManagerModPath;
+            Assets.Scripts.UnityGame.ModKit.UnityModKitRuntimeSelection.Set(previousReport);
             typeof(PersistanceManager).GetMethod("SetLastSnapshot", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
                 .Invoke(null, new object[] { previousSnapshot });
             if (Directory.Exists(directory)) Directory.Delete(directory, true);
