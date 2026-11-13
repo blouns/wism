@@ -30,6 +30,7 @@ public sealed partial class ArmyUiInputTests
             var path = Path.Combine(directory, "WISM1.SAV");
             var original = File.ReadAllBytes(path);
             var game = Game.Current;
+            yield return new WaitForLastCommand(manager.ControllerProvider);
             unity.InteractiveUI = true;
             yield return null;
             for (int attempt = 0; attempt < 2; attempt++)
@@ -37,7 +38,9 @@ public sealed partial class ArmyUiInputTests
                 using (var reader = attempt == 0
                     ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite) : null)
                 {
-                    yield return PressJourneyKey(Key.S);
+                    yield return Click(MenuPoint("OpenGameMenu"));
+                    Assert.That(MenuButton("SaveGame").interactable, Is.True);
+                    yield return Click(MenuPoint("SaveGame"));
                     yield return WaitFor(() => input.InputMode == InputMode.SaveGamePicker && unity.SaveLoadPicker.IsInitialized(),
                         () => $"Open save picker attempt={attempt}; mode={input.InputMode}; canInput={input.CanAcceptGameplayInput}");
                     var picker = unity.SaveLoadPicker;
