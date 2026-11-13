@@ -54,7 +54,11 @@ namespace Wism.Client.Modules
             object obj;
             using (var ms = File.OpenRead(path))
             {
-                var serializer = new DataContractJsonSerializer(typeof(T[]));
+                var serializer = new DataContractJsonSerializer(typeof(T[]), new DataContractJsonSerializerSettings
+                {
+                    // Army terrain overrides use named JSON properties rather than Key/Value arrays.
+                    UseSimpleDictionaryFormat = typeof(T) == typeof(ArmyInfo)
+                });
                 obj = serializer.ReadObject(ms);
             }
 

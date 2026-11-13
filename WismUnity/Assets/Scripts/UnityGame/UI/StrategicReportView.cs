@@ -21,6 +21,7 @@ namespace Assets.Scripts.UI
         private RawImage map;
         private MinimapCityOverlay cities;
         private MinimapArmyOverlay armies;
+        private MinimapLocationOverlay locations;
         public ClanReportRow[] Rows { get; private set; }
         public double[] Values { get; private set; }
         public StrategicReportKind Kind { get; private set; }
@@ -32,7 +33,14 @@ namespace Assets.Scripts.UI
             font = face;
             gameObject.AddComponent<Image>().color = new Color32(128, 128, 128, 255);
             heading = Label(transform, "ReportHeading", "Reports", 28);
-            Place(heading.rectTransform, 20, 16, 420, 42);
+            // Expanded navigation occupies the left header; keep the title clear of it and Close.
+            heading.rectTransform.anchorMin = Vector2.up;
+            heading.rectTransform.anchorMax = Vector2.one;
+            heading.rectTransform.offsetMin = new Vector2(500, -58);
+            heading.rectTransform.offsetMax = new Vector2(-140, -16);
+            heading.resizeTextForBestFit = true;
+            heading.resizeTextMinSize = 16;
+            heading.resizeTextMaxSize = 28;
             var exit = MakeButton(transform, "CloseReport", "Close", close);
             var exitRect = (RectTransform)exit.transform;
             exitRect.anchorMin = exitRect.anchorMax = exitRect.pivot = Vector2.one;
@@ -43,7 +51,11 @@ namespace Assets.Scripts.UI
             {
                 var kind = (StrategicReportKind)i;
                 tabs[i] = MakeButton(transform, "Report" + kind, kind.ToString(), () => Show(kind));
-                Place((RectTransform)tabs[i].transform, 20 + i * 120, 72, 112, 44);
+                var tab = (RectTransform)tabs[i].transform;
+                tab.anchorMin = new Vector2((float)i / tabs.Length, 1);
+                tab.anchorMax = new Vector2((float)(i + 1) / tabs.Length, 1);
+                tab.offsetMin = new Vector2(20, -116);
+                tab.offsetMax = new Vector2(-8, -72);
             }
             metric = Label(transform, "ReportMetric", "", 16);
             var metricRect = metric.rectTransform;
@@ -98,6 +110,7 @@ namespace Assets.Scripts.UI
             ratio.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
             cities = Rect(mapRect, "ReportCities").gameObject.AddComponent<MinimapCityOverlay>();
             armies = Rect(mapRect, "ReportArmies").gameObject.AddComponent<MinimapArmyOverlay>();
+            locations = Rect(mapRect, "ReportLocations").gameObject.AddComponent<MinimapLocationOverlay>();
         }
 
         public void Open(StrategicReportKind kind)
@@ -124,7 +137,9 @@ namespace Assets.Scripts.UI
             Kind = kind;
             cities.IncludeCity = null;
             cities.RouteDirections = null;
+            locations.gameObject.SetActive(false);
             if (kind == StrategicReportKind.Production) { ShowProduction(); return; }
+            if (kind == StrategicReportKind.Heroes || kind == StrategicReportKind.Ruins) { ShowLocations(kind); return; }
             Values = StrategicReportData.Values(Rows, kind);
             heading.text = kind == StrategicReportKind.Winning ? "Winning (estimate)" : kind.ToString();
             metric.text = kind == StrategicReportKind.Winning ? "City share 50%  /  Strength share 35%  /  Gold share 15%" :
@@ -133,6 +148,8 @@ namespace Assets.Scripts.UI
             for (int i = 0; i < tabs.Length; i++) tabs[i].image.color = i == (int)kind ? new Color32(226, 211, 152, 255) : new Color32(185, 185, 185, 255);
             cities.gameObject.SetActive(kind != StrategicReportKind.Armies);
             armies.gameObject.SetActive(kind == StrategicReportKind.Armies);
+            if (kind == StrategicReportKind.Armies)
+                armies.Bind(manager, GameObject.FindGameObjectWithTag("MinimapCamera").GetComponent<Camera>());
             cities.Refresh();
             foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
             content.sizeDelta = new Vector2(0, Rows.Length * 52);
@@ -166,6 +183,71 @@ namespace Assets.Scripts.UI
                 bar.gameObject.AddComponent<Image>().color = MinimapCityOverlay.ResolveColor(Rows[i].Color);
             }
             scroll.verticalNormalizedPosition = 1;
+        }
+
+        private void ShowLocations(StrategicReportKind kind)
+        {
+            cities.gameObject.SetActive(false);
+            armies.gameObject.SetActive(kind == StrategicReportKind.Heroes);
+            locations.gameObject.SetActive(kind == StrategicReportKind.Ruins);
+            heading.text = kind.ToString();
+            for (int i = 0; i < tabs.Length; i++)
+                tabs[i].image.color = i == (int)kind ? new Color32(226, 211, 152, 255) : new Color32(185, 185, 185, 255);
+            foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            var camera = GameObject.FindGameObjectWithTag("MinimapCamera").GetComponent<Camera>();
+            int count;
+            if (kind == StrategicReportKind.Heroes)
+            {
+                var player = Game.Current.GetCurrentPlayer();
+                var heroes = StrategicReportData.Heroes(player);
+                count = heroes.Length;
+                armies.Bind(manager, camera, army => army is Wism.Client.MapObjects.Hero && army.Player == player);
+                Values = new[] { (double)count };
+                metric.text = player.Clan.DisplayName + " - " + count + " living heroes";
+                for (int i = 0; i < count; i++)
+                    LocationRow(i, heroes[i].DisplayName, $"({heroes[i].X}, {heroes[i].Y})\nMoves: {heroes[i].MovesRemaining}/{heroes[i].Moves}");
+            }
+            else
+            {
+                var ruins = StrategicReportData.Ruins(World.Current);
+                count = ruins.Length;
+                int searched = ruins.Count(location => location.Searched);
+                Values = new[] { (double)(count - searched), searched };
+                metric.text = $"Unsearched: {count - searched} / Searched: {searched}\nGold: unsearched / Hollow gray: searched";
+                locations.Bind(manager, camera, ruins);
+                for (int i = 0; i < count; i++)
+                    LocationRow(i, ruins[i].DisplayName, $"({ruins[i].X}, {ruins[i].Y})\n" + (ruins[i].Searched ? "Searched" : "Unsearched"));
+            }
+            content.sizeDelta = new Vector2(0, Mathf.Max(1, count) * 72);
+            if (count == 0) LocationRow(0, kind == StrategicReportKind.Heroes ? "No living heroes" : "No ruins", "");
+            scroll.verticalNormalizedPosition = 1;
+        }
+
+        private void LocationRow(int index, string name, string state)
+        {
+            var row = Rect(content, "LocationRow" + index);
+            row.anchorMin = Vector2.up;
+            row.anchorMax = Vector2.one;
+            row.pivot = Vector2.up;
+            row.sizeDelta = new Vector2(0, 72);
+            row.anchoredPosition = new Vector2(0, -index * 72);
+            var label = Label(row, "LocationName", name, 18);
+            label.rectTransform.anchorMin = Vector2.zero;
+            label.rectTransform.anchorMax = new Vector2(.48f, 1);
+            label.rectTransform.offsetMin = new Vector2(8, 4);
+            label.rectTransform.offsetMax = new Vector2(-8, -4);
+            var details = Label(row, "LocationState", state, 16);
+            details.rectTransform.anchorMin = new Vector2(.48f, 0);
+            details.rectTransform.anchorMax = Vector2.one;
+            details.rectTransform.offsetMin = new Vector2(4, 4);
+            details.rectTransform.offsetMax = new Vector2(-8, -4);
+            foreach (var text in new[] { label, details })
+            {
+                text.supportRichText = false;
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 10;
+                text.resizeTextMaxSize = 18;
+            }
         }
 
         private void ShowProduction()

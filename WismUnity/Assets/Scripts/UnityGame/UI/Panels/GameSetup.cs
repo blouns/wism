@@ -29,6 +29,7 @@ public class GameSetup : MonoBehaviour
     private string worldName;
     private Button startButton;
     private Text validationText;
+    private ScrollRect validationScroll;
     private ClanInfo[] availableClans = new ClanInfo[0];
     private static readonly PlayerRole[] PlayerRoles =
     {
@@ -330,7 +331,7 @@ public class GameSetup : MonoBehaviour
             return GameSetupValidation.Invalid("World has no starting city for: " + string.Join(", ", missingStartClans));
         }
 
-        return GameSetupValidation.Valid("Ready.");
+        return GameSetupValidation.Valid(string.Empty);
     }
 
     private UnityNewGameEntity GetGameSettings()
@@ -610,6 +611,7 @@ public class GameSetup : MonoBehaviour
 
         validationText.text = validation.Message;
         validationText.color = validation.IsValid ? new Color(0f, 0.35f, 0.08f, 1f) : new Color(0.70f, 0f, 0f, 1f);
+        LayoutValidationText();
     }
 
     private void EnsureValidationText()
@@ -631,18 +633,89 @@ public class GameSetup : MonoBehaviour
         textObject.transform.SetParent(startButtonObject.transform.parent, false);
         validationText = textObject.GetComponent<Text>();
         validationText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
-        validationText.fontSize = 14;
+        validationText.fontSize = 22;
         validationText.fontStyle = FontStyle.Bold;
         validationText.alignment = TextAnchor.MiddleCenter;
         validationText.raycastTarget = false;
+        validationText.supportRichText = false;
 
-        var rect = textObject.GetComponent<RectTransform>();
-        var startRect = startButtonObject.GetComponent<RectTransform>();
+        LayoutValidationText();
+    }
+
+    private void LayoutValidationText()
+    {
+        var startRect = startButton.GetComponent<RectTransform>();
+        var rect = validationText.rectTransform;
+        rect.SetParent(startRect.parent, false);
         rect.anchorMin = startRect.anchorMin;
         rect.anchorMax = startRect.anchorMax;
         rect.pivot = startRect.pivot;
         rect.sizeDelta = new Vector2(520f, 28f);
-        rect.anchoredPosition = startRect.anchoredPosition + new Vector2(-155f, 34f);
+        rect.anchoredPosition = startRect.anchoredPosition + new Vector2(
+            -155f, startRect.rect.height * (1f - startRect.pivot.y) + rect.rect.height * rect.pivot.y + 8f);
+        validationText.alignment = TextAnchor.MiddleCenter;
+        validationText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        validationText.verticalOverflow = VerticalWrapMode.Truncate;
+        if (validationScroll != null) validationScroll.gameObject.SetActive(false);
+        if (string.IsNullOrEmpty(validationText.text) || validationText.preferredHeight <= rect.rect.height) return;
+
+        EnsureValidationScroll(startRect);
+        validationScroll.gameObject.SetActive(true);
+        rect.SetParent(validationScroll.viewport, false);
+        rect.anchorMin = rect.anchorMax = rect.pivot = Vector2.up;
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(validationScroll.viewport.rect.width, 0);
+        validationText.alignment = TextAnchor.UpperLeft;
+        rect.sizeDelta = new Vector2(rect.sizeDelta.x, validationText.preferredHeight);
+        validationScroll.content = rect;
+        validationScroll.verticalNormalizedPosition = 1;
+    }
+
+    private void EnsureValidationScroll(RectTransform startRect)
+    {
+        if (validationScroll != null) return;
+        var area = new GameObject("GameSetupValidationScroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
+        var root = area.GetComponent<RectTransform>();
+        root.SetParent(startRect.parent, false);
+        root.anchorMin = startRect.anchorMin;
+        root.anchorMax = startRect.anchorMax;
+        root.pivot = new Vector2(0.5f, 0);
+        root.sizeDelta = new Vector2(230, 156);
+        root.anchoredPosition = startRect.anchoredPosition + new Vector2(0,
+            startRect.rect.height * (1 - startRect.pivot.y) + 8);
+        area.GetComponent<Image>().color = new Color32(210, 210, 210, 255);
+        var viewport = new GameObject("ValidationViewport", typeof(RectTransform), typeof(RectMask2D)).GetComponent<RectTransform>();
+        viewport.SetParent(root, false);
+        viewport.anchorMin = Vector2.zero;
+        viewport.anchorMax = Vector2.one;
+        viewport.offsetMin = new Vector2(6, 6);
+        viewport.offsetMax = new Vector2(-24, -6);
+        var track = new GameObject("ValidationScrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+        var trackRect = track.GetComponent<RectTransform>();
+        trackRect.SetParent(root, false);
+        trackRect.anchorMin = Vector2.right;
+        trackRect.anchorMax = Vector2.one;
+        trackRect.offsetMin = new Vector2(-18, 4);
+        trackRect.offsetMax = new Vector2(-4, -4);
+        track.GetComponent<Image>().color = new Color32(65, 65, 65, 255);
+        var handle = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+        handle.transform.SetParent(trackRect, false);
+        var handleRect = handle.GetComponent<RectTransform>();
+        handleRect.anchorMin = Vector2.zero;
+        handleRect.anchorMax = Vector2.one;
+        handleRect.offsetMin = handleRect.offsetMax = Vector2.zero;
+        handle.GetComponent<Image>().color = new Color32(160, 160, 160, 255);
+        var bar = track.GetComponent<Scrollbar>();
+        bar.handleRect = handle.GetComponent<RectTransform>();
+        bar.targetGraphic = handle.GetComponent<Image>();
+        bar.direction = Scrollbar.Direction.BottomToTop;
+        validationScroll = area.GetComponent<ScrollRect>();
+        validationScroll.viewport = viewport;
+        validationScroll.horizontal = false;
+        validationScroll.movementType = ScrollRect.MovementType.Clamped;
+        validationScroll.scrollSensitivity = 35;
+        validationScroll.verticalScrollbar = bar;
+        validationScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
     }
 
     private static void NormalizeShortcutLabels()
@@ -1137,6 +1210,5 @@ public class GameSetup : MonoBehaviour
         }
     }
 }
-
 
 

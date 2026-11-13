@@ -139,9 +139,11 @@ public sealed partial class ArmyUiInputTests
         int oldWidth = Screen.width, oldHeight = Screen.height;
         try
         {
-            Screen.SetResolution(width, height, false);
+            ApplyViewport(width, height);
             yield return null;
             yield return null;
+            Assert.That(Screen.width, Is.EqualTo(width));
+            Assert.That(Screen.height, Is.EqualTo(height));
             yield return Tap(MenuPoint("OpenGameMenu"));
             Assert.That(unity.GameMenu.IsOpen, Is.True);
             yield return Tap(MenuPoint("ExitGame"));
@@ -160,7 +162,7 @@ public sealed partial class ArmyUiInputTests
             yield return Tap(MenuPoint("CancelExit"));
             unity.GameMenu.Close();
         }
-        finally { Screen.SetResolution(oldWidth, oldHeight, false); }
+        finally { ApplyViewport(oldWidth, oldHeight); }
     }
 
     private Button MenuButton(string name) => unity.GameMenu.GetComponentsInChildren<Button>(true).Single(button => button.name == name);

@@ -12,7 +12,7 @@ public sealed class MinimapArmyOverlay : MaskableGraphic
     private readonly List<Color32> colors = new List<Color32>();
     public int MarkerCount => centers.Count;
 
-    public void Bind(UnityManager manager, Camera camera)
+    public void Bind(UnityManager manager, Camera camera, System.Func<Wism.Client.MapObjects.Army, bool> include = null)
     {
         raycastTarget = false;
         centers.Clear();
@@ -20,7 +20,8 @@ public sealed class MinimapArmyOverlay : MaskableGraphic
         foreach (var player in Game.Current.Players)
         {
             var color = MinimapCityOverlay.ResolveColor(player.Clan.Info.PrimaryColor ?? player.Clan.Info.Color);
-            foreach (var stack in player.GetArmies().Where(army => !army.IsDead && army.Tile != null).GroupBy(army => army.Tile))
+            foreach (var stack in player.GetArmies().Where(army => !army.IsDead && army.Tile != null &&
+                (include == null || include(army))).GroupBy(army => army.Tile))
             {
                 var position = manager.WorldTilemap.ConvertGameToUnityVector(stack.Key.X, stack.Key.Y);
                 var point = camera.WorldToViewportPoint(position);

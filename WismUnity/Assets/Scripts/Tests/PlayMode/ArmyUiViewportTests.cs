@@ -211,12 +211,12 @@ public sealed partial class ArmyUiInputTests
         {
             follow.scale = 4;
             follow.ConfigureBoundsFromCurrentWorld();
-            var previous = follow.yMinClamp;
+            var previous = camera.orthographicSize;
             follow.scale = 12;
             yield return null;
             yield return null;
-            Assert.That(follow.yMinClamp, Is.EqualTo(camera.orthographicSize).Within(0.001f));
-            Assert.That(follow.yMinClamp, Is.LessThan(previous));
+            Assert.That(follow.yMinClamp, Is.EqualTo(unity.WorldTilemap.ConvertGameToUnityVector(0, 0).y));
+            Assert.That(camera.orthographicSize, Is.LessThan(previous));
             follow.target = null;
             follow.SetCameraTarget(new Vector3(8, 8, 0));
             var worldPoint = unity.WorldTilemap.ConvertGameToUnityVector(hero.X, hero.Y);
@@ -236,6 +236,34 @@ public sealed partial class ArmyUiInputTests
             Capture("offscreen-next-framed");
         }
         finally { follow.scale = originalScale; }
+    }
+
+    [UnityTest]
+    public IEnumerator Viewport_EdgeTilesCenterAndVoidRejectsOrders()
+    {
+        var camera = Camera.main;
+        var follow = camera.GetComponent<CameraFollow>();
+        follow.target = null;
+        var width = World.Current.Map.GetLength(0);
+        var height = World.Current.Map.GetLength(1);
+        var before = State();
+        foreach (var cell in new[] { new Vector2Int(0, 0), new Vector2Int(width - 1, 0),
+            new Vector2Int(0, height - 1), new Vector2Int(width - 1, height - 1) })
+        {
+            var destination = unity.WorldTilemap.ConvertGameToUnityVector(cell.x, cell.y);
+            follow.SetCameraTarget(destination);
+            var framed = camera.WorldToViewportPoint(destination);
+            Assert.That(framed.x, Is.EqualTo(0.5f).Within(0.001f));
+            Assert.That(framed.y, Is.EqualTo(0.5f).Within(0.001f));
+        }
+        follow.SetCameraTarget(unity.WorldTilemap.ConvertGameToUnityVector(0, 0));
+        var voidPoint = (Vector2)camera.WorldToScreenPoint(new Vector3(-1f, -1f, 0f));
+        Assert.That(unity.WorldTilemap.GetTileAtScreenPosition(camera, voidPoint), Is.Null);
+        yield return Click(voidPoint);
+        Assert.That(State(), Is.EqualTo(before));
+        Assert.That(camera.clearFlags, Is.EqualTo(CameraClearFlags.SolidColor));
+        Assert.That((Color32)camera.backgroundColor, Is.EqualTo(new Color32(28, 30, 32, 255)));
+        Capture("edge-capital-quiet-void");
     }
 
     private static void ApplyViewport(int width, int height)

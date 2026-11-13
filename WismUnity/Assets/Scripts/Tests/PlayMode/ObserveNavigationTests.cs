@@ -241,17 +241,24 @@ public sealed partial class ArmyUiInputTests
         int oldWidth = Screen.width, oldHeight = Screen.height;
         try
         {
-            Screen.SetResolution(width, height, false);
+            ApplyViewport(width, height);
             yield return null;
             yield return null;
+            Assert.That(Screen.width, Is.EqualTo(width));
+            Assert.That(Screen.height, Is.EqualTo(height));
             yield return Tap(MenuPoint("OpenGameMenu"));
             Canvas.ForceUpdateCanvases();
+            CaptureUiCanvas(unity.GameMenu.GetComponentInChildren<Canvas>(), "observe-menu-bounds", width, height);
             foreach (var item in unity.GameMenu.GetComponentsInChildren<Selectable>())
             {
                 var rect = (RectTransform)item.transform;
                 var corners = new Vector3[4];
                 rect.GetWorldCorners(corners);
-                Assert.That(corners.All(point => point.x >= 0 && point.y >= 0 && point.x <= Screen.width && point.y <= Screen.height), Is.True);
+                // Canvas scaling can round the full-screen backdrop edge below zero by 0.00002 pixels.
+                const float rounding = .001f;
+                Assert.That(corners.All(point => point.x >= -rounding && point.y >= -rounding &&
+                    point.x <= Screen.width + rounding && point.y <= Screen.height + rounding), Is.True,
+                    item.name + " corners: " + string.Join(", ", corners.Select(point => point.ToString("F5"))));
                 Assert.That(rect.rect.height, Is.GreaterThanOrEqualTo(44));
             }
             CaptureUiCanvas(unity.GameMenu.GetComponentInChildren<Canvas>(), "observe-menu", width, height);
@@ -263,7 +270,7 @@ public sealed partial class ArmyUiInputTests
             Assert.That(unity.GameMenu.IsOpen, Is.True);
             unity.GameMenu.Close();
         }
-        finally { Screen.SetResolution(oldWidth, oldHeight, false); }
+        finally { ApplyViewport(oldWidth, oldHeight); }
     }
 
     private Toggle PreferenceToggle(string name) => unity.GameMenu.GetComponentsInChildren<Toggle>(true).Single(toggle => toggle.name == name);

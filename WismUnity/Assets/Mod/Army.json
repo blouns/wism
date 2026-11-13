@@ -2,6 +2,8 @@
   {
     "DisplayName": "Cavalry",
     "ShortName": "Cavalry",
+    "TerrainMovementCosts": {"Forest":5,"Hill":6,"Marsh":5},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":-1,"Marsh":-1},
     "Strength": 5,
     "Moves": 16,
     "CanWalk": true,
@@ -11,6 +13,8 @@
   {
     "DisplayName": "Demons",
     "ShortName": "Demons",
+    "TerrainMovementCosts": {"Forest":4,"Hill":5,"Marsh":5},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":0,"Marsh":0},
     "Strength": 8,
     "Moves": 14,
     "CanWalk": true,
@@ -21,6 +25,8 @@
   {
     "DisplayName": "Devils",
     "ShortName": "Devils",
+    "TerrainMovementCosts": {"Forest":4,"Hill":5,"Marsh":5},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":0,"Marsh":0},
     "Strength": 9,
     "Moves": 14,
     "CanWalk": true,
@@ -41,6 +47,8 @@
   {
     "DisplayName": "Dwarven Legion",
     "ShortName": "DwarvenLegion",
+    "TerrainMovementCosts": {"Forest":6,"Hill":3,"Marsh":6},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":1,"Marsh":0},
     "Strength": 5,
     "Moves": 9,
     "CanWalk": true,
@@ -50,6 +58,8 @@
   {
     "DisplayName": "Elven Archers",
     "ShortName": "ElvenArchers",
+    "TerrainMovementCosts": {"Forest":2,"Hill":5,"Marsh":6},
+    "TerrainCombatModifiers": {"Forest":1,"Hill":-1,"Marsh":-1},
     "Strength": 4,
     "Moves": 14,
     "CanWalk": true,
@@ -59,6 +69,8 @@
   {
     "DisplayName": "Giant Warriors",
     "ShortName": "GiantWarriors",
+    "TerrainMovementCosts": {"Forest":5,"Hill":4,"Marsh":5},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":0,"Marsh":0},
     "Strength": 6,
     "Moves": 12,
     "CanWalk": true,
@@ -68,6 +80,7 @@
   {
     "DisplayName": "Griffins",
     "ShortName": "Griffins",
+    "TerrainCombatModifiers": {"Forest":0,"Hill":1,"Marsh":0},
     "Strength": 5,
     "Moves": 16,
     "CanWalk": true,
@@ -77,6 +90,8 @@
   {
     "DisplayName": "Heavy Infantry",
     "ShortName": "HeavyInfantry",
+    "TerrainMovementCosts": {"Forest":4,"Hill":6,"Marsh":5},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":-1,"Marsh":-1},
     "Strength": 5,
     "Moves": 8,
     "CanWalk": true,
@@ -86,6 +101,7 @@
   {
     "DisplayName": "Hero",
     "ShortName": "Hero",
+    "TerrainMovementCosts": {"Forest":4,"Hill":6,"Marsh":5},
     "Strength": 5,
     "Moves": 15,
     "CanWalk": true,
@@ -95,6 +111,8 @@
   {
     "DisplayName": "Light Infantry",
     "ShortName": "LightInfantry",
+    "TerrainMovementCosts": {"Forest":4,"Hill":6,"Marsh":5},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":-1,"Marsh":-1},
     "Strength": 3,
     "Moves": 12,
     "CanWalk": true,
@@ -104,6 +122,7 @@
   {
     "DisplayName": "Navy",
     "ShortName": "Navy",
+    "TerrainMovementCosts": {"Water":1,"Bridge":2,"Shore":2},
     "Strength": 5,
     "Moves": 18,
     "CanWalk": false,
@@ -113,6 +132,7 @@
   {
     "DisplayName": "Pegasus",
     "ShortName": "Pegasus",
+    "TerrainCombatModifiers": {"Forest":1,"Hill":0,"Marsh":0},
     "Strength": 4,
     "Moves": 16,
     "CanWalk": true,
@@ -122,6 +142,8 @@
   {
     "DisplayName": "Undead",
     "ShortName": "Undead",
+    "TerrainMovementCosts": {"Forest":4,"Hill":5,"Marsh":4},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":0,"Marsh":1},
     "Strength": 7,
     "Moves": 12,
     "CanWalk": true,
@@ -132,6 +154,7 @@
   {
     "DisplayName": "Wizards",
     "ShortName": "Wizards",
+    "TerrainMovementCosts": {"Forest":4,"Hill":6,"Marsh":5},
     "Strength": 6,
     "Moves": 50,
     "CanWalk": true,
@@ -142,6 +165,8 @@
   {
     "DisplayName": "Wolf Riders",
     "ShortName": "WolfRiders",
+    "TerrainMovementCosts": {"Forest":4,"Hill":6,"Marsh":4},
+    "TerrainCombatModifiers": {"Forest":-1,"Hill":-1,"Marsh":0},
     "Strength": 5,
     "Moves": 14,
     "CanWalk": true,

@@ -172,9 +172,11 @@ public sealed partial class ArmyUiInputTests
         int oldWidth = Screen.width, oldHeight = Screen.height;
         try
         {
-            Screen.SetResolution(width, height, false);
+            ApplyViewport(width, height);
             yield return null;
             yield return null;
+            Assert.That(Screen.width, Is.EqualTo(width));
+            Assert.That(Screen.height, Is.EqualTo(height));
             SetPresentationOffer();
             yield return OpenSurrenderChoice();
             Canvas.ForceUpdateCanvases();
@@ -194,6 +196,6 @@ public sealed partial class ArmyUiInputTests
             yield return Tap(RectTransformUtility.WorldToScreenPoint(null, buttonRect.TransformPoint(buttonRect.rect.center)));
             Assert.That(unity.CampaignPresentation.Page, Is.EqualTo(CampaignPage.Rejection));
         }
-        finally { Screen.SetResolution(oldWidth, oldHeight, false); }
+        finally { ApplyViewport(oldWidth, oldHeight); }
     }
 }

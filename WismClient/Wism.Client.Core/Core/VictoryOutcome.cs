@@ -221,6 +221,23 @@ namespace Wism.Client.Core
 
     public static class VictoryEvaluator
     {
+        /// <summary>
+        ///     The Warlords manual's classic rule on the 80-city Illuria map: surviving computer
+        ///     clans offer surrender when the human holds more than 40 cities and the strongest
+        ///     computer is not within 15 cities. Other maps scale both by their own city count
+        ///     (more than 50% of all cities, and a lead of more than 18.75% of all cities).
+        /// </summary>
+        public const int ClassicSurrenderReferenceCities = 80;
+
+        /// <summary>Cities the human must exceed on the 80-city reference map.</summary>
+        public const int ClassicSurrenderCities = 40;
+
+        /// <summary>Lead over the strongest computer the human must exceed on the reference map.</summary>
+        public const int ClassicSurrenderLead = 15;
+
+        /// <summary>Maps with fewer cities than this never offer the classic surrender.</summary>
+        public const int ClassicSurrenderMinimumCities = 10;
+
         public static VictoryOutcomeSnapshot None(int turn = 0)
         {
             return new VictoryOutcomeSnapshot(
@@ -277,11 +294,16 @@ namespace Wism.Client.Core
             var runnerUp = ordered.Skip(1).FirstOrDefault();
             var human = humans.Length == 1 ? humans[0] : null;
             var strongestComputerCities = computers.Length == 0 ? 0 : computers.Max(standing => standing.CityCount);
+            // One human seat on the roster (a hotseat campaign stays hotseat after its other
+            // humans fall) against any number of computer clans, at least one still fighting.
+            // The clan count varies per map, so it is not part of the rule.
+            var rosterHumans = standings.Count(standing => standing.IsHuman);
             var surrenderEligible = human != null &&
-                                    humans.Length == 1 &&
-                                    computers.Length == 7 &&
-                                    human.CityCount > 40 &&
-                                    strongestComputerCities < human.CityCount - 15;
+                                    rosterHumans == 1 &&
+                                    computers.Length > 0 &&
+                                    totalCities >= ClassicSurrenderMinimumCities &&
+                                    ExceedsClassicShare(human.CityCount, ClassicSurrenderCities, totalCities) &&
+                                    ExceedsClassicShare(human.CityCount - strongestComputerCities, ClassicSurrenderLead, totalCities);
 
             return CreateSnapshot(
                 surrenderEligible ? VictoryOutcomeKind.SurrenderOffered : VictoryOutcomeKind.None,
@@ -372,12 +394,18 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(world));
             }
 
-            if (offer == null || !offer.SurrenderEligible || string.IsNullOrWhiteSpace(offer.WinnerClanShortName))
+            RequireCurrentPendingOffer(game, offer, "accepted");
+            var winners = game.Players?
+                .Where(player => player.Clan.ShortName == offer.WinnerClanShortName)
+                .ToArray() ?? Array.Empty<Player>();
+            if (winners.Length != 1 || winners[0].IsDead)
             {
-                throw new InvalidOperationException("A surrender offer is required before surrender can be accepted.");
+                throw new InvalidOperationException(
+                    "A surrender can only be accepted for a single surviving clan on this game's roster.");
             }
 
-            var winner = game.Players.Single(player => player.Clan.ShortName == offer.WinnerClanShortName);
+            // Every check above precedes the first ownership or state change below.
+            var winner = winners[0];
             foreach (var player in game.Players.Where(player => player != winner).ToArray())
             {
                 foreach (var army in player.GetArmies().ToArray())
@@ -406,12 +434,27 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(game));
             }
 
-            if (offer == null || !offer.SurrenderEligible)
-            {
-                throw new InvalidOperationException("A surrender offer is required before surrender can be rejected.");
-            }
-
+            RequireCurrentPendingOffer(game, offer, "rejected");
             game.SetVictoryOutcome(offer.WithOutcome(VictoryOutcomeKind.RejectedSurrender, false));
+        }
+
+        /// <summary>
+        ///     A surrender decision applies only to the offer this game currently holds as its
+        ///     pending outcome. A retained, replaced, rejected, accepted or foreign snapshot is
+        ///     refused, as is any decision once the game is over.
+        /// </summary>
+        private static void RequireCurrentPendingOffer(Game game, VictoryOutcomeSnapshot offer, string decision)
+        {
+            if (offer == null ||
+                !ReferenceEquals(offer, game.VictoryOutcome) ||
+                offer.OutcomeKind != VictoryOutcomeKind.SurrenderOffered ||
+                !offer.SurrenderEligible ||
+                string.IsNullOrWhiteSpace(offer.WinnerClanShortName) ||
+                game.GameState == GameState.GameOver)
+            {
+                throw new InvalidOperationException(
+                    $"Only this game's current pending surrender offer can be {decision}.");
+            }
         }
 
         private static IReadOnlyList<VictoryClanStanding> BuildStandings(World world, IReadOnlyList<Player> players)
@@ -476,6 +519,16 @@ namespace Wism.Client.Core
                 dominanceEligible,
                 dominancePolicyId,
                 surrenderEligible);
+        }
+
+        /// <summary>
+        ///     True when <paramref name="count" /> of <paramref name="totalCities" /> is a larger share
+        ///     than <paramref name="referenceCount" /> of the reference map's cities. Integer
+        ///     cross-multiplication keeps the Illuria boundaries exact.
+        /// </summary>
+        private static bool ExceedsClassicShare(int count, int referenceCount, int totalCities)
+        {
+            return (long)count * ClassicSurrenderReferenceCities > (long)referenceCount * totalCities;
         }
 
         private static double Ratio(int numerator, int denominator)

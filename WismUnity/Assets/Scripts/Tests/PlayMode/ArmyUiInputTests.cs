@@ -88,6 +88,16 @@ public sealed partial class ArmyUiInputTests : IPrebuildSetup, IPostBuildCleanup
         traces.Clear();
         yield return new WaitForSecondsRealtime(0.1f);
         yield return null;
+        var initialPoint = ScreenPoint(hero.Tile);
+        var initialHits = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = initialPoint }, initialHits);
+        UnityEngine.Debug.Log($"Initial fixture viewport={Screen.width}x{Screen.height}; point={initialPoint}; UI={string.Join(",", initialHits.Select(hit => hit.gameObject.name))}");
+        // Generic journeys must not depend on the Editor's remembered Game View.
+        // Resolution-specific journeys explicitly override this baseline afterward.
+        ApplyViewport(1280, 720);
+        yield return WaitFor(() => Screen.width == 1280 && Screen.height == 720);
+        Canvas.ForceUpdateCanvases();
+        yield return null;
     }
 
     [UnityTearDown]
@@ -439,8 +449,22 @@ public sealed partial class ArmyUiInputTests : IPrebuildSetup, IPostBuildCleanup
     {
         InputSystem.QueueStateEvent(touch, new TouchState { touchId = 1, phase = UnityEngine.InputSystem.TouchPhase.Began, position = position });
         yield return null;
+        UnityEngine.Debug.Log($"Touch press: point={position}; current={Pointer.current}; touchPressed={touch.primaryTouch.press.wasPressedThisFrame}; action={input.LastPrimaryAction}; mode={input.InputMode}; accepts={input.CanAcceptGameplayInput}; execution={unity.ExecutionMode}; state={Game.Current.GameState}; frame={Time.frameCount}; actionFrame={input.LastPrimaryActionFrame}");
         InputSystem.QueueStateEvent(touch, new TouchState { touchId = 1, phase = UnityEngine.InputSystem.TouchPhase.Ended, position = position });
         yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator TouchPress_SurvivesOtherPointerMotion()
+    {
+        var position = ScreenPoint(hero.Tile);
+        InputSystem.QueueStateEvent(touch, new TouchState { touchId = 1, phase = UnityEngine.InputSystem.TouchPhase.Began, position = position });
+        InputSystem.QueueStateEvent(mouse, new MouseState { position = position + new Vector2(100, 0) });
+        yield return null;
+        UnityEngine.Debug.Log($"Mixed pointer: current={Pointer.current}; touchPressed={touch.primaryTouch.press.wasPressedThisFrame}; action={input.LastPrimaryAction}; mode={input.InputMode}; accepts={input.CanAcceptGameplayInput}; execution={unity.ExecutionMode}; state={Game.Current.GameState}");
+        InputSystem.QueueStateEvent(touch, new TouchState { touchId = 1, phase = UnityEngine.InputSystem.TouchPhase.Ended, position = position });
+        yield return WaitFor(() => Game.Current.ArmiesSelected(), () => $"touch action={input.LastPrimaryAction}, current={Pointer.current}, point={position}");
+        Assert.That(Game.Current.GetSelectedArmies().Single(), Is.SameAs(hero));
     }
 
     private Vector2 ScreenPoint(Tile tile)
