@@ -32,19 +32,27 @@ namespace Assets.Scripts.CommandProcessors
 
         public ActionState Execute(ICommandAction command)
         {
+            var loadGameCommand = (LoadGameCommand)command;
             ActionState actionState = command.Execute();
+            this.unityGame.GameManager.CompletePendingLoad(loadGameCommand, actionState);
+
+            if (actionState == ActionState.Failed)
+            {
+                Debug.LogWarning("Load failed: " + loadGameCommand.FailureReason);
+                if (this.unityGame.AwaitingInitialLoad)
+                    this.unityGame.InputManager.HandleSaveLoadPicker(false);
+                this.unityGame.NotifyUser("Could not load the game. Check the save file and required world, then try again.");
+                return actionState;
+            }
 
             if (actionState == ActionState.Succeeded)
             {
                 // Load Unity game state
-                // TODO: Ensure this cannot be out of sync w/ game state
-                //       Currently rapid saves would get out of sync.
                 PersistanceManager.LoadLastSnapshot(this.unityGame);
 
                 // Reset Unity managers
                 this.unityGame.Reset();
 
-                var loadGameCommand = (LoadGameCommand)command;
                 Debug.Log($"Game loaded successfully '{loadGameCommand.Snapshot.World.Name}'.");
             }
 

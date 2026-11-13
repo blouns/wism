@@ -46,6 +46,9 @@ namespace Assets.Scripts.Managers
         private ControllerProvider provider;
         private CommandController commandController;
         private UnityManager unityManager;
+        private readonly Dictionary<LoadGameCommand, PendingLoad> pendingLoads = new Dictionary<LoadGameCommand, PendingLoad>();
+
+        internal bool HasPendingLoad => this.pendingLoads.Count > 0;
 
         public ControllerProvider ControllerProvider { get => this.provider; set => this.provider = value; }
         public IWismLoggerFactory LoggerFactory { get; set; }
@@ -336,6 +339,7 @@ namespace Assets.Scripts.Managers
 
         internal void LoadGame(string filename)
         {
+            if (HasPendingLoad) throw new System.IO.InvalidDataException("Another saved game is still loading.");
             var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
             var snapshot = PersistanceManager.ReadEntities(filename, unityGame);
@@ -361,23 +365,58 @@ namespace Assets.Scripts.Managers
                 UnityEngine.SceneManagement.SceneManager.LoadScene(savedScene);
                 return;
             }
-            if (savedSelection == null)
+            var pending = new PendingLoad(this, snapshot);
+            var command = new LoadGameCommand(this.provider.GameController, snapshot.WismGameEntity);
+            try
             {
-                ApplyLegacySaveModContext(unityGame, snapshot);
+                if (savedSelection == null) ApplyLegacySaveModContext(unityGame, snapshot);
+                else UnityModKitSelection.ApplySavedSelection(unityGame, savedSelection, UnityModKitSelection.PluginModRoot);
+                this.pendingLoads.Add(command, pending);
+                this.commandController.AddCommand(command);
             }
-            else
+            catch (Exception error)
             {
-                UnityModKitSelection.ApplySavedSelection(
-                    unityGame,
-                    savedSelection,
-                    UnityModKitSelection.PluginModRoot);
+                this.pendingLoads.Remove(command);
+                pending.Restore(this);
+                throw new System.IO.InvalidDataException("The saved game's mod selection could not be applied.", error);
+            }
+        }
+
+        internal void CompletePendingLoad(LoadGameCommand command, ActionState result)
+        {
+            if (!this.pendingLoads.TryGetValue(command, out var pending)) return;
+            this.pendingLoads.Remove(command);
+            if (result == ActionState.Succeeded) PersistanceManager.SetLastSnapshot(pending.Snapshot);
+            else pending.Restore(this);
+        }
+
+        private sealed class PendingLoad
+        {
+            internal readonly UnityGameEntity Snapshot;
+            private readonly string modPath = ModFactory.ModPath;
+            private readonly string worldPath = ModFactory.WorldPath;
+            private readonly List<string> packs = ModFactory.ActiveFeaturePackIds.ToList();
+            private readonly UnityModKitSelectionReport report = UnityModKitRuntimeSelection.LastReport;
+            private readonly string managerModPath;
+            private readonly string managerWorldName;
+
+            internal PendingLoad(GameManager manager, UnityGameEntity snapshot)
+            {
+                Snapshot = snapshot;
+                this.managerModPath = manager.ModPath;
+                this.managerWorldName = manager.WorldName;
             }
 
-            this.commandController.AddCommand(
-                new LoadGameCommand(this.provider.GameController, snapshot.WismGameEntity));
-
-            // TODO: Ensure the Unity and Wism snapshots do not get out of sync
-            PersistanceManager.SetLastSnapshot(snapshot);
+            internal void Restore(GameManager manager)
+            {
+                ModFactory.ModPath = this.modPath;
+                ModFactory.WorldPath = this.worldPath;
+                ModFactory.ActiveFeaturePackIds = this.packs;
+                ModFactory.ResetCache();
+                UnityModKitRuntimeSelection.Set(this.report);
+                manager.ModPath = this.managerModPath;
+                manager.WorldName = this.managerWorldName;
+            }
         }
 
         private static void ApplyLegacySaveModContext(UnityManager unityGame, UnityGameEntity snapshot)

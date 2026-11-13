@@ -178,6 +178,29 @@ public sealed class GameStateFingerprintTests
     }
 
     [Test]
+    public void LoadCommand_FailedRestoreHasTerminalResultAndCanRetry()
+    {
+        var snapshot = CreateProductionSnapshot();
+        var game = Game.Current;
+        var world = World.Current;
+        var random = snapshot.Random;
+        snapshot.Random = null;
+        var command = new Wism.Client.Commands.Games.LoadGameCommand(
+            TestUtilities.CreateControllerProvider().GameController, snapshot);
+        Assert.That(command.Execute(), Is.EqualTo(ActionState.Failed));
+        Assert.That(command.Result, Is.EqualTo(ActionState.Failed));
+        Assert.That(command.FailureReason, Does.Contain(nameof(NullReferenceException)));
+        Assert.That(Newtonsoft.Json.JsonConvert.SerializeObject(command), Does.Not.Contain("FailureReason"));
+        Assert.That(command.ToExecutedEvent(command.Result).Parameters["LoadSuccess"], Is.EqualTo(false));
+        Assert.That(Game.Current, Is.SameAs(game));
+        Assert.That(World.Current, Is.SameAs(world));
+        snapshot.Random = random;
+        Assert.That(command.Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(command.Result, Is.EqualTo(ActionState.Succeeded));
+        Assert.That(command.FailureReason, Is.Null);
+    }
+
+    [Test]
     public void Capture_TransferredCapitalLeavesOneOwnerAndSnapshotLoads()
     {
         Game.CreateDefaultGame();
