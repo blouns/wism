@@ -159,6 +159,12 @@ public sealed class BetaSetupIdentityJourneyTests
             Assert.That(scroll.content.rect.height, Is.GreaterThan(scroll.viewport.rect.height));
             AssertRectOnScreen(scroll.viewport, viewport);
             var region = ScreenBounds((RectTransform)scroll.transform);
+            var handleBounds = ScreenBounds(scroll.verticalScrollbar.handleRect);
+            Assert.That(handleBounds.xMin, Is.GreaterThanOrEqualTo(region.xMin));
+            Assert.That(handleBounds.xMax, Is.LessThanOrEqualTo(region.xMax));
+            Assert.That(handleBounds.yMin, Is.GreaterThanOrEqualTo(region.yMin));
+            Assert.That(handleBounds.yMax, Is.LessThanOrEqualTo(region.yMax));
+            Assert.That(validation.fontSize, Is.GreaterThanOrEqualTo(22), "Feedback must remain legible at compact setup scale.");
             foreach (var control in new[] { "StartButton", "LoadButton", "AdvancedModsButton", "ShowAiCombatToggle" })
                 Assert.That(region.Overlaps(ScreenBounds(GameObject.Find(control).GetComponent<RectTransform>())),
                     Is.False, "Long feedback must not cover " + control);

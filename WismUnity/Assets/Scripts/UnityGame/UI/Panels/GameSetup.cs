@@ -633,7 +633,7 @@ public class GameSetup : MonoBehaviour
         textObject.transform.SetParent(startButtonObject.transform.parent, false);
         validationText = textObject.GetComponent<Text>();
         validationText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
-        validationText.fontSize = 14;
+        validationText.fontSize = 22;
         validationText.fontStyle = FontStyle.Bold;
         validationText.alignment = TextAnchor.MiddleCenter;
         validationText.raycastTarget = false;
@@ -680,7 +680,7 @@ public class GameSetup : MonoBehaviour
         root.anchorMin = startRect.anchorMin;
         root.anchorMax = startRect.anchorMax;
         root.pivot = new Vector2(0.5f, 0);
-        root.sizeDelta = new Vector2(230, 92);
+        root.sizeDelta = new Vector2(230, 156);
         root.anchoredPosition = startRect.anchoredPosition + new Vector2(0,
             startRect.rect.height * (1 - startRect.pivot.y) + 8);
         area.GetComponent<Image>().color = new Color32(210, 210, 210, 255);
@@ -700,6 +700,10 @@ public class GameSetup : MonoBehaviour
         track.GetComponent<Image>().color = new Color32(65, 65, 65, 255);
         var handle = new GameObject("Handle", typeof(RectTransform), typeof(Image));
         handle.transform.SetParent(trackRect, false);
+        var handleRect = handle.GetComponent<RectTransform>();
+        handleRect.anchorMin = Vector2.zero;
+        handleRect.anchorMax = Vector2.one;
+        handleRect.offsetMin = handleRect.offsetMax = Vector2.zero;
         handle.GetComponent<Image>().color = new Color32(160, 160, 160, 255);
         var bar = track.GetComponent<Scrollbar>();
         bar.handleRect = handle.GetComponent<RectTransform>();

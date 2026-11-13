@@ -248,12 +248,14 @@ public sealed partial class ArmyUiInputTests
             Assert.That(Screen.height, Is.EqualTo(height));
             yield return Tap(MenuPoint("OpenGameMenu"));
             Canvas.ForceUpdateCanvases();
+            CaptureUiCanvas(unity.GameMenu.GetComponentInChildren<Canvas>(), "observe-menu-bounds", width, height);
             foreach (var item in unity.GameMenu.GetComponentsInChildren<Selectable>())
             {
                 var rect = (RectTransform)item.transform;
                 var corners = new Vector3[4];
                 rect.GetWorldCorners(corners);
-                Assert.That(corners.All(point => point.x >= 0 && point.y >= 0 && point.x <= Screen.width && point.y <= Screen.height), Is.True);
+                Assert.That(corners.All(point => point.x >= 0 && point.y >= 0 && point.x <= Screen.width && point.y <= Screen.height), Is.True,
+                    item.name + " corners: " + string.Join(", ", corners.Select(point => point.ToString("F5"))));
                 Assert.That(rect.rect.height, Is.GreaterThanOrEqualTo(44));
             }
             CaptureUiCanvas(unity.GameMenu.GetComponentInChildren<Canvas>(), "observe-menu", width, height);
