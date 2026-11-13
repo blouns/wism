@@ -11,11 +11,36 @@ using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Wism.Client.Core;
+using Wism.Client.Core.Boons;
 using Wism.Client.MapObjects;
 using Wism.Client.Modules;
 
 public sealed partial class ArmyUiInputTests
 {
+    [UnityTest]
+    public IEnumerator HeroLifecycle_SearchKeyFindsArtifactAndTakeUsesRealInput()
+    {
+        var ruins = World.Current.GetLocations().Single(location => location.ShortName == "CryptKeeper");
+        var artifact = Artifact.Create(ModFactory.FindArtifactInfo("StaffOfMight"));
+        ruins.Boon = new ArtifactBoon(artifact);
+        yield return SelectItemHero();
+        manager.MoveSelectedArmies(ruins.X, ruins.Y);
+        yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(hero.Tile.Location, Is.SameAs(ruins));
+        Assert.That(hero.MovesRemaining, Is.GreaterThan(0));
+        Assert.That(ruins.Searched, Is.False);
+
+        yield return ItemKey(Key.Z);
+        yield return WaitFor(() => ruins.Searched);
+        yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(hero.IsDead, Is.False);
+        Assert.That(hero.Tile.Items, Does.Contain(artifact));
+        yield return ItemKey(Key.T);
+        yield return WaitFor(() => hero.HasItems() && hero.Items.Contains(artifact));
+        Assert.That(hero.Tile.Items, Has.No.Member(artifact));
+        Assert.That(hero.Items.Count(item => item == artifact), Is.EqualTo(1));
+    }
+
     private Artifact GroundItem(string name)
     {
         var item = Artifact.Create(ModFactory.FindArtifactInfo(name));
