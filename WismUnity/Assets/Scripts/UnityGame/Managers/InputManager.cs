@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Timers;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -507,9 +508,20 @@ namespace Assets.Scripts.Managers
                 {
                     var fileName = String.Format(saveLoadPicker.DefaultFilenameFormat, saveLoadPicker.SelectedIndex + 1);
                     var saveName = saveLoadPicker.GetCurrentSaveName();
-                    this.GameManager.SaveGame(fileName, saveName);
-                    saveLoadPicker.Clear();
-                    SetInputMode(InputMode.Game);
+                    try
+                    {
+                        this.GameManager.SaveGame(fileName, saveName);
+                    }
+                    catch (Exception error) when (error is IOException || error is UnauthorizedAccessException)
+                    {
+                        Debug.LogWarning("Save failed: " + error.Message);
+                        this.unityManager.NotifyUser("Could not save the game. Check disk space and write access, then try again.");
+                    }
+                    finally
+                    {
+                        saveLoadPicker.Clear();
+                        SetInputMode(InputMode.Game);
+                    }
                 }
             }
             else
