@@ -66,8 +66,15 @@ public sealed partial class ArmyUiInputTests
     {
         yield return new WaitForLastCommand(manager.ControllerProvider);
         var player = Game.Current.GetCurrentPlayer();
+        // Scene-authored locations differ from the JSON world; create both states explicitly.
+        var extraRuin = Wism.Client.MapObjects.Location.Create(new Wism.Client.Modules.Infos.LocationInfo
+        {
+            ShortName = "ReportFixtureRuin", DisplayName = "Report Fixture Ruin", Kind = "Ruins"
+        });
+        var emptyTile = World.Current.Map.Cast<Tile>().First(tile => tile.Location == null && !tile.HasCity() && !tile.HasArmies());
+        World.Current.AddLocation(extraRuin, emptyTile);
         var ruins = StrategicReportData.Ruins(World.Current);
-        Assert.That(ruins.Length, Is.GreaterThan(1), "Use both searched and unsearched real map sites.");
+        Assert.That(ruins.Length, Is.GreaterThan(1), "Use both searched and unsearched map sites.");
         ruins[0].Searched = true;
         ruins[1].Searched = false;
         var before = TerminalState();
