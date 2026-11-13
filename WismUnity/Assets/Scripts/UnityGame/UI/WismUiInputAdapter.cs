@@ -49,6 +49,16 @@ namespace Assets.Scripts.UI
 #endif
         }
 
+        public static bool SearchPressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.Z)) return true;
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.zKey.wasPressedThisFrame;
+#else
+            return false;
+#endif
+        }
+
         public static bool CapitalPressedThisFrame()
         {
             if (Input.GetKeyDown(KeyCode.C)) return true;

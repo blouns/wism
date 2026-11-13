@@ -301,7 +301,7 @@ namespace Assets.Scripts.Managers
             {
                 this.GameManager.QuitSelectedArmies();
             }
-            else if (Input.GetKeyDown(KeyCode.Z))
+            else if (WismUiInputAdapter.SearchPressedThisFrame())
             {
                 this.GameManager.SearchLocation();
             }
