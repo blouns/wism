@@ -37,7 +37,7 @@ public sealed partial class ArmyUiInputTests
             yield return new WaitForLastCommand(manager.ControllerProvider);
             unity.InteractiveUI = true;
             yield return null;
-            var camera = unity.GetMainCamera().transform.position;
+            var camera = Camera.main.transform.position;
             var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
             foreach (var failure in new[] { "malformed", "missing-core", "camera", "world", "deleted" })
             {
@@ -64,7 +64,7 @@ public sealed partial class ArmyUiInputTests
                     () => $"Load rejection={failure}; mode={input.InputMode}; picker={picker.OkCancelResult}");
                 Assert.That(Game.Current, Is.SameAs(game), failure);
                 Assert.That(PersistanceManager.GetLastSnapshot(), Is.SameAs(previousSnapshot), failure);
-                Assert.That(unity.GetMainCamera().transform.position, Is.EqualTo(camera), failure);
+                Assert.That(Camera.main.transform.position, Is.EqualTo(camera), failure);
                 Assert.That(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path, Is.EqualTo(scene), failure);
                 Assert.That(Wism.Client.Modules.ModFactory.ModPath, Is.EqualTo(modPath), failure);
                 Assert.That(Wism.Client.Modules.ModFactory.WorldPath, Is.EqualTo(worldPath), failure);
