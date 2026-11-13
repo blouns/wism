@@ -189,12 +189,15 @@ public sealed class GameStateFingerprintTests
             TestUtilities.CreateControllerProvider().GameController, snapshot);
         Assert.That(command.Execute(), Is.EqualTo(ActionState.Failed));
         Assert.That(command.Result, Is.EqualTo(ActionState.Failed));
+        Assert.That(command.FailureReason, Does.Contain(nameof(NullReferenceException)));
+        Assert.That(Newtonsoft.Json.JsonConvert.SerializeObject(command), Does.Not.Contain("FailureReason"));
         Assert.That(command.ToExecutedEvent(command.Result).Parameters["LoadSuccess"], Is.EqualTo(false));
         Assert.That(Game.Current, Is.SameAs(game));
         Assert.That(World.Current, Is.SameAs(world));
         snapshot.Random = random;
         Assert.That(command.Execute(), Is.EqualTo(ActionState.Succeeded));
         Assert.That(command.Result, Is.EqualTo(ActionState.Succeeded));
+        Assert.That(command.FailureReason, Is.Null);
     }
 
     [Test]

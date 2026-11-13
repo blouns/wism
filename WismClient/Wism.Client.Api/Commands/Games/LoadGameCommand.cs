@@ -23,9 +23,23 @@ namespace Wism.Client.Commands.Games
 
         public GameEntity Snapshot { get; }
 
+        [Newtonsoft.Json.JsonIgnore]
+        public string FailureReason { get; private set; }
+
         protected override ActionState ExecuteInternal()
         {
-            return this.GameController.LoadSnapshot(this.Snapshot);
+            this.FailureReason = null;
+            try
+            {
+                return this.GameController.LoadSnapshot(this.Snapshot);
+            }
+            catch (Exception error)
+            {
+                // The loader has restored the prior campaign. Record a terminal
+                // result so command consumers do not retry the bad save each frame.
+                this.FailureReason = error.ToString();
+                return ActionState.Failed;
+            }
         }
 
         public override CommandExecutedEvent ToExecutedEvent(ActionState result)

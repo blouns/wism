@@ -63,6 +63,7 @@ namespace Assets.Scripts.Managers
         public bool EndTurnPending { get; private set; }
 
         public bool CanAcceptGameplayInput => !EndTurnPending && Game.IsInitialized() &&
+            !this.GameManager.HasPendingLoad &&
             Game.Current.GetCurrentPlayer().IsHuman &&
             Game.Current.GameState != GameState.EndingTurn &&
             Game.Current.GameState != GameState.StartingTurn &&
@@ -557,7 +558,7 @@ namespace Assets.Scripts.Managers
                         error is Newtonsoft.Json.JsonException)
                     {
                         failed = true;
-                        Debug.LogWarning("Load failed: " + error.Message);
+                        Debug.LogWarning("Load failed: " + error);
                         this.unityManager.NotifyUser("Could not load the game. Check the save file and required world, then try again.");
                     }
                     finally
