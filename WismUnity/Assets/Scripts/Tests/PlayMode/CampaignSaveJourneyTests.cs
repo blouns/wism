@@ -18,6 +18,37 @@ using Wism.Client.MapObjects;
 
 public sealed partial class ArmyUiInputTests
 {
+    [UnityTest, UnityPlatform(RuntimePlatform.WindowsEditor)]
+    public IEnumerator CampaignSave_BlockedReplacementPreservesPreviousSaveAndRecovers()
+    {
+        var directory = Path.Combine(Application.temporaryCachePath, "SaveSafety-" + Guid.NewGuid().ToString("N"));
+        var previousDirectory = PersistanceManager.SaveDirectory;
+        try
+        {
+            PersistanceManager.SaveDirectory = directory;
+            PersistanceManager.Save("WISM1.SAV", "Before replacement", unity);
+            var path = Path.Combine(directory, "WISM1.SAV");
+            var original = File.ReadAllBytes(path);
+            // Writing is allowed, but replacement is blocked by this open reader.
+            using (var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                Assert.Throws<IOException>(() => PersistanceManager.Save("WISM1.SAV", "After replacement", unity));
+                Assert.That(File.ReadAllBytes(path), Is.EqualTo(original), "A failed commit must preserve the previous save byte for byte.");
+            }
+            Assert.That(Directory.GetFiles(directory), Has.Length.EqualTo(1), "Failed temporary writes must be cleaned up.");
+            PersistanceManager.Save("WISM1.SAV", "After replacement", unity);
+            Assert.That(File.ReadAllBytes(path), Is.Not.EqualTo(original));
+            Assert.That(File.ReadAllText(path), Does.Contain("After replacement"));
+            Assert.That(Directory.GetFiles(directory), Has.Length.EqualTo(1));
+        }
+        finally
+        {
+            PersistanceManager.SaveDirectory = previousDirectory;
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+        }
+        yield return null;
+    }
+
     [UnityTest] public IEnumerator CampaignSave_ResumeRedirectBattle1024() => SaveResumeRedirectBattle(1024, 768);
     [UnityTest] public IEnumerator CampaignSave_ResumeRedirectBattle1280() => SaveResumeRedirectBattle(1280, 720);
     [UnityTest] public IEnumerator CampaignSave_ResumeRedirectBattle1920() => SaveResumeRedirectBattle(1920, 1080);
