@@ -123,6 +123,60 @@ public sealed class GameStateFingerprintTests
         }
     }
 
+    [TestCase("random")]
+    [TestCase("tiles")]
+    [TestCase("army")]
+    [TestCase("city")]
+    public void Load_FailureRestoresRunningCampaignAndAllowsRetry(string failure)
+    {
+        CreateProductionSnapshot();
+        var game = Game.Current;
+        var world = World.Current;
+        var army = game.Players[0].ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), world.Map[1, 1]);
+        TestUtilities.Select(TestUtilities.CreateControllerProvider(), new List<Army> { army });
+        for (int i = 0; i < 7; i++) game.Random.Next();
+        var valid = game.Snapshot();
+        var broken = game.Snapshot();
+        var before = GameStateFingerprint.Capture(game).Hash;
+        var allocator = ArmyFactory.LastId;
+        var random = game.Random;
+        switch (failure)
+        {
+            case "random": broken.Random = null; break;
+            case "tiles": broken.World.Tiles = Array.Empty<TileEntity>(); break;
+            case "army": broken.Players[0].Armies = new[] { broken.Players[0].Armies[0], null }; break;
+            case "city": broken.World.Cities[0].X = -1; break;
+        }
+
+        Assert.Catch(() => GameFactory.Load(broken), "The injected corruption must reach a failing restore stage.");
+        Assert.Multiple(() =>
+        {
+            Assert.That(Game.Current, Is.SameAs(game), failure);
+            Assert.That(World.Current, Is.SameAs(world), failure);
+            Assert.That(ArmyFactory.LastId, Is.EqualTo(allocator), failure);
+            Assert.That(game.Random, Is.SameAs(random), failure);
+            Assert.That(game.GetSelectedArmies(), Does.Contain(army), failure);
+            Assert.That(GameStateFingerprint.Capture(game).Hash, Is.EqualTo(before), failure);
+        });
+
+        GameFactory.Load(valid);
+        Assert.That(GameStateFingerprint.Capture(Game.Current).Hash, Is.EqualTo(before), "A valid retry must restore the campaign.");
+    }
+
+    [Test]
+    public void Load_FailureBeforeFirstGameLeavesGameUninitialized()
+    {
+        var invalid = CreateProductionSnapshot();
+        invalid.Random = null;
+        var world = World.Current;
+        var allocator = ArmyFactory.LastId;
+        Game.Unload();
+        Assert.Catch(() => GameFactory.Load(invalid));
+        Assert.That(Game.IsInitialized(), Is.False);
+        Assert.That(World.Current, Is.SameAs(world));
+        Assert.That(ArmyFactory.LastId, Is.EqualTo(allocator));
+    }
+
     [Test]
     public void Capture_TransferredCapitalLeavesOneOwnerAndSnapshotLoads()
     {
