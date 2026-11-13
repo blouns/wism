@@ -10,6 +10,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
+using UnityEngine.SceneManagement;
+using Assets.Scripts.UnityGame.Persistance.Entities;
 using UnityEngine.UI;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
@@ -17,6 +19,66 @@ using Wism.Client.Modules;
 
 public sealed partial class ArmyUiInputTests
 {
+    [UnityTest] public IEnumerator HeroRecruitment_FirstHeroNamingUsesVisibleSubmit() => FirstHeroNaming(false);
+    [UnityTest] public IEnumerator HeroRecruitment_BlankNameCannotSubmitAndRecovers() => FirstHeroNaming(true);
+
+    private IEnumerator FirstHeroNaming(bool exerciseBlank)
+    {
+        unity.enabled = false;
+        input.enabled = false;
+        Game.Unload();
+        UnityManager.SetNewGameSettings(new UnityNewGameEntity
+        {
+            InteractiveUI = true, IsNewGame = true, RandomSeed = 1990, WorldName = "TestWorld",
+            Players = new[] {
+                new UnityPlayerEntity { ClanName = "Sirians", IsHuman = true },
+                new UnityPlayerEntity { ClanName = "LordBane", IsHuman = true }
+            }
+        });
+        SceneManager.LoadScene("Scenes/Test/TestWorld");
+        yield return WaitFor(() => Game.IsInitialized());
+        unity = GameObject.FindGameObjectWithTag("UnityManager").GetComponent<UnityManager>();
+        manager = unity.GetComponent<GameManager>();
+        input = unity.GetComponent<InputManager>();
+        manager.StandardTime = 0f;
+        manager.WarTime = 0f;
+        var naming = UnityUtilities.GameObjectHardFind("SolicitInputPanel").GetComponent<SolicitInput>();
+        yield return WaitFor(() => naming.IsInitialized());
+        ApplyViewport(1280, 720);
+        yield return null;
+        var player = Game.Current.GetCurrentPlayer();
+        var gold = player.Gold;
+        Assert.That(player.GetArmies().OfType<Hero>(), Is.Empty);
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.UI));
+        var field = naming.GetComponentInChildren<InputField>(true);
+        var submit = naming.GetComponentsInChildren<Button>(true).Single(button => button.name == "EnterButton");
+        if (exerciseBlank)
+        {
+            field.text = "   ";
+            yield return null;
+            Assert.That(submit.interactable, Is.False);
+            yield return Click(RectTransformUtility.WorldToScreenPoint(null, submit.transform.position));
+            Assert.That(player.GetArmies().OfType<Hero>(), Is.Empty);
+            Assert.That(input.InputMode, Is.EqualTo(InputMode.UI));
+        }
+        field.text = "Ariadne";
+        yield return null;
+        Assert.That(submit.interactable, Is.True);
+        var group = naming.GetComponent<CanvasGroup>();
+        Assert.That(group.alpha, Is.EqualTo(1));
+        Assert.That(group.interactable && group.blocksRaycasts, Is.True);
+        yield return Click(RectTransformUtility.WorldToScreenPoint(null, submit.transform.position));
+        yield return WaitFor(() => player.GetArmies().OfType<Hero>().Count() == 1);
+        hero = player.GetArmies().OfType<Hero>().Single();
+        Assert.That(hero.DisplayName, Is.EqualTo("Ariadne"));
+        Assert.That(hero.Tile, Is.SameAs(player.Capitol.Tile));
+        Assert.That(player.Gold, Is.EqualTo(gold), "The initial hero is free.");
+        Assert.That(group.alpha, Is.EqualTo(0));
+        Assert.That(group.blocksRaycasts, Is.False);
+        yield return null;
+        Assert.That(player.GetArmies().OfType<Hero>().Count(), Is.EqualTo(1));
+    }
+
     [UnityTest] public IEnumerator HeroControls_1024() => HeroControlJourney(1024, 768);
     [UnityTest] public IEnumerator HeroControls_1280() => HeroControlJourney(1280, 720);
     [UnityTest] public IEnumerator HeroControls_1920() => HeroControlJourney(1920, 1080);
