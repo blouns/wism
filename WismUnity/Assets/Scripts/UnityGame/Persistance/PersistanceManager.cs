@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using Wism.Client.Core;
 using Wism.Client.Data;
@@ -45,9 +46,27 @@ namespace Assets.Scripts.Managers
             string path = Path.Combine(SaveDirectory, filename);
             var settings = new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() };
             var json = JsonConvert.SerializeObject(snapshot, settings);
-            using (StreamWriter writer = new StreamWriter(path, false))
+            // Keep the previous save intact until a complete sibling file is durable.
+            var temporaryPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
             {
-                writer.Write(json);
+                using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                using (var writer = new StreamWriter(stream, new UTF8Encoding(false)))
+                {
+                    writer.Write(json);
+                    writer.Flush();
+                    stream.Flush(true);
+                }
+
+                if (File.Exists(path)) File.Replace(temporaryPath, path, null);
+                else File.Move(temporaryPath, path);
+            }
+            finally
+            {
+                // Cleanup must not hide a storage error or fall back to truncating the old save.
+                try { if (File.Exists(temporaryPath)) File.Delete(temporaryPath); }
+                catch (IOException) { }
+                catch (UnauthorizedAccessException) { }
             }
 
             Debug.Log($"Saved game successfully to '{path}'.");
