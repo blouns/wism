@@ -176,7 +176,7 @@ namespace Assets.Scripts.Managers
         private void HandleWaitForKey()
         {
             if (this.KeyPressed != null &&
-                Input.anyKeyDown)
+                WismUiInputAdapter.AnyKeyPressedThisFrame())
             {
                 this.KeyPressed();
             }

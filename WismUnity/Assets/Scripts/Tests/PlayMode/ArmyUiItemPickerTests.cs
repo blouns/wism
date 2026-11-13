@@ -31,7 +31,14 @@ public sealed partial class ArmyUiInputTests
         Assert.That(ruins.Searched, Is.False);
 
         yield return ItemKey(Key.Z);
-        yield return WaitFor(() => ruins.Searched);
+        var deadline = Time.realtimeSinceStartup + 5f;
+        while ((!ruins.Searched || input.InputMode != InputMode.Game) && Time.realtimeSinceStartup < deadline)
+        {
+            if (input.InputMode == InputMode.WaitForKey) yield return ItemKey(Key.Enter);
+            else yield return null;
+        }
+        Assert.That(ruins.Searched, Is.True, "Search must finish through real continuation input.");
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.Game));
         yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
         Assert.That(hero.IsDead, Is.False);
         Assert.That(hero.Tile.Items, Does.Contain(artifact));
