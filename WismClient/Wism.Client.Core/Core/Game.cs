@@ -23,6 +23,10 @@ namespace Wism.Client.Core
 
         // Singleton instance
         private static Game current;
+
+        internal static Game CurrentOrNull => current;
+
+        internal static void RestoreCurrent(Game previous) => current = previous;
         private readonly HashSet<Tile> quitArmySet = new HashSet<Tile>();
 
         private List<Tile> nextArmyQueue = new List<Tile>();

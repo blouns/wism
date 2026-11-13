@@ -10,6 +10,10 @@ namespace Wism.Client.Core
     public class World
     {
         private static World current;
+
+        internal static World CurrentOrNull => current;
+
+        internal static void RestoreCurrent(World previous) => current = previous;
         private readonly List<City> cities = new List<City>();
         private readonly List<Location> locations = new List<Location>();
         private readonly List<Artifact> looseItems = new List<Artifact>();

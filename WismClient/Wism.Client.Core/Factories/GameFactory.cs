@@ -49,6 +49,26 @@ namespace Wism.Client.Factories
                 throw new ArgumentNullException(nameof(snapshot));
             }
 
+            var previousGame = Game.CurrentOrNull;
+            var previousWorld = World.CurrentOrNull;
+            var previousArmyId = ArmyFactory.LastId;
+            try
+            {
+                return LoadSnapshot(snapshot);
+            }
+            catch
+            {
+                // Reconstruction uses global lookups; failed partial objects must not
+                // replace the live campaign or consume its army identifiers.
+                Game.RestoreCurrent(previousGame);
+                World.RestoreCurrent(previousWorld);
+                ArmyFactory.LastId = previousArmyId;
+                throw;
+            }
+        }
+
+        private static Game LoadSnapshot(GameEntity snapshot)
+        {
             Game.CreateEmpty();
 
             // Game settings
