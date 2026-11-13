@@ -553,7 +553,7 @@ namespace Assets.Scripts.Managers
                     {
                         this.GameManager.LoadGame(filename);
                     }
-                    catch (Exception error) when (error is IOException || error is UnauthorizedAccessException ||
+                    catch (Exception error) when (error is IOException || error is InvalidDataException || error is UnauthorizedAccessException ||
                         error is Newtonsoft.Json.JsonException)
                     {
                         failed = true;
