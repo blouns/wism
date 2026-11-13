@@ -254,7 +254,10 @@ public sealed partial class ArmyUiInputTests
                 var rect = (RectTransform)item.transform;
                 var corners = new Vector3[4];
                 rect.GetWorldCorners(corners);
-                Assert.That(corners.All(point => point.x >= 0 && point.y >= 0 && point.x <= Screen.width && point.y <= Screen.height), Is.True,
+                // Canvas scaling can round the full-screen backdrop edge below zero by 0.00002 pixels.
+                const float rounding = .001f;
+                Assert.That(corners.All(point => point.x >= -rounding && point.y >= -rounding &&
+                    point.x <= Screen.width + rounding && point.y <= Screen.height + rounding), Is.True,
                     item.name + " corners: " + string.Join(", ", corners.Select(point => point.ToString("F5"))));
                 Assert.That(rect.rect.height, Is.GreaterThanOrEqualTo(44));
             }
