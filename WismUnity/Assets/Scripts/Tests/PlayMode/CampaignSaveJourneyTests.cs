@@ -19,6 +19,57 @@ using Wism.Client.MapObjects;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest, UnityPlatform(RuntimePlatform.WindowsEditor)]
+    public IEnumerator CampaignSave_StorageFailureReturnsControlAndCanRetryFromPicker()
+    {
+        var directory = Path.Combine(Application.temporaryCachePath, "SaveRecovery-" + Guid.NewGuid().ToString("N"));
+        var previousDirectory = PersistanceManager.SaveDirectory;
+        try
+        {
+            PersistanceManager.SaveDirectory = directory;
+            PersistanceManager.Save("WISM1.SAV", "Original save", unity);
+            var path = Path.Combine(directory, "WISM1.SAV");
+            var original = File.ReadAllBytes(path);
+            var game = Game.Current;
+            yield return new WaitForLastCommand(manager.ControllerProvider);
+            unity.InteractiveUI = true;
+            yield return null;
+            for (int attempt = 0; attempt < 2; attempt++)
+            {
+                using (var reader = attempt == 0
+                    ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite) : null)
+                {
+                    yield return Click(MenuPoint("OpenGameMenu"));
+                    Assert.That(MenuButton("SaveGame").interactable, Is.True);
+                    yield return Click(MenuPoint("SaveGame"));
+                    yield return WaitFor(() => input.InputMode == InputMode.SaveGamePicker && unity.SaveLoadPicker.IsInitialized(),
+                        () => $"Open save picker attempt={attempt}; mode={input.InputMode}; canInput={input.CanAcceptGameplayInput}");
+                    var picker = unity.SaveLoadPicker;
+                    yield return PressJourneyButton(picker.GetComponentsInChildren<Button>().Single(button => button.name == "Button1"));
+                    picker.transform.Find("Filename1").GetComponent<InputField>().text = "Recovered save";
+                    yield return PressJourneyButton(picker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Save"));
+                    yield return WaitFor(() => input.InputMode == InputMode.Game && input.CanAcceptGameplayInput,
+                        () => $"Recover from save attempt={attempt}; mode={input.InputMode}; picker={picker.OkCancelResult}");
+                    Assert.That(Game.Current, Is.SameAs(game));
+                    Assert.That(picker.gameObject.activeSelf, Is.False);
+                    if (attempt == 0)
+                    {
+                        Assert.That(File.ReadAllBytes(path), Is.EqualTo(original));
+                        Assert.That(GameObject.FindGameObjectWithTag("NotificationBox").GetComponent<Text>().text,
+                            Does.StartWith("Could not save the game."));
+                    }
+                }
+            }
+            Assert.That(File.ReadAllText(path), Does.Contain("Recovered save"));
+            Assert.That(Directory.GetFiles(directory), Has.Length.EqualTo(1));
+        }
+        finally
+        {
+            PersistanceManager.SaveDirectory = previousDirectory;
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+        }
+    }
+
+    [UnityTest, UnityPlatform(RuntimePlatform.WindowsEditor)]
     public IEnumerator CampaignSave_BlockedReplacementPreservesPreviousSaveAndRecovers()
     {
         var directory = Path.Combine(Application.temporaryCachePath, "SaveSafety-" + Guid.NewGuid().ToString("N"));
