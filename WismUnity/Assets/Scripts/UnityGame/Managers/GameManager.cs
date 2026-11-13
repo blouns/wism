@@ -338,13 +338,17 @@ namespace Assets.Scripts.Managers
         {
             var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
-            var snapshot = PersistanceManager.LoadEntities(filename, unityGame);
+            var snapshot = PersistanceManager.ReadEntities(filename, unityGame);
+            if (snapshot?.WismGameEntity?.World == null || snapshot.CameraPosition == null ||
+                snapshot.CameraPosition.Length != 3 ||
+                Array.Exists(snapshot.CameraPosition, value => float.IsNaN(value) || float.IsInfinity(value)))
+                throw new System.IO.InvalidDataException("The saved game is incomplete or has invalid camera data.");
             var savedSelection = snapshot.ModKitSelection ?? snapshot.WismGameEntity?.ModKitSelection;
             var savedWorld = snapshot.WismGameEntity?.World?.Name ?? snapshot.WorldName;
             var explicitScene = savedSelection == null ? null : UnityModKitSelection.Inspect(
                 savedSelection.ProfileId, savedSelection.PackIds, savedSelection.World, UnityModKitSelection.PluginModRoot).unityScene;
             var savedScene = UnityWorldSceneCatalog.Resolve(savedWorld, explicitScene);
-            if (savedScene == null) throw new InvalidOperationException("The saved world's scene is not included in this build.");
+            if (savedScene == null) throw new System.IO.InvalidDataException("The saved world's scene is not included in this build.");
             var sceneName = System.IO.Path.GetFileNameWithoutExtension(savedScene);
             if (!string.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, sceneName, StringComparison.OrdinalIgnoreCase))
             {

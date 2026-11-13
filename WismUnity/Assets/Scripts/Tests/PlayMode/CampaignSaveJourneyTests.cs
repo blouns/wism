@@ -72,6 +72,14 @@ public sealed partial class ArmyUiInputTests
                 Assert.That(GameObject.FindGameObjectWithTag("NotificationBox").GetComponent<Text>().text,
                     Does.StartWith("Could not load the game."), failure);
             }
+            File.WriteAllText(path, valid);
+            yield return Click(MenuPoint("OpenGameMenu"));
+            yield return Click(MenuPoint("LoadGame"));
+            yield return WaitFor(() => input.InputMode == InputMode.LoadGamePicker && unity.SaveLoadPicker.IsInitialized());
+            yield return PressJourneyButton(unity.SaveLoadPicker.GetComponentsInChildren<Button>().Single(button => button.name == "Button1"));
+            yield return PressJourneyButton(unity.SaveLoadPicker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load"));
+            yield return WaitFor(() => !ReferenceEquals(Game.Current, game) && input.InputMode == InputMode.Game && input.CanAcceptGameplayInput);
+            Assert.That(PersistanceManager.GetLastSnapshot().DisplayName, Is.EqualTo("Load recovery"));
         }
         finally
         {

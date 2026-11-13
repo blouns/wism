@@ -91,6 +91,13 @@ namespace Assets.Scripts.Managers
 
         public static UnityGameEntity LoadEntities(string path, UnityManager unityGame)
         {
+            snapshot = ReadEntities(path, unityGame);
+            return snapshot;
+        }
+
+        // Preflight callers must not publish a snapshot until the save is accepted.
+        internal static UnityGameEntity ReadEntities(string path, UnityManager unityGame)
+        {
             if (string.IsNullOrWhiteSpace(path))
             {
                 throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace", nameof(path));
@@ -103,14 +110,13 @@ namespace Assets.Scripts.Managers
 
             if (!File.Exists(path))
             {
-                throw new ArgumentException("File could not be loaded because the file was not found: " + path);
+                throw new FileNotFoundException("The saved game could not be found.", path);
             }
 
             var json = File.ReadAllText(path);
 
             var settings = new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() };
-            snapshot = JsonConvert.DeserializeObject<UnityGameEntity>(json, settings);
-            return snapshot;
+            return JsonConvert.DeserializeObject<UnityGameEntity>(json, settings);
         }
 
         internal static void SetLastSnapshot(UnityGameEntity unityGameEntity)
