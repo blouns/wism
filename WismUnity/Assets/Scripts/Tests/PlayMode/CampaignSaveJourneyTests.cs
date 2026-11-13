@@ -31,18 +31,21 @@ public sealed partial class ArmyUiInputTests
             var original = File.ReadAllBytes(path);
             var game = Game.Current;
             unity.InteractiveUI = true;
+            yield return null;
             for (int attempt = 0; attempt < 2; attempt++)
             {
                 using (var reader = attempt == 0
                     ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite) : null)
                 {
                     yield return PressJourneyKey(Key.S);
-                    yield return WaitFor(() => input.InputMode == InputMode.SaveGamePicker && unity.SaveLoadPicker.IsInitialized());
+                    yield return WaitFor(() => input.InputMode == InputMode.SaveGamePicker && unity.SaveLoadPicker.IsInitialized(),
+                        () => $"Open save picker attempt={attempt}; mode={input.InputMode}; canInput={input.CanAcceptGameplayInput}");
                     var picker = unity.SaveLoadPicker;
                     yield return PressJourneyButton(picker.GetComponentsInChildren<Button>().Single(button => button.name == "Button1"));
                     picker.transform.Find("Filename1").GetComponent<InputField>().text = "Recovered save";
                     yield return PressJourneyButton(picker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Save"));
-                    yield return WaitFor(() => input.InputMode == InputMode.Game && input.CanAcceptGameplayInput);
+                    yield return WaitFor(() => input.InputMode == InputMode.Game && input.CanAcceptGameplayInput,
+                        () => $"Recover from save attempt={attempt}; mode={input.InputMode}; picker={picker.OkCancelResult}");
                     Assert.That(Game.Current, Is.SameAs(game));
                     Assert.That(picker.gameObject.activeSelf, Is.False);
                     if (attempt == 0)
