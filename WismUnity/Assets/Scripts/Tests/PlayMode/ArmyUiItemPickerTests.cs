@@ -42,6 +42,9 @@ public sealed partial class ArmyUiInputTests
         yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
         Assert.That(hero.IsDead, Is.False);
         Assert.That(hero.Tile.Items, Does.Contain(artifact));
+        yield return WaitFor(() => !Game.Current.ArmiesSelected());
+        yield return Click(ScreenPoint(hero.Tile));
+        yield return WaitFor(() => Game.Current.ArmiesSelected());
         yield return ItemKey(Key.T);
         yield return WaitFor(() => hero.HasItems() && hero.Items.Contains(artifact));
         Assert.That(hero.Tile.Items, Has.No.Member(artifact));
