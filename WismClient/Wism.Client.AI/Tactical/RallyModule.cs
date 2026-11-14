@@ -145,6 +145,11 @@ namespace Wism.Client.AI.Tactical
                     path[1].GetAllArmies().Any(army => army.Clan != armies[0].Clan))
                     continue;
 
+                // Do not spend movement approaching a known downstream capacity blockage.
+                // Recheck on each decision so a cleared route becomes eligible again.
+                if (path.Skip(1).Any(tile => tile == null || !tile.HasRoom(armies.Count)))
+                    continue;
+
                 var movable = Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armies, path[1]);
                 if (!Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(movable, path[1]))
                     continue;

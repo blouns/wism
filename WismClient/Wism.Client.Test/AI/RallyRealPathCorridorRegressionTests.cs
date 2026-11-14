@@ -17,7 +17,6 @@ using Wism.Client.Test.Common;
 
 namespace Wism.Client.Test.AI;
 
-// Prepared source only. The explicit control belongs on the unpatched baseline.
 [TestFixture]
 [NonParallelizable]
 public class RallyRealPathCorridorRegressionTests
@@ -85,24 +84,6 @@ public class RallyRealPathCorridorRegressionTests
         Assert.That(map[8, 3].HasRoom(1), Is.False);
         AssertRoute(2, new[] { 6, 5, 4, 3, 2 });
         AssertRoute(10, new[] { 6, 7, 8, 9, 10 });
-    }
-
-    [Test]
-    [Explicit("Negative control: run only against the unpatched RallyModule baseline.")]
-    public void Baseline_ExecutesSameArmyABAThenHitsOppositeBottleneck()
-    {
-        RunDecision(expectedDestination: 2, allowBlockedMove: true);
-        Assert.That(mover.X, Is.EqualTo(5));
-        Assert.That(failedMoves, Is.EqualTo(1));
-        Assert.That(steps.Select(s => s.X), Is.EqualTo(new[] { 6, 5 }));
-
-        RunDecision(expectedDestination: 10, allowBlockedMove: true);
-        Assert.That(steps.Select(s => s.X), Is.EqualTo(new[] { 6, 5, 6, 7 }));
-        Assert.That(steps.All(s => s.Y == 3 && s.ArmyId == mover.Id), Is.True);
-        Assert.That(HasABA(), Is.True);
-        Assert.That(failedMoves, Is.EqualTo(2));
-        Assert.That(mover.MovesRemaining, Is.LessThan(steps[0].Moves));
-        AssertUnchangedBlockersAndTurn();
     }
 
     [Test]
