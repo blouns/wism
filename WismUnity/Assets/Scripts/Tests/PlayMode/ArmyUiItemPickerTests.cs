@@ -22,6 +22,7 @@ public sealed partial class ArmyUiInputTests
     {
         var ruins = World.Current.GetLocations().Single(location => location.ShortName == "CryptKeeper");
         ruins.Monster = "Guardian";
+        ruins.Boon = new ArtifactBoon(Artifact.Create(ModFactory.FindArtifactInfo("StaffOfMight")));
         yield return SelectItemHero();
         manager.MoveSelectedArmies(ruins.X, ruins.Y);
         yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
@@ -34,8 +35,10 @@ public sealed partial class ArmyUiInputTests
             if (input.InputMode == InputMode.WaitForKey) yield return ItemKey(Key.Enter);
             else yield return null;
         }
-        yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
-        Assert.That(hero.IsDead, Is.True);
+        Assert.That(hero.IsDead, Is.True, "The pinned fatal search must finish within the continuation deadline.");
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.Game));
+        yield return WaitFor(() => manager.ControllerProvider.CommandController.GetLastCommand().Result != Wism.Client.Controllers.ActionState.InProgress &&
+            manager.ControllerProvider.CommandController.GetLastCommand().Result != Wism.Client.Controllers.ActionState.NotStarted);
         Assert.That(Game.Current.GameState, Is.EqualTo(GameState.Ready));
         int command = manager.ControllerProvider.CommandController.GetLastCommand().Id;
         yield return Click(ScreenPoint(tile));
