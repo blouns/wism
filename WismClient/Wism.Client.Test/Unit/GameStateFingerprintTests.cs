@@ -27,6 +27,18 @@ public sealed class GameStateFingerprintTests
     }
 
     [Test]
+    public void LegacySaveEnvelopeMigrationPreservesCampaignAndNextTurn()
+    {
+        var settings = TestGameFactory.CreateDefaultNewGameSettings(TestUtilities.DefaultTestWorld, 20261114);
+        GameFactory.Create(settings);
+        var original = Game.Current.Snapshot();
+        var json = Newtonsoft.Json.JsonConvert.SerializeObject(new { WismGameEntity = original });
+        var document = SaveFileFormat.Read(json);
+        var restored = document["WismGameEntity"].ToObject<GameEntity>();
+        AssertRoundTripAndNextEndTurn(restored, "legacy envelope migration");
+    }
+
+    [Test]
     public void Fingerprint_OneHundredSeedRoundTripsPreserveStateAndNextCommand()
     {
         for (var seed = 20260811; seed < 20260911; seed++)

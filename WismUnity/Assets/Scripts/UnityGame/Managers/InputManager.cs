@@ -559,7 +559,9 @@ namespace Assets.Scripts.Managers
                     {
                         failed = true;
                         Debug.LogWarning("Load failed: " + error);
-                        this.unityManager.NotifyUser("Could not load the game. Check the save file and required world, then try again.");
+                        this.unityManager.NotifyUser(error is Wism.Client.Data.SaveCompatibilityException
+                            ? error.Message
+                            : "Could not load the game. Check the save file and required world, then try again.");
                     }
                     finally
                     {

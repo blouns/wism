@@ -226,7 +226,7 @@ namespace Assets.Scripts.UnityGame.ModKit
             }
         }
 
-        static string ResolveWismVersion()
+        internal static string ResolveWismVersion()
         {
             return string.IsNullOrWhiteSpace(Application.version)
                 ? ModKitSelectionService.CurrentWismVersion

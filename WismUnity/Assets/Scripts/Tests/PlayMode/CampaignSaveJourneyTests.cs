@@ -46,10 +46,12 @@ public sealed partial class ArmyUiInputTests
             yield return null;
             var camera = Camera.main.transform.position;
             var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
-            foreach (var failure in new[] { "malformed", "missing-core", "camera", "world", "deleted", "deep-random", "deep-city" })
+            foreach (var failure in new[] { "malformed", "missing-core", "camera", "world", "deleted", "future-format", "invalid-format", "deep-random", "deep-city" })
             {
                 var json = Newtonsoft.Json.Linq.JObject.Parse(valid);
                 if (failure == "missing-core") json["WismGameEntity"] = null;
+                if (failure == "future-format") json["SaveFormat"]["SchemaVersion"] = 2;
+                if (failure == "invalid-format") json["SaveFormat"]["SchemaVersion"] = "one";
                 if (failure == "camera") json["CameraPosition"] = new Newtonsoft.Json.Linq.JArray(1);
                 if (failure == "deep-random") json["WismGameEntity"]["Random"] = null;
                 if (failure == "deep-city") json["WismGameEntity"]["World"]["Cities"][0]["X"] = -1;
@@ -62,6 +64,7 @@ public sealed partial class ArmyUiInputTests
                 }
                 File.WriteAllText(path, failure == "malformed"
                     ? "{\"DisplayName\":\"Broken save\",\"WismGameEntity\":" : json.ToString());
+                var originalBytes = File.ReadAllBytes(path);
                 yield return Click(MenuPoint("OpenGameMenu"));
                 yield return Click(MenuPoint("LoadGame"));
                 yield return WaitFor(() => input.InputMode == InputMode.LoadGamePicker && unity.SaveLoadPicker.IsInitialized());
@@ -82,8 +85,12 @@ public sealed partial class ArmyUiInputTests
                 Assert.That(Assets.Scripts.UnityGame.ModKit.UnityModKitRuntimeSelection.LastReport, Is.SameAs(runningReport), failure);
                 Assert.That(Wism.Client.Modules.ModFactory.WorldPath, Is.EqualTo(worldPath), failure);
                 Assert.That(Wism.Client.Modules.ModFactory.ActiveFeaturePackIds, Is.EqualTo(packs), failure);
+                if (failure != "deleted") Assert.That(File.ReadAllBytes(path), Is.EqualTo(originalBytes), failure);
+                var messagePrefix = failure == "future-format" ? "This save requires a newer WISM save reader." :
+                    failure == "invalid-format" ? "This save has an invalid compatibility version." :
+                    failure == "missing-core" ? "This save is missing its campaign data." : "Could not load the game.";
                 Assert.That(GameObject.FindGameObjectWithTag("NotificationBox").GetComponent<Text>().text,
-                    Does.StartWith("Could not load the game."), failure);
+                    Does.StartWith(messagePrefix), failure);
                 if (failure.StartsWith("deep-", StringComparison.Ordinal))
                 {
                     var command = manager.ControllerProvider.CommandController.GetLastCommand();
@@ -92,7 +99,10 @@ public sealed partial class ArmyUiInputTests
                     Assert.That(unity.LastCommandId, Is.EqualTo(command.Id), "A failed load must not be resubmitted each frame.");
                 }
             }
-            File.WriteAllText(path, valid);
+            var legacy = Newtonsoft.Json.Linq.JObject.Parse(valid);
+            legacy.Remove("SaveFormat");
+            File.WriteAllText(path, legacy.ToString());
+            var legacyBytes = File.ReadAllBytes(path);
             yield return Click(MenuPoint("OpenGameMenu"));
             yield return Click(MenuPoint("LoadGame"));
             yield return WaitFor(() => input.InputMode == InputMode.LoadGamePicker && unity.SaveLoadPicker.IsInitialized());
@@ -100,6 +110,8 @@ public sealed partial class ArmyUiInputTests
             yield return PressJourneyButton(unity.SaveLoadPicker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load"));
             yield return WaitFor(() => !ReferenceEquals(Game.Current, game) && input.InputMode == InputMode.Game && input.CanAcceptGameplayInput);
             Assert.That(PersistanceManager.GetLastSnapshot().DisplayName, Is.EqualTo("Load recovery"));
+            Assert.That(PersistanceManager.GetLastSnapshot().SaveFormat.SchemaVersion, Is.EqualTo(1));
+            Assert.That(File.ReadAllBytes(path), Is.EqualTo(legacyBytes), "Loading must not rewrite legacy saves.");
         }
         finally
         {
