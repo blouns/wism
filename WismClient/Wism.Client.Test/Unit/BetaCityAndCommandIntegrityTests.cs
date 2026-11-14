@@ -298,6 +298,22 @@ public class BetaCityAndCommandIntegrityTests
     }
 
     [Test]
+    public void Ruins_LastSelectedHeroDies_ReturnsToReadyAndAllowsReselection()
+    {
+        var location = MonsterRuins();
+        var hero = Owner.HireHero(location.Tile);
+        Game.Current.SelectArmies(new List<Army> { hero });
+        Game.Current.Random = new LosingRoll();
+        Assert.That(location.Search(new List<Army> { hero }, out _), Is.False);
+        Assert.That(hero.IsDead, Is.True);
+        Assert.That(Game.Current.ArmiesSelected(), Is.False);
+        Assert.That(Game.Current.GameState, Is.EqualTo(GameState.Ready));
+        var survivor = Owner.ConscriptArmy(Infantry, At(3, 3));
+        Game.Current.SelectArmies(new List<Army> { survivor });
+        Assert.That(Game.Current.GetSelectedArmies(), Is.EqualTo(new[] { survivor }));
+    }
+
+    [Test]
     public void Ruins_HighestRandomRollLosesInsteadOfAlwaysWinning()
     {
         var location = MonsterRuins();
