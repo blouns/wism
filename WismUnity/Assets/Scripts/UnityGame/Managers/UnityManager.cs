@@ -202,7 +202,7 @@ namespace Assets.Scripts.Managers
             else
             {
                 try { this.GameManager.LoadGame(filename); }
-                catch (Exception error) when (error is System.IO.IOException || error is UnauthorizedAccessException ||
+                catch (Exception error) when (error is System.IO.IOException || error is System.IO.InvalidDataException || error is UnauthorizedAccessException ||
                     error is Newtonsoft.Json.JsonException)
                 {
                     Debug.LogWarning("Initial load failed: " + error);
