@@ -35,6 +35,7 @@ namespace Assets.Scripts.Managers
 
             // Persist Unity game state
             var snapshot = new UnityGameEntity(saveGameName, unityGame);
+            snapshot.SaveFormat = SaveFileFormat.CreateMetadata(Application.version);
 
             // Persist WISM game state
             snapshot.WismGameEntity = Game.Current.Snapshot();
@@ -116,7 +117,8 @@ namespace Assets.Scripts.Managers
             var json = File.ReadAllText(path);
 
             var settings = new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() };
-            return JsonConvert.DeserializeObject<UnityGameEntity>(json, settings);
+            var document = SaveFileFormat.Read(json);
+            return document.ToObject<UnityGameEntity>(JsonSerializer.Create(settings));
         }
 
         internal static void SetLastSnapshot(UnityGameEntity unityGameEntity)

@@ -348,6 +348,10 @@ namespace Assets.Scripts.Managers
                 Array.Exists(snapshot.CameraPosition, value => float.IsNaN(value) || float.IsInfinity(value)))
                 throw new System.IO.InvalidDataException("The saved game is incomplete or has invalid camera data.");
             var savedSelection = snapshot.ModKitSelection ?? snapshot.WismGameEntity?.ModKitSelection;
+            if (savedSelection != null && !Wism.Client.Modules.Profiles.ModKitSelectionService.VerifySavedSelection(
+                UnityModKitSelection.PluginModRoot, savedSelection, UnityModKitSelection.ResolveWismVersion()).IsLoadable)
+                throw new Wism.Client.Data.SaveCompatibilityException(
+                    "This save requires different world or mod content. Restore the matching content before loading; the save has not been changed.");
             var savedWorld = snapshot.WismGameEntity?.World?.Name ?? snapshot.WorldName;
             var explicitScene = savedSelection == null ? null : UnityModKitSelection.Inspect(
                 savedSelection.ProfileId, savedSelection.PackIds, savedSelection.World, UnityModKitSelection.PluginModRoot).unityScene;

@@ -445,6 +445,8 @@ namespace Wism.Client.Core
             if (this.selectedArmies.Count == 0)
             {
                 this.selectedArmies = null;
+                // Combat/movement own their intermediate states; idle selection cannot outlive its last army.
+                if (this.GameState == GameState.SelectedArmy) this.Transition(GameState.Ready);
             }
         }
 

@@ -41,6 +41,11 @@ namespace Assets.Scripts.UI
                     return SelectObject(clickedTile, isDoubleClick);
 
                 case GameState.SelectedArmy:
+                    if (!Game.Current.ArmiesSelected())
+                    {
+                        Game.Current.Transition(GameState.Ready);
+                        return SelectObject(clickedTile, isDoubleClick);
+                    }
                     if (Game.Current.ArmiesSelected() &&
                         clickedTile == Game.Current.GetSelectedArmies()[0].Tile)
                     {

@@ -199,7 +199,18 @@ namespace Assets.Scripts.Managers
         {
             yield return null;
             if (string.IsNullOrWhiteSpace(filename)) this.InputManager.HandleSaveLoadPicker(false);
-            else this.GameManager.LoadGame(filename);
+            else
+            {
+                try { this.GameManager.LoadGame(filename); }
+                catch (Exception error) when (error is System.IO.IOException || error is System.IO.InvalidDataException || error is UnauthorizedAccessException ||
+                    error is Newtonsoft.Json.JsonException)
+                {
+                    Debug.LogWarning("Initial load failed: " + error);
+                    this.InputManager.HandleSaveLoadPicker(false);
+                    NotifyUser(error is Wism.Client.Data.SaveCompatibilityException ? error.Message :
+                        "Could not load the game. Choose another save or cancel to return to setup.");
+                }
+            }
         }
 
         public void CancelInitialLoad()

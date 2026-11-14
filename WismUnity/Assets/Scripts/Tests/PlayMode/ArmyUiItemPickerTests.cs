@@ -18,6 +18,41 @@ using Wism.Client.Modules;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest]
+    public IEnumerator HeroLifecycle_SearchDeathThenMapClickDoesNotIssueMovement()
+    {
+        var ruins = World.Current.GetLocations().Single(location => location.ShortName == "CryptKeeper");
+        ruins.Monster = "Guardian";
+        ruins.Boon = new ArtifactBoon(Artifact.Create(ModFactory.FindArtifactInfo("StaffOfMight")));
+        yield return SelectItemHero();
+        manager.MoveSelectedArmies(ruins.X, ruins.Y);
+        yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
+        Game.Current.Random = new RuinsLosingRoll();
+        var tile = hero.Tile;
+        yield return ItemKey(Key.Z);
+        var deadline = Time.realtimeSinceStartup + 5f;
+        while ((!hero.IsDead || input.InputMode != InputMode.Game) && Time.realtimeSinceStartup < deadline)
+        {
+            if (input.InputMode == InputMode.WaitForKey) yield return ItemKey(Key.Enter);
+            else yield return null;
+        }
+        Assert.That(hero.IsDead, Is.True, "The pinned fatal search must finish within the continuation deadline.");
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.Game));
+        yield return WaitFor(() => manager.ControllerProvider.CommandController.GetLastCommand().Result != Wism.Client.Controllers.ActionState.InProgress &&
+            manager.ControllerProvider.CommandController.GetLastCommand().Result != Wism.Client.Controllers.ActionState.NotStarted);
+        Assert.That(Game.Current.GameState, Is.EqualTo(GameState.Ready));
+        int command = manager.ControllerProvider.CommandController.GetLastCommand().Id;
+        yield return Click(ScreenPoint(tile));
+        yield return null;
+        Assert.That(Game.Current.ArmiesSelected(), Is.False);
+        Assert.That(manager.ControllerProvider.CommandController.GetLastCommand().Id, Is.EqualTo(command));
+    }
+
+    private sealed class RuinsLosingRoll : System.Random
+    {
+        public override int Next(int minValue, int maxValue) => maxValue - 1;
+    }
+
+    [UnityTest]
     public IEnumerator HeroLifecycle_SearchKeyFindsArtifactAndTakeUsesRealInput()
     {
         var ruins = World.Current.GetLocations().Single(location => location.ShortName == "CryptKeeper");

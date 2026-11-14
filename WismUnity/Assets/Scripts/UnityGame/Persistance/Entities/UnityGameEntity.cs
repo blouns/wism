@@ -45,6 +45,7 @@ namespace Assets.Scripts.Persistance.Entities
         }
 
         public string DisplayName { get; set; }
+        public Wism.Client.Data.SaveFormatMetadata SaveFormat { get; set; }
         public string WorldName { get; set; }
         public ModKitSelectionEntity ModKitSelection { get; set; }
         public int LastCommandId { get; set; }
