@@ -30,6 +30,12 @@ namespace Assets.Scripts.Managers
         LoadGame
     }
 
+    public enum GameplayAction
+    {
+        NextArmy, SkipArmy, Defend, Search, TakeItem, DropItem,
+        Production, ManageProduction, EndTurn
+    }
+
     public static class GameKeyboardShortcuts
     {
         public static GameKeyboardAction ResolveLKey(bool shiftHeld)
@@ -79,6 +85,57 @@ namespace Assets.Scripts.Managers
         }
 
         public void CompleteEndTurn() => EndTurnPending = false;
+
+        public string GameplayActionUnavailableReason(GameplayAction action)
+        {
+            if (!Enum.IsDefined(typeof(GameplayAction), action)) return "Unknown action";
+            if (!CanAcceptGameplayInput || UnityManager.ExecutionMode != ExecutionMode.Running)
+                return "Human turn required";
+            // Existing keyboard actions may append to the controller queue. Menu opening
+            // separately requires a stable snapshot; do not drop one-frame key presses.
+            if (action == GameplayAction.EndTurn) return null;
+            if (action == GameplayAction.Production || action == GameplayAction.ManageProduction)
+                return Game.Current.GetCurrentPlayer().GetCities().Count == 0 ? "No owned cities" : null;
+            if (action == GameplayAction.NextArmy)
+                return Game.Current.GetCurrentPlayer().GetArmies().Count == 0 ? "No armies" : null;
+            if (!Game.Current.ArmiesSelected()) return "Select an army";
+            var armies = Game.Current.GetSelectedArmies();
+            if (action == GameplayAction.Search)
+                return armies[0].Tile.Location == null ? "No location here" : null;
+            if (action == GameplayAction.TakeItem || action == GameplayAction.DropItem)
+            {
+                var hero = armies.Find(army => army is Hero) as Hero;
+                if (hero == null) return "Select a hero";
+                var items = action == GameplayAction.TakeItem ? hero.Tile.Items : hero.Items;
+                return items == null || items.Count == 0 ? "No items available" : null;
+            }
+            return null;
+        }
+
+        public bool TryExecuteGameplayAction(GameplayAction action)
+        {
+            if (InputMode != InputMode.Game) return false;
+            var reason = GameplayActionUnavailableReason(action);
+            if (reason != null)
+            {
+                if (CanAcceptGameplayInput) UnityManager.NotifyUser(reason);
+                return false;
+            }
+            switch (action)
+            {
+                case GameplayAction.NextArmy: GameManager.SelectNextArmy(); break;
+                case GameplayAction.SkipArmy: GameManager.QuitSelectedArmies(); break;
+                case GameplayAction.Defend: GameManager.DefendSelectedArmies(); break;
+                case GameplayAction.Search: GameManager.SearchLocation(); break;
+                case GameplayAction.TakeItem: UnityManager.HandleItemPicker(true); break;
+                case GameplayAction.DropItem: UnityManager.HandleItemPicker(false); break;
+                case GameplayAction.Production: UnityManager.SetProductionMode(ProductionMode.SelectCity); break;
+                case GameplayAction.ManageProduction: UnityManager.ShowProductionManagementPanelForCurrentPlayer(); break;
+                case GameplayAction.EndTurn: GameManager.EndTurn(); break;
+                default: return false;
+            }
+            return true;
+        }
 
         public GameManager GameManager { get => this.gameManager; set => this.gameManager = value; }
         public UnityManager UnityManager { get => this.unityManager; set => this.unityManager = value; }
@@ -290,22 +347,22 @@ namespace Assets.Scripts.Managers
             }
             else if (WismUiInputAdapter.NextArmyPressedThisFrame(out var deviceId))
             {
-                this.GameManager.SelectNextArmy();
+                if (!TryExecuteGameplayAction(GameplayAction.NextArmy)) return;
                 this.LastPrimaryAction = "army.next";
                 this.LastPrimaryActionFrame = Time.frameCount;
                 this.LastPrimaryDeviceId = deviceId;
             }
             else if (WismUiInputAdapter.DefendPressedThisFrame())
             {
-                this.GameManager.DefendSelectedArmies();
+                TryExecuteGameplayAction(GameplayAction.Defend);
             }
             else if (Input.GetKeyDown(KeyCode.Q))
             {
-                this.GameManager.QuitSelectedArmies();
+                TryExecuteGameplayAction(GameplayAction.SkipArmy);
             }
             else if (WismUiInputAdapter.SearchPressedThisFrame())
             {
-                this.GameManager.SearchLocation();
+                TryExecuteGameplayAction(GameplayAction.Search);
             }
             else if (WismUiInputAdapter.DisbandPressedThisFrame())
             {
@@ -316,18 +373,18 @@ namespace Assets.Scripts.Managers
             // Hero actions
             else if (WismUiInputAdapter.ItemActionPressed(true))
             {
-                this.UnityManager.HandleItemPicker(true);
+                TryExecuteGameplayAction(GameplayAction.TakeItem);
             }
             else if (WismUiInputAdapter.ItemActionPressed(false))
             {
-                this.UnityManager.HandleItemPicker(false);
+                TryExecuteGameplayAction(GameplayAction.DropItem);
             }
             // Read-only Inventory/Find shortcuts are handled by the modal game menu in Update.
 
             // City actions
             else if (WismUiInputAdapter.ProductionPressedThisFrame())
             {
-                this.UnityManager.SetProductionMode(ProductionMode.SelectCity);
+                TryExecuteGameplayAction(GameplayAction.Production);
             }
             else if (WismUiInputAdapter.RazePressedThisFrame())
             {
@@ -341,7 +398,7 @@ namespace Assets.Scripts.Managers
             // Game actions
             else if (WismUiInputAdapter.EndTurnPressedThisFrame())
             {
-                this.GameManager.EndTurn();
+                TryExecuteGameplayAction(GameplayAction.EndTurn);
             }
             else if (WismUiInputAdapter.SavePressedThisFrame())
             {
@@ -352,7 +409,7 @@ namespace Assets.Scripts.Managers
                 switch (GameKeyboardShortcuts.ResolveLKey(shiftHeld))
                 {
                     case GameKeyboardAction.OpenProductionManagement:
-                        this.UnityManager.ShowProductionManagementPanelForCurrentPlayer();
+                        TryExecuteGameplayAction(GameplayAction.ManageProduction);
                         break;
                     case GameKeyboardAction.LoadGame:
                         this.UnityManager.HandleSaveLoadPicker(false);

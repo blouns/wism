@@ -15,6 +15,96 @@ using Wism.Client.Core;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest]
+    public IEnumerator MenuActions_ProductionAndOwnedCitiesUseExistingModes()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        yield return Click(MenuPoint("OpenOrdersMenu"));
+        Canvas.ForceUpdateCanvases();
+        foreach (var button in unity.GameMenu.GetComponentsInChildren<Button>())
+        {
+            var corners = new Vector3[4];
+            ((RectTransform)button.transform).GetWorldCorners(corners);
+            foreach (var corner in corners)
+            {
+                Assert.That(corner.x, Is.InRange(-1f, Screen.width + 1f), button.name);
+                Assert.That(corner.y, Is.InRange(-1f, Screen.height + 1f), button.name);
+            }
+        }
+        Assert.That(MenuButton("ActionProduction").interactable, Is.True);
+        yield return Click(MenuPoint("ActionProduction"));
+        Assert.That(unity.GameMenu.IsOpen, Is.False);
+        Assert.That(unity.ProductionMode, Is.EqualTo(ProductionMode.SelectCity));
+        unity.ProductionMode = ProductionMode.None;
+        yield return Click(MenuPoint("OpenOrdersMenu"));
+        yield return Click(MenuPoint("ActionManageProduction"));
+        Assert.That(unity.GameMenu.IsOpen, Is.False);
+        Assert.That(unity.ProductionMode, Is.EqualTo(ProductionMode.CitySelected));
+        Assert.That(GameObject.FindGameObjectWithTag("CityProductionPanel").activeSelf, Is.True);
+    }
+
+    [UnityTest]
+    public IEnumerator MenuActions_EndTurnUsesNormalTurnTransition()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var previousPlayer = Game.Current.GetCurrentPlayer();
+        yield return Click(MenuPoint("OpenOrdersMenu"));
+        Assert.That(MenuButton("ActionEndTurn").interactable, Is.True);
+        yield return Click(MenuPoint("ActionEndTurn"));
+        yield return WaitFor(() => Game.Current.GetCurrentPlayer() != previousPlayer);
+        Assert.That(unity.GameMenu.IsOpen, Is.False);
+    }
+
+    [UnityTest]
+    public IEnumerator MenuActions_NextAndSkipRemainArmyOrdersNotApplicationExit()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        int exits = 0;
+        unity.GameMenu.ApplicationExit = () => exits++;
+        yield return Click(MenuPoint("OpenOrdersMenu"));
+        Assert.That(MenuButton("ActionSkipArmy").interactable, Is.False);
+        Assert.That(MenuButton("ActionSkipArmy").GetComponentInChildren<Text>().text, Does.Contain("Select an army"));
+        yield return Click(MenuPoint("ActionNextArmy"));
+        yield return WaitFor(() => Game.Current.ArmiesSelected());
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        yield return Click(MenuPoint("OpenOrdersMenu"));
+        yield return Click(MenuPoint("ActionSkipArmy"));
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(manager.ControllerProvider.CommandController.GetLastCommand().GetType().Name, Is.EqualTo("QuitArmyCommand"));
+        Assert.That(exits, Is.Zero);
+        Assert.That(unity.GameMenu.IsOpen, Is.False);
+    }
+
+    [UnityTest]
+    public IEnumerator MenuActions_HeroTakeAndModalAiGuardsShareDispatcher()
+    {
+        var item = GroundItem("StaffOfMight");
+        yield return SelectItemHero();
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        yield return Click(MenuPoint("OpenViewMenu"));
+        int command = unity.LastCommandId;
+        foreach (GameplayAction action in System.Enum.GetValues(typeof(GameplayAction)))
+            Assert.That(input.TryExecuteGameplayAction(action), Is.False, "Modal guard: " + action);
+        Assert.That(unity.LastCommandId, Is.EqualTo(command));
+        yield return Click(MenuPoint("ActionTakeItem"));
+        yield return WaitFor(() => hero.HasItems() && hero.Items.Contains(item));
+        Assert.That(hero.Items.Count(value => value == item), Is.EqualTo(1));
+        Assert.That(hero.Tile.Items.Contains(item), Is.False);
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        unity.enabled = false;
+        var player = Game.Current.GetCurrentPlayer();
+        player.IsHuman = false;
+        try
+        {
+            foreach (GameplayAction action in System.Enum.GetValues(typeof(GameplayAction)))
+            {
+                Assert.That(input.GameplayActionUnavailableReason(action), Is.Not.Null);
+                Assert.That(input.TryExecuteGameplayAction(action), Is.False, "AI guard: " + action);
+            }
+        }
+        finally { player.IsHuman = true; }
+    }
+
+    [UnityTest]
     public IEnumerator GameMenu_CancelDoesNotQuitArmyOrMutateGame()
     {
         yield return new WaitForLastCommand(manager.ControllerProvider);
