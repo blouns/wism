@@ -115,7 +115,7 @@ public sealed partial class ArmyUiInputTests
             city.Defense = 0;
             var footprint = city.GetTiles().ToArray();
             yield return AttackCapitalWithDevice();
-            yield return new WaitForLastCommand(manager.ControllerProvider);
+            yield return WaitForRazeJourneyCommand("after capture");
             yield return WaitFor(() => input.InputMode == InputMode.Game);
             Assert.That(city.Player, Is.SameAs(player));
             Assert.That(enemy.GetCities(), Is.Empty);
@@ -129,10 +129,11 @@ public sealed partial class ArmyUiInputTests
             {
                 yield return Click(ScreenPoint(city.Tile));
                 yield return WaitFor(() => hero.Tile.City == city, () => "Enter captured city before razing.");
-                yield return new WaitForLastCommand(manager.ControllerProvider);
+                yield return WaitForRazeJourneyCommand("after entering captured city");
             }
 
             unity.InteractiveUI = true;
+            Debug.Log("Raze journey: requesting confirmation");
             yield return PressJourneyKey(Key.R);
             var confirmation = GameObject.FindGameObjectWithTag("YesNoBox").GetComponent<YesNoBox>();
             yield return WaitFor(() => confirmation.IsActive() && input.InputMode == InputMode.UI,
@@ -144,10 +145,11 @@ public sealed partial class ArmyUiInputTests
             yesButton.onClick.AddListener(() => clickedYes = true);
             yield return PressJourneyButton(yesButton);
             Assert.That(clickedYes, Is.True, "The real Yes button must receive the click.");
+            Debug.Log("Raze journey: Yes clicked");
             unity.InteractiveUI = false;
             yield return WaitFor(() => !player.GetCities().Contains(city) && footprint.All(tile => tile.City == null), () =>
                 $"Confirmed city must leave holdings and all four tiles. input={input.InputMode}; yes={confirmation.Answer}; active={confirmation.IsActive()}; interactive={unity.InteractiveUI}; stage={RazeJourneyStage()}");
-            yield return new WaitForLastCommand(manager.ControllerProvider);
+            yield return WaitForRazeJourneyCommand("after razing footprint");
             yield return null;
             var map = unity.WorldTilemap.GetComponent<Tilemap>();
             Assert.That(footprint.Length, Is.EqualTo(4));
@@ -191,5 +193,13 @@ public sealed partial class ArmyUiInputTests
         var stager = (Assets.Scripts.CommandProcessors.CutsceneStager)processor.GetType()
             .GetField("stager", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(processor);
         return stager?.SceneIndex ?? -1;
+    }
+
+    private IEnumerator WaitForRazeJourneyCommand(string phase)
+    {
+        var command = manager.ControllerProvider.CommandController.GetLastCommand();
+        yield return WaitFor(() => command.Result != Wism.Client.Controllers.ActionState.NotStarted &&
+            command.Result != Wism.Client.Controllers.ActionState.InProgress,
+            () => $"Raze journey {phase}: command={command.GetType().Name}; result={command.Result}; mode={input.InputMode}; stage={RazeJourneyStage()}; interactive={unity.InteractiveUI}");
     }
 }
