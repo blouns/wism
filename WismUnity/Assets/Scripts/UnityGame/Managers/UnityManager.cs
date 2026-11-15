@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.CommandProcessors;
 using Assets.Scripts.Telemetry;
+using Assets.Scripts.Persistance.Entities;
 using Assets.Scripts.Tilemaps;
 using Assets.Scripts.UI;
 using Assets.Scripts.UnityGame.Persistance.Entities;
@@ -192,16 +193,20 @@ namespace Assets.Scripts.Managers
 
             this.isInitialized = true;
             this.ExecutionMode = ExecutionMode.Bootstrap;
-            if (this.AwaitingInitialLoad) StartCoroutine(OpenInitialLoadPicker(gameSettings.LoadFilename));
+            if (this.AwaitingInitialLoad) StartCoroutine(OpenInitialLoadPicker(gameSettings.LoadFilename, gameSettings.PreparedLoadSnapshot));
         }
 
-        private System.Collections.IEnumerator OpenInitialLoadPicker(string filename)
+        private System.Collections.IEnumerator OpenInitialLoadPicker(string filename, UnityGameEntity preparedSnapshot)
         {
             yield return null;
-            if (string.IsNullOrWhiteSpace(filename)) this.InputManager.HandleSaveLoadPicker(false);
+            if (preparedSnapshot == null && string.IsNullOrWhiteSpace(filename)) this.InputManager.HandleSaveLoadPicker(false);
             else
             {
-                try { this.GameManager.LoadGame(filename); }
+                try
+                {
+                    if (preparedSnapshot != null) this.GameManager.LoadPreparedGame(preparedSnapshot);
+                    else this.GameManager.LoadGame(filename);
+                }
                 catch (Exception error) when (error is System.IO.IOException || error is System.IO.InvalidDataException || error is UnauthorizedAccessException ||
                     error is Newtonsoft.Json.JsonException)
                 {

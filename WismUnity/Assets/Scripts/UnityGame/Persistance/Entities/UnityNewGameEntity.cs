@@ -1,4 +1,5 @@
 using Wism.Client.Data.Entities;
+using Assets.Scripts.Persistance.Entities;
 
 namespace Assets.Scripts.UnityGame.Persistance.Entities
 {
@@ -19,6 +20,7 @@ namespace Assets.Scripts.UnityGame.Persistance.Entities
 
         public bool IsNewGame { get; set; }
         public string LoadFilename { get; set; }
+        internal UnityGameEntity PreparedLoadSnapshot { get; set; }
 
         public ModKitSelectionEntity ModKitSelection { get; set; }
     }

@@ -1057,6 +1057,95 @@ public sealed partial class GameSetupPointerMatrixTests
     }
 
     private static RectTransform Checkbox(string name) => GameObject.Find(name).transform.Find("Background").GetComponent<RectTransform>();
+
+    [UnityTest]
+    public IEnumerator Load_CrossWorldDeepFailurePreservesCampaignAndRetryUsesCheckedSnapshot()
+    {
+        var originalDirectory = PersistanceManager.SaveDirectory;
+        var originalSnapshot = PersistanceManager.GetLastSnapshot();
+        var directory = Path.Combine(Application.temporaryCachePath, "CrossWorld-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            PersistanceManager.SaveDirectory = directory;
+            yield return StartRoster("TestWorld", null);
+            yield return WismTestAction.WaitForNewHeroOffer();
+            yield return WismTestAction.AcceptNewHeroOffer();
+            var unity = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
+            yield return WaitFor(() => unity.GetComponent<InputManager>().InputMode == InputMode.Game, "Saved world ready");
+            PersistanceManager.Save("WISM1.SAV", "Cross-world snapshot", unity);
+            var path = Path.Combine(directory, "WISM1.SAV");
+            var valid = File.ReadAllText(path);
+            UnityManager.SetNewGameSettings(null);
+            UnityModKitRuntimeSelection.Clear();
+            SceneManager.LoadScene("GameSetup");
+            yield return WaitFor(() => GameObject.Find("LoadButton") != null, "Setup for other world");
+            yield return SelectWorld("Mini-Illuria");
+            for (int row = 1; row <= 8; row++)
+            {
+                if (Find<Toggle>("Player" + row).isOn != (row == 1 || row == 8))
+                    yield return Click(Checkbox("Player" + row));
+                for (int press = 0; press < roles.Length && RoleText(row).text.Trim() != "Human"; press++)
+                    yield return Click(RoleIcon(row));
+            }
+            yield return Click(Find<Button>("StartButton").GetComponent<RectTransform>());
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "Mini-Illuria" && Game.IsInitialized(), "Active world initialized");
+            unity = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
+            var naming = UnityUtilities.GameObjectHardFind("SolicitInputPanel").GetComponent<SolicitInput>();
+            yield return WaitFor(() => naming.IsInitialized(), "Human naming panel");
+            naming.SetInputText("Recovery Hero");
+            naming.Ok();
+            yield return WaitFor(() => GameObject.FindGameObjectWithTag("CityProductionPanel") != null,
+                "First-turn production panel appears");
+            yield return WismTestAction.DismissProductionPanelIfVisible();
+            yield return WaitFor(() => unity.InputManager.InputMode == InputMode.Game &&
+                unity.ExecutionMode == ExecutionMode.Running && unity.InputManager.CanAcceptGameplayInput &&
+                unity.LastCommandId == unity.GameManager.ControllerProvider.CommandController.GetLastCommand().Id,
+                "Active world ready with bootstrap commands drained");
+            var game = Game.Current;
+            var scene = SceneManager.GetActiveScene().path;
+            var camera = Camera.main.transform.position;
+            var modPath = ModFactory.ModPath;
+            var worldPath = ModFactory.WorldPath;
+            var load = typeof(GameManager).GetMethod("LoadGame", BindingFlags.NonPublic | BindingFlags.Instance);
+            var broken = JObject.Parse(valid);
+            broken["WismGameEntity"]["Random"] = null;
+            File.WriteAllText(path, broken.ToString());
+            var rejectedBytes = File.ReadAllBytes(path);
+            yield return Click(Find<Button>("OpenGameMenu").GetComponent<RectTransform>());
+            yield return WaitFor(() => unity.GameMenu.IsOpen, "Cross-world game menu");
+            Assert.That(Find<Button>("LoadGame").interactable, Is.True, "Load is enabled after bootstrap drains");
+            yield return Click(Find<Button>("LoadGame").GetComponent<RectTransform>());
+            yield return WaitFor(() => unity.SaveLoadPicker.IsInitialized(), "Cross-world load picker");
+            var picker = unity.SaveLoadPicker;
+            yield return Click(picker.GetComponentsInChildren<Button>().Single(button => button.name == "Button1").GetComponent<RectTransform>());
+            yield return Click(picker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load").GetComponent<RectTransform>());
+            yield return WaitFor(() => unity.InputManager.InputMode == InputMode.Game && unity.InputManager.CanAcceptGameplayInput,
+                "Cross-world rejection returns gameplay control");
+            Assert.That(Game.Current, Is.SameAs(game));
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(scene));
+            Assert.That(Camera.main.transform.position, Is.EqualTo(camera));
+            Assert.That(ModFactory.ModPath, Is.EqualTo(modPath));
+            Assert.That(ModFactory.WorldPath, Is.EqualTo(worldPath));
+            Assert.That(unity.InputManager.CanAcceptGameplayInput, Is.True);
+            Assert.That(File.ReadAllBytes(path), Is.EqualTo(rejectedBytes));
+
+            File.WriteAllText(path, valid);
+            load.Invoke(unity.GameManager, new object[] { path });
+            File.Delete(path);
+            yield return WaitFor(() => UnityEngine.Object.FindAnyObjectByType<UnityManager>() is UnityManager loaded &&
+                !loaded.AwaitingInitialLoad && loaded.InputManager.InputMode == InputMode.Game &&
+                SceneManager.GetActiveScene().name == "TestWorld", "Checked snapshot survives source deletion");
+            Assert.That(PersistanceManager.GetLastSnapshot().DisplayName, Is.EqualTo("Cross-world snapshot"));
+            Assert.That(Game.Current, Is.Not.SameAs(game));
+        }
+        finally
+        {
+            PersistanceManager.SaveDirectory = originalDirectory;
+            typeof(PersistanceManager).GetMethod("SetLastSnapshot", BindingFlags.Static | BindingFlags.NonPublic)
+                .Invoke(null, new object[] { originalSnapshot });
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+        }
+    }
     private static RectTransform RoleIcon(int row) => GameObject.Find("Player" + row).GetComponentsInChildren<Image>()
         .Single(image => image.transform.parent.name == "Player" + row && image.name.StartsWith("Image", StringComparison.Ordinal)).rectTransform;
     private Text RoleText(int row) => GameObject.Find("Player" + row).GetComponentsInChildren<Text>().Single(text => roles.Contains(text.text.Trim()));

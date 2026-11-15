@@ -343,6 +343,14 @@ namespace Assets.Scripts.Managers
             var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
                 .GetComponent<UnityManager>();
             var snapshot = PersistanceManager.ReadEntities(filename, unityGame);
+            LoadPreparedGame(snapshot);
+        }
+
+        internal void LoadPreparedGame(UnityGameEntity snapshot)
+        {
+            if (HasPendingLoad) throw new System.IO.InvalidDataException("Another saved game is still loading.");
+            var unityGame = UnityUtilities.GameObjectHardFind("UnityManager")
+                .GetComponent<UnityManager>();
             if (snapshot?.WismGameEntity?.World == null || snapshot.CameraPosition == null ||
                 snapshot.CameraPosition.Length != 3 ||
                 Array.Exists(snapshot.CameraPosition, value => float.IsNaN(value) || float.IsInfinity(value)))
@@ -360,11 +368,23 @@ namespace Assets.Scripts.Managers
             var sceneName = System.IO.Path.GetFileNameWithoutExtension(savedScene);
             if (!string.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, sceneName, StringComparison.OrdinalIgnoreCase))
             {
-                // Recreate terrain from the saved world's scene, not the setup
-                // selection. The new manager will restore this same snapshot.
+                var preparation = new PendingLoad(this, snapshot);
+                try
+                {
+                    if (savedSelection == null) ApplyLegacySaveModContext(unityGame, snapshot);
+                    else UnityModKitSelection.ApplySavedSelection(unityGame, savedSelection, UnityModKitSelection.PluginModRoot);
+                    Wism.Client.Factories.GameFactory.ValidateLoad(snapshot.WismGameEntity);
+                }
+                catch (Exception error)
+                {
+                    throw new System.IO.InvalidDataException("The saved campaign could not be reconstructed. Your current game has not been changed.", error);
+                }
+                finally { preparation.Restore(this); }
+
+                // Carry the checked snapshot, not a filename that may change during transition.
                 UnityManager.SetNewGameSettings(new Assets.Scripts.UnityGame.Persistance.Entities.UnityNewGameEntity
                 {
-                    IsNewGame = false, InteractiveUI = true, WorldName = savedWorld, LoadFilename = filename
+                    IsNewGame = false, InteractiveUI = true, WorldName = savedWorld, PreparedLoadSnapshot = snapshot
                 });
                 UnityEngine.SceneManagement.SceneManager.LoadScene(savedScene);
                 return;
