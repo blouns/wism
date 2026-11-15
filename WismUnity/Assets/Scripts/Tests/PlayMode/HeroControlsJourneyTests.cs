@@ -52,8 +52,9 @@ public sealed partial class ArmyUiInputTests
             yield return null;
             yield return PressJourneyButton(naming.GetComponentsInChildren<Button>(true).Single(item => item.name == "EnterButton"));
         }
-        yield return new WaitForLastCommand(manager.ControllerProvider);
-        yield return WaitFor(() => input.InputMode == InputMode.Game && input.CanAcceptGameplayInput);
+        yield return WaitFor(() => unity.LastCommandId >= hire.Id &&
+            unity.LastCommandId == manager.ControllerProvider.CommandController.GetLastCommand().Id &&
+            input.InputMode == InputMode.Game && input.CanAcceptGameplayInput);
         Assert.That(recruit.HeroAccepted, Is.EqualTo(accept));
         Assert.That(player.Gold, Is.EqualTo(accept ? 900 : 1000));
         var added = player.GetArmies().Except(before).ToArray();
