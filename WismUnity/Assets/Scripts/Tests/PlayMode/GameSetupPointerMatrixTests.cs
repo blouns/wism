@@ -1104,15 +1104,22 @@ public sealed partial class GameSetupPointerMatrixTests
             var broken = JObject.Parse(valid);
             broken["WismGameEntity"]["Random"] = null;
             File.WriteAllText(path, broken.ToString());
-            var failure = Assert.Throws<TargetInvocationException>(() => load.Invoke(unity.GameManager, new object[] { path }));
-            Assert.That(failure.InnerException, Is.TypeOf<InvalidDataException>());
-            yield return null;
+            var rejectedBytes = File.ReadAllBytes(path);
+            yield return Click(Find<Button>("OpenGameMenu").GetComponent<RectTransform>());
+            yield return Click(Find<Button>("LoadGame").GetComponent<RectTransform>());
+            yield return WaitFor(() => unity.SaveLoadPicker.IsInitialized(), "Cross-world load picker");
+            var picker = unity.SaveLoadPicker;
+            yield return Click(picker.GetComponentsInChildren<Button>().Single(button => button.name == "Button1").GetComponent<RectTransform>());
+            yield return Click(picker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load").GetComponent<RectTransform>());
+            yield return WaitFor(() => unity.InputManager.InputMode == InputMode.Game && unity.InputManager.CanAcceptGameplayInput,
+                "Cross-world rejection returns gameplay control");
             Assert.That(Game.Current, Is.SameAs(game));
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(scene));
             Assert.That(Camera.main.transform.position, Is.EqualTo(camera));
             Assert.That(ModFactory.ModPath, Is.EqualTo(modPath));
             Assert.That(ModFactory.WorldPath, Is.EqualTo(worldPath));
             Assert.That(unity.InputManager.CanAcceptGameplayInput, Is.True);
+            Assert.That(File.ReadAllBytes(path), Is.EqualTo(rejectedBytes));
 
             File.WriteAllText(path, valid);
             load.Invoke(unity.GameManager, new object[] { path });
