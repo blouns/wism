@@ -284,6 +284,11 @@ namespace Wism.Client.Data
                     var subCommand = (MoveOnceCommand)command;
                     snapshot = new MoveCommandEntity
                     {
+                        TargetX = subCommand.X,
+                        TargetY = subCommand.Y,
+                        RevalidateFriendlyCapacity = subCommand.RevalidateFriendlyCapacity,
+                        RouteChecked = subCommand.RouteChecked,
+                        RouteRevalidationFailed = subCommand.RouteRevalidationFailed,
                         PathX = ConvertToInts(subCommand.Path, 0),
                         PathY = ConvertToInts(subCommand.Path, 1)
                     };

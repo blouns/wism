@@ -13,7 +13,8 @@ namespace Wism.Client.Commands.Armies
     public class MoveOnceCommand : ArmyCommand
     {
         private IList<Tile> path;
-        private bool routeChecked;
+        public bool RouteChecked { get; set; }
+        public bool RouteRevalidationFailed { get; set; }
 
         public bool RevalidateFriendlyCapacity { get; set; }
 
@@ -37,17 +38,21 @@ namespace Wism.Client.Commands.Armies
         {
             // Earlier queued AI moves may occupy a route after it was planned.
             // Replan only before this command starts, never reverse a partially executed route.
-            if (this.RevalidateFriendlyCapacity && !this.routeChecked)
+            if (this.RouteRevalidationFailed) return ActionState.Failed;
+            if (this.RevalidateFriendlyCapacity && !this.RouteChecked)
             {
-                this.routeChecked = true;
-                if (this.path != null && this.path.Skip(1).Any(tile => !tile.HasRoom(this.Armies.Count)))
+                this.RouteChecked = true;
+                if (Game.Current.PathingStrategy is DijkstraPathingStrategy strategy &&
+                    this.path != null && this.path.Skip(1).Any(tile => !tile.HasRoom(this.Armies.Count)))
                 {
-                    if (!(Game.Current.PathingStrategy is DijkstraPathingStrategy strategy))
-                        return ActionState.Failed;
                     var origin = this.Armies[0].Tile;
                     strategy.FindShortestRoute(World.Current.Map, this.Armies, World.Current.Map[this.X, this.Y],
                         out this.path, out _, false, tile => tile == origin || tile.HasRoom(this.Armies.Count));
-                    if (this.path == null || this.path.Count == 0) return ActionState.Failed;
+                    if (this.path == null || this.path.Count == 0)
+                    {
+                        this.RouteRevalidationFailed = true;
+                        return ActionState.Failed;
+                    }
                 }
             }
             return this.ArmyController.MoveOneStep(this.Armies, World.Current.Map[this.X, this.Y], ref this.path,

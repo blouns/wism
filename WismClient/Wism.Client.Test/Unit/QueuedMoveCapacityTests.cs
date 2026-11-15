@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Wism.Client.Commands.Armies;
+using Wism.Client.Commands;
+using Wism.Client.Data;
+using Wism.Client.Data.Entities.Army;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
@@ -58,6 +61,17 @@ public sealed class QueuedMoveCapacityTests
         Assert.That(result, Is.EqualTo(revalidate && detour ? ActionState.Succeeded : ActionState.Failed));
         Assert.That(armies.All(a => a.Tile == (revalidate && detour ? map[6, 1] : revalidate ? map[0, 1] : map[2, 1])), Is.True);
         if (revalidate && !detour)
+        {
             Assert.That(armies.All(a => a.MovesRemaining == 100), Is.True, "No route must not spend movement.");
+            Assert.That(command.Execute(), Is.EqualTo(ActionState.Failed), "Retry must remain safe.");
+        }
+        var saved = (MoveCommandEntity)CommandPersistence.SnapshotCommands(new List<Command> { command })[0];
+        Assert.Multiple(() => {
+            Assert.That(saved.TargetX, Is.EqualTo(6));
+            Assert.That(saved.TargetY, Is.EqualTo(1));
+            Assert.That(saved.RevalidateFriendlyCapacity, Is.EqualTo(revalidate));
+            Assert.That(saved.RouteChecked, Is.EqualTo(command.RouteChecked));
+            Assert.That(saved.RouteRevalidationFailed, Is.EqualTo(revalidate && !detour));
+        });
     }
 }
