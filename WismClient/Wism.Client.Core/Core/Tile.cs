@@ -314,6 +314,11 @@ namespace Wism.Client.Core
                 throw new ArgumentNullException(nameof(armies));
             }
 
+            if (armies.Any(army => army.MovesRemaining <= 0))
+            {
+                return false;
+            }
+
             var attackerClan = armies[0].Clan;
             var defenders = this.MusterArmy();
             var hasEnemyDefenders = defenders.Any(army => army.Clan != attackerClan);

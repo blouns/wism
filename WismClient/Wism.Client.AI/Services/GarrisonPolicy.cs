@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
+using Wism.Client.Pathing;
 
 namespace Wism.Client.AI.Services
 {
@@ -44,7 +46,7 @@ namespace Wism.Client.AI.Services
             }
 
             var nearbyEnemies = CountNearbyEnemies(player, origin);
-            if (nearbyEnemies == 0)
+            if (nearbyEnemies == 0 && city != player.Capitol)
             {
                 return stack;
             }
@@ -52,6 +54,17 @@ namespace Wism.Client.AI.Services
             var friendlyCityArmies = city.MusterArmies()
                 .Where(army => army.Player == player)
                 .ToList();
+            if (city == player.Capitol && friendlyCityArmies.Count == 1 &&
+                CanEnemyReachCapitalOnNextTurn(city, player))
+            {
+                return stack.Where(army => army != friendlyCityArmies[0]).ToList();
+            }
+
+            if (nearbyEnemies == 0)
+            {
+                return stack;
+            }
+
             var reservableDefenders = friendlyCityArmies
                 .Where(army => !(army is Hero))
                 .ToList();
@@ -95,6 +108,72 @@ namespace Wism.Client.AI.Services
                 .Max();
             return (int)System.Math.Max(1, System.Math.Min(MaximumProductionReserve,
                 System.Math.Ceiling(throughput)));
+        }
+
+        private static bool CanEnemyReachCapitalOnNextTurn(City city, Player player)
+        {
+            var approaches = city.GetTiles()
+                .Where(tile => tile != null)
+                .SelectMany(entry => entry.GetNineGrid().Cast<Tile>()
+                    .Where(tile => tile != null && tile.City != city && entry.IsNeighbor(tile))
+                    .Select(tile => new { Tile = tile, EntryCost = entry.Terrain.MovementCost }))
+                .GroupBy(approach => approach.Tile)
+                .Select(group => new { Tile = group.Key, EntryCost = group.Min(approach => approach.EntryCost) })
+                .ToList();
+
+            foreach (var enemy in Game.Current.Players
+                .Where(other => other != player && !other.IsDead)
+                .SelectMany(other => other.GetArmies())
+                .Where(army => !army.IsDead && army.Tile != null))
+            {
+                var attacker = new List<Army> { enemy };
+                foreach (var approach in approaches)
+                {
+                    var movesToApproach = enemy.Moves - approach.EntryCost;
+                    var distance = System.Math.Max(System.Math.Abs(enemy.Tile.X - approach.Tile.X),
+                        System.Math.Abs(enemy.Tile.Y - approach.Tile.Y));
+                    if (distance > movesToApproach)
+                    {
+                        continue;
+                    }
+
+                    if (enemy.Tile == approach.Tile)
+                    {
+                        return true;
+                    }
+
+                    if (!approach.Tile.HasRoom(1) || !approach.Tile.CanTraverseHere(attacker))
+                    {
+                        continue;
+                    }
+
+                    if (CanReachApproach(enemy, attacker, approach.Tile, movesToApproach))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool CanReachApproach(Army enemy, List<Army> attacker, Tile approach, int budget)
+        {
+            var pathing = Game.Current.PathingStrategy;
+            IList<Tile> route;
+            if (pathing is IConstrainedPathingStrategy constrained)
+            {
+                constrained.FindShortestRoute(World.Current.Map, attacker, approach, out route, out _, false,
+                    tile => tile == enemy.Tile || (tile.HasRoom(1) &&
+                        Math.Abs(tile.X - enemy.Tile.X) <= budget && Math.Abs(tile.Y - enemy.Tile.Y) <= budget));
+            }
+            else
+            {
+                pathing.FindShortestRoute(World.Current.Map, attacker, approach, out route, out _, ignoreClan: false);
+            }
+
+            return route != null && route.Skip(1).All(tile => tile.HasRoom(1)) &&
+                route.Skip(1).Sum(enemy.GetEffectiveMovementCost) <= budget;
         }
 
         private static int GetMobilityPriority(Army army)
