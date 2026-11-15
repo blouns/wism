@@ -53,7 +53,7 @@ public sealed class LazyPathingEquivalenceTests
                 occupied.VisitingArmies = new List<Army> { blocker };
                 Compare(map, armies, target, ignoreClan);
                 occupied.VisitingArmies.Clear();
-                occupied.Armies.Add(blocker);
+                occupied.Armies = new List<Army> { blocker };
             }
             blocker.Kill();
             mover.Kill();
