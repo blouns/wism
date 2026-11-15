@@ -31,6 +31,9 @@ public sealed partial class PlaygroundScenarioRunner
             if (Game.Current.GameState == GameState.GameOver) throw new InvalidDataException("Checkpoint is already terminal.");
             var player = Game.Current.GetCurrentPlayer();
             if (player.IsHuman) throw new InvalidDataException("Checkpoint must be at an AI decision boundary.");
+            if (Game.Current.GameState == GameState.StartingTurn &&
+                ExecuteCommand(new StartTurnCommand(controllers.GameController, player)) != ActionState.Succeeded)
+                throw new InvalidDataException("Could not prepare the checkpoint's starting turn.");
             using var recorder = enabled ? new LocalPerformanceRecorder(Path.Combine(output, "run-" + index)) : null;
             var probe = recorder == null ? null : new PerformanceProbe(recorder.Record) { DecisionId = 1 };
             var provider = WarlordsClassicAiFactory.CreateCommandProvider(controllers, loggerFactory.CreateLogger(), aiProfile: aiProfile);
@@ -75,6 +78,7 @@ public sealed partial class PlaygroundScenarioRunner
         File.WriteAllText(Path.Combine(output, "comparison.json"), JsonConvert.SerializeObject(new {
             CheckpointSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(checkpoint))),
             AiProfile = aiProfile, Repetitions = repetitions, IdenticalFinalStates = parity,
+            Preparation = "StartTurnCommand before measurement when StartingTurn",
             NoUnexpectedCommandFailures = legal, Scope = "one decision with a fresh provider per checkpoint; provider-local planning memory is not persisted; not a full campaign or Unity rendering proof",
             Runs = runs
         }, Formatting.Indented));

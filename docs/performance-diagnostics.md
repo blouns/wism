@@ -35,6 +35,7 @@ Wism.Agent.Playground profile-checkpoint checkpoint=<save.json> out=<new-folder>
 ```
 
 It reloads the same checkpoint for one warmup and balanced recorder-on/off runs,
+executing Start Turn before measurement when the snapshot is at a turn boundary,
 comparing generated command outcomes and final state hashes (excluding the save
 timestamp). An empty production review and its unneeded renewal can return
 `Failed` as a no-op; these are explicitly counted, not silently discarded.
