@@ -736,13 +736,16 @@ public sealed partial class GameSetupPointerMatrixTests
                         Math.Abs(player.Capitol.X - city.X) + Math.Abs(player.Capitol.Y - city.Y))
                         .ThenBy(player => player.Clan.ShortName, StringComparer.Ordinal).First();
                     foreach (var army in city.MusterArmies().ToArray()) army.Kill();
-                    if (city.Player != owner) city.Claim(owner);
+                    if (city.Player != owner) owner.ClaimCity(city);
                     for (int index = 0; index < armiesPerCity; index++)
                         owner.ConscriptArmy(Wism.Client.Modules.Infos.ArmyInfo.GetArmyInfo(
                             index % 2 == 0 ? "LightInfantry" : "HeavyInfantry"), city.Tile);
                 }
                 foreach (var player in players) player.Gold = 5000;
                 Assert.That(Game.Current.GetAllArmies().Count, Is.GreaterThanOrEqualTo(80 * armiesPerCity));
+                Assert.That(players.Sum(player => player.GetCities().Count), Is.EqualTo(80));
+                Assert.That(World.Current.GetCities().All(city => city.Player.GetCities().Contains(city)), Is.True,
+                    "City owner fields and player ownership lists must agree before timing.");
             }
             var initialTurns = Game.Current.Players.Sum(p => p.Turn);
             var initialArmies = Game.Current.GetAllArmies().Count;
