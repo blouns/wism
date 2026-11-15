@@ -3,6 +3,30 @@
 WismUnity is the Unity frontend for WISM. It renders and drives the game through
 the public WismClient engine assemblies instead of owning gameplay rules directly.
 
+## Gameplay Commands
+
+Open Menu to reveal Orders and View. These entries share their dispatcher and
+availability checks with the existing keyboard actions; disabled entries show
+why they are unavailable. Gameplay commands require a human turn with no pending
+order. Opening or canceling a menu does not issue an army command.
+
+| Menu | Action | Key |
+| --- | --- | --- |
+| Orders | Next Army | N |
+| Orders | Skip Army for this turn | Q |
+| Orders | Defend | D |
+| Orders | Production (then choose a city) | P |
+| Orders | Owned Cities production management | L |
+| Orders | End Turn | E, including Alt+E |
+| View | Take Item | T |
+| View | Drop Item | O |
+| View | Search Location | Z |
+
+Shift+L remains Load Game. Skip Army is not Exit Game; application exit retains
+its separate confirmation. Item actions require a selected hero and available
+items. Search uses the selected army's current location. Input in another dialog
+does not dispatch these gameplay actions.
+
 ## WismClient Plugin Assemblies
 
 WismUnity consumes WismClient through committed plugin assemblies under:

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Managers;
 using Wism.Client.Commands.Armies;
@@ -53,6 +54,9 @@ namespace Assets.Scripts.UI
         private Font font;
         private bool canIssueOrders;
         private bool canInspectHeroes;
+        private bool canIssueGameplay;
+        private readonly Dictionary<GameplayAction, Button> gameplayButtons = new Dictionary<GameplayAction, Button>();
+        private readonly Dictionary<GameplayAction, string> gameplayLabels = new Dictionary<GameplayAction, string>();
 
         public bool IsOpen => shield != null && shield.activeSelf;
         public bool IsConfirmingExit => confirmation != null && confirmation.activeSelf;
@@ -101,22 +105,31 @@ namespace Assets.Scripts.UI
             PlaceRow(loadButton, 152);
             PlaceRow(exitButton, 200);
             viewMenu = Panel(shield.transform, "ViewMenu", Stone);
-            Place((RectTransform)viewMenu.transform, new Vector2(0, 1), new Vector2(252, -56), new Vector2(240, 156));
+            Place((RectTransform)viewMenu.transform, new Vector2(0, 1), new Vector2(252, -56), new Vector2(240, 300));
             capitalButton = Button(viewMenu.transform, "Capital", "Capital", "view.capital", NavigateToCapital);
             Place((RectTransform)capitalButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(224, 44));
             inventoryButton = Button(viewMenu.transform, "Inventory", "Inventory", "heroes.inventory", () => OpenHeroes(false));
             heroesButton = Button(viewMenu.transform, "FindHeroes", "Find Heroes", "heroes.find", () => OpenHeroes(true));
             Place((RectTransform)inventoryButton.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(224, 44));
             Place((RectTransform)heroesButton.transform, new Vector2(0, 1), new Vector2(8, -104), new Vector2(224, 44));
+            GameplayButton(viewMenu.transform, GameplayAction.TakeItem, "Take Item", 8, 152);
+            GameplayButton(viewMenu.transform, GameplayAction.DropItem, "Drop Item", 8, 200);
+            GameplayButton(viewMenu.transform, GameplayAction.Search, "Search Location", 8, 248);
             viewMenu.SetActive(false);
             ordersMenu = Panel(shield.transform, "OrdersMenu", Stone);
-            Place((RectTransform)ordersMenu.transform, new Vector2(0, 1), new Vector2(360, -56), new Vector2(240, 156));
+            Place((RectTransform)ordersMenu.transform, new Vector2(0, 1), new Vector2(360, -56), new Vector2(480, 300));
             buildButton = Button(ordersMenu.transform, "Build", "Build", "orders.build", () => Order(true));
             razeButton = Button(ordersMenu.transform, "Raze", "Raze", "orders.raze", () => Order(false));
             disbandButton = Button(ordersMenu.transform, "Disband", "Disband...", "orders.disband", RequestDisband);
             Place((RectTransform)buildButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(224, 44));
             Place((RectTransform)razeButton.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(224, 44));
             Place((RectTransform)disbandButton.transform, new Vector2(0, 1), new Vector2(8, -104), new Vector2(224, 44));
+            GameplayButton(ordersMenu.transform, GameplayAction.NextArmy, "Next Army", 8, 152);
+            GameplayButton(ordersMenu.transform, GameplayAction.SkipArmy, "Skip Army", 8, 200);
+            GameplayButton(ordersMenu.transform, GameplayAction.Defend, "Defend", 8, 248);
+            GameplayButton(ordersMenu.transform, GameplayAction.Production, "Production", 248, 8);
+            GameplayButton(ordersMenu.transform, GameplayAction.ManageProduction, "Owned Cities", 248, 56);
+            GameplayButton(ordersMenu.transform, GameplayAction.EndTurn, "End Turn", 248, 104);
             ordersMenu.SetActive(false);
 
             confirmation = Panel(shield.transform, "ExitConfirmation", Stone);
@@ -196,6 +209,8 @@ namespace Assets.Scripts.UI
             saveButton.interactable = loadButton.interactable = CanPersist;
             canIssueOrders = CanPersist && manager.InputManager.CanAcceptGameplayInput &&
                 Wism.Client.Core.Game.Current.ArmiesSelected();
+            canIssueGameplay = CanPersist && previousMode == InputMode.Game;
+            RefreshGameplayButtons();
             canInspectHeroes = CanPersist && CanInspectState && manager.InteractiveUI &&
                 Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman == true;
             observeToggle.SetIsOnWithoutNotify(manager.ObserveAiMovement);
@@ -340,6 +355,37 @@ namespace Assets.Scripts.UI
             Close();
             if (build) manager.GameManager.Build();
             else manager.GameManager.RazeCity();
+        }
+
+        private void GameplayButton(Transform parent, GameplayAction action, string label, int x, int y)
+        {
+            var button = Button(parent, "Action" + action, label, "orders." + action.ToString().ToLowerInvariant(),
+                () => ExecuteGameplayAction(action));
+            Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(x, -y), new Vector2(224, 44));
+            gameplayButtons.Add(action, button);
+            gameplayLabels.Add(action, label);
+        }
+
+        private void RefreshGameplayButtons()
+        {
+            foreach (var entry in gameplayButtons)
+            {
+                var reason = !canIssueGameplay ? "Orders unavailable" : manager.InputManager.GameplayActionUnavailableReason(entry.Key);
+                entry.Value.interactable = reason == null;
+                var label = entry.Value.GetComponentInChildren<Text>();
+                label.fontSize = reason == null ? 20 : 14;
+                label.text = gameplayLabels[entry.Key] + (reason == null ? "" : "\n" + reason);
+            }
+        }
+
+        private void ExecuteGameplayAction(GameplayAction action)
+        {
+            if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || exitRequested || !canIssueGameplay ||
+                !gameplayButtons[action].gameObject.activeInHierarchy ||
+                manager.InputManager.GameplayActionUnavailableReason(action) != null) return;
+            Close();
+            // The shared dispatcher rechecks turn, queue and selection after returning input.
+            manager.InputManager.TryExecuteGameplayAction(action);
         }
 
         public void OpenHeroes(bool find)
