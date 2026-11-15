@@ -732,11 +732,11 @@ public sealed partial class GameSetupPointerMatrixTests
                 var players = Game.Current.Players.ToArray();
                 foreach (var city in World.Current.GetCities())
                 {
-                    var owner = city.Player ?? players.OrderBy(player =>
+                    var owner = players.Contains(city.Player) ? city.Player : players.OrderBy(player =>
                         Math.Abs(player.Capitol.X - city.X) + Math.Abs(player.Capitol.Y - city.Y))
                         .ThenBy(player => player.Clan.ShortName, StringComparer.Ordinal).First();
                     foreach (var army in city.MusterArmies().ToArray()) army.Kill();
-                    if (city.Player == null) city.Claim(owner);
+                    if (city.Player != owner) city.Claim(owner);
                     for (int index = 0; index < armiesPerCity; index++)
                         owner.ConscriptArmy(Wism.Client.Modules.Infos.ArmyInfo.GetArmyInfo(
                             index % 2 == 0 ? "LightInfantry" : "HeavyInfantry"), city.Tile);
