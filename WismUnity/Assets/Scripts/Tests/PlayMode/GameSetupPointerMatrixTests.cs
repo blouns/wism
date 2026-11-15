@@ -1094,7 +1094,10 @@ public sealed partial class GameSetupPointerMatrixTests
             yield return WaitFor(() => naming.IsInitialized(), "Human naming panel");
             naming.SetInputText("Recovery Hero");
             naming.Ok();
-            yield return WaitFor(() => unity.GetComponent<InputManager>().InputMode == InputMode.Game, "Active world ready");
+            yield return WaitFor(() => unity.InputManager.InputMode == InputMode.Game &&
+                unity.ExecutionMode == ExecutionMode.Running && unity.InputManager.CanAcceptGameplayInput &&
+                unity.LastCommandId == unity.GameManager.ControllerProvider.CommandController.GetLastCommand().Id,
+                "Active world ready with bootstrap commands drained");
             var game = Game.Current;
             var scene = SceneManager.GetActiveScene().path;
             var camera = Camera.main.transform.position;
@@ -1106,6 +1109,8 @@ public sealed partial class GameSetupPointerMatrixTests
             File.WriteAllText(path, broken.ToString());
             var rejectedBytes = File.ReadAllBytes(path);
             yield return Click(Find<Button>("OpenGameMenu").GetComponent<RectTransform>());
+            yield return WaitFor(() => unity.GameMenu.IsOpen, "Cross-world game menu");
+            Assert.That(Find<Button>("LoadGame").interactable, Is.True, "Load is enabled after bootstrap drains");
             yield return Click(Find<Button>("LoadGame").GetComponent<RectTransform>());
             yield return WaitFor(() => unity.SaveLoadPicker.IsInitialized(), "Cross-world load picker");
             var picker = unity.SaveLoadPicker;
