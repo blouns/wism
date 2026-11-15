@@ -15,6 +15,106 @@ using Wism.Client.Core;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest]
+    public IEnumerator GameMenu_SoundPreferenceRoundtripCannotUnmuteValidation()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(UnityManager.RequiresSilentAudio(Application.isBatchMode, System.Environment.GetCommandLineArgs()), Is.True);
+        var before = TerminalState();
+        yield return Click(MenuPoint("OpenGameMenu"));
+        var toggle = unity.GameMenu.GetComponentsInChildren<Toggle>(true).Single(value => value.name == "SoundEnabled");
+        var rect = (RectTransform)toggle.transform;
+        Canvas.ForceUpdateCanvases();
+        var point = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center));
+        bool original = unity.SoundEnabled;
+        yield return Click(point);
+        Assert.That(unity.SoundEnabled, Is.EqualTo(!original));
+        Assert.That(AudioListener.volume, Is.Zero);
+        yield return Click(point);
+        Assert.That(unity.SoundEnabled, Is.EqualTo(original));
+        Assert.That(AudioListener.volume, Is.Zero, "Sound On must not defeat forced process-local mute.");
+        unity.GameMenu.Close();
+
+        var oldSnapshot = PersistanceManager.GetLastSnapshot();
+        var oldDirectory = PersistanceManager.SaveDirectory;
+        var args = System.Environment.GetCommandLineArgs();
+        int option = System.Array.IndexOf(args, "-wism-profile-output");
+        var root = option >= 0 && option + 1 < args.Length ? args[option + 1] : Application.temporaryCachePath;
+        var directory = Path.Combine(root, "sound-save-proof-" + System.Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(directory, "sound.json");
+        try
+        {
+            PersistanceManager.SaveDirectory = directory;
+            foreach (bool enabled in new[] { false, true })
+            {
+                unity.SoundEnabled = enabled;
+                PersistanceManager.Save("sound.json", "Sound preference", unity);
+                PersistanceManager.LoadEntities(path, unity);
+                unity.SoundEnabled = !enabled;
+                typeof(PersistanceManager).GetMethod("LoadLastSnapshot", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(null, new object[] { unity });
+                Assert.That(unity.SoundEnabled, Is.EqualTo(enabled));
+                Assert.That(AudioListener.volume, Is.Zero);
+            }
+            var legacy = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(path));
+            legacy.Remove("SoundEnabled");
+            File.WriteAllText(path, legacy.ToString());
+            Assert.That(PersistanceManager.LoadEntities(path, unity).SoundEnabled, Is.True,
+                "Existing valid saves without the additive preference keep the default.");
+            Assert.That(TerminalState(), Is.EqualTo(before));
+        }
+        finally
+        {
+            unity.SoundEnabled = original;
+            PersistanceManager.SaveDirectory = oldDirectory;
+            if (File.Exists(path)) File.Delete(path);
+            if (Directory.Exists(directory)) Directory.Delete(directory);
+            typeof(PersistanceManager).GetMethod("SetLastSnapshot", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(null, new object[] { oldSnapshot });
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator GameMenu_SoundPolicyHonorsAllForcedSilentModes()
+    {
+        Assert.That(UnityManager.RequiresSilentAudio(false, null), Is.False);
+        Assert.That(UnityManager.RequiresSilentAudio(true, new string[0]), Is.True);
+        foreach (var argument in new[] { "-wism-mute-audio", "-noaudio", "-runTests", "-wism-autoplay", "-NOAUDIO" })
+            Assert.That(UnityManager.RequiresSilentAudio(false, new[] { argument }), Is.True, argument);
+        Assert.That(UnityManager.RequiresSilentAudio(false, new[] { "-unrelated" }), Is.False);
+        yield return null;
+    }
+
+    [UnityTest]
+    public IEnumerator GameMenu_AboutIsReadableAndNeverChangesCampaign()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var before = TerminalState();
+        foreach (var size in new[] { new Vector2Int(1024, 768), new Vector2Int(1920, 1080) })
+        {
+            ApplyViewport(size.x, size.y);
+            yield return WaitFor(() => Screen.width == size.x && Screen.height == size.y);
+            yield return Click(MenuPoint("OpenGameMenu"));
+            yield return Click(MenuPoint("AboutWism"));
+            Assert.That(EventSystem.current.currentSelectedGameObject.name, Is.EqualTo("CloseAbout"));
+            var details = unity.GameMenu.GetComponentsInChildren<Text>().Single(text => text.name == "AboutDetails");
+            Assert.That(details.text, Does.Contain(Application.version));
+            Assert.That(details.text, Does.Contain("independent"));
+            Canvas.ForceUpdateCanvases();
+            Assert.That(details.preferredHeight, Is.LessThanOrEqualTo(details.rectTransform.rect.height + 1));
+            var corners = new Vector3[4];
+            details.rectTransform.GetWorldCorners(corners);
+            foreach (var corner in corners)
+            {
+                Assert.That(corner.x, Is.InRange(0f, (float)Screen.width));
+                Assert.That(corner.y, Is.InRange(0f, (float)Screen.height));
+            }
+            yield return Click(MenuPoint("CloseAbout"));
+            Assert.That(unity.GameMenu.IsOpen, Is.False);
+            Assert.That(TerminalState(), Is.EqualTo(before));
+        }
+    }
+
+    [UnityTest]
     public IEnumerator MenuActions_ProductionAndOwnedCitiesUseExistingModes()
     {
         yield return new WaitForLastCommand(manager.ControllerProvider);
