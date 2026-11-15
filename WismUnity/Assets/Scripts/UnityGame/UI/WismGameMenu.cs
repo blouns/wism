@@ -115,7 +115,7 @@ namespace Assets.Scripts.UI
             controlButton = Button(menu.transform, "PlayerControl", "Player Control", "game.control", OpenPlayerControls);
             PlaceRow(controlButton, 344);
             viewMenu = Panel(shield.transform, "ViewMenu", Stone);
-            Place((RectTransform)viewMenu.transform, new Vector2(0, 1), new Vector2(252, -56), new Vector2(240, 300));
+            Place((RectTransform)viewMenu.transform, new Vector2(0, 1), new Vector2(252, -56), new Vector2(240, 348));
             capitalButton = Button(viewMenu.transform, "Capital", "Capital", "view.capital", NavigateToCapital);
             Place((RectTransform)capitalButton.transform, new Vector2(0, 1), new Vector2(8, -8), new Vector2(224, 44));
             inventoryButton = Button(viewMenu.transform, "Inventory", "Inventory", "heroes.inventory", () => OpenHeroes(false));
@@ -125,6 +125,7 @@ namespace Assets.Scripts.UI
             GameplayButton(viewMenu.transform, GameplayAction.TakeItem, "Take Item", 8, 152);
             GameplayButton(viewMenu.transform, GameplayAction.DropItem, "Drop Item", 8, 200);
             GameplayButton(viewMenu.transform, GameplayAction.Search, "Search Location", 8, 248);
+            GameplayButton(viewMenu.transform, GameplayAction.Stack, "Stack", 8, 296);
             viewMenu.SetActive(false);
             ordersMenu = Panel(shield.transform, "OrdersMenu", Stone);
             Place((RectTransform)ordersMenu.transform, new Vector2(0, 1), new Vector2(360, -56), new Vector2(480, 300));

@@ -265,6 +265,32 @@ public sealed partial class ArmyUiInputTests
     }
 
     [UnityTest]
+    public IEnumerator MenuActions_StackOpensPickerAndReturnsToGame()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        yield return Click(MenuPoint("OpenViewMenu"));
+        Assert.That(MenuButton("ActionStack").interactable, Is.False);
+        unity.GameMenu.Cancel();
+        yield return SelectItemHero();
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var selected = Game.Current.GetSelectedArmies().Select(a => a.Id).OrderBy(id => id).ToArray();
+        yield return Click(MenuPoint("OpenViewMenu"));
+        Assert.That(MenuButton("ActionStack").interactable, Is.True);
+        yield return Click(MenuPoint("ActionStack"));
+        var picker = Object.FindAnyObjectByType<ArmyPicker>();
+        Assert.That(picker, Is.Not.Null);
+        Assert.That(unity.GameMenu.IsOpen, Is.False);
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.UI));
+        var ok = picker.GetComponentsInChildren<Button>().Single(b => b.name != "SelectButton");
+        var rect = (RectTransform)ok.transform;
+        yield return Click(RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center)));
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(picker.gameObject.activeSelf, Is.False);
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.Game));
+        Assert.That(Game.Current.GetSelectedArmies().Select(a => a.Id).OrderBy(id => id), Is.EqualTo(selected));
+    }
+
+    [UnityTest]
     public IEnumerator MenuActions_EndTurnUsesNormalTurnTransition()
     {
         yield return new WaitForLastCommand(manager.ControllerProvider);

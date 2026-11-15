@@ -33,7 +33,7 @@ namespace Assets.Scripts.Managers
     public enum GameplayAction
     {
         NextArmy, SkipArmy, Defend, Search, TakeItem, DropItem,
-        Production, ManageProduction, EndTurn
+        Production, ManageProduction, EndTurn, Stack
     }
 
     public static class GameKeyboardShortcuts
@@ -132,6 +132,7 @@ namespace Assets.Scripts.Managers
                 case GameplayAction.Production: UnityManager.SetProductionMode(ProductionMode.SelectCity); break;
                 case GameplayAction.ManageProduction: UnityManager.ShowProductionManagementPanelForCurrentPlayer(); break;
                 case GameplayAction.EndTurn: GameManager.EndTurn(); break;
+                case GameplayAction.Stack: UnityManager.HandleArmyPicker(); break;
                 default: return false;
             }
             return true;
@@ -338,7 +339,7 @@ namespace Assets.Scripts.Managers
             // Army actions
             if (Input.GetKeyDown(KeyCode.M))
             {
-                this.UnityManager.HandleArmyPicker();
+                this.TryExecuteGameplayAction(GameplayAction.Stack);
             }
             else if (Input.GetKeyDown(KeyCode.Period) ||
                      Input.GetKeyDown(KeyCode.KeypadPeriod))
