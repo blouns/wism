@@ -1069,10 +1069,21 @@ public sealed partial class GameSetupPointerMatrixTests
         try
         {
             PersistanceManager.SaveDirectory = directory;
-            yield return StartRoster("TestWorld", null);
-            yield return WismTestAction.WaitForNewHeroOffer();
-            yield return WismTestAction.AcceptNewHeroOffer();
+            UnityManager.SetNewGameSettings(new UnityNewGameEntity
+            {
+                IsNewGame = true, InteractiveUI = true, RandomSeed = 1990, WorldName = "TestWorld",
+                Players = new[] {
+                    new UnityPlayerEntity { ClanName = "Sirians", IsHuman = true },
+                    new UnityPlayerEntity { ClanName = "LordBane", IsHuman = true }
+                }
+            });
+            SceneManager.LoadScene("Scenes/Test/TestWorld");
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "TestWorld" && Game.IsInitialized(), "Human source world");
             var unity = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
+            var naming = UnityUtilities.GameObjectHardFind("SolicitInputPanel").GetComponent<SolicitInput>();
+            yield return WaitFor(() => naming.IsInitialized(), "Source human naming");
+            naming.SetInputText("Startup Hero");
+            naming.Ok();
             yield return WaitFor(() => GameObject.FindGameObjectWithTag("CityProductionPanel") != null,
                 "Source first-turn production panel");
             yield return WismTestAction.DismissProductionPanelIfVisible();
