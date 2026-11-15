@@ -64,6 +64,7 @@ public class BoardMutationInvariantTests
         var mixed = new List<Army> { reserve, hero };
 
         Assert.That(new SelectArmyCommand(armyController, mixed).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(new DeselectArmyCommand(armyController, mixed).Execute(), Is.EqualTo(ActionState.Succeeded));
         Assert.That(new SelectArmyCommand(armyController, exhausted).Execute(), Is.EqualTo(ActionState.Succeeded));
         var attack = new AttackOnceCommand(armyController, exhausted, target.X, target.Y);
         Assert.Multiple(() =>
@@ -83,6 +84,7 @@ public class BoardMutationInvariantTests
         });
 
         var mobile = new List<Army> { reserve };
+        Assert.That(new DeselectArmyCommand(armyController, exhausted).Execute(), Is.EqualTo(ActionState.Succeeded));
         Assert.That(new SelectArmyCommand(armyController, mobile).Execute(), Is.EqualTo(ActionState.Succeeded));
         Assert.That(new PrepareForBattleCommand(armyController, mobile, target.X, target.Y).Execute(),
             Is.EqualTo(ActionState.Succeeded));
