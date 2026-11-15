@@ -695,7 +695,15 @@ public sealed partial class GameSetupPointerMatrixTests
     [UnityTest] public IEnumerator Start_IlluriaAllEightClans() => StartRoster("Illuria", Enumerable.Range(1, 8).ToArray());
 
     [UnityTest, Category("PerformanceQualification")]
-    public IEnumerator Performance_AuthoredIlluriaEightAiRecordsBoundedNativeWindow()
+    public IEnumerator Performance_AuthoredIlluriaEightAiRecordsBoundedNativeWindow() => MeasureIlluriaWindow(0);
+
+    [UnityTest, Category("PerformanceQualification")]
+    public IEnumerator Performance_IlluriaSeeded160Armies() => MeasureIlluriaWindow(2);
+
+    [UnityTest, Category("PerformanceQualification")]
+    public IEnumerator Performance_IlluriaSeeded400Armies() => MeasureIlluriaWindow(5);
+
+    private IEnumerator MeasureIlluriaWindow(int armiesPerCity)
     {
         Assert.That(Assets.Scripts.Telemetry.PlaytestPerformance.Instance, Is.Null,
             "The proof requires its own recorder lifetime.");
@@ -718,6 +726,27 @@ public sealed partial class GameSetupPointerMatrixTests
             Assert.That(Game.Current.Players.All(p => !p.IsHuman), Is.True);
             Assert.That(manager.ObserveAiMovement, Is.False);
             Assert.That(manager.ShowAiCombat, Is.False);
+            if (armiesPerCity > 0)
+            {
+                // A reproducible scale fixture, not a claimed naturally evolved campaign.
+                var players = Game.Current.Players.ToArray();
+                foreach (var city in World.Current.GetCities())
+                {
+                    var owner = players.Contains(city.Player) ? city.Player : players.OrderBy(player =>
+                        Math.Abs(player.Capitol.X - city.X) + Math.Abs(player.Capitol.Y - city.Y))
+                        .ThenBy(player => player.Clan.ShortName, StringComparer.Ordinal).First();
+                    foreach (var army in city.MusterArmies().ToArray()) army.Kill();
+                    if (city.Player != owner) owner.ClaimCity(city);
+                    for (int index = 0; index < armiesPerCity; index++)
+                        owner.ConscriptArmy(Wism.Client.Modules.Infos.ArmyInfo.GetArmyInfo(
+                            index % 2 == 0 ? "LightInfantry" : "HeavyInfantry"), city.Tile);
+                }
+                foreach (var player in players) player.Gold = 5000;
+                Assert.That(Game.Current.GetAllArmies().Count, Is.GreaterThanOrEqualTo(80 * armiesPerCity));
+                Assert.That(players.Sum(player => player.GetCities().Count), Is.EqualTo(80));
+                Assert.That(World.Current.GetCities().All(city => city.Player.GetCities().Contains(city)), Is.True,
+                    "City owner fields and player ownership lists must agree before timing.");
+            }
             var initialTurns = Game.Current.Players.Sum(p => p.Turn);
             var initialArmies = Game.Current.GetAllArmies().Count;
             var frames = new List<double>();
@@ -738,7 +767,10 @@ public sealed partial class GameSetupPointerMatrixTests
             var decisionCount = File.ReadLines(Path.Combine(output, "samples.jsonl"))
                 .Count(line => (string)JObject.Parse(line)["Kind"] == "decision-end");
             var summary = new JObject {
-                ["Scope"] = "120-second native Illuria startup window; not dense late-game or human acceptance",
+                ["Scope"] = armiesPerCity == 0
+                    ? "120-second native Illuria startup window; not dense late-game or human acceptance"
+                    : "120-second seeded Illuria scale fixture; not a naturally evolved campaign or human acceptance",
+                ["SeededArmiesPerCity"] = armiesPerCity,
                 ["Width"] = 109, ["Height"] = 156, ["Cities"] = 80, ["Clans"] = 8,
                 ["ObserveAiMovement"] = false, ["ShowAiCombat"] = false,
                 ["ElapsedSeconds"] = previous - started, ["Frames"] = frames.Count,
