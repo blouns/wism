@@ -47,10 +47,12 @@ public sealed partial class PlaygroundScenarioRunner
             timer.Stop();
             allocated = GC.GetAllocatedBytesForCurrentThread() - allocated;
             var outcomes = new List<string>();
+            var failedMoves = new List<object>();
             int emptyProductionReviews = 0;
             int movementExhaustions = 0;
             foreach (var command in provider.GetBufferedCommands().OfType<Command>())
             {
+                var beforeMove = command is MoveOnceCommand pendingMove ? DescribeMove(pendingMove) : null;
                 var result = ExecuteCommand(command);
                 int iterations = 0;
                 while (result == ActionState.InProgress && iterations++ < 4096) result = ExecuteCommand(command);
@@ -63,6 +65,9 @@ public sealed partial class PlaygroundScenarioRunner
                 var exhausted = result == ActionState.Failed && command is MoveOnceCommand move &&
                     IsExpectedMovementExhaustion(move.Armies, move.Path, iterations);
                 if (exhausted) movementExhaustions++;
+                if (result == ActionState.Failed && command is MoveOnceCommand failedMove)
+                    failedMoves.Add(new { CommandIndex = outcomes.Count, Continuations = iterations,
+                        ExpectedExhaustion = exhausted, Before = beforeMove, After = DescribeMove(failedMove) });
                 legal &= result == ActionState.Succeeded || emptyProduction || exhausted;
                 outcomes.Add(command.GetType().Name + ":" + result);
             }
@@ -79,7 +84,7 @@ public sealed partial class PlaygroundScenarioRunner
                 AllocatedBytes = allocated, PathQueries = probe?.PathQueries,
                 ExpandedNodes = probe?.ExpandedNodes, GraphCells = probe?.GraphCells,
                 Outcomes = outcomes, EmptyProductionNoOps = emptyProductionReviews,
-                MovementExhaustions = movementExhaustions, StateHash = hash
+                MovementExhaustions = movementExhaustions, FailedMoves = failedMoves, StateHash = hash
             });
         }
         File.WriteAllText(Path.Combine(output, "comparison.json"), JsonConvert.SerializeObject(new {
@@ -91,6 +96,15 @@ public sealed partial class PlaygroundScenarioRunner
         }, Formatting.Indented));
         return parity && legal;
     }
+
+    // Materialize values before execution; the command mutates both armies and its path.
+    private static object DescribeMove(MoveOnceCommand move) => new {
+        TargetX = move.X, TargetY = move.Y,
+        Armies = move.Armies.Select(a => new {
+            a.Id, a.ShortName, a.MovesRemaining, a.IsDead, X = a.Tile?.X, Y = a.Tile?.Y
+        }).ToArray(),
+        Path = move.Path?.Select(t => new { t.X, t.Y }).ToArray()
+    };
 
     internal static bool IsExpectedMovementExhaustion(List<Army> armies, IList<Tile>? path, int completedSteps)
     {
