@@ -86,7 +86,7 @@ public sealed partial class ArmyUiInputTests
             Assert.That(input.TryExecuteGameplayAction(action), Is.False, "Modal guard: " + action);
         Assert.That(unity.LastCommandId, Is.EqualTo(command));
         yield return Click(MenuPoint("ActionTakeItem"));
-        yield return WaitFor(() => hero.Items.Contains(item));
+        yield return WaitFor(() => hero.HasItems() && hero.Items.Contains(item));
         Assert.That(hero.Items.Count(value => value == item), Is.EqualTo(1));
         Assert.That(hero.Tile.Items.Contains(item), Is.False);
         yield return new WaitForLastCommand(manager.ControllerProvider);
