@@ -87,6 +87,7 @@ namespace Assets.Scripts.Managers
             unityGame.LastCommandId = snapshot.LastCommandId;
             unityGame.ShowAiCombat = snapshot.ShowAiCombat;
             unityGame.SoundEnabled = snapshot.SoundEnabled;
+            unityGame.RestorePendingPlayerControls(snapshot.PendingPlayerControls);
             unityGame.ObserveAiMovement = snapshot.ObserveAiMovement;
             unityGame.GetComponent<UnityGameFactory>().WorldName = snapshot.WorldName;
         }
@@ -119,7 +120,25 @@ namespace Assets.Scripts.Managers
 
             var settings = new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() };
             var document = SaveFileFormat.Read(json);
-            return document.ToObject<UnityGameEntity>(JsonSerializer.Create(settings));
+            var result = document.ToObject<UnityGameEntity>(JsonSerializer.Create(settings));
+            ValidatePlayerControls(result);
+            return result;
+        }
+
+        private static void ValidatePlayerControls(UnityGameEntity saved)
+        {
+            var choices = saved.PendingPlayerControls;
+            if (choices == null || choices.Length == 0) return;
+            if (saved.SaveFormat.SchemaVersion < 2 || choices.Length > (saved.WismGameEntity?.Players?.Length ?? 0))
+                throw new SaveCompatibilityException("This save has invalid pending player controls.");
+            var clans = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+            foreach (var choice in choices)
+            {
+                if (choice == null || string.IsNullOrWhiteSpace(choice.ClanName) || !clans.Add(choice.ClanName) ||
+                    !choice.AiDifficulty.HasValue || !Enum.IsDefined(typeof(AiDifficultyTier), choice.AiDifficulty.Value) ||
+                    !System.Array.Exists(saved.WismGameEntity.Players, player => player.ClanShortName == choice.ClanName && !player.IsDead))
+                    throw new SaveCompatibilityException("This save has invalid pending player controls.");
+            }
         }
 
         internal static void SetLastSnapshot(UnityGameEntity unityGameEntity)

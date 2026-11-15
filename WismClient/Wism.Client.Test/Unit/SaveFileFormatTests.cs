@@ -52,14 +52,59 @@ public sealed class SaveFileFormatTests
         Assert.Throws<SaveCompatibilityException>(() => SaveFileFormat.Read(root.ToString()));
     }
 
-    [TestCase(2, 1)]
-    [TestCase(2, 2)]
+    [TestCase(3, 1)]
+    [TestCase(3, 3)]
     [TestCase(1, 2)]
     public void FutureOrInconsistentVersionsAreRejected(int schema, int minimum)
     {
         var root = Current();
         root["SaveFormat"]["SchemaVersion"] = schema;
         root["SaveFormat"]["MinimumReaderVersion"] = minimum;
+        Assert.Throws<SaveCompatibilityException>(() => SaveFileFormat.Read(root.ToString()));
+    }
+
+    [Test]
+    public void SchemaOneRemainsReadableWithoutRewritingItsHeader()
+    {
+        var root = Current();
+        root["SaveFormat"]["SchemaVersion"] = 1;
+        root["SaveFormat"]["MinimumReaderVersion"] = 1;
+        Assert.That(JToken.DeepEquals(root, SaveFileFormat.Read(root.ToString())), Is.True);
+    }
+
+    [Test]
+    public void NewSemanticStateRequiresTheVersionTwoReader()
+    {
+        var header = SaveFileFormat.CreateMetadata("beta-test");
+        Assert.That(header.SchemaVersion, Is.EqualTo(2));
+        Assert.That(header.MinimumReaderVersion, Is.EqualTo(2));
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public void PendingControlChangesCannotMasqueradeAsOlderSchema(bool legacy)
+    {
+        var root = Current();
+        if (legacy) root.Remove("SaveFormat");
+        else
+        {
+            root["SaveFormat"]["SchemaVersion"] = 1;
+            root["SaveFormat"]["MinimumReaderVersion"] = 1;
+        }
+        root["PendingPlayerControls"] = new JArray(new JObject { ["ClanName"] = "Sirians" });
+        Assert.Throws<SaveCompatibilityException>(() => SaveFileFormat.Read(root.ToString()));
+    }
+
+    [Test]
+    public void PendingControlsRequireMinimumReaderTwoAndCanonicalFieldName()
+    {
+        var root = Current();
+        root["SaveFormat"]["MinimumReaderVersion"] = 1;
+        root["PendingPlayerControls"] = new JArray(new JObject { ["ClanName"] = "Sirians" });
+        Assert.Throws<SaveCompatibilityException>(() => SaveFileFormat.Read(root.ToString()));
+        root["SaveFormat"]["MinimumReaderVersion"] = 2;
+        root["pendingPlayerControls"] = root["PendingPlayerControls"].DeepClone();
+        root.Remove("PendingPlayerControls");
         Assert.Throws<SaveCompatibilityException>(() => SaveFileFormat.Read(root.ToString()));
     }
 

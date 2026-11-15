@@ -35,6 +35,7 @@ namespace Assets.Scripts.CommandProcessors
         public ActionState Execute(ICommandAction command)
         {
             var startTurn = (StartTurnCommand)command;
+            this.unityGame.ApplyPlayerControlAtTurnStart(startTurn.Player);
 
             if (!this.unityGame.ShouldPresentFor(startTurn.Player))
             {

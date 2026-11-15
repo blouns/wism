@@ -50,7 +50,7 @@ public sealed partial class ArmyUiInputTests
             {
                 var json = Newtonsoft.Json.Linq.JObject.Parse(valid);
                 if (failure == "missing-core") json["WismGameEntity"] = null;
-                if (failure == "future-format") json["SaveFormat"]["SchemaVersion"] = 2;
+                if (failure == "future-format") json["SaveFormat"]["SchemaVersion"] = Wism.Client.Data.SaveFileFormat.CurrentVersion + 1;
                 if (failure == "invalid-format") json["SaveFormat"]["SchemaVersion"] = "one";
                 if (failure == "camera") json["CameraPosition"] = new Newtonsoft.Json.Linq.JArray(1);
                 if (failure == "deep-random") json["WismGameEntity"]["Random"] = null;
@@ -110,7 +110,7 @@ public sealed partial class ArmyUiInputTests
             yield return PressJourneyButton(unity.SaveLoadPicker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load"));
             yield return WaitFor(() => !ReferenceEquals(Game.Current, game) && input.InputMode == InputMode.Game && input.CanAcceptGameplayInput);
             Assert.That(PersistanceManager.GetLastSnapshot().DisplayName, Is.EqualTo("Load recovery"));
-            Assert.That(PersistanceManager.GetLastSnapshot().SaveFormat.SchemaVersion, Is.EqualTo(1));
+            Assert.That(PersistanceManager.GetLastSnapshot().SaveFormat.SchemaVersion, Is.EqualTo(Wism.Client.Data.SaveFileFormat.CurrentVersion));
             Assert.That(File.ReadAllBytes(path), Is.EqualTo(legacyBytes), "Loading must not rewrite legacy saves.");
         }
         finally

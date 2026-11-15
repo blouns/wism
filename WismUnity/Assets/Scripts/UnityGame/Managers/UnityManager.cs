@@ -114,6 +114,45 @@ namespace Assets.Scripts.Managers
         public DebugManager DebugManager { get => this.debugManager; set => this.debugManager = value; }
         public bool InteractiveUI { get => this.interactiveUI; set => this.interactiveUI = value; }
         public bool ShowAiCombat { get; set; } = true;
+        private readonly Dictionary<string, UnityPlayerEntity> pendingPlayerControls = new Dictionary<string, UnityPlayerEntity>(StringComparer.Ordinal);
+
+        public UnityPlayerEntity[] GetPendingPlayerControls() => this.pendingPlayerControls.Values
+            .Where(choice => Game.IsInitialized() && Game.Current.Players.Any(player => player.Clan.ShortName == choice.ClanName && !player.IsDead))
+            .OrderBy(choice => choice.ClanName, StringComparer.Ordinal).Select(CloneControl).ToArray();
+
+        private static UnityPlayerEntity CloneControl(UnityPlayerEntity choice) => new UnityPlayerEntity
+            { ClanName = choice.ClanName, IsHuman = choice.IsHuman, AiDifficulty = choice.AiDifficulty };
+
+        internal void RestorePendingPlayerControls(UnityPlayerEntity[] choices)
+        {
+            this.pendingPlayerControls.Clear();
+            foreach (var choice in choices ?? Array.Empty<UnityPlayerEntity>())
+                this.pendingPlayerControls.Add(choice.ClanName, CloneControl(choice));
+        }
+
+        public bool QueuePlayerControl(string clanName, bool human, AiDifficultyTier difficulty)
+        {
+            if (!Game.IsInitialized() || this.ExecutionMode != ExecutionMode.Running || Game.Current.GameState == GameState.GameOver ||
+                !Enum.IsDefined(typeof(AiDifficultyTier), difficulty)) return false;
+            var player = Game.Current.Players.FirstOrDefault(value => value.Clan.ShortName == clanName && !value.IsDead);
+            if (player == null) return false;
+            if (player.IsHuman == human && player.AiDifficulty == difficulty)
+                this.pendingPlayerControls.Remove(clanName);
+            else
+                this.pendingPlayerControls[clanName] = new UnityPlayerEntity { ClanName = clanName, IsHuman = human, AiDifficulty = difficulty };
+            return true;
+        }
+
+        internal void ApplyPlayerControlAtTurnStart(Player player)
+        {
+            if (Game.Current.GameState != GameState.StartingTurn || Game.Current.GetCurrentPlayer() != player ||
+                !this.pendingPlayerControls.TryGetValue(player.Clan.ShortName, out var choice)) return;
+            this.pendingPlayerControls.Remove(player.Clan.ShortName);
+            if (player.IsDead) return;
+            player.IsHuman = choice.IsHuman;
+            player.AiDifficulty = choice.AiDifficulty.Value;
+            this.InputManager.SetInputMode(player.IsHuman ? InputMode.Game : InputMode.AITurn);
+        }
         private bool soundEnabled = true;
         public bool SoundEnabled
         {

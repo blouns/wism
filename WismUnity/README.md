@@ -35,6 +35,11 @@ regardless of that preference. This does not change the Editor's saved mute sett
 or the operating system volume. About WISM shows the application version and project
 identity without issuing game commands.
 
+Player Control selects Human or an AI difficulty for each living clan. Apply queues
+the choice until that clan starts its next turn; it never interrupts a running
+turn. Cancel leaves control unchanged. Pending choices survive save/load using
+save schema 2, which older readers safely refuse.
+
 ## WismClient Plugin Assemblies
 
 WismUnity consumes WismClient through committed plugin assemblies under:

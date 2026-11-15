@@ -35,6 +35,7 @@ namespace Assets.Scripts.Persistance.Entities
             LastCommandId = unityGame.LastCommandId;
             ShowAiCombat = unityGame.ShowAiCombat;
             SoundEnabled = unityGame.SoundEnabled;
+            PendingPlayerControls = unityGame.GetPendingPlayerControls();
             ObserveAiMovement = unityGame.ObserveAiMovement;
             var cameraPosition = unityGame.GetMainCamera().transform.position;
             CameraPosition = new[]
@@ -52,6 +53,7 @@ namespace Assets.Scripts.Persistance.Entities
         public int LastCommandId { get; set; }
         public bool ShowAiCombat { get; set; } = true;
         public bool SoundEnabled { get; set; } = true;
+        public Assets.Scripts.UnityGame.Persistance.Entities.UnityPlayerEntity[] PendingPlayerControls { get; set; }
         public bool ObserveAiMovement { get; set; } = true;
         public float[] CameraPosition { get; set; }
         public GameEntity WismGameEntity { get; set; }
