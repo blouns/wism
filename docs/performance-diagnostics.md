@@ -39,6 +39,9 @@ executing Start Turn before measurement when the snapshot is at a turn boundary,
 comparing generated command outcomes and final state hashes (excluding the save
 timestamp). An empty production review and its unneeded renewal can return
 `Failed` as a no-op; these are explicitly counted, not silently discarded.
+Movement that makes progress and then exhausts the engine-calculated movement
+needed for its next traversable tile is counted separately, retaining its raw
+Failed result. Zero-progress and blocked-path failures are not waived.
 Other failed commands invalidate the comparison. This is one-decision replay,
 not proof of full-match parity or Windows rendering performance.
 

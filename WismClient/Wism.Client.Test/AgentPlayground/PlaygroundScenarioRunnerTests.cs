@@ -28,6 +28,25 @@ public class PlaygroundScenarioRunnerTests
             "A turn-boundary replay must refresh the turn before attempting movement.");
         var comparison = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(Path.Combine(output, "comparison", "comparison.json")));
         Assert.That((string)comparison["Preparation"], Is.EqualTo("StartTurnCommand before measurement when StartingTurn"));
+        Assert.That(comparison["Runs"].All(r => (int)r["MovementExhaustions"] > 0), Is.True);
+        Assert.That(comparison["Runs"].All(r => r["Outcomes"].Any(o => (string)o == "MoveOnceCommand:Failed")), Is.True,
+            "Expected exhaustion must retain the raw engine result.");
+    }
+
+    [Test]
+    public void ProfileMovementExhaustion_RequiresProgressPathAndInsufficientMoves()
+    {
+        new PlaygroundScenarioRunner(suppressConsoleLogs: true).Sample();
+        var army = Game.Current.GetCurrentPlayer().GetArmies().First();
+        var armies = new List<Wism.Client.MapObjects.Army> { army };
+        var next = World.Current.Map.Cast<Tile>().First(t => t != army.Tile && t.CanTraverseHere(armies));
+        var path = new List<Tile> { army.Tile, next };
+        army.MovesRemaining = 0;
+        Assert.That(PlaygroundScenarioRunner.IsExpectedMovementExhaustion(armies, path, 1), Is.True);
+        Assert.That(PlaygroundScenarioRunner.IsExpectedMovementExhaustion(armies, path, 0), Is.False);
+        Assert.That(PlaygroundScenarioRunner.IsExpectedMovementExhaustion(armies, null, 1), Is.False);
+        army.MovesRemaining = 1000;
+        Assert.That(PlaygroundScenarioRunner.IsExpectedMovementExhaustion(armies, path, 1), Is.False);
     }
 
     [Test]

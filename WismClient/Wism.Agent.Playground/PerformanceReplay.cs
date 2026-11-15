@@ -4,6 +4,8 @@ using Newtonsoft.Json;
 using Wism.Client.AI.Framework;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Players;
+using Wism.Client.Commands.Armies;
+using Wism.Client.MapObjects;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.Diagnostics;
@@ -46,6 +48,7 @@ public sealed partial class PlaygroundScenarioRunner
             allocated = GC.GetAllocatedBytesForCurrentThread() - allocated;
             var outcomes = new List<string>();
             int emptyProductionReviews = 0;
+            int movementExhaustions = 0;
             foreach (var command in provider.GetBufferedCommands().OfType<Command>())
             {
                 var result = ExecuteCommand(command);
@@ -57,7 +60,10 @@ public sealed partial class PlaygroundScenarioRunner
                     ((command is ReviewProductionCommand review && review.ArmiesProducedResult == null && review.ArmiesDeliveredResult == null) ||
                      (command is RenewProductionCommand renew && renew.ReviewProductionCommand.Result == ActionState.Failed));
                 if (emptyProduction) emptyProductionReviews++;
-                legal &= result == ActionState.Succeeded || emptyProduction;
+                var exhausted = result == ActionState.Failed && command is MoveOnceCommand move &&
+                    IsExpectedMovementExhaustion(move.Armies, move.Path, iterations);
+                if (exhausted) movementExhaustions++;
+                legal &= result == ActionState.Succeeded || emptyProduction || exhausted;
                 outcomes.Add(command.GetType().Name + ":" + result);
             }
             var snapshot = Game.Current.Snapshot();
@@ -72,7 +78,8 @@ public sealed partial class PlaygroundScenarioRunner
                 Index = index, Enabled = enabled, PlanningMs = timer.Elapsed.TotalMilliseconds,
                 AllocatedBytes = allocated, PathQueries = probe?.PathQueries,
                 ExpandedNodes = probe?.ExpandedNodes, GraphCells = probe?.GraphCells,
-                Outcomes = outcomes, EmptyProductionNoOps = emptyProductionReviews, StateHash = hash
+                Outcomes = outcomes, EmptyProductionNoOps = emptyProductionReviews,
+                MovementExhaustions = movementExhaustions, StateHash = hash
             });
         }
         File.WriteAllText(Path.Combine(output, "comparison.json"), JsonConvert.SerializeObject(new {
@@ -83,5 +90,13 @@ public sealed partial class PlaygroundScenarioRunner
             Runs = runs
         }, Formatting.Indented));
         return parity && legal;
+    }
+
+    internal static bool IsExpectedMovementExhaustion(List<Army> armies, IList<Tile>? path, int completedSteps)
+    {
+        if (completedSteps <= 0 || armies.Count == 0 || path == null || path.Count < 2 ||
+            armies.Any(a => a.IsDead || a.Tile != path[0]) || !path[1].CanTraverseHere(armies)) return false;
+        var applicable = Game.Current.MovementCoordinator.GetArmiesWithApplicableMoves(armies, path[1]);
+        return !Game.Current.MovementCoordinator.HasSufficientMovesAdjacentTile(applicable, path[1]);
     }
 }
