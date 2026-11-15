@@ -44,7 +44,10 @@ namespace Assets.Scripts.Telemetry
         private bool listening;
         private bool warned;
         private bool hasPublished;
-        private string latestFrame;
+        private int snapshotRequested;
+
+        // Consumed on the game thread before building, so a concurrent join stays pending.
+        public bool ConsumeSnapshotRequest() => Interlocked.Exchange(ref this.snapshotRequested, 0) != 0;
 
         // Keep fallback transports fully populated; their consumers are not visible here.
         public bool NeedsInfluenceSnapshot
@@ -109,6 +112,8 @@ namespace Assets.Scripts.Telemetry
 
             try
             {
+                var clientsSnapshot = GetClientsSnapshot();
+                if (clientsSnapshot.Count == 0) return;
                 ApplyTelemetry(payload);
 
                 var invocation = new HubInvocation
@@ -120,13 +125,6 @@ namespace Assets.Scripts.Telemetry
                 using (Wism.Client.Diagnostics.PerformanceProbe.Measure(payload is MapSnapshot ? "snapshot-serialize" : "telemetry-serialize"))
                     json = JsonConvert.SerializeObject(invocation, JsonSettings);
                 var framed = json + (char)RecordSeparator;
-                this.latestFrame = framed;
-
-                var clientsSnapshot = GetClientsSnapshot();
-                if (clientsSnapshot.Count == 0)
-                {
-                    return;
-                }
 
                 foreach (var client in clientsSnapshot)
                 {
@@ -522,21 +520,7 @@ namespace Assets.Scripts.Telemetry
             lock (this.clientsLock)
             {
                 this.clients[client.Id] = client;
-            }
-
-            var frame = this.latestFrame;
-            if (!string.IsNullOrEmpty(frame))
-            {
-                _ = client.SendTextAsync(frame, this.cancellationTokenSource.Token)
-                    .ContinueWith(
-                        task =>
-                        {
-                            if (task.IsFaulted || task.IsCanceled)
-                            {
-                                RemoveClient(client.Id);
-                            }
-                        },
-                        TaskScheduler.Default);
+                Interlocked.Exchange(ref this.snapshotRequested, 1);
             }
         }
 
