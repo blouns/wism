@@ -117,7 +117,7 @@ namespace Assets.Scripts.Telemetry
                     Arguments = new object[] { payload }
                 };
                 string json;
-                using (Wism.Client.Diagnostics.PerformanceProbe.Measure("snapshot-serialize"))
+                using (Wism.Client.Diagnostics.PerformanceProbe.Measure(payload is MapSnapshot ? "snapshot-serialize" : "telemetry-serialize"))
                     json = JsonConvert.SerializeObject(invocation, JsonSettings);
                 var framed = json + (char)RecordSeparator;
                 this.latestFrame = framed;
