@@ -48,8 +48,10 @@ not proof of full-match parity or Windows rendering performance.
 ## Limits
 
 Unity omits the optional Companion influence overlay when its socket listener
-has no connected viewers. Basic map snapshots remain cached for late joiners;
-the overlay resumes with the next snapshot after a viewer connects. Named-pipe
+has no connected viewers. Map construction and serialization also skip that case.
+A newly connected viewer requests a fresh snapshot from the next running game-thread
+update, including while the human is idle or a menu is open; stale maps are not replayed.
+Named-pipe
 fallback keeps the overlay because its consumer demand is not known. This does
 not change the AI's own influence field or simulation state.
 

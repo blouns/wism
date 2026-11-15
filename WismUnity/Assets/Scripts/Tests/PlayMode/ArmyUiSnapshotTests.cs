@@ -112,7 +112,8 @@ public sealed partial class ArmyUiInputTests
         {
             Assert.That(publisher.NeedsInfluenceSnapshot, Is.False);
             var socketBroadcaster = new UnityMapSnapshotBroadcaster(new MapSnapshotBuilder(),
-                new MapSnapshotEmitter(manager.LoggerFactory, publisher: publisher), () => false);
+                new MapSnapshotEmitter(manager.LoggerFactory, publisher: publisher), () => false,
+                () => publisher.NeedsInfluenceSnapshot);
             socketBroadcaster.TryEmitSnapshot();
             try
             {
@@ -124,7 +125,7 @@ public sealed partial class ArmyUiInputTests
         foreach (var phase in new[] { "snapshot-build", "snapshot-publish", "snapshot-serialize" })
         {
             var rows = samples.Where(sample => sample.Name == phase).ToArray();
-            Assert.That(rows.Length, Is.EqualTo(6), phase);
+            Assert.That(rows.Length, Is.Zero, "No viewer must mean no map work: " + phase);
             TestContext.WriteLine($"Snapshot phase {phase}: count={rows.Length}, inclusiveMs={rows.Sum(r => r.DurationMs):F3}, exclusiveMs={rows.Sum(r => r.ExclusiveMs):F3}");
         }
         Assert.That(JToken.DeepEquals(before, SnapshotState()), Is.True, "Transport measurement must preserve game/RNG state.");
@@ -151,6 +152,8 @@ public sealed partial class ArmyUiInputTests
             send.GetAwaiter().GetResult();
             while (!publisher.NeedsInfluenceSnapshot && !timeout.IsCancellationRequested) yield return null;
             Assert.That(publisher.NeedsInfluenceSnapshot, Is.True);
+            Assert.That(publisher.ConsumeSnapshotRequest(), Is.True);
+            Assert.That(publisher.ConsumeSnapshotRequest(), Is.False);
             client.Abort();
             while (publisher.NeedsInfluenceSnapshot && !timeout.IsCancellationRequested) yield return null;
             Assert.That(publisher.NeedsInfluenceSnapshot, Is.False);
@@ -160,6 +163,95 @@ public sealed partial class ArmyUiInputTests
                 Assert.That(fallback.NeedsInfluenceSnapshot, Is.True);
             publisher.Dispose();
             Assert.That(publisher.NeedsInfluenceSnapshot, Is.False);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator SnapshotDemand_IdleMenuJoinAndReconnectReceiveFreshMap()
+    {
+        unity.enabled = false;
+        var flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        var publisherField = unity.GetType().GetField("socketTelemetryPublisher", flags);
+        var broadcasterField = unity.GetType().GetField("snapshotBroadcaster", flags);
+        var originalPublisher = publisherField.GetValue(unity);
+        var originalBroadcaster = broadcasterField.GetValue(unity);
+        using (var publisher = new UnitySocketTelemetryPublisher(manager.LoggerFactory, port: 0))
+        using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15)))
+        {
+            publisherField.SetValue(unity, publisher);
+            broadcasterField.SetValue(unity, new UnityMapSnapshotBroadcaster(new MapSnapshotBuilder(),
+                new MapSnapshotEmitter(manager.LoggerFactory, publisher: publisher),
+                () => publisher.NeedsInfluenceSnapshot, () => publisher.NeedsInfluenceSnapshot));
+            try
+            {
+                unity.GameMenu.Open();
+                Assert.That(unity.GameMenu.IsOpen, Is.True);
+                var before = SnapshotState();
+                var listener = (TcpListener)typeof(UnitySocketTelemetryPublisher).GetField("listener", flags).GetValue(publisher);
+                int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+                for (int join = 0; join < 2; join++)
+                {
+                    // Neither a cached map nor the caller's mutable object may be replayed.
+                    var stale = new MapSnapshot { Width = -1, Height = -1 };
+                    publisher.Publish(stale);
+                    stale.Width = -2;
+                    using (var client = new ClientWebSocket())
+                    {
+                        var connect = client.ConnectAsync(new Uri($"ws://127.0.0.1:{port}/gameHub"), timeout.Token);
+                        while (!connect.IsCompleted) yield return null;
+                        connect.GetAwaiter().GetResult();
+                        var hello = Encoding.UTF8.GetBytes("{\"protocol\":\"json\",\"version\":1}\u001e");
+                        var send = client.SendAsync(new ArraySegment<byte>(hello), WebSocketMessageType.Text, true, timeout.Token);
+                        while (!send.IsCompleted) yield return null;
+                        send.GetAwaiter().GetResult();
+                        JObject handshake = null;
+                        yield return ReadSnapshotMessage(client, timeout.Token, value => handshake = value);
+                        Assert.That(handshake.Count, Is.Zero);
+                        while (!publisher.NeedsInfluenceSnapshot && !timeout.IsCancellationRequested) yield return null;
+                        Assert.That(publisher.NeedsInfluenceSnapshot, Is.True);
+                        unity.FixedUpdate(); // Menu is open: no command execution needed to refresh.
+                        JObject message = null;
+                        yield return ReadSnapshotMessage(client, timeout.Token, value => message = value);
+                        Assert.That((string)message["target"], Is.EqualTo("OnMapSnapshot"));
+                        Assert.That(new MapSnapshotBuilder().TryBuild(out var expected), Is.True);
+                        var received = message["arguments"][0].ToObject<MapSnapshot>();
+                        Assert.That(received.Width, Is.EqualTo(expected.Width));
+                        Assert.That(received.Height, Is.EqualTo(expected.Height));
+                        Assert.That(received.Cities.Count, Is.EqualTo(expected.Cities.Count));
+                        Assert.That(received.Influence, Is.Not.Null);
+                        Assert.That(publisher.ConsumeSnapshotRequest(), Is.False);
+                        client.Abort();
+                        while (publisher.NeedsInfluenceSnapshot && !timeout.IsCancellationRequested) yield return null;
+                        Assert.That(publisher.NeedsInfluenceSnapshot, Is.False);
+                    }
+                }
+                Assert.That(JToken.DeepEquals(before, SnapshotState()), Is.True, "Idle viewer joins must not advance gameplay/RNG.");
+            }
+            finally
+            {
+                unity.GameMenu.Cancel();
+                publisherField.SetValue(unity, originalPublisher);
+                broadcasterField.SetValue(unity, originalBroadcaster);
+            }
+        }
+    }
+
+    private static IEnumerator ReadSnapshotMessage(ClientWebSocket client, CancellationToken token, Action<JObject> received)
+    {
+        using (var bytes = new MemoryStream())
+        {
+            var buffer = new byte[8192];
+            while (true)
+            {
+                var read = client.ReceiveAsync(new ArraySegment<byte>(buffer), token);
+                while (!read.IsCompleted) yield return null;
+                var result = read.GetAwaiter().GetResult();
+                Assert.That(result.MessageType, Is.EqualTo(WebSocketMessageType.Text));
+                bytes.Write(buffer, 0, result.Count);
+                Assert.That(bytes.Length, Is.LessThan(4 * 1024 * 1024));
+                if (result.EndOfMessage) break;
+            }
+            received(JObject.Parse(Encoding.UTF8.GetString(bytes.ToArray()).TrimEnd('\u001e')));
         }
     }
 }

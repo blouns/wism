@@ -255,6 +255,7 @@ namespace Assets.Scripts.Managers
                 telemetryContext,
                 this.socketTelemetryPublisher);
             this.snapshotBroadcaster = new UnityMapSnapshotBroadcaster(builder, emitter,
+                () => this.socketTelemetryPublisher.NeedsInfluenceSnapshot,
                 () => this.socketTelemetryPublisher.NeedsInfluenceSnapshot);
         }
 
@@ -522,6 +523,11 @@ namespace Assets.Scripts.Managers
 
         public void FixedUpdate()
         {
+            // A viewer can join while the human is idle, a menu is open, or play has ended.
+            // Only the game thread may read the live world; socket threads merely request it.
+            if (this.isInitialized && !this.AwaitingInitialLoad && this.ExecutionMode == ExecutionMode.Running
+                && this.socketTelemetryPublisher != null && this.socketTelemetryPublisher.ConsumeSnapshotRequest())
+                EmitSnapshot(true);
             if (this.GameMenu != null && this.GameMenu.IsOpen) return;
             // The loader's placeholder world must never start a turn or run AI.
             // Only the queued load command may replace it with playable state.
@@ -834,9 +840,9 @@ namespace Assets.Scripts.Managers
             this.logger.LogInformation($"{playerKind} task executing: {command.Id}: {command.GetType()}");
         }
 
-        private void EmitSnapshot()
+        private void EmitSnapshot(bool force = false)
         {
-            if (Time.time >= nextSnapshotTime)
+            if (force || Time.time >= nextSnapshotTime)
             {
                 if (PlaytestPerformance.Instance == null) snapshotBroadcaster.TryEmitSnapshot();
                 else PlaytestPerformance.Instance.Measure("map-snapshot", () => snapshotBroadcaster.TryEmitSnapshot());
