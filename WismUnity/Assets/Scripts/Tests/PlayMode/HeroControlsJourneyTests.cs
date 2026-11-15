@@ -19,6 +19,63 @@ using Wism.Client.Modules;
 
 public sealed partial class ArmyUiInputTests
 {
+    [UnityTest] public IEnumerator HeroRecruitment_PaidAcceptNamesHeroAndDeliversAllies() => PaidHeroOffer(true);
+    [UnityTest] public IEnumerator HeroRecruitment_PaidDeclinePreservesGoldAndArmies() => PaidHeroOffer(false);
+
+    private IEnumerator PaidHeroOffer(bool accept)
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        unity.InteractiveUI = true;
+        var player = Game.Current.GetCurrentPlayer();
+        player.Gold = 1000;
+        var before = player.GetArmies().ToArray();
+        var tile = player.Capitol.Tile;
+        var recruit = new FixedHeroOffer(manager.ControllerProvider.PlayerController, player)
+        {
+            HeroTile = tile, HeroPrice = 100, HeroDisplayName = "Offered Hero",
+            HeroAllies = new List<Wism.Client.Modules.Infos.ArmyInfo> { ModFactory.FindArmyInfo("LightInfantry") }
+        };
+        var hire = new Wism.Client.Commands.Players.HireHeroCommand(manager.ControllerProvider.PlayerController, recruit);
+        manager.ControllerProvider.CommandController.AddCommand(recruit);
+        manager.ControllerProvider.CommandController.AddCommand(hire);
+        var offer = UnityUtilities.GameObjectHardFind("AcceptRejectPanel").GetComponent<YesNoBox>();
+        yield return WaitFor(() => offer.IsActive() && input.InputMode == InputMode.UI);
+        Assert.That(player.Gold, Is.EqualTo(1000));
+        Assert.That(player.GetArmies(), Is.EquivalentTo(before));
+        var button = offer.GetComponentsInChildren<Button>().Single(item => item.name == (accept ? "AcceptButton" : "RejectButton"));
+        yield return PressJourneyButton(button);
+        if (accept)
+        {
+            var naming = UnityUtilities.GameObjectHardFind("SolicitInputPanel").GetComponent<SolicitInput>();
+            yield return WaitFor(() => naming.IsInitialized());
+            naming.GetComponentInChildren<InputField>(true).text = "Paid Hero";
+            yield return null;
+            yield return PressJourneyButton(naming.GetComponentsInChildren<Button>(true).Single(item => item.name == "EnterButton"));
+        }
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        yield return WaitFor(() => input.InputMode == InputMode.Game && input.CanAcceptGameplayInput);
+        Assert.That(recruit.HeroAccepted, Is.EqualTo(accept));
+        Assert.That(player.Gold, Is.EqualTo(accept ? 900 : 1000));
+        var added = player.GetArmies().Except(before).ToArray();
+        if (accept)
+        {
+            Assert.That(added.Length, Is.EqualTo(2), "One paid hero and one accompanying army.");
+            Assert.That(added.OfType<Hero>().Single().DisplayName, Is.EqualTo("Paid Hero"));
+            Assert.That(added.All(army => army.Tile == tile), Is.True);
+        }
+        else Assert.That(added, Is.Empty);
+        for (int frame = 0; frame < 10; frame++) yield return null;
+        Assert.That(player.Gold, Is.EqualTo(accept ? 900 : 1000), "No repeated charge after completion.");
+        Assert.That(player.GetArmies().Count, Is.EqualTo(before.Length + (accept ? 2 : 0)));
+    }
+
+    private sealed class FixedHeroOffer : Wism.Client.Commands.Players.RecruitHeroCommand
+    {
+        internal FixedHeroOffer(Wism.Client.Controllers.PlayerController controller, Player player) : base(controller, player) { }
+        // Fix offer generation only; real processors, UI, hiring and ally delivery execute.
+        protected override Wism.Client.Controllers.ActionState ExecuteInternal() => Wism.Client.Controllers.ActionState.Succeeded;
+    }
+
     [UnityTest] public IEnumerator HeroRecruitment_FirstHeroNamingUsesVisibleSubmit() => FirstHeroNaming(false);
     [UnityTest] public IEnumerator HeroRecruitment_BlankNameCannotSubmitAndRecovers() => FirstHeroNaming(true);
 
