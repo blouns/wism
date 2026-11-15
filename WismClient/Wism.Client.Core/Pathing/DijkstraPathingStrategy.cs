@@ -95,6 +95,12 @@ namespace Wism.Client.Pathing
             }
         }
 
+        private sealed class IndexedPathNode : PathNode
+        {
+            public int ArrayX { get; set; }
+            public int ArrayY { get; set; }
+        }
+
         private sealed class LazyGraph
         {
             private readonly Tile[,] map;
@@ -129,7 +135,7 @@ namespace Wism.Client.Pathing
                         return null;
                     if (tile.CanTraverseHere(this.armies, this.ignoreClan) ||
                         (this.ignoreClan && x == this.target.X && y == this.target.Y))
-                        this.nodes[x, y] = new PathNode { Distance = int.MaxValue, Value = tile };
+                        this.nodes[x, y] = new IndexedPathNode { Distance = int.MaxValue, Value = tile, ArrayX = x, ArrayY = y };
                     return this.nodes[x, y];
                 }
             }
@@ -138,7 +144,8 @@ namespace Wism.Client.Pathing
         private static void PrepareNeighbors(LazyGraph graph, PathNode node)
         {
             // Preserve the eager implementation's ordering, including edge tie breaks.
-            int x = node.Value.X, y = node.Value.Y;
+            var indexed = (IndexedPathNode)node;
+            int x = indexed.ArrayX, y = indexed.ArrayY;
             int mapSizeX = graph.Width, mapSizeY = graph.Height;
             var xMax = mapSizeX - 1;
             var yMax = mapSizeY - 1;

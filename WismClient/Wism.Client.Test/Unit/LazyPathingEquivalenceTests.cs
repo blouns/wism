@@ -61,6 +61,30 @@ public sealed class LazyPathingEquivalenceTests
     }
 
     [Test]
+    public void ArrayAdjacencyDoesNotRequireTileCoordinatesToBeAffixed()
+    {
+        var map = new Tile[2, 3];
+        for (int x = 0; x < 2; x++)
+            for (int y = 0; y < 3; y++)
+                map[x, y] = new Tile { Terrain = Terrain.Create(ModFactory.FindTerrainInfo("Grass")) };
+        World.CreateWorld(map);
+        var armies = new List<Army> { Game.Current.GetCurrentPlayer().ConscriptArmy(ModFactory.FindArmyInfo("LightInfantry"), map[0, 0]) };
+        Compare(map, armies, map[1, 2], false);
+    }
+
+    [Test]
+    public void MixedHeroAndFlyingStackMatchesAcrossTerrain()
+    {
+        string[,] matrix = { { "S", "0", "0" }, { "0", "5", "0" }, { "0", "0", "T" } };
+        var map = PathingStrategyTests.ConvertMatrixToMap(matrix, out var armies, out var target);
+        var flyer = armies[0].Player.ConscriptArmy(ModFactory.FindArmyInfo("Pegasus"), armies[0].Tile);
+        armies.Add(flyer);
+        Compare(map, armies, target, false);
+        armies.Remove(flyer);
+        Compare(map, armies, target, false);
+    }
+
+    [Test]
     public void NearbyRouteAvoidsFullWorldGraphAllocation()
     {
         var map = new Tile[109, 156];
