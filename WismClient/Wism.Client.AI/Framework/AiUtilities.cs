@@ -78,7 +78,8 @@ namespace Wism.Client.AI.Framework
 
             var move = new MoveOnceCommand(armyController, armies, targetTile.X, targetTile.Y)
             {
-                Path = path
+                Path = path,
+                RevalidateFriendlyCapacity = true
             };
 
             commands.Add(move);

@@ -10,6 +10,12 @@ namespace Wism.Client.Pathing
         public void FindShortestRoute(Tile[,] map, List<Army> armiesToMove, Tile target, out IList<Tile> fastestRoute,
             out float distance, bool ignoreClan = false)
         {
+            this.FindShortestRoute(map, armiesToMove, target, out fastestRoute, out distance, ignoreClan, null);
+        }
+
+        public void FindShortestRoute(Tile[,] map, List<Army> armiesToMove, Tile target, out IList<Tile> fastestRoute,
+            out float distance, bool ignoreClan, Predicate<Tile> admitTile)
+        {
             var diagnostics = Wism.Client.Diagnostics.PerformanceProbe.Current;
             diagnostics?.PathStarted(map == null ? 0 : map.Length);
             using (Wism.Client.Diagnostics.PerformanceProbe.Measure("pathfinding"))
@@ -35,7 +41,7 @@ namespace Wism.Client.Pathing
             var queue = new PathNodeQueue();
             var visited = new HashSet<PathNode>();
 
-            var graph = new LazyGraph(map, armiesToMove, target, ignoreClan);
+            var graph = new LazyGraph(map, armiesToMove, target, ignoreClan, admitTile);
 
             // Distance from source to source is zero
             var sourceX = armiesToMove[0].X;
@@ -107,17 +113,19 @@ namespace Wism.Client.Pathing
             private readonly List<Army> armies;
             private readonly Tile target;
             private readonly bool ignoreClan;
+            private readonly Predicate<Tile> admitTile;
             private readonly PathNode[,] nodes;
             private readonly bool[,] evaluated;
             public int Width => this.map.GetLength(0);
             public int Height => this.map.GetLength(1);
 
-            public LazyGraph(Tile[,] map, List<Army> armies, Tile target, bool ignoreClan)
+            public LazyGraph(Tile[,] map, List<Army> armies, Tile target, bool ignoreClan, Predicate<Tile> admitTile)
             {
                 this.map = map;
                 this.armies = armies;
                 this.target = target;
                 this.ignoreClan = ignoreClan;
+                this.admitTile = admitTile;
                 this.nodes = new PathNode[map.GetLength(0), map.GetLength(1)];
                 this.evaluated = new bool[map.GetLength(0), map.GetLength(1)];
             }
@@ -129,6 +137,7 @@ namespace Wism.Client.Pathing
                     if (this.evaluated[x, y]) return this.nodes[x, y];
                     this.evaluated[x, y] = true;
                     var tile = this.map[x, y];
+                    if (this.admitTile != null && !this.admitTile(tile)) return null;
                     if (!this.ignoreClan &&
                         ((tile.HasArmies() && tile.Armies.Exists(army => army.Clan != this.armies[0].Clan)) ||
                          (tile.HasVisitingArmies() && tile.VisitingArmies.Exists(army => army.Clan != this.armies[0].Clan))))
