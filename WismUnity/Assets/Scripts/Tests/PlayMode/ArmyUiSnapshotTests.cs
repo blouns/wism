@@ -105,6 +105,29 @@ public sealed partial class ArmyUiInputTests
         new UnityMapSnapshotBroadcaster(new MapSnapshotBuilder(), emitter).TryEmitSnapshot();
         Assert.That(sink.Last.Influence, Is.Not.Null, "Legacy callers retain the overlay.");
         Assert.That(JToken.DeepEquals(before, SnapshotState()), Is.True, "Snapshot work must not mutate gameplay or RNG.");
+
+        var samples = new System.Collections.Generic.List<Wism.Client.Diagnostics.PerformanceSample>();
+        var previousProbe = Wism.Client.Diagnostics.PerformanceProbe.Current;
+        using (var publisher = new UnitySocketTelemetryPublisher(manager.LoggerFactory, port: 0))
+        {
+            Assert.That(publisher.NeedsInfluenceSnapshot, Is.False);
+            var socketBroadcaster = new UnityMapSnapshotBroadcaster(new MapSnapshotBuilder(),
+                new MapSnapshotEmitter(manager.LoggerFactory, publisher: publisher), () => false);
+            socketBroadcaster.TryEmitSnapshot();
+            try
+            {
+                Wism.Client.Diagnostics.PerformanceProbe.Current = new Wism.Client.Diagnostics.PerformanceProbe(samples.Add);
+                for (int i = 0; i < 6; i++) socketBroadcaster.TryEmitSnapshot();
+            }
+            finally { Wism.Client.Diagnostics.PerformanceProbe.Current = previousProbe; }
+        }
+        foreach (var phase in new[] { "snapshot-build", "snapshot-publish", "snapshot-serialize" })
+        {
+            var rows = samples.Where(sample => sample.Name == phase).ToArray();
+            Assert.That(rows.Length, Is.EqualTo(6), phase);
+            TestContext.WriteLine($"Snapshot phase {phase}: count={rows.Length}, inclusiveMs={rows.Sum(r => r.DurationMs):F3}, exclusiveMs={rows.Sum(r => r.ExclusiveMs):F3}");
+        }
+        Assert.That(JToken.DeepEquals(before, SnapshotState()), Is.True, "Transport measurement must preserve game/RNG state.");
     }
 
     [UnityTest]

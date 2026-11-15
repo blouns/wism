@@ -2,6 +2,8 @@ using System;
 using Wism.Client.AI.InfluenceMaps;
 using Wism.Client.Api.Telemetry;
 using Wism.Client.Core.Telemetry;
+using Wism.Client.Diagnostics;
+using Wism.Companion.Shared.Events;
 
 namespace Assets.Scripts.Telemetry
 {
@@ -21,7 +23,11 @@ namespace Assets.Scripts.Telemetry
 
         public void TryEmitSnapshot()
         {
-            if (builder.TryBuild(out var snapshot))
+            MapSnapshot snapshot;
+            using (PerformanceProbe.Measure("snapshot-build"))
+            {
+                if (!builder.TryBuild(out snapshot)) return;
+            }
             {
                 snapshot.InvertYAxis = true;
 
@@ -31,7 +37,7 @@ namespace Assets.Scripts.Telemetry
                 if (includeInfluence == null || includeInfluence())
                     snapshot.Influence = InfluenceFieldExporter.BuildForCurrentPlayer();
 
-                emitter.Publish(snapshot);
+                using (PerformanceProbe.Measure("snapshot-publish")) emitter.Publish(snapshot);
             }
         }
     }

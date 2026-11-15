@@ -693,6 +693,76 @@ public sealed partial class GameSetupPointerMatrixTests
     [UnityTest] public IEnumerator Start_IlluriaTwoNoncontiguousClans() => StartRoster("Illuria", new[] { 1, 5 });
     [UnityTest] public IEnumerator Start_IlluriaFourNoncontiguousClans() => StartRoster("Illuria", new[] { 1, 3, 6, 8 });
     [UnityTest] public IEnumerator Start_IlluriaAllEightClans() => StartRoster("Illuria", Enumerable.Range(1, 8).ToArray());
+
+    [UnityTest, Category("PerformanceQualification")]
+    public IEnumerator Performance_AuthoredIlluriaEightAiRecordsBoundedNativeWindow()
+    {
+        Assert.That(Assets.Scripts.Telemetry.PlaytestPerformance.Instance, Is.Null,
+            "The proof requires its own recorder lifetime.");
+        var diagnostics = new GameObject("Illuria performance proof")
+            .AddComponent<Assets.Scripts.Telemetry.PlaytestPerformance>();
+        UnityManager manager = null;
+        try
+        {
+            Assert.That(diagnostics.Recording, Is.True);
+            var settings = Assets.Scripts.Telemetry.AutonomousPlaytest.Settings();
+            settings.ObserveAiMovement = false;
+            UnityManager.SetNewGameSettings(settings);
+            SceneManager.LoadScene("Illuria");
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "Illuria" && Game.IsInitialized(), "Native Illuria initialized");
+            manager = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
+            Assert.That(World.Current.Map.GetLength(0), Is.EqualTo(109));
+            Assert.That(World.Current.Map.GetLength(1), Is.EqualTo(156));
+            Assert.That(World.Current.GetCities().Count, Is.EqualTo(80));
+            Assert.That(Game.Current.Players.Count, Is.EqualTo(8));
+            Assert.That(Game.Current.Players.All(p => !p.IsHuman), Is.True);
+            Assert.That(manager.ObserveAiMovement, Is.False);
+            Assert.That(manager.ShowAiCombat, Is.False);
+            var initialTurns = Game.Current.Players.Sum(p => p.Turn);
+            var initialArmies = Game.Current.GetAllArmies().Count;
+            var frames = new List<double>();
+            var started = Time.realtimeSinceStartupAsDouble;
+            var previous = started;
+            while (Time.realtimeSinceStartupAsDouble - started < 120 && Game.Current.GameState != GameState.GameOver)
+            {
+                yield return null;
+                var now = Time.realtimeSinceStartupAsDouble;
+                frames.Add((now - previous) * 1000);
+                previous = now;
+            }
+            manager.enabled = false;
+            var output = diagnostics.OutputDirectory;
+            UnityEngine.Object.DestroyImmediate(diagnostics.gameObject);
+            diagnostics = null;
+            frames.Sort();
+            var decisionCount = File.ReadLines(Path.Combine(output, "samples.jsonl"))
+                .Count(line => (string)JObject.Parse(line)["Kind"] == "decision-end");
+            var summary = new JObject {
+                ["Scope"] = "120-second native Illuria startup window; not dense late-game or human acceptance",
+                ["Width"] = 109, ["Height"] = 156, ["Cities"] = 80, ["Clans"] = 8,
+                ["ObserveAiMovement"] = false, ["ShowAiCombat"] = false,
+                ["ElapsedSeconds"] = previous - started, ["Frames"] = frames.Count,
+                ["FrameP95Ms"] = frames.Count == 0 ? 0 : frames[(int)((frames.Count - 1) * .95)],
+                ["FrameMaxMs"] = frames.Count == 0 ? 0 : frames[frames.Count - 1],
+                ["CompletedDecisions"] = decisionCount,
+                ["InitialArmyCount"] = initialArmies, ["FinalArmyCount"] = Game.Current.GetAllArmies().Count,
+                ["InitialClanTurnSum"] = initialTurns, ["FinalClanTurnSum"] = Game.Current.Players.Sum(p => p.Turn),
+                ["Outcome"] = Game.Current.GameState.ToString(),
+                ["Players"] = JArray.FromObject(Game.Current.Players.Select(p => new {
+                    Clan = p.Clan.ShortName, p.Turn, p.IsDead, Armies = p.GetArmies().Count, Cities = p.GetCities().Count }))
+            };
+            File.WriteAllText(Path.Combine(output, "native-window.json"), summary.ToString());
+            TestContext.Out.WriteLine(summary.ToString());
+            Assert.That(frames.Count, Is.GreaterThan(10));
+            Assert.That(decisionCount, Is.GreaterThan(0));
+            Assert.That(Game.Current.Players.Sum(p => p.Turn), Is.GreaterThan(initialTurns), "No real turn progress.");
+        }
+        finally
+        {
+            if (manager != null) manager.enabled = false;
+            if (diagnostics != null) UnityEngine.Object.DestroyImmediate(diagnostics.gameObject);
+        }
+    }
     [UnityTest] public IEnumerator Start_MiniIlluria() => StartRoster("Mini-Illuria", null);
     [UnityTest] public IEnumerator Start_TestWorld() => StartRoster("TestWorld", null);
 
