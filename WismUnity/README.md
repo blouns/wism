@@ -29,6 +29,12 @@ its separate confirmation. Item actions require a selected hero and available
 items. Search uses the selected army's current location. Input in another dialog
 does not dispatch these gameplay actions.
 
+The Game menu's Sound preference is stored with the campaign; older saves without
+it default to sound enabled. Automated and explicitly muted sessions remain silent
+regardless of that preference. This does not change the Editor's saved mute setting
+or the operating system volume. About WISM shows the application version and project
+identity without issuing game commands.
+
 ## WismClient Plugin Assemblies
 
 WismUnity consumes WismClient through committed plugin assemblies under:

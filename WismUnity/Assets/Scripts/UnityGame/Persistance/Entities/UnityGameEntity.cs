@@ -34,6 +34,7 @@ namespace Assets.Scripts.Persistance.Entities
             ModKitSelection = Game.IsInitialized() ? Game.Current.ModKitSelection : null;
             LastCommandId = unityGame.LastCommandId;
             ShowAiCombat = unityGame.ShowAiCombat;
+            SoundEnabled = unityGame.SoundEnabled;
             ObserveAiMovement = unityGame.ObserveAiMovement;
             var cameraPosition = unityGame.GetMainCamera().transform.position;
             CameraPosition = new[]
@@ -50,6 +51,7 @@ namespace Assets.Scripts.Persistance.Entities
         public ModKitSelectionEntity ModKitSelection { get; set; }
         public int LastCommandId { get; set; }
         public bool ShowAiCombat { get; set; } = true;
+        public bool SoundEnabled { get; set; } = true;
         public bool ObserveAiMovement { get; set; } = true;
         public float[] CameraPosition { get; set; }
         public GameEntity WismGameEntity { get; set; }

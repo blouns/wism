@@ -43,6 +43,8 @@ namespace Assets.Scripts.UI
         private DisbandArmiesCommand pendingDisband;
         private Toggle observeToggle;
         private Toggle combatToggle;
+        private Toggle soundToggle;
+        private GameObject aboutPanel;
         public StrategicReportView Reports { get; private set; }
         private Button saveButton;
         private Button loadButton;
@@ -93,17 +95,21 @@ namespace Assets.Scripts.UI
             shield.AddComponent<Button>().onClick.AddListener(Cancel);
 
             menu = Panel(shield.transform, "GameMenu", Stone);
-            Place((RectTransform)menu.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(304, 252));
+            Place((RectTransform)menu.transform, new Vector2(0, 1), new Vector2(8, -56), new Vector2(304, 348));
             observeToggle = Preference("ObserveMovement", "Observe AI Moves", "game.observe", 8,
                 value => manager.ObserveAiMovement = value);
             combatToggle = Preference("ShowAiCombat", "Show AI Combat", "game.show-ai-combat", 56,
                 value => manager.ShowAiCombat = value);
+            soundToggle = Preference("SoundEnabled", "Sound", "game.sound", 104,
+                value => manager.SoundEnabled = value);
             saveButton = Button(menu.transform, "SaveGame", "Save Game", "game.save", () => OpenPersistence(true));
             loadButton = Button(menu.transform, "LoadGame", "Load Game", "game.load", () => OpenPersistence(false));
             exitButton = Button(menu.transform, "ExitGame", "Exit Game...", "game.exit.request", RequestExit);
-            PlaceRow(saveButton, 104);
-            PlaceRow(loadButton, 152);
-            PlaceRow(exitButton, 200);
+            PlaceRow(saveButton, 152);
+            PlaceRow(loadButton, 200);
+            PlaceRow(exitButton, 248);
+            var aboutButton = Button(menu.transform, "AboutWism", "About WISM", "game.about", OpenAbout);
+            PlaceRow(aboutButton, 296);
             viewMenu = Panel(shield.transform, "ViewMenu", Stone);
             Place((RectTransform)viewMenu.transform, new Vector2(0, 1), new Vector2(252, -56), new Vector2(240, 300));
             capitalButton = Button(viewMenu.transform, "Capital", "Capital", "view.capital", NavigateToCapital);
@@ -160,6 +166,7 @@ namespace Assets.Scripts.UI
             heroRoot.transform.SetParent(shield.transform, false);
             HeroControls = heroRoot.GetComponent<HeroControlsView>();
             HeroControls.Initialize(manager, font, Close);
+            InitializeAbout();
             InitializeDisband();
             WismUiSurface.Ensure(canvasRoot, "game-menu", WismUiControlState.Normal, WismUiControlState.Disabled);
             shield.SetActive(false);
@@ -215,6 +222,8 @@ namespace Assets.Scripts.UI
                 Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman == true;
             observeToggle.SetIsOnWithoutNotify(manager.ObserveAiMovement);
             combatToggle.SetIsOnWithoutNotify(manager.ShowAiCombat);
+            soundToggle.SetIsOnWithoutNotify(manager.SoundEnabled);
+            aboutPanel.SetActive(false);
             capitalButton.interactable = manager.CanNavigateToCapital;
             capitalButton.GetComponentInChildren<Text>().text = capitalButton.interactable ? "Capital" : "No owned capital";
             inventoryButton.interactable = heroesButton.interactable = canInspectHeroes;
@@ -233,6 +242,7 @@ namespace Assets.Scripts.UI
 
         public void RequestExit()
         {
+            aboutPanel?.SetActive(false);
             if (IsConfirmingDisband) return;
             if (!IsOpen) Open();
             if (!IsOpen || exitRequested) return;
@@ -270,6 +280,7 @@ namespace Assets.Scripts.UI
         {
             if (!IsOpen || exitRequested) return;
             shield.SetActive(false);
+            aboutPanel.SetActive(false);
             viewMenu.SetActive(false);
             ordersMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
@@ -301,6 +312,7 @@ namespace Assets.Scripts.UI
         {
             if (!IsOpen) Open();
             if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || exitRequested) return;
+            aboutPanel.SetActive(false);
             menu.SetActive(false);
             viewMenu.SetActive(false);
             ordersMenu.SetActive(false);
@@ -320,6 +332,7 @@ namespace Assets.Scripts.UI
         {
             if (!IsOpen) Open();
             if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || exitRequested) return;
+            aboutPanel.SetActive(false);
             menu.SetActive(false);
             Reports.gameObject.SetActive(false);
             viewMenu.SetActive(true);
@@ -332,6 +345,7 @@ namespace Assets.Scripts.UI
         {
             if (!IsOpen) Open();
             if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || exitRequested) return;
+            aboutPanel.SetActive(false);
             menu.SetActive(false);
             viewMenu.SetActive(false);
             Reports.gameObject.SetActive(false);
@@ -396,6 +410,7 @@ namespace Assets.Scripts.UI
             if (!IsOpen) Open();
             if (!IsOpen || !canInspectHeroes || !CanInspectState || IsConfirmingExit || IsConfirmingDisband || exitRequested ||
                 manager.InputManager.EndTurnPending || Wism.Client.Core.Game.Current.GetCurrentPlayer()?.IsHuman != true) return;
+            aboutPanel.SetActive(false);
             menu.SetActive(false);
             viewMenu.SetActive(false);
             ordersMenu.SetActive(false);
@@ -408,6 +423,40 @@ namespace Assets.Scripts.UI
             if (!viewMenu.activeSelf || !manager.CanNavigateToCapital) return;
             Close();
             manager.GoToCapitol(Wism.Client.Core.Game.Current.GetCurrentPlayer());
+        }
+
+        private void InitializeAbout()
+        {
+            aboutPanel = Panel(shield.transform, "AboutPanel", Stone);
+            var rect = (RectTransform)aboutPanel.transform;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, .5f);
+            rect.sizeDelta = new Vector2(440, 240);
+            var title = WismUiFactory.CreateText(rect, "AboutTitle", "WISM", 26, TextAnchor.MiddleCenter);
+            title.font = font;
+            title.color = Color.black;
+            Place(title.rectTransform, new Vector2(0, 1), new Vector2(16, -12), new Vector2(408, 40));
+            var details = WismUiFactory.CreateText(rect, "AboutDetails",
+                "Version " + Application.version + "\nTurn-based fantasy strategy.\nAn independent project, not an official Warlords release.",
+                18, TextAnchor.MiddleCenter);
+            details.font = font;
+            details.color = Color.black;
+            Place(details.rectTransform, new Vector2(0, 1), new Vector2(16, -58), new Vector2(408, 110));
+            var close = Button(rect, "CloseAbout", "Close", "game.about.close", Close);
+            Place((RectTransform)close.transform, new Vector2(0, 1), new Vector2(122, -180), new Vector2(196, 44));
+            aboutPanel.SetActive(false);
+        }
+
+        public void OpenAbout()
+        {
+            if (!IsOpen) Open();
+            if (!IsOpen || IsConfirmingExit || IsConfirmingDisband || exitRequested) return;
+            menu.SetActive(false);
+            viewMenu.SetActive(false);
+            ordersMenu.SetActive(false);
+            Reports.gameObject.SetActive(false);
+            HeroControls.gameObject.SetActive(false);
+            aboutPanel.SetActive(true);
+            Select(aboutPanel.GetComponentInChildren<Button>().gameObject);
         }
 
         private void SetNavigation(bool visible)
@@ -436,6 +485,7 @@ namespace Assets.Scripts.UI
             if (preview?.CanExecute != true) return;
             if (!IsOpen) Open();
             if (!IsOpen || !canIssueOrders || previousMode != InputMode.Game) return;
+            aboutPanel.SetActive(false);
             pendingDisband = candidate;
             menu.SetActive(false);
             ordersMenu.SetActive(false);

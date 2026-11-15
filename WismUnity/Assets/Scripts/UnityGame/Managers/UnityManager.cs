@@ -114,6 +114,23 @@ namespace Assets.Scripts.Managers
         public DebugManager DebugManager { get => this.debugManager; set => this.debugManager = value; }
         public bool InteractiveUI { get => this.interactiveUI; set => this.interactiveUI = value; }
         public bool ShowAiCombat { get; set; } = true;
+        private bool soundEnabled = true;
+        public bool SoundEnabled
+        {
+            get => this.soundEnabled;
+            set
+            {
+                this.soundEnabled = value;
+                AudioListener.volume = value && !RequiresSilentAudio(Application.isBatchMode, Environment.GetCommandLineArgs()) ? 1f : 0f;
+            }
+        }
+
+        public static bool RequiresSilentAudio(bool batchMode, string[] arguments) => batchMode ||
+            Array.Exists(arguments ?? Array.Empty<string>(), argument =>
+                string.Equals(argument, "-wism-mute-audio", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(argument, "-noaudio", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(argument, "-runTests", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(argument, "-wism-autoplay", StringComparison.OrdinalIgnoreCase));
         private bool observeAiMovement = true;
         public bool ObserveAiMovement
         {
