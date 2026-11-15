@@ -9,7 +9,8 @@ During a diagnostic session:
 
 - F9 bookmarks a slowdown and requests a checkpoint at the next AI decision
   boundary. Input-event time and processing time use separately identified clocks.
-- F10 arms a binary Unity Profiler capture **before the next AI decision**.
+- F8 arms a binary Unity Profiler capture **before the next AI decision**.
+  F10 remains the game-menu shortcut and does not request a capture.
   Up to three one-frame captures are available. Deep Profiling is not enabled.
 - Closing the application drains the bounded output queue and writes a receipt.
   Session duration is capped at two hours. Compact JSONL output stops at 256 MiB
@@ -34,9 +35,13 @@ Wism.Agent.Playground profile-checkpoint checkpoint=<save.json> out=<new-folder>
 ```
 
 It reloads the same checkpoint for one warmup and balanced recorder-on/off runs,
+executing Start Turn before measurement when the snapshot is at a turn boundary,
 comparing generated command outcomes and final state hashes (excluding the save
 timestamp). An empty production review and its unneeded renewal can return
 `Failed` as a no-op; these are explicitly counted, not silently discarded.
+Movement that makes progress and then exhausts the engine-calculated movement
+needed for its next traversable tile is counted separately, retaining its raw
+Failed result. Zero-progress and blocked-path failures are not waived.
 Other failed commands invalidate the comparison. This is one-decision replay,
 not proof of full-match parity or Windows rendering performance.
 
