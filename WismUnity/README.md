@@ -7,9 +7,10 @@ the public WismClient engine assemblies instead of owning gameplay rules directl
 
 Open Menu to reveal Orders and View. These entries share their dispatcher and
 availability checks with the existing keyboard actions; disabled entries show
-why they are unavailable. Gameplay commands require a human turn. Most wait for
-the current order to finish; End Turn can queue behind it and immediately locks
-further input. Opening or canceling a menu does not issue an army command.
+why they are unavailable. Gameplay commands require a human turn and preserve
+the existing ordered command queue. End Turn immediately locks further input.
+Menus additionally wait for a stable command boundary. Opening or canceling a
+menu does not issue an army command.
 
 | Menu | Action | Key |
 | --- | --- | --- |

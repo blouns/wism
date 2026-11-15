@@ -91,11 +91,9 @@ namespace Assets.Scripts.Managers
             if (!Enum.IsDefined(typeof(GameplayAction), action)) return "Unknown action";
             if (!CanAcceptGameplayInput || UnityManager.ExecutionMode != ExecutionMode.Running)
                 return "Human turn required";
-            // End Turn deliberately appends behind the current order and immediately locks
-            // further input through TryBeginEndTurn; do not lose a one-frame key press.
+            // Existing keyboard actions may append to the controller queue. Menu opening
+            // separately requires a stable snapshot; do not drop one-frame key presses.
             if (action == GameplayAction.EndTurn) return null;
-            if (UnityManager.LastCommandId != (GameManager.ControllerProvider.CommandController.GetLastCommand()?.Id ?? 0))
-                return "Wait for current order";
             if (action == GameplayAction.Production || action == GameplayAction.ManageProduction)
                 return Game.Current.GetCurrentPlayer().GetCities().Count == 0 ? "No owned cities" : null;
             if (action == GameplayAction.NextArmy)
