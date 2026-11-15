@@ -9,7 +9,8 @@ During a diagnostic session:
 
 - F9 bookmarks a slowdown and requests a checkpoint at the next AI decision
   boundary. Input-event time and processing time use separately identified clocks.
-- F10 arms a binary Unity Profiler capture **before the next AI decision**.
+- F8 arms a binary Unity Profiler capture **before the next AI decision**.
+  F10 remains the game-menu shortcut and does not request a capture.
   Up to three one-frame captures are available. Deep Profiling is not enabled.
 - Closing the application drains the bounded output queue and writes a receipt.
   Session duration is capped at two hours. Compact JSONL output stops at 256 MiB

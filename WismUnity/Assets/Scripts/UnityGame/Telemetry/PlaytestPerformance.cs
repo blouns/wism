@@ -88,7 +88,7 @@ namespace Assets.Scripts.Telemetry
                     Decision = decision, InputEventSeconds = evt.time, Detail = "Timestamp=processing Stopwatch ticks" });
                 bookmarkPending = true;
             }
-            if (keyboard.f10Key.ReadValueFromEvent(evt, out var capture) && capture > .5f && !keyboard.f10Key.isPressed)
+            if (keyboard.f8Key.ReadValueFromEvent(evt, out var capture) && capture > .5f && !keyboard.f8Key.isPressed)
             {
                 captureArmed = true;
                 recorder?.Record(new PerformanceSample { Kind = "capture-armed", InputEventSeconds = evt.time });

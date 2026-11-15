@@ -14,6 +14,22 @@ using Wism.Client.Core;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest]
+    public IEnumerator PerformanceCaptureShortcut_DoesNotInvokeGameMenu()
+    {
+        InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F8));
+        InputSystem.Update();
+        Assert.That(Assets.Scripts.UI.WismUiInputAdapter.MenuPressedThisFrame(), Is.False);
+        yield return null;
+        Assert.That(unity.GameMenu.IsOpen, Is.False);
+        InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+        InputSystem.Update();
+        yield return null;
+        InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F10));
+        InputSystem.Update();
+        Assert.That(Assets.Scripts.UI.WismUiInputAdapter.MenuPressedThisFrame(), Is.True);
+    }
+
+    [UnityTest]
     public IEnumerator PerformanceDiagnostics_RecordsDecisionCommandsFramesAndReplayCheckpoint()
     {
         unity.enabled = false;
@@ -23,7 +39,7 @@ public sealed partial class ArmyUiInputTests
         Game.Current.GetCurrentPlayer().IsHuman = false;
         // Bind the newly-created recorder when this fixture did not start with profiling enabled.
         typeof(Assets.Scripts.Managers.UnityManager).GetMethod("InitializeAI", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(unity, null);
-        InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F9, Key.F10));
+        InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.F9, Key.F8));
         InputSystem.Update();
         for (int i = 0; i < 12; i++)
             typeof(Assets.Scripts.Managers.UnityManager).GetMethod("DoTasks", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(unity, null);
