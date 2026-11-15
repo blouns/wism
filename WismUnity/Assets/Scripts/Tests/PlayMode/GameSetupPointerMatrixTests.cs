@@ -1073,7 +1073,12 @@ public sealed partial class GameSetupPointerMatrixTests
             yield return WismTestAction.WaitForNewHeroOffer();
             yield return WismTestAction.AcceptNewHeroOffer();
             var unity = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
-            yield return WaitFor(() => unity.InputManager.InputMode == InputMode.Game, "Source save ready");
+            yield return WaitFor(() => GameObject.FindGameObjectWithTag("CityProductionPanel") != null,
+                "Source first-turn production panel");
+            yield return WismTestAction.DismissProductionPanelIfVisible();
+            yield return WaitFor(() => unity.InputManager.InputMode == InputMode.Game && unity.InputManager.CanAcceptGameplayInput &&
+                unity.LastCommandId == unity.GameManager.ControllerProvider.CommandController.GetLastCommand().Id,
+                "Source save is a playable campaign");
             PersistanceManager.Save("WISM3.SAV", "Startup retry", unity);
             var badPath = Path.Combine(directory, "invalid-startup.sav");
             File.WriteAllText(badPath, "{not-json");
