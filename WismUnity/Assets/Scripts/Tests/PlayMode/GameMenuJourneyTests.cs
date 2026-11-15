@@ -15,6 +15,128 @@ using Wism.Client.Core;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest]
+    public IEnumerator PlayerControls_MenuCancelAndApplyDoNotChangeCurrentOwner()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var player = Game.Current.GetCurrentPlayer();
+        var before = TerminalState();
+        yield return Click(MenuPoint("OpenGameMenu"));
+        yield return Click(MenuPoint("PlayerControl"));
+        var dropdown = unity.GameMenu.PlayerControls.GetComponentsInChildren<Dropdown>()
+            .Single(value => value.name == "Control" + player.Clan.ShortName);
+        dropdown.value = 4;
+        yield return Click(MenuPoint("CancelControls"));
+        Assert.That(unity.GetPendingPlayerControls(), Is.Empty);
+        Assert.That(TerminalState(), Is.EqualTo(before));
+        foreach (int difficulty in new[] { 0, 1, 2, 3 })
+        {
+            yield return Click(MenuPoint("OpenGameMenu"));
+            yield return Click(MenuPoint("PlayerControl"));
+            dropdown = unity.GameMenu.PlayerControls.GetComponentsInChildren<Dropdown>()
+                .Single(value => value.name == "Control" + player.Clan.ShortName);
+            dropdown.value = difficulty + 1;
+            yield return Click(MenuPoint("ApplyControls"));
+            Assert.That(player.IsHuman, Is.True, "Applying a choice must not interrupt this turn.");
+            var pending = unity.GetPendingPlayerControls().Single();
+            Assert.That(pending.IsHuman, Is.False);
+            Assert.That((int)pending.AiDifficulty.Value, Is.EqualTo(difficulty));
+        }
+        Assert.That(unity.QueuePlayerControl(player.Clan.ShortName, true, player.AiDifficulty), Is.True);
+        Assert.That(unity.GetPendingPlayerControls(), Is.Empty, "Selecting the existing control cancels a pending change.");
+        Assert.That(unity.QueuePlayerControl("missing-clan", false, AiDifficultyTier.Knight), Is.False);
+        Assert.That(unity.QueuePlayerControl(player.Clan.ShortName, false, (AiDifficultyTier)99), Is.False);
+    }
+
+    [UnityTest]
+    public IEnumerator PlayerControls_HumanBecomesAiOnlyOnItsFollowingTurn()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var target = Game.Current.GetCurrentPlayer();
+        Assert.That(unity.QueuePlayerControl(target.Clan.ShortName, false, AiDifficultyTier.Baron), Is.True);
+        manager.EndTurn();
+        yield return WaitFor(() => Game.Current.GetCurrentPlayer() != target);
+        Assert.That(target.IsHuman, Is.True);
+        Assert.That(unity.GetPendingPlayerControls(), Has.Length.EqualTo(1));
+        yield return Assets.Scripts.Tests.PlayMode.Common.WismTestAction.WaitForNewHeroOffer();
+        yield return Assets.Scripts.Tests.PlayMode.Common.WismTestAction.AcceptNewHeroOffer();
+        yield return WaitFor(() => input.CanAcceptGameplayInput && input.InputMode == InputMode.Game);
+        manager.EndTurn();
+        yield return WaitFor(() => Game.Current.GetCurrentPlayer() == target && !target.IsHuman);
+        Assert.That(target.AiDifficulty, Is.EqualTo(AiDifficultyTier.Baron));
+        Assert.That(unity.GetPendingPlayerControls(), Is.Empty);
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.AITurn));
+    }
+
+    [UnityTest]
+    public IEnumerator PlayerControls_AiBecomesHumanAtItsTurnBeforeAnyAiAction()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var target = Game.Current.Players.Single(player => player != Game.Current.GetCurrentPlayer());
+        target.IsHuman = false;
+        Assert.That(unity.QueuePlayerControl(target.Clan.ShortName, true, target.AiDifficulty), Is.True);
+        Assert.That(target.IsHuman, Is.False);
+        manager.EndTurn();
+        yield return WaitFor(() => Game.Current.GetCurrentPlayer() == target && target.IsHuman);
+        Assert.That(unity.GetPendingPlayerControls(), Is.Empty);
+        Assert.That(input.InputMode, Is.Not.EqualTo(InputMode.AITurn));
+        yield return Assets.Scripts.Tests.PlayMode.Common.WismTestAction.WaitForNewHeroOffer();
+        yield return Assets.Scripts.Tests.PlayMode.Common.WismTestAction.AcceptNewHeroOffer();
+        yield return WaitFor(() => input.CanAcceptGameplayInput && input.InputMode == InputMode.Game);
+    }
+
+    [UnityTest]
+    public IEnumerator PlayerControls_SaveRestoresPendingAndRejectsInvalidChoicesWithoutMutation()
+    {
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        var oldDirectory = PersistanceManager.SaveDirectory;
+        var oldSnapshot = PersistanceManager.GetLastSnapshot();
+        var args = System.Environment.GetCommandLineArgs();
+        int option = System.Array.IndexOf(args, "-wism-profile-output");
+        var root = option >= 0 && option + 1 < args.Length ? args[option + 1] : Application.temporaryCachePath;
+        var directory = Path.Combine(root, "control-save-" + System.Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(directory, "controls.json");
+        try
+        {
+            var player = Game.Current.GetCurrentPlayer();
+            Assert.That(unity.QueuePlayerControl(player.Clan.ShortName, false, AiDifficultyTier.Warlord), Is.True);
+            PersistanceManager.SaveDirectory = directory;
+            PersistanceManager.Save("controls.json", "Pending control", unity);
+            var valid = File.ReadAllText(path);
+            Assert.That(unity.QueuePlayerControl(player.Clan.ShortName, true, player.AiDifficulty), Is.True);
+            var oldGame = Game.Current;
+            typeof(GameManager).GetMethod("LoadGame", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(manager, new object[] { path });
+            yield return WaitFor(() => Game.Current != oldGame && input.CanAcceptGameplayInput);
+            Assert.That(Game.Current.GetCurrentPlayer().IsHuman, Is.True);
+            Assert.That(unity.GetPendingPlayerControls().Single().AiDifficulty, Is.EqualTo(AiDifficultyTier.Warlord));
+            var game = Game.Current;
+            var snapshot = PersistanceManager.GetLastSnapshot();
+            foreach (var fault in new[] { "duplicate", "unknown", "difficulty", "legacy" })
+            {
+                var json = Newtonsoft.Json.Linq.JObject.Parse(valid);
+                var choices = (Newtonsoft.Json.Linq.JArray)json["PendingPlayerControls"];
+                if (fault == "duplicate") choices.Add(choices[0].DeepClone());
+                if (fault == "unknown") choices[0]["ClanName"] = "missing-clan";
+                if (fault == "difficulty") choices[0]["AiDifficulty"] = 99;
+                if (fault == "legacy") json.Remove("SaveFormat");
+                File.WriteAllText(path, json.ToString());
+                Assert.Throws<Wism.Client.Data.SaveCompatibilityException>(() => PersistanceManager.LoadEntities(path, unity), fault);
+                Assert.That(Game.Current, Is.SameAs(game), fault);
+                Assert.That(PersistanceManager.GetLastSnapshot(), Is.SameAs(snapshot), fault);
+                Assert.That(unity.GetPendingPlayerControls().Single().AiDifficulty, Is.EqualTo(AiDifficultyTier.Warlord), fault);
+            }
+        }
+        finally
+        {
+            PersistanceManager.SaveDirectory = oldDirectory;
+            typeof(PersistanceManager).GetMethod("SetLastSnapshot", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(null, new object[] { oldSnapshot });
+            if (File.Exists(path)) File.Delete(path);
+            if (Directory.Exists(directory)) Directory.Delete(directory);
+        }
+    }
+
+    [UnityTest]
     public IEnumerator GameMenu_SoundPreferenceRoundtripCannotUnmuteValidation()
     {
         yield return new WaitForLastCommand(manager.ControllerProvider);

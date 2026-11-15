@@ -21,7 +21,7 @@ namespace Wism.Client.Data
     /// <summary>Validates the save envelope before any live game or scene changes.</summary>
     public static class SaveFileFormat
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
         public const string FormatName = "WISM.Save";
 
         public static SaveFormatMetadata CreateMetadata(string producerVersion)
@@ -42,11 +42,16 @@ namespace Wism.Client.Data
                 DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error
             });
             foreach (var property in root.Properties())
+            {
                 if (string.Equals(property.Name, "SaveFormat", StringComparison.OrdinalIgnoreCase) && property.Name != "SaveFormat")
                     throw new SaveCompatibilityException("This save has an incorrectly named format header.");
+                if (string.Equals(property.Name, "PendingPlayerControls", StringComparison.OrdinalIgnoreCase) && property.Name != "PendingPlayerControls")
+                    throw new SaveCompatibilityException("This save has an incorrectly named player-control field.");
+            }
             var metadata = root["SaveFormat"];
             if (metadata == null)
             {
+                RejectUnversionedControlChanges(root);
                 // Version zero used the same payload, without an envelope or AI display options.
                 // Never manufacture missing campaign state or rewrite the caller's source file.
                 if (!(root["WismGameEntity"] is JObject))
@@ -66,9 +71,17 @@ namespace Wism.Client.Data
                 throw new SaveCompatibilityException("This save has inconsistent compatibility versions.");
             if (schema > CurrentVersion || minimum > CurrentVersion)
                 throw new SaveCompatibilityException("This save requires a newer WISM save reader. Update the game to load it; the save has not been changed.");
+            if (schema < 2 || minimum < 2) RejectUnversionedControlChanges(root);
             if (!(root["WismGameEntity"] is JObject))
                 throw new SaveCompatibilityException("This save is missing its campaign data.");
             return root;
+        }
+
+        private static void RejectUnversionedControlChanges(JObject root)
+        {
+            var choices = root["PendingPlayerControls"];
+            if (choices != null && choices.Type != JTokenType.Null && (!(choices is JArray array) || array.Count != 0))
+                throw new SaveCompatibilityException("Pending player controls require save schema and reader version 2.");
         }
 
         private static int ReadVersion(JObject header, string name)

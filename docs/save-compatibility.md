@@ -4,7 +4,10 @@ Save schema versions are independent of game release versions. New saves carry a
 `SaveFormat` header with format `WISM.Save`, `SchemaVersion`,
 `MinimumReaderVersion`, and a diagnostic `ProducerVersion`.
 
-The current reader supports schema 1 and unversioned legacy saves (version 0).
+The current reader writes schema 2 and supports schema 1 and unversioned legacy saves (version 0).
+Schema 2 preserves pending player-control changes until the affected clan's next
+turn. It requires reader version 2 so older readers cannot silently discard those
+choices. Invalid, duplicate, or unknown clan choices are rejected before loading.
 Legacy normalization adds the header and missing AI display preferences in memory;
 it does not reconstruct absent campaign data or modify the original file. Existing
 world and mod compatibility checks still apply. Old content identifiers may require

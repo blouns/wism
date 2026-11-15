@@ -70,6 +70,7 @@ namespace Assets.Scripts
             this.unityManager.InteractiveUI = newGameEntity.InteractiveUI;
             this.unityManager.ShowAiCombat = newGameEntity.ShowAiCombat;
             this.unityManager.SoundEnabled = newGameEntity.SoundEnabled;
+            this.unityManager.RestorePendingPlayerControls(null);
             this.unityManager.ObserveAiMovement = newGameEntity.ObserveAiMovement;
 
             if (newGameEntity.ModKitSelection != null)
