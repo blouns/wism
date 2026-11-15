@@ -18,6 +18,51 @@ using Wism.Client.Modules;
 public sealed partial class ArmyUiInputTests
 {
     [UnityTest]
+    public IEnumerator HeroLifecycle_BattleDeathDropsArtifactAndVictorTakesItOnce()
+    {
+        var enemy = Game.Current.Players[1];
+        var battleTile = World.Current.Map[enemy.Capitol.X - 1, enemy.Capitol.Y];
+        Assert.That(battleTile.City, Is.Null, "Use a field battle, not terminal city conquest.");
+        enemy.HireHero(battleTile);
+        var defender = enemy.GetArmies().OfType<Hero>().Single();
+        var artifact = Artifact.Create(ModFactory.FindArtifactInfo("StaffOfMight"));
+        battleTile.AddItem(artifact);
+        defender.Take(artifact);
+        defender.Strength = 1;
+        hero.Strength = 9;
+        yield return Click(ScreenPoint(hero.Tile));
+        yield return WaitFor(() => Game.Current.ArmiesSelected());
+        manager.MoveSelectedArmies(battleTile.X - 1, battleTile.Y);
+        yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
+        yield return Click(ScreenPoint(battleTile));
+        Assert.That(input.LastPrimaryAction, Is.EqualTo("army.attack"));
+        yield return WaitFor(() => defender.IsDead && Game.Current.GameState != GameState.AttackingArmy);
+        yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(hero.IsDead, Is.False);
+        Assert.That(battleTile.Items, Does.Contain(artifact));
+        Assert.That(defender.HasItems(), Is.False);
+        if (!Game.Current.ArmiesSelected())
+        {
+            yield return Click(ScreenPoint(hero.Tile));
+            yield return WaitFor(() => Game.Current.ArmiesSelected());
+        }
+        if (hero.Tile != battleTile)
+        {
+            yield return Click(ScreenPoint(battleTile));
+            yield return WaitFor(() => hero.Tile == battleTile);
+            yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
+        }
+        unity.InteractiveUI = true;
+        yield return ItemKey(Key.T);
+        yield return WaitFor(() => hero.HasItems() && hero.Items.Contains(artifact));
+        Assert.That(battleTile.Items, Has.No.Member(artifact));
+        Assert.That(hero.Items.Count(item => item == artifact), Is.EqualTo(1));
+        yield return ItemKey(Key.T);
+        Assert.That(hero.Items.Count(item => item == artifact), Is.EqualTo(1));
+        Assert.That(input.CanAcceptGameplayInput, Is.True);
+    }
+
+    [UnityTest]
     public IEnumerator HeroLifecycle_SearchDeathThenMapClickDoesNotIssueMovement()
     {
         var ruins = World.Current.GetLocations().Single(location => location.ShortName == "CryptKeeper");

@@ -1058,6 +1058,62 @@ public sealed partial class GameSetupPointerMatrixTests
 
     private static RectTransform Checkbox(string name) => GameObject.Find(name).transform.Find("Background").GetComponent<RectTransform>();
 
+    [UnityTest] public IEnumerator Load_InvalidStartupSaveCanRetryValidSlot() => InvalidStartupSave(false);
+    [UnityTest] public IEnumerator Load_InvalidStartupSaveCanCancelToSetup() => InvalidStartupSave(true);
+
+    private IEnumerator InvalidStartupSave(bool cancel)
+    {
+        var originalDirectory = PersistanceManager.SaveDirectory;
+        var originalSnapshot = PersistanceManager.GetLastSnapshot();
+        var directory = Path.Combine(Application.temporaryCachePath, "InitialLoad-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            PersistanceManager.SaveDirectory = directory;
+            yield return StartRoster("TestWorld", null);
+            yield return WismTestAction.WaitForNewHeroOffer();
+            yield return WismTestAction.AcceptNewHeroOffer();
+            var unity = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
+            yield return WaitFor(() => unity.InputManager.InputMode == InputMode.Game, "Source save ready");
+            PersistanceManager.Save("WISM3.SAV", "Startup retry", unity);
+            var badPath = Path.Combine(directory, "invalid-startup.sav");
+            File.WriteAllText(badPath, "{not-json");
+            var bytes = File.ReadAllBytes(badPath);
+            UnityManager.SetNewGameSettings(new UnityNewGameEntity
+            {
+                IsNewGame = false, InteractiveUI = true, WorldName = "TestWorld", LoadFilename = badPath
+            });
+            SceneManager.LoadScene("Scenes/Test/TestWorld");
+            yield return WaitFor(() => UnityEngine.Object.FindAnyObjectByType<UnityManager>() is UnityManager current &&
+                current.AwaitingInitialLoad && current.SaveLoadPicker != null && current.SaveLoadPicker.IsInitialized(),
+                "Invalid initial filename returns to load picker");
+            unity = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
+            Assert.That(File.ReadAllBytes(badPath), Is.EqualTo(bytes));
+            var picker = unity.SaveLoadPicker;
+            if (cancel)
+            {
+                yield return Click(picker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Cancel").GetComponent<RectTransform>());
+                yield return WaitFor(() => SceneManager.GetActiveScene().name == "GameSetup", "Cancel rejected initial load");
+                Assert.That(Game.IsInitialized(), Is.False);
+            }
+            else
+            {
+                yield return Click(picker.GetComponentsInChildren<Button>().Single(button => button.name == "Button3").GetComponent<RectTransform>());
+                yield return Click(picker.GetComponentsInChildren<Button>().Single(button => button.GetComponentInChildren<Text>()?.text == "Load").GetComponent<RectTransform>());
+                yield return WaitFor(() => !unity.AwaitingInitialLoad && unity.InputManager.InputMode == InputMode.Game &&
+                    unity.InputManager.CanAcceptGameplayInput, "Valid retry after startup rejection");
+                Assert.That(PersistanceManager.GetLastSnapshot().DisplayName, Is.EqualTo("Startup retry"));
+            }
+            Assert.That(File.ReadAllBytes(badPath), Is.EqualTo(bytes));
+        }
+        finally
+        {
+            PersistanceManager.SaveDirectory = originalDirectory;
+            typeof(PersistanceManager).GetMethod("SetLastSnapshot", BindingFlags.Static | BindingFlags.NonPublic)
+                .Invoke(null, new object[] { originalSnapshot });
+            if (Directory.Exists(directory)) Directory.Delete(directory, true);
+        }
+    }
+
     [UnityTest]
     public IEnumerator Load_CrossWorldDeepFailurePreservesCampaignAndRetryUsesCheckedSnapshot()
     {
