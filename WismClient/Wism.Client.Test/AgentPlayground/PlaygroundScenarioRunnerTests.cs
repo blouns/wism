@@ -15,6 +15,22 @@ namespace Wism.Client.Test.AgentPlayground;
 public class PlaygroundScenarioRunnerTests
 {
     [Test]
+    public void ProfileCheckpoint_PreparesStartingTurnBeforeComparingRecorderModes()
+    {
+        var output = Path.Combine(TestContext.CurrentContext.WorkDirectory, "profile-turn-" + Guid.NewGuid().ToString("N"));
+        var runner = new PlaygroundScenarioRunner(suppressConsoleLogs: true);
+        var campaign = runner.Campaign(seed: 1990, clans: 8, maxTurns: 80,
+            outputRoot: output, name: "starting-turn", size: "large",
+            scenarioFamily: "classic-ai-conquest", checkpointMode: "summary", aiProfile: "tactical");
+        Assert.That(Game.Current.GameState, Is.EqualTo(GameState.StartingTurn));
+        var checkpoint = campaign.Checkpoints.Last();
+        Assert.That(runner.ProfileCheckpoint(checkpoint, Path.Combine(output, "comparison"), repetitions: 2), Is.True,
+            "A turn-boundary replay must refresh the turn before attempting movement.");
+        var comparison = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(Path.Combine(output, "comparison", "comparison.json")));
+        Assert.That((string)comparison["Preparation"], Is.EqualTo("StartTurnCommand before measurement when StartingTurn"));
+    }
+
+    [Test]
     public void ProductionRiskEval_DoesNotLetOtherCasesMaskUnsupportedBuildOrMissingEvidence()
     {
         foreach (var risky in new[] { EvalCounters.Empty,
