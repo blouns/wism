@@ -35,7 +35,7 @@ namespace Wism.Client.Pathing
             var queue = new PathNodeQueue();
             var visited = new HashSet<PathNode>();
 
-            var graph = BuildGraph(map, armiesToMove, target, ignoreClan);
+            var graph = new LazyGraph(map, armiesToMove, target, ignoreClan);
 
             // Distance from source to source is zero
             var sourceX = armiesToMove[0].X;
@@ -86,6 +86,7 @@ namespace Wism.Client.Pathing
                     }
                 }
 
+                PrepareNeighbors(graph, currentNode);
                 foreach (var neighbor in currentNode.Neighbors)
                 {
                     UpdateNeighborIfShorter(queue, visited, currentNode, neighbor, armiesToMove);
@@ -94,131 +95,130 @@ namespace Wism.Client.Pathing
             }
         }
 
-        private static PathNode[,] BuildGraph(Tile[,] map, List<Army> armies, Tile target, bool ignoreClan)
+        private sealed class LazyGraph
         {
-            var mapSizeX = map.GetLength(0);
-            var mapSizeY = map.GetLength(1);
-            var graph = new PathNode[mapSizeX, mapSizeY];
-            for (var y = 0; y < mapSizeY; y++)
-            {
-                for (var x = 0; x < mapSizeX; x++)
-                {
-                    // Terrain traversal alone does not check stacks occupying the route.
-                    // Combat planning opts out explicitly through ignoreClan.
-                    var tile = map[x, y];
-                    if (!ignoreClan &&
-                        ((tile.HasArmies() && tile.Armies.Exists(army => army.Clan != armies[0].Clan)) ||
-                         (tile.HasVisitingArmies() && tile.VisitingArmies.Exists(army => army.Clan != armies[0].Clan))))
-                    {
-                        continue;
-                    }
+            private readonly Tile[,] map;
+            private readonly List<Army> armies;
+            private readonly Tile target;
+            private readonly bool ignoreClan;
+            private readonly PathNode[,] nodes;
+            private readonly bool[,] evaluated;
+            public int Width => this.map.GetLength(0);
+            public int Height => this.map.GetLength(1);
 
-                    // Only add a node if the army can actually traverse there
-                    // Note: this will leave some "null" spots as a sparse-array
-                    if (map[x, y].CanTraverseHere(armies, ignoreClan) ||
-                        (ignoreClan && x == target.X && y == target.Y))
-                    {
-                        var node = new PathNode();
-                        node.Distance = int.MaxValue;
-                        node.Value = map[x, y];
-                        node.Previous = null;
-                        graph[x, y] = node;
-                    }
-                }
+            public LazyGraph(Tile[,] map, List<Army> armies, Tile target, bool ignoreClan)
+            {
+                this.map = map;
+                this.armies = armies;
+                this.target = target;
+                this.ignoreClan = ignoreClan;
+                this.nodes = new PathNode[map.GetLength(0), map.GetLength(1)];
+                this.evaluated = new bool[map.GetLength(0), map.GetLength(1)];
             }
 
-            for (var y = 0; y < mapSizeY; y++)
+            public PathNode this[int x, int y]
             {
-                for (var x = 0; x < mapSizeX; x++)
+                get
                 {
-                    // Army cannot traverse there
-                    if (graph[x, y] == null)
-                    {
-                        continue;
-                    }
-
-                    var xMax = mapSizeX - 1;
-                    var yMax = mapSizeY - 1;
-                    if (x == 0 && y == 0)
-                    {
-                        // Upper-left corner
-                        graph[x, y].AddNeighbor(graph[x + 1, y]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
-                        graph[x, y].AddNeighbor(graph[x, y + 1]);
-                    }
-                    else if (x == 0 && y == yMax)
-                    {
-                        // Lower-left corner
-                        graph[x, y].AddNeighbor(graph[x + 1, y]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x, y - 1]);
-                    }
-                    else if (x == xMax && y == 0)
-                    {
-                        // Upper-right corner
-                        graph[x, y].AddNeighbor(graph[x - 1, y]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
-                        graph[x, y].AddNeighbor(graph[x, y + 1]);
-                    }
-                    else if (x == xMax && y == yMax)
-                    {
-                        // Lower-right corner
-                        graph[x, y].AddNeighbor(graph[x - 1, y]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x, y - 1]);
-                    }
-                    else if (y == 0)
-                    {
-                        // Top middle
-                        graph[x, y].AddNeighbor(graph[x - 1, y]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
-                        graph[x, y].AddNeighbor(graph[x, y + 1]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
-                    }
-                    else if (y == yMax)
-                    {
-                        // Bottom middle
-                        graph[x, y].AddNeighbor(graph[x - 1, y]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
-                    }
-                    else if (x == 0)
-                    {
-                        // Left middle
-                        graph[x, y].AddNeighbor(graph[x, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x, y + 1]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
-                    }
-                    else if (x == xMax)
-                    {
-                        // Right middle
-                        graph[x, y].AddNeighbor(graph[x, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x, y + 1]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
-                    }
-                    else
-                    {
-                        // Middle
-                        graph[x, y].AddNeighbor(graph[x, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x, y + 1]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
-                        graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
-                    }
+                    if (this.evaluated[x, y]) return this.nodes[x, y];
+                    this.evaluated[x, y] = true;
+                    var tile = this.map[x, y];
+                    if (!this.ignoreClan &&
+                        ((tile.HasArmies() && tile.Armies.Exists(army => army.Clan != this.armies[0].Clan)) ||
+                         (tile.HasVisitingArmies() && tile.VisitingArmies.Exists(army => army.Clan != this.armies[0].Clan))))
+                        return null;
+                    if (tile.CanTraverseHere(this.armies, this.ignoreClan) ||
+                        (this.ignoreClan && x == this.target.X && y == this.target.Y))
+                        this.nodes[x, y] = new PathNode { Distance = int.MaxValue, Value = tile };
+                    return this.nodes[x, y];
                 }
             }
+        }
 
-            return graph;
+        private static void PrepareNeighbors(LazyGraph graph, PathNode node)
+        {
+            // Preserve the eager implementation's ordering, including edge tie breaks.
+            int x = node.Value.X, y = node.Value.Y;
+            int mapSizeX = graph.Width, mapSizeY = graph.Height;
+            var xMax = mapSizeX - 1;
+            var yMax = mapSizeY - 1;
+            if (x == 0 && y == 0)
+            {
+                // Upper-left corner
+                graph[x, y].AddNeighbor(graph[x + 1, y]);
+                graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
+                graph[x, y].AddNeighbor(graph[x, y + 1]);
+            }
+            else if (x == 0 && y == yMax)
+            {
+                // Lower-left corner
+                graph[x, y].AddNeighbor(graph[x + 1, y]);
+                graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
+                graph[x, y].AddNeighbor(graph[x, y - 1]);
+            }
+            else if (x == xMax && y == 0)
+            {
+                // Upper-right corner
+                graph[x, y].AddNeighbor(graph[x - 1, y]);
+                graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
+                graph[x, y].AddNeighbor(graph[x, y + 1]);
+            }
+            else if (x == xMax && y == yMax)
+            {
+                // Lower-right corner
+                graph[x, y].AddNeighbor(graph[x - 1, y]);
+                graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
+                graph[x, y].AddNeighbor(graph[x, y - 1]);
+            }
+            else if (y == 0)
+            {
+                // Top middle
+                graph[x, y].AddNeighbor(graph[x - 1, y]);
+                graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
+                graph[x, y].AddNeighbor(graph[x, y + 1]);
+                graph[x, y].AddNeighbor(graph[x + 1, y]);
+                graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
+            }
+            else if (y == yMax)
+            {
+                // Bottom middle
+                graph[x, y].AddNeighbor(graph[x - 1, y]);
+                graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
+                graph[x, y].AddNeighbor(graph[x, y - 1]);
+                graph[x, y].AddNeighbor(graph[x + 1, y]);
+                graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
+            }
+            else if (x == 0)
+            {
+                // Left middle
+                graph[x, y].AddNeighbor(graph[x, y - 1]);
+                graph[x, y].AddNeighbor(graph[x, y + 1]);
+                graph[x, y].AddNeighbor(graph[x + 1, y]);
+                graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
+                graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
+            }
+            else if (x == xMax)
+            {
+                // Right middle
+                graph[x, y].AddNeighbor(graph[x, y - 1]);
+                graph[x, y].AddNeighbor(graph[x, y + 1]);
+                graph[x, y].AddNeighbor(graph[x - 1, y]);
+                graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
+                graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
+            }
+            else
+            {
+                // Middle
+                graph[x, y].AddNeighbor(graph[x, y - 1]);
+                graph[x, y].AddNeighbor(graph[x, y + 1]);
+                graph[x, y].AddNeighbor(graph[x - 1, y]);
+                graph[x, y].AddNeighbor(graph[x - 1, y - 1]);
+                graph[x, y].AddNeighbor(graph[x - 1, y + 1]);
+                graph[x, y].AddNeighbor(graph[x + 1, y]);
+                graph[x, y].AddNeighbor(graph[x + 1, y - 1]);
+                graph[x, y].AddNeighbor(graph[x + 1, y + 1]);
+            }
+
         }
 
         private static void UpdateNeighborIfShorter(
