@@ -172,7 +172,7 @@ namespace Wism.Client.AI.Services
                 pathing.FindShortestRoute(World.Current.Map, attacker, approach, out route, out _, ignoreClan: false);
             }
 
-            return route != null && route.Skip(1).All(tile => tile.HasRoom(1)) &&
+            return route != null && route.Count > 0 && route.Skip(1).All(tile => tile.HasRoom(1)) &&
                 route.Skip(1).Sum(enemy.GetEffectiveMovementCost) <= budget;
         }
 
