@@ -60,7 +60,11 @@ public sealed partial class ArmyUiInputTests
         var path = System.IO.Path.Combine(Application.persistentDataPath, filename);
         try
         {
-            System.IO.File.WriteAllText(path, "{}");
+            PersistanceManager.Save(filename, "Legacy combat setting", unity);
+            var legacy = Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText(path));
+            legacy.Remove("SaveFormat");
+            legacy.Remove("ShowAiCombat");
+            System.IO.File.WriteAllText(path, legacy.ToString());
             Assert.That(PersistanceManager.LoadEntities(path, unity).ShowAiCombat, Is.True);
             foreach (var enabled in new[] { false, true })
             {
