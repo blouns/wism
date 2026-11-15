@@ -13,9 +13,15 @@ namespace Wism.Client.Pathing
     ///     The legacy A* implementation used an inadmissible heuristic for weighted diagonal
     ///     maps and could choose visually short but more expensive routes.
     /// </remarks>
-    public class AStarPathingStrategy : IPathingStrategy
+    public class AStarPathingStrategy : IConstrainedPathingStrategy
     {
         private readonly DijkstraPathingStrategy weightedRouter = new DijkstraPathingStrategy();
+
+        public void FindShortestRoute(Tile[,] map, List<Army> armies, Tile target, out IList<Tile> fastestRoute,
+            out float distance, bool ignoreClan, System.Predicate<Tile> admitTile)
+        {
+            this.weightedRouter.FindShortestRoute(map, armies, target, out fastestRoute, out distance, ignoreClan, admitTile);
+        }
 
         public void FindShortestRoute(Tile[,] map, List<Army> armies, Tile target, out IList<Tile> fastestRoute,
             out float distance, bool ignoreClan = false)

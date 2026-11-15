@@ -42,7 +42,7 @@ namespace Wism.Client.Commands.Armies
             if (this.RevalidateFriendlyCapacity && !this.RouteChecked)
             {
                 this.RouteChecked = true;
-                if (Game.Current.PathingStrategy is DijkstraPathingStrategy strategy &&
+                if (Game.Current.PathingStrategy is IConstrainedPathingStrategy strategy &&
                     this.path != null && this.path.Skip(1).Any(tile => !tile.HasRoom(this.Armies.Count)))
                 {
                     var origin = this.Armies[0].Tile;

@@ -18,13 +18,17 @@ namespace Wism.Client.Test.Unit;
 [TestFixture]
 public sealed class QueuedMoveCapacityTests
 {
-    [TestCase(true, true)]
-    [TestCase(false, true)]
-    [TestCase(true, false)]
-    public void QueuedRouteRespectsChangedCapacityWithoutChangingHumanMovement(bool revalidate, bool detour)
+    [TestCase(true, true, false)]
+    [TestCase(false, true, false)]
+    [TestCase(true, false, false)]
+    [TestCase(true, true, true)]
+    [TestCase(false, true, true)]
+    [TestCase(true, false, true)]
+    public void QueuedRouteRespectsChangedCapacityWithoutChangingHumanMovement(bool revalidate, bool detour, bool aStar)
     {
         Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
         Game.CreateDefaultGame();
+        Game.Current.PathingStrategy = aStar ? new AStarPathingStrategy() : new DijkstraPathingStrategy();
         var map = new Tile[7, 3];
         for (int x = 0; x < 7; x++)
             for (int y = 0; y < 3; y++)

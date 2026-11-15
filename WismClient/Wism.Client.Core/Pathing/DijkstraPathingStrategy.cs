@@ -5,7 +5,7 @@ using Wism.Client.MapObjects;
 
 namespace Wism.Client.Pathing
 {
-    public class DijkstraPathingStrategy : IPathingStrategy
+    public class DijkstraPathingStrategy : IConstrainedPathingStrategy
     {
         public void FindShortestRoute(Tile[,] map, List<Army> armiesToMove, Tile target, out IList<Tile> fastestRoute,
             out float distance, bool ignoreClan = false)
