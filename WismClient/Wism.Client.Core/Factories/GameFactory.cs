@@ -67,6 +67,25 @@ namespace Wism.Client.Factories
             }
         }
 
+        public static void ValidateLoad(GameEntity snapshot)
+        {
+            if (snapshot is null) throw new ArgumentNullException(nameof(snapshot));
+            var previousGame = Game.CurrentOrNull;
+            var previousWorld = World.CurrentOrNull;
+            var previousArmyId = ArmyFactory.LastId;
+            try
+            {
+                // Exercise reconstruction without publishing a replacement campaign.
+                LoadSnapshot(snapshot);
+            }
+            finally
+            {
+                Game.RestoreCurrent(previousGame);
+                World.RestoreCurrent(previousWorld);
+                ArmyFactory.LastId = previousArmyId;
+            }
+        }
+
         private static Game LoadSnapshot(GameEntity snapshot)
         {
             Game.CreateEmpty();
