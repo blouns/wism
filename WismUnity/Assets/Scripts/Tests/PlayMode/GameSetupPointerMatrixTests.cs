@@ -1094,6 +1094,7 @@ public sealed partial class GameSetupPointerMatrixTests
             yield return WaitFor(() => naming.IsInitialized(), "Human naming panel");
             naming.SetInputText("Recovery Hero");
             naming.Ok();
+            yield return WismTestAction.DismissProductionPanelIfVisible();
             yield return WaitFor(() => unity.InputManager.InputMode == InputMode.Game &&
                 unity.ExecutionMode == ExecutionMode.Running && unity.InputManager.CanAcceptGameplayInput &&
                 unity.LastCommandId == unity.GameManager.ControllerProvider.CommandController.GetLastCommand().Id,
