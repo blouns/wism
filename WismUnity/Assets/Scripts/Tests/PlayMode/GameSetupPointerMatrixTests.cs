@@ -1079,10 +1079,21 @@ public sealed partial class GameSetupPointerMatrixTests
             UnityModKitRuntimeSelection.Clear();
             SceneManager.LoadScene("GameSetup");
             yield return WaitFor(() => GameObject.Find("LoadButton") != null, "Setup for other world");
-            yield return StartRoster("Mini-Illuria", null);
-            yield return WismTestAction.WaitForNewHeroOffer();
-            yield return WismTestAction.AcceptNewHeroOffer();
+            yield return SelectWorld("Mini-Illuria");
+            for (int row = 1; row <= 8; row++)
+            {
+                if (Find<Toggle>("Player" + row).isOn != (row == 1 || row == 8))
+                    yield return Click(Checkbox("Player" + row));
+                for (int press = 0; press < roles.Length && RoleText(row).text.Trim() != "Human"; press++)
+                    yield return Click(RoleIcon(row));
+            }
+            yield return Click(Find<Button>("StartButton").GetComponent<RectTransform>());
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "Mini-Illuria" && Game.IsInitialized(), "Active world initialized");
             unity = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
+            var naming = UnityUtilities.GameObjectHardFind("SolicitInputPanel").GetComponent<SolicitInput>();
+            yield return WaitFor(() => naming.IsInitialized(), "Human naming panel");
+            naming.SetInputText("Recovery Hero");
+            naming.Ok();
             yield return WaitFor(() => unity.GetComponent<InputManager>().InputMode == InputMode.Game, "Active world ready");
             var game = Game.Current;
             var scene = SceneManager.GetActiveScene().path;
