@@ -41,7 +41,7 @@ public class GarrisonRoleSelectionTests
 
         var cp = f.Provider;
         Assert.That(TestUtilities.Select(cp, mobile), Is.EqualTo(ActionState.Succeeded));
-        Assert.That(TestUtilities.MoveUntilDone(cp.CommandController, cp.ArmyController, mobile, 10, 8),
+        Assert.That(TestUtilities.MoveUntilDone(cp.CommandController, cp.ArmyController, mobile, 10, 7),
             Is.EqualTo(ActionState.Succeeded));
         Assert.That(TestUtilities.ExecuteCommandUntilDone(cp.CommandController,
             new CaptureCityCommand(cp.CityController, f.Player, mobile, f.Opportunity)), Is.EqualTo(ActionState.Succeeded));
@@ -185,7 +185,7 @@ public class GarrisonRoleSelectionTests
         var mobile = new GarrisonPolicy().GetMobileArmies(new List<Army> { f.Strong, f.Fast });
         var reserved = new[] { f.Strong, f.Fast }.Single(a => !mobile.Contains(a));
         Assert.That(TestUtilities.Select(cp, mobile), Is.EqualTo(ActionState.Succeeded));
-        Assert.That(TestUtilities.MoveUntilDone(cp.CommandController, cp.ArmyController, mobile, 10, 8),
+        Assert.That(TestUtilities.MoveUntilDone(cp.CommandController, cp.ArmyController, mobile, 10, 7),
             Is.EqualTo(ActionState.Succeeded));
         Assert.That(TestUtilities.ExecuteCommandUntilDone(cp.CommandController,
             new CaptureCityCommand(cp.CityController, f.Player, mobile, f.Opportunity)), Is.EqualTo(ActionState.Succeeded));

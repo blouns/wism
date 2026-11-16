@@ -79,8 +79,13 @@ namespace Wism.Client.AI.Services
 
             // Reserve specific armies across the whole city. A count alone can
             // release a reserved soldier when modules ask about a smaller stack.
+            // Specials stay with the field force. Among ordinary units keep the
+            // slowest by base movement, then the strongest, so spent movement
+            // cannot swap a home defender with the expansion force.
             var reserved = new HashSet<Army>(reservableDefenders
-                .OrderBy(GetMobilityPriority)
+                .OrderBy(army => army.IsSpecial())
+                .ThenBy(army => army.Moves)
+                .ThenByDescending(army => army.Strength)
                 .ThenByDescending(army => army.Id)
                 .Take(reserveCount));
             return stack
