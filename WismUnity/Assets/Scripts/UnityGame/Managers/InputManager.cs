@@ -337,7 +337,7 @@ namespace Assets.Scripts.Managers
         private void HandleKeyboard()
         {
             // Army actions
-            if (Input.GetKeyDown(KeyCode.M))
+            if (WismUiInputAdapter.StackPressedThisFrame())
             {
                 this.TryExecuteGameplayAction(GameplayAction.Stack);
             }
