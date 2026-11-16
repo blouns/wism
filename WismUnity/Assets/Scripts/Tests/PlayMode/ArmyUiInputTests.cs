@@ -244,7 +244,8 @@ public sealed partial class ArmyUiInputTests : IPrebuildSetup, IPostBuildCleanup
         InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.M));
         yield return null;
         InputSystem.QueueStateEvent(keyboard, new KeyboardState());
-        yield return WaitFor(() => input.InputMode == InputMode.UI);
+        yield return WaitFor(() => input.InputMode == InputMode.UI,
+            () => $"M picker: mode={input.InputMode}; state={Game.Current.GameState}; selected={Game.Current.ArmiesSelected()}");
         var picker = UnityEngine.Object.FindAnyObjectByType<ArmyPicker>();
         Assert.That(picker, Is.Not.Null);
         var confirm = picker.GetComponentsInChildren<Button>().Single(button => button.name != "SelectButton");
