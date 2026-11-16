@@ -226,9 +226,10 @@ public sealed partial class ArmyUiInputTests
             yield return null;
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return WaitFor(() => Game.Current.ArmiesSelected());
-            yield return null;
             Assert.That(Game.Current.GetSelectedArmies().Single(), Is.SameAs(hero));
             Assert.That(hero.Tile, Is.SameAs(tile));
+            yield return WaitFor(() =>
+                Vector2.Distance(camera.WorldToViewportPoint(worldPoint), new Vector2(0.5f, 0.5f)) < 0.01f);
             var framed = camera.WorldToViewportPoint(worldPoint);
             Assert.That(framed.x, Is.InRange(0.05f, 0.95f));
             Assert.That(framed.y, Is.InRange(0.05f, 0.95f));
