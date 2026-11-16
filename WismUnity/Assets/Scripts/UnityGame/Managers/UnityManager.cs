@@ -925,8 +925,7 @@ namespace Assets.Scripts.Managers
                 this.cameraFollow.target = null;
                 return;
             }
-            this.cameraFollow.ResetCamera();
-            SetCameraTarget(this.selectedArmyBox.transform);
+            this.cameraFollow.PanToSelection(this.selectedArmyBox.transform);
         }
 
         internal void ShowProductionPanel(City city)

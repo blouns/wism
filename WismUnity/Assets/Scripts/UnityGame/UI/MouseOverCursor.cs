@@ -56,7 +56,8 @@ namespace Assets.Scripts.UI
             }
 
             // Order matters
-            if (IsPanel())
+            var input = this.unityManager.InputManager;
+            if (IsPanel() || input.InputMode == InputMode.AITurn || !input.CanAcceptGameplayInput)
             {
                 this.cursorManager.PointCursor();
             }
@@ -190,12 +191,12 @@ namespace Assets.Scripts.UI
 
         private Tile GetCurrentTile()
         {
-            return this.worldTilemap.GetTileAtScreenPosition(this.mainCamera, Input.mousePosition);
+            return this.worldTilemap.GetTileAtScreenPosition(this.mainCamera, WismUiInputAdapter.PointerPosition);
         }
 
         private Vector3 GetMoveHeading()
         {
-            Vector3 targetPosition = this.mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 targetPosition = this.mainCamera.ScreenToWorldPoint(WismUiInputAdapter.PointerPosition);
             var tile = Game.Current.GetSelectedArmies()[0].Tile;
             Vector3 playerPosition = this.worldTilemap.ConvertGameToUnityVector(tile.X, tile.Y);
 

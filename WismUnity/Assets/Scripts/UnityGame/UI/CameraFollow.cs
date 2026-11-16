@@ -5,6 +5,8 @@ using Wism.Client.Core;
 [DefaultExecutionOrder(100)]
 public class CameraFollow : MonoBehaviour
 {
+    private const float SelectionPanDuration = 0.25f;
+
     public Transform target;
     public float speed;
     public float scale;
@@ -18,6 +20,9 @@ public class CameraFollow : MonoBehaviour
     private Vector3 difference;
     private bool isDragging;
     private bool centered;
+    private Transform selectionFocus;
+    private Vector3 selectionPanOrigin;
+    private float selectionPanElapsed;
     private Camera followCamera;
     private Assets.Scripts.Tilemaps.WorldTilemap worldTilemap;
     private int lastMapWidth;
@@ -115,8 +120,16 @@ public class CameraFollow : MonoBehaviour
 
     public void ResetCamera()
     {
+        this.selectionFocus = null;
         this.centered = false;
         this.isDragging = false;
+    }
+
+    internal void PanToSelection(Transform focus)
+    {
+        this.target = this.selectionFocus = focus;
+        this.selectionPanOrigin = this.transform.position;
+        this.selectionPanElapsed = 0f;
     }
 
     private void HandleCameraMove()
@@ -124,6 +137,11 @@ public class CameraFollow : MonoBehaviour
         // Right mouse button drags the screen
         if (Input.GetMouseButton(1))
         {
+            if (this.selectionFocus != null)
+            {
+                if (this.target == this.selectionFocus) this.target = null;
+                this.selectionFocus = null;
+            }
             this.difference = (this.followCamera.ScreenToWorldPoint(Input.mousePosition)) - this.followCamera.transform.position;
             if (this.isDragging == false)
             {
@@ -137,8 +155,13 @@ public class CameraFollow : MonoBehaviour
             if (this.target != null &&
                (Game.Current.GameState == GameState.MovingArmy))
             {
+                this.selectionFocus = null;
                 // Linearly interpolate
                 SetCameraTargetLerp(this.target);
+            }
+            else if (this.selectionFocus != null && this.target == this.selectionFocus)
+            {
+                AdvanceSelectionPan();
             }
             // Snap to a location
             else if (this.target != null &&
@@ -165,6 +188,20 @@ public class CameraFollow : MonoBehaviour
         }
     }
 
+    private void AdvanceSelectionPan()
+    {
+        this.selectionPanElapsed += Time.unscaledDeltaTime;
+        var progress = Mathf.Clamp01(this.selectionPanElapsed / SelectionPanDuration);
+        var focus = this.selectionFocus.position;
+        var destination = ClampVectorToTilemap(new Vector3(focus.x, focus.y, this.selectionPanOrigin.z));
+        this.transform.position = Vector3.Lerp(this.selectionPanOrigin, destination, Mathf.SmoothStep(0f, 1f, progress));
+        if (progress < 1f) return;
+
+        this.selectionFocus = null;
+        this.centered = true;
+        if (Game.Current.GameState != GameState.SelectedArmy) this.target = null;
+    }
+
     private Vector3 ClampVectorToTilemap(Vector3 vector)
     {
         ConfigureBoundsFromCurrentWorld();
@@ -177,6 +214,11 @@ public class CameraFollow : MonoBehaviour
 
     public void SetCameraTarget(Vector3 vector)
     {
+        if (this.selectionFocus != null)
+        {
+            if (this.target == this.selectionFocus) this.target = null;
+            this.selectionFocus = null;
+        }
         this.transform.position = ClampVectorToTilemap(vector + new Vector3(0f, 0f, -10f));
     }
 

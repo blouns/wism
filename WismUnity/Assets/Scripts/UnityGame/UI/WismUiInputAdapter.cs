@@ -279,6 +279,16 @@ namespace Assets.Scripts.UI
 #endif
         }
 
+        public static bool StackPressedThisFrame()
+        {
+            if (Input.GetKeyDown(KeyCode.M)) return true;
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.mKey.wasPressedThisFrame;
+#else
+            return false;
+#endif
+        }
+
         public static bool ItemActionPressed(bool taking)
         {
             if (Input.GetKeyDown(taking ? KeyCode.T : KeyCode.O)) return true;

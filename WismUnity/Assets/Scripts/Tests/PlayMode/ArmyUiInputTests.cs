@@ -177,6 +177,41 @@ public sealed partial class ArmyUiInputTests : IPrebuildSetup, IPostBuildCleanup
     }
 
     [UnityTest]
+    public IEnumerator Hover_UsesNeutralPointerWhileAwaitingTheNextHumanTurn()
+    {
+        yield return Click(ScreenPoint(hero.Tile));
+        yield return WaitFor(() => Game.Current.ArmiesSelected());
+        var destination = hero.Tile.GetNineGrid().Cast<Tile>().First(tile =>
+            tile != null && tile != hero.Tile && tile.CanTraverseHere(hero) && !tile.HasAnyArmies());
+        var position = ScreenPoint(destination);
+        var cursor = unity.GetComponent<CursorManager>();
+        var activeTexture = typeof(CursorManager).GetField("activeCursor", BindingFlags.Instance | BindingFlags.NonPublic);
+        var pointTexture = typeof(CursorManager).GetField("point", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.That(pointTexture.GetValue(cursor), Is.Not.Null);
+        InputSystem.QueueStateEvent(mouse, new MouseState { position = position });
+        yield return null;
+        Assert.That(activeTexture.GetValue(cursor), Is.Not.SameAs(pointTexture.GetValue(cursor)));
+        var before = State();
+
+        Assert.That(input.TryBeginEndTurn(), Is.True);
+        try
+        {
+            yield return null;
+            Assert.That(activeTexture.GetValue(cursor), Is.SameAs(pointTexture.GetValue(cursor)));
+            yield return Click(position);
+            Assert.That(State(), Is.EqualTo(before), "A hover or click during handoff cannot issue orders.");
+        }
+        finally
+        {
+            input.CompleteEndTurn();
+            input.SetInputMode(InputMode.Game);
+        }
+
+        yield return null;
+        Assert.That(activeTexture.GetValue(cursor), Is.Not.SameAs(pointTexture.GetValue(cursor)));
+    }
+
+    [UnityTest]
     public IEnumerator TouchAndKeyboard_ReachRealArmySelection()
     {
         var position = ScreenPoint(hero.Tile);
@@ -192,6 +227,47 @@ public sealed partial class ArmyUiInputTests : IPrebuildSetup, IPostBuildCleanup
         yield return WaitFor(() => Game.Current.ArmiesSelected());
         Assert.That(Game.Current.GetSelectedArmies().Single(), Is.SameAs(hero));
         Trace("touch.select-keyboard.next", position);
+    }
+
+    [UnityTest]
+    public IEnumerator Attack_ExhaustedHeroRemainsExhaustedAfterArmyPicker()
+    {
+        var city = Game.Current.Players[1].Capitol;
+        var defender = city.Player.HireHero(city.Tile);
+        yield return Click(ScreenPoint(hero.Tile));
+        yield return WaitFor(() => Game.Current.ArmiesSelected());
+        manager.MoveSelectedArmies(city.X - 1, city.Y);
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(hero.Tile.IsNeighbor(city.Tile), Is.True);
+
+        hero.MovesRemaining = 0;
+        InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.M));
+        yield return null;
+        InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+        yield return WaitFor(() => input.InputMode == InputMode.UI,
+            () => $"M picker: mode={input.InputMode}; state={Game.Current.GameState}; selected={Game.Current.ArmiesSelected()}");
+        var picker = UnityEngine.Object.FindAnyObjectByType<ArmyPicker>();
+        Assert.That(picker, Is.Not.Null);
+        var confirm = picker.GetComponentsInChildren<Button>().Single(button => button.name != "SelectButton");
+        var rect = (RectTransform)confirm.transform;
+        var canvas = confirm.GetComponentInParent<Canvas>();
+        var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        yield return Click(RectTransformUtility.WorldToScreenPoint(camera, rect.TransformPoint(rect.rect.center)));
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(Game.Current.GetSelectedArmies(), Is.EqualTo(new[] { hero }));
+        Assert.That(hero.MovesRemaining, Is.Zero);
+
+        var origin = hero.Tile;
+        var owner = city.Player;
+        yield return Click(ScreenPoint(city.Tile));
+        yield return new WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(input.LastPrimaryAction, Is.Not.EqualTo("army.attack"));
+        Assert.That(Game.Current.GameState, Is.EqualTo(GameState.SelectedArmy));
+        Assert.That(unity.WarPanel.gameObject.activeSelf, Is.False);
+        Assert.That(hero.Tile, Is.SameAs(origin));
+        Assert.That(hero.MovesRemaining, Is.Zero);
+        Assert.That(city.Player, Is.SameAs(owner));
+        Assert.That(defender.IsDead, Is.False);
     }
 
     [UnityTest]
