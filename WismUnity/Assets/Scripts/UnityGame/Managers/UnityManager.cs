@@ -317,6 +317,7 @@ namespace Assets.Scripts.Managers
 
         private void OnDestroy()
         {
+            this.commandProcessors?.OfType<StartTurnProcessor>().FirstOrDefault()?.CancelAnnouncement(clearNotification: false);
             this.socketTelemetryPublisher?.Dispose();
             if (this.ownedMinimapTexture != null)
             {
@@ -442,6 +443,7 @@ namespace Assets.Scripts.Managers
         /// </summary>
         public void Reset()
         {
+            this.commandProcessors?.OfType<StartTurnProcessor>().FirstOrDefault()?.CancelAnnouncement();
             this.GameMenu?.ResetForGame();
             this.CampaignPresentation?.ResetForGame();
             this.CampaignResultText = null;

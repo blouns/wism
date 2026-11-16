@@ -98,6 +98,14 @@ public sealed partial class ArmyUiInputTests
         => ExerciseBattlePresentation(true, false, true, true);
 
     [UnityTest]
+    public IEnumerator BattlePresentation_HumanAttackerLossShowsDefeat()
+        => ExerciseBattlePresentation(true, false, true, true, defenderWins: true);
+
+    [UnityTest]
+    public IEnumerator BattlePresentation_HumanDefenseWinShowsVictory()
+        => ExerciseBattlePresentation(false, true, true, true, defenderWins: true);
+
+    [UnityTest]
     public IEnumerator BattlePresentation_NoninteractiveAiVsAi_ResolvesSilently()
         => ExerciseBattlePresentation(false, false, false, true);
 
@@ -158,7 +166,7 @@ public sealed partial class ArmyUiInputTests
     }
 
     private IEnumerator ExerciseBattlePresentation(bool humanAttacker, bool humanDefender,
-        bool interactive, bool defended, bool showAiCombat = true)
+        bool interactive, bool defended, bool showAiCombat = true, bool defenderWins = false)
     {
         var attacker = hero.Player;
         var defender = Game.Current.Players[1];
@@ -168,9 +176,9 @@ public sealed partial class ArmyUiInputTests
         {
             defender.HireHero(city.Tile);
             defendingHero = defender.GetArmies().OfType<Hero>().First();
-            defendingHero.Strength = 1;
+            defendingHero.Strength = defenderWins ? 9 : 1;
         }
-        hero.Strength = 9;
+        hero.Strength = defenderWins ? 1 : 9;
         city.Defense = 0;
         manager.SelectArmies(new List<Army> { hero });
         yield return WaitFor(() => Game.Current.ArmiesSelected());
@@ -195,6 +203,7 @@ public sealed partial class ArmyUiInputTests
         var armies = Game.Current.GetSelectedArmies();
         var prepare = new PrepareForBattleCommand(armyController, armies, city.X, city.Y);
         var attack = new AttackOnceCommand(armyController, armies, city.X, city.Y);
+        var complete = new CompleteBattleCommand(armyController, attack);
         var prepareProcessor = new PrepareForBattleProcessor(manager.LoggerFactory, unity);
         var battleProcessor = new BattleProcessor(manager.LoggerFactory, unity);
         var completeProcessor = (Wism.Client.CommandProcessors.ICommandProcessor)System.Activator.CreateInstance(
@@ -240,15 +249,18 @@ public sealed partial class ArmyUiInputTests
             }
             Assert.That(result, Is.EqualTo(ActionState.Succeeded));
             Assert.That(input.InputMode, Is.EqualTo(humanAttacker ? InputMode.Game : InputMode.AITurn));
-            Assert.That(battleProcessor.Execute(attack), Is.EqualTo(ActionState.Succeeded));
-            Assert.That(hero.IsDead, Is.False);
-            if (defended) Assert.That(defendingHero.IsDead, Is.True);
+            if (defenderWins) Game.Current.Random = new DefenderVictoryRolls();
+            var expectedResult = defenderWins ? ActionState.Failed : ActionState.Succeeded;
+            Assert.That(battleProcessor.Execute(attack), Is.EqualTo(expectedResult));
+            Assert.That(hero.IsDead, Is.EqualTo(defenderWins));
+            if (defended) Assert.That(defendingHero.IsDead, Is.EqualTo(!defenderWins));
             Assert.That(BattleClones(unity.WarPanel.KilledPrefab), Is.EqualTo(shouldPresent && defended ? 1 : 0));
-            Assert.That(completeProcessor.Execute(new CompleteBattleCommand(armyController, attack)),
-                Is.EqualTo(ActionState.Succeeded));
-            Assert.That(city.Player, Is.SameAs(attacker));
-            var expectedOutcome = humanAttacker ? "You are victorious!" :
-                humanDefender ? "You have been defeated." : attacker.Clan.DisplayName + " won the battle.";
+            Assert.That(completeProcessor.Execute(complete), Is.EqualTo(expectedResult));
+            Assert.That(city.Player, Is.SameAs(defenderWins ? defender : attacker));
+            var winner = defenderWins ? defender : attacker;
+            var loser = defenderWins ? attacker : defender;
+            var expectedOutcome = winner.IsHuman ? "You are victorious!" :
+                loser.IsHuman ? "You have been defeated." : winner.Clan.DisplayName + " won the battle.";
             Assert.That(notificationText.text, Is.EqualTo(shouldPresent ? expectedOutcome : string.Empty));
             Assert.That(unity.WarPanel.gameObject.activeSelf, Is.False);
             Assert.That(warScene.activeSelf, Is.False);
@@ -263,6 +275,18 @@ public sealed partial class ArmyUiInputTests
             attacker.IsHuman = defender.IsHuman = true;
             unity.InteractiveUI = false;
             Time.fixedDeltaTime = originalStep;
+        }
+    }
+
+    private sealed class DefenderVictoryRolls : System.Random
+    {
+        private bool attackerRoll = true;
+
+        public override int Next(int minValue, int maxValue)
+        {
+            var roll = this.attackerRoll ? minValue : maxValue - 1;
+            this.attackerRoll = !this.attackerRoll;
+            return roll;
         }
     }
 

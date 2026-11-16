@@ -84,14 +84,21 @@ namespace Assets.Scripts.CommandProcessors
 
             if (this.waitForAcknowledgment)
             {
-                input.KeyPressed -= Acknowledge;
                 input.SkipInput();
             }
+            CancelAnnouncement();
             input.SetInputMode(player.IsHuman ? InputMode.Game : InputMode.AITurn);
-            this.announcement.ClearNotification();
+            return startTurn.Result == ActionState.NotStarted ? startTurn.Execute() : startTurn.Result;
+        }
+
+        internal void CancelAnnouncement(bool clearNotification = true)
+        {
+            var input = this.unityGame.InputManager;
+            if (input != null) input.KeyPressed -= Acknowledge;
+            if (clearNotification && this.announcement != null) this.announcement.ClearNotification();
             this.announcement = null;
             this.announcedTurn = null;
-            return startTurn.Result == ActionState.NotStarted ? startTurn.Execute() : startTurn.Result;
+            this.waitForAcknowledgment = false;
         }
 
         private void Acknowledge()
