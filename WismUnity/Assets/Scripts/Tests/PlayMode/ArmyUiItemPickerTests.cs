@@ -145,10 +145,11 @@ public sealed partial class ArmyUiInputTests
         Assert.That(ruins.Tile.GetAllArmies().Contains(hero), Is.EqualTo(wins));
         Assert.That(ruins.Searched, Is.EqualTo(wins));
         Assert.That(ruins.Tile.Items.Count(item => item == artifact), Is.EqualTo(wins ? 1 : 0));
+        Assert.That(searchIcon.gameObject.activeSelf, Is.True);
         Assert.That(searchIcon.sprite, Is.SameAs(wins ? originalSprite : deathSprite));
-        yield return null;
-        yield return null;
+        yield return new WaitForSecondsRealtime(NotificationBox.DefaultInterval + 0.1f);
         Assert.That(notification.text, Is.EqualTo(expected));
+        Assert.That(searchIcon.gameObject.activeSelf, Is.True);
         Assert.That(roll.Count, Is.EqualTo(1), "Waiting for acknowledgment must not reroll combat.");
 
         yield return ItemKey(Key.Enter);

@@ -19,7 +19,7 @@ namespace Assets.Scripts.CommandProcessors
             worldTilemap.HideSearchIcon();
             ClearNotifications();
 
-            return this.Command.Result == ActionState.Succeeded ? SceneResult.Success : SceneResult.Failure;
+            return this.Command.Result == ActionState.Failed ? SceneResult.Failure : SceneResult.Success;
         }
     }
 }
