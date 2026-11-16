@@ -3,6 +3,7 @@ using Assets.Scripts.UI;
 using Assets.Tests.PlayMode;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using Wism.Client.Commands.Players;
 
 namespace Assets.Scripts.Tests.PlayMode.Common
@@ -37,9 +38,23 @@ namespace Assets.Scripts.Tests.PlayMode.Common
                 .GetComponent<SolicitInput>();
 
             // Accept new hero
+            var deadline = Time.realtimeSinceStartup + 10f;
+            while (!inputPanel.IsInitialized() && Time.realtimeSinceStartup < deadline)
+            {
+                AcknowledgeTurnAnnouncementIfPending(unityManager.InputManager);
+                yield return null;
+            }
             inputPanel.SetInputText(heroName);
             inputPanel.Ok();
             yield return new WaitForCommandOfType<HireHeroCommand>(gameManager.ControllerProvider, true, lastId);
+        }
+
+        internal static void AcknowledgeTurnAnnouncementIfPending(InputManager input)
+        {
+            if (input.InputMode != InputMode.WaitForKey) return;
+            var notification = GameObject.FindGameObjectWithTag("NotificationBox")?.GetComponent<Text>();
+            if (notification != null && notification.text.EndsWith(", your turn is starting!"))
+                input.KeyPressed?.Invoke();
         }
 
         internal static IEnumerator DismissProductionPanel()

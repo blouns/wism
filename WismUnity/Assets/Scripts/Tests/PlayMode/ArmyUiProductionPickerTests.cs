@@ -620,8 +620,31 @@ public sealed partial class ArmyUiInputTests
                 ((RectTransform)instance.transform).GetWorldCorners(corners);
                 var canvas = instance.GetComponentInParent<Canvas>();
                 var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-                Assert.That(RectTransformUtility.WorldToScreenPoint(camera, corners[0]).x, Is.EqualTo(0).Within(1));
-                Assert.That(RectTransformUtility.WorldToScreenPoint(camera, corners[2]).x, Is.EqualTo(Screen.width).Within(1));
+                var bottomLeft = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
+                var topRight = RectTransformUtility.WorldToScreenPoint(camera, corners[2]);
+                Assert.That(bottomLeft.x, Is.EqualTo(0).Within(1));
+                Assert.That(bottomLeft.y, Is.EqualTo(0).Within(1));
+                Assert.That(topRight.x, Is.EqualTo(Screen.width).Within(1));
+
+                var dock = (RectTransform)UnityUtilities.GameObjectHardFind("InformationPanel").transform;
+                dock.GetWorldCorners(corners);
+                var dockTop = RectTransformUtility.WorldToScreenPoint(camera, corners[2]).y;
+                Assert.That(topRight.y, Is.GreaterThanOrEqualTo(dockTop - 1f));
+                foreach (var text in instance.GetComponentsInChildren<Text>())
+                {
+                    text.rectTransform.GetWorldCorners(corners);
+                    Assert.That(RectTransformUtility.WorldToScreenPoint(camera, corners[0]).y,
+                        Is.GreaterThanOrEqualTo(bottomLeft.y - 1f), text.name);
+                    Assert.That(RectTransformUtility.WorldToScreenPoint(camera, corners[2]).y,
+                        Is.LessThanOrEqualTo(topRight.y + 1f), text.name);
+                }
+                var hits = new System.Collections.Generic.List<RaycastResult>();
+                var inputEvent = new PointerEventData(EventSystem.current)
+                    { position = new Vector2(Screen.width * 0.5f, topRight.y * 0.5f) };
+                EventSystem.current.RaycastAll(inputEvent, hits);
+                Assert.That(hits, Is.Not.Empty);
+                Assert.That(hits[0].gameObject.transform == instance.transform ||
+                    hits[0].gameObject.transform.IsChildOf(instance.transform), Is.True);
                 Assert.That(State(), Is.EqualTo(before), "Opening a report cannot mutate gameplay.");
                 box.Yes(); Assert.That(box.Answer, Is.True);
                 box.Clear(); box.No(); Assert.That(box.Answer, Is.False);

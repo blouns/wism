@@ -317,6 +317,7 @@ namespace Assets.Scripts.Managers
 
         private void OnDestroy()
         {
+            this.commandProcessors?.OfType<StartTurnProcessor>().FirstOrDefault()?.CancelAnnouncement(clearNotification: false);
             this.socketTelemetryPublisher?.Dispose();
             if (this.ownedMinimapTexture != null)
             {
@@ -442,6 +443,7 @@ namespace Assets.Scripts.Managers
         /// </summary>
         public void Reset()
         {
+            this.commandProcessors?.OfType<StartTurnProcessor>().FirstOrDefault()?.CancelAnnouncement();
             this.GameMenu?.ResetForGame();
             this.CampaignPresentation?.ResetForGame();
             this.CampaignResultText = null;
@@ -933,6 +935,15 @@ namespace Assets.Scripts.Managers
             this.productionPanel.GetComponent<CityProduction>()
                             .Initialize(this, city);
             this.productionPanel.SetActive(true);
+        }
+
+        internal void FrameBattleAttacker(Army army)
+        {
+            if (army.Tile == null || !ShouldFollowArmy(army.Player)) return;
+
+            var position = this.WorldTilemap.ConvertGameToUnityVector(army.X, army.Y);
+            SetSelectedBoxPosition(position, false);
+            this.cameraFollow.PanToSelection(this.selectedArmyBox.transform);
         }
 
         internal void ShowProductionManagementPanel(Player player)

@@ -157,7 +157,7 @@ namespace Assets.Scripts.Managers
             if (!Game.Current.ArmiesSelected()) return;
             this.commandController.AddCommand(
                 new DefendCommand(this.provider.ArmyController, Game.Current.GetSelectedArmies()));
-            this.SelectNextArmy();
+            this.commandController.AddCommand(new SelectNextArmyCommand(this.provider.ArmyController));
         }
 
         public void QuitSelectedArmies()
@@ -169,7 +169,7 @@ namespace Assets.Scripts.Managers
         public void SelectNextArmy()
         {
             this.commandController.AddCommand(
-                new SelectNextArmyCommand(this.provider.ArmyController));
+                new Assets.Scripts.CommandProcessors.SelectNextArmyFromInputCommand(this.provider.ArmyController));
         }
 
         public void StartProduction(City productionCity, ArmyInfo armyKind, City destinationCity = null)

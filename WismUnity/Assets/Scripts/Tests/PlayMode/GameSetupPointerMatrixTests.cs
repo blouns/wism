@@ -1183,7 +1183,11 @@ public sealed partial class GameSetupPointerMatrixTests
             yield return WaitFor(() => SceneManager.GetActiveScene().name == "TestWorld" && Game.IsInitialized(), "Human source world");
             var unity = UnityEngine.Object.FindAnyObjectByType<UnityManager>();
             var naming = UnityUtilities.GameObjectHardFind("SolicitInputPanel").GetComponent<SolicitInput>();
-            yield return WaitFor(() => naming.IsInitialized(), "Source human naming");
+            yield return WaitFor(() =>
+            {
+                WismTestAction.AcknowledgeTurnAnnouncementIfPending(unity.InputManager);
+                return naming.IsInitialized();
+            }, "Source human naming");
             naming.SetInputText("Startup Hero");
             naming.Ok();
             yield return WaitFor(() => GameObject.FindGameObjectWithTag("CityProductionPanel") != null,
