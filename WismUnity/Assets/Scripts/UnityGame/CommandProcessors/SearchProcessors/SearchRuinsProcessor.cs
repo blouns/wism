@@ -65,6 +65,7 @@ namespace Assets.Scripts.CommandProcessors
             {
                 this.unityManager.InputManager.SetInputMode(InputMode.Game);
                 this.unityManager.GameManager.DeselectArmies();
+                this.unityManager.InputManager.KeyPressed -= this.stager.OnAnyKeyPressed;
                 this.stager = null;
             }
 

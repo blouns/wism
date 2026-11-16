@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Tilemaps;
 using UnityEngine;
 using Wism.Client.Commands.Locations;
+using Wism.Client.Controllers;
 
 namespace Assets.Scripts.CommandProcessors
 {
@@ -18,7 +19,7 @@ namespace Assets.Scripts.CommandProcessors
             worldTilemap.HideSearchIcon();
             ClearNotifications();
 
-            return SceneResult.Success;
+            return this.Command.Result == ActionState.Failed ? SceneResult.Failure : SceneResult.Success;
         }
     }
 }

@@ -32,17 +32,21 @@ namespace Assets.Scripts.CommandProcessors.Cutscenes
             stages.Add(new SearchStatusStage(command));
             stages.Add(new RuinsIntroStage(command));
 
-            if (command.Location.Boon is ArtifactBoon)
-            {
-                stages.Add(new RuinsEncounteredMonsterStage(command));
-                stages.Add(new RuinsFightMonsterStage(command));
-            }
-            else if (command.Location.Boon is ThroneBoon)
+            if (command.Location.Boon is ThroneBoon)
             {
                 stages.Add(new RuinsSitAtThroneStage(command));
             }
 
-            stages.Add(new SearchLocationStage(command));
+            if (command.Location.HasMonster())
+            {
+                stages.Add(new RuinsEncounteredMonsterStage(command));
+                stages.Add(new RuinsFightMonsterStage(command));
+            }
+            else
+            {
+                stages.Add(new SearchLocationStage(command));
+            }
+
             stages.Add(new RuinsRevealBoonStage(command));
 
             var stager = new CutsceneStager(stages)

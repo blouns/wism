@@ -98,6 +98,92 @@ public sealed partial class ArmyUiInputTests
     }
 
     [UnityTest]
+    public IEnumerator HeroLifecycle_GuardianLossShowsDeathAndRemovesHero()
+    {
+        yield return VerifyGuardianOutcome(false);
+    }
+
+    [UnityTest]
+    public IEnumerator HeroLifecycle_GuardianVictoryShowsSurvivalAndAwardsOnce()
+    {
+        yield return VerifyGuardianOutcome(true);
+    }
+
+    private IEnumerator VerifyGuardianOutcome(bool wins)
+    {
+        var ruins = World.Current.GetLocations().Single(location => location.ShortName == "CryptKeeper");
+        ruins.Monster = "Demon";
+        var artifact = Artifact.Create(ModFactory.FindArtifactInfo("StaffOfMight"));
+        ruins.Boon = new ArtifactBoon(artifact);
+        yield return SelectItemHero();
+        manager.MoveSelectedArmies(ruins.X, ruins.Y);
+        yield return new Assets.Tests.PlayMode.WaitForLastCommand(manager.ControllerProvider);
+        Assert.That(hero.Tile, Is.SameAs(ruins.Tile));
+        Assert.That(hero.MovesRemaining, Is.GreaterThan(0));
+
+        var owner = hero.Player;
+        var notification = GameObject.FindGameObjectWithTag("NotificationBox").GetComponent<Text>();
+        var searchIcon = UnityUtilities.GameObjectHardFind("Search").GetComponent<SpriteRenderer>();
+        var originalSprite = searchIcon.sprite;
+        var deathSprite = unity.WarPanel.KilledPrefab.GetComponent<Image>().sprite;
+        Assert.That(deathSprite, Is.Not.Null.And.Not.SameAs(originalSprite));
+        var roll = new CountingGuardianRoll(wins);
+        Game.Current.Random = roll;
+        unity.InteractiveUI = true;
+
+        yield return ItemKey(Key.Z);
+        yield return WaitFor(() => notification.text.Contains("encounters a Demon"));
+        Assert.That(hero.IsDead, Is.False);
+        Assert.That(roll.Count, Is.Zero, "The encounter introduction precedes the fight.");
+        yield return ItemKey(Key.Enter);
+        var expected = wins ? "...and is victorious!" : "...and is slain!";
+        yield return WaitFor(() => notification.text == expected);
+
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.WaitForKey));
+        Assert.That(hero.IsDead, Is.EqualTo(!wins));
+        Assert.That(owner.GetArmies().Contains(hero), Is.EqualTo(wins));
+        Assert.That(ruins.Tile.GetAllArmies().Contains(hero), Is.EqualTo(wins));
+        Assert.That(ruins.Searched, Is.EqualTo(wins));
+        Assert.That(ruins.Tile.Items?.Count(item => item == artifact) ?? 0, Is.EqualTo(wins ? 1 : 0));
+        Assert.That(searchIcon.gameObject.activeSelf, Is.True);
+        Assert.That(searchIcon.sprite, Is.SameAs(wins ? originalSprite : deathSprite));
+        yield return new WaitForSecondsRealtime(NotificationBox.DefaultInterval + 0.1f);
+        Assert.That(notification.text, Is.EqualTo(expected));
+        Assert.That(searchIcon.gameObject.activeSelf, Is.True);
+        Assert.That(roll.Count, Is.EqualTo(1), "Waiting for acknowledgment must not reroll combat.");
+
+        yield return ItemKey(Key.Enter);
+        if (wins)
+        {
+            yield return WaitFor(() => input.InputMode == InputMode.WaitForKey && notification.text != expected);
+            yield return ItemKey(Key.Enter);
+        }
+        yield return WaitFor(() => input.InputMode == InputMode.Game);
+        Assert.That(searchIcon.gameObject.activeSelf, Is.False);
+        Assert.That(searchIcon.sprite, Is.SameAs(originalSprite));
+        Assert.That(roll.Count, Is.EqualTo(1));
+        Assert.That(ruins.Tile.Items?.Count(item => item == artifact) ?? 0, Is.EqualTo(wins ? 1 : 0));
+    }
+
+    private sealed class CountingGuardianRoll : System.Random
+    {
+        private readonly bool wins;
+
+        public CountingGuardianRoll(bool wins)
+        {
+            this.wins = wins;
+        }
+
+        public int Count { get; private set; }
+
+        public override int Next(int minValue, int maxValue)
+        {
+            this.Count++;
+            return this.wins ? minValue : maxValue - 1;
+        }
+    }
+
+    [UnityTest]
     public IEnumerator HeroLifecycle_SearchKeyFindsArtifactAndTakeUsesRealInput()
     {
         var ruins = World.Current.GetLocations().Single(location => location.ShortName == "CryptKeeper");
