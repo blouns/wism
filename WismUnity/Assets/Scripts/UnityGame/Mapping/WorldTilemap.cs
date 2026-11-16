@@ -16,6 +16,7 @@ namespace Assets.Scripts.Tilemaps
     {
         private Tilemap tileMap;
         private GameObject searchGO;
+        private Sprite searchSpriteBeforeDeath;
 
         public void Start()
         {
@@ -110,6 +111,20 @@ namespace Assets.Scripts.Tilemaps
             if (this.searchGO)
             {
                 this.searchGO.SetActive(false);
+                if (this.searchSpriteBeforeDeath != null && this.searchGO.TryGetComponent<SpriteRenderer>(out var renderer))
+                {
+                    renderer.sprite = this.searchSpriteBeforeDeath;
+                    this.searchSpriteBeforeDeath = null;
+                }
+            }
+        }
+
+        internal void ShowSearchDeathIcon(Sprite sprite)
+        {
+            if (sprite != null && this.searchGO != null && this.searchGO.TryGetComponent<SpriteRenderer>(out var renderer))
+            {
+                this.searchSpriteBeforeDeath = renderer.sprite;
+                renderer.sprite = sprite;
             }
         }
 
