@@ -144,7 +144,7 @@ public sealed partial class ArmyUiInputTests
         Assert.That(owner.GetArmies().Contains(hero), Is.EqualTo(wins));
         Assert.That(ruins.Tile.GetAllArmies().Contains(hero), Is.EqualTo(wins));
         Assert.That(ruins.Searched, Is.EqualTo(wins));
-        Assert.That(ruins.Tile.Items.Count(item => item == artifact), Is.EqualTo(wins ? 1 : 0));
+        Assert.That(ruins.Tile.Items?.Count(item => item == artifact) ?? 0, Is.EqualTo(wins ? 1 : 0));
         Assert.That(searchIcon.gameObject.activeSelf, Is.True);
         Assert.That(searchIcon.sprite, Is.SameAs(wins ? originalSprite : deathSprite));
         yield return new WaitForSecondsRealtime(NotificationBox.DefaultInterval + 0.1f);
@@ -162,7 +162,7 @@ public sealed partial class ArmyUiInputTests
         Assert.That(searchIcon.gameObject.activeSelf, Is.False);
         Assert.That(searchIcon.sprite, Is.SameAs(originalSprite));
         Assert.That(roll.Count, Is.EqualTo(1));
-        Assert.That(ruins.Tile.Items.Count(item => item == artifact), Is.EqualTo(wins ? 1 : 0));
+        Assert.That(ruins.Tile.Items?.Count(item => item == artifact) ?? 0, Is.EqualTo(wins ? 1 : 0));
     }
 
     private sealed class CountingGuardianRoll : System.Random
