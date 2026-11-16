@@ -87,7 +87,11 @@ namespace Assets.Scripts.CommandProcessors
             if (!timerElapsed)
             {
                 unityGame.InputManager.SetInputMode(sceneMode);
-                UnityUtilities.GameObjectHardFind("SelectedBox").SetActive(false);
+                unityGame.HideSelectedBox();
+                if (this.timer == null && attackers.Count > 0)
+                {
+                    unityGame.FrameBattleAttacker(attackers[0]);
+                }
                 StartTimerOnFirstTime();
                 ShowBattleNotification(defenders.Count > 0
                     ? defendingPlayer

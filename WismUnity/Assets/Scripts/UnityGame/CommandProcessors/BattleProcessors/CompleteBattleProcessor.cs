@@ -40,6 +40,7 @@ namespace Assets.Scripts.CommandProcessors
             var attackCommand = completeBattle.AttackCommand;
             var isHuman = attackCommand.Player.IsHuman;
             var presentedBattle = unityGame.WarPanel.gameObject.activeSelf;
+            var defender = BattlePresentation.ResolveDefendingPlayer(completeBattle.TargetTile, attackCommand.OriginalDefendingArmies);
 
             if (presentedBattle)
             {
@@ -58,6 +59,14 @@ namespace Assets.Scripts.CommandProcessors
                 OpenProductionPanelIfClaimingCity(attackCommand);
             }
 
+            if (BattlePresentation.ShouldPresent(unityGame, attackCommand.Player, defender))
+            {
+                if (attackCommand.LastAttackResult == AttackResult.AttackerWinsBattle && completeResult == ActionState.Succeeded)
+                    ShowOutcome(attackCommand.Player, defender);
+                else if (attackCommand.LastAttackResult == AttackResult.DefenderWinBattle)
+                    ShowOutcome(defender, attackCommand.Player);
+            }
+
             // If we didn’t just switch into UI for production, set the next mode
             if (unityGame.InputManager.GetInputMode() != InputMode.UI)
             {
@@ -69,6 +78,15 @@ namespace Assets.Scripts.CommandProcessors
             return completeResult;
         }
 
+        private void ShowOutcome(Player winner, Player loser)
+        {
+            if (winner.IsHuman)
+                unityGame.NotifyUser("You are victorious!");
+            else if (loser.IsHuman)
+                unityGame.NotifyUser("You have been defeated.");
+            else
+                unityGame.NotifyUser("{0} won the battle.", winner.Clan.DisplayName);
+        }
 
         private void OpenProductionPanelIfClaimingCity(AttackOnceCommand attackCommand)
         {

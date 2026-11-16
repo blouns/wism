@@ -935,6 +935,15 @@ namespace Assets.Scripts.Managers
             this.productionPanel.SetActive(true);
         }
 
+        internal void FrameBattleAttacker(Army army)
+        {
+            if (army.Tile == null || !ShouldFollowArmy(army.Player)) return;
+
+            var position = this.WorldTilemap.ConvertGameToUnityVector(army.X, army.Y);
+            SetSelectedBoxPosition(position, false);
+            this.cameraFollow.PanToSelection(this.selectedArmyBox.transform);
+        }
+
         internal void ShowProductionManagementPanel(Player player)
         {
             this.productionPanel.GetComponent<CityProduction>()

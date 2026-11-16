@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Common;
 using Assets.Scripts.Managers;
 using Assets.Scripts.UI;
+using UnityEngine;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
 using Wism.Client.Common;
@@ -15,6 +16,11 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
+        private StartTurnCommand announcedTurn;
+        private NotificationBox announcement;
+        private bool waitForAcknowledgment;
+        private bool acknowledged;
+        private float dismissAt;
 
         public StartTurnProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -35,35 +41,62 @@ namespace Assets.Scripts.CommandProcessors
         public ActionState Execute(ICommandAction command)
         {
             var startTurn = (StartTurnCommand)command;
-            this.unityGame.ApplyPlayerControlAtTurnStart(startTurn.Player);
+            var player = startTurn.Player;
+            var input = this.unityGame.InputManager;
 
-            if (!this.unityGame.ShouldPresentFor(startTurn.Player))
+            if (this.announcedTurn != startTurn)
             {
-                return command.Execute();
+                this.unityGame.ApplyPlayerControlAtTurnStart(player);
+                if (!this.unityGame.InteractiveUI || player.IsDead)
+                {
+                    return startTurn.Execute();
+                }
+
+                this.announcedTurn = startTurn;
+                this.announcement = UnityUtilities.GameObjectHardFind("NotificationBox").GetComponent<NotificationBox>();
+                var isEliminated = player.GetCities().Count == 0 && !Game.Current.IgnoreGameOver;
+                var name = TextUtilities.CleanupName(player.Clan.DisplayName);
+                this.waitForAcknowledgment = player.IsHuman && !isEliminated;
+                this.acknowledged = false;
+                this.dismissAt = Time.realtimeSinceStartup + NotificationBox.DefaultInterval;
+
+                if (this.waitForAcknowledgment)
+                {
+                    this.unityGame.GoToCapitol(player);
+                    input.SetInputMode(InputMode.WaitForKey);
+                    input.KeyPressed += Acknowledge;
+                }
+
+                if (isEliminated)
+                {
+                    startTurn.Execute();
+                }
+                this.announcement.Notify(
+                    isEliminated ? $"Wretched {name}, for you the war is over..." : $"{name}, your turn is starting!",
+                    double.PositiveInfinity);
+                return ActionState.InProgress;
             }
 
-            CenterOnCapitol(startTurn.Player);
-
-            var messageBox = UnityUtilities.GameObjectHardFind("NotificationBox")
-                .GetComponent<NotificationBox>();
-
-            string name = TextUtilities.CleanupName(startTurn.Player.Clan.DisplayName);
-            if (startTurn.Player.GetCities().Count == 0)
+            if (this.waitForAcknowledgment ? !this.acknowledged : Time.realtimeSinceStartup < this.dismissAt)
             {
-                // Player has died                
-                messageBox.Notify($"Wretched {name}, for you the war is over...");
-            }
-            else
-            {
-                messageBox.Notify($"{name} your turn is starting!");
+                return ActionState.InProgress;
             }
 
-            return command.Execute();
+            if (this.waitForAcknowledgment)
+            {
+                input.KeyPressed -= Acknowledge;
+                input.SkipInput();
+            }
+            input.SetInputMode(player.IsHuman ? InputMode.Game : InputMode.AITurn);
+            this.announcement.ClearNotification();
+            this.announcement = null;
+            this.announcedTurn = null;
+            return startTurn.Result == ActionState.NotStarted ? startTurn.Execute() : startTurn.Result;
         }
 
-        private void CenterOnCapitol(Player player)
+        private void Acknowledge()
         {
-            this.unityGame.GoToCapitol(player);
+            this.acknowledged = true;
         }
     }
 }

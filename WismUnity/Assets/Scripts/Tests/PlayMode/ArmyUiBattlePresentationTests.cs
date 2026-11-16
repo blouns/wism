@@ -8,12 +8,83 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Wism.Client.Commands.Armies;
+using Wism.Client.Commands.Players;
 using Wism.Client.Controllers;
 using Wism.Client.Core;
 using Wism.Client.MapObjects;
 
 public sealed partial class ArmyUiInputTests
 {
+    [UnityTest]
+    public IEnumerator TurnAnnouncement_HumanClickDismissesWithoutIssuingMapOrder()
+    {
+        var endingPlayer = Game.Current.GetCurrentPlayer();
+        var enteringPlayer = Game.Current.GetNextPlayer();
+        var notification = GameObject.FindGameObjectWithTag("NotificationBox").GetComponent<Text>();
+        unity.InteractiveUI = true;
+        manager.EndTurn();
+        yield return WaitFor(() => input.InputMode == InputMode.WaitForKey &&
+            notification.text.Contains("your turn is starting"));
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.SameAs(enteringPlayer));
+        Assert.That(Game.Current.GetCurrentPlayer(), Is.Not.SameAs(endingPlayer));
+        var announcement = notification.text;
+        var priorPressFrame = input.LastPrimaryActionFrame;
+        yield return new WaitForSecondsRealtime(Assets.Scripts.UI.NotificationBox.DefaultInterval + 0.1f);
+        Assert.That(notification.text, Is.EqualTo(announcement));
+        Assert.That(Game.Current.GameState, Is.EqualTo(GameState.StartingTurn));
+        yield return Click(ScreenPoint(enteringPlayer.Capitol.Tile));
+        yield return WaitFor(() => input.InputMode != InputMode.WaitForKey && notification.text != announcement);
+        Assert.That(input.LastPrimaryActionFrame, Is.EqualTo(priorPressFrame));
+    }
+
+    [UnityTest]
+    public IEnumerator TurnAnnouncement_AiDismissesAutomatically()
+    {
+        yield return VerifyTimedTurnAnnouncement(false);
+    }
+
+    [UnityTest]
+    public IEnumerator TurnAnnouncement_EliminationShowsOnceAtStartOfTurn()
+    {
+        yield return VerifyTimedTurnAnnouncement(true);
+    }
+
+    private IEnumerator VerifyTimedTurnAnnouncement(bool eliminated)
+    {
+        unity.enabled = false;
+        unity.InteractiveUI = true;
+        var player = Game.Current.GetCurrentPlayer();
+        player.IsHuman = false;
+        if (eliminated)
+        {
+            Game.Current.DeselectArmies();
+            foreach (var city in player.GetCities().ToArray())
+                player.RazeCity(city);
+            Assert.That(player.IsDead, Is.False);
+        }
+
+        input.SetInputMode(InputMode.AITurn);
+        var processor = new StartTurnProcessor(manager.LoggerFactory, unity);
+        var command = new StartTurnCommand(manager.ControllerProvider.GameController, player);
+        var notification = GameObject.FindGameObjectWithTag("NotificationBox").GetComponent<Text>();
+        var result = processor.Execute(command);
+        Assert.That(result, Is.EqualTo(ActionState.InProgress));
+        Assert.That(notification.text, Does.Contain(eliminated ? "the war is over" : "your turn is starting"));
+        Assert.That(player.IsDead, Is.EqualTo(eliminated));
+        Assert.That(input.InputMode, Is.EqualTo(InputMode.AITurn));
+
+        yield return new WaitForSecondsRealtime(0.1f);
+        Assert.That(processor.Execute(command), Is.EqualTo(ActionState.InProgress));
+        yield return WaitFor(() =>
+        {
+            result = processor.Execute(command);
+            return result != ActionState.InProgress;
+        });
+        Assert.That(result, Is.EqualTo(ActionState.Succeeded));
+        Assert.That(notification.text, Is.Empty);
+        Assert.That(player.IsDead, Is.EqualTo(eliminated));
+    }
+
     [UnityTest]
     public IEnumerator BattlePresentation_AiVsAi_ShowsWarningArmiesAndCasualty()
         => ExerciseBattlePresentation(false, false, true, true);
@@ -131,6 +202,11 @@ public sealed partial class ArmyUiInputTests
             manager.LoggerFactory, unity);
         var before = State();
         var originalStep = Time.fixedDeltaTime;
+        var camera = Camera.main;
+        var follow = camera.GetComponent<CameraFollow>();
+        var attackerPosition = unity.WorldTilemap.ConvertGameToUnityVector(hero.X, hero.Y);
+        follow.target = null;
+        follow.SetCameraTarget(attackerPosition + new Vector3(-3f, 0f, 0f));
         try
         {
             Assert.That(unity.WarPanel.gameObject.activeSelf, Is.False);
@@ -150,6 +226,9 @@ public sealed partial class ArmyUiInputTests
                     return result != ActionState.InProgress;
                 });
                 Assert.That(unity.WarPanel.gameObject.activeSelf, Is.True);
+                if (humanAttacker || unity.ObserveAiMovement)
+                    Assert.That(Vector2.Distance(camera.WorldToViewportPoint(attackerPosition),
+                        new Vector2(0.5f, 0.5f)), Is.LessThan(0.01f), "Frame the attacker before showing the battle panel.");
                 Assert.That(BattleClones(unity.WarPanel.AttackerPrefab), Is.EqualTo(1));
                 Assert.That(BattleClones(unity.WarPanel.DefenderPrefab), Is.EqualTo(defended ? 1 : 0));
             }
@@ -168,6 +247,9 @@ public sealed partial class ArmyUiInputTests
             Assert.That(completeProcessor.Execute(new CompleteBattleCommand(armyController, attack)),
                 Is.EqualTo(ActionState.Succeeded));
             Assert.That(city.Player, Is.SameAs(attacker));
+            var expectedOutcome = humanAttacker ? "You are victorious!" :
+                humanDefender ? "You have been defeated." : attacker.Clan.DisplayName + " won the battle.";
+            Assert.That(notificationText.text, Is.EqualTo(shouldPresent ? expectedOutcome : string.Empty));
             Assert.That(unity.WarPanel.gameObject.activeSelf, Is.False);
             Assert.That(warScene.activeSelf, Is.False);
             if (!humanAttacker) Assert.That(input.InputMode, Is.EqualTo(InputMode.AITurn));

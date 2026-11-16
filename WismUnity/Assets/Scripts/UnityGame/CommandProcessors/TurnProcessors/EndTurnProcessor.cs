@@ -1,6 +1,4 @@
 ﻿using Assets.Scripts.Managers;
-using Assets.Scripts.UI;
-using UnityEngine;
 using Wism.Client.CommandProcessors;
 using Wism.Client.Commands;
 using Wism.Client.Commands.Players;
@@ -38,7 +36,6 @@ namespace Assets.Scripts.CommandProcessors
 
             if (endTurn.Result == ActionState.NotStarted)
             {
-                HandleGameOver(endTurn);
                 this.unityGame.ClearInfoPanel();
 
                 var result = command.Execute();
@@ -49,21 +46,6 @@ namespace Assets.Scripts.CommandProcessors
             }
 
             return HandleOfferOfPeace(endTurn);
-        }
-
-        private void HandleGameOver(EndTurnCommand command)
-        {
-            if (!this.unityGame.ShouldPresentFor(command.Player))
-            {
-                return;
-            }
-
-            if (command.Player.GetCities().Count == 0)
-            {
-                var messageBox = GameObject.FindGameObjectWithTag("NotificationBox")
-                    .GetComponent<NotificationBox>();
-                messageBox.Notify($"Wretched {command.Player.Clan.DisplayName}! For you, the war is over!");
-            }
         }
 
         private ActionState HandleOfferOfPeace(EndTurnCommand command)
