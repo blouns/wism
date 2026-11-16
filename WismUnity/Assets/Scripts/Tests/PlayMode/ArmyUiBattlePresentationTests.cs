@@ -77,10 +77,12 @@ public sealed partial class ArmyUiInputTests
         Assert.That(processor.Execute(command), Is.EqualTo(ActionState.InProgress));
         yield return WaitFor(() =>
         {
-            result = processor.Execute(command);
+            if (result == ActionState.InProgress) result = processor.Execute(command);
             return result != ActionState.InProgress;
         });
         Assert.That(result, Is.EqualTo(ActionState.Succeeded));
+        Assert.That(processor.Execute(command), Is.EqualTo(ActionState.Succeeded),
+            "A completed turn must not announce or start again.");
         Assert.That(notification.text, Is.Empty);
         Assert.That(player.IsDead, Is.EqualTo(eliminated));
     }

@@ -46,6 +46,11 @@ namespace Assets.Scripts.CommandProcessors
 
             if (this.announcedTurn != startTurn)
             {
+                if (startTurn.Result != ActionState.NotStarted)
+                {
+                    return startTurn.Result;
+                }
+
                 this.unityGame.ApplyPlayerControlAtTurnStart(player);
                 if (!this.unityGame.InteractiveUI || player.IsDead)
                 {
