@@ -50,6 +50,47 @@ public class BoardMutationInvariantTests
     }
 
     [Test]
+    public void Invariant_ReselectingExhaustedHeroCannotStartBattle()
+    {
+        var armyController = TestUtilities.CreateArmyController();
+        var origin = World.Current.Map[2, 2];
+        var target = World.Current.Map[2, 3];
+        var player = Game.Current.Players[0];
+        var hero = player.HireHero(origin);
+        var reserve = player.ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), origin);
+        var defender = Game.Current.Players[1].ConscriptArmy(ArmyInfo.GetArmyInfo("LightInfantry"), target);
+        hero.MovesRemaining = 0;
+        var exhausted = new List<Army> { hero };
+        var mixed = new List<Army> { reserve, hero };
+
+        Assert.That(new SelectArmyCommand(armyController, mixed).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(new DeselectArmyCommand(armyController, mixed).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(new SelectArmyCommand(armyController, exhausted).Execute(), Is.EqualTo(ActionState.Succeeded));
+        var attack = new AttackOnceCommand(armyController, exhausted, target.X, target.Y);
+        Assert.Multiple(() =>
+        {
+            Assert.That(target.CanAttackHere(exhausted), Is.False);
+            Assert.That(target.CanAttackHere(mixed), Is.False);
+            Assert.That(new PrepareForBattleCommand(armyController, exhausted, target.X, target.Y).Execute(),
+                Is.EqualTo(ActionState.Failed));
+            Assert.That(armyController.PrepareForBattle(), Is.EqualTo(ActionState.Failed));
+            Assert.That(attack.Execute(), Is.EqualTo(ActionState.Failed));
+            Assert.That(attack.LastAttackResult, Is.Null);
+            Assert.That(Game.Current.GameState, Is.EqualTo(GameState.SelectedArmy));
+            Assert.That(hero.MovesRemaining, Is.Zero);
+            Assert.That(hero.Tile, Is.SameAs(origin));
+            Assert.That(target.MusterArmy(), Does.Contain(defender));
+            Assert.That(defender.IsDead, Is.False);
+        });
+
+        var mobile = new List<Army> { reserve };
+        Assert.That(new DeselectArmyCommand(armyController, exhausted).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(new SelectArmyCommand(armyController, mobile).Execute(), Is.EqualTo(ActionState.Succeeded));
+        Assert.That(new PrepareForBattleCommand(armyController, mobile, target.X, target.Y).Execute(),
+            Is.EqualTo(ActionState.Succeeded));
+    }
+
+    [Test]
     public void Invariant_BattleAttackerVictoryLeavesOnlyWinningClanOnTargetTile()
     {
         var armyController = TestUtilities.CreateArmyController();

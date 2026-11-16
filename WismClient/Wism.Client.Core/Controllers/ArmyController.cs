@@ -46,6 +46,12 @@ namespace Wism.Client.Controllers
                 return ActionState.Failed;
             }
 
+            if (Game.Current.GetSelectedArmies().Any(army => army.MovesRemaining <= 0))
+            {
+                this.logger.LogInformation("Cannot prepare for battle with an exhausted army.");
+                return ActionState.Failed;
+            }
+
             this.logger.LogInformation("Transitioning to AttackingArmy state.");
             Game.Current.Transition(GameState.AttackingArmy);
 

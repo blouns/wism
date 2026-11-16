@@ -130,6 +130,7 @@ namespace Wism.Client.AI.Framework
             var winningBidSet = new HashSet<IBid>(winningBids);
             var commandBids = OrderCommandBidsForRecovery(winningBids, bids, winningBidSet).ToList();
             var reservedArmyIds = new HashSet<int>();
+            var armyIdsWaitingForSearch = new HashSet<int>();
 
             foreach (var bid in commandBids)
             {
@@ -140,7 +141,8 @@ namespace Wism.Client.AI.Framework
 
                 List<ICommandAction> generated = null;
                 var bidModuleName = bid.Module?.GetType().Name ?? "Unknown";
-                if (!winningBidSet.Contains(bid))
+                var isWinningBid = winningBidSet.Contains(bid);
+                if (!isWinningBid)
                 {
                     logger?.LogInformation(
                         $"[Adapta] Trying fallback bid module={bidModuleName} utility={bid.Utility:0.000} armies={DescribeArmies(bid.Armies)}.");
@@ -153,11 +155,27 @@ namespace Wism.Client.AI.Framework
                         generated = bid.Module.GenerateCommands(bid.Armies, world)?.ToList() ?? new List<ICommandAction>();
                     },
                     "accepted-bid-command-generation:" + bidModuleName);
+                if (!isWinningBid && bid.Module is ExterminationModule &&
+                    HasReservedArmy(bid, armyIdsWaitingForSearch) && generated.Any(command => command is MoveOnceCommand))
+                {
+                    logger?.LogInformation("[Adapta] Skipping pursuit fallback while the stack waits for movement to continue its search.");
+                    continue;
+                }
+
                 var generatedBeforeSuppression = generated.Count;
                 generated = SuppressRepeatedCommandBatch(bid, generated);
                 LogBidCommands(bid, generated);
                 var trace = CreateTrace(bid, generated, generatedBeforeSuppression, world);
                 traces.Add(trace);
+                if (isWinningBid && bid.Module is SearchModule &&
+                    trace.BlockingReason == BlockedReasonCategories.InsufficientMoves)
+                {
+                    // The destination is still viable next turn. Keep the search ahead of
+                    // distant pursuit on each decision while allowing actionable alternatives.
+                    ReserveArmies(bid, armyIdsWaitingForSearch);
+                    continue;
+                }
+
                 UpdateBlockedBidMemory(bid, trace);
                 if (generated.Count > 0)
                 {
