@@ -5,6 +5,7 @@ using Wism.Client.Common;
 using Wism.Client.Core;
 using Wism.Client.Controllers;
 using Wism.Client.Commands.Armies;
+using UnityEngine;
 
 namespace Assets.Scripts.CommandProcessors
 {
@@ -12,6 +13,7 @@ namespace Assets.Scripts.CommandProcessors
     {
         private readonly IWismLogger logger;
         private readonly UnityManager unityGame;
+        private AudioSource noMovesAudio;
 
         public SelectArmyProcessor(IWismLoggerFactory loggerFactory, UnityManager unityGame)
         {
@@ -43,7 +45,35 @@ namespace Assets.Scripts.CommandProcessors
                 }
             }
 
+            if (state == ActionState.Failed && selectNext is SelectNextArmyFromInputCommand &&
+                this.unityGame.InputManager.CanAcceptGameplayInput)
+            {
+                PlayNoMovesBeep();
+            }
+
             return state;
         }
+
+        private void PlayNoMovesBeep()
+        {
+            if (!this.unityGame.InteractiveUI || !this.unityGame.SoundEnabled || AudioListener.pause || AudioListener.volume <= 0f)
+                return;
+
+            var clip = this.unityGame.WarPanel?.KilledPrefab?.GetComponent<AudioSource>()?.clip;
+            if (clip == null) return;
+
+            if (this.noMovesAudio == null)
+            {
+                this.noMovesAudio = this.unityGame.gameObject.AddComponent<AudioSource>();
+                this.noMovesAudio.playOnAwake = false;
+                this.noMovesAudio.spatialBlend = 0f;
+            }
+            this.noMovesAudio.PlayOneShot(clip);
+        }
+    }
+
+    internal sealed class SelectNextArmyFromInputCommand : SelectNextArmyCommand
+    {
+        public SelectNextArmyFromInputCommand(ArmyController armyController) : base(armyController) { }
     }
 }
